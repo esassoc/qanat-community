@@ -1,0 +1,93 @@
+<page-header icon="Transactions" [customRichTextTypeID]="richTextTypeID" [templateAbove]="templateAbove" pageTitle="Upload Water Measurement Raster Data (TIF)">
+    <ng-template #templateAbove>
+        <div class="back">
+            <a routerLink="../" class="back__link">Back to Water Measurements</a>
+        </div>
+    </ng-template>
+</page-header>
+
+<div class="page-body">
+    <app-alert-display></app-alert-display>
+    <form class="form mb-3 grid-9">
+        <ng-template #fileInputPanel>
+            <div class="field g-col-6">
+                <label class="required field-label">File</label>
+                <div class="file-upload-wrapper pb-2">
+                    <label for="file-upload" class="custom-file-upload">
+                        <input type="file" class="form-control" name="file-upload" [id]="fileUploadElementID" (change)="onFileUploadChange($event)" accept=".tif, .tiff" required />
+                        {{ fileUpload?.name ?? "No file chosen..." }}
+
+                        <fresca-button iconClass="fas fa-folder-open" (click)="onClickFileUpload()"> Browse </fresca-button>
+                    </label>
+                </div>
+                <em>Accepted extensions: tif, tiff</em>
+                <i class="fas fa-file-open"></i>
+            </div>
+
+            <div class="form__actions flex-end">
+                <fresca-button (click)="getFileMetadata()" [disabled]="!fileUpload || isLoadingSubmit">
+                    <span *ngIf="isLoadingSubmit" class="fa fa-spinner loading-spinner"></span>
+                    Continue
+                </fresca-button>
+            </div>
+        </ng-template>
+
+        <ng-container *ngIf="!displayFileInputPanel; else fileInputPanel">
+            <form class="form mb-3 grid-8">
+                <div class="field g-col-6">
+                    <label class="d-block required field-label">File Name</label>
+                    <h3>{{ fileUpload?.name }}</h3>
+                </div>
+                <div class="field g-col-6">
+                    <label class="d-block required field-label">Water Measurement Type</label>
+                    <ng-select
+                        class="form-control"
+                        name="waterMeasurementType"
+                        [(ngModel)]="waterMeasurementTypeID"
+                        [items]="waterMeasurementTypes"
+                        bindLabel="WaterMeasurementTypeName"
+                        bindValue="WaterMeasurementTypeID"></ng-select>
+                    <field-definition fieldDefinitionType="UsageType"></field-definition>
+                </div>
+
+                <div class="field g-col-6">
+                    <label class="d-block required field-label">Unit Type</label>
+                    <ng-select class="form-control" name="unitType" [(ngModel)]="unitTypeID" [items]="unitTypes" bindLabel="UnitTypeDisplayName" bindValue="UnitTypeID"></ng-select>
+                </div>
+
+                <div class="field g-col-6">
+                    <label class="field-label">Estimate Date</label>
+                    <h3>{{ effectiveDate | date: short }}</h3>
+
+                    <field-definition fieldDefinitionType="EstimateDate"></field-definition>
+                </div>
+
+                <div class="field g-col-3">
+                    <label class="required field-label">Estimate Month</label>
+                    <ng-select class="form-control" name="estimateMonth" [(ngModel)]="effectiveDateMonth" (change)="updateEffectiveDate($event)">
+                        <ng-option *ngFor="let month of months; index as i" [value]="i">
+                            {{ month }}
+                        </ng-option>
+                    </ng-select>
+                </div>
+
+                <div class="field g-col-3">
+                    <label class="required field-label">Estimate Year</label>
+                    <ng-select class="form-control" name="estimateYear" [(ngModel)]="effectiveDateYear" [items]="years" (change)="updateEffectiveDate($event)"></ng-select>
+                </div>
+            </form>
+
+            <div class="form__actions flex-end">
+                <button class="btn btn-primary-outline btn-lg" (click)="backToFileInputPanel()" [disabled]="isLoadingSubmit">
+                    <i class="fa fa-long-arrow-left"></i>
+                    Back
+                </button>
+
+                <button class="btn btn-primary btn-lg" (click)="onSubmit()" [disabled]="isLoadingSubmit">
+                    <span *ngIf="isLoadingSubmit" class="fa fa-spinner loading-spinner"></span>
+                    Save
+                </button>
+            </div>
+        </ng-container>
+    </form>
+</div>

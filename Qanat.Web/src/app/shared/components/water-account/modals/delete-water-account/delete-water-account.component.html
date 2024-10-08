@@ -1,0 +1,25 @@
+<div *ngIf="waterAccount$ | async as waterAccount">
+    <div class="modal-header">
+        <h3 class="section-title">
+            <icon icon="WaterAccounts"></icon>
+            Delete {{ waterAccount.WaterAccountName }}
+            <small class="text-muted">#{{ modalContext.WaterAccountID }}</small>
+        </h3>
+        <button type="button" class="close" (click)="close()">
+            <i class="fa fa-times-circle"></i>
+        </button>
+    </div>
+
+    <div class="modal-body">
+        <div class="copy copy-3 description-color p-2">
+            <p>
+                Are you sure you want to delete this Water Account? All parcels associated with this Water Account will be orphaned and need to be assigned to new water accounts.
+            </p>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button class="btn btn-danger" (click)="save()">Delete Water Account</button>
+        <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+    </div>
+</div>

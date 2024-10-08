@@ -1,0 +1,55 @@
+@use "/src/scss/abstracts" as *;
+
+.page {
+    &-header {
+        padding-bottom: 1rem;
+        border-bottom: 1px solid $gray-100;
+        margin-bottom: 2rem;
+
+        .page-tab {
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: $type-size-200;
+            color: $secondary;
+            padding-bottom: 0.5rem;
+        }
+
+        .page-title {
+            padding-bottom: 0;
+        }
+    }
+
+    &-body {
+        .sidebar-help {
+            padding-top: 3rem;
+
+            @include desktop-medium {
+                padding-top: 0;
+                border-left: 1px solid rgba(27, 47, 54, 0.25);
+                padding-left: 1rem;
+                margin-left: 2rem;
+            }
+
+            .headline {
+                padding-bottom: 0.5rem;
+
+                h3 {
+                    font-size: $type-size-300;
+                    color: $secondary;
+                }
+
+                i {
+                    display: inline-block;
+                    margin-right: 0.25rem;
+                }
+            }
+        }
+    }
+
+    &-footer {
+        padding-top: 2rem;
+        border-top: 1px solid rgba(27, 47, 54, 0.25);
+        margin-top: 2rem;
+        text-align: right;
+    }
+}

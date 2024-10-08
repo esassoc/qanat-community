@@ -1,0 +1,331 @@
+<div class="guide full-width-page">
+    <page-header pageTitle="Guide for Water Managers" icon="Guide"></page-header>
+
+    <div class="page-body">
+        <app-alert-display></app-alert-display>
+
+        <div class="about pt-3 grid-12">
+            <div class="about__info">
+                <div class="about__photo">
+                    <img src="../assets/main/home/local-authority.jpg" alt="Photo of California farmlands" />
+                </div>
+
+                <h2 class="section-title guide-title primary">
+                    <div class="icon"><icon icon="Manage"></icon></div>
+                    Managers, Welcome to the Platform!
+                </h2>
+
+                <div class="copy copy-1">
+                    <p>
+                        The Groundwater Accounting Platform has been designed to facilitate your data management. Much like a bank account, you will be able to view water usage and
+                        allocations as debits and credits to water accounts that you manage. For your geography, you can configure your policies to be represented in the Platform.
+                        Such policies include decisions such as data types available to water account owners, and allocation amounts. You can find more information in the FAQs and
+                        in the Platform overview below.
+                    </p>
+                </div>
+
+                <section class="quick-links">
+                    <h2 class="section-title">Quick Links</h2>
+
+                    <div class="grid-8 quick-links-grid">
+                        <rich-link [customRichTextTypeID]="growerGuideRichTextTypeID" icon="WaterAccounts" cardTitle="Guide for Growers" class="g-col-4">
+                            <button class="btn btn-primary btn-sm" routerLink="/grower-guide">View Guide</button>
+                        </rich-link>
+                        <rich-link [customRichTextTypeID]="geographiesRichTextTypeID" icon="Geography-Alt" cardTitle="Geographies" class="g-col-4">
+                            <button class="btn btn-primary btn-sm" routerLink="/geographies">Learn More</button>
+                        </rich-link>
+                    </div>
+                </section>
+            </div>
+
+            <div class="faqs">
+                <faq-display [faqDisplayLocationTypeID]="faqDisplayLocationTypeID"></faq-display>
+            </div>
+        </div>
+
+        <div class="annotations-header">
+            <h2 class="page-title">
+                <div class="icon"><icon icon="Manage"></icon></div>
+                Explore the Manage Tools
+            </h2>
+        </div>
+
+        <div class="annotated-figure first geography-statistics grid-12">
+            <div class="annotated-figure__header">
+                <h2 class="section-title guide-title primary">
+                    <div class="icon"><icon icon="LineChart"></icon></div>
+                    Geography Statistics
+                </h2>
+
+                <div class="copy copy-1">
+                    <p>The Geography Statistics page gives Water Managers a comprehensive overview of all water accounts rolled up into a single view.</p>
+                </div>
+            </div>
+
+            <div class="screenshot">
+                <img src="../assets/main/images/manager-geography-statistics.png" alt="Screenshot of the Geography Statistics screen" />
+            </div>
+
+            <div class="captions">
+                <div class="caption">
+                    <div class="caption__item"><span>A</span></div>
+
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Display Options:</strong>
+                            Choose the year and units to display. Units can be either depth (ac-ft/ac) or volumetric (ac-ft).
+                        </p>
+                    </div>
+                </div>
+
+                <div class="caption">
+                    <div class="caption__item"><span>B</span></div>
+
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Budget Overview:</strong>
+                            View the top-line numbers for “Total Usage”, “Total Supply”, and “Balance” for the entire geography.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="caption">
+                    <div class="caption__item"><span>C</span></div>
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Cumulative Water Usage Chart:</strong>
+                            Cumulative water use is displayed over time for the selected year. The red line shows the available water supply.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="caption">
+                    <div class="caption__item"><span>D</span></div>
+
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Monthly Water Usage Chart:</strong>
+                            Toggle to view a month-by-month view of water use in a bar chart.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="caption">
+                    <div class="caption__item"><span>E</span></div>
+
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Annual Usage Meter:</strong>
+                            The annual usage meter gives a quick overview of the entire geography’s usage progress relative to available supply.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="caption">
+                    <div class="caption__item"><span>F</span></div>
+
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Supply:</strong>
+                            View a list of water supply sources and the amount available for each type.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="annotated-figure water-account-budget-report grid-12">
+            <div class="annotated-figure__header">
+                <h2 class="section-title guide-title primary">
+                    <div class="icon"><icon icon="Budget"></icon></div>
+                    Water Account Budget Report
+                </h2>
+
+                <div class="copy copy-1">
+                    <p>The Water Account Budgets page provides a comprehensive view of data for all Water Accounts in a geography and a summary of usage for each account.</p>
+                </div>
+            </div>
+
+            <div class="screenshot">
+                <img src="../assets/main/images/manager-water-account-budget-report.png" alt="Screenshot of the Water Account Budget Report screen" />
+            </div>
+
+            <div class="captions">
+                <div class="caption">
+                    <div class="caption__item"><span>A</span></div>
+
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Display Options:</strong>
+                            Choose which year of data to display.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="caption">
+                    <div class="caption__item"><span>B</span></div>
+
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Search:</strong>
+                            Search and find specific Water Accounts or other key terms in the data grid.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="caption">
+                    <div class="caption__item"><span>C</span></div>
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Data Columns:</strong>
+                            View data for all supply and usage figures.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="caption">
+                    <div class="caption__item"><span>D</span></div>
+
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Filter & Sort:</strong>
+                            Built in features to filter and sort data provide opportunities to prepare and export specific data-sets and report.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="caption">
+                    <div class="caption__item"><span>E</span></div>
+
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Download:</strong>
+                            Data can be exported to CSV for use off platform for analysis using tools such as Excel or for integration with other systems such as billing software.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="annotated-figure zones grid-12">
+            <div class="annotated-figure__header">
+                <h2 class="section-title guide-title primary">
+                    <div class="icon"><icon icon="Zones"></icon></div>
+                    Zones
+                </h2>
+
+                <div class="copy copy-1">
+                    <p>
+                        Zones pages provide Water Managers the ability to organize their Water Accounts and Parcels into geospatial zones and access to reporting views for each
+                        zone. Zones can represent groundwater management areas, political boundaries, or any other useful grouping of water accounting data.
+                    </p>
+                </div>
+            </div>
+
+            <div class="screenshot">
+                <img src="../assets/main/images/manager-zones.png" alt="Screenshot of the Zones screen" />
+            </div>
+
+            <div class="captions">
+                <div class="caption">
+                    <div class="caption__item"><span>A</span></div>
+
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Map:</strong>
+                            View all of the zones on map.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="caption">
+                    <div class="caption__item"><span>B</span></div>
+
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Historical Water Budgets by Zone:</strong>
+                            View a chart of Water Budgets per zone, comparing and contrasting water use over time.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="annotated-figure water-account-budget-report grid-12">
+            <div class="annotated-figure__header">
+                <h2 class="section-title guide-title primary">
+                    <div class="icon"><icon icon="Allocations"></icon></div>
+                    Allocation Plans
+                </h2>
+
+                <div class="copy copy-1">
+                    <p>
+                        Allocation Plans pages present visualizations of planned water allocations into the future. The Allocation Plan can be flexibly configured to align with GSA
+                        policies, such as multi-year allocations and carry-over.
+                    </p>
+                </div>
+            </div>
+
+            <div class="screenshot">
+                <img src="../assets/main/images/manager-allocation-plans.png" alt="Screenshot of the Allocation Plans screen" />
+            </div>
+
+            <div class="captions">
+                <div class="caption">
+                    <div class="caption__item"><span>A</span></div>
+
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Water Type:</strong>
+                            Toggle between the various water supply types configured in the geography.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="caption">
+                    <div class="caption__item"><span>B</span></div>
+
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Zones:</strong>
+                            Separate Allocation Plans can be configured per Zone. For example, groundwater management zones may be developed to consider local aquifer, with some
+                            zones receiving higher or lower allocations than others.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="caption">
+                    <div class="caption__item"><span>C</span></div>
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Chart:</strong>
+                            View a visual display of year-by-year allocations, including representation of allocation policies and timing.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="caption">
+                    <div class="caption__item"><span>D</span></div>
+
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Allocation Year:</strong>
+                            View the base allocation, duration, start and end year, as well as carry-over or borrow-forward options.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="caption">
+                    <div class="caption__item"><span>E</span></div>
+
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Configure:</strong>
+                            Edit, add, or delete allocation years.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

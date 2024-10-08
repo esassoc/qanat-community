@@ -1,0 +1,15 @@
+<div class="model-index-card">
+    <div class="flex left">
+        <model-image [modelID]="model.ModelID"></model-image>
+        <div class="flex ai-fs">
+            <icon icon="Model"></icon>
+            <div>
+                <h4>{{ model.ModelName }}</h4>
+                <div class="meta">{{ model.ModelEngine }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="mr-3">
+        <a [routerLink]="[model.ModelShortName]" class="btn btn-primary-outline">Run Scenarios</a>
+    </div>
+</div>

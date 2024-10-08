@@ -1,0 +1,112 @@
+<water-dashboard-nav></water-dashboard-nav>
+
+<div class="full-width-page" *ngIf="currentUser$ | async">
+    <page-header
+        preTitle="Water Dashboard"
+        pageTitle="Water Accounts"
+        [customRichTextTypeID]="richTextID"
+        icon="WaterAccounts"
+        [templateBottomRight]="templateBottomRight"></page-header>
+
+    <ng-template #templateBottomRight>
+        <button routerLink="request-changes" class="btn btn-orange request-changes-button" [disabled]="isLoading || currentUserHasNoGeographies">
+            Request Water Account Changes
+        </button>
+    </ng-template>
+
+    <div class="page-body" *ngIf="waterAccountGeographies$ | async as waterAccountGeographies" [loadingSpinner]="{ isLoading: isLoading && firstLoad, loadingHeight: 700 }">
+        <ng-container *ngIf="!currentUserHasNoGeographies; else noWaterAccountsMessage">
+            <ng-container *ngIf="waterAccounts$ | async as waterAccounts">
+                <qanat-grid-header
+                    *ngIf="gridRef"
+                    [grid]="gridRef"
+                    [rowDataCount]="waterAccounts?.length"
+                    [leftAlignClearFiltersButton]="true"
+                    [disableGlobalFilter]="selectedPanel === 'Map'">
+                    <div customGridActionsCenter>
+                        <div class="button-group tab-nav">
+                            <button class="button-group__item btn-sm" [class.active]="selectedPanel === 'Grid'" (click)="toggleSelectedPanel('Grid')">Grid</button>
+                            <button class="button-group__item btn-sm" [class.active]="selectedPanel === 'Hybrid'" (click)="toggleSelectedPanel('Hybrid')">Hybrid</button>
+                            <button class="button-group__item btn-sm" [class.active]="selectedPanel === 'Map'" (click)="toggleSelectedPanel('Map')">Map</button>
+                        </div>
+                    </div>
+
+                    <div customGridActionsRight>
+                        <div class="form-field" class="geography-selector">
+                            <div class="field">
+                                <select
+                                    *ngIf="waterAccountGeographies.length > 0"
+                                    name="selectedGeographyID"
+                                    [(ngModel)]="selectedGeography"
+                                    (ngModelChange)="onGeographySelected()">
+                                    <option *ngFor="let geography of waterAccountGeographies" [ngValue]="geography">
+                                        {{ geography.GeographyName }}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </qanat-grid-header>
+
+                <div
+                    class="grid-12 mt-3"
+                    [loadingSpinner]="{
+                        isLoading: isLoading && !firstLoad,
+                        loadingHeight: 500
+                    }">
+                    <div class="tab-nav-panel" [class.g-col-6]="selectedPanel === 'Hybrid'" [class.g-col-12]="selectedPanel === 'Grid'" [class.hidden]="selectedPanel === 'Map'">
+                        <qanat-grid
+                            height="675px"
+                            [rowData]="waterAccounts"
+                            [columnDefs]="columnDefs"
+                            [hideDownloadButton]="true"
+                            [overrideDefaultGridHeader]="true"
+                            rowSelection="single"
+                            (gridReady)="onGridReady($event)"
+                            (gridRefReady)="onGridRefReady($event)"
+                            (selectionChanged)="onGridSelectionChanged()"></qanat-grid>
+                    </div>
+
+                    <div class="tab-nav-panel" [class.g-col-6]="selectedPanel === 'Hybrid'" [class.g-col-12]="selectedPanel === 'Map'" [class.hidden]="selectedPanel === 'Grid'">
+                        <qanat-map class="location-card" mapHeight="720px" (onMapLoad)="handleMapReady($event)">
+                            <ng-container *ngIf="mapIsReady">
+                                <water-accounts-layer
+                                    *ngIf="waterAccountIDs"
+                                    [geographyID]="selectedGeography.GeographyID"
+                                    [waterAccountIDs]="waterAccountIDs"
+                                    [selectedWaterAccountID]="selectedWaterAccountID"
+                                    [map]="map"
+                                    [layerControl]="layerControl"
+                                    (layerBoundsCalculated)="handleLayerBoundsCalculated($event)"
+                                    (waterAccountSelected)="onMapSelectionChanged($event)"></water-accounts-layer>
+                                <gsa-boundaries
+                                    *ngIf="selectedGeography"
+                                    [displayOnLoad]="false"
+                                    [map]="map"
+                                    [geographyID]="selectedGeography.GeographyID"
+                                    [layerControl]="layerControl"></gsa-boundaries>
+                            </ng-container>
+                        </qanat-map>
+                    </div>
+                </div>
+            </ng-container>
+        </ng-container>
+
+        <water-dashboard-management-actions-panel *ngIf="this.currentUserHasManagerPermissionsForSelectedGeography && this.selectedGeography">
+            <a routerLink="{{ selectedGeography.GeographyName.toLowerCase() }}/suggestions">
+                <icon icon="Map"></icon>
+                <span>Water Account Suggestions</span>
+            </a>
+        </water-dashboard-management-actions-panel>
+
+        <ng-template #noWaterAccountsMessage>
+            <div class="alert alert-info">
+                <div class="alert-content">
+                    <i class="fa fa-info"></i>
+                    Your user profile does not currently have access to any Water Accounts. Claim Water Accounts to get started or contact a water manager for your geography for
+                    assistance.
+                </div>
+            </div>
+        </ng-template>
+    </div>
+</div>

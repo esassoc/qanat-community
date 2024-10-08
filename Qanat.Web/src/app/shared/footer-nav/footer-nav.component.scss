@@ -1,0 +1,46 @@
+@use "/src/scss/abstracts" as *;
+
+.site-footer {
+    background-color: $primary;
+    font-size: $type-size-200;
+    color: $white;
+    padding: 2rem;
+
+    .credits {
+        @include desktop-small {
+            grid-column: 4 / span 6;
+            text-align: center;
+        }
+    }
+
+    .copy-3 {
+        line-height: 1.5em;
+    }
+
+    .ck {
+        a {
+            color: unset;
+        }
+    }
+
+    .btn-secondary-outline {
+        color: $white;
+        border-color: $white;
+
+        &:hover {
+            background: $white;
+            color: $primary;
+        }
+    }
+}
+
+custom-rich-text a {
+    color: $white;
+}
+
+.system-info {
+    display: flex;
+    gap: 2rem;
+    color: #fff;
+    justify-content: center;
+}

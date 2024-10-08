@@ -1,0 +1,64 @@
+<div *ngIf="isLoading" class="text-center">
+    <span class="fa fa-spinner loading-spinner"></span>
+</div>
+
+<div class="field-definition-wrapper" *ngIf="!isLoading">
+    <ng-template #popTitle>
+        <div class="field-definition-title flex-between">
+            <div class="mt-1">
+                {{ fieldDefinition.CustomRichTextType.CustomRichTextTypeDisplayName }}
+            </div>
+            <button type="button" class="btn btn-link" [hidden]="isEditing" *ngIf="showEditButton()" (click)="enterEdit($event)">
+                <i class="fa fa-pencil-square-o" attr.aria-label="Edit the definition for {{ fieldDefinition.CustomRichTextType.CustomRichTextTypeDisplayName }}"></i>
+            </button>
+        </div>
+    </ng-template>
+
+    <ng-template #popContent>
+        <ng-container *ngIf="!isEditing">
+            <div *ngIf="showEditButton()">
+                <div *ngIf="!emptyContent" [innerHtml]="fieldDefinition.CustomRichTextContent"></div>
+                <div *ngIf="emptyContent" class="hoverEmptySpace"></div>
+            </div>
+            <div *ngIf="!showEditButton()" [innerHtml]="fieldDefinition.CustomRichTextContent"></div>
+        </ng-container>
+
+        <div *ngIf="isEditing">
+            <editor #tinyMceEditor [init]="tinyMceConfig" [(ngModel)]="editedContent"></editor>
+            <div class="editor-buttons">
+                <button type="button" class="btn btn-sm btn-primary mt-1 mr-1 mb-1" (click)="saveEdit()">Save</button>
+                <button type="button" class="btn btn-sm btn-secondary mt-1 mb-1" (click)="cancelEdit(p)">Cancel</button>
+            </div>
+        </div>
+    </ng-template>
+
+    <ng-container *ngIf="!inline; else inlineDisplay">
+        <span *ngIf="showEditButton()" style="overflow: hidden; text-overflow: ellipsis">
+            {{ getLabelText() }}
+            <i class="fas fa-question-circle small" style="cursor: help" [popper]="popContent" [useBodyContainer]="useBodyContainer" [popperTitle]="popTitle"></i>
+        </span>
+
+        <span *ngIf="!showEditButton()">
+            {{ getLabelText() }}
+            <i
+                class="fas fa-question-circle small"
+                style="cursor: help"
+                [popper]="popContent"
+                [useBodyContainer]="useBodyContainer"
+                [popperTitle]="fieldDefinition.CustomRichTextType.CustomRichTextTypeDisplayName"></i>
+        </span>
+    </ng-container>
+
+    <ng-template #inlineDisplay>
+        <div class="inline-display flex-start pt-2">
+            <i class="fas fa-question-circle small"></i>
+
+            <div>
+                <span [innerHtml]="fieldDefinition.CustomRichTextContent"></span>
+                <em *ngIf="showEditButton()" class="edit-button" [popper]="popContent" [useBodyContainer]="useBodyContainer" [popperTitle]="popTitle" (click)="enterEdit($event)">
+                    (edit)
+                </em>
+            </div>
+        </div>
+    </ng-template>
+</div>

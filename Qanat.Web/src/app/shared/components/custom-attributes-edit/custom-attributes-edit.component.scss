@@ -1,0 +1,78 @@
+@use "../../../../scss/abstracts/" as *;
+
+.add-new {
+    border: 1px solid $gray-light;
+    background-color: $gray-lighter;
+    border-radius: $spacing-100;
+    padding: $spacing-500;
+
+    .add-new-title {
+        border-bottom: 2px solid $gray-light;
+        padding-bottom: $spacing-100;
+        margin-bottom: $spacing-600;
+    }
+
+    .form {
+        align-items: flex-end;
+        gap: $spacing-600;
+    }
+}
+
+.add-button {
+    padding-right: $spacing-600;
+    padding-left: $spacing-600;
+}
+
+.remove-button {
+    display: flex;
+    align-items: center;
+    gap: $spacing-200;
+    padding-top: 12px;
+
+    icon {
+        color: $red-default;
+    }
+
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+.custom-attribute-name {
+    width: 85%;
+}
+
+table {
+    width: 100%;
+
+    th,
+    td {
+        padding: 1rem;
+        line-height: 1em;
+        text-align: left;
+    }
+
+    th {
+        background: $primary;
+        color: $white;
+        font-size: $type-size-200;
+    }
+
+    td {
+        font-size: $type-size-200;
+    }
+
+    tr + tr {
+        td {
+            border-top: 1px solid rgba($black, 0.1);
+        }
+    }
+}
+
+.no-table-data {
+    color: $gray-dark;
+    margin: $spacing-500;
+    display: flex;
+    justify-content: center;
+    font-style: italic;
+}

@@ -1,0 +1,336 @@
+@use "/src/scss/abstracts" as *;
+
+.account-users {
+    .section-title {
+        padding-bottom: 0;
+    }
+}
+
+.user-table {
+    &__header,
+    &__item {
+        .name {
+        }
+
+        .email {
+            .flex-start {
+                align-items: center;
+            }
+
+            &__address {
+                display: block;
+                width: 12rem;
+                flex: 1;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+
+                @include desktop-x-large {
+                    width: unset;
+                    flex: unset;
+                }
+            }
+        }
+
+        .role {
+            width: 10rem;
+        }
+
+        .date-added {
+            @include desktop-medium {
+                width: 12rem;
+            }
+        }
+
+        .remove {
+            @include desktop-medium {
+                width: 6rem;
+                padding: 1.5rem;
+                text-align: center;
+            }
+        }
+
+        .name,
+        .date-added,
+        .email {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    }
+}
+
+.user-table {
+    counter-reset: user-list;
+    border: 1px solid rgba($black, 0.05);
+    border-radius: 0.25rem;
+    box-shadow: 0px 0px 1rem rgba($black, 0.1);
+    width: 100%;
+    max-width: calc(100vw - 7rem);
+    overflow: hidden;
+
+    &__header {
+        display: none;
+        border-top-left-radius: 0.25rem;
+        border-top-right-radius: 0.25rem;
+        background: $primary;
+        color: $white;
+        text-align: left;
+        font-size: $type-size-100;
+        letter-spacing: 0.05em;
+        font-weight: bold;
+        text-transform: uppercase;
+
+        @include desktop-medium {
+            display: table-row;
+        }
+    }
+
+    &__item {
+        font-size: $type-size-200;
+        border-top: 0.5rem solid $primary;
+        border-top-left-radius: 0.25rem;
+        border-top-right-radius: 0.25rem;
+        display: block;
+
+        @include desktop-medium {
+            display: table-row;
+            border-radius: unset;
+            border-top: unset;
+        }
+
+        & + .user-table__item {
+            margin-top: 2rem;
+
+            @include desktop-medium {
+                margin-top: unset;
+                border-top: 1px solid rgba($black, 0.05);
+            }
+        }
+    }
+
+    &__cell {
+        padding: 1rem;
+        display: block;
+
+        @include desktop-medium {
+            display: table-cell;
+            vertical-align: middle;
+            padding: 1rem 1.5rem;
+        }
+
+        &:before {
+            content: attr(data-label);
+            display: block;
+            font-style: normal;
+            font-weight: bold;
+            font-size: $type-size-100;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+            color: $black;
+
+            @include desktop-medium {
+                display: none;
+            }
+        }
+    }
+
+    .name {
+        font-weight: bold;
+    }
+
+    .remove {
+        @include desktop-medium {
+            border-left: 1px solid rgba($black, 0.05);
+        }
+
+        button.btn {
+            padding: 0.5rem;
+        }
+    }
+
+    &__close {
+        display: grid;
+        align-items: center;
+
+        i {
+            display: block;
+            font-size: $type-size-300 !important;
+            color: rgba($black, 0.5);
+            transition: all 200ms ease;
+        }
+
+        &:hover {
+            cursor: pointer;
+            i {
+                color: $red-default;
+            }
+        }
+    }
+
+    &__item.pending {
+        .name,
+        .email,
+        .date-added {
+            color: rgba($black, 0.5);
+            font-style: italic;
+        }
+
+        .name,
+        .date-added {
+            @include desktop-medium-max {
+                display: none;
+            }
+        }
+
+        .role {
+            select {
+                pointer-events: none;
+            }
+        }
+    }
+
+    .switch {
+        width: 7rem;
+        .toggle {
+            &:after {
+                content: "Inactive";
+                font-size: $type-size-100;
+                top: 0.6875rem;
+            }
+        }
+
+        input:checked {
+            & + .toggle {
+                &:before {
+                    transform: translateX(5rem);
+                }
+
+                &:after {
+                    content: "Active";
+                }
+            }
+        }
+    }
+
+    .field {
+        label.small {
+            display: block;
+            font-size: $type-size-050;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+            padding-bottom: 0.25rem;
+        }
+
+        input[type="text"] {
+            max-width: unset;
+        }
+
+        select {
+            height: 2.5rem;
+            font-size: $type-size-200;
+        }
+    }
+}
+
+.resend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $primary;
+    background: transparent;
+    border-radius: 50%;
+    height: 1.5rem;
+    width: 1.5rem;
+    font-style: normal;
+    font-size: $type-size-050;
+    margin-left: 0.5rem;
+    border: 2px solid $primary;
+
+    &:hover {
+        background: $primary;
+        color: $white;
+        cursor: pointer;
+    }
+
+    i {
+        display: block;
+
+        &:before {
+            display: block;
+            transform: translate3d(-1px, 1px, 0);
+        }
+    }
+}
+
+.flex-between {
+    .page-title,
+    .section-title {
+        padding-bottom: 0;
+    }
+}
+
+.add-new {
+    .role {
+        select {
+            width: 8rem;
+
+            @include desktop-small {
+                width: 13rem;
+            }
+        }
+    }
+
+    &__header {
+        margin-top: 3rem;
+        border-top: 1px solid rgba($black, 0.1);
+        padding-top: 3rem;
+
+        .copy {
+            max-width: 55rem;
+        }
+    }
+}
+
+.invite-link {
+    display: grid;
+    gap: 0.5rem 2rem;
+    align-items: center;
+
+    @include desktop-small {
+        grid-template-columns: 12rem 1fr;
+    }
+
+    .field-label {
+        text-transform: none;
+        letter-spacing: 0;
+        font-size: $type-size-300;
+        padding-bottom: 0;
+    }
+
+    input {
+        font-family: $overpass-mono;
+        font-size: $type-size-150;
+        padding-bottom: 0.25rem;
+    }
+
+    &__input {
+        position: relative;
+        max-width: 32rem;
+
+        .copy-key {
+            display: block;
+            color: $primary;
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: $type-size-200;
+
+            &:hover {
+                cursor: pointer;
+            }
+        }
+    }
+}

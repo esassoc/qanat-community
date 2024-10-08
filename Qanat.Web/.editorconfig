@@ -1,0 +1,15 @@
+# Editor configuration, see https://editorconfig.org
+# prettier configuration, see https://prettier.io/docs/en/options.html
+
+root = true
+
+[*]
+charset = utf-8
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.md]
+max_line_length = off
+trim_trailing_whitespace = false

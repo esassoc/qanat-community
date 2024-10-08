@@ -1,0 +1,13 @@
+<page-header *ngIf="geography$ | async as geography" icon="Question" [templateTitleAppend]="templateTitleAppend" pageTitle="Support & Contact">
+    <ng-template #templateTitleAppend>
+        <name-tag [name]="geography.GeographyName" class="mb-2"></name-tag>
+    </ng-template>
+</page-header>
+
+<div class="page-body grid-12">
+    <app-alert-display></app-alert-display>
+
+    <div class="copy copy-2">
+        <custom-rich-text *ngIf="geography$ | async as geography" [customRichTextTypeID]="customRichTextTypeID" [geographyID]="geography.GeographyID"></custom-rich-text>
+    </div>
+</div>

@@ -1,0 +1,24 @@
+<div class="page-header p-3">
+    <div class="page-header-left">
+        <div class="logo">
+            <geography-logo [geographyID]="geography.GeographyID"></geography-logo>
+        </div>
+
+        <h1 class="page-title">
+            {{ geography.GeographyName }}
+            <div class="account-number">
+                {{ geography.GeographyDisplayName }}
+            </div>
+        </h1>
+    </div>
+
+    <div>
+        <h3 class="module-title">CONTACT</h3>
+        <div class="email">
+            {{ geography.ContactEmail }}
+        </div>
+        <div class="phone pt-2">
+            {{ geography.ContactPhoneNumber | phone }}
+        </div>
+    </div>
+</div>

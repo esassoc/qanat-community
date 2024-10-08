@@ -1,0 +1,97 @@
+<page-header pageTitle="Attachments"></page-header>
+<app-alert-display></app-alert-display>
+<workflow-body [helpCustomRichTextTypeID]="customRichTextTypeID">
+    <div class="module-header mb-4">
+        <h3 class="section-title text-primary underline">File Upload</h3>
+    </div>
+
+    <form #attachmentsForm="ngForm" class="form grid-12 mb-3">
+        <div class="field g-col-12">
+            <label class="required field-label">File</label>
+            <div class="file-upload-wrapper pb-2">
+                <label for="file-upload" class="custom-file-upload">
+                    <input type="file" class="form-control" name="file-upload" [id]="fileUploadElementID" (change)="onFileUploadChange($event)" required />
+                    {{ fileUpload?.name ?? "No file chosen..." }}
+
+                    <fresca-button iconClass="fas fa-folder-open" (click)="onClickFileUpload()"> Browse </fresca-button>
+                </label>
+            </div>
+            <em>Accepted extensions: PDF, PNG, JPG, DOCX, DOC, XLSX</em>
+            <i class="fas fa-file-open"></i>
+        </div>
+        <div class="field g-col-12">
+            <label class="field-label">Description</label>
+            <textarea class="form-control" name="file-description" [(ngModel)]="fileDescription" placeholder="Describe the content of the file"></textarea>
+        </div>
+
+        <fresca-button type="submit" iconClass="fas fa-file-upload" (onClick)="createWellRegistrationFileResource()" [disabled]="isLoadingSubmit">
+            <span *ngIf="isLoadingSubmit" class="fa fa-spinner loading-spinner"></span>
+            Upload File
+        </fresca-button>
+    </form>
+
+    <div class="module-header mt-5 mb-4">
+        <h3 class="section-title text-primary underline">List of Attachments</h3>
+    </div>
+
+    <div *ngFor="let wellRegistrationFileResource of wellRegistrationFileResources; let index = index; let last = last">
+        <div class="grid-12 flex-space-between">
+            <div class="g-col-8 attachment-data">
+                <div class="pb-2">
+                    <b>
+                        <a (click)="openFileResourceLink(wellRegistrationFileResource.FileResource)">
+                            {{ wellRegistrationFileResource.FileResource.OriginalBaseFilename }}
+                        </a>
+                    </b>
+                </div>
+                <div class="pb-2">{{ wellRegistrationFileResource.FileDescription }}</div>
+                <div>
+                    <em>
+                        Uploaded
+                        {{ wellRegistrationFileResource.FileResource.CreateDate | date: "short" }}
+                    </em>
+                </div>
+            </div>
+            <div class="g-col-4 attachment-actions">
+                <button class="btn btn-rounded btn-primary mr-2" (click)="open(updateWellRegistrationFileResourceModal, wellRegistrationFileResource)">Edit</button>
+                <button class="btn btn-danger-bordered btn-rounded" (click)="deleteWellRegistrationFileResource(wellRegistrationFileResource, index)">Delete</button>
+            </div>
+        </div>
+        <hr *ngIf="!last" />
+    </div>
+
+    <div *ngIf="wellRegistrationFileResources?.length == 0">
+        <em>No attachments have been uploaded yet.</em>
+    </div>
+</workflow-body>
+
+<div class="page-footer">
+    <fresca-button (click)="continue()">Continue</fresca-button>
+</div>
+
+<ng-template #updateWellRegistrationFileResourceModal>
+    <div class="modal-header">
+        <h2>Edit File Description</h2>
+        <button type="button" class="close" (click)="close()"><i class="fa fa-close"></i></button>
+    </div>
+    <div class="modal-body">
+        <form #attachmentsUpdateForm="ngForm" class="form grid-12 mb-3">
+            <div class="field g-col-12">
+                <label class="field-label">File</label>
+                <div class="pl-2">
+                    <b>
+                        {{ wellRegistrationFileResourceToUpdate.FileResource.OriginalBaseFilename }}
+                    </b>
+                </div>
+            </div>
+            <div class="field g-col-12">
+                <label class="field-label">Description</label>
+                <textarea class="form-control" name="file-description" [(ngModel)]="model.FileDescription" placeholder="Describe the content of the file"></textarea>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary" (click)="updateWellRegistrationFileResource()">Save</button>
+        <button class="btn btn-secondary" (click)="close()">Cancel</button>
+    </div>
+</ng-template>

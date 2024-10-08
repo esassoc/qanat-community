@@ -1,0 +1,20 @@
+version: '3.7'
+
+services:
+  qanat.api:
+    image: qanat/api
+    build:
+      context: ..
+      dockerfile: Qanat.API/Dockerfile
+
+  qanat.swagger:
+    image: qanat/swagger
+    build:
+      context: ..
+      dockerfile: Qanat.Swagger/Dockerfile
+
+  qanat.gdalapi:
+    image: qanat/gdalapi
+    build:
+      context: ..
+      dockerfile: Qanat.GDALAPI/Dockerfile

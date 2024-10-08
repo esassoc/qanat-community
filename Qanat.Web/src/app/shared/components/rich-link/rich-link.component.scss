@@ -1,0 +1,23 @@
+@use "/src/scss/abstracts" as *;
+
+.rich-link {
+    display: grid;
+    gap: $spacing-400;
+    padding: $spacing-600;
+    border: 1px solid rgba($black, 0.1);
+    border-radius: $spacing-200;
+    height: 100%;
+
+    icon {
+        color: $primary;
+    }
+
+    &-header {
+        display: grid;
+        gap: $spacing-200;
+    }
+
+    &-body {
+        color: $gray-dark;
+    }
+}

@@ -1,0 +1,58 @@
+<div class="grid-header flex-between">
+    <div class="grid-actions flex">
+        <div class="global-filter">
+            <div class="field" *ngIf="!hideGlobalFilter">
+                <input
+                    type="text"
+                    name="quickFilterText"
+                    [(ngModel)]="quickFilterText"
+                    (ngModelChange)="onQuickFilterTextChanged()"
+                    placeholder="Search grid..."
+                    [disabled]="disableGlobalFilter" />
+            </div>
+        </div>
+
+        <div class="clear-filters-button" *ngIf="leftAlignClearFiltersButton">
+            <qanat-clear-grid-filters-button
+                [grid]="grid"
+                (filtersCleared)="onFiltersCleared()"></qanat-clear-grid-filters-button>
+        </div>
+
+        <ng-content select="[customGridActionsLeft]"></ng-content>
+    </div>
+
+    <div class="grid-actions flex-center">
+        <ng-content select="[customGridActionsCenter]"></ng-content>
+    </div>
+
+    <div class="grid-actions flex-end">
+        <ng-container *ngIf="multiSelectEnabled">
+            <span class="selection-info" *ngIf="selectedRowsCount > 0">
+                {{ selectedRowsCount }} of {{ rowDataCount }} Selected
+            </span>
+
+            <button
+                class="btn btn-sm btn-secondary"
+                (click)="onSelectAll()"
+                [class.disabled]="allRowsSelected">
+                Select All
+                <span *ngIf="anyFilterPresent">(filtered)</span>
+            </button>
+            <button
+                class="btn btn-sm btn-secondary"
+                (click)="onDeselectAll()"
+                [class.disabled]="selectedRowsCount < 1">
+                Deselect All
+                <span *ngIf="anyFilterPresent">(filtered)</span>
+            </button>
+        </ng-container>
+
+        <ng-content select="[customGridActionsRight]"></ng-content>
+
+        <div class="clear-filters-button" *ngIf="!leftAlignClearFiltersButton">
+            <qanat-clear-grid-filters-button
+                [grid]="grid"
+                (filtersCleared)="onFiltersCleared()"></qanat-clear-grid-filters-button>
+        </div>
+    </div>
+</div>

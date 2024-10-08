@@ -1,0 +1,74 @@
+<page-header pageTitle="Zones" icon="Zones" [customRichTextTypeID]="richTextTypeID"></page-header>
+
+<div class="page-body grid-12" *ngIf="zoneGroupSubscription$ | async as zoneGroups">
+    <app-alert-display></app-alert-display>
+    <div>
+        <div class="alert alert-danger" *ngIf="zoneGroups.length < 1">
+            <div class="alert-content">
+                <i class="fa fa-exclamation"></i>
+                There are currently no Zone Groups for this geography. Please make one in the configure dashboard.
+            </div>
+        </div>
+    </div>
+    <div class="zone-card grid-12 mb-2" *ngFor="let zoneGroup of zoneGroups">
+        <div class="g-col-12 zone-card__header flex-between no-wrap">
+            <div>
+                <h3 class="section-title flex-start">
+                    <icon icon="Zones"></icon>
+                    {{ zoneGroup.ZoneGroupName }}
+                </h3>
+                <div class="copy copy-2 zone-group-description">
+                    {{ zoneGroup.ZoneGroupDescription }}
+                </div>
+            </div>
+            <div>
+                <a [routerLink]="[zoneGroup.ZoneGroupSlug]" class="btn btn-primary zone-detail-button"> Explore Data </a>
+            </div>
+        </div>
+        <div class="g-col-4 zone-card__map">
+            <qanat-map (onMapLoad)="handleMapReady($event, zoneGroup)" mapHeight="300px" [showLayerControl]="false" [boundingBox]="geography?.BoundingBox">
+                <zone-group-layer
+                    *ngIf="mapInits && mapInits[zoneGroup.ZoneGroupID]"
+                    [displayOnLoad]="true"
+                    [zoneGroupID]="zoneGroup.ZoneGroupID"
+                    [zoneGroupName]="zoneGroup.ZoneGroupName"
+                    [map]="mapInits[zoneGroup.ZoneGroupID].map"
+                    [layerControl]="mapInits[zoneGroup.ZoneGroupID].layerControl"></zone-group-layer>
+            </qanat-map>
+        </div>
+        <div class="g-col-8 zone-card__info">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th class="zone-header">Zones</th>
+                            <th class="parcels-header">Parcels</th>
+                            <th class="acres-header">Acres</th>
+                            <th class="description-header">Description</th>
+                            <th class="color-header">Color</th>
+                        </tr>
+                    </thead>
+                    <tbody *ngIf="zones">
+                        <tr *ngFor="let zone of zoneGroup.ZoneList">
+                            <td>
+                                {{ zone.ZoneName }}
+                            </td>
+                            <td class="parcels">
+                                {{ getTotalParcels(zone.ZoneID) | number }}
+                            </td>
+                            <td class="acres">
+                                {{ getTotalArea(zone.ZoneID) | number: "1.2-2" }}
+                            </td>
+                            <td>
+                                {{ zone.ZoneDescription }}
+                            </td>
+                            <td>
+                                <input disabled type="color" [value]="zone.ZoneColor" />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

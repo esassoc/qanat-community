@@ -1,0 +1,24 @@
+@use "/src/scss/abstracts" as *;
+
+.field-definition-wrapper {
+    display: inline-block;
+}
+
+::ng-deep .popover-header,
+::ng-deep .popover-body {
+    text-transform: none;
+}
+
+.inline-display {
+    align-items: start;
+    column-gap: 0.8rem;
+
+    .edit-button {
+        cursor: pointer;
+        color: $primary;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+}

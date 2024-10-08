@@ -1,0 +1,6 @@
+@use "/src/scss/abstracts" as *;
+
+.sidebar-link.disabled {
+    pointer-events: none;
+    background-color: #eee;
+}

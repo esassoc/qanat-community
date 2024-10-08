@@ -1,0 +1,274 @@
+@use "/src/scss/abstracts" as *;
+
+.dropdown {
+    &-menu {
+        display: none;
+
+        @include desktop-medium {
+            position: absolute;
+            z-index: 1111;
+            top: 2rem;
+            left: 0;
+            background: white;
+            width: 16rem;
+            border-radius: 0.25rem;
+            box-shadow: $shadow-100;
+        }
+
+        &-right {
+            @include desktop-medium {
+                left: unset;
+                right: 0;
+            }
+        }
+
+        &.active {
+            padding-top: 0.5rem;
+            display: block;
+
+            @include desktop-medium {
+                padding-top: unset;
+            }
+        }
+    }
+
+    &-item {
+        display: block;
+        font-size: $type-size-300;
+        padding: 1rem 0;
+        color: $white;
+
+        @include desktop-medium {
+            padding: 1rem;
+            transition: all 300ms ease;
+            font-size: $type-size-200;
+            color: $secondary;
+        }
+
+        &:hover {
+            color: $white;
+
+            @include desktop-medium {
+                background: $secondary;
+                color: $white;
+            }
+        }
+
+        &:first-of-type {
+            @include desktop-medium {
+                border-top-left-radius: 0.25rem;
+                border-top-right-radius: 0.25rem;
+            }
+        }
+
+        &:last-of-type {
+            padding-bottom: 0;
+
+            @include desktop-medium {
+                padding-bottom: 1rem;
+                border-bottom-left-radius: 0.25rem;
+                border-bottom-right-radius: 0.25rem;
+            }
+        }
+
+        & + .dropdown-item {
+            border-top: 1px solid rgba(white, 0.05);
+
+            @include desktop-medium {
+                border-top: 1px solid rgba(black, 0.05);
+            }
+        }
+    }
+}
+
+.dropdown-menu {
+    &__water-dashboard {
+        color: $white;
+
+        @include desktop-medium {
+            width: 600px;
+
+            color: $blue-700;
+            padding: $spacing-500;
+            padding-top: $spacing-500 !important;
+        }
+
+        &-grid {
+            @include desktop-medium {
+                display: grid;
+                grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+                gap: $spacing-400;
+            }
+        }
+
+        a {
+            color: $white;
+
+            @include desktop-medium {
+                color: $blue-700;
+            }
+        }
+
+        .water-accounts {
+            &__header {
+                padding-top: $spacing-200;
+                font-size: 1rem;
+                line-height: 1rem;
+                font-weight: 500;
+
+                @include desktop-medium {
+                    padding-top: 0;
+                    padding-bottom: $spacing-200;
+                    border-bottom: 1px solid $gray-200;
+                }
+
+                a:hover {
+                    text-decoration: underline;
+                }
+
+                svg {
+                    width: 14px;
+                    height: 14px;
+                }
+
+                .count {
+                    font-size: 0.875rem;
+                }
+            }
+        }
+
+        .right {
+            padding-top: $spacing-400;
+
+            @include desktop-medium {
+                padding-top: $spacing-200;
+                border-left: 1px solid $gray-200;
+                padding-left: $spacing-400;
+            }
+        }
+
+        .water-account {
+            display: grid;
+            grid-template-columns: 2fr minmax(0, 1fr) minmax(0, 1fr);
+            gap: $spacing-200 0;
+            align-items: center;
+            padding: $spacing-300 0 $spacing-200 0;
+
+            & + .water-account {
+                border-top: 1px solid rgba($white, 0.1);
+
+                @include desktop-medium {
+                    border-top: 1px solid $gray-100;
+                }
+            }
+
+            &__geography {
+                grid-column: 1 / -1;
+                font-size: 0.75rem;
+
+                @include desktop-medium {
+                    color: $gray-500;
+                }
+            }
+
+            &__number {
+                display: flex;
+                align-items: center;
+                gap: $spacing-100;
+
+                &-label {
+                    display: block;
+                    font-weight: bold;
+                    text-decoration: underline;
+                    font-size: 0.875rem;
+                }
+
+                .zone {
+                    background: #7f3c8d;
+                    color: $white;
+                    font-size: 10px;
+                    font-weight: bold;
+                    line-height: 1em;
+                    display: block;
+                    padding: 5px 8px 4px 8px;
+                    border-radius: 1rem;
+                    transform: translateY(-1px);
+                }
+            }
+
+            &__parcels {
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                gap: $spacing-100;
+
+                svg {
+                    color: $blue-700;
+                    width: 10px;
+                    height: 10px;
+                }
+
+                .count {
+                    font-size: 12px;
+
+                    @include desktop-medium {
+                        color: $gray-900;
+                    }
+                }
+            }
+
+            &__acres {
+                text-align: right;
+                font-size: 12px;
+
+                @include desktop-medium {
+                    color: $gray-500;
+                }
+            }
+        }
+
+        .main-links {
+            display: grid;
+            gap: $spacing-300;
+        }
+
+        .main-link {
+            font-size: 1rem;
+            line-height: 1rem;
+            font-weight: 500;
+
+            a:hover {
+                text-decoration: underline;
+            }
+
+            svg {
+                width: 14px;
+                height: 14px;
+            }
+
+            .count {
+                font-size: 0.875rem;
+            }
+        }
+
+        .other-links {
+            margin-top: $spacing-400;
+            padding-top: $spacing-400;
+            display: grid;
+            gap: $spacing-300;
+            border-top: 1px solid rgba($white, 0.1);
+
+            @include desktop-medium {
+                border-top: 1px solid $gray-200;
+            }
+        }
+
+        .other-link {
+            font-size: 0.875rem;
+
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+    }
+}

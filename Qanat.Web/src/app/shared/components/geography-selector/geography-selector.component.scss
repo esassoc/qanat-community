@@ -1,0 +1,56 @@
+@use "/src/scss/abstracts" as *;
+
+.geography-list {
+    display: grid;
+    gap: $spacing-300;
+    height: 380px;
+    width: 400px;
+    overflow-y: scroll;
+    background-color: $white;
+    text-align: left;
+    border: 1px solid rgba($black, 0.1);
+    border-radius: $spacing-200;
+    padding: $spacing-400;
+}
+
+.select-label {
+    color: $blue-default;
+}
+
+.geography-list-item {
+    display: grid;
+    grid-template-columns: 3.5rem 1fr;
+    gap: $spacing-400;
+    align-items: center;
+    border: 1px solid rgba($black, 0.1);
+    border-radius: $spacing-100;
+    padding: $spacing-400 $spacing-500;
+    background-color: $gray-lighter;
+
+    &:hover {
+        background-color: $teal-lighter;
+        cursor: pointer;
+    }
+
+    geography-logo {
+        ::ng-deep img {
+            max-height: 3.5rem;
+            max-width: 3.5rem;
+            mix-blend-mode: multiply;
+        }
+    }
+
+    .geography-name {
+        .geography-short-name {
+            font-size: $type-size-300;
+            padding-bottom: $spacing-100;
+            color: $blue-default;
+        }
+
+        .geography-long-name {
+            font-size: $type-size-100;
+            color: $gray-dark;
+            line-height: 1.125em;
+        }
+    }
+}

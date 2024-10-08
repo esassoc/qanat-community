@@ -1,0 +1,6 @@
+@use "/src/scss/abstracts" as *;
+
+.modal-body {
+    background-color: $white;
+    border-top: 1px solid rgba($black, 0.05);
+}

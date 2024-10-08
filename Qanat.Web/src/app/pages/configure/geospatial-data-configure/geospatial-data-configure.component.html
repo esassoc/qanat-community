@@ -1,0 +1,32 @@
+<page-header icon="DataLayers" [customRichTextTypeID]="richTextTypeID" [templateRight]="templateRight">
+    <ng-template #templateRight>
+        <name-tag name="enabled" color="#ffa62b" title="{{ hoverText }}"></name-tag>
+    </ng-template>
+</page-header>
+
+<div class="page-body">
+    <app-alert-display></app-alert-display>
+    <div class="flex-end mb-4">
+        <button class="btn btn-primary btn-rounded" [routerLink]="['create']">+ New Geospatial Data Layer</button>
+    </div>
+    <qanat-grid
+        height="300px"
+        [rowData]="geospatialData"
+        [columnDefs]="columnDefs"
+        downloadFileName="geospatial-data"
+        [colIDsToExclude]="csvDownloadColIDsToExclude"
+        rowSelection="single"></qanat-grid>
+
+    <div class="map-section-wrapper pt-5">
+        <h3 class="module-title">Preview Map</h3>
+
+        <div class="copy copy-2">
+            Geospatial Data Layers are available on all maps within the platform. This map can be used to test and confirm the Geospatial Data Layers configuration.
+        </div>
+
+        <div class="map-wrapper" *ngIf="geography">
+            <parcel-map mapID="parcelMap" mapHeight="540px" [cqlFilter]="mapCqlFilter" [boundingBoxInput]="geography?.BoundingBox" [geographyID]="geographyID"></parcel-map>
+        </div>
+    </div>
+</div>
+<div class="page-footer"></div>

@@ -1,0 +1,56 @@
+@use "/src/scss/abstracts" as *;
+
+.model-run-card {
+    height: 96px;
+    display: flex;
+    justify-content: space-between;
+    box-shadow: $shadow-100;
+    border: 1px solid rgba($black, 0.05);
+    border-radius: 0.5rem;
+    align-items: center;
+    gap: 1rem;
+    overflow: hidden;
+
+    .thumbnail {
+        width: 96px;
+        height: 96px;
+        flex-shrink: 0;
+        img {
+            border-top-left-radius: 0.5rem;
+            border-bottom-left-radius: 0.5rem;
+        }
+    }
+
+    .details {
+        margin-right: auto;
+        display: grid;
+        grid-template-columns: 1.25rem 1fr;
+        gap: 1rem;
+        align-items: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-width: 0;
+    }
+
+    h4 {
+        font-size: $type-size-100;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: $gray-default;
+        font-weight: normal;
+        padding-bottom: 0.25rem;
+    }
+
+    h3 {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: $type-size-400;
+        font-weight: 500;
+
+        name-tag {
+            transform: translateY(-3px);
+        }
+    }
+}

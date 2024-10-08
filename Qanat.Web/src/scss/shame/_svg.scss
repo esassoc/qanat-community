@@ -1,0 +1,14 @@
+@use "/src/scss/abstracts" as *;
+
+.parcel-popup .water-account-title.small {
+    color: $primary;
+    &:hover {
+        text-decoration: underline;
+    }
+}
+.parcel-popup parcel-title .apn {
+    color: $primary;
+    &:hover {
+        text-decoration: underline;
+    }
+}

@@ -1,0 +1,3 @@
+<ng-container *ngFor="let link of params.value.links; last as isLast">
+    <a [routerLink]="[params.inRouterLink, link.LinkValue]" *ngIf="link.LinkDisplay" [className]="params.cssClasses"> {{ link.LinkDisplay }}{{ isLast ? "" : ", " }} </a>
+</ng-container>

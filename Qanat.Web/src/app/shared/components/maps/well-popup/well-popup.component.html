@@ -1,0 +1,15 @@
+<div class="parcel-popup popup-wrapper" [loadingSpinner]="{ isLoading, loadingHeight: 225 }">
+    <ng-container *ngIf="well$ | async as well">
+        <div class="popup-body">
+            <icon icon="Wells"></icon>
+            <span class="well-name pl-1">{{ well.WellName ?? "Unnamed Well" }}</span>
+            <span class="link pl-2" *ngIf="well.WellRegistrationID">
+                <a [routerLink]="['/profile', 'well-registrations', well?.WellRegistrationID]"> Registration Details </a>
+            </span>
+            <div class="parcel-number p-1">
+                <icon icon="Parcels"></icon>
+                <span>{{ well.Parcel.ParcelNumber }}</span>
+            </div>
+        </div>
+    </ng-container>
+</div>

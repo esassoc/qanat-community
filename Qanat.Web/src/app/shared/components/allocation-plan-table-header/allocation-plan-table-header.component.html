@@ -1,0 +1,10 @@
+<allocation-plan-table-row [years]="years">
+    <ng-template #period>
+        <div>Allocation Period</div>
+    </ng-template>
+    <ng-template #items let-year>
+        <div class="border-left">
+            {{ year }}
+        </div>
+    </ng-template>
+</allocation-plan-table-row>

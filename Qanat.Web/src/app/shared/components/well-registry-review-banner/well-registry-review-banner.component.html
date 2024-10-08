@@ -1,0 +1,20 @@
+<ng-container *ngIf="wellProgress$ | async as wellProgress">
+    <ng-container *ngIf="wellProgress.WellRegistrationStatus?.WellRegistrationStatusID === WellRegistrationStatusEnum.Submitted && geography$ | async as geography">
+        <div
+            class="flex-end review-banner"
+            *withGeographyFlag="{
+                currentUser: currentUser,
+                flag: FlagEnum.CanReviewWells,
+                geographyID: geographyID
+            }">
+            <button class="btn btn-primary" [disabled]="isLoadingSubmit" (click)="approve(wellProgress.WellRegistrationID)">
+                <icon icon="ReviewApprove"></icon>
+                Approve
+            </button>
+            <button class="btn btn-danger" [disabled]="isLoadingSubmit" (click)="return(wellProgress.WellRegistrationID)">
+                <icon icon="ReviewReturn"></icon>
+                Return
+            </button>
+        </div>
+    </ng-container>
+</ng-container>

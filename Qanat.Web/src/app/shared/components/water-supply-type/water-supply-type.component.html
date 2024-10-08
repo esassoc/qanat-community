@@ -1,0 +1,12 @@
+<div class="label">
+    <water-type-field-definition [waterType]="waterType"></water-type-field-definition>
+</div>
+
+<div class="amount">
+    {{ value | number: "1.2-2" }}
+    <span class="unit">{{ unit }}</span>
+</div>
+
+<div class="meter">
+    <div class="supply" [style]="barStyle()"></div>
+</div>

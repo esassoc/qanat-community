@@ -1,0 +1,71 @@
+<page-header icon="Calendar" [templateRight]="templateRight"></page-header>
+<ng-template #templateRight>
+    <name-tag name="enabled" color="#ffa62b" title="{{ hoverText }}"></name-tag>
+</ng-template>
+
+<div class="page-body">
+    <app-alert-display></app-alert-display>
+
+    <div class="card reporting-periods mt-5">
+        <div class="card-header">
+            <h3 class="card-title">Reporting Period</h3>
+        </div>
+
+        <div *ngIf="reportingPeriod" class="card-body grid-12">
+            <div class="field name fill g-col-6">
+                <label class="field-label small">Name</label>
+                <input [value]="reportingPeriod.ReportingPeriodName" type="text" [(ngModel)]="reportingPeriod.ReportingPeriodName" />
+            </div>
+
+            <div class="field start-month g-col-3">
+                <label class="field-label small">Start Month</label>
+                <select class="form-control" name="month-select" [(ngModel)]="reportingPeriod.StartMonth">
+                    <option value="1">January</option>
+                    <option value="2">February</option>
+                    <option value="3">March</option>
+                    <option value="4">April</option>
+                    <option value="5">May</option>
+                    <option value="6">June</option>
+                    <option value="7">July</option>
+                    <option value="8">August</option>
+                    <option value="9">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                </select>
+            </div>
+
+            <div class="field interval g-col-3">
+                <label class="field-label small">Interval</label>
+                <select name="month" [(ngModel)]="reportingPeriod.Interval">
+                    <option *ngFor="let interval of intervals" [value]="interval">
+                        {{ interval }}
+                    </option>
+                </select>
+            </div>
+
+            <div class="inline-help mt-4">
+                <div class="icon">
+                    <i class="fa fa-info-circle"></i>
+                </div>
+
+                <div class="copy copy-3 copy-55">
+                    <p>
+                        <strong>Start Month:</strong>
+                        The month when the reporting period begins. Typical Start Months would be October for Water Year, January for Calendar Year, or July for Fiscal Year. All
+                        Reporting Periods have a duration of 12 months.
+                    </p>
+                    <p>
+                        <strong>Interval:</strong>
+                        The unit of data aggregation for analysis and display, including dashboard charts and tables.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-footer flex-end">
+            <button type="submit" class="btn btn-primary" (click)="saveReportingPeriod()">Save</button>
+            <a class="btn btn-primary-outline ml-2" routerLink="..">Cancel</a>
+        </div>
+    </div>
+</div>

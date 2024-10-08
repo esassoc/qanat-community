@@ -1,0 +1,56 @@
+<div *ngIf="isUserAdmin()">
+    <page-header icon="Users" pageTitle="Users">
+        <div class="copy copy-2">
+            <p>A list of users is shown in the grid below.</p>
+        </div>
+    </page-header>
+
+    <div class="page-body">
+        <div class="all-users">
+            <qanat-grid height="800px" [rowData]="users" [columnDefs]="columnDefs" downloadDisplayName="users" [pagination]="true" [paginationPageSize]="100"></qanat-grid>
+        </div>
+
+        <hr class="section-spacer" />
+
+        <div class="section-header">
+            <h2 class="section-title">Pending Users</h2>
+
+            <div class="copy copy-2"></div>
+
+            <qanat-grid
+                height="800px"
+                [rowData]="pendingUsers"
+                [columnDefs]="columnDefsPending"
+                downloadDisplayName="pending-users"
+                [pagination]="true"
+                [sizeColumnsToFitGrid]="true"></qanat-grid>
+
+            <hr class="section-spacer" />
+
+            <div class="unassigned-users">
+                <div class="section-header">
+                    <h2 class="section-title">Unassigned Users</h2>
+
+                    <div class="copy copy-2">
+                        <p *ngIf="users && unassignedUsers.length">
+                            This is a list of all users who are awaiting account configuration. Assign the user a role and billing account(s). If the account was created in error,
+                            edit the record and save it with a role of No Access to remove them from this list.
+                        </p>
+
+                        <p *ngIf="users && !unassignedUsers.length">Congratulations! All users have been assigned a role.</p>
+                    </div>
+
+                    <div class="mt-4" *ngIf="users && unassignedUsers.length">
+                        <qanat-grid
+                            height="300px"
+                            [rowData]="unassignedUsers"
+                            [columnDefs]="columnDefs"
+                            downloadDisplayName="unassigned-users"
+                            [pagination]="true"
+                            [sizeColumnsToFitGrid]="true"></qanat-grid>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

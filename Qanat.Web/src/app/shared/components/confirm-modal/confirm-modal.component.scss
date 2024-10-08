@@ -1,0 +1,17 @@
+@use "/src/scss/abstracts" as *;
+
+.modal-body__content {
+    padding: $spacing-200;
+    border-radius: $spacing-100;
+    border: 1px solid $red-light;
+    background-color: $red-lighter;
+}
+
+.confirmation-icon {
+    color: $blue-default;
+    font-size: large;
+}
+
+.default-confirmation-icon {
+    color: $red-default;
+}

@@ -1,0 +1,22 @@
+@use "/src/scss/abstracts" as *;
+.manage-zone-group-card {
+    box-shadow: $shadow-200;
+    padding: $spacing-600;
+    &-header {
+    }
+    &-body {
+    }
+    &-footer {
+        gap: $spacing-600;
+        border-top: 1px solid $gray-default;
+        padding-top: $spacing-400;
+        padding-bottom: $spacing-400;
+
+        .download icon {
+            color: $primary;
+        }
+        .delete icon {
+            color: $red-default;
+        }
+    }
+}

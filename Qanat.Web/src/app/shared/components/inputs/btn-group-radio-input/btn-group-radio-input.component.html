@@ -1,0 +1,7 @@
+<div class="button-group" role="group" [class.invalid]="required && val == null">
+    <ng-container *ngFor="let option of options">
+        <button type="button" class="button-group__item" [name]="uniqueName" [class.active]="val == option.value" (click)="value = option.value">
+            {{ option.label }}
+        </button>
+    </ng-container>
+</div>

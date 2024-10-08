@@ -1,0 +1,24 @@
+<div class="modal-header">
+    <div>
+        <h3 class="section-title">
+            <icon icon="Users"></icon>
+            Update Role for {{ userDisplayName }}
+        </h3>
+    </div>
+    <button type="button" class="close" (click)="close()">
+        <i class="fa fa-times-circle"></i>
+    </button>
+</div>
+
+<div class="modal-body">
+    <form action="" class="form" [formGroup]="formGroup">
+        <div class="mb-3" *ngIf="roleDropDownOptions$ | async as roleDropDownOptions">
+            <form-field [formControl]="formGroup.controls.WaterAccountRole" fieldLabel="Role" [formInputOptions]="roleDropDownOptions" [type]="FormFieldType.Select"></form-field>
+        </div>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-primary" (click)="save()" [disabled]="!formGroup.valid || isLoadingSubmit">Update User's Role</button>
+    <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+</div>

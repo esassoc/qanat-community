@@ -1,0 +1,20 @@
+@use "/src/scss/abstracts" as *;
+
+.bullet {
+    font-size: 20px;
+}
+.status-color {
+    font-weight: 600;
+}
+.date {
+    color: $gray-default;
+    border-left: 1px solid $gray-default;
+    padding-left: 0.5rem;
+}
+
+.meta {
+    padding-top: 0.5rem;
+    font-size: $type-size-150;
+    color: $gray-default;
+    gap: 0 0.5rem;
+}

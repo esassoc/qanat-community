@@ -1,0 +1,22 @@
+<div class="alert" [class]="'alert-' + alert.context">
+    <div class="alert-content">
+        <ng-container *ngIf="alert.context === 'danger'">
+            <i class="fa fa-exclamation"></i>
+        </ng-container>
+        <ng-container *ngIf="alert.context === 'success'">
+            <i class="fa fa-check"></i>
+        </ng-container>
+        <ng-container *ngIf="alert.context === 'info' || alert.context === 'primary'">
+            <i class="fa fa-info"></i>
+        </ng-container>
+        <ng-container *ngIf="alert.context === 'warning'">
+            <i class="fa fa-warning"></i>
+        </ng-container>
+        <ng-content></ng-content>
+    </div>
+    <div class="alert-dismissible" *ngIf="alert.dismissible">
+        <button (click)="closeAlert()" class="close">
+            <span class="fa fa-close"></span>
+        </button>
+    </div>
+</div>

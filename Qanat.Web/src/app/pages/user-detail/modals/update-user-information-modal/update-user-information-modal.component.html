@@ -1,0 +1,29 @@
+<div class="modal-header">
+    <div>
+        <h3 class="section-title">Update {{ modalContext.User.FullName }}</h3>
+    </div>
+    <button type="button" class="close" (click)="close()">
+        <i class="fa fa-times-circle"></i>
+    </button>
+</div>
+
+<div class="modal-body">
+    <form action="" class="form" [formGroup]="formGroup" *ngIf="roleDropDownOptions$ | async as roleDropDownOptions">
+        <div class="mb-3">
+            <form-field [formControl]="formGroup.controls.RoleID" fieldLabel="System Role" [formInputOptions]="roleDropDownOptions" [type]="FormFieldType.Select"></form-field>
+        </div>
+
+        <div class="mb-3">
+            <form-field [formControl]="formGroup.controls.GETRunCustomerID" fieldLabel="GET Customer ID" [type]="FormFieldType.Number"></form-field>
+        </div>
+
+        <div class="mb-3">
+            <form-field [formControl]="formGroup.controls.GETRunUserID" fieldLabel="GET User ID" [type]="FormFieldType.Number"></form-field>
+        </div>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-primary" (click)="save()" [disabled]="!formGroup.valid || isLoadingSubmit">Update User</button>
+    <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+</div>

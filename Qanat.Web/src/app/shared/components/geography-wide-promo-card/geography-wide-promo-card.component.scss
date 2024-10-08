@@ -1,0 +1,32 @@
+@use "/src/scss/abstracts" as *;
+
+.promo-card {
+    display: flex;
+    gap: 0.25rem;
+    box-shadow: $shadow-100;
+    border: 1px solid rgba($black, 0.05);
+    border-radius: 0.5rem;
+}
+.promo-card-header {
+    background: $primary;
+    text-align: center;
+    border-top-left-radius: 0.5rem;
+    border-bottom-left-radius: 0.5rem;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    padding: $spacing-600;
+}
+.promo-card-footer {
+    display: flex;
+    align-items: center;
+    padding: $spacing-600;
+}
+h3 {
+    color: $white;
+}
+
+.promo-card-body {
+    justify-content: space-between;
+    padding: $spacing-600;
+}

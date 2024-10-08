@@ -1,0 +1,67 @@
+<div class="water-account-card grid-12" *ngIf="waterAccount$ | async as waterAccount">
+    <div class="g-col-7 water-account-details">
+        <div class="water-account-header-body">
+            <h2 class="section-title underline">
+                <icon icon="WaterAccounts"></icon>
+                <a class="account-name-link pl-2" [routerLink]="['./', waterAccount.WaterAccountID]"> #{{ waterAccount.WaterAccountNumber }} </a>
+                <small class="text-muted account-id">{{ waterAccount.WaterAccountName }}</small>
+            </h2>
+            <div class="grid-12">
+                <div class="g-col-6">
+                    <div class="metadata-item">
+                        <h3 class="module-title text-muted">Contact Name</h3>
+                        <p>{{ waterAccount.ContactName }}</p>
+                    </div>
+                    <div class="metadata-item">
+                        <h3 class="module-title text-muted">Contact Address</h3>
+                        <p>{{ waterAccount.ContactAddress }}</p>
+                    </div>
+                    <div class="metadata-item">
+                        <a [routerLink]="['./', waterAccount.WaterAccountID]" class="btn btn-primary"> Users & Settings </a>
+                    </div>
+                </div>
+                <div class="g-col-6">
+                    <div class="metadata-item">
+                        <h3 class="module-title text-muted">Parcels ({{ waterAccount.Parcels.length }})</h3>
+                        <div class="parcels scroll-shadow">
+                            <div *ngFor="let parcel of waterAccount.Parcels">
+                                <parcel-icon-with-number [parcel]="parcel"></parcel-icon-with-number>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="water-account-footer py-2" *ngIf="displayActions">
+            <button (click)="openUpdateParcelsModal()">
+                <i class="fas fa-map"></i>
+                Update Parcels
+            </button>
+            <button (click)="openUpdateInfoModal()">
+                <i class="fas fa-info-circle"></i>
+                Update Info
+            </button>
+            <button (click)="openMergeModal()">
+                <svg width="17" height="14" viewBox="0 0 17 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M1.98137 13.467L0.146973 12.6686C1.23977 10.159 2.66857 8.27182 4.36697 7.15502C2.66857 6.03822 1.23897 4.15102 0.146973 1.64142L1.98137 0.843018C3.03577 3.26702 4.86537 5.99502 8.14697 5.99502L10.547 5.99502V3.55502L16.147 7.15502L10.547 10.755V8.31502H8.14697C4.86537 8.31502 3.03577 11.043 1.98137 13.467Z"
+                        fill="#0D5B73" />
+                </svg>
+                Merge
+            </button>
+            <button class="danger" (click)="openDeleteModal()">
+                <i class="fa fa-times-circle text-danger"></i>
+                Delete
+            </button>
+        </div>
+    </div>
+    <div class="g-col-5 water-account-map">
+        <parcel-map
+            [mapID]="mapID"
+            mapHeight="500px"
+            [selectedParcelIDs]="selectedParcelIDs"
+            [highlightParcelOnClick]="false"
+            [collapsedLayerControl]="true"
+            [geographyID]="waterAccount.Geography.GeographyID"></parcel-map>
+    </div>
+</div>

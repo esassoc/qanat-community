@@ -1,0 +1,37 @@
+<div class="modal-header">
+    <h2>
+        <icon icon="Zones"></icon>
+        Edit Zone Assignments
+    </h2>
+    <button type="button" class="close" (click)="close()">
+        <i class="fa fa-times-circle"></i>
+    </button>
+</div>
+
+<div class="modal-body">
+    <form action="" class="grid-12" [formGroup]="formGroup" *ngIf="parcel$ | async as parcel">
+        <ng-container *ngIf="zoneGroups$ | async as zoneGroups">
+            <ng-container formArrayName="ParcelZoneAssignments">
+                <ng-container *ngFor="let control of formGroup.controls.ParcelZoneAssignments.controls; let i = index">
+                    <ng-container [formGroup]="control">
+                        <form-field
+                            [formControl]="control.controls.ZoneID"
+                            [fieldLabel]="zoneGroups[i].ZoneGroupName"
+                            [formInputOptions]="zoneGroups[i].Options"
+                            [type]="FormFieldType.Select"></form-field>
+                    </ng-container>
+                </ng-container>
+            </ng-container>
+        </ng-container>
+        <note>
+            Are you sure you want to update the zone assignments for parcel
+            <strong>{{ parcel.ParcelNumber }}</strong>
+            ?
+        </note>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-primary" (click)="save()" [class.disabled]="!formGroup.valid">Edit Zone Assignments</button>
+    <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+</div>

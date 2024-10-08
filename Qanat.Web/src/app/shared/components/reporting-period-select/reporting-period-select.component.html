@@ -1,0 +1,11 @@
+<div class="statistics__filter year">
+    <h5 class="statistics__filter-label" *ngIf="$reportingPeriod | async as reportingPeriod">
+        {{ reportingPeriod.ReportingPeriodName }}
+    </h5>
+
+    <select *ngIf="$reportingPeriodYears | async as reportingPeriodYears" name="reporting-period-years" [(ngModel)]="selectedYear" (change)="onSelectionChanged()">
+        <option *ngFor="let year of reportingPeriodYears" [value]="year">
+            {{ year }}
+        </option>
+    </select>
+</div>

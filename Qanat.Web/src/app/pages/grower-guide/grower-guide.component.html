@@ -1,0 +1,394 @@
+<div class="guide full-width-page">
+    <page-header pageTitle="Guide for Growers" icon="Guide"></page-header>
+
+    <div class="page-body">
+        <app-alert-display></app-alert-display>
+
+        <div class="about pt-3 grid-12">
+            <div class="about__info">
+                <div class="about__photo">
+                    <img src="../assets/main/home/hero.jpg" alt="Photo of California farmlands" />
+                </div>
+
+                <h2 class="section-title guide-title primary">
+                    <div class="icon"><icon icon="WaterAccounts"></icon></div>
+                    Growers, Welcome to the Platform!
+                </h2>
+
+                <div class="copy copy-1">
+                    <p>
+                        The Groundwater Accounting Platform has been designed to facilitate your data management. Much like a bank account, you will be able to view water usage and
+                        allocations as debits and credits to your water account. For each geography in which you own or manage parcels, you will see that geography's policies
+                        represented in the Platform. Such policies include decisions such as data types available to you and allocation amounts. You can find more information in
+                        the FAQs and in the Platform overview below.
+                    </p>
+                </div>
+
+                <section class="quick-links">
+                    <h2 class="section-title">Quick Links</h2>
+
+                    <div class="grid-9 quick-links-grid">
+                        <rich-link [customRichTextTypeID]="waterDashboardRichTextTypeID" icon="WaterAccounts" cardTitle="Water Dashboard" class="g-col-3">
+                            <button class="btn btn-primary btn-sm" routerLink="/water-dashboard">Vist the Dashboard</button>
+                        </rich-link>
+                        <rich-link [customRichTextTypeID]="managerGuideRichTextTypeID" icon="Manage" cardTitle="Guide for Water Managers" class="g-col-3">
+                            <button class="btn btn-primary btn-sm" routerLink="/manager-guide">View Guide</button>
+                        </rich-link>
+                        <rich-link [customRichTextTypeID]="geographiesRichTextTypeID" icon="Geography-Alt" cardTitle="Geographies" class="g-col-3">
+                            <button class="btn btn-primary btn-sm" routerLink="/geographies">Learn More</button>
+                        </rich-link>
+                    </div>
+                </section>
+            </div>
+
+            <div class="faqs">
+                <faq-display [faqDisplayLocationTypeID]="faqDisplayLocationTypeID"></faq-display>
+            </div>
+        </div>
+
+        <div class="annotations-header">
+            <div class="icon"><icon icon="WaterAccounts"></icon></div>
+            <h2 class="page-title">Explore the Water Dashboard</h2>
+        </div>
+
+        <div class="annotated-figure first water-dashboard grid-12">
+            <div class="annotated-figure__header">
+                <h2 class="section-title guide-title primary">
+                    <div class="icon"><icon icon="WaterAccounts"></icon></div>
+                    Water Dashboard
+                </h2>
+
+                <div class="copy copy-1">
+                    <p>The Water Dashboard is the central hub for all of your water data. View your Water Accounts, Parcels, and Wells.</p>
+                </div>
+            </div>
+
+            <div class="screenshot">
+                <img src="../assets/main/images/grower-water-dashboard.png" alt="Screenshot of Water Dashboard screen" />
+            </div>
+
+            <div class="captions">
+                <div class="caption">
+                    <div class="caption__item"><span>A</span></div>
+
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Water Dashboard Navigation:</strong>
+                            Toggle between views of your Water Accounts, Parcels, and Wells.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="caption">
+                    <div class="caption__item"><span>B</span></div>
+
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Budget Data:</strong>
+                            Switch from the map view to a data-table view of your Water Account data. View, sort, and filter your data, or download the data for use in a
+                            spreadsheet.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="caption">
+                    <div class="caption__item"><span>C</span></div>
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Filter by Geography:</strong>
+                            When you have Water Accounts across multiple geographies, you can use this filter to narrow your view to a single geography.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="caption">
+                    <div class="caption__item"><span>D</span></div>
+
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>List of Water Accounts:</strong>
+                            View a list of all of your Water Accounts. Click the “Details” link on any of the accounts to view the Water Budget.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="caption">
+                    <div class="caption__item"><span>E</span></div>
+
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Map of Water Accounts:</strong>
+                            View on map the outlines of all your Parcels and Water Accounts. Click on a shape to get a quick view of that Water Account’s details.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="annotated-figure water-budget grid-12">
+            <div class="annotated-figure__header">
+                <h2 class="section-title guide-title primary">
+                    <div class="icon"><icon icon="LineChart"></icon></div>
+                    Water Budget
+                </h2>
+
+                <div class="copy copy-1">
+                    <p>The Water Budget tab is the most up-to-date, at-a-glance view of your supply and usage data.</p>
+                </div>
+            </div>
+
+            <div class="screenshot">
+                <img src="../assets/main/images/grower-water-budget.png" alt="Screenshot of Water Budget screen" />
+            </div>
+
+            <div class="captions">
+                <div class="caption">
+                    <div class="caption__item"><span>A</span></div>
+
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Display Options:</strong>
+                            Choose which year and period of data to display, as well as whether to show data in depth or volume.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="caption">
+                    <div class="caption__item"><span>B</span></div>
+
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Budget Overview:</strong>
+                            View the top-line numbers for “Total Usage”, “Total Supply”, and “Balance” for the current period.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="caption">
+                    <div class="caption__item"><span>C</span></div>
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Parcel Map:</strong>
+                            View on a map the parcel boundaries of the APNs contained in your Water Account.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="caption">
+                    <div class="caption__item"><span>D</span></div>
+
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Select a Water Account:</strong>
+                            Choose which of your Water Accounts to view.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="caption">
+                    <div class="caption__item"><span>E</span></div>
+
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Cumulative Water Usage Chart:</strong>
+                            Cumulative water use is displayed over time for the period. A red bar indicates the supply limit.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="caption">
+                    <div class="caption__item"><span>F</span></div>
+
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Monthly Water Usage Chart:</strong>
+                            Toggle to view a month-by-month view of water use in a bar chart.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="caption">
+                    <div class="caption__item"><span>G</span></div>
+
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Annual Usage Meter:</strong>
+                            The annual usage meter gives a quick overview of the period’s usage progress.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="caption">
+                    <div class="caption__item"><span>H</span></div>
+
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Supply:</strong>
+                            View a list of water supply sources and the amount given for each.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="annotated-figure account-activity grid-12">
+            <div class="annotated-figure__header">
+                <h2 class="section-title guide-title primary">
+                    <div class="icon"><icon icon="Budget"></icon></div>
+                    Account Activity
+                </h2>
+
+                <div class="copy copy-1">
+                    <p>The Account Activity tab is your full ledger and history of water use debits and supply credits.</p>
+                </div>
+            </div>
+
+            <div class="screenshot">
+                <img src="../assets/main/images/grower-account-activity.png" alt="Screenshot of Account Activity screen" />
+            </div>
+
+            <div class="captions">
+                <div class="caption">
+                    <div class="caption__item"><span>A</span></div>
+
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Display Options:</strong>
+                            Choose which year and period of data to display, as well as whether to show data in depth or volume.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="caption">
+                    <div class="caption__item"><span>B</span></div>
+
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Balance:</strong>
+                            View the top-line Balance value for the current period.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="caption">
+                    <div class="caption__item"><span>C</span></div>
+
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Last Transaction:</strong>
+                            View the latest transaction value for the current period.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="caption">
+                    <div class="caption__item"><span>D</span></div>
+
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>All Transactions:</strong>
+                            Toggle to view a complete table of all transactions that can be exported as a CSV.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="caption">
+                    <div class="caption__item"><span>E</span></div>
+
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Recent Transactions:</strong>
+                            View a bank account-style transactions list of all recent usage and supply transactions for this Water Account for this period.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="caption">
+                    <div class="caption__item"><span>F</span></div>
+
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Transaction Subledger:</strong>
+                            Toggle the arrow on the right to view a parcel-by-parcel breakdown of usage or supply transactions for the month.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="annotated-figure parcel-detail grid-12">
+            <div class="annotated-figure__header">
+                <h2 class="section-title guide-title primary">
+                    <div class="icon"><icon icon="Parcels"></icon></div>
+                    Parcel Detail
+                </h2>
+
+                <div class="copy copy-1">
+                    <p>The Parcel Detail page provides water usage estimates for the parcel, in addition to other relevant data and information.</p>
+                </div>
+            </div>
+
+            <div class="screenshot">
+                <img src="../assets/main/images/grower-parcel-detail.png" alt="Screenshot of Parcel Detail screen" />
+            </div>
+
+            <div class="captions">
+                <div class="caption">
+                    <div class="caption__item"><span>A</span></div>
+
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Water Account Link:</strong>
+                            Navigate directly to the Water Account that the Parcel belongs to.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="caption">
+                    <div class="caption__item"><span>B</span></div>
+
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Parcel Map:</strong>
+                            View the boundaries on the Parcel on a map.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="caption">
+                    <div class="caption__item"><span>C</span></div>
+
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Parcel Meta Data:</strong>
+                            View information about the Parcel’s area, zones, and ownership.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="caption">
+                    <div class="caption__item"><span>D</span></div>
+
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Water Measurements:</strong>
+                            View water use estimates for water measurements on the Parcel. The Platform can support metered data, remote telemetry data, and satellite-based
+                            evapotranspiration data.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="caption">
+                    <div class="caption__item"><span>E</span></div>
+
+                    <div class="caption__text copy copy-2">
+                        <p>
+                            <strong>Allocation Plan:</strong>
+                            For Geographies that have enabled Allocation Plans, this chart displays future water supplies into the future.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

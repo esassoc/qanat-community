@@ -1,0 +1,16 @@
+<div class="card chart mt-2">
+    <div class="card-header flex-between">
+        <h3 class="card-title">Water Measurements</h3>
+
+        <fresca-button (click)="downloadWaterMeasurements()" cssClass="btn btn-sm btn-secondary" iconClass="" [disabled]="isDownloading">
+            <span *ngIf="isDownloading" class="fa fa-spinner loading-spinner"></span>
+            <i class="fas fa-download"></i>
+            Download Water Measurements
+        </fresca-button>
+    </div>
+    <div class="card-body">
+        <div [loadingSpinner]="{ isLoading }">
+            <div id="vis" style="width: 100%"></div>
+        </div>
+    </div>
+</div>

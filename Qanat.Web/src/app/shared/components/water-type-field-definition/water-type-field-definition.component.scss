@@ -1,0 +1,9 @@
+@use "/src/scss/abstracts" as *;
+.fa-question-circle {
+    color: $blue-default;
+    cursor: help;
+
+    &.white {
+        color: #fff;
+    }
+}

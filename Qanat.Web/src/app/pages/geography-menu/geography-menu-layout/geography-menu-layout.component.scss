@@ -1,0 +1,6 @@
+@use "/src/scss/abstracts" as *;
+
+.sidebar-header h2 {
+    color: $primary;
+    margin-top: 12px;
+}

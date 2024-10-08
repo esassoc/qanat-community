@@ -1,0 +1,62 @@
+<page-header
+    *ngIf="waterAccount$ | async as waterAccount"
+    [pageTitle]="'#' + waterAccount.WaterAccountNumber"
+    [templateTitleAppend]="templateTitleAppend"
+    icon="WaterAccounts"
+    preTitle="Parcels">
+    <ng-template #templateTitleAppend>
+        <span class="water-account-name" *ngIf="waterAccount.WaterAccountName?.length > 0" title="{{ waterAccount.WaterAccountName }}">
+            {{ waterAccount.WaterAccountName }}
+        </span>
+        <span *ngIf="allocationPlans$ | async as allocationPlans">
+            <name-tag
+                *ngIf="allocationPlans?.length > 0"
+                [name]="allocationPlans[0].ZoneName"
+                [color]="allocationPlans[0].ZoneColor"
+                [routerLink]="[
+                    '/geographies',
+                    waterAccount.Geography.GeographyName.toLowerCase(),
+                    'allocation-plans',
+                    allocationPlans[0].WaterTypeSlug,
+                    allocationPlans[0].ZoneSlug
+                ]"
+                class="zone-tag"
+                title="Allocation Plan Zone"></name-tag>
+        </span>
+    </ng-template>
+</page-header>
+
+<div class="page-body grid-12">
+    <div class="g-col-12" *ngIf="selectedParcelIDs && geographyID">
+        <qanat-map class="location-card" (onMapLoad)="handleMapReady($event)" mapHeight="700px">
+            <ng-container *ngIf="mapIsReady">
+                <parcel-layer
+                    *ngIf="selectedParcelIDs"
+                    [geographyID]="geographyID"
+                    [parcelIDs]="selectedParcelIDs"
+                    [selectedParcelID]="highlightedParcelID"
+                    [map]="map"
+                    [layerControl]="layerControl"
+                    [displayOnLoad]="true"
+                    (parcelSelected)="selectHighlightedParcelIDRowNode($event)"></parcel-layer>
+            </ng-container>
+        </qanat-map>
+    </div>
+    <div class="g-col-12">
+        <h3 class="module-title underline">All Parcels</h3>
+        <div class="table-wrapper">
+            @if (parcels$ | async; as parcels) {
+                <qanat-grid
+                    [rowData]="parcels"
+                    [columnDefs]="columnDefs"
+                    downloadFileName="parcels"
+                    rowSelection="single"
+                    (gridReady)="onGridReady($event)"
+                    (selectionChanged)="onSelectionChanged($event)"
+                    [height]="'500px'"
+                    (filterChanged)="selectHighlightedParcelIDRowNode()"
+                    [pagination]="true"></qanat-grid>
+            }
+        </div>
+    </div>
+</div>

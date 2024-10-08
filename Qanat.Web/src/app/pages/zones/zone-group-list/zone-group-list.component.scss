@@ -1,0 +1,75 @@
+@use "/src/scss/abstracts" as *;
+
+.zone-header {
+    width: 15%;
+}
+.parcel-header {
+    width: 10%;
+}
+.acres-header {
+    width: 10%;
+}
+.description-header {
+    width: 55%;
+}
+.color-header {
+    width: 10%;
+}
+.parcels {
+    text-align: right;
+}
+
+.acres {
+    text-align: right;
+}
+.zone-group-description {
+    flex: 1;
+    padding-right: 2rem;
+}
+.zone-detail-button {
+    align-self: end;
+}
+
+.zone-card {
+    border-radius: 0.5rem;
+    background: $white;
+    box-shadow: $shadow-200;
+    gap: 1rem;
+
+    &__map {
+        overflow: hidden;
+        border-bottom-left-radius: 0.5rem;
+        height: 100%;
+        .location-card {
+            max-height: 20rem;
+        }
+        parcel-map {
+            height: 100%;
+            display: flex;
+            min-height: 16rem;
+        }
+    }
+
+    &__info {
+        .table-responsive {
+            max-height: 30rem;
+        }
+
+        overflow-y: auto;
+        thead {
+            position: sticky;
+            top: 0;
+        }
+    }
+    &__header {
+        padding: 2rem 2rem 2rem 2rem;
+
+        .section-title {
+            color: $primary;
+
+            svg path {
+                fill: $primary;
+            }
+        }
+    }
+}

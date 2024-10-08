@@ -1,0 +1,130 @@
+<div class="geography-landing-page" *ngIf="geography$ | async as geography">
+    <geography-landing-page-header [geography]="geography"></geography-landing-page-header>
+
+    <div class="grid-12">
+        <div class="g-col-12 copy copy-2">
+            <custom-rich-text [customRichTextTypeID]="CustomRichTextTypeEnum.LandingPageBody" [geographyID]="geography.GeographyID"></custom-rich-text>
+        </div>
+    </div>
+
+    <div class="flex-center">
+        <h3 class="module-title my-5">{{ geography.WellRegistryEnabled ? "3" : "2" }} STEPS TO GET STARTED</h3>
+    </div>
+
+    <div class="grid-12 promos" *ngIf="landingPageDto$ | async as landingPageDto">
+        <geography-promo-card
+            class="g-col-4"
+            [ngClass]="{ 'g-col-6': geography.WellRegistryEnabled == false }"
+            [number]="1"
+            cardTitle="Create a User Account"
+            [customRichTextTypeID]="CustomRichTextTypeEnum.LandingPageUserCard"
+            icon="User">
+            <div *ngIf="currentUser; else notLoggedIn">
+                <icon icon="StepComplete" class="text-success"></icon>
+                You have successfully created an account.
+                <p class="pt-2">
+                    <strong>Welcome, {{ currentUser.FullName }}</strong>
+                </p>
+            </div>
+            <ng-template #notLoggedIn>
+                <a class="btn btn-orange btn-sm" (click)="signUp()">Create User Account</a>
+                <div class="p-2">
+                    <em>You are currently not logged in.</em>
+                    <p class="pt-2"><a href="javascript:void(0);" (click)="login()">Sign in</a></p>
+                </div>
+            </ng-template>
+        </geography-promo-card>
+
+        <geography-promo-card
+            class="g-col-4"
+            [ngClass]="{ 'g-col-6': geography.WellRegistryEnabled == false }"
+            [number]="2"
+            cardTitle="Claim Water Accounts"
+            [customRichTextTypeID]="CustomRichTextTypeEnum.LandingPageParcelCard"
+            icon="Parcels">
+            <a class="btn btn-orange btn-sm" [routerLink]="['claim-water-accounts']" [class.disabled]="currentUser === null"> Claim Water Accounts </a>
+
+            <ng-container *ngIf="currentUser">
+                <div *ngIf="landingPageDto.NumberOfWaterAccounts > 0; else noParcels" class="pt-2">
+                    <icon icon="StepComplete" class="text-success"></icon>
+                    <em>
+                        You have successfully claimed
+                        {{ landingPageDto.NumberOfWaterAccounts }} water account{{ landingPageDto.NumberOfWaterAccounts > 1 ? "s" : "" }}.
+                    </em>
+                </div>
+                <ng-template #noParcels>
+                    <div class="pt-2">
+                        <em>You have not claimed any water accounts yet.</em>
+                    </div>
+                </ng-template>
+            </ng-container>
+        </geography-promo-card>
+
+        <geography-promo-card
+            class="g-col-4"
+            *ngIf="geography.WellRegistryEnabled"
+            [number]="3"
+            cardTitle="Register a Well"
+            [customRichTextTypeID]="CustomRichTextTypeEnum.LandingPageWellCard"
+            icon="Wells">
+            <a class="btn btn-orange btn-sm" [routerLink]="['/well-registry/', geography.GeographyName.toLowerCase(), 'new']" [class.disabled]="currentUser == null">
+                Register a Well
+            </a>
+            <div *ngIf="landingPageDto.NumberOfWells > 0; else noWells" class="pt-2">
+                <icon icon="StepComplete" class="text-success"></icon>
+                <em> You have successfully registered {{ landingPageDto.NumberOfWells }} well(s). </em>
+            </div>
+            <ng-template #noWells>
+                <div class="pt-2">
+                    <em>You have not registered any wells yet.</em>
+                </div>
+            </ng-template>
+        </geography-promo-card>
+    </div>
+    <ng-container>
+        <div class="mt-5" *ngIf="hasUserCompletedSetUp">
+            <geography-wide-promo-card icon="WaterAccounts" cardTitle="View Water Accounts" [customRichTextTypeID]="CustomRichTextTypeEnum.LandingPageWaterAccountCard">
+                <a class="btn btn-orange btn-sm" [routerLink]="['/water-dashboard']"> View Water Accounts </a>
+            </geography-wide-promo-card>
+        </div>
+    </ng-container>
+
+    <div class="about mt-5 pb-2">
+        <h2 class="section-title">About {{ geography.GeographyName }}</h2>
+
+        <div class="about-grid grid-12">
+            <rich-link
+                class="g-col-3"
+                [ngClass]="{ 'g-col-4': geography.AllocationPlansEnabled == false }"
+                icon="Info"
+                cardTitle="Overview"
+                [customRichTextTypeID]="CustomRichTextTypeEnum.LandingPageOverview">
+                <a class="btn btn-primary btn-sm" [routerLink]="['/geographies/', geography.GeographyName.toLowerCase(), 'overview']"> Learn More </a>
+            </rich-link>
+            <rich-link
+                class="g-col-3"
+                *ngIf="geography.AllocationPlansEnabled"
+                icon="Allocations"
+                cardTitle="Allocation Plans"
+                [customRichTextTypeID]="CustomRichTextTypeEnum.LandingPageAllocationPlans">
+                <a class="btn btn-primary btn-sm" [routerLink]="['/geographies/', geography.GeographyName.toLowerCase(), 'allocation-plans']"> Learn More </a>
+            </rich-link>
+            <rich-link
+                class="g-col-3"
+                [ngClass]="{ 'g-col-4': geography.AllocationPlansEnabled == false }"
+                icon="LineChart"
+                cardTitle="Water Levels"
+                [customRichTextTypeID]="CustomRichTextTypeEnum.LandingPageWaterLevels">
+                <a class="btn btn-primary btn-sm" [routerLink]="['/geographies/', geography.GeographyName.toLowerCase(), 'groundwater-levels']"> View Data </a>
+            </rich-link>
+            <rich-link
+                class="g-col-3"
+                [ngClass]="{ 'g-col-4': geography.AllocationPlansEnabled == false }"
+                icon="Question"
+                cardTitle="Contact and Support"
+                [customRichTextTypeID]="CustomRichTextTypeEnum.LandingPageContact">
+                <a class="btn btn-primary btn-sm" [routerLink]="['/geographies/', geography.GeographyName.toLowerCase(), 'support']"> Contact Us </a>
+            </rich-link>
+        </div>
+    </div>
+</div>

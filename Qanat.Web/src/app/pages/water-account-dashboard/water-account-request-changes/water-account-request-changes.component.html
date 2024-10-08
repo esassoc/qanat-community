@@ -1,0 +1,175 @@
+<div class="page-wrapper" *ngIf="currentUser$ | async">
+    <page-header pageTitle="Request Water Account Changes" icon="WaterAccounts" [customRichTextTypeID]="customRichTextTypeID" [templateRight]="templateRight">
+        <ng-template #templateRight>
+            <div class="page-controls">
+                <ng-container *ngIf="geographies$ | async as geographiesForView" name="selectedGeography">
+                    <ng-container *ngIf="geographiesForView.length > 1">
+                        <div class="field">
+                            <div class="field-label">Geography</div>
+                            <select [(ngModel)]="selectedGeographyID" (ngModelChange)="onGeographySelected()">
+                                <option *ngFor="let geography of geographiesForView" [ngValue]="geography.GeographyID" [disabled]="geography.GeographyID === selectedGeographyID">
+                                    {{ geography.GeographyName }}
+                                </option>
+                            </select>
+                        </div>
+                    </ng-container>
+                </ng-container>
+
+                <ng-container *ngIf="waterAccountHolders$ | async as waterAccountHolders" name="selectedUser">
+                    <div class="field user">
+                        <div class="field-label">View As</div>
+                        <ngx-select-dropdown
+                            [multiple]="false"
+                            [config]="userDropdownConfig"
+                            name="selectedUser"
+                            [(ngModel)]="selectedUser"
+                            (ngModelChange)="onUserSelected($event)"
+                            [options]="waterAccountHolders"></ngx-select-dropdown>
+                    </div>
+                </ng-container>
+            </div>
+        </ng-template>
+    </page-header>
+
+    <div class="page-body grid-12" *ngIf="waterAccounts$ | async" [loadingSpinner]="{ isLoading: isLoading }">
+        <app-alert-display></app-alert-display>
+
+        <div class="account-changes-form" cdkDropListGroup *ngIf="selectedUserID && showForm">
+            <div class="section aside">
+                <div class="section-header">
+                    <h3>
+                        <icon icon="Parcels"></icon>
+                        Parcels to Remove
+                    </h3>
+                </div>
+
+                <note noteType="warning">
+                    <icon icon="Warning" class="warning"></icon>
+                    <b> {{ parcelsToRemove.length }} parcel{{ parcelsToRemove.length === 1 ? "" : "s" }} </b>
+                    to be removed
+                </note>
+
+                <div cdkDropList class="drop-area" [cdkDropListData]="parcelsToRemove">
+                    <parcel-list-item
+                        *ngFor="let parcel of parcelsToRemove"
+                        cdkDrag
+                        (cdkDragDropped)="onDrop($event)"
+                        [parcel]="parcel"
+                        titleText="Restore Parcel"
+                        (removed)="restoreParcel(parcel)">
+                        <div cdkDragHandle class="drag-handle">
+                            <i class="fas fa-bars text-muted"></i>
+                        </div>
+                    </parcel-list-item>
+                </div>
+            </div>
+
+            <div class="section main">
+                <div class="section-header">
+                    <h3>
+                        <icon icon="WaterAccounts"></icon>
+                        My Water Accounts ({{ waterAccounts.length }})
+                    </h3>
+                    <button
+                        class="btn btn-secondary btn-sm"
+                        (click)="consolidateWaterAccounts()"
+                        [buttonLoading]="isConsolidatingAccounts"
+                        [disabled]="isConsolidatingAccounts || isLoadingSubmit || waterAccounts?.length === 1">
+                        Consolidate Accounts
+                    </button>
+                </div>
+
+                <div class="water-account-cards">
+                    <div class="card" *ngFor="let waterAccount of waterAccounts">
+                        <ng-container *ngIf="waterAccountZones[waterAccount.WaterAccountID]">
+                            <div
+                                *ngIf="waterAccountZones[waterAccount.WaterAccountID].ZoneID > 0; else invalidZoneDisplay"
+                                class="zone-display"
+                                [style.background-color]="waterAccountZones[waterAccount.WaterAccountID].ZoneColor"
+                                [style.color]="waterAccountZones[waterAccount.WaterAccountID].ZoneAccentColor">
+                                {{ waterAccountZones[waterAccount.WaterAccountID].ZoneName }}
+                            </div>
+                            <ng-template #invalidZoneDisplay>
+                                <div class="zone-display invalid">
+                                    <icon icon="Warning"></icon>
+                                    Warning: Invalid Zone
+                                </div>
+                            </ng-template>
+                        </ng-container>
+
+                        <div class="card-header">
+                            <div class="card-header-wrapper">
+                                <span class="water-account-name">
+                                    <icon icon="WaterAccounts"></icon>
+                                    #{{ waterAccount.WaterAccountNumber }}
+                                </span>
+                                <span class="text-muted">{{ waterAccount.WaterAccountName }}</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div>
+                                <b>{{ waterAccount.ContactName }}</b>
+                                <br />
+                                <b>{{ waterAccount.ContactAddress }}</b>
+                                (
+                                <a (click)="openUpdateInfoModal(waterAccount)">Edit</a>
+                                )
+                            </div>
+
+                            <div cdkDropList [cdkDropListData]="waterAccount.Parcels" class="drop-area">
+                                <parcel-list-item
+                                    *ngFor="let parcel of waterAccount.Parcels"
+                                    cdkDrag
+                                    (cdkDragDropped)="onDrop($event)"
+                                    [parcel]="parcel"
+                                    (removed)="removeParcel(parcel, waterAccount)">
+                                    <div cdkDragHandle class="drag-handle">
+                                        <i class="fas fa-bars text-muted"></i>
+                                    </div>
+                                </parcel-list-item>
+                            </div>
+
+                            <note noteType="info">
+                                <icon icon="Info" class="info"></icon>
+                                This account has
+                                <b> {{ waterAccount.Parcels.length }} parcel{{ waterAccount.Parcels.length === 1 ? "" : "s" }} </b>
+                                .
+                            </note>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-footer" *ngIf="selectedUserID && showForm">
+        <button class="btn btn-primary mr-3" (click)="submitWaterAccountChanges()" [buttonLoading]="isLoadingSubmit" [disabled]="isLoadingSubmit || isConsolidatingAccounts">
+            Submit Request
+        </button>
+
+        <button class="btn btn-primary-outline mr-3" (click)="reset()" [disabled]="isLoadingSubmit || isConsolidatingAccounts">Reset</button>
+
+        <button class="btn btn-primary-outline" routerLink=".." [disabled]="isLoadingSubmit || isConsolidatingAccounts">Cancel</button>
+    </div>
+
+    <!--MK 6/20 -- The card asked that these look like existing alerts -- I know its a bit weird that I am using the alert classes here instead of pushing alerts but there are two reasons for that."
+      1) In the first case I couldn't get the waterAccountsSubject to fire correctly so I couldn't push the alerts to the alert service because it'd pass over the ngIf check on the page div.
+      2) In the second case I am not sure you can get the support link into the alert via the alert service. 
+    "-->
+    <div class="alert alert-info" *ngIf="isWaterAccountViewer">
+        <div class="alert-content">
+            <i class="fa fa-info"></i>
+            You are not an Account Holder in this geography. Contact an Account Holder with any questions.
+        </div>
+    </div>
+
+    <div class="alert alert-info" *ngIf="!(isAdmin || isWaterManager) && isWaterAccountHolder && !selectedGeographyAllowRequests">
+        <div class="alert-content">
+            <i class="fa fa-info"></i>
+            This geography does not allow self-service account configuration. Please contact your GSA with any questions or to request account changes. &nbsp;
+            <a routerLink="/geographies/{{ selectedGeographyNameLowered }}/support"> Request Support </a>
+        </div>
+    </div>
+
+    <div class="no-water-accounts" *ngIf="noWaterAccountHolders">No water accounts to display</div>
+</div>

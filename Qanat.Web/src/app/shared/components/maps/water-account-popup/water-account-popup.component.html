@@ -1,0 +1,19 @@
+<div class="popup-wrapper" [loadingSpinner]="{ isLoading, loadingHeight: 225 }">
+    <ng-container *ngIf="data$ | async as data">
+        <div class="popup-meta">
+            <name-tag [title]="waterAccount.Geography.GeographyDisplayName" [name]="waterAccount.Geography.GeographyName"></name-tag>
+            <span class="parcels">
+                {{ waterAccount.Parcels.length }}
+                {{ waterAccount.Parcels.length > 1 ? "parcels" : "parcel" }}
+            </span>
+        </div>
+
+        <water-account-title [waterAccountName]="waterAccount.WaterAccountName" [waterAccountNumber]="waterAccount.WaterAccountNumber.toString()"></water-account-title>
+
+        <div class="popup-body">
+            <div>
+                <a class="btn btn-primary" [routerLink]="['/water-dashboard/water-accounts', waterAccount.WaterAccountID]"> View Water Account </a>
+            </div>
+        </div>
+    </ng-container>
+</div>

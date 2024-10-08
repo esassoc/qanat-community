@@ -1,0 +1,63 @@
+@use "/src/scss/abstracts" as *;
+
+:host,
+.promo-card,
+.promo-card-content-container {
+    height: 100%;
+}
+
+.promo-card {
+    gap: 0.25rem;
+    box-shadow: $shadow-100;
+    border: 1px solid rgba($black, 0.05);
+    border-radius: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    .promo-card-header {
+        background: $primary;
+        text-align: center;
+        border-top-left-radius: 0.5rem;
+        border-top-right-radius: 0.5rem;
+    }
+    .promo-card-content-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .promo-card-footer {
+        text-align: center;
+        border-top: 1px solid rgba($black, 0.05);
+    }
+}
+
+.number-wrapper {
+    position: absolute;
+    top: -0.75rem;
+    left: 0;
+    right: 0;
+    .number {
+        display: block;
+        text-align: center;
+        width: 1rem;
+        height: 1rem;
+        border-radius: 50%;
+        border: 2px solid $secondary;
+        background: $secondary;
+        color: $white;
+        line-height: 0.95rem;
+
+        font-weight: 900;
+        font-size: $type-size-050;
+
+        @include desktop-medium {
+            font-size: $type-size-200;
+            width: 2rem;
+            height: 2rem;
+            line-height: 1.9rem;
+        }
+    }
+}
+
+h3 {
+    color: $white;
+}

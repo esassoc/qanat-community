@@ -1,0 +1,81 @@
+@use "/src/scss/abstracts" as *;
+
+::ng-deep {
+    .page-header {
+        margin-bottom: $spacing-200;
+    }
+}
+
+.permissions-title {
+    font-size: $type-size-200;
+    display: inline-block;
+    border-bottom-width: 3px;
+    padding-bottom: 0.125rem;
+}
+
+.card-footer {
+    display: flex;
+    gap: 3rem;
+    align-items: center;
+
+    a {
+        color: $black;
+        letter-spacing: 0;
+        cursor: pointer;
+        text-decoration: underline;
+    }
+
+    icon {
+        display: inline-block;
+        @include svg-100-deep;
+        color: $primary;
+        width: 20px;
+        height: 20px;
+        margin-right: $spacing-200;
+        transform: translateY(4px);
+
+        &.red {
+            color: $red-default;
+        }
+    }
+}
+
+.user-card {
+    padding: 0;
+    margin-bottom: $spacing-400;
+    .card-header {
+        color: $white;
+        background-color: $teal-default;
+        padding: $spacing-400;
+        align-items: center;
+        .date-column {
+            justify-self: end;
+            text-wrap: nowrap;
+        }
+    }
+
+    .account-holder {
+        background-color: $blue-default;
+    }
+
+    .card-body {
+        padding: $spacing-400;
+    }
+
+    .card-footer {
+        padding: $spacing-400;
+        .remove-user-icon {
+            color: $red-default;
+        }
+    }
+
+    .user-icon-name-email {
+        display: inline-flex;
+        .user-name-email {
+            margin-left: $spacing-200;
+            .pending-invite {
+                margin-top: $spacing-200;
+            }
+        }
+    }
+}

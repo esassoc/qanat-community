@@ -1,0 +1,12 @@
+<div>
+    <div class="modal-header">
+        <h3 class="modal-title">State Well {{ siteCode }}</h3>
+        <button type="button" class="close" (click)="close()">
+            <i class="fa fa-times-circle"></i>
+        </button>
+    </div>
+
+    <div class="modal-body">
+        <vega-monitoring-wells-measurement-chart [geographyID]="geographyID" [siteCode]="siteCode"></vega-monitoring-wells-measurement-chart>
+    </div>
+</div>

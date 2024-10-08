@@ -1,0 +1,30 @@
+<div [hidden]="!modelOutlet.isActivated">
+    <router-outlet #modelOutlet="outlet"></router-outlet>
+</div>
+<div [hidden]="modelOutlet.isActivated">
+    <page-header [customRichTextTypeID]="scenarioPlannerRichTextTypeID" icon="ScenarioPlanner" pageTitle="Scenario Planner"></page-header>
+    <div class="page-body">
+        <h2 class="section-title primary pt-3 mb-3">Models</h2>
+        <section class="model-groups" *ngIf="modelGroups$ | async as modelGroups">
+            <ng-container *ngFor="let group of modelGroups | keyvalue">
+                <div class="model-group">
+                    <h3>{{ group.key }} Subbasin</h3>
+                    <model-index-card *ngFor="let model of group.value" [model]="model"></model-index-card>
+                </div>
+            </ng-container>
+        </section>
+        <section class="get-promo grid-12">
+            <div class="g-col-2">
+                <img src="assets/main/images/get-logo.png" alt="Groundwater Evaluation Toolbox Logo" />
+            </div>
+
+            <div class="g-col-10">
+                <h3 class="module-title">Powered by GET</h3>
+                <!-- todo: RTE -->
+                <div class="copy copy-3 copy-55">
+                    <custom-rich-text [customRichTextTypeID]="scenarioPlannerGETRichTextTypeID"></custom-rich-text>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>

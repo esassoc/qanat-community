@@ -1,0 +1,23 @@
+<div class="promo-card">
+    <div class="promo-card-header">
+        <div class="number-wrapper flex-center">
+            <div class="number">
+                {{ number }}
+            </div>
+        </div>
+
+        <h3 class="p-5 flex-center">
+            <icon [icon]="icon"></icon>
+            {{ cardTitle }}
+        </h3>
+    </div>
+
+    <div class="p-4 promo-card-content-container">
+        <div class="promo-card-body copy copy-3">
+            <custom-rich-text [customRichTextTypeID]="customRichTextTypeID"></custom-rich-text>
+        </div>
+        <div class="promo-card-footer mt-3 pt-3">
+            <ng-content></ng-content>
+        </div>
+    </div>
+</div>

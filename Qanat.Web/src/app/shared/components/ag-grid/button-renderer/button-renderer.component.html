@@ -1,0 +1,4 @@
+<button *ngIf="params.value.ActionHandler" (click)="params.value.ActionHandler()" [className]="params.value.CssClasses">
+    <span *ngIf="params.value.ActionIcon" [class]="params.value.ActionIcon"></span>
+    {{ params.value.ActionName }}
+</button>

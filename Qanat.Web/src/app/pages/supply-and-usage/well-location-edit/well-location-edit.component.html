@@ -1,0 +1,17 @@
+<page-header pageTitle="Update Well Location" [customRichTextTypeID]="customRichTextTypeID"></page-header>
+
+<div class="page-body">
+    <app-alert-display></app-alert-display>
+
+    <well-location-edit-map
+        *ngIf="wellLocation$ | async as wellLocation"
+        [wellLatLng]="wellLatLng"
+        [parcelGeoJson]="wellLocation.ParcelGeoJson"
+        [boundingBox]="wellLocation.BoundingBox"
+        (locationChanged)="onLocationChanged($event)"></well-location-edit-map>
+
+    <div class="footer">
+        <button class="btn btn-primary" (click)="previewChanges()" [disabled]="isLoadingSubmit">Update Well</button>
+        <a class="btn btn-primary-outline" routerLink="..">Cancel</a>
+    </div>
+</div>

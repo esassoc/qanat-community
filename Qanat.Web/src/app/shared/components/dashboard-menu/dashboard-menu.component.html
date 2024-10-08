@@ -1,0 +1,63 @@
+<ul class="sidebar-nav">
+    <ng-container *ngFor="let item of dashboardMenu.menuItems">
+        <li
+            *ngIf="!item.isDisabled"
+            class="sidebar-item"
+            routerLinkActive="active"
+            #rla="routerLinkActive"
+            [routerLinkActiveOptions]="item.routerLinkActiveOptions ?? { exact: viewingDetailPage }">
+            <a
+                *ngIf="!item.isDropdown; else dropdown"
+                [routerLink]="item.routerLink"
+                class="sidebar-link flex-between"
+                [class]="item.cssClasses"
+                [class.active]="rla.isActive"
+                [fragment]="item.fragment">
+                <icon [icon]="item.icon"></icon>
+                <span class="sidebar-link__label">{{ item.title }}</span>
+            </a>
+            <ng-template #dropdown>
+                <button
+                    (click)="item.preventCollapse ? null : toggleDropdown(item)"
+                    class="sidebar-dropdown-button flex-between"
+                    [class.active]="rla.isActive"
+                    [title]="item.isExpanded ? 'Click to Collapse ' + item.title + ' Menu' : 'Click to Expand ' + item.title + ' Menu'">
+                    <span class="flex button-left">
+                        <icon [icon]="item.icon"></icon>
+                        <span class="button-title">{{ item.title }}</span>
+                    </span>
+
+                    <span class="caret">
+                        <icon *ngIf="!item.preventCollapse" [icon]="item.isExpanded ? 'AngleUp' : 'AngleDown'"></icon>
+                    </span>
+                </button>
+                <ul [@slideState]="item.isExpanded ? 'expanded' : 'collapsed'" class="dropdown-overflow dropdown-list">
+                    <ng-container *ngFor="let subItem of item.menuItems">
+                        <ng-container *ngIf="subItem.withGeographyFlag; else dashboardMenuListItem">
+                            <ng-container *withGeographyFlag="subItem.withGeographyFlag">
+                                <ng-container *ngTemplateOutlet="dashboardMenuListItem"></ng-container>
+                            </ng-container>
+                        </ng-container>
+
+                        <ng-template #dashboardMenuListItem>
+                            <li *ngIf="!subItem.isDisabled">
+                                <a
+                                    routerLinkActive="active"
+                                    [routerLinkActiveOptions]="subItem.routerLinkActiveOptions ? subItem.routerLinkActiveOptions : defaultSubItemRouterLinkActiveOptions"
+                                    [routerLink]="subItem.routerLink"
+                                    [fragment]="subItem.fragment"
+                                    class="sidebar-sub-link"
+                                    [class]="subItem.cssClasses">
+                                    <span class="flex">
+                                        <icon [icon]="subItem.icon"></icon>
+                                        {{ subItem.title }}
+                                    </span>
+                                </a>
+                            </li>
+                        </ng-template>
+                    </ng-container>
+                </ul>
+            </ng-template>
+        </li>
+    </ng-container>
+</ul>

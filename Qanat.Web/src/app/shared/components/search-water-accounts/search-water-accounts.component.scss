@@ -1,0 +1,132 @@
+@use "/src/scss/abstracts" as *;
+
+:host {
+    display: block;
+}
+.search-container {
+    position: relative;
+    input {
+        padding-left: 3rem;
+        font-family: inherit;
+
+        &:disabled {
+            background: #e5e5e5;
+            cursor: not-allowed;
+        }
+    }
+    .search-prepend,
+    .search-append {
+        position: absolute;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .search-prepend {
+        left: 0;
+        width: 50px;
+        pointer-events: none;
+    }
+    .search-append {
+        top: 0;
+        right: 0;
+        button.clear {
+            margin-right: 15px;
+            background: none;
+            border: none;
+            color: #444444;
+            &:hover {
+                color: #000;
+            }
+        }
+    }
+}
+
+.search-results {
+    position: absolute;
+    z-index: 10;
+    box-shadow: 0px 4px 4px 0px #00000040;
+    background: #fff;
+    border-radius: 8px;
+
+    .refine-search {
+        width: 400px;
+    }
+    ul {
+        max-height: 500px;
+        max-width: 500px;
+        overflow-y: auto;
+
+        @include desktop-small {
+            width: 400px;
+        }
+
+        li {
+            &:first-child button {
+                border-radius: 8px 8px 0 0;
+            }
+
+            &:last-child button {
+                border-radius: 0 0 8px 8px;
+            }
+
+            button {
+                padding: 1rem 1.5rem;
+                background: none;
+                border: none;
+                text-align: left;
+                width: 100%;
+                font-family: inherit;
+
+                &:hover,
+                &:focus {
+                    background: rgba($primary, 0.1);
+                }
+            }
+
+            & + li {
+                border-top: 1px solid #e5e5e5;
+            }
+
+            &.highlighted-search-result {
+                background: rgba($primary, 0.05);
+            }
+        }
+    }
+
+    .button-head {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+
+        svg {
+            path {
+                fill: $primary;
+            }
+        }
+    }
+
+    .wa-name {
+        font-size: $type-size-300;
+        color: $primary;
+        padding-left: 0.25rem;
+    }
+
+    .wa-id {
+        font-size: $type-size-100;
+        color: $gray-default;
+    }
+
+    .wa-parcels,
+    .wa-acres {
+        font-size: $type-size-200;
+    }
+
+    .wa-acres {
+        padding-left: 0.125rem;
+    }
+
+    .wa-meta {
+        font-size: $type-size-150;
+    }
+}

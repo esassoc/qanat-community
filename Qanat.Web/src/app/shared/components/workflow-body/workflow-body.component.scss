@@ -1,0 +1,6 @@
+@use "/src/scss/abstracts" as *;
+
+.sticky-help {
+    position: sticky;
+    top: $spacing-600;
+}

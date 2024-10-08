@@ -1,0 +1,15 @@
+<dialog
+    #dialog
+    [class.small]="modalSize == ModalSizeEnum.Small"
+    [class.medium]="modalSize == ModalSizeEnum.Medium"
+    [class.large]="modalSize == ModalSizeEnum.Large"
+    [class.extra-large]="modalSize == ModalSizeEnum.ExtraLarge"
+    [class.not-top-layer]="!topLayer"
+    [class.overflow-visible]="overflowVisible"
+    [class.primary]="modalTheme == ModalThemeEnum.Primary"
+    [class.light]="modalTheme == ModalThemeEnum.Light">
+    <ng-container #vc>
+        <ng-content></ng-content>
+        <ng-template [ngTemplateOutlet]="context"></ng-template>
+    </ng-container>
+</dialog>

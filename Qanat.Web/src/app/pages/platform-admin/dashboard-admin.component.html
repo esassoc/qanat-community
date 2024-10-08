@@ -1,0 +1,48 @@
+<div class="dashboard">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h5 class="sidebar-title">
+                <a routerLink="/platform-admin">
+                    <img src="assets/main/logos/gap-logo-blue.jpg" alt="Groundwater Accounting Platform Logo" />
+                    Platform Admin
+                </a>
+            </h5>
+        </div>
+
+        <ul class="sidebar-nav">
+            <li class="sidebar-item">
+                <a [routerLink]="['geographies']" routerLinkActive="active" [routerLinkActiveOptions]="routerLinkActiveOptions" class="sidebar-link">
+                    <i class="fa fa-map"></i>
+                    Geographies
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a [routerLink]="['labels-and-definitions']" routerLinkActive="active" [routerLinkActiveOptions]="routerLinkActiveOptions" class="sidebar-link">
+                    <i class="fa fa-list-ul"></i>
+                    Labels & Definitions
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a [routerLink]="['users']" routerLinkActive="active" [routerLinkActiveOptions]="routerLinkActiveOptions" class="sidebar-link">
+                    <i class="fa fa-user"></i>
+                    Users
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a [routerLink]="['frequently-asked-questions']" routerLinkActive="active" [routerLinkActiveOptions]="routerLinkActiveOptions" class="sidebar-link">
+                    <i class="fa fa-question"></i>
+                    FAQ
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <main class="main">
+        <router-outlet #adminOutlet="outlet"></router-outlet>
+        <div *ngIf="!adminOutlet.isActivated">
+            <page-header pageTitle="Dashboard"></page-header>
+
+            <div class="page-body grid-12"></div>
+        </div>
+    </main>
+</div>

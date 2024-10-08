@@ -1,0 +1,119 @@
+@use "/src/scss/abstracts" as *;
+
+.field {
+    * {
+        &:focus,
+        &:active {
+            outline-color: $primary;
+        }
+
+        &.ng-invalid.ng-touched {
+            outline-color: $red-default;
+            outline-width: 2px;
+            outline-style: solid;
+        }
+    }
+
+    &-label {
+        display: flex;
+        align-items: center;
+        font-weight: bold;
+        font-size: $type-size-150;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding-bottom: 0.5rem;
+        margin-bottom: 0;
+    }
+
+    &-checkbox-single {
+        display: flex;
+        align-items: center;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="date"],
+    select,
+    textarea,
+    .custom-file-upload {
+        width: 100%;
+        border-radius: 0.25rem;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid rgba(black, 0.2);
+        background: $white;
+        .file-upload-name {
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+
+        @include placeholder {
+            color: rgba(black, 0.5);
+        }
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="date"],
+    .custom-file-upload {
+        height: 3rem;
+        line-height: 3rem;
+        font-size: $type-size-300;
+    }
+
+    select {
+        background: $white;
+        height: 3rem;
+        font-size: $type-size-300;
+
+        &.small {
+            height: 2.5rem;
+            font-size: $type-size-200;
+        }
+    }
+
+    textarea {
+        min-height: 6rem;
+    }
+
+    .custom-file-upload {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 3rem;
+
+        padding-right: 0;
+        overflow: hidden;
+
+        input {
+            display: none;
+        }
+    }
+
+    parcel-typeahead {
+        .ng-select.ng-select-single .ng-select-container {
+            height: 42px;
+        }
+        .ng-select-focused .ng-placeholder {
+            opacity: 0;
+        }
+        .ng-value .ng-value-label {
+            transform: translateY(3px);
+            display: inline-block;
+        }
+    }
+
+    .checkbox-label {
+        margin: 0;
+        padding-left: 0.125rem;
+        display: block;
+
+        & + .checkbox-label {
+            margin-top: 0.75rem;
+        }
+    }
+}

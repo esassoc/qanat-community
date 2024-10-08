@@ -1,0 +1,126 @@
+@use "/src/scss/abstracts" as *;
+
+.disabled {
+    pointer-events: none;
+}
+
+.switch-account {
+    display: flex;
+    gap: $spacing-200;
+    color: $gray-dark;
+    font-size: $type-size-150;
+
+    &:hover {
+        text-decoration: underline;
+        cursor: pointer;
+    }
+
+    icon {
+        display: block;
+        width: 7px;
+        height: 4px;
+        @include svg-100-deep;
+        transform: translateY(-2px);
+    }
+}
+
+.water-account-nav-header {
+    padding-top: 3rem;
+    justify-content: space-between;
+    align-items: flex-end;
+
+    .current-account {
+        padding-right: 0.5rem;
+        display: grid;
+        grid-template-columns: 0.75rem 1fr;
+        gap: 0.5rem;
+        align-items: end;
+    }
+
+    &:hover {
+        cursor: pointer;
+
+        .switch-account {
+            text-decoration: underline;
+        }
+    }
+}
+
+.available-item {
+    padding: 0.5rem 0;
+}
+
+.switcher {
+    display: grid;
+    gap: 0 1.5rem;
+    grid-template-columns: 1fr 3.5rem;
+    align-items: center;
+
+    * {
+        transition: all 300ms ease;
+    }
+
+    &-title {
+    }
+
+    &-name {
+        color: $primary;
+        font-size: $type-size-150;
+    }
+
+    &-id {
+        padding-left: 0.25rem;
+        color: $gray-default;
+        font-size: $type-size-050;
+    }
+
+    &-geography {
+        display: inline-block;
+        font-size: 0.675rem;
+        background: $secondary;
+        color: $white;
+        border-radius: 2rem;
+        padding: 0.25rem 0.5rem 0.125rem;
+        text-transform: uppercase;
+    }
+
+    &-no-results {
+        padding: 2rem 1rem 2rem 1rem;
+
+        p {
+            font-size: $type-size-200;
+            color: $gray-default;
+            font-style: italic;
+        }
+    }
+
+    &-button {
+        border: 1px solid rgba($black, 0.1);
+        padding: 0.75rem 1rem 0.5rem;
+        border-radius: 4px;
+        min-height: 52px;
+        display: grid;
+
+        .switcher {
+            grid-template-columns: 1fr;
+            gap: 0;
+            padding-right: 2rem;
+
+            &:before {
+                display: block;
+                content: "";
+                background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 320 512"><path d="M143 352.3L7 216.3c-9.4-9.4-9.4-24.6 0-33.9l22.6-22.6c9.4-9.4 24.6-9.4 33.9 0l96.4 96.4 96.4-96.4c9.4-9.4 24.6-9.4 33.9 0l22.6 22.6c9.4 9.4 9.4 24.6 0 33.9l-136 136c-9.2 9.4-24.4 9.4-33.8 0z"/></svg>');
+                background-repeat: no-repeat;
+                position: absolute;
+                right: 0;
+                top: calc(50% - 8px);
+                width: 14px;
+                height: 16px;
+            }
+        }
+
+        &:hover {
+            cursor: pointer;
+        }
+    }
+}

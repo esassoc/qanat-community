@@ -1,0 +1,27 @@
+@use "/src/scss/abstracts" as *;
+
+.usersList {
+    li {
+        .user {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            border-left: 1px solid rgba(0, 0, 0, 0.05);
+            border-right: 1px solid rgba(0, 0, 0, 0.05);
+            button {
+                font-size: $type-size-400;
+                color: $gray-default;
+                border-left: 1px solid rgba(0, 0, 0, 0.05);
+                &:hover {
+                    color: $red-default;
+                }
+            }
+        }
+
+        &:last-child .user {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+    }
+}

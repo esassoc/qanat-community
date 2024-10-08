@@ -1,0 +1,78 @@
+<div *ngIf="allocationPlan$ | async">
+    <page-header icon="Allocations" pageTitle="Allocation Plans" [customRichTextTypeID]="richTextTypeID" [templateRight]="templateRight"></page-header>
+    <ng-template #templateRight>
+        <label class="switch">
+            <input type="checkbox" [(ngModel)]="model.IsActive" (change)="onToggle()" />
+            <span class="toggle toggle-orange"></span>
+        </label>
+    </ng-template>
+    <div class="page-body grid-12" [loadingSpinner]="{ isLoading: !model }">
+        <app-alert-display></app-alert-display>
+
+        <div class="card-header">
+            <h2>Options</h2>
+        </div>
+        <div class="card-body" *ngIf="model">
+            <form class="form grid-9" #allocationPlanForm="ngForm">
+                <div class="field g-col-6 mb-2">
+                    <label class="field-label required" for="zoneGroup"> Allocation Zone Group </label>
+                    <select class="form-control" name="zoneGroup" [(ngModel)]="model.ZoneGroupID">
+                        <option *ngFor="let zoneGroup of zoneGroups" [ngValue]="zoneGroup.ZoneGroupID">
+                            {{ zoneGroup.ZoneGroupName }}
+                        </option>
+                    </select>
+                </div>
+
+                <div class="field g-col mb-2">
+                    <label for="waterType" class="field-label required"> Allocation Water Supply Types </label>
+
+                    <label *ngFor="let waterType of waterTypes" class="checkbox-label">
+                        <input type="checkbox" class="form-control" name="waterType-{{ waterType.WaterTypeID }}" [(ngModel)]="waterTypeSelected[waterType.WaterTypeID]" />
+                        {{ waterType.WaterTypeName }}
+                    </label>
+                </div>
+
+                <div class="field g-col-3">
+                    <label for="startYear" class="field-label required">Start Year</label>
+                    <input type="text" name="startYear" [(ngModel)]="model.StartYear" placeholder="e.g. 2024" mask="0000" />
+                </div>
+
+                <div class="field g-col-3">
+                    <label for="endYear" class="field-label required">End Year</label>
+                    <input type="text" name="endYear" [(ngModel)]="model.EndYear" placeholder="e.g. 2030" mask="0000" />
+                </div>
+
+                <div class="field g-col mb-2">
+                    <label class="field-label required" for="visibleToLandowners"> Show read-only pages in platform </label>
+                    <label class="switch">
+                        <input type="checkbox" id="visibleToLandowners" name="visibleToLandowners" [(ngModel)]="model.IsVisibleToLandowners" />
+                        <span class="toggle" for="visibleToLandowners"></span>
+                    </label>
+                </div>
+
+                <div class="field g-col mb-2">
+                    <label class="field-label required" for="visibleToPublic"> Allow public viewing of read-only page within Geography Dashboard </label>
+                    <label class="switch">
+                        <input type="checkbox" id="visibleToPublic" name="visibleToPublic" [(ngModel)]="model.IsVisibleToPublic" />
+                        <span class="toggle" for="visibleToPublic"></span>
+                    </label>
+                </div>
+
+                <div class="field g-col allocation-plans-description">
+                    <label for="allocation-plans-description" class="field-label"> Description </label>
+                    <div class="tinyMCEFontColor">
+                        <editor #tinyMceEditor [init]="tinyMceConfig" name="allocation-plans-description" [(ngModel)]="model.AllocationPlansDescription"></editor>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="card-footer flex-end pb-3">
+            <button type="submit" class="btn btn-primary" [disabled]="isLoadingSubmit" (click)="onSubmit()">
+                <span *ngIf="isLoadingSubmit" class="fa fa-spinner loading-spinner"></span>
+                Save
+            </button>
+            <a class="btn btn-primary-outline ml-2" routerLink="/configure">Cancel</a>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,22 @@
+@use "/src/scss/abstracts" as *;
+
+.button-group {
+    gap: 0.25em;
+}
+
+.button-group__item {
+    padding: 0.75rem 1rem 0.75em;
+
+    &:nth-child(2) {
+        color: $red-default;
+        background: $white;
+        border-color: $red-default;
+
+        &:hover,
+        &.active {
+            background: $red-default;
+            color: $white;
+            border-color: $red-default;
+        }
+    }
+}

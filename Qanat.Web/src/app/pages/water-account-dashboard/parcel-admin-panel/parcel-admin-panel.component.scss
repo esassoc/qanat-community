@@ -1,0 +1,11 @@
+@use "/src/scss/abstracts" as *;
+
+.card {
+    margin-bottom: $spacing-600;
+}
+
+.management-actions {
+    .flex-start {
+        gap: $spacing-600;
+    }
+}

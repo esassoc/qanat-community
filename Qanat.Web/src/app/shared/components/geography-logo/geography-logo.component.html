@@ -1,0 +1,13 @@
+<ng-container *ngIf="geographyID; else noGeography" [ngSwitch]="geographyID">
+    <img *ngSwitchCase="1" src="assets/main/logos/MIUGSA-logo.png" alt="MIUGSA Logo" />
+    <img *ngSwitchCase="2" src="assets/main/logos/pajaro-logo.jfif" alt="Pajaro Logo" />
+    <img *ngSwitchCase="3" src="assets/main/logos/rrb-logo.jfif" alt="RRB Logo" />
+    <img *ngSwitchCase="4" src="assets/main/logos/yolo-logo.jfif" alt="Yolo Logo" />
+    <img *ngSwitchCase="5" src="assets/main/logos/gap-logo-blue.jpg" alt="Demo Geography Logo" />
+    <img *ngSwitchCase="6" src="assets/main/logos/MSGSA-logo.png" alt="MSGSA Logo" />
+    <img *ngSwitchCase="7" src="assets/main/logos/east-turlock-logo.png" alt="ETSGSA Logo" />
+</ng-container>
+
+<ng-template #noGeography>
+    <img src="assets/main/logos/gap-logo-blue.jpg" alt="Groundwater Accounting Platform" />
+</ng-template>

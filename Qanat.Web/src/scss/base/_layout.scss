@@ -1,0 +1,42 @@
+@use "/src/scss/abstracts" as *;
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    background: $tan;
+}
+
+app-root {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    min-height: 100vh;
+}
+
+.site {
+    display: grid;
+
+    &-wrapper {
+        max-width: 48rem;
+        width: calc(100% - 2rem);
+        margin: 1rem auto;
+        border-radius: 8px;
+        box-shadow: 0 0 1.5rem rgba(black, 0.07);
+        background: rgba(white, 0.9);
+
+        @include tablet {
+            margin: 2rem auto;
+        }
+
+        @include desktop-small {
+            max-width: 120rem;
+            width: calc(100% - 4rem);
+        }
+
+        & > *:not(router-outlet) {
+            display: grid;
+            height: 100%;
+        }
+    }
+}

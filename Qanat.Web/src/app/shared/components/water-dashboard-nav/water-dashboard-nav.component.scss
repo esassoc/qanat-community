@@ -1,0 +1,30 @@
+@use '/src/scss/abstracts' as *;
+
+.nav-container {
+    height: 100%;
+}
+
+.tab-nav {
+    display: flex;
+    align-items: flex-start;
+    background-color: $gray-50;
+    border-bottom: 1px solid $gray-200;
+    border-radius: $spacing-100 $spacing-100 0 0;
+    height: 98%;
+    max-height: 60px;
+
+    .tab {
+        padding: $spacing-400 $spacing-500;
+        height: 100%;
+        border-right: 1px solid $gray-200;
+
+        &.active {
+            background-color: $white;
+            height: 102%;
+        }
+
+        icon {
+            margin-right: $spacing-200;
+        }
+    }
+}

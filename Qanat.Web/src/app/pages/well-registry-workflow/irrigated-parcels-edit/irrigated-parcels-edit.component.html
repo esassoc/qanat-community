@@ -1,0 +1,19 @@
+<page-header pageTitle="Irrigated Parcels">
+    <workflow-help [customRichTextTypeID]="customRichTextTypeID"></workflow-help>
+</page-header>
+
+<workflow-body>
+    <app-alert-display></app-alert-display>
+
+    <well-irrigated-parcels-edit-map
+        *ngIf="wellRegistrationIrrigatedParcels$ | async"
+        [wellIrrigatedParcels]="wellRegistrationIrrigatedParcels"
+        [geographyID]="geographyID"
+        [wellLatLng]="wellLatLng"
+        (selectionChanged)="onSelectionChanged($event)"></well-irrigated-parcels-edit-map>
+</workflow-body>
+
+<div class="page-footer">
+    <fresca-button class="mr-2" (click)="save()" iconClass="" [disabled]="isLoadingSubmit"> Save </fresca-button>
+    <fresca-button class="ml-auto" (click)="save(true)" [disabled]="isLoadingSubmit"> Save & Continue </fresca-button>
+</div>

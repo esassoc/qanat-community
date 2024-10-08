@@ -1,0 +1,223 @@
+@use "/src/scss/abstracts" as *;
+
+.statistics {
+    &__filters {
+        width: 100%;
+        display: flex;
+        align-items: flex-end;
+        flex-wrap: wrap;
+        gap: 2rem;
+        background: $gray-50;
+        border: 1px solid $gray-200;
+        border-radius: $border-radius-200;
+        padding: $spacing-400;
+    }
+
+    &__filter {
+        &-label {
+            text-transform: uppercase;
+            font-size: $type-size-150;
+            font-weight: 600;
+            padding-bottom: 0.25rem;
+            letter-spacing: 0.05em;
+        }
+
+        select {
+            width: 16rem;
+            height: 45px;
+            border-radius: 0.25rem;
+            border: 1px solid #ccc;
+            font-size: $type-size-300;
+            padding: 0 0.5rem;
+            background: $white;
+        }
+    }
+
+    &__module {
+        margin-top: 2rem;
+        background: $white;
+        border: 1px solid $gray-200;
+        border-radius: $border-radius-200;
+        padding: 1.5rem 1rem;
+        box-shadow: 0px 4px 12px 0px rgba($black, 0.1);
+
+        @include desktop-medium {
+            padding: $spacing-600;
+        }
+
+        &-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 0.5rem;
+
+            &.underline {
+                border-bottom: 2px solid;
+            }
+        }
+    }
+
+    &__date {
+        font-style: italic;
+        font-size: $type-size-100;
+        color: #6a6a6a;
+    }
+
+    &__title {
+        &-large {
+            font-size: $type-size-500;
+        }
+
+        &-small {
+            font-size: $type-size-100;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+    }
+
+    .group {
+        display: grid;
+        gap: 2rem;
+
+        &-2 {
+            @include tablet {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        &-3 {
+            @include tablet {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
+        &-4 {
+            @include tablet {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            @include desktop-medium {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+            }
+        }
+
+        .statistics__module {
+            margin-top: 0;
+        }
+    }
+
+    .stat {
+        &__value {
+            font-size: $type-size-500;
+            font-weight: 600;
+
+            @include tablet {
+                font-size: $type-size-400;
+            }
+
+            @include desktop-medium {
+                font-size: $type-size-500;
+            }
+        }
+
+        &__meta {
+            color: #6a6a6a;
+            display: block;
+            padding-top: 0.25rem;
+            font-size: $type-size-300;
+            font-weight: normal;
+        }
+    }
+
+    &__usage-meter {
+        @include desktop-medium {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .meter {
+            background: $white;
+            border: 1px solid rgba($black, 0.08);
+            box-shadow: inset 0px 2px 7px rgba($black, 0.12);
+            border-radius: 0.5rem;
+            width: 100%;
+        }
+
+        .usage {
+            background: linear-gradient(90deg, #3594b6 0%, #71cae9 100%);
+            border-radius: 0.5rem;
+            height: 1.5rem;
+            max-width: 100%;
+
+            &.over {
+                background: linear-gradient(90deg, #b63535 0%, #e97171 100%);
+            }
+        }
+
+        .stat {
+            padding-top: 0.75rem;
+
+            @include desktop-medium {
+                padding-top: 0;
+                order: -1;
+            }
+
+            &__meta {
+                white-space: nowrap;
+            }
+        }
+    }
+
+    &__water-supply {
+        &-type {
+            padding: 1.25rem 0;
+            border-bottom: 1px solid rgba($black, 0.1);
+            display: grid;
+            gap: 0.5rem 2rem;
+
+            @include desktop-small {
+                grid-template-columns: 10rem 8rem 1fr;
+                align-items: center;
+            }
+
+            @include desktop-large {
+                grid-template-columns: 16rem 10rem 1fr;
+            }
+
+            &:last-of-type {
+                border-bottom: unset;
+                padding-bottom: 0;
+            }
+        }
+
+        .label {
+            font-size: $type-size-300;
+            font-weight: bold;
+            line-height: 1.25em;
+        }
+
+        .amount {
+        }
+
+        .meter {
+            .supply {
+                background: linear-gradient(90deg, #3594b6 0%, #71cae9 100%);
+                border-radius: 0.5rem;
+                height: 0.5rem;
+            }
+        }
+
+        .note {
+            padding-top: 0.5rem;
+            grid-column: 1 / -1;
+            font-size: $type-size-150;
+            font-style: italic;
+            color: rgba($black, 0.5);
+
+            i {
+                color: $red-default;
+                margin-right: 0.25rem;
+            }
+        }
+    }
+}

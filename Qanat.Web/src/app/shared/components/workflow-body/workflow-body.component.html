@@ -1,0 +1,18 @@
+<ng-template #loadingTemplate>
+    <div [loadingSpinner]="{ loadingHeight: 700, isLoading: showLoadingSpinner }"></div>
+</ng-template>
+<div class="page-body" *ngIf="!showLoadingSpinner; else loadingTemplate">
+    <div class="grid-12">
+        <div [class.g-col-8]="displaySidebar" [class.g-col-12]="!displaySidebar">
+            <ng-content></ng-content>
+        </div>
+        <ng-container *ngIf="displaySidebar">
+            <div class="g-col-4 sticky-help">
+                <workflow-help [customRichTextTypeID]="helpCustomRichTextTypeID" *ngIf="helpCustomRichTextTypeID"></workflow-help>
+                <div *ngIf="sidebarTemplateAppend" class="mt-4">
+                    <ng-container *ngTemplateOutlet="sidebarTemplateAppend"></ng-container>
+                </div>
+            </div>
+        </ng-container>
+    </div>
+</div>

@@ -1,0 +1,46 @@
+<div class="modal-header">
+    <div>
+        <h3 class="section-title">Copy Allocation Plan</h3>
+        <div class="copy copy-3">
+            <custom-rich-text [customRichTextTypeID]="richTextTypeID"></custom-rich-text>
+        </div>
+    </div>
+    <button type="button" class="close" (click)="close()">
+        <i class="fa fa-times-circle"></i>
+    </button>
+</div>
+
+<div class="modal-body">
+    <form action="" class="form" [formGroup]="formGroup" *ngIf="allocationPlanDropdownOptions$ | async as allocationPlanDropdownOptions">
+        <form-field
+            [formControl]="formGroup.controls.SelectedAllocationPlan"
+            fieldLabel="Action Plan"
+            [formInputOptions]="allocationPlanDropdownOptions"
+            [type]="FormFieldType.Select"></form-field>
+    </form>
+    <div class="copy copy-3 mt-3">
+        <note *ngIf="formGroup.controls.SelectedAllocationPlan.value">
+            You are copying the
+            <strong>
+                {{ formGroup.controls.SelectedAllocationPlan.value.WaterTypeName }} /
+                {{ formGroup.controls.SelectedAllocationPlan.value.ZoneName }}
+            </strong>
+            into the
+            <strong>
+                {{ modalContext.AllocationPlanManageDto.WaterType.WaterTypeName }} /
+                {{ modalContext.AllocationPlanManageDto.Zone.ZoneName }}
+            </strong>
+            Allocation plan. This will clear and replace all existing periods for the
+            <strong>
+                {{ modalContext.AllocationPlanManageDto.WaterType.WaterTypeName }} /
+                {{ modalContext.AllocationPlanManageDto.Zone.ZoneName }}
+            </strong>
+            Allocation Plan. Are you sure you want to proceed?
+        </note>
+    </div>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-primary" (click)="save()">Copy Plan</button>
+    <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+</div>

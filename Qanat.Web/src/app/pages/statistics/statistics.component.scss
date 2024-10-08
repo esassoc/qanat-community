@@ -1,0 +1,8 @@
+.chart {
+    text-align: center;
+    &__button-group {
+        margin-top: 2rem;
+        justify-content: center;
+        display: inline-flex;
+    }
+}

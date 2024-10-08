@@ -1,0 +1,58 @@
+@use "/src/scss/abstracts" as *;
+
+.input-card {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 1rem;
+
+    &.blue {
+        background-color: rgba($secondary, 0.1);
+
+        &.selected {
+            outline: 3px solid $secondary;
+            background: rgba($secondary, 0.2);
+            border-color: rgba($secondary, 0.2);
+        }
+
+        .fa-map-marker-alt {
+            color: $secondary;
+        }
+    }
+
+    &.yellow {
+        background-color: rgba($yellow-default, 0.1);
+        border-color: rgba($yellow-default, 0.7);
+
+        &.selected {
+            outline: 3px solid $yellow-default;
+            background: rgba($yellow-default, 0.2);
+            border-color: rgba($yellow-default, 0.2);
+        }
+
+        .fa-map-marker-alt {
+            color: $yellow-default;
+        }
+    }
+}
+
+.delete-button {
+    margin-top: -24px;
+    margin-right: -24px;
+    margin-bottom: 10px;
+    z-index: 10;
+
+    .delete-icon {
+        background-color: white;
+        border-radius: 50%;
+    }
+}
+
+.lat-lng {
+    display: grid;
+    grid-template-columns: 12px 1fr;
+    gap: 0.5rem;
+
+    div {
+        margin-top: 0;
+    }
+}

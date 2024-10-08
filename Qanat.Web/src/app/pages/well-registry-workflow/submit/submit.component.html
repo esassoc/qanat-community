@@ -1,0 +1,26 @@
+<page-header pageTitle="Submit"></page-header>
+
+<workflow-body [helpCustomRichTextTypeID]="customRichTextTypeID" [sidebarTemplateAppend]="sidebarTemplateAppend">
+    <app-alert-display></app-alert-display>
+    <form class="form grid-12" #wellRegistryDeclaration="ngForm">
+        <form-field
+            [formControl]="formControl"
+            fieldLabel="I understand, acknowledge and agree to all the following:"
+            checkLabel="I declare that I am authorized to provide the information requested in this form, and all of the information and statements provided herein are true and correct to the best of my knowledge."
+            [type]="FormFieldType.Check"></form-field>
+    </form>
+</workflow-body>
+
+<ng-template #sidebarTemplateAppend>
+    <ng-container *ngIf="registryProgress$ | async as progressDto">
+        <note noteType="danger" *ngIf="showIncompleteNote">
+            <div class="p-2">
+                <custom-rich-text [customRichTextTypeID]="incompleteCustomRichTextTypeID"></custom-rich-text>
+            </div>
+        </note>
+    </ng-container>
+</ng-template>
+
+<div class="page-footer">
+    <fresca-button class="ml-auto" [disabled]="!formControl.value" (click)="submitWell()"> Submit </fresca-button>
+</div>

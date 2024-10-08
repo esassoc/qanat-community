@@ -1,0 +1,93 @@
+@use "/src/scss/abstracts" as *;
+.has-spinner {
+    position: relative;
+}
+
+.spinner-container {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    z-index: 2000;
+    background: #fff;
+    transition:
+        visibility 0.15s,
+        opacity 0.15s linear;
+    visibility: visible;
+    opacity: 1;
+
+    &.hidden {
+        visibility: hidden;
+        opacity: 0;
+    }
+}
+
+.circle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 75px;
+    height: 75px;
+    background: #ccc;
+    border: 5px solid #fff;
+    box-shadow: 0 0 0 2px $primary;
+    border-radius: 50%;
+    overflow: hidden;
+    .wave {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        background: $primary;
+        border-radius: 50%;
+
+        &:before,
+        &:after {
+            content: "";
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            top: 0;
+            left: 50%;
+            transform: translate(-50%, -75%);
+            background: #000;
+        }
+        &:before {
+            border-radius: 45%;
+            background: rgba(255, 255, 255, 1);
+            animation: animate 5s linear infinite;
+        }
+        &:after {
+            border-radius: 40%;
+            background: rgba(255, 255, 255, 0.5);
+            animation: animate 10s linear infinite;
+        }
+    }
+}
+
+@keyframes animate {
+    0% {
+        transform: translate(-50%, -75%) rotate(0deg);
+    }
+    100% {
+        transform: translate(-50%, -75%) rotate(360deg);
+    }
+}
+
+// generic spin class
+
+.spin-animation {
+    animation: spinAnimation 2s linear infinite;
+}
+@keyframes spinAnimation {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}

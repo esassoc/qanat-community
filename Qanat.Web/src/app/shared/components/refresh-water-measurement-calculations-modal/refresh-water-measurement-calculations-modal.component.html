@@ -1,0 +1,26 @@
+<div class="modal-header">
+    <h3>Refresh {{ modalContext.GeographyName }} Water Measurement Calculations</h3>
+    <button type="button" class="close" (click)="close()">
+        <i class="fa fa-times-circle"></i>
+    </button>
+</div>
+
+<div class="modal-body grid-12">
+    <div class="field">
+        <label class="required field-label">Month</label>
+        <ng-select class="form-control" name="estimateMonth" [(ngModel)]="selectedMonth">
+            <ng-option *ngFor="let month of months; index as i" [value]="i">
+                {{ month }}
+            </ng-option>
+        </ng-select>
+    </div>
+    <div class="field">
+        <label class="required field-label">Year</label>
+        <ng-select class="form-control" name="estimateYear" [(ngModel)]="selectedYear" [items]="years"></ng-select>
+    </div>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-primary" (click)="save()" [disabled]="isLoadingSubmit" [buttonLoading]="isLoadingSubmit">Refresh Calculations</button>
+    <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+</div>

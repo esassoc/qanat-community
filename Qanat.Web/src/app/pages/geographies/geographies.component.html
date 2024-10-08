@@ -1,0 +1,29 @@
+<div class="full-width-page">
+    <page-header [customRichTextTypeID]="richTextTypeID" pageTitle="Geographies" icon="Geography-Alt"></page-header>
+
+    <div class="page-body grid-12">
+        <app-alert-display></app-alert-display>
+
+        <div class="g-col-3 card" *ngFor="let geography of geographies$ | async" (click)="navigateToGeographyDashboard(geography)">
+            <div class="card-header">
+                <div class="logo" [ngSwitch]="geography.GeographyID">
+                    <img src="assets/main/logos/MIUGSA-logo.png" alt="MIUGSA Logo" *ngSwitchCase="1" />
+                    <img src="assets/main/logos/pajaro-logo.jfif" alt="Pajaro Logo" *ngSwitchCase="2" />
+                    <img src="assets/main/logos/rrb-logo.jfif" alt="RRB Logo" *ngSwitchCase="3" />
+                    <img src="assets/main/logos/yolo-logo.jfif" alt="Yolo Logo" *ngSwitchCase="4" />
+                    <img src="assets/main/logos/gap-logo-blue.jpg" alt="Demo Geography Logo" *ngSwitchCase="5" />
+                    <img src="assets/main/logos/MSGSA-logo.png" alt="MSGSA Logo" *ngSwitchCase="6" />
+                    <img src="assets/main/logos/east-turlock-logo.png" alt="MSGSA Logo" *ngSwitchCase="7" />
+                </div>
+            </div>
+
+            <div class="card-body">
+                <h3>{{ geography.GeographyName }}</h3>
+
+                <div class="copy copy-4">
+                    {{ geography.GeographyDisplayName }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

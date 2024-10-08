@@ -1,0 +1,26 @@
+<ng-container *ngIf="geography$ | async as geography">
+    <ng-container *ngIf="geography.currentUserAvailableGeographies.length > 1">
+        <span class="dropdown">
+            <a
+                href="javascript:void(0);"
+                [dropdownToggle]="geographyToggle"
+                [title]="geography.currentSelectedGeography.GeographyDisplayName"
+                class="dropdown-toggle"
+                role="button"
+                data-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false">
+                Switch Geography
+                <icon icon="AngleDown"></icon>
+            </a>
+            <div #geographyToggle class="dropdown-menu">
+                <div class="dropdown-item__wrapper" *ngFor="let geography of geography.currentUserAvailableGeographies">
+                    <button class="dropdown-item" (click)="changeGeography(geography.GeographyName)">
+                        <span class="short-name">{{ geography.GeographyName }}</span>
+                        <span class="long-name">{{ geography.GeographyDisplayName }}</span>
+                    </button>
+                </div>
+            </div>
+        </span>
+    </ng-container>
+</ng-container>

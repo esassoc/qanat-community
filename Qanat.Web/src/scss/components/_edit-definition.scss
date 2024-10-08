@@ -1,0 +1,9 @@
+@use "/src/scss/abstracts" as *;
+
+.edit-definition {
+    .ck {
+        &-content {
+            min-height: 16rem;
+        }
+    }
+}

@@ -1,0 +1,17 @@
+@use "/src/scss/abstracts" as *;
+
+dl {
+    display: grid;
+    margin: 0;
+
+    ::ng-deep {
+        key-value-pair + key-value-pair {
+            padding-top: $spacing-400;
+            margin-top: $spacing-400;
+        }
+
+        key-value-pair.horizontal + key-value-pair.horizontal {
+            border-top: 1px solid rgba(black, 0.05);
+        }
+    }
+}

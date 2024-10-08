@@ -1,0 +1,20 @@
+<div class="card mt-4">
+    <div class="card-header">
+        <div class="flex-between">
+            <div><h3 class="card-title">Historical Water Budgets by Zone</h3></div>
+
+            <div class="button-group">
+                <a class="button-group__item" [ngClass]="{ active: !showAcreFeet }" (click)="changeUnits(false)"> ac-ft/ac </a>
+                <a class="button-group__item" [ngClass]="{ active: showAcreFeet }" (click)="changeUnits(true)"> ac-ft </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body" [loadingSpinner]="{ isLoading, loadingHeight: 400 }">
+        <div class="copy copy-3 pb-3">
+            <custom-rich-text [customRichTextTypeID]="richTextTypeID"></custom-rich-text>
+        </div>
+
+        <div id="zoneGroupUsageChart" class="mt-3" style="width: 95%"></div>
+    </div>
+</div>

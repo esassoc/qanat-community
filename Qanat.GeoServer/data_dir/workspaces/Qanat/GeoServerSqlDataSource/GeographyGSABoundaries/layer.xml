@@ -1,0 +1,20 @@
+<layer>
+  <name>GeographyGSABoundaries</name>
+  <id>LayerInfoImpl-1c8d4cef:18a1f09844c:-7ffe</id>
+  <type>VECTOR</type>
+  <defaultStyle>
+    <id>StyleInfoImpl--5e1140ce:18a3cc578ff:5115</id>
+  </defaultStyle>
+  <styles class="linked-hash-set">
+    <style>
+      <id>StyleInfoImpl--5e1140ce:18a3cc578ff:5115</id>
+    </style>
+  </styles>
+  <resource class="featureType">
+    <id>FeatureTypeInfoImpl-1c8d4cef:18a1f09844c:-7fff</id>
+  </resource>
+  <attribution>
+    <logoWidth>0</logoWidth>
+    <logoHeight>0</logoHeight>
+  </attribution>
+</layer>

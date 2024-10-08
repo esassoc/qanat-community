@@ -1,0 +1,37 @@
+<div class="dashboard" *ngIf="currentGeography$ | async as currentSelectedGeography">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <a [routerLink]="'/manage/' + currentSelectedGeography.GeographyID">
+                <geography-logo [geographyID]="currentSelectedGeography.GeographyID"></geography-logo>
+            </a>
+        </div>
+        <div class="sidebar-body sticky-nav">
+            <div class="sidebar-body__wrapper">
+                <h3 class="sidebar-body__title">
+                    <icon icon="Manage"></icon>
+                    Supply and Usage
+                </h3>
+
+                <div class="sidebar-body__switcher">
+                    <h4 class="sidebar-body__current">
+                        <icon icon="Geography-Alt"></icon>
+                        {{ currentSelectedGeography.GeographyName }}
+                    </h4>
+
+                    <geography-switcher></geography-switcher>
+                </div>
+            </div>
+
+            <dashboard-menu [dashboardMenu]="supplyAndUsageMenu" [viewingDetailPage]="viewingDetailPage"></dashboard-menu>
+        </div>
+    </aside>
+
+    <main class="main">
+        <router-outlet #manageOutlet="outlet"></router-outlet>
+        <div *ngIf="!manageOutlet.isActivated">
+            <page-header pageTitle="Dashboard"></page-header>
+
+            <div class="page-body grid-12"></div>
+        </div>
+    </main>
+</div>

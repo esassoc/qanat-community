@@ -1,0 +1,46 @@
+<div class="allocation-plan-period-body-container">
+    <div class="period-header" [style.color]="zoneColor" [style.border-color]="zoneColor">
+        {{ allocationPlanPeriod.StartYear }}
+    </div>
+
+    <div class="period-body">
+        <!-- borrow forward -->
+        <div
+            *ngIf="allocationPlanPeriod.EnableBorrowForward"
+            class="allocation borrow-forward-allocation"
+            [style.grid-column-start]="borrowForwardStart"
+            [style.grid-column-end]="borrowForwardEnd"
+            [style.background-color]="zoneColor"
+            [style.border-color]="zoneColor">
+            <div class="borrow-forward-allocation-content">Borrow-forward</div>
+
+            <div class="borrow-forward-allocation-overlay"></div>
+        </div>
+
+        <!-- primary allocation -->
+        <div
+            class="allocation primary-allocation"
+            [style.grid-column-start]="primaryAllocationStart"
+            [style.grid-column-end]="primaryAllocationEnd"
+            [style.background-color]="zoneColor"
+            [style.border-color]="zoneColor">
+            <div class="allocation-amount">
+                {{ allocationPlanPeriod.AllocationAcreFeetPerAcre | number: "1.2-2" }}
+            </div>
+            <div class="units">ac-ft/ac</div>
+        </div>
+
+        <!-- carry over -->
+        <div
+            *ngIf="allocationPlanPeriod.EnableCarryOver"
+            class="allocation carry-over-allocation"
+            [style.grid-column-start]="carryOverStart"
+            [style.grid-column-end]="carryOverEnd"
+            [style.background-color]="zoneColor"
+            [style.border-color]="zoneColor">
+            <div class="carry-over-allocation-content">{{ allocationPlanPeriod.CarryOverDepreciationRate | percent }} of Remaining Carry-Over</div>
+
+            <div class="carry-over-allocation-overlay"></div>
+        </div>
+    </div>
+</div>

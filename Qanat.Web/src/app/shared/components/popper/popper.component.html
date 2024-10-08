@@ -1,0 +1,13 @@
+<div class="popover">
+    <h3 class="popover-header" *ngIf="title">
+        <ng-template *ngIf="titleIsTemplate(); else simpleTitle" [ngTemplateOutlet]="title"></ng-template>
+        <ng-template #simpleTitle>
+            {{ title }}
+        </ng-template>
+    </h3>
+    <div class="popover-body">
+        <ng-content></ng-content>
+        <ng-template [ngTemplateOutlet]="context"></ng-template>
+    </div>
+</div>
+<div class="popover-arrow" data-popper-arrow></div>

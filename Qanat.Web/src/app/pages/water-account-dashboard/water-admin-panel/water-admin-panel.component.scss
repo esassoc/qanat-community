@@ -1,0 +1,33 @@
+@use "/src/scss/abstracts" as *;
+
+.no-custom-attributes {
+    margin: auto;
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    font-style: italic;
+}
+
+.management-actions {
+    .flex-start {
+        gap: $spacing-600;
+    }
+}
+
+.parcels {
+    &__list {
+        .headline {
+            padding-bottom: 0.25rem;
+        }
+
+        a {
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+    }
+}
+
+.card {
+    margin-bottom: $spacing-600;
+}

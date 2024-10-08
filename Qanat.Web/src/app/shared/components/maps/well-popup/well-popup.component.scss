@@ -1,0 +1,69 @@
+@use "/src/scss/abstracts" as *;
+
+:host {
+    margin: -13px -24px -13px -20px;
+    display: flex;
+}
+
+.popup-wrapper {
+    width: 24rem;
+    display: grid;
+    gap: 1rem;
+    padding: 1.5rem;
+
+    & > * {
+        font-family: $overpass;
+    }
+}
+
+.popup-header {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+    padding-bottom: 0.5rem;
+
+    .pill {
+        padding: 0.4rem 0.75rem 0.25rem 0.75rem;
+        font-size: $type-size-100;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        text-align: center;
+        font-weight: bold;
+        color: $white;
+        border-radius: 50px;
+        white-space: nowrap;
+        background: $secondary;
+    }
+
+    .parcels {
+        color: $primary;
+        font-weight: 900;
+        text-transform: uppercase;
+    }
+}
+
+parcels-icon {
+    display: grid;
+    align-items: center;
+    transform: translateY(-3px);
+    color: grey;
+}
+
+.parcel-number {
+    color: gray;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: $type-size-100;
+    font-weight: bold;
+}
+
+.well-name {
+    font-size: $type-size-300;
+}
+
+.link a {
+    font-size: $type-size-150;
+    text-decoration: underline;
+}

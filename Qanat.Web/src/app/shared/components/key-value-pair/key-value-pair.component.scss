@@ -1,0 +1,33 @@
+@use "/src/scss/abstracts" as *;
+
+:host.horizontal {
+    display: flex;
+    flex-wrap: wrap;
+    font-size: clamp(0.72rem, 0.62rem + 0.52vw, 0.94rem);
+    line-height: 1.375em;
+    dt {
+        flex-basis: 50%;
+        padding-bottom: 0;
+        font-weight: bold;
+        text-transform: none;
+        margin-bottom: 0;
+    }
+    dd {
+        flex-basis: 50%;
+        padding-bottom: 0;
+        margin-bottom: 0;
+    }
+}
+
+dt {
+    font-weight: bold;
+    display: block;
+    text-transform: uppercase;
+    margin-bottom: $spacing-200;
+}
+
+dd {
+    display: block;
+    font-size: 15px;
+    line-height: 1.25em;
+}

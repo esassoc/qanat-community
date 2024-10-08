@@ -1,0 +1,17 @@
+@use "/src/scss/abstracts" as *;
+
+.required {
+    &::after {
+        display: block;
+        content: "\f069";
+        color: $red-default;
+        font-family: "Font Awesome 5 Free";
+        font-size: 0.5rem;
+        transform: translate3d(3px, -4px, 0);
+    }
+
+    &-note {
+        border-top: 1px solid rgba($black, 0.05);
+        padding-top: 1rem;
+    }
+}

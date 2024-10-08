@@ -1,0 +1,12 @@
+@use "/src/scss/abstracts" as *;
+
+.well-map {
+    cursor: crosshair;
+}
+
+.model-information {
+    margin-top: $spacing-200;
+    padding: $spacing-600;
+    background: $gray-lighter;
+    border: 1px solid $gray-light;
+}

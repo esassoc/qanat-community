@@ -1,0 +1,62 @@
+<qanat-grid-header
+    *ngIf="!overrideDefaultGridHeader && gridLoaded"
+    [grid]="gridref"
+    [rowDataCount]="rowData?.length"
+    [hideGlobalFilter]="hideGlobalFilter"
+    [disableGlobalFilter]="disableGlobalFilter"
+    [multiSelectEnabled]="multiSelectEnabled">
+    <ng-content select="[customGridActionsLeft]" ngProjectAs="[customGridActionsLeft]"></ng-content>
+    <ng-content
+        select="[customGridActionsCenter]"
+        ngProjectAs="[customGridActionsCenter]"></ng-content>
+    <ng-content
+        select="[customGridActionsRight]"
+        ngProjectAs="[customGridActionsRight]"></ng-content>
+</qanat-grid-header>
+
+<div class="table-responsive">
+    <ag-grid-angular
+        [style.height]="height"
+        [style.width]="width"
+        defaultGridOptions
+        #gridref
+        class="ag-theme-balham"
+        [overlayLoadingTemplate]="agGridOverlay"
+        [autoSizeStrategy]="autoSizeStrategy"
+        [rowData]="rowData"
+        [columnDefs]="columnDefs"
+        [defaultColDef]="defaultColDef"
+        [tooltipInteraction]="true"
+        [tooltipShowDelay]="800"
+        [rowSelection]="rowSelection"
+        [suppressRowClickSelection]="suppressRowClickSelection"
+        [rowMultiSelectWithClick]="rowMultiSelectWithClick"
+        [suppressRowTransform]="true"
+        [suppressMenuHide]="true"
+        [pagination]="pagination"
+        [paginationPageSize]="paginationPageSize"
+        [suppressPaginationPanel]="true"
+        [quickFilterText]="quickFilterText"
+        [getRowId]="getRowId"
+        (gridReady)="onGridReady($event)"
+        (firstDataRendered)="onFirstDataRendered($event)"
+        (gridColumnsChanged)="onGridColumnsChanged($event)"
+        (selectionChanged)="this.onSelectionChanged($event)"
+        (filterChanged)="onFilterChanged($event)"></ag-grid-angular>
+
+    <div class="table-footer flex-between">
+        <div *ngIf="!hideDownloadButton" class="download-button">
+            <qanat-csv-download-button [grid]="gridref" [fileName]="downloadFileName" [colIDsToExclude]="colIDsToExclude"></qanat-csv-download-button>
+        </div>
+
+        <pagination-controls
+            *ngIf="gridLoaded && pagination"
+            [grid]="gridref"></pagination-controls>
+
+        <div class="row-count-data">
+            Total Records: {{ rowData?.length | number }}
+
+            <div *ngIf="anyFilterPresent" class="filtered-rows-count">Filtered Records: {{ filteredRowsCount | number }}</div>
+        </div>
+    </div>
+</div>

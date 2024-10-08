@@ -1,0 +1,46 @@
+<div class="grid-12">
+    <div class="table-responsive">
+        <table class="custom-attributes">
+            <thead>
+                <tr>
+                    <th>Custom Attribute Name</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let customAttribute of customAttributes; index as i" class="custom-attribute-row">
+                    <td class="custom-attribute-name">
+                        <div class="field fill">
+                            <input type="text" name="customAttributeName" [(ngModel)]="customAttribute.CustomAttributeName" [disabled]="readonly" />
+                        </div>
+                    </td>
+                    <td>
+                        <span *ngIf="!readonly" (click)="removeCustomAttribute(i)" class="remove-button">
+                            <icon icon="Delete"></icon>
+                            Remove
+                        </span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div *ngIf="customAttributes?.length === 0" class="no-table-data">
+            <span>No custom attributes to display</span>
+        </div>
+    </div>
+
+    <form class="add-new" *ngIf="!readonly">
+        <h3 class="add-new-title underline">Add New Custom Attribute</h3>
+
+        <div class="form flex-between">
+            <div class="field fill">
+                <span class="field-label">Custom Attribute Name</span>
+                <input placeholder="Custom Attribute Name" name="customAttributeName" type="text" [(ngModel)]="newCustomAttributeName" />
+            </div>
+
+            <div class="field-actions">
+                <button class="btn btn-secondary btn-md add-button" (click)="createNewCustomAttribute()" [disabled]="!newCustomAttributeName">+ Add</button>
+            </div>
+        </div>
+    </form>
+</div>

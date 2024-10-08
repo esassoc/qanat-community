@@ -1,0 +1,312 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Name>Qanat.Database</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>4.1</ProjectVersion>
+    <ProjectGuid>{8851eb6a-bcea-42b4-83dd-125a1bcfaa52}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql150DatabaseSchemaProvider</DSP>
+    <OutputType>Database</OutputType>
+    <RootPath>
+    </RootPath>
+    <RootNamespace>Qanat.Database</RootNamespace>
+    <AssemblyName>Qanat.Database</AssemblyName>
+    <ModelCollation>1033,CI</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <DeployToDatabase>True</DeployToDatabase>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <TargetLanguage>CS</TargetLanguage>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SqlServerVerification>False</SqlServerVerification>
+    <IncludeCompositeObjects>True</IncludeCompositeObjects>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+    <DefaultCollation>SQL_Latin1_General_CP1_CI_AS</DefaultCollation>
+    <DefaultFilegroup>PRIMARY</DefaultFilegroup>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <!-- Default to the v11.0 targets path if the targets file for the current VS version is not found -->
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Condition="'$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <ItemGroup>
+    <Folder Include="Properties" />
+    <Folder Include="dbo\" />
+    <Folder Include="dbo\Tables\" />
+    <Folder Include="dbo\Views\" />
+    <Folder Include="dbo\User Defined Types\" />
+    <Folder Include="Scripts" />
+    <Folder Include="Scripts\LookupTables" />
+    <Folder Include="Scripts\PreReleaseScripts" />
+    <Folder Include="Scripts\ReleaseScripts" />
+    <Folder Include="Scripts\Utility" />
+    <Folder Include="dbo\Procs" />
+    <Folder Include="dbo\Functions" />
+    <Folder Include="HangFire" />
+    <Folder Include="HangFire\Tables" />
+    <Folder Include="Scripts\ReleaseScripts\Archive" />
+    <Folder Include="Scripts\PreReleaseScripts\Archive" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="dbo\Tables\dbo.CustomRichText.sql" />
+    <Build Include="dbo\Tables\dbo.CustomRichTextType.sql" />
+    <Build Include="dbo\Tables\dbo.DatabaseMigration.sql" />
+    <Build Include="dbo\Tables\dbo.FileResource.sql" />
+    <Build Include="dbo\Tables\dbo.MenuItem.sql" />
+    <Build Include="dbo\Tables\dbo.Role.sql" />
+    <Build Include="dbo\Tables\dbo.User.sql" />
+    <Build Include="dbo\User Defined Types\html.sql" />
+    <None Include="Scripts\LookupTables\Script.PostDeployment.LookupTables.sql" />
+    <None Include="Scripts\LookupTables\dbo.CustomRichTextType.sql" />
+    <None Include="Scripts\LookupTables\dbo.MenuItem.sql" />
+    <None Include="Scripts\LookupTables\dbo.Role.sql" />
+    <None Include="Scripts\PreReleaseScripts\Script.PreDeployment.ReleaseScripts.sql" />
+    <None Include="Scripts\ReleaseScripts\Script.PostDeployment.ReleaseScripts.sql" />
+    <None Include="Scripts\Utility\Script.PostDeployment.Utility.sql" />
+    <Build Include="dbo\Tables\dbo.Permission.sql" />
+    <Build Include="dbo\Tables\dbo.Flag.sql" />
+    <None Include="Scripts\LookupTables\dbo.Flag.sql" />
+    <None Include="Scripts\LookupTables\dbo.Permission.sql" />
+    <Build Include="dbo\Tables\dbo.Parcel.sql" />
+    <Build Include="dbo\Tables\dbo.ParcelStatus.sql" />
+    <Build Include="dbo\Views\dbo.vGeoServerAllParcels.sql" />
+    <Build Include="dbo\Tables\dbo.Well.sql" />
+    <Build Include="dbo\Tables\dbo.WellRegistrationStatus.sql" />
+    <Build Include="dbo\Tables\dbo.WellRegistrationFileResource.sql" />
+    <Build Include="dbo\Tables\dbo.WellRegistrationContact.sql" />
+    <Build Include="dbo\Tables\dbo.WellRegistrationContactType.sql" />
+    <Build Include="dbo\Tables\dbo.State.sql" />
+    <None Include="Scripts\LookupTables\dbo.State.sql" />
+    <None Include="Scripts\LookupTables\dbo.WellRegistrationContactType.sql" />
+    <Build Include="dbo\Tables\dbo.WaterAccount.sql" />
+    <Build Include="dbo\Tables\dbo.WaterAccountParcel.sql" />
+    <Build Include="dbo\Tables\dbo.WaterAccountReconciliation.sql" />
+    <Build Include="dbo\Tables\dbo.WaterAccountUser.sql" />
+    <Build Include="dbo\Tables\dbo.OpenETSyncHistory.sql" />
+    <Build Include="dbo\Tables\dbo.OpenETSyncResultType.sql" />
+    <Build Include="dbo\Tables\dbo.ParcelSupply.sql" />
+    <Build Include="dbo\Tables\dbo.ParcelStaging.sql" />
+    <Build Include="dbo\Tables\dbo.WaterType.sql" />
+    <Build Include="dbo\Tables\dbo.Geography.sql" />
+    <None Include="Scripts\LookupTables\dbo.OpenETSyncResultType.sql" />
+    <Build Include="dbo\Tables\dbo.ContentType.sql" />
+    <Build Include="dbo\Tables\dbo.UploadedGdb.sql" />
+    <Build Include="dbo\Procs\dbo.pParcelStagingMakeGeometryValid.sql" />
+    <Build Include="dbo\Procs\dbo.pParcelStagingTruncate.sql" />
+    <Build Include="dbo\Tables\dbo.WaterAccountUserStaging.sql" />
+    <Build Include="dbo\Tables\dbo.GETAction.sql" />
+    <Build Include="dbo\Tables\dbo.GETActionStatus.sql" />
+    <None Include="Scripts\LookupTables\dbo.GETActionStatus.sql" />
+    <Build Include="dbo\Tables\dbo.ReportingPeriod.sql" />
+    <Build Include="dbo\Tables\dbo.GeographyRole.sql" />
+    <None Include="Scripts\LookupTables\dbo.GeographyRole.sql" />
+    <Build Include="dbo\Tables\dbo.GeographyUser.sql" />
+    <Build Include="dbo\Procs\dbo.pWaterTypeSupplyByYearAndGeography.sql" />
+    <Build Include="dbo\Tables\dbo.WaterAccountRole.sql" />
+    <None Include="Scripts\LookupTables\dbo.WaterAccountRole.sql" />
+    <Build Include="dbo\Tables\dbo.OpenETDataType.sql" />
+    <None Include="Scripts\LookupTables\dbo.OpenETDataType.sql" />
+    <Build Include="dbo\Tables\dbo.OpenETSync.sql" />
+    <Build Include="dbo\Tables\dbo.WaterMeasurement.sql" />
+    <Build Include="dbo\Tables\dbo.UploadedWellGDB.sql" />
+    <Build Include="HangFire\Tables\HangFire.AggregatedCounter.sql" />
+    <Build Include="HangFire\Tables\HangFire.Counter.sql" />
+    <Build Include="HangFire\Tables\HangFire.Hash.sql" />
+    <Build Include="HangFire\Tables\HangFire.Job.sql" />
+    <Build Include="HangFire\Tables\HangFire.JobParameter.sql" />
+    <Build Include="HangFire\Tables\HangFire.JobQueue.sql" />
+    <Build Include="HangFire\Tables\HangFire.List.sql" />
+    <Build Include="HangFire\Tables\HangFire.Schema.sql" />
+    <Build Include="HangFire\Tables\HangFire.Server.sql" />
+    <Build Include="HangFire\Tables\HangFire.Set.sql" />
+    <Build Include="HangFire\Tables\HangFire.State.sql" />
+    <Build Include="HangFire\HangFire.sql" />
+    <Build Include="dbo\Tables\dbo.Model.sql" />
+    <Build Include="dbo\Tables\dbo.Scenario.sql" />
+    <Build Include="dbo\Tables\dbo.ModelScenario.sql" />
+    <None Include="Scripts\LookupTables\dbo.Model.sql" />
+    <None Include="Scripts\LookupTables\dbo.Scenario.sql" />
+    <Build Include="dbo\Tables\dbo.UnitType.sql" />
+    <Build Include="dbo\Tables\dbo.ExternalMapLayer.sql" />
+    <Build Include="dbo\Tables\dbo.ExternalMapLayerType.sql" />
+    <None Include="Scripts\LookupTables\dbo.ExternalMapLayerType.sql" />
+    <Build Include="dbo\Tables\dbo.WaterMeasurementType.sql" />
+    <Build Include="dbo\Tables\dbo.Zone.sql" />
+    <Build Include="dbo\Tables\dbo.ZoneGroup.sql" />
+    <Build Include="dbo\Tables\dbo.ParcelZone.sql" />
+    <Build Include="dbo\Views\dbo.vGeoServerZoneGroups.sql" />
+    <Build Include="dbo\Procs\dbo.pGeographyMonthlyUsageSummary.sql" />
+    <Build Include="dbo\Tables\dbo.MonitoringWell.sql" />
+    <Build Include="dbo\Tables\dbo.MonitoringWellSourceType.sql" />
+    <None Include="Scripts\LookupTables\dbo.MonitoringWellSourceType.sql" />
+    <Build Include="dbo\Tables\dbo.MonitoringWellMeasurement.sql" />
+    <Build Include="dbo\Procs\dbo.pMakeValidGeographyBoundaries.sql" />
+    <Build Include="dbo\Views\dbo.vGeoServerCNRAMonitoringWells.sql" />
+    <Build Include="dbo\Tables\dbo.AllocationPlanPeriod.sql" />
+    <Build Include="dbo\Tables\dbo.ModelBoundary.sql" />
+    <Build Include="dbo\Tables\dbo.GETActionFileResource.sql" />
+    <Build Include="dbo\Tables\dbo.GETActionOutputFileType.sql" />
+    <None Include="Scripts\LookupTables\dbo.GETActionOutputFileType.sql" />
+    <Build Include="dbo\Tables\dbo.GETActionOutputFile.sql" />
+    <Build Include="dbo\Views\dbo.vParcelSupplyTransactionHistory.sql" />
+    <Build Include="dbo\Tables\dbo.GeographyBoundary.sql" />
+    <Build Include="dbo\Functions\dbo.fReportingPeriod.sql" />
+    <Build Include="dbo\Functions\dbo.fWaterAccountParcelByGeography.sql" />
+    <Build Include="dbo\Functions\dbo.fWaterAccountParcelByUser.sql" />
+    <Build Include="dbo\Functions\dbo.fWaterAccountUser.sql" />
+    <Build Include="dbo\Procs\dbo.pZoneGroupMonthlyUsage.sql" />
+    <Build Include="dbo\Views\dbo.vGeoServerYoloWRIDMonitoringWells.sql" />
+    <Build Include="dbo\Tables\dbo.WellIrrigatedParcel.sql" />
+    <Build Include="dbo\Tables\dbo.WellRegistrationMetadatum.sql" />
+    <Build Include="dbo\Tables\dbo.WellRegistrationWaterUse.sql" />
+    <Build Include="dbo\Tables\dbo.WellRegistrationWaterUseType.sql" />
+    <Build Include="dbo\Tables\dbo.FuelType.sql" />
+    <None Include="Scripts\LookupTables\dbo.FuelType.sql" />
+    <None Include="Scripts\LookupTables\dbo.WellRegistrationWaterUseType.sql" />
+    <Build Include="dbo\Functions\dbo.fWaterAccountParcelByGeographyAndYear.sql" />
+    <Build Include="dbo\Procs\dbo.pWaterAccountMonthlyUsageSummary.sql" />
+    <Build Include="dbo\Procs\dbo.pWaterAccountMostRecentEffectiveDate.sql" />
+    <Build Include="dbo\Functions\dbo.fWaterAccountParcelByWaterAccountAndYear.sql" />
+    <Build Include="dbo\Procs\dbo.pWaterTypeSupplyByYearAndWaterAccount.sql" />
+    <Build Include="dbo\Procs\dbo.pWaterAccountBudgetReportByGeographyAndYear.sql" />
+    <Build Include="dbo\Tables\dbo.ParcelGeometry.sql" />
+    <Build Include="dbo\Tables\dbo.ParcelHistory.sql" />
+    <Build Include="dbo\Procs\dbo.pParcelUpdateFromStaging.sql" />
+    <Build Include="dbo\Functions\dbo.fParcelStagingChanges.sql" />
+    <Build Include="dbo\Procs\dbo.pWaterAccountSuggestion.sql" />
+    <Build Include="dbo\Tables\dbo.GeographyConfiguration.sql" />
+    <Build Include="dbo\Procs\dbo.sp_MSforeachtable.sql" />
+    <Build Include="dbo\Tables\dbo.ReferenceWell.sql" />
+    <Build Include="dbo\Tables\dbo.WellRegistration.sql" />
+    <Build Include="dbo\Tables\dbo.WellRegistrationIrrigatedParcel.sql" />
+    <Build Include="dbo\Tables\dbo.Meter.sql" />
+    <Build Include="dbo\Tables\dbo.MeterStatus.sql" />
+    <None Include="Scripts\LookupTables\dbo.MeterStatus.sql" />
+    <Build Include="dbo\Tables\dbo.WellStatus.sql" />
+    <None Include="Scripts\LookupTables\dbo.WellStatus.sql" />
+    <Build Include="dbo\Tables\dbo.CustomAttribute.sql" />
+    <Build Include="dbo\Tables\dbo.CustomAttributeType.sql" />
+    <None Include="Scripts\LookupTables\dbo.CustomAttributeType.sql" />
+    <Build Include="dbo\Tables\dbo.FrequentlyAskedQuestion.sql" />
+    <Build Include="dbo\Tables\dbo.WaterAccountCustomAttribute.sql" />
+    <Build Include="dbo\Tables\dbo.ParcelCustomAttribute.sql" />
+    <Build Include="dbo\Tables\dbo.FaqDisplayLocationType.sql" />
+    <None Include="Scripts\LookupTables\dbo.FaqDisplayLocationType.sql" />
+    <Build Include="dbo\Tables\dbo.FrequentlyAskedQuestionFaqDisplayLocationType.sql" />
+    <Build Include="dbo\Tables\dbo.WaterMeasurementCategoryType.sql" />
+    <None Include="Scripts\LookupTables\dbo.WaterMeasurementCategoryType.sql" />
+    <Build Include="dbo\Tables\dbo.UsageEntityGeometry.sql" />
+    <Build Include="dbo\Tables\dbo.UsageEntity.sql" />
+    <Build Include="dbo\Tables\dbo.UsageEntityCrop.sql" />
+    <Build Include="dbo\Views\dbo.vGeoServerAllUsageEntities.sql" />
+    <Build Include="dbo\Procs\dbo.pMakeValidUsageEntityGeometries.sql" />
+    <Build Include="dbo\Views\dbo.vParcelDetailed.sql" />
+    <Build Include="dbo\Views\dbo.vGeoServerMonitoringWells.sql" />
+    <Build Include="dbo\Views\dbo.vWaterMeasurementSourceOfRecord.sql" />
+    <Build Include="dbo\Views\dbo.vWaterMeasurement.sql" />
+    <Build Include="dbo\Tables\dbo.WaterMeasurementTypeDependency.sql" />
+    <Build Include="dbo\Tables\dbo.WaterMeasurementCalculationType.sql" />
+    <None Include="Scripts\LookupTables\dbo.WaterMeasurementCalculationType.sql" />
+    <Build Include="dbo\Tables\dbo.OpenETRasterCalculationResultType.sql" />
+    <None Include="Scripts\LookupTables\dbo.OpenETRasterCalculationResultType.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Qanat.Database.publish.xml" />
+    <None Include="Scripts\PreReleaseScripts\README.md" />
+    <None Include="Scripts\ReleaseScripts\README.md" />
+    <None Include="Scripts\LookupTables\dbo.ParcelStatus.sql" />
+    <None Include="Scripts\LookupTables\dbo.WellRegistrationStatus.sql" />
+    <None Include="Scripts\LookupTables\dbo.ContentType.sql" />
+    <None Include="Scripts\LookupTables\dbo.UnitType.sql" />
+    <Build Include="dbo\Views\dbo.vGeoserverGeographyGSABoundaries.sql" />
+    <Build Include="dbo\Tables\dbo.GeographyAllocationPlanConfiguration.sql" />
+    <Build Include="dbo\Tables\dbo.AllocationPlan.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <PostDeploy Include="Scripts\Script.PostDeployment.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <PreDeploy Include="Scripts\Script.PreDeployment.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="Qanat.Database.refactorlog" />
+  </ItemGroup>
+  <UsingTask TaskName="ScriptDeploymentGenerator" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+    <ParameterGroup>
+      <releaseScriptFolder ParameterType="System.String" Required="true" />
+      <releaseScriptFileName ParameterType="System.String" Required="true" />
+      <projectName ParameterType="System.String" Required="true" />
+      <title ParameterType="System.String" Required="true" />
+    </ParameterGroup>
+    <Task>
+      <Code Type="Fragment" Language="cs"><![CDATA[
+
+        var files = Directory.GetFiles(releaseScriptFolder, "*.sql");
+        StringBuilder sb = new StringBuilder();
+
+        sb.AppendLine("/*");
+        sb.AppendLine(title + " Script");
+        sb.AppendLine("--------------------------------------------------------------------------------------");
+        sb.AppendLine("This file is generated on every build, DO NOT modify.");
+        sb.AppendLine("--------------------------------------------------------------------------------------");
+        sb.AppendLine("*/");
+        sb.AppendLine("");
+        sb.AppendLine("PRINT N'" + projectName + " - " + releaseScriptFileName +"';");
+        sb.AppendLine("GO");
+        sb.AppendLine("");
+
+        foreach (var file in files.OrderBy(f => f))
+        {
+            if (file.Contains(releaseScriptFileName))
+            {
+              continue;
+            }
+
+            var fileName = file.Replace(releaseScriptFolder, "");
+
+            sb.AppendLine(":r \"." + fileName + "\"");
+            sb.AppendLine("GO");
+                    
+        }
+        using (System.IO.StreamWriter file = new System.IO.StreamWriter(Path.Combine(releaseScriptFolder, releaseScriptFileName)))
+        {
+          file.WriteLine(sb.ToString()); 
+        }
+
+]]></Code>
+    </Task>
+  </UsingTask>
+  <Target Name="CustomBuildStep" BeforeTargets="BeforeBuild">
+    <ScriptDeploymentGenerator projectName="$(MSBuildProjectName)" title="Post-Deployment" releaseScriptFolder="Scripts\\ReleaseScripts" releaseScriptFileName="Script.PostDeployment.ReleaseScripts.sql" />
+    <ScriptDeploymentGenerator projectName="$(MSBuildProjectName)" title="Pre-Deployment" releaseScriptFolder="Scripts\\PreReleaseScripts" releaseScriptFileName="Script.PreDeployment.ReleaseScripts.sql" />
+    <ScriptDeploymentGenerator projectName="$(MSBuildProjectName)" title="Lookup-Table" releaseScriptFolder="Scripts\\LookupTables" releaseScriptFileName="Script.PostDeployment.LookupTables.sql" />
+  </Target>
+</Project>

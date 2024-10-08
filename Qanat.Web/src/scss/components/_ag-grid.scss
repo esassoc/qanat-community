@@ -1,0 +1,197 @@
+@use "node_modules/ag-grid-community/styles" as ag;
+@use "/src/scss/abstracts" as *;
+
+@include ag.grid-styles(
+    (
+        theme: balham,
+        grid-size: 0.25rem,
+        cell-horizontal-padding: 0.625rem,
+        balham-active-color: $primary,
+        header-height: 3rem,
+        header-background-color: $primary,
+        header-foreground-color: $white,
+        header-column-separator-color: darken($primary, 5%),
+        header-cell-hover-background-color: lighten($primary, 3%),
+        header-cell-moving-background-color: lighten($primary, 3%),
+        row-height: 2.75rem,
+        row-hover-color: rgba($primary, 0.05),
+        font-size: 0.75rem,
+    )
+);
+
+.ag-theme-balham {
+    .ag-body-viewport.ag-selectable .ag-cell-wrapper {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .ag-root {
+        &-wrapper {
+            border: 1px solid rgba($black, 0.1);
+            border-radius: 4px;
+        }
+    }
+
+    .ag-header {
+        &-cell {
+            &::after {
+                top: 0;
+                height: 100%;
+            }
+        }
+
+        &-icon {
+            color: $white;
+        }
+
+        .flex {
+            &-start,
+            &-between,
+            &-end {
+                flex-wrap: nowrap;
+            }
+        }
+    }
+
+    .ag-row {
+        border-bottom: 1px solid rgba($black, 0.15);
+
+        &-odd {
+            background: $gray-lighter;
+        }
+
+        &:hover {
+            cursor: pointer;
+        }
+
+        &-selected {
+            background: $white;
+            border-bottom: 1px solid rgba($black, 0.15);
+
+            &::before {
+                background: rgba($secondary, 0.15);
+            }
+        }
+    }
+
+    .ag-cell {
+        display: flex;
+        align-items: center;
+
+        &:focus-within {
+            outline: none !important;
+            border: none !important;
+        }
+    }
+
+    .ag-popup {
+        position: initial;
+    }
+
+    .ag-menu {
+        background: $white;
+        border-radius: 0.25rem;
+        padding: 0.25rem;
+    }
+
+    .ag-icon-menu:before {
+        font-family: "FontAwesome";
+        font-size: 0.75rem;
+        content: "\f0b0";
+        display: block;
+    }
+
+    .ag-icon-filter:before {
+        font-family: "FontAwesome";
+        content: "*";
+        color: $orange-default;
+    }
+
+    .ag-icon-asc:before,
+    .ag-icon-desc:before,
+    .ag-icon-menu:before {
+        color: #fff;
+    }
+
+    .ag-filter {
+        background-color: $white;
+
+        &-body {
+            .ag-wrapper {
+                input {
+                    margin-top: 8px;
+                    padding: 4px;
+                    min-height: 2rem;
+                    border-radius: 4px;
+                    font-size: $type-size-150;
+
+                    &:focus {
+                        border: 1px solid rgba($primary, 0.2);
+                    }
+                }
+            }
+        }
+
+        &-condition {
+            padding: 0.5rem 0;
+        }
+
+        &-select {
+            .ag-picker-field-wrapper {
+                min-height: 2rem;
+            }
+        }
+    }
+
+    .btn {
+        display: block;
+        font-family: $overpass;
+        font-size: 0.9375rem;
+        font-weight: 400;
+        line-height: 1em;
+        padding: 0.5rem 1rem 0.3125rem;
+    }
+
+    .ag-cell-value.context-menu-container {
+        overflow: visible;
+    }
+
+    .context-menu-container .ag-cell-value,
+    .ag-body-viewport.ag-selectable .context-menu-container .ag-cell-wrapper {
+        overflow: visible;
+    }
+}
+
+// AG Grids pagination
+.ag-paging-panel .ag-paging-row-summary-panel,
+.ag-paging-panel .ag-paging-page-summary-panel {
+    color: #000;
+}
+
+.ag-row-position-absolute {
+    $target: 0;
+    $index: 100;
+
+    @while $index >0 {
+        &[aria-rowindex="#{$target}"] {
+            z-index: #{$index};
+        }
+
+        $target: $target + 1;
+        $index: $index - 1;
+    }
+}
+
+.ag-popup {
+    z-index: 1000;
+}
+
+.ag-center-cols-container,
+.ag-center-cols-viewport {
+    min-height: 100% !important;
+}
+
+.custom-grid-actions {
+    display: inline-flex;
+    column-gap: $spacing-200;
+}

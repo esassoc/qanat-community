@@ -1,0 +1,19 @@
+<div class="pagination-control-panel" *ngIf="paginationValues$ | async as paginationValues">
+    <button (click)="goToFirstPage()" class="control-button" [disabled]="paginationValues.onFirstPage">
+        <i class="fas fa-angle-double-left"></i>
+    </button>
+
+    <button (click)="goToPreviousPage()" class="control-button" [disabled]="paginationValues.onFirstPage">
+        <i class="fas fa-angle-left"></i>
+    </button>
+
+    <div class="control-text">Page {{ paginationValues.currentPage }} of {{ paginationValues.totalPages }}</div>
+
+    <button (click)="goToNextPage()" class="control-button" [disabled]="paginationValues.onLastPage">
+        <i class="fas fa-angle-right"></i>
+    </button>
+
+    <button (click)="goToLastPage()" class="control-button" [disabled]="paginationValues.onLastPage">
+        <i class="fas fa-angle-double-right"></i>
+    </button>
+</div>

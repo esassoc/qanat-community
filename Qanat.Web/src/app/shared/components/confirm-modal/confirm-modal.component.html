@@ -1,0 +1,23 @@
+<div class="modal-header">
+    <h2 class="section-title">
+        <icon [icon]="modalContext.icon" class="confirmation-icon" *ngIf="modalContext.icon"></icon>
+        <icon [icon]="'Warning'" class="default-confirmation-icon" *ngIf="!modalContext.icon"></icon>
+        {{ modalContext.title }}
+    </h2>
+    <button type="button" class="close" (click)="close()">
+        <i class="fa fa-times-circle"></i>
+    </button>
+</div>
+
+<div class="modal-body">
+    <div class="modal-body__content" [innerHtml]="this.sanitizer.bypassSecurityTrustHtml(modalContext.message)"></div>
+</div>
+
+<div class="modal-footer">
+    <button class="btn {{ modalContext.buttonClassYes }}" (click)="save()">
+        {{ modalContext.buttonTextYes }}
+    </button>
+    <button class="btn btn-primary-outline" (click)="close()">
+        {{ modalContext.buttonTextNo }}
+    </button>
+</div>

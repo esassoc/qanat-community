@@ -1,0 +1,37 @@
+<div class="modal-header">
+    <h2>
+        <icon icon="WaterAccounts"></icon>
+        Update Water Account
+    </h2>
+    <button type="button" class="close" (click)="close()">
+        <i class="fa fa-times-circle"></i>
+    </button>
+</div>
+
+<div class="modal-body">
+    <form action="" class="grid-12" [formGroup]="formGroup" *ngIf="parcel$ | async as parcel">
+        <div>
+            <label class="field-label">New Water Account</label>
+            <search-water-accounts
+                [geographyID]="modalContext.GeographyID"
+                formControlName="WaterAccount"
+                [excludedWaterAccountIDs]="[parcel.WaterAccountID]"></search-water-accounts>
+        </div>
+        <form-field
+            *ngIf="effectiveYearOptions$ | async as effectiveYearOptions"
+            [formInputOptions]="effectiveYearOptions"
+            [formControl]="formGroup.controls.EffectiveYear"
+            [fieldLabel]="'Effective Year'"
+            [type]="FormFieldType.Select"></form-field>
+        <note>
+            Are you sure you want to update parcel
+            <strong>{{ parcel.ParcelNumber }}</strong>
+            to a new Water Account?
+        </note>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-primary" (click)="save()" [class.disabled]="!formGroup.valid">Transfer Water Account</button>
+    <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+</div>

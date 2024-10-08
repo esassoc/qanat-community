@@ -1,0 +1,94 @@
+@use "/src/scss/abstracts" as *;
+$allocation-plan-grid-width: $spacing-950;
+$allocation-plan-period-width: $spacing-1000;
+
+.allocation-plan-period-body-container {
+    text-align: center;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+
+    .period-header {
+        background: #fff;
+        color: #53bcdc;
+        font-weight: 900;
+        font-size: 18px;
+        line-height: 18px;
+        border: 2px solid #53bcdc;
+        border-radius: 4px 4px 0 0;
+        padding: 5px 0 2px;
+    }
+
+    .period-body {
+        flex-grow: 1;
+        color: #fff;
+        display: grid;
+        grid-template-columns: $allocation-plan-grid-width;
+        grid-auto-flow: column;
+        grid-auto-columns: $allocation-plan-grid-width;
+
+        .allocation-amount {
+            font-size: 24px;
+            font-weight: 900;
+        }
+
+        .units {
+            font-size: 14px;
+            font-weight: 700;
+        }
+    }
+
+    .allocation {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border-bottom: 2px solid;
+        padding: 12px;
+        font-weight: 900;
+
+        &:first-child {
+            border-radius: 0 0 0 4px;
+            border-left: 2px solid;
+        }
+
+        &:last-child {
+            border-radius: 0 0 4px 0;
+            border-right: 2px solid;
+
+            &:first-child {
+                border-radius: 0 0 4px 4px;
+            }
+        }
+    }
+
+    .carry-over-allocation {
+        font-size: 12px;
+
+        .carry-over-allocation-content {
+            z-index: 2;
+        }
+
+        .carry-over-allocation-overlay {
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            background-color: #0004;
+            border-radius: 0 0 4px 0;
+        }
+    }
+
+    .borrow-forward-allocation {
+        font-size: 12px;
+        .borrow-forward-allocation-content {
+            z-index: 2;
+        }
+        .borrow-forward-allocation-overlay {
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.267);
+            border-radius: 0 0 4px 0;
+        }
+    }
+}

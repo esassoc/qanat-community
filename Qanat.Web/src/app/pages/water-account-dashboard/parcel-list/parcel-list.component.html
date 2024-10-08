@@ -1,0 +1,112 @@
+<water-dashboard-nav></water-dashboard-nav>
+
+<div class="full-width-page" *ngIf="currentUser$ | async">
+    <page-header [customRichTextTypeID]="richTextID" icon="Parcels" pageTitle="Parcels"></page-header>
+
+    <div class="page-body" *ngIf="waterAccountGeographies$ | async as waterAccountGeographies" [loadingSpinner]="{ isLoading: isLoading && firstLoad, loadingHeight: 700 }">
+        <ng-container *ngIf="!currentUserHasNoGeographies; else noWaterAccountsMessage">
+            <ng-container *ngIf="parcels$ | async as parcels">
+                <qanat-grid-header
+                    *ngIf="gridRef"
+                    [grid]="gridRef"
+                    [rowDataCount]="parcels?.length"
+                    [leftAlignClearFiltersButton]="true"
+                    [disableGlobalFilter]="selectedPanel === 'Map'">
+                    <div customGridActionsCenter>
+                        <div class="button-group tab-nav">
+                            <button class="button-group__item btn-sm" [class.active]="selectedPanel === 'Grid'" (click)="toggleSelectedPanel('Grid')">Grid</button>
+                            <button class="button-group__item btn-sm" [class.active]="selectedPanel === 'Hybrid'" (click)="toggleSelectedPanel('Hybrid')">Hybrid</button>
+                            <button class="button-group__item btn-sm" [class.active]="selectedPanel === 'Map'" (click)="toggleSelectedPanel('Map')">Map</button>
+                        </div>
+                    </div>
+
+                    <div customGridActionsRight>
+                        <div class="form-field" class="geography-selector">
+                            <div class="field">
+                                <select name="selectedGeographyID" [(ngModel)]="selectedGeography.GeographyID" (ngModelChange)="onGeographySelected()">
+                                    <option *ngFor="let geography of waterAccountGeographies" [ngValue]="geography.GeographyID">
+                                        {{ geography.GeographyName }}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </qanat-grid-header>
+
+                <div
+                    class="grid-12 mt-3"
+                    [loadingSpinner]="{
+                        isLoading: isLoading && !firstLoad,
+                        loadingHeight: 500
+                    }">
+                    <div class="tab-nav-panel" [class.g-col-6]="selectedPanel === 'Hybrid'" [class.g-col-12]="selectedPanel === 'Grid'" [class.hidden]="selectedPanel === 'Map'">
+                        <qanat-grid
+                            height="675px"
+                            [rowData]="parcels"
+                            [columnDefs]="columnDefs"
+                            [hideDownloadButton]="true"
+                            [overrideDefaultGridHeader]="true"
+                            rowSelection="single"
+                            (selectionChanged)="onGridSelectionChanged()"
+                            (gridReady)="onGridReady($event)"
+                            (gridRefReady)="onGridRefReady($event)"></qanat-grid>
+                    </div>
+
+                    <div class="tab-nav-panel" [class.g-col-6]="selectedPanel === 'Hybrid'" [class.g-col-12]="selectedPanel === 'Map'" [class.hidden]="selectedPanel === 'Grid'">
+                        <qanat-map class="location-card" mapHeight="720px" (onMapLoad)="handleMapReady($event)">
+                            <ng-container *ngIf="mapIsReady">
+                                <parcel-layer
+                                    *ngIf="parcelIDs"
+                                    [geographyID]="selectedGeography.GeographyID"
+                                    [parcelIDs]="parcelIDs"
+                                    [selectedParcelID]="selectedParcelID"
+                                    [map]="map"
+                                    [layerControl]="layerControl"
+                                    [displayOnLoad]="true"
+                                    (parcelSelected)="onMapSelectionChanged($event)"></parcel-layer>
+
+                                <gsa-boundaries
+                                    *ngIf="selectedGeography"
+                                    [displayOnLoad]="false"
+                                    [map]="map"
+                                    [geographyID]="selectedGeography.GeographyID"
+                                    [layerControl]="layerControl"></gsa-boundaries>
+                            </ng-container>
+                        </qanat-map>
+                    </div>
+                </div>
+            </ng-container>
+        </ng-container>
+
+        <water-dashboard-management-actions-panel *ngIf="this.currentUserHasManagerPermissionsForSelectedGeography && this.selectedGeography">
+            <a routerLink="{{ selectedGeography.GeographyName.toLowerCase() }}/update">
+                <i class="fas fa-wrench"></i>
+                <span>Update Parcels</span>
+            </a>
+
+            <a routerLink="{{ selectedGeography.GeographyName.toLowerCase() }}/zones/upload">
+                <icon icon="Zones"></icon>
+                <span>Assign Parcels to Zones</span>
+            </a>
+
+            <a routerLink="{{ selectedGeography.GeographyName.toLowerCase() }}/bulk-actions">
+                <icon icon="Budget"></icon>
+                <span>Bulk Actions</span>
+            </a>
+        </water-dashboard-management-actions-panel>
+
+        <ng-template #noWaterAccountsMessage>
+            <div class="alert alert-info">
+                <div class="alert-content">
+                    <i class="fa fa-info"></i>
+                    Your user profile does not currently have access to any Parcels. Claim Water Accounts to get started or contact a water manager for your geography for
+                    assistance.
+                </div>
+            </div>
+        </ng-template>
+    </div>
+
+    <!-- <div class="page-body" [loadingSpinner]="{ isLoading: isLoading, loadingHeight: 500 }">
+        <water-dashboard-parcels *ngIf="parcels$ | async as parcels" [parcels]="parcels"></water-dashboard-parcels>
+    </div> -->
+</div>

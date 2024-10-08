@@ -1,0 +1,74 @@
+@use "/src/scss/abstracts" as *;
+
+*[data-popper] {
+    display: none;
+    min-width: 300px;
+    max-width: 300px;
+    z-index: 100;
+
+    &[data-popper-placement^="right"] > [data-popper-arrow] {
+        left: -5px;
+    }
+    &[data-popper-placement^="left"] > [data-popper-arrow] {
+        right: -5px;
+    }
+    &[data-popper-placement^="top"] > [data-popper-arrow] {
+        bottom: -5px;
+    }
+    &[data-popper-placement^="bottom"] > [data-popper-arrow] {
+        top: -5px;
+    }
+
+    .popover-arrow {
+        height: 10px;
+        width: 10px;
+        z-index: 1;
+        &:before {
+            content: "";
+            display: block;
+            transform: rotate(45deg);
+            background: white;
+            top: 0;
+            left: 0;
+            height: 10px;
+            width: 10px;
+            position: absolute;
+            transition:
+                transform 0.2s ease-out,
+                visibility 0.2s ease-out;
+            visibility: visible;
+            transform: translateX(0px) rotate(45deg);
+            transform-origin: center;
+        }
+    }
+
+    .popover {
+        box-shadow: $shadow-200;
+        border-radius: 0.5rem;
+        z-index: 2;
+        font-size: $type-size-150;
+
+        &-header {
+            background: white;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+            padding: 0.5rem 1rem;
+            border-top-left-radius: 0.25rem;
+            border-top-right-radius: 0.25rem;
+        }
+
+        .btn-edit {
+            padding: 0;
+        }
+
+        &-body {
+            padding: 1rem 1rem 0.5rem 1rem;
+            background: white;
+            border-bottom-left-radius: 0.25rem;
+            border-bottom-right-radius: 0.25rem;
+        }
+    }
+}
+
+*[data-popper][data-show] {
+    display: inline-block;
+}

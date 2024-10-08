@@ -1,0 +1,19 @@
+@use "/src/scss/abstracts" as *;
+
+body {
+    font-family: $overpass;
+    line-height: 1;
+}
+
+a {
+    color: $primary;
+}
+
+button {
+    font-family: $overpass;
+}
+
+.site-footer a {
+    color: $white;
+    text-decoration: underline;
+}

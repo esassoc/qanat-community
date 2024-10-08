@@ -1,0 +1,66 @@
+$sizes: (
+    1: 0.25rem,
+    2: 0.5rem,
+    3: 1rem,
+    4: 2rem,
+    5: 3rem,
+    6: 4rem,
+);
+
+@each $level, $size in $sizes {
+    .m-#{$level}.m-#{$level} {
+        margin: $size !important;
+    }
+
+    .mt-#{$level}.mt-#{$level} {
+        margin-top: $size !important;
+    }
+
+    .mr-#{$level}.mr-#{$level} {
+        margin-right: $size !important;
+    }
+
+    .mb-#{$level}.mb-#{$level} {
+        margin-bottom: $size !important;
+    }
+
+    .ml-#{$level}.ml-#{$level} {
+        margin-left: $size !important;
+    }
+    .my-#{$level}.my-#{$level} {
+        margin-top: $size !important;
+        margin-bottom: $size !important;
+    }
+    .mx-#{$level}.mx-#{$level} {
+        margin-left: $size !important;
+        margin-right: $size !important;
+    }
+    .p-#{$level}.p-#{$level} {
+        padding: $size !important;
+    }
+
+    .pt-#{$level}.pt-#{$level} {
+        padding-top: $size !important;
+    }
+
+    .pr-#{$level}.pr-#{$level} {
+        padding-right: $size !important;
+    }
+
+    .pb-#{$level}.pb-#{$level} {
+        padding-bottom: $size !important;
+    }
+
+    .pl-#{$level}.pl-#{$level} {
+        padding-left: $size !important;
+    }
+
+    .py-#{$level}.py-#{$level} {
+        padding-top: $size !important;
+        padding-bottom: $size !important;
+    }
+    .px-#{$level}.px-#{$level} {
+        padding-left: $size !important;
+        padding-right: $size !important;
+    }
+}

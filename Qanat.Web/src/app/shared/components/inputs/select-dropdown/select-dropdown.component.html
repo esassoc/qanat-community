@@ -1,0 +1,5 @@
+<select name="Test" [formControl]="formControl">
+    <option *ngFor="let option of formInputOptions" [ngValue]="option.Value" [disabled]="option.Disabled">
+        {{ option.Label }}
+    </option>
+</select>

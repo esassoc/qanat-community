@@ -1,0 +1,29 @@
+@use "/src/scss/abstracts" as *;
+
+.model-index-card {
+    height: 72px;
+    display: flex;
+    justify-content: space-between;
+    box-shadow: $shadow-200;
+    border-radius: 0.5rem;
+    align-items: center;
+    gap: 1rem;
+
+    .left {
+        gap: 1.5rem;
+
+        img {
+            border-top-left-radius: 0.5rem;
+            border-bottom-left-radius: 0.5rem;
+        }
+    }
+
+    h4 {
+        font-size: $type-size-400;
+    }
+
+    .meta {
+        font-size: $type-size-200;
+        color: $gray-default;
+    }
+}

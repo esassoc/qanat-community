@@ -1,0 +1,90 @@
+<div class="form-group">
+    <div class="field">
+        <div class="search-container">
+            <div class="search-prepend">
+                <i class="fa" [class.fa-search]="!isSearching" [class.fa-spinner]="isSearching" [class.spin-animation]="isSearching"></i>
+            </div>
+
+            <input
+                onkeydown="return event.key != 'Enter';"
+                (keyup.arrowdown)="selectNext()"
+                (keyup.arrowup)="selectPrevious()"
+                (keyup.enter)="selectCurrent($event)"
+                type="text"
+                name="WaterAccountSearch"
+                placeholder="Search by Account Name, Account ID, APN, or Owner Name"
+                [formControl]="searchString"
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="none"
+                spellcheck="false" />
+
+            <div class="search-append" *ngIf="searchString.value">
+                <button class="clear" (click)="clearSearch()">
+                    <i class="fa fa-times-circle"></i>
+                    Clear
+                </button>
+            </div>
+        </div>
+        <div class="search-results" *ngIf="searchResults$ | async as searchResults">
+            <div class="refine-search p-3" *ngIf="searchResults?.TotalResults > 10 && searchString.value && searchString.value.length > 1 && !isSearching && !val">
+                Only displaying 10 of {{ searchResults?.TotalResults }} results for the search term "
+                <strong>{{ searchString.value }}</strong>
+                ", please refine your query.
+            </div>
+            <ul *ngIf="val == null && !isSearching" class="scroll-shadow">
+                <li
+                    *ngFor="let result of searchResults.WaterAccountSearchResults"
+                    [id]="'WaterAccount_' + result.WaterAccount.WaterAccountID"
+                    [class.highlighted-search-result]="result == highlightedSearchResult">
+                    <button (click)="selectWaterAccount(result)">
+                        <div class="button-head">
+                            <svg width="19" height="17" viewBox="0 0 19 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M16 6.71667C16.707 6.71579 17.3847 6.43456 17.8846 5.93465C18.3845 5.43475 18.6658 4.75698 18.6667 4.05001V2.05001H16.6667C15.9841 2.05102 15.3282 2.3151 14.8353 2.78734C14.49 2.16069 13.9829 1.63807 13.367 1.2739C12.7511 0.909724 12.0489 0.717305 11.3333 0.716675H9.33333V2.71667C9.33457 3.77716 9.75639 4.79386 10.5063 5.54374C11.2561 6.29362 12.2728 6.71544 13.3333 6.71667H14V15.3833H6V12.05H6.66667C7.37364 12.0491 8.0514 11.7679 8.55131 11.268C9.05122 10.7681 9.33245 10.0903 9.33333 9.38334V7.38334H7.33333C6.65076 7.38435 5.99484 7.64844 5.502 8.12068C5.15663 7.49402 4.64961 6.97141 4.0337 6.60723C3.41779 6.24306 2.71552 6.05064 2 6.05001H0V8.05001C0.00123507 9.1105 0.423059 10.1272 1.17294 10.8771C1.92281 11.6269 2.93951 12.0488 4 12.05H4.66667V15.3833H0V16.7167H18.6667V15.3833H15.3333V6.71667H16ZM15.3333 4.71667C15.3337 4.36316 15.4743 4.02423 15.7242 3.77426C15.9742 3.52428 16.3132 3.38369 16.6667 3.38334H17.3333V4.05001C17.333 4.40352 17.1924 4.74246 16.9424 4.99243C16.6924 5.2424 16.3535 5.38299 16 5.38334H15.3333V4.71667ZM6 10.05C6.00035 9.6965 6.14094 9.35756 6.39091 9.10759C6.64089 8.85762 6.97982 8.71703 7.33333 8.71667H8V9.38334C7.99965 9.73686 7.85906 10.0758 7.60909 10.3258C7.35911 10.5757 7.02018 10.7163 6.66667 10.7167H6V10.05ZM4.66667 10.7167H4C3.29303 10.7158 2.61526 10.4346 2.11536 9.93465C1.61545 9.43475 1.33422 8.75698 1.33333 8.05001V7.38334H2C2.70697 7.38422 3.38474 7.66546 3.88464 8.16536C4.38455 8.66527 4.66578 9.34303 4.66667 10.05V10.7167ZM14 5.38334H13.3333C12.6264 5.38246 11.9486 5.10122 11.4487 4.60132C10.9488 4.10141 10.6675 3.42365 10.6667 2.71667V2.05001H11.3333C12.0403 2.05089 12.7181 2.33213 13.218 2.83203C13.7179 3.33194 13.9991 4.0097 14 4.71667V5.38334Z"
+                                    fill="black" />
+                            </svg>
+                            <strong class="wa-name" [innerHTML]="'#' + result.WaterAccount.WaterAccountNumber" [highlight]="searchString.value"></strong>
+                            <span class="wa-id" [highlight]="searchString.value" [innerHTML]="result.WaterAccount.WaterAccountName ?? result.WaterAccount.WaterAccountName"></span>
+                        </div>
+
+                        <div class="button-metadata mt-1">
+                            <span class="wa-parcels">
+                                {{ result.WaterAccount.Parcels.length }}
+                                {{ result.WaterAccount.Parcels.length == 1 ? "parcel" : "parcels" }}
+                                ·
+                            </span>
+                            <span class="wa-acres">
+                                {{ result.WaterAccount.Parcels | sum: "ParcelArea" | number: "1.1-1" }}
+                                acres
+                            </span>
+                        </div>
+
+                        <div class="button-metadata mt-1" *ngIf="result.MatchedFields.APN">
+                            <small class="wa-apns wa-meta">
+                                <strong>Parcel APNs:</strong>
+                                <span [highlight]="searchString.value" [innerHTML]="result.WaterAccount.Parcels | commaJoin: 'ParcelNumber'"></span>
+                            </small>
+                        </div>
+
+                        <div class="button-metadata mt-1" *ngIf="result.MatchedFields.ContactName">
+                            <small class="wa-contact-name wa-meta">
+                                <strong>Contact Name:</strong>
+                                <span [highlight]="searchString.value" [innerHTML]="result.WaterAccount.ContactName"></span>
+                            </small>
+                        </div>
+
+                        <div class="button-metadata mt-1" *ngIf="result.MatchedFields.ContactAddress">
+                            <small class="wa-contact-address wa-meta">
+                                <strong>Contact Address:</strong>
+                                <span [highlight]="searchString.value" [innerHTML]="result.WaterAccount.ContactAddress"></span>
+                            </small>
+                        </div>
+                    </button>
+                </li>
+
+                <li *ngIf="searchResults?.WaterAccountSearchResults?.length == 0 && searchString.value && searchString.value.length > 1" class="p-3">No results</li>
+            </ul>
+        </div>
+    </div>
+</div>

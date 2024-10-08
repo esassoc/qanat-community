@@ -1,0 +1,88 @@
+<page-header [templateAbove]="templateAbove" pageTitle="Review Parcels">
+    <ng-template #templateAbove>
+        <div class="back">
+            <a [routerLink]="['../../parcels/update']" class="back__link">Back to Update Parcels</a>
+        </div>
+    </ng-template>
+</page-header>
+
+<div class="page-body grid-12">
+    <div class="g-col-8">
+        <app-alert-display></app-alert-display>
+        <form class="form grid-12" [formGroup]="submitForPreviewForm" (ngSubmit)="onSubmitForPreview()" *ngIf="featureClass && !resultsPreview">
+            <div class="module-header">
+                <h3 class="module-title underline">Columns in Layer</h3>
+            </div>
+            <table class="table table-group-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th class="w-50">Expected Column</th>
+                        <th class="w-50">Layer Column To Use</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>APN / Parcel Number</td>
+                        <td>
+                            <select class="form-control" name="parcelNumberColumn" [(ngModel)]="parcelLayerUpdateDto.ParcelNumberColumn" [ngModelOptions]="{ standalone: true }">
+                                <option [ngValue]="undefined" disabled>Select a Column</option>
+                                <option *ngFor="let column of getColumns()" [ngValue]="column">
+                                    {{ column }}
+                                </option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Owner Name</td>
+                        <td>
+                            <select class="form-control" name="ownerNameColumn" [(ngModel)]="parcelLayerUpdateDto.OwnerNameColumn" [ngModelOptions]="{ standalone: true }">
+                                <option [ngValue]="undefined" disabled>Select a Column</option>
+                                <option *ngFor="let column of getColumns()" [ngValue]="column">
+                                    {{ column }}
+                                </option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Owner Address</td>
+                        <td>
+                            <select class="form-control" name="ownerAddressColumn" [(ngModel)]="parcelLayerUpdateDto.OwnerAddressColumn" [ngModelOptions]="{ standalone: true }">
+                                <option [ngValue]="undefined" disabled>Select a Column</option>
+                                <option *ngFor="let column of getColumns()" [ngValue]="column">
+                                    {{ column }}
+                                </option>
+                            </select>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="module-header">
+                <h3 class="module-title underline">Effective Year</h3>
+            </div>
+            <div class="field g-col-9">
+                <span class="field-label"> Select the effective year the updated parcel layer will be in effect </span>
+                <div class="form-check">
+                    <select class="form-check-input" id="effectiveYear" formControlName="waterYearSelection" [value]="effectiveYear">
+                        <option *ngFor="let year of availableYears" [value]="year">
+                            {{ year }}
+                        </option>
+                    </select>
+                </div>
+                <div class="alert alert-danger p-2" *ngIf="submitForPreviewFormControls.waterYearSelection.touched && submitForPreviewFormControls.waterYearSelection.invalid">
+                    <div *ngIf="submitForPreviewFormControls.waterYearSelection.errors.required">Please choose an Effective Year</div>
+                </div>
+            </div>
+            <em *ngIf="nextAvailableEffectiveYear">
+                Latest Effective Year:
+                <strong>{{ nextAvailableEffectiveYear }}</strong>
+            </em>
+        </form>
+    </div>
+    <div class="sidebar-help g-col-4">
+        <custom-rich-text [customRichTextTypeID]="customRichTextType"></custom-rich-text>
+    </div>
+</div>
+
+<div class="page-footer">
+    <fresca-button (onClick)="onSubmitForPreview()" [disabled]="isLoadingSubmit || !previewFormValid()" [buttonLoading]="isLoadingSubmit"> Save & Confirm </fresca-button>
+</div>

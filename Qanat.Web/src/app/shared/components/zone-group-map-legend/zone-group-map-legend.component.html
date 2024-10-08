@@ -1,0 +1,13 @@
+<div class="card" *ngIf="zoneGroup">
+    <div class="card-body map-legend">
+        <div class="legend-label mb-3">Map Legend</div>
+
+        <div *ngFor="let zone of zoneGroup.ZoneList" class="legend-item mb-2">
+            <div class="legend-color" [style.background-color]="zone.ZoneColor"></div>
+
+            <p class="copy copy-4">
+                {{ zone.ZoneName }}
+            </p>
+        </div>
+    </div>
+</div>

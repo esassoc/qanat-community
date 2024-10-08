@@ -1,0 +1,16 @@
+@use "/src/scss/abstracts" as *;
+.text-center {
+    text-align: center;
+}
+
+.border-left {
+    border-left: 1px solid #ffffff80;
+}
+
+:host {
+    background: $blue-default;
+    color: #fff;
+    padding: 10px 0;
+    font-weight: 700;
+    text-align: center;
+}

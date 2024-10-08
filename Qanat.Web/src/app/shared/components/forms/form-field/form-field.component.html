@@ -1,0 +1,131 @@
+<div class="field">
+    <ng-container [ngSwitch]="type">
+        <!-- Text -->
+        <ng-container *ngSwitchCase="FormFieldType.Text">
+            <div class="field-label" [class.required]="formControl | isRequired">
+                {{ fieldLabel }}
+            </div>
+            <div class="units-wrapper">
+                <input [mask]="mask" type="text" [placeholder]="placeholder" [formControl]="formControl" [name]="name" />
+                <span *ngIf="units" class="units">{{ units }}</span>
+            </div>
+        </ng-container>
+
+        <!-- Number -->
+        <ng-container *ngSwitchCase="FormFieldType.Number">
+            <div class="field-label" [class.required]="formControl | isRequired">
+                {{ fieldLabel }}
+            </div>
+            <div class="units-wrapper">
+                <input type="number" [placeholder]="placeholder" [formControl]="formControl" [mask]="mask" [name]="name" />
+                <span *ngIf="units" class="units">{{ units }}</span>
+            </div>
+        </ng-container>
+
+        <!-- Textarea -->
+        <ng-container *ngSwitchCase="FormFieldType.Textarea">
+            <div class="field-label" [class.required]="formControl | isRequired">
+                {{ fieldLabel }}
+            </div>
+            <textarea [placeholder]="placeholder" [formControl]="formControl" [name]="name"></textarea>
+        </ng-container>
+
+        <!-- RTE -->
+        <ng-container *ngSwitchCase="FormFieldType.RTE">
+            <div class="field-label" [class.required]="formControl | isRequired">
+                {{ fieldLabel }}
+            </div>
+            <editor #tinyMceEditor [init]="tinyMceEditor | tinyMceConfig" [formControl]="formControl"></editor>
+        </ng-container>
+
+        <!-- Toggle -->
+        <ng-container *ngSwitchCase="FormFieldType.Toggle">
+            <label class="field-label" [class.required]="formControl | isRequired">
+                {{ fieldLabel }}
+            </label>
+            <div class="switch-container" [style.minHeight]="toggleHeight">
+                <label class="switch">
+                    <input type="checkbox" [formControl]="formControl" [name]="name" />
+                    <span class="toggle" [attr.check-true]="toggleTrue" [attr.check-false]="toggleFalse"></span>
+                </label>
+            </div>
+        </ng-container>
+
+        <!-- Check -->
+        <ng-container *ngSwitchCase="FormFieldType.Check">
+            <label class="field-label" [class.required]="formControl | isRequired">
+                {{ fieldLabel }}
+            </label>
+            <label class="check-label">
+                <input type="checkbox" [formControl]="formControl" [name]="name" />
+                {{ checkLabel }}
+            </label>
+        </ng-container>
+
+        <!-- Date -->
+        <ng-container *ngSwitchCase="FormFieldType.Date">
+            <label class="field-label" [class.required]="formControl | isRequired">
+                {{ fieldLabel }}
+            </label>
+            <input type="date" [formControl]="formControl" [name]="name" />
+        </ng-container>
+
+        <!-- Select -->
+        <ng-container *ngSwitchCase="FormFieldType.Select">
+            <label class="field-label" [class.required]="formControl | isRequired">
+                {{ fieldLabel }}
+            </label>
+
+            <select-dropdown *ngIf="formInputOptions; else noOptionsProvided" [formInputOptions]="formInputOptions" [formControl]="formControl"></select-dropdown>
+            <ng-template #noOptionsProvided>
+                <span class="text-danger"> No "formInputOptions" were provided to this form field component </span>
+            </ng-template>
+        </ng-container>
+
+        <!-- Radio -->
+        <ng-container *ngSwitchCase="FormFieldType.Radio">
+            <label class="field-label" [class.required]="formControl | isRequired">
+                {{ fieldLabel }}
+            </label>
+            <div class="radio-options">
+                <label *ngFor="let formInputOption of formInputOptions">
+                    <input type="radio" [formControl]="formControl" [name]="name" [value]="formInputOption.Value" />
+                    {{ formInputOption.Label }}
+                </label>
+            </div>
+        </ng-container>
+
+        <!-- File -->
+        <ng-container *ngSwitchCase="FormFieldType.File">
+            <div class="field-label" [class.required]="formControl | isRequired">
+                {{ fieldLabel }}
+            </div>
+            <div class="custom-file-upload">
+                <input
+                    type="file"
+                    #fileUploadField
+                    (change)="onFileChange($event)"
+                    [accept]="uploadFileAccepts"
+                    [placeholder]="placeholder"
+                    [formControl]="formControl"
+                    [name]="name" />
+                {{ formControl.value ? formControl.value.name : "No file chosen..." }}
+                <button type="button" class="btn btn-lg btn-primary" (click)="onClickFileUpload($event)">
+                    <i class="fas fa-folder-open"></i>
+                    Browse
+                </button>
+            </div>
+            <div class="copy copy-3 pt-2">
+                <em>
+                    Maximum total file size should not exceed 500MB. Accepted extensions:
+                    <strong>{{ uploadFileAccepts }}</strong>
+                </em>
+            </div>
+        </ng-container>
+    </ng-container>
+    <ng-container *ngIf="fieldDefinitionName">
+        <field-definition [fieldDefinitionType]="fieldDefinitionName"></field-definition>
+    </ng-container>
+
+    <input-errors [validateFormControl]="formControl"></input-errors>
+</div>

@@ -1,0 +1,8 @@
+@if (zones.length > 0) {
+    <span class="zone" *ngFor="let zone of zones">
+        <span class="zone-color" [style.background-color]="zone.ZoneColor"></span>
+        {{ zone.ZoneName }}
+    </span>
+} @else {
+    N/A
+}

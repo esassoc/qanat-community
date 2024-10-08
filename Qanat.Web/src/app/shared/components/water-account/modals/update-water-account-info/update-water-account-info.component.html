@@ -1,0 +1,40 @@
+<div *ngIf="waterAccount$ | async as waterAccount">
+    <div class="modal-header">
+        <custom-rich-text [customRichTextTypeID]="customRichTextID" [showLoading]="false" [showInfoIcon]="false"></custom-rich-text>
+        <button type="button" class="close" (click)="close()">
+            <i class="fa fa-times-circle"></i>
+        </button>
+    </div>
+
+    <div class="modal-body">
+        <div class="icon">
+            <h2 class="section-title mb-2">
+                <icon icon="WaterAccounts"></icon>
+                #{{ waterAccount.WaterAccountNumber }}
+                <small class="text-muted">{{ waterAccountName }}</small>
+            </h2>
+        </div>
+        <form action="" class="form grid-12" [formGroup]="formGroup">
+            <form-field
+                [formControl]="formGroup.controls.WaterAccountName"
+                fieldLabel="Water Account Name"
+                placeholder="Water Account Name"
+                [type]="FormFieldType.Text"></form-field>
+
+            <form-field [formControl]="formGroup.controls.ContactName" fieldLabel="Contact Name" placeholder="Contact Name" [type]="FormFieldType.Text"></form-field>
+
+            <form-field
+                [formControl]="formGroup.controls.ContactAddress"
+                fieldLabel="Contact Address"
+                placeholder="Contact Street Address"
+                [type]="FormFieldType.Text"></form-field>
+
+            <form-field [formControl]="formGroup.controls.Notes" fieldLabel="Notes" placeholder="Notes..." [type]="FormFieldType.Textarea"></form-field>
+        </form>
+    </div>
+
+    <div class="modal-footer">
+        <button class="btn btn-primary" (click)="save()" [disabled]="!formGroup.valid">Update Info & Save</button>
+        <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+    </div>
+</div>

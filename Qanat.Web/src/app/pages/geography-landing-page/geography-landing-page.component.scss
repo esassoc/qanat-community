@@ -1,0 +1,14 @@
+@use "/src/scss/abstracts" as *;
+
+.geography-landing-page {
+    padding: $spacing-600;
+}
+
+h2 {
+    color: $primary;
+    text-align: center;
+}
+
+.about-grid {
+    gap: $spacing-400;
+}

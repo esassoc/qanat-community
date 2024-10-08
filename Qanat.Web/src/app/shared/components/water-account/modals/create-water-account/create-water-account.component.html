@@ -1,0 +1,25 @@
+<div class="modal-header">
+    <custom-rich-text [customRichTextTypeID]="customRichTextID" [showLoading]="false" [showInfoIcon]="false"></custom-rich-text>
+    <button type="button" class="close" (click)="close()">
+        <i class="fa fa-times-circle"></i>
+    </button>
+</div>
+
+<div class="modal-body">
+    <form action="" class="form" [formGroup]="formGroup">
+        <form-field [formControl]="formGroup.controls.WaterAccountName" fieldLabel="Water Account Name" placeholder="Water Account Name" [type]="FormFieldType.Text"></form-field>
+
+        <form-field [formControl]="formGroup.controls.ContactName" fieldLabel="Contact Name" placeholder="Contact Name" [type]="FormFieldType.Text"></form-field>
+
+        <form-field
+            [formControl]="formGroup.controls.ContactAddress"
+            fieldLabel="Contact Address"
+            placeholder="(e.g.: 1234 Happy St. City CA 55555)"
+            [type]="FormFieldType.Text"></form-field>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-primary" (click)="save()" [disabled]="formGroup.invalid">Update Info & Save</button>
+    <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+</div>

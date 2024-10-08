@@ -1,0 +1,38 @@
+@use "/src/scss/abstracts" as *;
+
+:host {
+    margin-left: -$spacing-600;
+    display: flex;
+}
+
+.progress-wrapper {
+    display: flex;
+    border-bottom: 1px solid rgba(black, 0.06);
+    width: 100%;
+    padding: $spacing-400;
+    font-weight: bold;
+    .percentage {
+        padding-right: $spacing-400;
+        margin-right: $spacing-400;
+        border-right: 1px solid rgba(black, 0.06);
+    }
+    progress {
+        flex-grow: 1;
+        -webkit-appearance: none;
+        border: 1px solid #ccc;
+        overflow: hidden;
+        color: $primary;
+        border-radius: 15px;
+
+        &::-webkit-progress-bar {
+            background: $white;
+        }
+        &::-webkit-progress-value {
+            background: $primary;
+            transition: width 0.5s ease-in-out;
+        }
+        &::-moz-progress-bar {
+            background: $primary;
+        }
+    }
+}

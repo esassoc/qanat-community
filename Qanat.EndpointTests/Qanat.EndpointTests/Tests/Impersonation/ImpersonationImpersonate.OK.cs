@@ -1,0 +1,1 @@
+﻿// MCS: A client user, such as the one used by automated testing, cannot be used to impersonate a user

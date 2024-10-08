@@ -1,0 +1,18 @@
+@use "/src/scss/abstracts" as *;
+
+.clipboard-copy-wrapper {
+    display: inline-flex;
+    align-items: start;
+
+    .clipboard-copy-button {
+        border: none;
+        background: none;
+        color: $gray-default;
+        transition: all 0.2s ease-in-out;
+        transform: translateY(2px);
+
+        &.copied {
+            color: $green-default;
+        }
+    }
+}

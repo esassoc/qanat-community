@@ -1,0 +1,60 @@
+@use "/src/scss/abstracts" as *;
+
+.kv-pair {
+    flex-direction: column;
+
+    .key {
+        border: none;
+        padding-bottom: 4px;
+        text-transform: uppercase;
+    }
+
+    .value {
+        border: none;
+        padding-top: 4px;
+    }
+}
+
+.card-footer {
+    display: flex;
+    gap: 3rem;
+    align-items: center;
+
+    a {
+        color: $black;
+        letter-spacing: 0;
+        cursor: pointer;
+        text-decoration: underline;
+    }
+
+    icon {
+        display: inline-block;
+        @include svg-100-deep;
+        color: $primary;
+        width: 20px;
+        height: 20px;
+        margin-right: $spacing-200;
+        transform: translateY(4px);
+
+        &.red {
+            color: $red-default;
+        }
+    }
+}
+
+.no-well-meter {
+    margin-top: $spacing-300;
+    border: 2px dashed #e0e0e0;
+    min-height: 250px;
+    display: flex;
+    gap: $spacing-300;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #f9f9f9;
+    border-radius: 5px;
+}
+
+.map-container {
+    z-index: 1;
+}

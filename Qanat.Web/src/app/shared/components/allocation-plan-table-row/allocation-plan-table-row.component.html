@@ -1,0 +1,13 @@
+<div class="period">
+    <ng-container *ngTemplateOutlet="period"></ng-container>
+</div>
+
+<ng-container *ngIf="items">
+    <div class="year" *ngFor="let year of years">
+        <ng-container *ngTemplateOutlet="items; context: { $implicit: year }"></ng-container>
+    </div>
+</ng-container>
+
+<div class="slot" *ngIf="slot" [style.grid-column-start]="gridColumnStart" [style.grid-column-end]="gridColumnEnd">
+    <ng-container *ngTemplateOutlet="slot"></ng-container>
+</div>

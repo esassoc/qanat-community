@@ -1,0 +1,22 @@
+@import url("https://fonts.googleapis.com/css2?family=Overpass:ital,wght@0,100..900;1,100..900&Overpass+Mono:wght@400;700&display=swap");
+
+/*
+
+    OVERPASS
+    400, 400i
+    700, 700i
+    900, 900i
+
+    OVERPASS MONO
+    400
+    700
+
+*/
+
+$overpass: "Overpass", sans-serif;
+$overpass-mono: "Overpass Mono", monospace;
+
+$header-nav-link-font-weight: inherit;
+
+$font-family-sans-serif: $overpass;
+$font-size: 16px;

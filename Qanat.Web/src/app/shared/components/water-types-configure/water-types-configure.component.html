@@ -1,0 +1,35 @@
+<ul cdkDropList class="reorderable" (cdkDropListDropped)="drop($event)">
+    <li class="reorderable__item" *ngFor="let waterType of waterTypes" cdkDrag>
+        <div class="reorderable__order">
+            <span></span>
+        </div>
+
+        <div class="reorderable__label">
+            <div class="reorderable__title">
+                <input type="text" [name]="waterType.WaterTypeName" [(ngModel)]="waterType.WaterTypeName" />
+
+                <water-type-field-definition [waterType]="waterType" [labelOverride]="" [editable]="true"></water-type-field-definition>
+
+                <div class="reorderable__status">
+                    <label class="switch">
+                        <input type="checkbox" id="project-water" [checked]="waterType.IsActive" (click)="toggleIsActive(waterType)" />
+                        <span class="toggle" for="project-water"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="reorderable__handle" cdkDragHandle><i class="fas fa-bars"></i></div>
+    </li>
+</ul>
+
+<form class="form add-new mt-4 flex-between ai-fe">
+    <div class="field fill">
+        <label class="field-label"> Add Custom Water {{ isUsageConfiguration ? "Use" : "Supply" }} Type </label>
+        <input [placeholder]="getPlaceholder()" name="newWaterTypeName" type="text" [(ngModel)]="newWaterTypeName" />
+    </div>
+
+    <div class="field-actions">
+        <button class="btn btn-secondary btn-md" (click)="createNewWaterType()" [disabled]="!newWaterTypeName">+ Add</button>
+    </div>
+</form>

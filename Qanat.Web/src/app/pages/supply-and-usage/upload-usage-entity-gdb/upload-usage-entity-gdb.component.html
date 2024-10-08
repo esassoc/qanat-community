@@ -1,0 +1,16 @@
+<page-header icon="Geography" pageTitle="Upload Usage Entity GDB"></page-header>
+
+<div class="page-body grid-12">
+    <app-alert-display [clearAlertsOnDestroy]="false"></app-alert-display>
+
+    <form class="form grid-12" *ngIf="geography$ | async as geography">
+        <div class="field g-col-12">
+            <form-field [type]="FormFieldType.File" [formControl]="uploadFormField" [uploadFileAccepts]="'.gdb.zip,.zip'" [fieldLabel]="'GDB.zip File'"></form-field>
+        </div>
+    </form>
+
+    <div class="card-footer flex-end pb-3">
+        <button type="submit" class="btn btn-primary" [disabled]="isLoadingSubmit" [buttonLoading]="isLoadingSubmit" (click)="onSubmit()">Save</button>
+        <a class="btn btn-primary-outline ml-2" routerLink="/admin/geographies">Cancel</a>
+    </div>
+</div>

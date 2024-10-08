@@ -1,0 +1,46 @@
+@use "/src/scss/abstracts" as *;
+
+.form-top {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr; /* Columns take equal space, middle column minimum */
+    gap: 1em;
+    .water-account {
+        flex-grow: 5;
+    }
+}
+
+ol {
+    max-height: 200px;
+    overflow: auto;
+
+    li {
+        width: 100%;
+        padding: 1rem 0;
+
+        span.parcel-index {
+            display: inline-block;
+            width: 1.5em;
+            font-weight: 600;
+        }
+        & + li {
+            border-top: 1px solid #0000001a;
+        }
+    }
+}
+
+.button-group__item {
+    padding: 0.75rem 1rem 0.75em;
+
+    &:nth-child(2) {
+        color: $red-default;
+        background: $white;
+        border-color: $red-default;
+
+        &:hover,
+        &.active {
+            background: $red-default;
+            color: $white;
+            border-color: $red-default;
+        }
+    }
+}

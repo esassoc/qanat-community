@@ -1,0 +1,53 @@
+<page-header pageTitle="Water Supply" icon="Transactions" [customRichTextTypeID]="richTextTypeID"></page-header>
+
+<div class="page-body">
+    <app-alert-display></app-alert-display>
+
+    <div class="transaction-options grid-12" *ngIf="canCreateTransactions()">
+        <div class="g-col-6 single">
+            <h2 class="section-title">Create Single Transaction</h2>
+            <div class="copy copy-3 pt-1 pb-2">
+                <p>Use Single Transaction to perform a water deposit or withdrawal transaction for an individual parcel.</p>
+            </div>
+            <fresca-button [routerLink]="['new']" cssClass="btn btn-primary" iconClass=""> Create Single Transaction </fresca-button>
+        </div>
+
+        <div class="g-col-6 bulk">
+            <h2 class="section-title">Create Bulk Transaction</h2>
+            <div class="copy copy-3 pt-1 pb-2">
+                <p>Set Water Supply for multiple parcels at once by filtering and selecting a data grid.</p>
+            </div>
+
+            <fresca-button [routerLink]="['bulk-new']" cssClass="btn btn-primary" iconClass=""> Create Bulk Transaction </fresca-button>
+        </div>
+
+        <div class="g-col-6 supply-csv">
+            <h2 class="section-title">Upload Supply Transactions (CSV)</h2>
+            <div class="copy copy-3 pt-1 pb-2">
+                <p>Create water supply transactions for multiple parcels by uploading a comma-separated spreadsheet containing water supply per Parcel.</p>
+            </div>
+
+            <fresca-button [routerLink]="['csv-upload/supply']" cssClass="btn btn-primary" iconClass=""> Upload Supply Transactions (CSV) </fresca-button>
+        </div>
+        <div class="g-col-6 supply-csv">
+            <h2 class="section-title">OpenET Integration</h2>
+            <div class="copy copy-3 pt-1 pb-2">
+                <p></p>
+            </div>
+
+            <fresca-button [routerLink]="['openet-integration']" cssClass="btn btn-primary" iconClass=""> OpenET Integration </fresca-button>
+        </div>
+    </div>
+
+    <div class="transaction-history">
+        <div class="section-header pt-5 pb-3">
+            <h2 class="module-title underline">Transaction History</h2>
+
+            <div class="copy copy-2">
+                <custom-rich-text [customRichTextTypeID]="historyRichTextTypeID"></custom-rich-text>
+            </div>
+        </div>
+
+        <qanat-grid [rowData]="transactionHistory" [columnDefs]="columnDefs" downloadFileName="transaction-history" [pagination]="true"></qanat-grid>
+    </div>
+</div>

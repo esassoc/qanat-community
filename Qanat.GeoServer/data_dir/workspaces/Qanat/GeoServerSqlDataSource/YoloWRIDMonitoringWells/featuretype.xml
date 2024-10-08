@@ -1,0 +1,44 @@
+<featureType>
+  <id>FeatureTypeInfoImpl-3fba757c:18bcee947a8:-11f8</id>
+  <name>YoloWRIDMonitoringWells</name>
+  <nativeName>vGeoServerYoloWRIDMonitoringWells</nativeName>
+  <namespace>
+    <id>NamespaceInfoImpl-7b9aae14:16b8f8d06b8:cc1</id>
+  </namespace>
+  <title>vGeoServerYoloWRIDMonitoringWells</title>
+  <keywords>
+    <string>features</string>
+    <string>vGeoServerYoloWRIDMonitoringWells</string>
+  </keywords>
+  <srs>EPSG:4326</srs>
+  <nativeBoundingBox>
+    <minx>-122.181602443632</minx>
+    <maxx>-121.67458056650834</maxx>
+    <miny>38.499392730012126</miny>
+    <maxy>38.9236707784734</maxy>
+    <crs>EPSG:4326</crs>
+  </nativeBoundingBox>
+  <latLonBoundingBox>
+    <minx>-122.181602443632</minx>
+    <maxx>-121.67458056650834</maxx>
+    <miny>38.499392730012126</miny>
+    <maxy>38.9236707784734</maxy>
+    <crs>EPSG:4326</crs>
+  </latLonBoundingBox>
+  <projectionPolicy>FORCE_DECLARED</projectionPolicy>
+  <enabled>true</enabled>
+  <metadata>
+    <entry key="cachingEnabled">false</entry>
+  </metadata>
+  <store class="dataStore">
+    <id>DataStoreInfoImpl--5295db08:16ba03a820a:-7ff9</id>
+  </store>
+  <serviceConfiguration>false</serviceConfiguration>
+  <maxFeatures>0</maxFeatures>
+  <numDecimals>0</numDecimals>
+  <padWithZeros>false</padWithZeros>
+  <forcedDecimal>false</forcedDecimal>
+  <overridingServiceSRS>false</overridingServiceSRS>
+  <skipNumberMatched>false</skipNumberMatched>
+  <circularArcPresent>false</circularArcPresent>
+</featureType>

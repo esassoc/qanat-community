@@ -1,0 +1,288 @@
+@use "/src/scss/abstracts" as *;
+
+::ng-deep {
+    .page-header {
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+    }
+}
+
+.text-green {
+    color: $green-default;
+}
+
+.table-responsive {
+    box-shadow: unset;
+    overflow-y: hidden;
+    overflow-x: auto;
+}
+
+.activity {
+    .stat {
+        &__value {
+            &.activity__value {
+                letter-spacing: -0.05em;
+            }
+
+            &.debit {
+            }
+
+            &.credit {
+            }
+        }
+
+        &__meta {
+            &.activity-note {
+                font-size: $type-size-200;
+            }
+        }
+    }
+
+    &__ledger {
+        &-header {
+            background: $secondary;
+            font-weight: bold;
+            font-size: $type-size-100;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: $white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1rem;
+
+            @include desktop-small {
+                grid-template-columns: 8rem minmax(0, 1fr) minmax(0, 1fr);
+            }
+
+            @include desktop-medium {
+                grid-template-columns: 12rem minmax(0, 2fr) minmax(0, 1fr);
+            }
+        }
+
+        &-item {
+            margin-top: $spacing-300;
+            padding: $spacing-500;
+            background: $white;
+            color: $black;
+            border: 1px solid $gray-200;
+            box-shadow: $shadow-100;
+            border-radius: $border-radius-200;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1rem;
+            align-items: center;
+
+            @include desktop-small {
+                grid-template-columns: 8rem minmax(0, 1fr) minmax(0, 1fr);
+            }
+
+            @include desktop-medium {
+                grid-template-columns: 12rem minmax(0, 2fr) minmax(0, 1fr);
+            }
+
+            .effective-date {
+                font-size: $type-size-150;
+                color: $gray-default;
+            }
+
+            .transaction {
+                @include desktop-small {
+                    display: grid;
+                    gap: 1rem;
+                    grid-template-columns: 2rem 1fr;
+                }
+
+                .icon {
+                    display: none;
+
+                    @include desktop-small {
+                        display: block;
+                    }
+
+                    &__fpo {
+                        color: $white;
+                        font-size: $type-size-200;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        width: 2rem;
+                        height: 2rem;
+                        background: $green-default;
+                        border-radius: 50%;
+
+                        &.credit {
+                            background: $green-default;
+                        }
+
+                        &.debit {
+                            background: $primary;
+                        }
+                    }
+                }
+            }
+
+            .quantity {
+                .amount {
+                    letter-spacing: -0.05em;
+                    font-weight: bold;
+                    font-size: $type-size-300;
+
+                    @include desktop-medium {
+                        font-size: $type-size-400;
+                    }
+                }
+
+                .balance {
+                    color: #9a9a9a;
+                    padding-top: 0.25rem;
+
+                    font-size: $type-size-150;
+                }
+            }
+
+            &.open-et-correction {
+                .icon__fpo {
+                }
+
+                .quantity {
+                    .amount {
+                        font-size: $type-size-300;
+                    }
+                }
+            }
+
+            &.open-et-rollup {
+                .toggle {
+                    position: absolute;
+                    right: 0;
+                    top: 0;
+                    font-size: $type-size-500;
+                    transform: rotate(90deg);
+
+                    &.open {
+                        transform: rotate(180deg);
+                    }
+
+                    &:hover {
+                        cursor: pointer;
+                    }
+                }
+            }
+        }
+
+        &-title {
+            &.small {
+                font-size: $type-size-200;
+            }
+
+            &.large {
+                font-size: $type-size-300;
+
+                @include desktop-medium {
+                    font-size: $type-size-400;
+                }
+
+                .method {
+                    display: block;
+                    font-size: $type-size-200;
+                    padding-top: 0.25rem;
+                }
+            }
+        }
+
+        &-meta {
+            padding-top: 0.5rem;
+            color: #9a9a9a;
+            font-size: $type-size-150;
+
+            span {
+                & + span {
+                    padding-left: 1rem;
+                }
+
+                strong {
+                    padding-right: 0.25rem;
+                }
+
+                a {
+                    color: #9a9a9a;
+                    text-decoration: underline;
+                }
+            }
+        }
+
+        .sub-ledger {
+            grid-column: 1 / span 3;
+            padding-top: 0.5rem;
+            border-top: 1px solid rgba($black, 0.1);
+            margin-top: 1rem;
+            font-size: $type-size-150;
+            color: $gray-default;
+            display: none;
+
+            @include desktop-medium {
+                grid-column: 2 / span 2;
+            }
+
+            &.open {
+                display: block;
+            }
+
+            .transactions {
+                width: 100%;
+
+                th,
+                td {
+                    padding: 1rem;
+                    line-height: 1em;
+                    text-align: left;
+                }
+
+                th {
+                    background: $primary;
+                    color: $white;
+                    font-size: $type-size-200;
+
+                    &:first-of-type {
+                        border-top-left-radius: 0.25rem;
+                        border-bottom-left-radius: 0.25rem;
+                    }
+
+                    &:last-of-type {
+                        border-top-right-radius: 0.25rem;
+                        border-bottom-right-radius: 0.25rem;
+                    }
+                }
+
+                td {
+                    font-size: $type-size-200;
+                }
+
+                tr + tr {
+                    td {
+                        border-top: 1px solid rgba($black, 0.1);
+                    }
+                }
+
+                &__amount {
+                    width: 12rem;
+                }
+            }
+
+            .total {
+                width: 12rem;
+                margin-left: auto;
+                padding: 0 1rem;
+
+                .amount {
+                    max-width: 8rem;
+                    margin-top: 0.5rem;
+                    border-top: 2px solid;
+                    padding-top: 0.5rem;
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,15 @@
+<div class="card-body" [loadingSpinner]="{ isLoading, loadingHeight: 400 }">
+    <div [hidden]="chartData?.length == 0">
+        <div id="monitoringWellMeasurementChart" class="mt-3" style="width: 100%"></div>
+
+        <div class="mt-3">
+            <small>
+                <em class="text-muted">Last Measurement Date: {{ lastMeasurementDate | date }}</em>
+            </small>
+        </div>
+    </div>
+
+    <div *ngIf="chartData?.length == 0" class="flex-center" style="min-height: 300px">
+        <i>This Monitoring Well does not currently have any measurement data.</i>
+    </div>
+</div>

@@ -1,0 +1,34 @@
+<div class="dashboard" *ngIf="currentUser$ | async as currentUser">
+    <ng-container *ngIf="parcel$ | async as parcel; else isLoadingTemplate">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a routerLink="/water-dashboard">
+                    <geography-logo [geographyID]="parcel?.GeographyID"></geography-logo>
+                </a>
+            </div>
+            <div class="sidebar-body sticky-nav" *ngIf="allocationPlans$ | async">
+                <div class="sidebar-body__wrapper">
+                    <h3 class="sidebar-body__title">
+                        <icon icon="WaterAccounts"></icon>
+                        Water Dashboard
+                    </h3>
+                </div>
+                <dashboard-menu *ngIf="dashboardMenu" [dashboardMenu]="dashboardMenu" [viewingDetailPage]="true"></dashboard-menu>
+            </div>
+        </aside>
+
+        <main class="main">
+            <router-outlet #manageOutlet="outlet"></router-outlet>
+            <div *ngIf="!manageOutlet.isActivated">
+                <page-header pageTitle="Dashboard"></page-header>
+
+                <div class="page-body grid-12"></div>
+            </div>
+        </main>
+    </ng-container>
+
+    <ng-template #isLoadingTemplate>
+        <aside class="sidebar" [loadingSpinner]="{ isLoading: true }"></aside>
+        <main class="main" [loadingSpinner]="{ isLoading: true }"></main>
+    </ng-template>
+</div>

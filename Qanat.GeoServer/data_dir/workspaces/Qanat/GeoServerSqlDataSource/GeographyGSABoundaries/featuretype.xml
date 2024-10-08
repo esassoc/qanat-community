@@ -1,0 +1,54 @@
+<featureType>
+  <id>FeatureTypeInfoImpl-1c8d4cef:18a1f09844c:-7fff</id>
+  <name>GeographyGSABoundaries</name>
+  <nativeName>vGeoserverGeographyGSABoundaries</nativeName>
+  <namespace>
+    <id>NamespaceInfoImpl-7b9aae14:16b8f8d06b8:cc1</id>
+  </namespace>
+  <title>vGeoserverGeographyGSABoundaries</title>
+  <keywords>
+    <string>features</string>
+    <string>vGeoserverGeographyGSABoundaries</string>
+  </keywords>
+  <srs>EPSG:4326</srs>
+  <nativeBoundingBox>
+    <minx>-122.26837227072934</minx>
+    <maxx>-119.1097886274304</maxx>
+    <miny>35.27620764809925</miny>
+    <maxy>38.92599211646943</maxy>
+    <crs>EPSG:4326</crs>
+  </nativeBoundingBox>
+  <latLonBoundingBox>
+    <minx>-122.26837227072934</minx>
+    <maxx>-119.1097886274304</maxx>
+    <miny>35.27620764809925</miny>
+    <maxy>38.92599211646943</maxy>
+    <crs>EPSG:4326</crs>
+  </latLonBoundingBox>
+  <projectionPolicy>FORCE_DECLARED</projectionPolicy>
+  <enabled>true</enabled>
+  <metadata>
+    <entry key="elevation">
+      <dimensionInfo>
+        <enabled>false</enabled>
+      </dimensionInfo>
+    </entry>
+    <entry key="time">
+      <dimensionInfo>
+        <enabled>false</enabled>
+      </dimensionInfo>
+    </entry>
+    <entry key="cachingEnabled">false</entry>
+  </metadata>
+  <store class="dataStore">
+    <id>DataStoreInfoImpl--5295db08:16ba03a820a:-7ff9</id>
+  </store>
+  <serviceConfiguration>false</serviceConfiguration>
+  <maxFeatures>0</maxFeatures>
+  <numDecimals>0</numDecimals>
+  <padWithZeros>false</padWithZeros>
+  <forcedDecimal>false</forcedDecimal>
+  <overridingServiceSRS>false</overridingServiceSRS>
+  <skipNumberMatched>false</skipNumberMatched>
+  <circularArcPresent>false</circularArcPresent>
+</featureType>

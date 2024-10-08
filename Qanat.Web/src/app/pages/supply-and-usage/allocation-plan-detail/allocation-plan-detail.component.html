@@ -1,0 +1,31 @@
+<div *ngIf="allocationPlan$ | async as allocationPlan">
+    <div class="flex-between ai-fs mb-3">
+        <div>
+            <h2 class="section-title">{{ allocationPlan.WaterType.WaterTypeName }} / {{ allocationPlan.Zone.ZoneName }}</h2>
+            <small *ngIf="editing">
+                <em>
+                    <strong>Last Updated:</strong>
+                    {{ allocationPlan.LastUpdated | timeAgo }} ({{ allocationPlan.LastUpdated | date: "short" }})
+                </em>
+            </small>
+        </div>
+        <div *ngIf="allocationPlans$ | async as allocationPlans">
+            <button *ngIf="editing && canCopyFromExisting" type="button" class="btn btn-primary-outline" (click)="copyFromExistingPeriod()">
+                <i class="fa fa-copy"></i>
+                Copy From Existing
+            </button>
+        </div>
+    </div>
+
+    <ng-container *ngIf="allocationPlan?.AllocationPlanPeriods.length > 0; else noAllocationPlanPeriods">
+        <allocation-plan-table [allocationPlan]="allocationPlan" [readonly]="!editing" class="mb-3"></allocation-plan-table>
+    </ng-container>
+
+    <ng-template #noAllocationPlanPeriods>
+        <div class="no-allocation-plan-periods mb-3">
+            <p><em>No Allocation Plan set for this zone</em></p>
+        </div>
+    </ng-template>
+
+    <button *ngIf="editing" type="button" class="btn btn-secondary" (click)="addAllocationPeriod()">+ Add Allocation Period</button>
+</div>

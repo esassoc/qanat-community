@@ -1,0 +1,113 @@
+<div class="modal-header">
+    <custom-rich-text [customRichTextTypeID]="customRichTextID" [showLoading]="false" [showInfoIcon]="false"></custom-rich-text>
+    <button type="button" class="close" (click)="close()">
+        <i class="fa fa-times-circle"></i>
+    </button>
+</div>
+
+<div class="modal-body" #modalBody>
+    <form action="" class="form" [formGroup]="formGroup">
+        <div class="form-top">
+            <div class="primary-water-account water-account">
+                <div class="field" *ngIf="waterAccountDto$ | async as waterAccount">
+                    <search-water-accounts
+                        class="mb-4"
+                        [geographyID]="waterAccount.Geography.GeographyID"
+                        [excludedWaterAccountIDs]="excludedWaterAccountIDs"
+                        formControlName="primaryWaterAccount"></search-water-accounts>
+                </div>
+                <ol *ngIf="formGroup.controls.primaryWaterAccount.valid && formGroup.controls.primaryWaterAccount.value.Parcels.length > 0" class="scroll-shadow">
+                    <li *ngFor="let parcel of formGroup.controls.primaryWaterAccount.value.Parcels; let i = index">
+                        <span class="parcel-index">{{ i + 1 }}.</span>
+                        <parcel-icon-with-number [parcel]="parcel"></parcel-icon-with-number>
+                    </li>
+                </ol>
+                <note *ngIf="formGroup.controls.primaryWaterAccount.valid && formGroup.controls.secondaryWaterAccount.valid">
+                    <em>
+                        <strong>
+                            {{ formGroup.controls.primaryWaterAccount.value.Parcels.length + formGroup.controls.secondaryWaterAccount.value.Parcels.length }}
+                            parcels
+                        </strong>
+                        to be combined into the primary account (
+                        <strong>
+                            {{ formGroup.controls.primaryWaterAccount.value.WaterAccountNameAndNumber }}
+                        </strong>
+                        )
+                    </em>
+                </note>
+            </div>
+            <div class="swap-accounts">
+                <button
+                    class="btn btn-primary"
+                    [disabled]="!formGroup.controls.primaryWaterAccount.valid || !formGroup.controls.secondaryWaterAccount.valid"
+                    (click)="swapAccounts()">
+                    <i class="fas fa-exchange-alt"></i>
+                </button>
+            </div>
+            <div class="secondary-water-account water-account">
+                <div class="field">
+                    <search-water-accounts
+                        class="mb-4"
+                        [geographyID]="modalContext.GeographyID"
+                        [excludedWaterAccountIDs]="excludedWaterAccountIDs"
+                        formControlName="secondaryWaterAccount"></search-water-accounts>
+                </div>
+                <ol *ngIf="formGroup.controls.secondaryWaterAccount.valid && formGroup.controls.secondaryWaterAccount.value.Parcels.length > 0" class="scroll-shadow">
+                    <li *ngFor="let parcel of formGroup.controls.secondaryWaterAccount.value.Parcels; let i = index">
+                        <span class="parcel-index">{{ i + 1 }}.</span>
+                        <parcel-icon-with-number [parcel]="parcel"></parcel-icon-with-number>
+                    </li>
+                </ol>
+            </div>
+        </div>
+        <ng-container *ngIf="previewWaterAccount">
+            <hr />
+            <h3 class="my-4"><em>Preview of merged Water Account:</em></h3>
+            <water-account-card [waterAccountID]="previewWaterAccount.WaterAccountID" [displayActions]="false"></water-account-card>
+        </ng-container>
+
+        <div class="grid-12 my-4" *ngIf="formGroup.controls.primaryWaterAccount.valid && formGroup.controls.secondaryWaterAccount.valid">
+            <div class="field g-col-6">
+                <label class="required field-label" for="deleteMerge">Merge Type</label>
+                <field-definition fieldDefinitionType="WaterAccountMergeType" [inline]="true" class="mb-3 flex"></field-definition>
+                <div class="flex-start">
+                    <btn-group-radio-input
+                        [required]="true"
+                        formControlName="deleteMerge"
+                        id="deleteMerge"
+                        [options]="[
+                            { label: 'Preserve Merge', value: false },
+                            { label: 'Delete Merge', value: true }
+                        ]"></btn-group-radio-input>
+                </div>
+                <note *ngIf="formGroup.controls.deleteMerge.value" class="my-3 flex-start">
+                    <em>
+                        You have selected the Delete Merge. This will delete the water account to be merged, and transfer all water account history to the primary water account.
+                        <strong>This action cannot be undone</strong>
+                        . Are you sure you want to perform this action?
+                    </em>
+                </note>
+            </div>
+            <div class="field g-col-6" *ngIf="formGroup.controls.deleteMerge.value === false">
+                <form-field
+                    *ngIf="effectiveYearDropdownOptions"
+                    [formControl]="formGroup.controls.effectiveYear"
+                    fieldLabel="Effective Year"
+                    [type]="FormFieldType.Select"
+                    [formInputOptions]="effectiveYearDropdownOptions"
+                    required></form-field>
+                <ng-container *ngIf="effectiveYear$ | async as effectiveDate">
+                    <note class="mt-2 flex-start">
+                        <strong>Effective On:</strong>
+                        {{ effectiveDate | date: "longDate" }}
+                    </note>
+                </ng-container>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-primary" (click)="save()" [disabled]="!formGroup.valid || isLoadingSubmit">Merge Accounts & Save</button>
+    <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+</div>

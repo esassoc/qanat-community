@@ -1,0 +1,128 @@
+import { DOCUMENT, NgIf } from "@angular/common";
+import { ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, QueryList, ViewChildren } from "@angular/core";
+import { UntypedFormGroup, UntypedFormControl, Validators, FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { ActivatedRoute, Router, RouterLink } from "@angular/router";
+import { Subscription } from "rxjs";
+import { ParcelService } from "src/app/shared/generated/api/parcel.service";
+import { Alert } from "src/app/shared/models/alert";
+import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
+import { FeatureClassInfo } from "src/app/shared/generated/model/feature-class-info";
+import { ApiService } from "src/app/shared/services";
+import { AlertService } from "src/app/shared/services/alert.service";
+import { SelectedGeographyService } from "src/app/shared/services/selected-geography.service";
+import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
+import { AlertDisplayComponent } from "src/app/shared/components/alert-display/alert-display.component";
+import { ButtonComponent } from "src/app/shared/components/button/button.component";
+import { CustomRichTextComponent } from "src/app/shared/components/custom-rich-text/custom-rich-text.component";
+
+@Component({
+    selector: "update-parcels-upload",
+    templateUrl: "./update-parcels-upload.component.html",
+    styleUrls: ["./update-parcels-upload.component.scss"],
+    standalone: true,
+    imports: [PageHeaderComponent, RouterLink, AlertDisplayComponent, NgIf, FormsModule, ReactiveFormsModule, CustomRichTextComponent, ButtonComponent],
+})
+export class UpdateParcelsUploadComponent implements OnInit, OnDestroy {
+    private selectedGeography$: Subscription = Subscription.EMPTY;
+    private geographyID: number;
+    @ViewChildren("fileInput") public fileInput: QueryList<any>;
+
+    public isLoadingSubmit: boolean;
+    public userID: number;
+    public customRichTextType: number = 40;
+    public allowableFileTypes = ["gdb"];
+    public maximumFileSizeMB = 30;
+    public newParcelLayerForm = new UntypedFormGroup({
+        gdbUploadForParcelLayer: new UntypedFormControl("", [Validators.required]),
+    });
+    public submitForPreviewForm = new UntypedFormGroup({
+        waterYearSelection: new UntypedFormControl("", [Validators.required]),
+    });
+    public gdbInputFile: any = null;
+    public featureClass: FeatureClassInfo;
+    public uploadedGdbID: number;
+    public currentWaterYear: number;
+    public previousWaterYear: number;
+    public waterYearsNotPresentError: boolean;
+    private fileUploadElement: HTMLElement;
+    public fileUploadElementID = "gdbUploadForParcelLayer";
+
+    constructor(
+        private router: Router,
+        private alertService: AlertService,
+        private cdr: ChangeDetectorRef,
+        private parcelService: ParcelService,
+        private apiService: ApiService,
+        private route: ActivatedRoute,
+        private selectedGeographyService: SelectedGeographyService,
+        @Inject(DOCUMENT) private document: Document
+    ) {}
+
+    ngOnInit() {
+        this.selectedGeography$ = this.selectedGeographyService.curentUserSelectedGeographyObservable.subscribe((geography) => {
+            this.geographyID = geography.GeographyID;
+        });
+    }
+
+    get f() {
+        return this.newParcelLayerForm.controls;
+    }
+
+    get submitForPreviewFormControls() {
+        return this.submitForPreviewForm.controls;
+    }
+
+    ngOnDestroy() {
+        this.cdr.detach();
+    }
+
+    public onClickFileUpload() {
+        if (!this.fileUploadElement) {
+            this.fileUploadElement = document.getElementById(this.fileUploadElementID);
+        }
+
+        this.fileUploadElement.click();
+    }
+
+    private getSelectedFile(event: any) {
+        if (event.target.files && event.target.files.length) {
+            const [file] = event.target.files;
+            //returns bytes, but I'd rather not handle a constant that's a huge value
+            return event.target.files.item(0);
+        }
+        return null;
+    }
+
+    public onGDBFileChange(event: any) {
+        this.gdbInputFile = this.getSelectedFile(event);
+        this.newParcelLayerForm.get("gdbUploadForParcelLayer").setValue(this.gdbInputFile);
+    }
+
+    public getInputFileForGDB() {
+        return this.gdbInputFile ? this.gdbInputFile.name : "No file chosen...";
+    }
+
+    public onSubmitGDB() {
+        this.alertService.clearAlerts();
+        if (!this.newParcelLayerForm.valid) {
+            Object.keys(this.newParcelLayerForm.controls).forEach((field) => {
+                const control = this.newParcelLayerForm.get(field);
+                control.markAsTouched({ onlySelf: true });
+            });
+            return;
+        }
+
+        this.isLoadingSubmit = true;
+        this.parcelService.geographiesGeographyIDUploadParcelGdbPost(this.geographyID, this.gdbInputFile).subscribe(
+            (response) => {
+                this.isLoadingSubmit = false;
+                this.router.navigate(["../review-parcels"], { relativeTo: this.route });
+            },
+            (error) => {
+                this.alertService.pushAlert(new Alert("Failed to upload GDB! If available, error details are above.", AlertContext.Danger));
+                // this.apiService.handleError(error);
+                this.isLoadingSubmit = false;
+            }
+        );
+    }
+}

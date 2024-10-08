@@ -1,0 +1,126 @@
+@use "/src/scss/abstracts" as *;
+
+.ng-select {
+    .ng-select-container {
+        .ng-value-container {
+            height: 100%;
+            input[type="text"] {
+                max-height: 36px;
+            }
+        }
+    }
+}
+
+#currentWaterAccount {
+    .ngx-dropdown-list-container {
+        padding: 0;
+
+        @include desktop-small {
+            width: 400px;
+            top: 2rem !important;
+        }
+
+        .search-container {
+            padding: 1rem;
+            margin-top: 0;
+            display: flex;
+            flex-direction: column;
+
+            label {
+                text-transform: none;
+                letter-spacing: none;
+                color: $black;
+                font-size: $type-size-050;
+                font-weight: bold;
+                text-transform: uppercase;
+                padding: 0 0 0.25rem 0;
+                position: static;
+                top: unset;
+                left: unset;
+                order: -1;
+                transform: none;
+            }
+
+            input {
+                padding: 0.5rem 1rem;
+                border: 1px solid rgba($black, 0.1);
+                border-radius: 2rem;
+                height: auto;
+                box-sizing: border-box;
+                font-family: inherit;
+                font-size: $type-size-150;
+
+                &:active,
+                &:focus {
+                    border: 1px solid rgba($black, 0.1);
+                }
+            }
+        }
+
+        hr {
+            margin: 0;
+        }
+
+        .available-items,
+        .selected-items {
+            margin: 0;
+        }
+
+        .selected-items {
+            display: none;
+        }
+
+        .selected-item {
+            border-top: 1px solid rgba($black, 0.1);
+            line-height: 1em;
+            padding: 1rem 1rem 0.875rem 1rem;
+            margin: 0;
+            background: rgba($primary, 0.1);
+
+            .switcher-header {
+                display: flex;
+                align-items: center;
+                gap: 0 0.5rem;
+
+                &:before {
+                    display: block;
+                    font-family: "Font Awesome 5 Free";
+                    content: "\f057";
+                    color: $black;
+                }
+            }
+        }
+
+        .available-item {
+            line-height: 1em;
+            padding: 1rem 1rem 0.875rem 1rem;
+            margin: 0;
+            border-bottom: 1px solid rgba($black, 0.1);
+            color: $primary;
+            transition: all 100ms ease;
+
+            &:hover {
+                background: $primary;
+
+                .switcher {
+                    &-name {
+                        color: $white;
+                    }
+
+                    &-id {
+                        color: $white;
+                    }
+
+                    &-geography {
+                        background: $white;
+                        color: $primary;
+                    }
+                }
+            }
+
+            & + .switcher-no-results {
+                display: none;
+            }
+        }
+    }
+}

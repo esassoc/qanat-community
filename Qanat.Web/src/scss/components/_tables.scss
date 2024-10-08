@@ -1,0 +1,62 @@
+@use "/src/scss/abstracts" as *;
+
+.table {
+    width: 100%;
+    font-size: $type-size-200;
+    border: 1px solid $gray-light;
+    border-radius: $spacing-200;
+    border-collapse: separate;
+
+    thead {
+        th {
+            text-align: left;
+            background: $primary;
+            color: $white;
+            padding: 1rem 0.75rem;
+            vertical-align: middle;
+            &:first-child {
+                border-radius: $spacing-200 0 0 0;
+            }
+            &:last-child {
+                border-radius: 0 $spacing-200 0 0;
+            }
+        }
+    }
+
+    tbody {
+        td {
+            padding: 1rem 0.75rem;
+            vertical-align: middle;
+        }
+
+        tr {
+            & > td:first-of-type {
+                font-weight: bold;
+            }
+
+            & + tr {
+                td {
+                    border-top: 1px solid rgba($black, 0.1);
+                }
+            }
+        }
+
+        tr:nth-of-type(even) {
+            background: rgba($primary, 0.05);
+        }
+    }
+
+    a {
+        text-decoration: underline;
+    }
+
+    &-responsive {
+        overflow-x: auto;
+        box-shadow: 0px 2px 8px 0px #0000001a;
+        border-radius: $spacing-200;
+    }
+
+    &-max-height {
+        max-height: 500px;
+    }
+}

@@ -1,0 +1,27 @@
+<div class="input-card mb-3 {{ colorScheme }}" [class.selected]="selected" (click)="onCardSelected()">
+    <div class="delete-button flex-end">
+        <div delete-icon>
+            <i class="fas fa-times-circle delete-icon" (click)="onDelete()" style="cursor: pointer"></i>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <ng-content select="[card-header]"></ng-content>
+    </div>
+
+    <div class="mb-3">
+        <ng-content select="[card-input]"></ng-content>
+    </div>
+
+    <div class="copy copy-4 lat-lng">
+        <i class="fas fa-map-marker-alt"></i>
+
+        <div>
+            <b>Latitude:</b>
+            {{ latitude | number: "1.5-5" }}
+            <br />
+            <b>Longitude:</b>
+            {{ longitude | number: "1.5-5" }}
+        </div>
+    </div>
+</div>

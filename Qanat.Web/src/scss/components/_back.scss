@@ -1,0 +1,20 @@
+@use "/src/scss/abstracts" as *;
+.back {
+    padding-bottom: 0.75rem;
+
+    &__link {
+        display: inline-block;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-size: $type-size-100;
+        color: $primary;
+
+        &:before {
+            content: "← ";
+        }
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+}

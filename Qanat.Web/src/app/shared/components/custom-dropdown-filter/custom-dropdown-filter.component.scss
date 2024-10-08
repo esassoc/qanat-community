@@ -1,0 +1,66 @@
+@use "/src/scss/abstracts" as *;
+
+$qanat-primary: #41bad9;
+$border-gray: #bdc3c7;
+$background-gray: #d3d0c5;
+$qanat-yellow: #f6d992;
+$filter-option-hover: #f1f1f1;
+
+#filter-select-buttons {
+    background-color: #f1f5f9;
+    color: $black;
+    border: 1px solid rgba($black, 0.2);
+    padding: 0.25rem;
+    border-radius: 4px;
+    overflow: hidden;
+    font-weight: bold;
+    display: flex;
+    gap: 0 0.5rem;
+    align-items: center;
+
+    input {
+        display: none;
+
+        &:checked + label {
+            background: $white;
+            color: $black;
+            font-weight: bold;
+            box-shadow: 0 0 8px rgba($black, 0.1);
+            border: 1px solid rgba($black, 0.2);
+            line-height: 14px;
+        }
+    }
+
+    label {
+        padding: 0.5rem 0;
+        margin: 0;
+        min-height: 2rem;
+        height: 2rem;
+        flex-basis: 50%;
+        min-width: 6rem;
+        text-align: center;
+        border-radius: 3px;
+        line-height: 16px;
+        color: #64758b;
+    }
+}
+
+#filter-options {
+    background-color: #fff;
+    border: 1px solid rgba($black, 0.2);
+    max-height: 125px;
+    overflow: auto;
+    border-radius: 4px;
+
+    label.filter-option {
+        margin: 0;
+        display: flex;
+        align-items: center;
+        background-color: $white;
+        font-size: $type-size-150;
+
+        &:hover {
+            background-color: #f1f5f9;
+        }
+    }
+}

@@ -1,0 +1,13 @@
+@use "/src/scss/abstracts" as *;
+
+.name-tag {
+    padding: 0.4rem 0.75rem 0.25rem 0.75rem;
+    font-size: $type-size-100;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    text-align: center;
+    font-weight: bold;
+    color: $white;
+    border-radius: 50px;
+    white-space: nowrap;
+}

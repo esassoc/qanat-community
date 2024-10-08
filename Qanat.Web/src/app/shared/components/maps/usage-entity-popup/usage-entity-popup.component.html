@@ -1,0 +1,32 @@
+<div class="popup-wrapper" [loadingSpinner]="{ isLoading, loadingHeight: 225 }">
+    <ng-container *ngIf="data$ | async as data">
+        <div class="popup-title">
+            <h2>Field: {{ data.UsageEntityName }}</h2>
+        </div>
+
+        <div class="popup-body">
+            <div>
+                <div>
+                    Field Area (Acres):
+                    {{ data.Area | number: "1.3-3" }}
+                </div>
+                <div>
+                    Water Account:
+                    <a [routerLink]="['/water-dashboard/water-accounts', data.WaterAccountID]">
+                        {{ data.WaterAccountName }}
+                    </a>
+                </div>
+                <div>
+                    Parcel:
+                    <a [routerLink]="['/water-dashboard/parcels', data.ParcelID]">
+                        {{ data.ParcelNumber }}
+                    </a>
+                </div>
+                <div>
+                    Crops:
+                    <strong>{{ data.CropNames.join(", ") }}</strong>
+                </div>
+            </div>
+        </div>
+    </ng-container>
+</div>

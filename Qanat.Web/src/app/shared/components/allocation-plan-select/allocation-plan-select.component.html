@@ -1,0 +1,45 @@
+<div *ngIf="allocationPlansDescription$ | async as allocationPlanDescription" class="copy copy-2 copy-user-entered mb-4" [innerHtml]="allocationPlanDescription"></div>
+
+<div *ngIf="allocationPlans?.length > 0; else noAllocationPlansAvailable">
+    <div class="mb-4">
+        <ng-container *ngIf="waterTypes">
+            <label class="field-label">Water Type</label>
+            <button-group>
+                <button *ngFor="let waterType of waterTypes" (click)="changeSelectedWaterType(waterType)" [class.active]="selectedWaterType == waterType">
+                    {{ waterType.WaterTypeName }}
+                </button>
+            </button-group>
+        </ng-container>
+
+        <ng-container *ngIf="showZoneToggle && availableAllocationPlans">
+            <label class="field-label mt-4">{{ zoneGroupName }}</label>
+            <button-group>
+                <a
+                    [routerLink]="[allocationPlan.WaterTypeSlug, allocationPlan.ZoneSlug]"
+                    routerLinkActive="active"
+                    [routerLinkActiveOptions]="{ exact: true }"
+                    *ngFor="let allocationPlan of availableAllocationPlans">
+                    {{ allocationPlan.ZoneName }}
+                </a>
+            </button-group>
+        </ng-container>
+    </div>
+
+    <router-outlet #allocationPlanOutletRef="outlet"></router-outlet>
+
+    <ng-container *ngIf="!allocationPlanOutletRef.isActivated">
+        <div class="no-allocation-plan">
+            <p>
+                <strong><em>No Allocation Plan Selected</em></strong>
+            </p>
+        </div>
+    </ng-container>
+</div>
+
+<ng-template #noAllocationPlansAvailable>
+    <div class="no-allocation-plan">
+        <p>
+            <strong><em>No Allocation Plans Currently Available</em></strong>
+        </p>
+    </div>
+</ng-template>

@@ -1,0 +1,33 @@
+.small {
+    width: 300px;
+    max-width: 30%;
+}
+
+.medium {
+    width: 540px;
+    max-width: 50%;
+}
+
+.large {
+    width: 1090px;
+    max-width: 90%;
+}
+
+.extra-large {
+    width: 1480px;
+    max-width: 90%;
+}
+
+:host.not-top-layer {
+    &::before {
+        content: "";
+        position: fixed;
+        inset: 0px;
+        background: rgba(0, 0, 0, 0.1);
+        z-index: 2;
+    }
+}
+
+.overflow-visible {
+    overflow: visible;
+}

@@ -1,0 +1,39 @@
+<page-header icon="WaterDropFilled" [templateRight]="templateRight"></page-header>
+<ng-template #templateRight>
+    <name-tag name="enabled" color="#ffa62b" title="{{ hoverText }}"></name-tag>
+</ng-template>
+
+<div class="page-body">
+    <app-alert-display></app-alert-display>
+
+    <div class="card custom-water-types">
+        <div class="card-header">
+            <h3 class="card-title">Custom Water Supply Types</h3>
+        </div>
+
+        <div class="card-body">
+            <div class="inline-help mb-4">
+                <div class="icon">
+                    <i class="fa fa-info-circle"></i>
+                </div>
+
+                <div class="copy copy-3">
+                    <p>
+                        Use this page to configure the different types of water supply managed by the system. You can set the available water for each supply type using the Create
+                        Water Transactions editors.
+                    </p>
+                </div>
+            </div>
+
+            <water-types-configure [waterTypes]="waterTypes" [currentUser]="currentUser" [geographyID]="geographyID"></water-types-configure>
+        </div>
+
+        <div class="card-footer flex-end">
+            <button type="submit" class="btn btn-primary" [disabled]="isLoadingSubmit" (click)="saveWaterTypes()">
+                <span *ngIf="isLoadingSubmit" class="fa fa-spinner loading-spinner"></span>
+                Save
+            </button>
+            <a class="btn btn-primary-outline" routerLink="/configure/">Cancel</a>
+        </div>
+    </div>
+</div>

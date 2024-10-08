@@ -1,0 +1,12 @@
+<div class="faq">
+    <div class="faq__question" [expandCollapse]="answer">
+        <h3 [highlight]="highlightText">
+            {{ faq.QuestionText }}
+        </h3>
+        <icon icon="AngleDown"></icon>
+    </div>
+
+    <div class="faq__answer copy copy-2 copy-user-entered" #answer>
+        <div [innerHTML]="faq.AnswerText" [highlight]="highlightText"></div>
+    </div>
+</div>

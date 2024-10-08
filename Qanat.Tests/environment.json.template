@@ -1,0 +1,17 @@
+{
+  "sqlConnectionString": "#{sqlConnectionString}#",
+  "restoreBuildForTests": true,
+  "bacpacFilePath": "#{Pipeline.Workspace}#/bacpac/#{databaseName}#.bacpac",
+  "dacpacFilePath": "#{Pipeline.Workspace}#/Database/Qanat.Database.dacpac",
+
+  "OpenETApiBaseUrl": "https://openet-api.org",
+  "OpenETApiKey": "#{openETApiKey}#",
+
+  //Google Cloud
+  "googleProjectID": "#{googleProjectID}#",
+  "googleCloudPrivateKeyID": "#{googleCloudPrivateKeyID}#",
+  "googleCloudPrivateKey": "#{googleCloudPrivateKey}#",
+  "googleClientEmail": "#{googleClientEmail}#",
+  "googleClientID": "#{googleClientID}#",
+  "googleClientCertURL": "#{googleClientCertURL}#"
+}

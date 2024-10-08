@@ -1,0 +1,33 @@
+<div class="full-width-page">
+    <page-header [customRichTextTypeID]="customRichTextID" icon="ChatBubble"></page-header>
+
+    <div class="page-body grid-12">
+        <app-alert-display></app-alert-display>
+
+        <div class="search-container">
+            <form-field [formControl]="searchFormControl" [type]="FormFieldType.Text" [placeholder]="'Search FAQs'"></form-field>
+            <button *ngIf="searchFormControl.value" class="clear" (click)="clearSearch()">
+                <i class="fa fa-times-circle"></i>
+                Clear
+            </button>
+        </div>
+
+        <div class="faqs-list">
+            <ng-container *ngIf="frequentlyAskedQuestions$ | async; else loading">
+                <ng-container *ngIf="faqsToDisplay$ | async as faqsToDisplay">
+                    <ng-container *ngIf="faqsToDisplay.length < 1">
+                        <em>
+                            There are no FAQs to display.
+                            <a *ngIf="searchFormControl.value" href="javascript:void(0);" (click)="clearSearch()"> Clear my search terms </a>
+                        </em>
+                    </ng-container>
+
+                    <frequently-asked-question-display [highlightText]="searchTermDebounced" *ngFor="let faq of faqsToDisplay" [faq]="faq"></frequently-asked-question-display>
+                </ng-container>
+            </ng-container>
+            <ng-template #loading>
+                <div [loadingSpinner]="{ isLoading: true, loadingHeight: 300 }"></div>
+            </ng-template>
+        </div>
+    </div>
+</div>

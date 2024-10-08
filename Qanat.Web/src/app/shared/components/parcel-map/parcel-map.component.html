@@ -1,0 +1,3 @@
+<div id="{{ mapID }}" class="location-card" [style.height]="mapHeight">
+    <gsa-boundaries *ngIf="layerControl" [map]="map" [layerControl]="layerControl" [geographyID]="geographyID" [displayOnLoad]="displayGSABoundaryOnLoad"></gsa-boundaries>
+</div>

@@ -1,0 +1,166 @@
+<div class="grid-12">
+    <app-alert-display></app-alert-display>
+</div>
+
+<div *ngIf="waterAccountUsers$ | async">
+    <page-header
+        *ngIf="waterAccount"
+        [pageTitle]="'#' + waterAccount.WaterAccountNumber"
+        [templateTitleAppend]="templateTitleAppend"
+        [templateRight]="templateRight"
+        icon="WaterAccounts"
+        preTitle="Users & Settings">
+        <ng-template #templateTitleAppend>
+            <span class="water-account-name" *ngIf="waterAccount.WaterAccountName?.length > 0" title="{{ waterAccount.WaterAccountName }}">
+                {{ waterAccount.WaterAccountName }}
+            </span>
+            <name-tag
+                *ngIf="allocationPlans?.length > 0"
+                [name]="allocationPlans[0].ZoneName"
+                [color]="allocationPlans[0].ZoneColor"
+                [routerLink]="[
+                    '/geographies',
+                    waterAccount.Geography.GeographyName.toLowerCase(),
+                    'allocation-plans',
+                    allocationPlans[0].WaterTypeSlug,
+                    allocationPlans[0].ZoneSlug
+                ]"
+                class="zone-tag"
+                title="Allocation Plan Zone"></name-tag>
+        </ng-template>
+        <ng-template #templateRight>
+            <button routerLink="/water-dashboard/water-accounts/request-changes" class="btn btn-primary-outline">Request Water Account Changes</button>
+        </ng-template>
+    </page-header>
+    <div class="page-body grid-12">
+        <div class="card g-col-12">
+            <div class="card-header flex-between">
+                <h3 class="card-title">Contact Info</h3>
+            </div>
+
+            <div class="card-body">
+                <key-value-pair-list class="g-col-6">
+                    <key-value-pair>
+                        <ng-container key>Water Account Name</ng-container>
+                        <ng-container keyValue>
+                            <div>{{ waterAccount?.WaterAccountName }}</div>
+                            <em *ngIf="!waterAccount?.WaterAccountName" class="text-muted"> Not Available </em>
+                        </ng-container>
+                    </key-value-pair>
+                    <key-value-pair>
+                        <ng-container key>Contact Name</ng-container>
+                        <ng-container keyValue>
+                            <div>{{ waterAccount?.ContactName }}</div>
+                            <em *ngIf="!waterAccount?.ContactName" class="text-muted"> Not Available </em>
+                        </ng-container>
+                    </key-value-pair>
+                    <key-value-pair>
+                        <ng-container key>Contact Address</ng-container>
+                        <ng-container keyValue>
+                            <div>{{ waterAccount?.ContactAddress }}</div>
+                            <em *ngIf="!waterAccount?.ContactAddress" class="text-muted"> Not Available </em>
+                        </ng-container>
+                    </key-value-pair>
+                    <key-value-pair>
+                        <ng-container key>Notes</ng-container>
+                        <ng-container keyValue>
+                            <div>{{ waterAccount?.Notes }}</div>
+                            <em *ngIf="!waterAccount?.Notes" class="text-muted">Not Available</em>
+                        </ng-container>
+                    </key-value-pair>
+                </key-value-pair-list>
+            </div>
+            <div class="card-footer" *ngIf="isCurrentUserAnAccountHolder || isCurrentUserGeographyManager || currentUser.Role.RoleID === RoleEnum.SystemAdmin">
+                <div>
+                    <icon icon="Info"></icon>
+                    <a (click)="updateInfoModal(waterAccount.WaterAccountID)">
+                        <!--MK 7/11 - Span is needed here so we don't get an underlined space. Current prettier config does not respect html whitespace.-->
+                        <span>Update Contact Info</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="card g-col-12">
+            <div class="card-header flex-between">
+                <h3 class="card-title">Users</h3>
+                <button
+                    class="btn btn-secondary"
+                    *ngIf="isCurrentUserAnAccountHolder || isCurrentUserGeographyManager || currentUser.Role.RoleID === RoleEnum.SystemAdmin"
+                    (click)="inviteUserToWaterAccountModal(waterAccount)">
+                    + Add User
+                </button>
+            </div>
+
+            <div class="card-body">
+                <div class="copy copy-2 pb-4">
+                    <p>
+                        Invite users to be added to your water account. Enter their email address, set their role-level, and send them an email with an invite link to easily join
+                        this Water Account. Users can be added as either:
+                    </p>
+
+                    <ul>
+                        <li>
+                            <strong>Account Holder</strong>
+                            : Full permissions to all features and functionality in the Groundwater Accounting Platform, including the ability to modify data and manage Water
+                            Accounts (and its users).
+                        </li>
+                        <li>
+                            <strong>Viewer</strong>
+                            : Read-only access only to Water Account data.
+                        </li>
+                    </ul>
+                </div>
+                <div class="card g-col-12 user-card" *ngFor="let user of users">
+                    <div
+                        class="card-header grid-12"
+                        [ngClass]="{
+                            'account-holder': user.WaterAccountRole.WaterAccountRoleID == WaterAccountRoleEnum.WaterAccountHolder
+                        }">
+                        <div class="g-col-5 user-icon-name-email">
+                            <div>
+                                <icon icon="User"></icon>
+                            </div>
+                            <div class="user-name-email">
+                                <ng-container *ngIf="user.User.RoleID != RoleEnum.PendingLogin; else pending">
+                                    <h3>
+                                        {{ user.User.FullName }}
+                                    </h3>
+                                    {{ user.User.Email }}
+                                </ng-container>
+                                <ng-template #pending>
+                                    <div class="pending-invite">
+                                        {{ user.User.Email }}
+                                    </div>
+                                </ng-template>
+                            </div>
+                        </div>
+                        <div class="g-col-5">
+                            {{ user.WaterAccountRole.WaterAccountRoleDisplayName }}
+                        </div>
+                        <div class="g-col-2 date-column">
+                            <ng-container *ngIf="user.User.RoleID != RoleEnum.PendingLogin; else pendingDate"> Date Added: {{ user.ClaimDate | date: "MM/dd/yyyy" }} </ng-container>
+                            <ng-template #pendingDate>
+                                <em>Pending</em>
+                            </ng-template>
+                        </div>
+                    </div>
+
+                    <div class="card-footer" *ngIf="isCurrentUserAnAccountHolder || isCurrentUserGeographyManager || currentUser.Role.RoleID === RoleEnum.SystemAdmin">
+                        <div>
+                            <icon icon="Users"></icon>
+                            <a (click)="updateUserWaterAccountRoleModal(user)">Update Role</a>
+                        </div>
+                        <div *ngIf="user.User.RoleID == RoleEnum.PendingLogin">
+                            <icon icon="Resend"></icon>
+                            <a (click)="resendUserInviteConfirmation(user)">Resend Email</a>
+                        </div>
+                        <div>
+                            <icon icon="Delete" class="remove-user-icon"></icon>
+                            <a (click)="removeUserFromWaterAcountComfirmation(user)">Remove User</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

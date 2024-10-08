@@ -1,0 +1,6 @@
+﻿CREATE TABLE dbo.FrequentlyAskedQuestionFaqDisplayLocationType(
+	FrequentlyAskedQuestionFaqDisplayLocationTypeID int NOT NULL IDENTITY(1,1) CONSTRAINT PK_FrequentlyAskedQuestionFaqDisplayLocationType_FrequentlyAskedQuestionFaqDisplayLocationTypeID PRIMARY KEY,
+	FrequentlyAskedQuestionID int NOT NULL constraint FK_FrequentlyAskedQuestionFaqDisplayLocationType_FrequentlyAskedQuestion_FrequentlyAskedQuestionID Foreign key references dbo.FrequentlyAskedQuestion(FrequentlyAskedQuestionID) ON DELETE CASCADE,
+	FaqDisplayLocationTypeID int NOT NULL constraint FK_FrequentlyAskedQuestionFaqDisplayLocationType_FaqDisplayLocationType_FaqDisplayLocationTypeID Foreign key references dbo.FaqDisplayLocationType(FaqDisplayLocationTypeID),
+	SortOrder int NOT NULL
+);

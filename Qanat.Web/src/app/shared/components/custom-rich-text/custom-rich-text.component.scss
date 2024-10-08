@@ -1,0 +1,50 @@
+.hoverEditButton {
+    position: absolute;
+    right: 5px;
+    top: -10px;
+    z-index: 1;
+}
+.hoverEditButton a.btn-rio {
+    background-color: gray;
+    color: white;
+}
+.hoverEmptySpace {
+    width: 100%;
+    height: 100%;
+}
+.customRichTextContent {
+    background-color: inherit;
+    -ms-transition: all 100ms ease-out;
+    -o-transition: all 100ms ease-out;
+    -webkit-transition: all 100ms ease-out;
+    transition: all 100ms ease-out;
+
+    min-height: 20rem;
+    border: 2px dashed transparent;
+    border-radius: 8px;
+}
+
+.customRichTextContent.editable:hover {
+    background-color: #d3d3d3;
+    background-color: rgba(211, 211, 211, 0.2);
+    border: 2px dashed rgba(#354968, 0.5);
+}
+
+.customRichTextContent .hoverEditButton {
+    visibility: hidden;
+    -ms-opacity: 0;
+    opacity: 0;
+    -ms-transition: all 100ms ease-out;
+    -o-transition: all 100ms ease-out;
+    -webkit-transition: all 100ms ease-out;
+    transition: all 100ms ease-out;
+}
+.customRichTextContent:hover .hoverEditButton {
+    visibility: visible;
+    -ms-opacity: 1;
+    opacity: 1;
+}
+
+.tinyMCEFontColor {
+    color: #000;
+}

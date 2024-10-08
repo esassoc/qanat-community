@@ -1,0 +1,24 @@
+@use "/src/scss/abstracts" as *;
+
+.grid-12 {
+    display: grid;
+    gap: 2rem;
+    align-items: start;
+
+    @include desktop-medium {
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+    }
+
+    & > * {
+        grid-column: 1 / -1;
+        min-width: 0px;
+    }
+
+    @for $i from 1 through 12 {
+        & > .g-col-#{$i} {
+            @include desktop-medium {
+                grid-column: span $i;
+            }
+        }
+    }
+}

@@ -1,0 +1,19 @@
+@use "./src/scss/abstracts/colors" as *;
+
+@mixin btn-disabled {
+    &.disabled,
+    &:disabled {
+        opacity: 0.6;
+        background: $gray-light;
+        border: 1px solid $gray-default;
+        text-shadow: unset;
+        color: $gray-dark;
+
+        &:hover {
+            cursor: not-allowed;
+            background: $gray-light;
+            pointer-events: none;
+            color: $gray-dark;
+        }
+    }
+}

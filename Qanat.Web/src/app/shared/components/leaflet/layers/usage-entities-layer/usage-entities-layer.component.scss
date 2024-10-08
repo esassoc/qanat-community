@@ -1,0 +1,11 @@
+.legend {
+    display: inline-flex;
+    gap: 0.5rem;
+    align-items: center;
+    .legend-icon {
+        display: inline-flex;
+        width: 15px;
+        height: 15px;
+        border: 1px solid;
+    }
+}

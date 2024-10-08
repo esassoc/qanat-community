@@ -1,0 +1,19 @@
+@use "/src/scss/abstracts" as *;
+
+* {
+    font-family: $overpass;
+}
+h2 {
+    font-size: 23px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.large {
+    .apn {
+        font-size: $type-size-400;
+        font-weight: bold;
+        display: block;
+        transform: translateY(2px);
+    }
+}

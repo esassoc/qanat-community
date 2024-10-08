@@ -1,0 +1,7 @@
+@use "/src/scss/abstracts" as *;
+
+icon.info-icon {
+    ::ng-deep svg path {
+        fill: $teal-default;
+    }
+}

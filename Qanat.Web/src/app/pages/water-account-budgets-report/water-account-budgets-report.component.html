@@ -1,0 +1,17 @@
+<div [loadingSpinner]="{ isLoading }">
+    <page-header pageTitle="Water Account Budget Report" icon="Budget" [customRichTextTypeID]="richTextTypeID"></page-header>
+
+    <app-alert-display></app-alert-display>
+
+    <div class="grid-12 ai-fe mb-3">
+        <div class="field g-col-3">
+            <reporting-period-select
+                *ngIf="geographyID"
+                [geographyID]="geographyID"
+                [defaultDisplayYear]="selectedYear"
+                (selectionChanged)="updateReportForSelectedYear($event)"></reporting-period-select>
+        </div>
+
+        <qanat-grid [rowData]="waterAccountBudgetReports" [columnDefs]="columnDefs" downloadFileName="water-account-budgets-{{ selectedYear }}"></qanat-grid>
+    </div>
+</div>

@@ -1,0 +1,99 @@
+<div class="dashboard" *ngIf="currentUser$ | async as currentUser">
+    <ng-container *ngIf="waterAccounts$ | async as waterAccounts; else isLoadingTemplate">
+        <ng-container *ngIf="currentGeography$ | async as currentGeography">
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <a routerLink="/water-dashboard/water-accounts">
+                        <geography-logo [geographyID]="currentGeography?.GeographyID"></geography-logo>
+                    </a>
+                </div>
+                <div class="sidebar-body sticky-nav">
+                    <div class="sidebar-body__wrapper">
+                        <h3 class="sidebar-body__title">
+                            <icon icon="WaterAccounts"></icon>
+                            Water Dashboard
+                        </h3>
+
+                        <ng-container *ngIf="viewingWaterAccount; else atRootSidebar">
+                            <div class="sidebar-body__switcher" *ngIf="waterAccounts?.length > 1">
+                                <div class="water-account-switcher">
+                                    <ng-template #optionTemplate let-item="item" let-config="config">
+                                        <div class="switcher">
+                                            <div class="switcher-title">
+                                                <span class="switcher-name">
+                                                    {{ item.WaterAccountNumber }}
+                                                </span>
+                                                <span class="switcher-id" *ngIf="item.WaterAccountName"> ({{ item.WaterAccountName }}) </span>
+                                            </div>
+
+                                            <div class="switcher-meta">
+                                                <span class="switcher-geography" [title]="item.Geography.GeographyDisplayName">
+                                                    {{ item.Geography.GeographyName }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </ng-template>
+
+                                    <ng-template #selectedTemplate let-item="item" let-config="config"></ng-template>
+
+                                    <ng-template #noResults let-config="config">
+                                        <div class="switcher-no-results">
+                                            <p>No Water Accounts found.</p>
+                                        </div>
+                                    </ng-template>
+
+                                    <ng-template #dropdownButton>
+                                        <div class="switch-account">
+                                            Switch Account
+                                            <icon icon="AngleDown"></icon>
+                                        </div>
+                                    </ng-template>
+
+                                    <ngx-select-dropdown
+                                        [optionItemTemplate]="optionTemplate"
+                                        [selectedItemTemplate]="selectedTemplate"
+                                        [dropdownButtonTemplate]="dropdownButton"
+                                        [notFoundTemplate]="noResults"
+                                        id="currentWaterAccount"
+                                        [config]="waterAccountDropdownConfig"
+                                        name="currentWaterAccount"
+                                        [(ngModel)]="currentWaterAccount"
+                                        [options]="filteredWaterAccounts"
+                                        (change)="changedWaterAccount()"></ngx-select-dropdown>
+                                </div>
+                            </div>
+                        </ng-container>
+
+                        <!-- todo: do we need this? -->
+                        <ng-template #atRootSidebar>
+                            <ul class="sidebar-nav">
+                                <li class="sidebar-item">
+                                    <a [routerLink]="['./']" routerLinkActive="active" class="sidebar-link">
+                                        <icon icon="WaterAccounts"></icon>
+                                        <span class="sidebar-link__label">Water Accounts</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </ng-template>
+                    </div>
+
+                    <dashboard-menu [dashboardMenu]="dashboardMenu" [viewingDetailPage]="true"></dashboard-menu>
+                </div>
+            </aside>
+        </ng-container>
+
+        <main class="main">
+            <router-outlet #manageOutlet="outlet"></router-outlet>
+            <div *ngIf="!manageOutlet.isActivated">
+                <page-header pageTitle="Dashboard"></page-header>
+
+                <div class="page-body grid-12"></div>
+            </div>
+        </main>
+    </ng-container>
+
+    <ng-template #isLoadingTemplate>
+        <aside class="sidebar" [loadingSpinner]="{ isLoading: true }"></aside>
+        <main class="main" [loadingSpinner]="{ isLoading: true }"></main>
+    </ng-template>
+</div>

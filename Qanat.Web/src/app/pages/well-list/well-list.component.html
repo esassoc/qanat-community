@@ -1,0 +1,109 @@
+<water-dashboard-nav></water-dashboard-nav>
+
+<div class="full-width-page" *ngIf="currentUser$ | async">
+    <page-header [customRichTextTypeID]="richTextID" icon="Wells" [templateBottomRight]="templateBottomRight"></page-header>
+
+    <ng-template #templateBottomRight>
+        <button [routerLink]="['/well-registry', selectedGeography?.GeographyName.toLowerCase(), 'new']" class="btn btn-orange" [disabled]="!selectedGeography">
+            Register a Well
+        </button>
+    </ng-template>
+
+    <div class="page-body" *ngIf="waterAccountGeographies$ | async as waterAccountGeographies" [loadingSpinner]="{ isLoading: isLoading && firstLoad, loadingHeight: 700 }">
+        <ng-container *ngIf="!currentUserHasNoGeographies; else noWaterAccountsMessage">
+            <ng-container *ngIf="wells$ | async as wells">
+                <qanat-grid-header
+                    *ngIf="gridRef"
+                    [grid]="gridRef"
+                    [rowDataCount]="wells?.length"
+                    [leftAlignClearFiltersButton]="true"
+                    [disableGlobalFilter]="selectedPanel === 'Map'">
+                    <div customGridActionsCenter>
+                        <div class="button-group tab-nav">
+                            <button class="button-group__item btn-sm" [class.active]="selectedPanel === 'Grid'" (click)="toggleSelectedPanel('Grid')">Grid</button>
+                            <button class="button-group__item btn-sm" [class.active]="selectedPanel === 'Hybrid'" (click)="toggleSelectedPanel('Hybrid')">Hybrid</button>
+                            <button class="button-group__item btn-sm" [class.active]="selectedPanel === 'Map'" (click)="toggleSelectedPanel('Map')">Map</button>
+                        </div>
+                    </div>
+
+                    <div customGridActionsRight>
+                        <div class="form-field" class="geography-selector">
+                            <div class="field">
+                                <select
+                                    *ngIf="waterAccountGeographies.length > 0"
+                                    name="selectedGeographyID"
+                                    [(ngModel)]="selectedGeography"
+                                    (ngModelChange)="onGeographySelected()">
+                                    <option *ngFor="let geography of waterAccountGeographies" [ngValue]="geography">
+                                        {{ geography.GeographyName }}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </qanat-grid-header>
+
+                <div
+                    class="grid-12 mt-3"
+                    [loadingSpinner]="{
+                        isLoading: isLoading && !firstLoad,
+                        loadingHeight: 500
+                    }">
+                    <div class="tab-nav-panel" [class.g-col-6]="selectedPanel === 'Hybrid'" [class.g-col-12]="selectedPanel === 'Grid'" [class.hidden]="selectedPanel === 'Map'">
+                        <qanat-grid
+                            height="675px"
+                            [rowData]="wells"
+                            [columnDefs]="columnDefs"
+                            [hideDownloadButton]="true"
+                            [overrideDefaultGridHeader]="true"
+                            rowSelection="single"
+                            (gridReady)="onGridReady($event)"
+                            (gridRefReady)="onGridRefReady($event)"
+                            (selectionChanged)="onGridSelectionChanged()"></qanat-grid>
+                    </div>
+
+                    <div class="tab-nav-panel" [class.g-col-6]="selectedPanel === 'Hybrid'" [class.g-col-12]="selectedPanel === 'Map'" [class.hidden]="selectedPanel === 'Grid'">
+                        <qanat-map (onMapLoad)="handleMapReady($event)" mapHeight="700px">
+                            <ng-container *ngIf="mapIsReady">
+                                <wells-layer
+                                    [wells]="wells"
+                                    [displayOnLoad]="true"
+                                    [map]="map"
+                                    (popupOpened)="onMapSelectionChanged($event)"
+                                    [layerControl]="layerControl"
+                                    [highlightedWellID]="selectedWellID"></wells-layer>
+                            </ng-container>
+                        </qanat-map>
+                    </div>
+                </div>
+            </ng-container>
+        </ng-container>
+
+        <water-dashboard-management-actions-panel *ngIf="currentUserHasManagerPermissionsForSelectedGeography">
+            <a routerLink="{{ selectedGeography.GeographyName.toLowerCase() }}/review-submitted-wells">
+                <icon icon="Review"></icon>
+                <span>Review Submitted Wells</span>
+            </a>
+
+            <a routerLink="{{ selectedGeography.GeographyName.toLowerCase() }}/well-registrations">
+                <icon icon="Map"></icon>
+                <span>Well Registrations</span>
+            </a>
+
+            <a routerLink="{{ selectedGeography.GeographyName.toLowerCase() }}/reference-wells">
+                <icon icon="Budget"></icon>
+                <span>Reference Wells</span>
+            </a>
+        </water-dashboard-management-actions-panel>
+
+        <ng-template #noWaterAccountsMessage>
+            <div class="alert alert-info">
+                <div class="alert-content">
+                    <i class="fa fa-info"></i>
+                    Your user profile does not currently have access to any Wells. Claim Water Accounts to get started or contact a water manager for your geography for
+                    assistance.
+                </div>
+            </div>
+        </ng-template>
+    </div>
+</div>

@@ -1,0 +1,196 @@
+<ng-container *ngIf="well$ | async as well">
+    <page-header icon="Wells" [templateRight]="templateRight" [templateTitleAppend]="templateTitleAppend" [pageTitle]="well.WellName">
+        <ng-template #templateTitleAppend>
+            <small class="text-muted account-id">{{ well.WellID }}</small>
+        </ng-template>
+        <ng-template #templateRight>
+            <a
+                *ngIf="well.WellRegistration?.WellRegistrationID"
+                [routerLink]="['/manage', well.Geography.GeographyName.toLowerCase(), 'wells', 'well-registrations', well.WellRegistration.WellRegistrationID]"
+                target="_blank">
+                <span class="text-muted">
+                    <icon icon="ExternalLink"></icon>
+                    View Well Registration
+                </span>
+            </a>
+        </ng-template>
+    </page-header>
+    <div class="page-body grid-12">
+        <app-alert-display></app-alert-display>
+
+        <div class="card g-col">
+            <div class="card-header">
+                <h3 class="card-title">Well Details</h3>
+            </div>
+            <div class="card-body grid-12">
+                <div class="g-col-3">
+                    <dl class="kv-pair">
+                        <ng-template #notAvailable>
+                            <dd class="value"><i>Not Available</i></dd>
+                        </ng-template>
+
+                        <dt class="key">Default APN</dt>
+                        <dd class="value" *ngIf="well.Parcel; else notAvailable">
+                            <a routerLink="/manage/{{ well.Geography.GeographyName.toLowerCase() }}/parcels/{{ well.Parcel?.ParcelID }}">
+                                <icon icon="Parcels"></icon>
+                                {{ well.Parcel?.ParcelNumber }}
+                            </a>
+                        </dd>
+
+                        <dt class="key">
+                            <field-definition fieldDefinitionType="WaterAccount" [inline]="false"></field-definition>
+                        </dt>
+                        <dd class="value" *ngIf="well.Parcel?.WaterAccount; else notAvailable">
+                            <a routerLink="/manage/{{ well.Geography.GeographyName.toLowerCase() }}/water-accounts/{{ well.Parcel?.WaterAccountID }}">
+                                <icon icon="WaterAccounts"></icon>
+                                {{ well.Parcel?.WaterAccount?.WaterAccountNumber }}
+                            </a>
+                        </dd>
+
+                        <ng-container *ngIf="well.IrrigatedParcels?.length > 0">
+                            <dt class="key">Irrigated Parcels</dt>
+                            <dd class="value">
+                                <div *ngFor="let parcel of well.IrrigatedParcels">
+                                    <a routerLink="/manage/{{ well.Geography.GeographyName.toLowerCase() }}/parcels/{{ parcel?.ParcelID }}">
+                                        <icon icon="Parcels"></icon>
+                                        {{ parcel?.ParcelNumber }}
+                                    </a>
+                                </div>
+                            </dd>
+                        </ng-container>
+
+                        <dt class="key">Latitude/Longitude</dt>
+                        <dd class="value">
+                            {{ well.Latitude | number: "0.5-5" }},
+                            {{ well.Longitude | number: "0.5-5" }}
+                        </dd>
+
+                        <dt class="key">
+                            <field-definition fieldDefinitionType="WellStatus" [inline]="false"></field-definition>
+                        </dt>
+                        <dd class="value">{{ well.WellStatus.WellStatusDisplayName }}</dd>
+                    </dl>
+                </div>
+                <div class="g-col-3">
+                    <dl class="kv-pair">
+                        <dt class="key">
+                            <field-definition fieldDefinitionType="StateWCRNo" [inline]="false"></field-definition>
+                        </dt>
+                        <dd class="value">{{ well.StateWCRNumber }}</dd>
+
+                        <dt class="key">
+                            <field-definition fieldDefinitionType="CountyWellPermitNo" [inline]="false"></field-definition>
+                        </dt>
+                        <dd class="value">{{ well.CountyWellPermitNumber }}</dd>
+
+                        <dt class="key">
+                            <field-definition fieldDefinitionType="DateDrilled" [inline]="false"></field-definition>
+                        </dt>
+                        <dd class="value">{{ well.DateDrilled | date: "MM/dd/yyyy" }}</dd>
+
+                        <dt class="key">
+                            <field-definition fieldDefinitionType="WellDepth" [inline]="false"></field-definition>
+                        </dt>
+                        <dd class="value">{{ well.WellDepth }}</dd>
+
+                        <dt class="key">Well Registration</dt>
+                        <dd class="value">
+                            <a routerLink="/manage/{{ well.Geography.GeographyName.toLowerCase() }}/wells/well-registrations/{{ well.WellRegistration.WellRegistrationID }}">
+                                {{ well.WellRegistration.ApprovalDate | date: "MM/dd/yyyy" }}
+                            </a>
+                        </dd>
+
+                        <dt class="key">Notes</dt>
+                        <dd class="value">{{ well.Notes }}</dd>
+                    </dl>
+                </div>
+
+                <div *ngIf="wellLocation$ | async as wellLocation" class="g-col-6 map-container">
+                    <qanat-map (onMapLoad)="handleMapReady($event)" mapHeight="400px" [showLayerControl]="false">
+                        <ng-container *ngIf="mapIsReady">
+                            <highlighted-parcels-layer
+                                *ngIf="highlightedParcelIDs"
+                                [displayOnLoad]="true"
+                                [map]="map"
+                                controlTitle="Irrigated Parcel(s)"
+                                [geographyID]="well.Geography.GeographyID"
+                                [highlightedParcelIDs]="highlightedParcelIDs"
+                                [layerControl]="layerControl"></highlighted-parcels-layer>
+                            <wells-layer [wells]="[wellLocation]" [displayOnLoad]="true" [map]="map" [layerControl]="layerControl"></wells-layer>
+                        </ng-container>
+                    </qanat-map>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div>
+                    <icon icon="Info"></icon>
+                    <a (click)="updateWellInfoModal()">Update Well Info</a>
+                </div>
+
+                <div>
+                    <icon icon="Map"></icon>
+                    <a routerLink="update-location">Update Well Location</a>
+                </div>
+
+                <div>
+                    <icon icon="Parcels"></icon>
+                    <a routerLink="update-irrigated-parcels">Update Irrigated Parcels</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card g-col" *ngIf="well.MetersEnabled" id="meter">
+            <div class="card-header">
+                <h3 class="card-title">Meter</h3>
+            </div>
+            <ng-container *ngIf="well.Meter; else noWellMeter">
+                <div class="card-body grid-12">
+                    <div class="g-col-6">
+                        <dl class="kv-pair">
+                            <dt class="key">
+                                <field-definition fieldDefinitionType="SerialNumber" [inline]="false"></field-definition>
+                            </dt>
+                            <dd class="value">{{ well.Meter.SerialNumber }}</dd>
+
+                            <dt class="key">Meter Status</dt>
+                            <dd class="value">
+                                {{ well.Meter.MeterStatus.MeterStatusDisplayName }}
+                            </dd>
+                        </dl>
+                    </div>
+                    <div class="g-col-6">
+                        <dl class="kv-pair">
+                            <dt class="key">Device Name</dt>
+                            <dd class="value">{{ well.Meter.DeviceName }}</dd>
+
+                            <dt class="key">Make</dt>
+                            <dd class="value">{{ well.Meter.Make }}</dd>
+
+                            <dt class="key">Model Number</dt>
+                            <dd class="value">{{ well.Meter.ModelNumber }}</dd>
+                        </dl>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div>
+                        <icon icon="Info"></icon>
+                        <a (click)="updateMeterModal()">Update Meter Info</a>
+                    </div>
+
+                    <div>
+                        <icon icon="Delete" class="red"></icon>
+                        <a (click)="removeWellMeterModal()">Remove Meter from Well</a>
+                    </div>
+                </div>
+            </ng-container>
+            <ng-template #noWellMeter>
+                <div class="card-body">
+                    <div class="no-well-meter">
+                        <p>No meter assigned to well.</p>
+                        <button class="btn btn-primary" (click)="addWellMeterModal()">Add Meter to Well</button>
+                    </div>
+                </div>
+            </ng-template>
+        </div>
+    </div>
+</ng-container>

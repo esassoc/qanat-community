@@ -1,0 +1,8 @@
+.angular
+.vscode
+bin
+docker-compose
+obj
+Properties
+src/assets/**
+src/app/shared/generated/**

@@ -1,0 +1,24 @@
+.leaflet-draw-section a {
+    &:hover {
+        color: white;
+        text-decoration: none;
+    }
+}
+
+.leaflet-control-layers-close {
+    color: #0078a8 !important;
+    border: none;
+    background: none;
+    cursor: pointer;
+    float: right;
+    display: none;
+}
+
+.leaflet-control-layers-expanded .leaflet-control-layers-close {
+    display: block;
+}
+
+// for the get action boundaries
+.selecting-location .leaflet-interactive.boundary {
+    cursor: crosshair !important;
+}

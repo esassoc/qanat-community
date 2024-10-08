@@ -1,0 +1,38 @@
+<div id="{{ mapID }}" class="location-card mb-4" style="height: 500px"></div>
+
+<div class="stats grid-12 mb-4">
+    <scenario-output-stat
+        class="g-col-4"
+        [statTitle]="'Average change in water level'"
+        [value]="averageChangeInWaterLevel"
+        [units]="'feet'"
+        [description]="'As of the end of the model run (' + (getActionResult.ModelRunEndDate | date) + ')'"></scenario-output-stat>
+
+    <scenario-output-stat
+        class="g-col-4"
+        [statTitle]="'Total Change in Aquifer Storage'"
+        [value]="totalChangeInAquiferStorage"
+        [units]="'ac-ft'"
+        [description]="'Change in the aquifer(s) volume of water.'"></scenario-output-stat>
+
+    <ng-container [ngSwitch]="getAction.Scenario.ScenarioID">
+        <scenario-output-stat
+            *ngSwitchCase="ScenarioEnum.AddaWell"
+            class="g-col-4"
+            [statTitle]="'Total change in pumping'"
+            [value]="totalChangeInPumping"
+            [units]="'ac-ft'"
+            [description]="'As of the end of the model run (' + (getActionResult.ModelRunEndDate | date) + ')'"></scenario-output-stat>
+
+        <scenario-output-stat
+            *ngSwitchCase="ScenarioEnum.Recharge"
+            class="g-col-4"
+            [statTitle]="'Total change in recharge'"
+            [value]="totalChangeInRecharge"
+            [units]="'ac-ft'"
+            [description]="'As of the end of the model run (' + (getActionResult.ModelRunEndDate | date) + ')'"></scenario-output-stat>
+    </ng-container>
+</div>
+
+<h2 class="mb-3">Water Levels</h2>
+<time-series-output-chart [getActionResult]="getActionResult" [getAction]="getAction" [(selectedLabel)]="selectedMarker"></time-series-output-chart>

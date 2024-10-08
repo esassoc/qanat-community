@@ -1,0 +1,48 @@
+@use "/src/scss/abstracts" as *;
+.button-group-component {
+    &.wrap #buttonGroup {
+        overflow-x: auto;
+        flex-wrap: wrap;
+    }
+    #buttonGroup {
+        display: inline-flex;
+        border-radius: 0.25rem;
+        padding: 0.25rem;
+        border: 1px solid rgba($black, 0.1);
+        gap: 0.125rem;
+        flex-wrap: nowrap;
+        overflow-x: scroll;
+        align-content: center;
+        align-items: center;
+
+        > * {
+            white-space: nowrap;
+            display: block;
+            padding: 0.75rem 1rem 0.5rem;
+            line-height: 0.875em;
+            color: $gray-default;
+            background-color: $white;
+            font-weight: bold;
+            transition: all 200ms ease;
+            border-radius: 0.25rem;
+            border: 1px solid;
+            border-color: transparent;
+
+            &:hover {
+                cursor: pointer;
+                color: $white;
+                background-color: $primary;
+            }
+
+            &.active {
+                background: $primary;
+                color: $white;
+                cursor: pointer;
+
+                &:hover {
+                    color: $white;
+                }
+            }
+        }
+    }
+}

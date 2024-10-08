@@ -1,0 +1,12 @@
+@use "/src/scss/abstracts" as *;
+
+.scenario-planner-dashboard {
+    .sidebar-scenarios {
+        .sidebar-header {
+            padding-bottom: 2rem;
+        }
+        .model-nav-header {
+            padding-top: 3rem;
+        }
+    }
+}

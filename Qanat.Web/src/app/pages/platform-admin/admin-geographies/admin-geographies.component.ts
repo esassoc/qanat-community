@@ -1,0 +1,100 @@
+import { Component, OnInit } from "@angular/core";
+import { ActivatedRoute, Router } from "@angular/router";
+import { ColDef } from "ag-grid-community";
+import { Observable, map, tap } from "rxjs";
+import { UtilityFunctionsService } from "src/app/shared/services/utility-functions.service";
+import { GeographyService } from "src/app/shared/generated/api/geography.service";
+import { MonitoringWellService } from "src/app/shared/generated/api/monitoring-well.service";
+import { GeographyBoundarySimpleDto, GeographyDto } from "src/app/shared/generated/model/models";
+import { Alert } from "src/app/shared/models/alert";
+import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
+import { AlertService } from "src/app/shared/services/alert.service";
+import { QanatGridComponent } from "src/app/shared/components/qanat-grid/qanat-grid.component";
+import { NgIf, AsyncPipe, DatePipe } from "@angular/common";
+import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
+import { AlertDisplayComponent } from "src/app/shared/components/alert-display/alert-display.component";
+
+@Component({
+    selector: "admin-geographies",
+    templateUrl: "./admin-geographies.component.html",
+    styleUrls: ["./admin-geographies.component.scss"],
+    standalone: true,
+    imports: [PageHeaderComponent, AlertDisplayComponent, NgIf, QanatGridComponent, AsyncPipe, DatePipe],
+})
+export class AdminGeographiesComponent implements OnInit {
+    public geographies$: Observable<GeographyDto[]>;
+    public geographyBoundaries$: Observable<GeographyBoundarySimpleDto[]>;
+    public lastUpdatedGSABoundariesDate: Date;
+    public isLoadingSubmit = false;
+
+    public columnDefs: ColDef[];
+    public colIDsToExclude = ["0"];
+
+    constructor(
+        private geographyService: GeographyService,
+        private alertService: AlertService,
+        private monitoringWellService: MonitoringWellService,
+        private utilityFunctionsService: UtilityFunctionsService,
+        private route: ActivatedRoute,
+        private router: Router
+    ) {}
+
+    ngOnInit(): void {
+        this.geographies$ = this.geographyService
+            .publicGeographiesGet()
+            .pipe(map((geographies) => geographies.sort((a, b) => (a.GeographyDisplayName > b.GeographyDisplayName ? 1 : -1))));
+
+        this.geographyBoundaries$ = this.geographyService
+            .publicGeographyBoundariesGet()
+            .pipe(
+                tap(
+                    (geographyBoundaries) =>
+                        (this.lastUpdatedGSABoundariesDate = geographyBoundaries.map((x) => (x.GSABoundaryLastUpdated ? new Date(x.GSABoundaryLastUpdated) : null)).sort()[0])
+                )
+            );
+
+        this.createColumnDefs();
+    }
+
+    createColumnDefs(): void {
+        this.columnDefs = [
+            { headerName: "Long Name", field: "GeographyDisplayName" },
+            { headerName: "Short Name", field: "GeographyName" },
+            this.utilityFunctionsService.createYearColumnDef("Start Year", "StartYear"),
+            this.utilityFunctionsService.createYearColumnDef("Default Display Year", "DefaultDisplayYear"),
+            { headerName: "APN Regex", field: "APNRegexPattern" },
+            { headerName: "APN Regex Display", field: "APNRegexPatternDisplay" },
+            { headerName: "Landowner Dashboard Supply Label", field: "LandownerDashboardSupplyLabel" },
+            { headerName: "Landowner Dashboard Usage Label", field: "LandownerDashboardUsageLabel" },
+            { headerName: "Coordinate System", field: "CoordinateSystem" },
+            { headerName: "Contact Email", field: "ContactEmail" },
+            this.utilityFunctionsService.createPhoneNumberColumnDef("Contact Phone", "ContactPhoneNumber"),
+            { headerName: "Is Demo Geography?", valueGetter: (params) => (params.data.IsDemoGeography ? "Yes" : "No") },
+            { headerName: "Display Usage Geometries as Field?", valueGetter: (params) => (params.data.DisplayUsageGeometriesAsField ? "Yes" : "No") },
+            this.utilityFunctionsService.createMultiLinkColumnDef("Water Managers", "WaterManagers", "UserID", "FullName", {
+                InRouterLink: "/admin/users/",
+            }),
+        ];
+    }
+
+    refreshGSABoundaries() {
+        this.isLoadingSubmit = true;
+
+        this.geographyService.geographiesGsaBoundariesPut().subscribe({
+            next: (geographyBoundaries) => {
+                this.isLoadingSubmit = false;
+                this.alertService.pushAlert(new Alert("Geography GSA boundaries successfully refreshed", AlertContext.Success));
+                this.lastUpdatedGSABoundariesDate = geographyBoundaries.map((x) => (x.GSABoundaryLastUpdated ? new Date(x.GSABoundaryLastUpdated) : null)).sort()[0];
+            },
+            complete: () => {
+                this.isLoadingSubmit = false;
+            },
+        });
+    }
+
+    triggerMonitorWellsCNRA() {
+        this.monitoringWellService.monitoringWellMeasurementsPost().subscribe((response) => {
+            this.alertService.pushAlert(new Alert("Monitoring Wells Job triggered successfully!", AlertContext.Success, true));
+        });
+    }
+}

@@ -1,0 +1,40 @@
+<page-header icon="ActivityCenter" [customRichTextTypeID]="customRichTextTypeID"></page-header>
+
+<div class="page-body">
+    <app-alert-display></app-alert-display>
+
+    <div class="grid-12 activity-options">
+        <div class="g-col-6 update-parcels">
+            <h2 class="section-title">Geography Statistics</h2>
+            <div class="copy copy-3 pt-1 pb-2">
+                <p>View high level summary statistics.</p>
+            </div>
+            <fresca-button [routerLink]="['..', 'statistics']" cssClass="btn btn-primary" iconClass=""> Geography Statistics </fresca-button>
+        </div>
+
+        <div class="g-col-6 account-suggestions">
+            <h2 class="section-title">Water Account Budgets</h2>
+            <div class="copy copy-3 pt-1 pb-2">
+                <p>View detailed reports of water use for each water account.</p>
+            </div>
+
+            <fresca-button [routerLink]="['..', 'water-account-budgets-report']" cssClass="btn btn-primary" iconClass=""> Water Account Budget </fresca-button>
+        </div>
+        <div class="g-col-6 update-parcels">
+            <h2 class="section-title">Update Parcels</h2>
+            <div class="copy copy-3 pt-1 pb-2">
+                <p>Update the parcels in the platform from a zipped Esri file.</p>
+            </div>
+            <fresca-button [routerLink]="['..', 'parcels', 'update']" cssClass="btn btn-primary" iconClass=""> Update Parcels </fresca-button>
+        </div>
+
+        <div class="g-col-6 account-suggestions">
+            <h2 class="section-title">Water Account Suggestions</h2>
+            <div class="copy copy-3 pt-1 pb-2">
+                <p>Review and approve or reject suggested water accounts.</p>
+            </div>
+
+            <fresca-button [routerLink]="['../water-accounts', 'water-account-suggestions']" cssClass="btn btn-primary" iconClass=""> Water Account Suggestions </fresca-button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,15 @@
+@mixin svg-100 {
+    svg {
+        width: 100%;
+        height: 100%;
+    }
+}
+
+@mixin svg-100-deep {
+    ::ng-deep {
+        svg {
+            width: 100%;
+            height: 100%;
+        }
+    }
+}

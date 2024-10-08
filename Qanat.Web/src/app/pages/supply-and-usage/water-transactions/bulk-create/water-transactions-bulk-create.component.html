@@ -1,0 +1,61 @@
+<page-header icon="Transactions" [customRichTextTypeID]="richTextTypeID" [templateAbove]="templateAbove" pageTitle="New Bulk Water Transaction">
+    <ng-template #templateAbove>
+        <div class="back">
+            <a routerLink="../" class="back__link">Back to Water Transactions</a>
+        </div>
+    </ng-template>
+</page-header>
+
+<div class="page-body">
+    <app-alert-display></app-alert-display>
+
+    <div class="form grid-9 mb-4">
+        <div class="field g-col-half">
+            <reporting-period-select [geographyID]="geographyID" [defaultDisplayYear]="selectedYear" (selectionChanged)="changeSelectedYear($event)"></reporting-period-select>
+        </div>
+    </div>
+    <div>
+        <qanat-grid
+            height="500px"
+            [rowData]="parcelWaterSupplyAndUsages"
+            [columnDefs]="columnDefs"
+            rowSelection="multiple"
+            [rowMultiSelectWithClick]="true"
+            (selectionChanged)="onSelectionChanged($event)"
+            [pagination]="true"
+            [paginationPageSize]="100"
+            [hideDownloadButton]="true"></qanat-grid>
+    </div>
+
+    <form class="form pt-4 mb-3 grid-9" *ngIf="model">
+        <div class="field">
+            <label class="d-block required field-label">Supply Type</label>
+            <ng-select class="form-control" name="waterType" [(ngModel)]="model.WaterTypeID" [items]="waterTypes" bindLabel="WaterTypeName" bindValue="WaterTypeID"></ng-select>
+            <field-definition fieldDefinitionType="SupplyType"></field-definition>
+        </div>
+
+        <div class="field g-col-half">
+            <label class="required field-label">Quantity (ac-ft/ac)</label>
+            <input type="number" step="1" class="form-control" name="transactionAmount" required [(ngModel)]="model.TransactionAmount" />
+        </div>
+
+        <div class="field g-col-half">
+            <label class="required field-label">Effective Date</label>
+            <input type="date" class="form-control" name="effectiveDate" required [(ngModel)]="model.EffectiveDate" />
+
+            <field-definition fieldDefinitionType="EffectiveDate"></field-definition>
+        </div>
+
+        <div class="field">
+            <label class="field-label">Comment</label>
+            <textarea class="form-control" name="userComment" required [(ngModel)]="model.UserComment"></textarea>
+        </div>
+    </form>
+</div>
+
+<div class="page-footer">
+    <fresca-button class="ml-auto" (click)="onSubmit()" [disabled]="isLoadingSubmit || noParcelsSelected">
+        <span *ngIf="isLoadingSubmit" class="fa fa-spinner loading-spinner"></span>
+        Save
+    </fresca-button>
+</div>

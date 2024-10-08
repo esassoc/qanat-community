@@ -1,0 +1,41 @@
+<div class="modal-header">
+    <h2 class="section-title">
+        <icon icon="WaterAccounts"></icon>
+        Approve Selected Suggestions
+    </h2>
+    <button type="button" class="close" (click)="close()">
+        <i class="fa fa-times-circle"></i>
+    </button>
+</div>
+
+<div class="modal-body">
+    <div class="grid-12">
+        <p>
+            Are you sure you want to approve
+            <strong>{{ modalContext.WaterAccountSuggestions.length | number }}</strong>
+            water account{{ modalContext.WaterAccountSuggestions.length == 1 ? "" : "s" }}?
+        </p>
+        <div class="g-col-6">
+            <form action="" class="form" [formGroup]="formGroup">
+                <div class="field g-col-9">
+                    <label class="field-label">Effective Year*</label>
+                    <div class="form-check">
+                        <select class="form-check-input" id="effectiveYear" formControlName="waterYearSelection">
+                            <option *ngFor="let year of availableYears" [value]="year">
+                                {{ year }}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="alert alert-danger" *ngIf="formGroup.touched && formGroup.invalid">
+                        <div *ngIf="formGroup.waterYearSelection?.errors.required">Please choose an Effective Year</div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-primary" (click)="save()" [disabled]="!formGroup.valid || isLoadingSubmit">Approve Accounts</button>
+    <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+</div>

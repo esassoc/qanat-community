@@ -1,0 +1,36 @@
+<div class="modal-header">
+    <div>
+        <h3 class="section-title">Add Water Account</h3>
+    </div>
+    <button type="button" class="close" (click)="close()">
+        <i class="fa fa-times-circle"></i>
+    </button>
+</div>
+
+<div class="modal-body" [loadingSpinner]="{ isLoading: isLoadingWaterAccounts }">
+    <form action="" class="form" [formGroup]="formGroup">
+        <div class="mb-3">
+            <span class="field-label required">Water Account</span>
+            <ngx-select-dropdown
+                [multiple]="false"
+                [config]="waterAccountDropDownConfig"
+                [formControl]="waterAccountDropDownFormControl"
+                [options]="waterAccountDropDownOptions"
+                (change)="changedWaterAccount($event)"
+                *ngIf="waterAccountDropDownOptions$ | async as waterAccountDropDownOptions"></ngx-select-dropdown>
+        </div>
+
+        <div class="mb-3" *ngIf="roleDropDownOptions$ | async as roleDropDownOptions">
+            <form-field
+                [formControl]="formGroup.controls.WaterAccountRoleID"
+                fieldLabel="Water Account Role"
+                [formInputOptions]="roleDropDownOptions"
+                [type]="FormFieldType.Select"></form-field>
+        </div>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-primary" (click)="save()" [disabled]="!formGroup.valid || isLoadingSubmit">Add Water Account</button>
+    <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+</div>
