@@ -24,6 +24,12 @@ Ensure the following software is installed:
 5. **Docker**
 6. **Microsoft SQL Server**
 7. **.NET 8 SDK**
+8. **Git Submodule**  
+   This project requires a Git submodule located at: [https://github.com/sitkatech/efcorepocogenerator](https://github.com/sitkatech/efcorepocogenerator). Please follow the readme found there to complete the setup. To properly link the git submodule please run the following command in this repository:
+
+   ```bash
+   git submodule update --init --recursive
+   ```
 
 ### Qanat API Setup
 
@@ -51,6 +57,8 @@ Ensure the following software is installed:
 
 5. **Open the solution in Visual Studio 2022:**  
    Set `docker-compose` as the startup project. Press the green play button to start the API server.
+
+> Note for external developers: You will need to generate your own build folder based on your environment and infrastructure setup. For internal ESA developers, please contact the development team for guidance.
 
 ---
 
@@ -124,6 +132,10 @@ If the project doesn't work after not working on it for a while, try the followi
   - `environment.qa.ts`
   - `environment.prod.ts`
 - In `auth.config.ts`, update the `msalconfig` section to reflect your instance's configuration details.
+
+> **Secrets**:  
+> For internal ESA developers, please contact the development team to get the appropriate secret files.  
+> For external developers, you will need to generate your own secrets according to your infrastructure setup (e.g., Azure, Google Cloud, AWS, self hosted etc.).
 
 ---
 
