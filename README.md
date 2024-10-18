@@ -58,7 +58,8 @@ Ensure the following software is installed:
 5. **Open the solution in Visual Studio 2022:**  
    Set `docker-compose` as the startup project. Press the green play button to start the API server.
 
-> Note for external developers: You will need to generate your own build folder based on your environment and infrastructure setup. For internal ESA developers, please contact the development team for guidance.
+> Note for external developers: You will need to generate your own build folder based on your environment and infrastructure setup.
+> For internal ESA developers, please contact the development team for guidance.
 
 ---
 
