@@ -24,12 +24,6 @@ Ensure the following software is installed:
 5. **Docker**
 6. **Microsoft SQL Server**
 7. **.NET 8 SDK**
-8. **Git Submodule**  
-   This project requires a Git submodule located at: [https://github.com/sitkatech/efcorepocogenerator](https://github.com/sitkatech/efcorepocogenerator). Please follow the readme found there to complete the setup. To properly link the git submodule please run the following command in this repository:
-
-   ```bash
-   git submodule update --init --recursive
-   ```
 
 ### Qanat API Setup
 
