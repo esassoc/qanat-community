@@ -34,6 +34,7 @@ import { TinyMceConfigPipe } from "./shared/pipes/tiny-mce-config.pipe";
 import { RequiredPipe } from "./shared/pipes/required.pipe";
 import { CommaJoinPipe } from "./shared/pipes/comma-join.pipe";
 import { MapPipe } from "./shared/pipes/map.pipe";
+import { RECAPTCHA_V3_SITE_KEY } from "ng-recaptcha";
 
 export function init_app(datadogService: DatadogService) {
     return () => {
@@ -64,6 +65,7 @@ export function MSALGuardConfigFactory(): MsalGuardConfiguration {
 export function MSALInterceptorConfigFactory(): MsalInterceptorConfiguration {
     const protectedResourceMap = new Map<string, Array<string | ProtectedResourceScopes> | null>([
         [`${environment.mainAppApiUrl}/public/*`, [{ httpMethod: "GET", scopes: null }]],
+        [`${environment.mainAppApiUrl}/public/support-tickets/create/`, [{ httpMethod: "POST", scopes: null }]],
         [`${environment.mainAppApiUrl}/*`, b2cPolicies.apiScopes],
     ]);
 
@@ -86,6 +88,7 @@ export function MSALInterceptorConfigFactory(): MsalInterceptorConfiguration {
 export const appConfig: ApplicationConfig = {
     providers: [
         provideRouter(routes),
+        { provide: RECAPTCHA_V3_SITE_KEY, useValue: environment.recaptchaV3SiteKey },
         importProvidersFrom(
             ApiModule.forRoot(() => {
                 return new Configuration({

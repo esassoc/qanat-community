@@ -12,10 +12,10 @@ import {
     ParcelBulkUpdateParcelStatusDtoForm,
     ParcelBulkUpdateParcelStatusDtoFormControls,
 } from "src/app/shared/generated/model/parcel-bulk-update-parcel-status-dto";
-import { ParcelService } from "src/app/shared/generated/api/parcel.service";
 import { FormFieldComponent, FormFieldType } from "src/app/shared/components/forms/form-field/form-field.component";
 import { FieldDefinitionComponent } from "src/app/shared/components/field-definition/field-definition.component";
 import { AlertContext } from "../../models/enums/alert-context.enum";
+import { ParcelByGeographyService } from "../../generated/api/parcel-by-geography.service";
 
 @Component({
     selector: "bulk-update-parcel-status-modal",
@@ -45,11 +45,7 @@ export class BulkUpdateParcelStatusModalComponent implements OnInit {
 
     public yearOptions: SelectDropdownOption[] = [{ Value: null, Label: "Select End Year:", Disabled: true }];
 
-    constructor(
-        private modalService: ModalService,
-        private parcelService: ParcelService,
-        private alertService: AlertService
-    ) {}
+    constructor(private modalService: ModalService, private parcelByGeographyService: ParcelByGeographyService, private alertService: AlertService) {}
 
     ngOnInit(): void {
         this.numberOfParcels = this.modalContext.ParcelIDs.length;
@@ -67,7 +63,7 @@ export class BulkUpdateParcelStatusModalComponent implements OnInit {
             submitDto.EndYear = new Date().getFullYear(); // default to current year if no year picker
         }
 
-        this.parcelService.geographiesGeographyIDParcelsBulkUpdateParcelStatusPost(this.modalContext.GeographyID, submitDto).subscribe(() => {
+        this.parcelByGeographyService.geographiesGeographyIDParcelsBulkUpdateParcelStatusPost(this.modalContext.GeographyID, submitDto).subscribe(() => {
             this.alertService.clearAlerts();
             this.alertService.pushAlert(new Alert("Parcels successfully updated!", AlertContext.Success));
             this.modalService.close(this.modalComponentRef, true);

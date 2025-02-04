@@ -18,6 +18,7 @@ namespace Qanat.EFModels.Entities
                 ParcelNumber = parcelStaging.ParcelNumber,
                 OwnerName = parcelStaging.OwnerName,
                 OwnerAddress = parcelStaging.OwnerAddress,
+                Acres = parcelStaging.Acres,
                 HasConflict = parcelStaging.HasConflict
             };
             return dto;

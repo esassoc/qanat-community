@@ -5,13 +5,13 @@ namespace Qanat.API.Services.GET;
 
 public class GETNewRunModel
 {
-    public GETNewRunModel(int numForRunName, GETAction getAction, int getCustomerID, int getUserID, int getScenarioID)
+    public GETNewRunModel(int numForRunName, ScenarioRun scenarioRun, int getCustomerID, int getUserID, int getScenarioID)
     {
-        Name = getAction.ActionName;
+        Name = scenarioRun.ActionName;
         Description = "This action was automatically created by the Groundwater Accounting Platform";
         CustomerID = getCustomerID;
         UserID = getUserID;
-        ModelID = getAction.Model.GETModelID;
+        ModelID = scenarioRun.Model.GETModelID;
         ScenarioID = getScenarioID;
         CreateMaps = false;
         IsDifferential = true;

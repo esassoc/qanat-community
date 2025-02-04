@@ -1,20 +1,27 @@
-<div class="list-view">
-    <page-header icon="ActivityCenter" [templateRight]="templateRight" [customRichTextTypeID]="richTextTypeID">
-        <ng-template #templateRight>
-            <button class="btn btn-primary btn-rounded" (click)="addMeterModal()">+ Add Meter</button>
-        </ng-template>
-    </page-header>
+<div class="full-width-page">
+    <div class="list-view" *ngIf="geography$ | async as geography">
+        <page-header icon="ActivityCenter" [templateRight]="templateRight" [templateAbove]="templateAbove" [customRichTextTypeID]="richTextTypeID">
+            <ng-template #templateRight>
+                <button class="btn btn-primary btn-rounded" (click)="addMeterModal(geography)">+ Add Meter</button>
+            </ng-template>
+            <ng-template #templateAbove>
+                <div class="back">
+                    <a routerLink="/water-dashboard/wells" class="back__link">Back to All Wells</a>
+                </div>
+            </ng-template>
+        </page-header>
 
-    <div class="page-body grid-12">
-        <app-alert-display></app-alert-display>
-        <div class="table-responsive">
-            <qanat-grid
-                *ngIf="meters$ | async as meters"
-                [rowData]="meters"
-                [columnDefs]="columnDefs"
-                (gridReady)="onGridReady($event)"
-                rowSelection="single"
-                [downloadFileName]="'meters'"></qanat-grid>
+        <div class="page-body grid-12">
+            <app-alert-display></app-alert-display>
+            <div class="table-responsive">
+                <qanat-grid
+                    *ngIf="meters$ | async as meters"
+                    [rowData]="meters"
+                    [columnDefs]="columnDefs"
+                    (gridReady)="onGridReady($event)"
+                    downloadFileName="meters"
+                    [sizeColumnsToFitGrid]="true"></qanat-grid>
+            </div>
         </div>
     </div>
 </div>

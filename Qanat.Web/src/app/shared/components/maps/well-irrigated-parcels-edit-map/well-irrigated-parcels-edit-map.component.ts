@@ -13,8 +13,9 @@ import { FormsModule } from "@angular/forms";
 import { NgSelectModule } from "@ng-select/ng-select";
 import { HighlightedParcelsLayerComponent } from "src/app/shared/components/leaflet/layers/highlighted-parcels-layer/highlighted-parcels-layer.component";
 import { GeographyParcelsLayerComponent } from "src/app/shared/components/leaflet/layers/geography-parcels-layer/geography-parcels-layer.component";
-import { NgIf, NgFor, NgClass, AsyncPipe } from "@angular/common";
+import { NgIf, NgFor, NgClass, AsyncPipe, JsonPipe } from "@angular/common";
 import { QanatMapComponent } from "src/app/shared/components/leaflet/qanat-map/qanat-map.component";
+import { ParcelByGeographyService } from "src/app/shared/generated/api/parcel-by-geography.service";
 
 @Component({
     selector: "well-irrigated-parcels-edit-map",
@@ -58,18 +59,16 @@ export class WellIrrigatedParcelsEditMapComponent implements OnInit {
     public mapIsReady = false;
     public layerControl: L.layerControl;
 
-    constructor(
-        private parcelService: ParcelService,
-        private leafletHelperService: LeafletHelperService,
-        private cdr: ChangeDetectorRef
-    ) {}
+    constructor(private parcelByGeographyService: ParcelByGeographyService, private leafletHelperService: LeafletHelperService, private cdr: ChangeDetectorRef) {}
 
     public ngOnInit(): void {
         this._wellIrrigatedParcels.forEach((parcel) => {
             this.isIrrigatedParcel[parcel.ParcelID] = true;
             this.irrigatedParcelIDs = [...this.irrigatedParcelIDs, parcel.ParcelID];
         });
+
         this.irrigatedParcels = this._wellIrrigatedParcels;
+        this.selectionChanged.emit(this.irrigatedParcelIDs); //MK 12/18/2024 -- Was getting a null reference on the API without emitting here.
 
         // parcel typeahead search
         this.parcels$ = this.parcelInputs$.pipe(
@@ -78,7 +77,7 @@ export class WellIrrigatedParcelsEditMapComponent implements OnInit {
             tap(() => (this.searchLoading = true)),
             debounceTime(800),
             switchMap((searchTerm) =>
-                this.parcelService.geographiesGeographyIDParcelsSearchSearchStringGet(this.geographyID, searchTerm).pipe(
+                this.parcelByGeographyService.geographiesGeographyIDParcelsSearchSearchStringGet(this.geographyID, searchTerm).pipe(
                     catchError(() => of([])),
                     tap(() => (this.searchLoading = false))
                 )

@@ -20,6 +20,7 @@ import { Observable }                                        from 'rxjs';
 
 import { BoundingBoxDto } from '../model/bounding-box-dto';
 import { ZoneDetailedDto } from '../model/zone-detailed-dto';
+import { ZoneGroupDto } from '../model/zone-group-dto';
 import { ZoneGroupMinimalDto } from '../model/zone-group-minimal-dto';
 import { ZoneGroupMonthlyUsageDto } from '../model/zone-group-monthly-usage-dto';
 
@@ -298,6 +299,49 @@ export class ZoneGroupService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
+    public geographiesGeographyIDZoneGroupsDetailedGet(geographyID: number, observe?: 'body', reportProgress?: boolean): Observable<Array<ZoneGroupDto>>;
+    public geographiesGeographyIDZoneGroupsDetailedGet(geographyID: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<ZoneGroupDto>>>;
+    public geographiesGeographyIDZoneGroupsDetailedGet(geographyID: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<ZoneGroupDto>>>;
+    public geographiesGeographyIDZoneGroupsDetailedGet(geographyID: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+
+        if (geographyID === null || geographyID === undefined) {
+            throw new Error('Required parameter geographyID was null or undefined when calling geographiesGeographyIDZoneGroupsDetailedGet.');
+        }
+
+        let headers = this.defaultHeaders;
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'text/plain',
+            'application/json',
+            'text/json',
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers = headers.set('Accept', httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+        ];
+
+        return this.httpClient.get<Array<ZoneGroupDto>>(`${this.basePath}/geographies/${encodeURIComponent(String(geographyID))}/zone-groups-detailed`,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        ).pipe(catchError((error: any) => { return this.apiService.handleError(error)}));
+    }
+
+    /**
+     * 
+     * 
+     * @param geographyID 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
     public geographiesGeographyIDZoneGroupsGet(geographyID: number, observe?: 'body', reportProgress?: boolean): Observable<Array<ZoneGroupMinimalDto>>;
     public geographiesGeographyIDZoneGroupsGet(geographyID: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<ZoneGroupMinimalDto>>>;
     public geographiesGeographyIDZoneGroupsGet(geographyID: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<ZoneGroupMinimalDto>>>;
@@ -522,54 +566,6 @@ export class ZoneGroupService {
         ];
 
         return this.httpClient.get<Array<ZoneDetailedDto>>(`${this.basePath}/geographies/${encodeURIComponent(String(geographyID))}/zones`,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        ).pipe(catchError((error: any) => { return this.apiService.handleError(error)}));
-    }
-
-    /**
-     * 
-     * 
-     * @param geographyID 
-     * @param zoneGroupSlug 
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public publicGeographyGeographyIDZoneGroupZoneGroupSlugGet(geographyID: number, zoneGroupSlug: string, observe?: 'body', reportProgress?: boolean): Observable<ZoneGroupMinimalDto>;
-    public publicGeographyGeographyIDZoneGroupZoneGroupSlugGet(geographyID: number, zoneGroupSlug: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ZoneGroupMinimalDto>>;
-    public publicGeographyGeographyIDZoneGroupZoneGroupSlugGet(geographyID: number, zoneGroupSlug: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ZoneGroupMinimalDto>>;
-    public publicGeographyGeographyIDZoneGroupZoneGroupSlugGet(geographyID: number, zoneGroupSlug: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-
-        if (geographyID === null || geographyID === undefined) {
-            throw new Error('Required parameter geographyID was null or undefined when calling publicGeographyGeographyIDZoneGroupZoneGroupSlugGet.');
-        }
-
-        if (zoneGroupSlug === null || zoneGroupSlug === undefined) {
-            throw new Error('Required parameter zoneGroupSlug was null or undefined when calling publicGeographyGeographyIDZoneGroupZoneGroupSlugGet.');
-        }
-
-        let headers = this.defaultHeaders;
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'text/plain',
-            'application/json',
-            'text/json',
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers = headers.set('Accept', httpHeaderAcceptSelected);
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-        ];
-
-        return this.httpClient.get<ZoneGroupMinimalDto>(`${this.basePath}/public/geography/${encodeURIComponent(String(geographyID))}/zone-group/${encodeURIComponent(String(zoneGroupSlug))}`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,

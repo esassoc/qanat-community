@@ -30,6 +30,9 @@ services:
       - HOSTNAME=${HOSTNAME}
       - YoloWRIDAPIBaseUrl=${YoloWRIDAPIBaseUrl}
       - GDALAPIBaseUrl=${GDALAPIBaseUrl}
+      - RecaptchaSecretKey=${RecaptchaSecretKey}
+      - RecaptchaVerifyUrl=${RecaptchaVerifyUrl}
+      - RecaptchaScoreThreshold=${RecaptchaScoreThreshold}
     volumes:
       - ~/.aspnet/https:/https:ro
 

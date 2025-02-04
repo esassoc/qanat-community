@@ -1,0 +1,85 @@
+<page-header [templateAbove]="templateAbove" pageTitle="Confirm Parcels">
+    <ng-template #templateAbove>
+        <div class="back">
+            <a [routerLink]="['../../update']" class="back__link">Back to Update Parcels</a>
+        </div>
+    </ng-template>
+</page-header>
+
+<ng-container *ngIf="geography$ | async as geography">
+    <div class="page-body grid-12">
+        <app-alert-display></app-alert-display>
+        <div class="g-col-8">
+            <form class="form" [formGroup]="submitForPreviewForm" *ngIf="resultsPreview$ | async as resultsPreview">
+                <div class="module-header mb-4">
+                    <h3 class="module-title underline">Parcel Upload Summary</h3>
+                </div>
+                <table class="parcel-confirm-table">
+                    <tbody>
+                        <tr>
+                            <td><strong>Number of Parcels in GDB</strong></td>
+                            <td>{{ resultsPreview.NumParcelsInGdb | number }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Number of Parcels Added and Set to Unassigned</strong></td>
+                            <td>{{ resultsPreview.NumParcelsAdded | number }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Number of Parcels To Be Inactivated</strong></td>
+                            <td>{{ resultsPreview.NumParcelsToBeInactivated | number }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Number of Parcels Unchanged</strong></td>
+                            <td>{{ resultsPreview.NumParcelsUnchanged | number }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Number of Parcels To Be Updated</strong></td>
+                            <td>{{ resultsPreview.NumParcelsToBeUpdated | number }}</td>
+                        </tr>
+                        <tr>
+                            <td class="pl-4"><strong>Number of Parcels With Updated Geometries</strong></td>
+                            <td>{{ resultsPreview.NumParcelsWithUpdatedGeometries | number }}</td>
+                        </tr>
+                        <tr>
+                            <td class="pl-4">
+                                <strong>Number of Parcels With Updated Owner Name or Address</strong>
+                            </td>
+                            <td>{{ resultsPreview.NumParcelsWithOwnerOrAddressChange | number }}</td>
+                        </tr>
+                        <tr>
+                            <td class="pl-4">
+                                <strong>Number of Parcels With Updated Acres</strong>
+                            </td>
+                            <td>{{ resultsPreview.NumParcelsWithAcresChange | number }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </form>
+        </div>
+        <div class="sidebar-help g-col-4">
+            <custom-rich-text [customRichTextTypeID]="customRichTextType"></custom-rich-text>
+        </div>
+    </div>
+    <div class="page-footer">
+        <fresca-button (onClick)="launchModal(finalizeChangesModalContent)" [disabled]="!expectedResultsRetrievedSuccessfully || isLoadingSubmit">
+            <span *ngIf="isLoadingSubmit" class="fa fa-spinner loading-spinner"></span>
+            Finalize Changes
+        </fresca-button>
+
+        <ng-template #finalizeChangesModalContent let-modal>
+            <div class="modal-header">
+                <h5 class="modal-title" id="finalizeChangesModalTitle">Finalize Water Account and Parcel Changes</h5>
+                <button type="button" class="close" aria-label="Close" (click)="close()">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to finalize these changes? This action cannot be undone.</p>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" (click)="onSubmitChanges(geography)" ngbAutoFocus>Save</button>
+                    <button type="button" class="btn btn-secondary-outline btn-sm" (click)="close()">Cancel</button>
+                </div>
+            </div>
+        </ng-template>
+    </div>
+</ng-container>

@@ -6,5 +6,6 @@ CREATE TABLE [dbo].[ParcelStaging](
 	[OwnerName] [varchar](200) NOT NULL,
 	[Geometry4326] [geometry] NULL,
 	[OwnerAddress] [varchar](200) NOT NULL,
+	[Acres] FLOAT NOT NULL,
 	[HasConflict] [bit] NOT NULL,
 )

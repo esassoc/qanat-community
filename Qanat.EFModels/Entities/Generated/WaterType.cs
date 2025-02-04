@@ -37,6 +37,11 @@ public partial class WaterType
     [Unicode(false)]
     public string WaterTypeSlug { get; set; }
 
+    [Required]
+    [StringLength(7)]
+    [Unicode(false)]
+    public string WaterTypeColor { get; set; }
+
     [InverseProperty("WaterType")]
     public virtual ICollection<AllocationPlan> AllocationPlans { get; set; } = new List<AllocationPlan>();
 

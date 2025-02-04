@@ -1,0 +1,176 @@
+<page-header icon="Zones" [customRichTextTypeID]="richTextTypeID" [templateRight]="templateRight" [pageTitle]="'Zones'">
+    <ng-template #templateRight>
+        <name-tag name="enabled" color="#ffa62b" title="{{ hoverText }}"></name-tag>
+    </ng-template>
+</page-header>
+
+<div class="page-body grid-12" [loadingSpinner]="{ isLoading: isLoading }">
+    <app-alert-display></app-alert-display>
+
+    <div class="flex-end mb-4">
+        <button type="button" class="btn btn-primary btn-rounded" (click)="addZoneGroup()">+ Add New Zone Group</button>
+    </div>
+    <div cdkDropList class="card-wrapper" (cdkDropListDropped)="dropZoneGroup($event)" *ngIf="zoneGroups$ | async">
+        <div class="card" *ngFor="let zoneGroup of zoneGroupList; let index = index" cdkDrag>
+            <div class="card-header" [hidden]="editingZoneGroup?.ZoneGroupID === zoneGroup.ZoneGroupID">
+                <div class="flex-between">
+                    <div>
+                        <h3 class="card-title">
+                            {{ zoneGroup.ZoneGroupName }}
+
+                            <span *ngIf="zoneGroup.HasAllocationPlan" class="card-subtitle">
+                                <icon icon="Allocations"></icon>
+                                Allocation Zone Group
+                            </span>
+                        </h3>
+                        <div class="zone-list" *ngIf="zoneGroup.ZoneList.length > 0" [innerHTML]="getZonesText(zoneGroup)"></div>
+                    </div>
+                    <button class="btn btn-primary edit-button" *ngIf="!editingZoneGroup" (click)="editZoneGroup(zoneGroup)">
+                        <span class="fas fa-edit"></span>
+                        Edit
+                    </button>
+                    <div class="zone__handle" cdkDragHandle [hidden]="editingZoneGroup">
+                        <i class="fas fa-bars"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sub-ledger" *ngIf="editingZoneGroup" [hidden]="editingZoneGroup?.ZoneGroupID !== zoneGroup.ZoneGroupID">
+                <form class="form">
+                    <div class="card-header flex-start">
+                        <div class="field">
+                            <label class="field-label required">Zone Group Name</label>
+                            <input type="text" [(ngModel)]="editingZoneGroup.ZoneGroupName" name="ZoneGroupName" />
+                        </div>
+                        <div class="field zone-group-description">
+                            <label class="field-label">Zone Group Description</label>
+                            <textarea [(ngModel)]="editingZoneGroup.ZoneGroupDescription" name="ZoneGroupDescription"></textarea>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <ul cdkDropList class="reorderable" (cdkDropListDropped)="drop($event)">
+                            <li class="reorderable__item" *ngFor="let zone of editingZoneGroup.ZoneList; let i = index" cdkDrag>
+                                <div class="reorderable__order">
+                                    <span></span>
+                                </div>
+
+                                <div class="reorderable__label">
+                                    <div class="reorderable__title flex-left ai-fe">
+                                        <div class="field">
+                                            <label class="field-label required small" style="display: flex"> Zone Name </label>
+                                            <input [ngModelOptions]="{ standalone: true }" type="text" [(ngModel)]="zone.ZoneName" />
+                                        </div>
+
+                                        <div class="field" style="flex: 0 15%" *ngIf="zonePrecipMultipliersEnabled && zoneGroup.HasAllocationPlan">
+                                            <label class="field-label required small" style="display: flex"> Precip Multiplier </label>
+                                            <input [ngModelOptions]="{ standalone: true }" type="number" [(ngModel)]="zone.PrecipMultiplier" />
+                                        </div>
+
+                                        <div class="field">
+                                            <label class="field-label small required" style="display: flex"> Primary </label>
+                                            <input [ngModelOptions]="{ standalone: true }" type="color" [(ngModel)]="zone.ZoneColor" />
+                                        </div>
+
+                                        <div class="field">
+                                            <label class="field-label small required" style="display: flex"> Accent </label>
+                                            <input [ngModelOptions]="{ standalone: true }" type="color" [(ngModel)]="zone.ZoneAccentColor" />
+                                        </div>
+                                    </div>
+                                    <div class="reorderable__title flex-left ai-fe" style="margin-top: 1rem">
+                                        <div class="field fill">
+                                            <label class="field-label small"> Zone Description </label>
+                                            <input [ngModelOptions]="{ standalone: true }" type="text" [(ngModel)]="zone.ZoneDescription" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-link" (click)="removeZone(zone)">
+                                    <div class="reorderable__close">
+                                        <i class="fas fa-times-circle"></i>
+                                    </div>
+                                </button>
+
+                                <div class="reorderable__handle" cdkDragHandle>
+                                    <i class="fas fa-bars"></i>
+                                </div>
+                            </li>
+                        </ul>
+
+                        <div class="module-header pt-5">
+                            <h3 class="module-title underline">Add New Zone</h3>
+                        </div>
+
+                        <form class="form add-new mt-4 flex-between ai-fe">
+                            <div></div>
+                            <div class="field">
+                                <label class="field-label required">Zone Name</label>
+                                <input name="newZoneName" type="text" [(ngModel)]="newZone.ZoneName" />
+                            </div>
+
+                            <div class="field fill">
+                                <label class="field-label">Zone Description</label>
+                                <input name="newZoneDescription" type="text" [(ngModel)]="newZone.ZoneDescription" />
+                            </div>
+
+                            <div class="field" style="flex: 0 15%" *ngIf="zonePrecipMultipliersEnabled && zoneGroup.HasAllocationPlan">
+                                <label class="field-label required"> Precip Multiplier </label>
+                                <input [ngModelOptions]="{ standalone: true }" type="number" [(ngModel)]="newZone.PrecipMultiplier" />
+                            </div>
+
+                            <div class="field">
+                                <label class="field-label required">Primary</label>
+                                <input class="new-color" name="newZoneColor" type="color" [(ngModel)]="newZone.ZoneColor" />
+                            </div>
+
+                            <div class="field">
+                                <label class="field-label required">Accent</label>
+                                <input class="new-color" name="newZoneAccentColor" type="color" [(ngModel)]="newZone.ZoneAccentColor" />
+                            </div>
+
+                            <div class="field-actions">
+                                <button type="button" class="btn btn-secondary btn-md" (click)="addZone()">+ Add</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="card-footer pb-3">
+                        <div class="flex-between">
+                            <button type="button" class="btn btn-danger" (click)="open(deleteZoneGroupModal)" [disabled]="isLoadingSubmit || zoneGroup.HasAllocationPlan">
+                                <span *ngIf="isLoadingSubmit" class="fa fa-spinner loading-spinner"></span>
+                                Delete Zone Group
+                            </button>
+
+                            <div>
+                                <button type="submit" class="btn btn-primary" [disabled]="isLoadingSubmit" (click)="saveZoneGroup()">
+                                    <span *ngIf="isLoadingSubmit" class="fa fa-spinner loading-spinner"></span>
+                                    Save
+                                </button>
+                                <a class="btn btn-primary-outline ml-2" (click)="closeEdit()"> Cancel </a>
+                            </div>
+                        </div>
+
+                        <note *ngIf="zoneGroup.HasAllocationPlan" class="mt-3">
+                            <p class="p-2">This Zone Group cannot be deleted because it is currently used for the Allocation Plans configuration.</p>
+                        </note>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <ng-template #deleteZoneGroupModal let-modal>
+        <div class="modal-header bg-secondary">
+            <h3 class="modal-title" id="applyTagModalTitle">Warning</h3>
+            <button type="button" class="close" aria-label="Close" (click)="close()">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">Are you sure you want to delete this zone group?</div>
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-danger" (click)="deleteZoneGroup()" [disabled]="isLoadingSubmit">
+                <span *ngIf="isLoadingSubmit" class="fa fa-spinner loading-spinner"></span>
+                Delete
+            </button>
+            <button class="btn btn-secondary" (click)="close()">Cancel</button>
+        </div>
+    </ng-template>
+</div>

@@ -58,10 +58,6 @@ namespace Qanat.EFModels.Entities
 
             modelBuilder
                 .Entity<vParcelDetailed>()
-                .OwnsMany(x => x.Zones, x => x.ToJson());
-
-            modelBuilder
-                .Entity<vParcelDetailed>()
                 .OwnsMany(x => x.WellsOnParcel, x => x.ToJson());
 
             modelBuilder
@@ -72,6 +68,7 @@ namespace Qanat.EFModels.Entities
         public virtual DbSet<vParcelDetailed> vParcelDetaileds { get; set; }
         public virtual DbSet<ParcelWaterSupplyAndUsage> ParcelWaterSupplyAndUsages { get; set; }
         public virtual DbSet<WaterTypeSupply> WaterTypeSupplies { get; set; }
+        public virtual DbSet<WaterTypeMonthlySupply> WaterTypeMonthlySupplies { get; set; }
         public virtual DbSet<WaterAccountMostRecentEffectiveDate> WaterAccountMostRecentEffectiveDate { get; set; }
         public virtual DbSet<WaterAccountBudgetReportByGeographyAndYear> WaterAccountBudgetReportByGeographyAndDateRanges { get; set; }
         public virtual DbSet<MonthlyUsageSummary> MonthlyUsageSummary { get; set; }

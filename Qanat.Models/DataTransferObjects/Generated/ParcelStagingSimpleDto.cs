@@ -12,6 +12,7 @@ namespace Qanat.Models.DataTransferObjects
         public string ParcelNumber { get; set; }
         public string OwnerName { get; set; }
         public string OwnerAddress { get; set; }
+        public double Acres { get; set; }
         public bool HasConflict { get; set; }
     }
 }

@@ -1,15 +1,14 @@
 import { Component, Input, OnInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
-import { GETActionDto } from "src/app/shared/generated/model/get-action-dto";
 import { Map } from "leaflet";
 import * as L from "leaflet";
-import { LeafletHelperService } from "src/app/shared/services/leaflet-helper.service";
 import GestureHandling from "leaflet-gesture-handling";
-import { GETActionService } from "src/app/shared/generated/api/get-action.service";
+import { LeafletHelperService } from "src/app/shared/services/leaflet-helper.service";
 import { TimeSeriesOutputChartComponent } from "../time-series-output-chart/time-series-output-chart.component";
 import { ScenarioOutputStatComponent } from "../scenario-output-stat/scenario-output-stat.component";
 import { ScenarioEnum } from "src/app/shared/generated/enum/scenario-enum";
-import { GetActionResult, GetActionResultPointOfInterest } from "src/app/shared/generated/model/models";
+import { ScenarioRunDto, ScenarioRunResult, ScenarioRunResultPointOfInterest } from "src/app/shared/generated/model/models";
+import { ModelService } from "../../generated/api/model.service";
 
 @Component({
     selector: "time-series-output",
@@ -19,8 +18,8 @@ import { GetActionResult, GetActionResultPointOfInterest } from "src/app/shared/
     styleUrls: ["./time-series-output.component.scss"],
 })
 export class TimeSeriesOutputComponent implements OnInit {
-    @Input() getActionResult: GetActionResult;
-    @Input() getAction: GETActionDto;
+    @Input() getScenarioRunResult: ScenarioRunResult;
+    @Input() scenarioRun: ScenarioRunDto;
     public ScenarioEnum = ScenarioEnum;
     public mapLoading: boolean = true;
     public map: L.map;
@@ -53,12 +52,12 @@ export class TimeSeriesOutputComponent implements OnInit {
     }
 
     constructor(
-        private getActionService: GETActionService,
+        private modelService: ModelService,
         private leafletHelperService: LeafletHelperService
     ) {}
 
     ngOnInit(): void {
-        this.getActionService.modelsModelShortNameBoundaryGet(this.getAction.Model.ModelShortName).subscribe((modelBoundary) => {
+        this.modelService.modelsModelShortNameBoundaryGet(this.scenarioRun.Model.ModelShortName).subscribe((modelBoundary) => {
             const geoJsonObject = JSON.parse(modelBoundary.GeoJson);
 
             if (geoJsonObject) {
@@ -75,10 +74,10 @@ export class TimeSeriesOutputComponent implements OnInit {
     }
 
     public setStats() {
-        this.averageChangeInWaterLevel = this.getActionResult.AverageChangeInWaterLevel;
-        this.totalChangeInAquiferStorage = this.getActionResult.TotalChangeInAquiferStorage;
-        this.totalChangeInPumping = this.getActionResult.TotalChangeInPumping;
-        this.totalChangeInRecharge = this.getActionResult.TotalChangeInRecharge;
+        this.averageChangeInWaterLevel = this.getScenarioRunResult.AverageChangeInWaterLevel;
+        this.totalChangeInAquiferStorage = this.getScenarioRunResult.TotalChangeInAquiferStorage;
+        this.totalChangeInPumping = this.getScenarioRunResult.TotalChangeInPumping;
+        this.totalChangeInRecharge = this.getScenarioRunResult.TotalChangeInRecharge;
     }
 
     public onMapReady(map: Map) {
@@ -103,7 +102,7 @@ export class TimeSeriesOutputComponent implements OnInit {
         L.Map.addInitHook("addHandler", "gestureHandling", GestureHandling);
 
         let currentColorIndex = 0;
-        this.getActionResult.PointsOfInterest.forEach((input) => {
+        this.getScenarioRunResult.PointsOfInterest.forEach((input) => {
             const icon = this.leafletHelperService.createDivIcon(this.leafletHelperService.markerColors[currentColorIndex], input.AverageValue == null);
 
             const popupContent = this.popupContentForInput(input);
@@ -131,9 +130,9 @@ export class TimeSeriesOutputComponent implements OnInit {
         });
     }
 
-    popupContentForInput(input: GetActionResultPointOfInterest): string {
-        const isRecharge = this.getAction.Scenario.ScenarioID == ScenarioEnum.Recharge;
-        const pointType = input.AverageValue == null ? "Observation Point" : this.getAction.Scenario.ScenarioID == ScenarioEnum.Recharge ? "Recharge Site" : "Pumping Well";
+    popupContentForInput(input: ScenarioRunResultPointOfInterest): string {
+        const isRecharge = this.scenarioRun.Scenario.ScenarioID == ScenarioEnum.Recharge;
+        const pointType = input.AverageValue == null ? "Observation Point" : this.scenarioRun.Scenario.ScenarioID == ScenarioEnum.Recharge ? "Recharge Site" : "Pumping Well";
         let popupContent = `
       <p>
         <strong>${pointType}: </strong>

@@ -32,7 +32,7 @@ namespace Qanat.EFModels.Entities
                 ParcelNumber = parcel.ParcelNumber,
                 ParcelArea = parcel.ParcelArea,
                 WaterAccountID = parcel.WaterAccountID,
-                WaterAccountNameAndNumber = parcel.WaterAccount?.WaterAccountNameAndNumber(),
+                WaterAccountNameAndNumber = parcel.WaterAccount?.WaterAccountNumberAndName(),
                 WaterAccountOwnerName = parcel.WaterAccount?.ContactName
 
             };
@@ -71,9 +71,10 @@ namespace Qanat.EFModels.Entities
                 ParcelStatusDisplayName = parcel.ParcelStatusDisplayName,
                 OwnerAddress = parcel.OwnerAddress,
                 OwnerName = parcel.OwnerName,
+                WaterAccountID = parcel.WaterAccountID,
                 WaterAccountName =  parcel.WaterAccountName,
                 WaterAccountNumber =  parcel.WaterAccountNumber,
-                Zones = parcel.Zones,
+                ZoneIDs = parcel.ZoneIDs,
                 CustomAttributes = string.IsNullOrWhiteSpace(parcel.CustomAttributes) ? null : JsonSerializer.Deserialize<Dictionary<string, string>>(parcel.CustomAttributes, GeoJsonSerializer.DefaultSerializerOptions),
                 WellsOnParcel = parcel.WellsOnParcel,
                 IrrigatedByWells = parcel.IrrigatedByWells
@@ -83,7 +84,7 @@ namespace Qanat.EFModels.Entities
         public static ParcelPopupDto AsPopupDto(this Parcel parcel)
         {
             var allocationPlanZoneGroup = parcel.Geography.GeographyAllocationPlanConfiguration.ZoneGroup;
-            var zone = parcel.ParcelZones.Single(x => allocationPlanZoneGroup.Zones.Select(y => y.ZoneID).Contains(x.ZoneID));
+            var zone = parcel.ParcelZones.SingleOrDefault(x => allocationPlanZoneGroup.Zones.Select(y => y.ZoneID).Contains(x.ZoneID));
 
             return new ParcelPopupDto
             {
@@ -95,9 +96,9 @@ namespace Qanat.EFModels.Entities
                 WaterAccountNumber = parcel.WaterAccount?.WaterAccountNumber,
                 GeographyName = parcel.Geography.GeographyName,
                 GeographyDisplayName = parcel.Geography.GeographyDisplayName,
-                AllocationZoneColor = zone.Zone.ZoneColor,
+                AllocationZoneColor = zone?.Zone.ZoneColor,
                 AllocationZoneGroupName = allocationPlanZoneGroup.ZoneGroupName,
-                AllocationZoneName = zone.Zone.ZoneName,
+                AllocationZoneName = zone?.Zone.ZoneName,
             };
         }
 
@@ -109,7 +110,7 @@ namespace Qanat.EFModels.Entities
                 ParcelNumber = parcel.ParcelNumber,
                 ParcelArea = parcel.ParcelArea,
                 WaterAccountID = parcel.WaterAccountID,
-                WaterAccountNameAndNumber = parcel.WaterAccount?.WaterAccountNameAndNumber(),
+                WaterAccountNameAndNumber = parcel.WaterAccount?.WaterAccountNumberAndName(),
                 WaterAccountOwnerName = parcel.WaterAccount?.ContactName,
                 GeoJSON = parcel.ParcelGeometry.Geometry4326.ToGeoJSON(),
             };
@@ -128,5 +129,21 @@ namespace Qanat.EFModels.Entities
                 WaterAccount = parcel.WaterAccount?.AsDisplayDto()
             };
         }
+
+        public static ParcelSearchResultDto AsSearchResultDto(this Parcel parcel)
+        {
+            return new ParcelSearchResultDto()
+            {
+                WaterAccountID = parcel.WaterAccountID,
+                WaterAccountNumber = parcel.WaterAccount?.WaterAccountNumber,
+                WaterAccountName = parcel.WaterAccount?.WaterAccountName,
+                ContactName = parcel.OwnerName,
+                ContactAddress = parcel.OwnerAddress,
+                WaterAccountNameAndNumber = parcel.WaterAccount?.WaterAccountNumberAndName(),
+                ParcelID = parcel.ParcelID,
+                ParcelNumber = parcel.ParcelNumber
+            };
+        }
+
     }
 }

@@ -20,14 +20,16 @@ import { Observable }                                        from 'rxjs';
 
 import { AllocationPlanMinimalDto } from '../model/allocation-plan-minimal-dto';
 import { MergeWaterAccountsDto } from '../model/merge-water-accounts-dto';
+import { MostRecentEffectiveDatesDto } from '../model/most-recent-effective-dates-dto';
 import { UpdateWaterAccountParcelsDto } from '../model/update-water-account-parcels-dto';
+import { WaterAccountBudgetStatDto } from '../model/water-account-budget-stat-dto';
 import { WaterAccountDto } from '../model/water-account-dto';
 import { WaterAccountGeoJSONDto } from '../model/water-account-geo-json-dto';
 import { WaterAccountMinimalDto } from '../model/water-account-minimal-dto';
 import { WaterAccountParcelWaterMeasurementDto } from '../model/water-account-parcel-water-measurement-dto';
 import { WaterAccountUpdateDto } from '../model/water-account-update-dto';
 import { WaterAccountUserMinimalDto } from '../model/water-account-user-minimal-dto';
-import { WaterAccountWaterTypeSupplyDto } from '../model/water-account-water-type-supply-dto';
+import { WaterAccountWaterTypeMonthlySupplyDto } from '../model/water-account-water-type-monthly-supply-dto';
 
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
@@ -436,17 +438,17 @@ export class WaterAccountService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public waterAccountsWaterAccountIDParcelSuppliesYearMonthlyUsageSummaryGet(waterAccountID: number, year: number, observe?: 'body', reportProgress?: boolean): Observable<Array<WaterAccountParcelWaterMeasurementDto>>;
-    public waterAccountsWaterAccountIDParcelSuppliesYearMonthlyUsageSummaryGet(waterAccountID: number, year: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<WaterAccountParcelWaterMeasurementDto>>>;
-    public waterAccountsWaterAccountIDParcelSuppliesYearMonthlyUsageSummaryGet(waterAccountID: number, year: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<WaterAccountParcelWaterMeasurementDto>>>;
-    public waterAccountsWaterAccountIDParcelSuppliesYearMonthlyUsageSummaryGet(waterAccountID: number, year: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    public waterAccountsWaterAccountIDParcelSuppliesYearsYearMonthlyUsageSummaryGet(waterAccountID: number, year: number, observe?: 'body', reportProgress?: boolean): Observable<Array<WaterAccountParcelWaterMeasurementDto>>;
+    public waterAccountsWaterAccountIDParcelSuppliesYearsYearMonthlyUsageSummaryGet(waterAccountID: number, year: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<WaterAccountParcelWaterMeasurementDto>>>;
+    public waterAccountsWaterAccountIDParcelSuppliesYearsYearMonthlyUsageSummaryGet(waterAccountID: number, year: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<WaterAccountParcelWaterMeasurementDto>>>;
+    public waterAccountsWaterAccountIDParcelSuppliesYearsYearMonthlyUsageSummaryGet(waterAccountID: number, year: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         if (waterAccountID === null || waterAccountID === undefined) {
-            throw new Error('Required parameter waterAccountID was null or undefined when calling waterAccountsWaterAccountIDParcelSuppliesYearMonthlyUsageSummaryGet.');
+            throw new Error('Required parameter waterAccountID was null or undefined when calling waterAccountsWaterAccountIDParcelSuppliesYearsYearMonthlyUsageSummaryGet.');
         }
 
         if (year === null || year === undefined) {
-            throw new Error('Required parameter year was null or undefined when calling waterAccountsWaterAccountIDParcelSuppliesYearMonthlyUsageSummaryGet.');
+            throw new Error('Required parameter year was null or undefined when calling waterAccountsWaterAccountIDParcelSuppliesYearsYearMonthlyUsageSummaryGet.');
         }
 
         let headers = this.defaultHeaders;
@@ -466,7 +468,7 @@ export class WaterAccountService {
         const consumes: string[] = [
         ];
 
-        return this.httpClient.get<Array<WaterAccountParcelWaterMeasurementDto>>(`${this.basePath}/water-accounts/${encodeURIComponent(String(waterAccountID))}/parcel-supplies/${encodeURIComponent(String(year))}/monthlyUsageSummary`,
+        return this.httpClient.get<Array<WaterAccountParcelWaterMeasurementDto>>(`${this.basePath}/water-accounts/${encodeURIComponent(String(waterAccountID))}/parcel-supplies/years/${encodeURIComponent(String(year))}/monthly-usage-summary`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
@@ -521,6 +523,54 @@ export class WaterAccountService {
 
         return this.httpClient.put<WaterAccountDto>(`${this.basePath}/water-accounts/${encodeURIComponent(String(waterAccountID))}`,
             waterAccountUpdateDto,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        ).pipe(catchError((error: any) => { return this.apiService.handleError(error)}));
+    }
+
+    /**
+     * 
+     * 
+     * @param waterAccountID 
+     * @param year 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public waterAccountsWaterAccountIDRecentEffectiveDatesYearsYearGet(waterAccountID: number, year: number, observe?: 'body', reportProgress?: boolean): Observable<MostRecentEffectiveDatesDto>;
+    public waterAccountsWaterAccountIDRecentEffectiveDatesYearsYearGet(waterAccountID: number, year: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<MostRecentEffectiveDatesDto>>;
+    public waterAccountsWaterAccountIDRecentEffectiveDatesYearsYearGet(waterAccountID: number, year: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<MostRecentEffectiveDatesDto>>;
+    public waterAccountsWaterAccountIDRecentEffectiveDatesYearsYearGet(waterAccountID: number, year: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+
+        if (waterAccountID === null || waterAccountID === undefined) {
+            throw new Error('Required parameter waterAccountID was null or undefined when calling waterAccountsWaterAccountIDRecentEffectiveDatesYearsYearGet.');
+        }
+
+        if (year === null || year === undefined) {
+            throw new Error('Required parameter year was null or undefined when calling waterAccountsWaterAccountIDRecentEffectiveDatesYearsYearGet.');
+        }
+
+        let headers = this.defaultHeaders;
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'text/plain',
+            'application/json',
+            'text/json',
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers = headers.set('Accept', httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+        ];
+
+        return this.httpClient.get<MostRecentEffectiveDatesDto>(`${this.basePath}/water-accounts/${encodeURIComponent(String(waterAccountID))}/recent-effective-dates/years/${encodeURIComponent(String(year))}`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
@@ -592,17 +642,17 @@ export class WaterAccountService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public waterAccountsWaterAccountIDWaterTypeSupplyYearGet(waterAccountID: number, year: number, observe?: 'body', reportProgress?: boolean): Observable<Array<WaterAccountWaterTypeSupplyDto>>;
-    public waterAccountsWaterAccountIDWaterTypeSupplyYearGet(waterAccountID: number, year: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<WaterAccountWaterTypeSupplyDto>>>;
-    public waterAccountsWaterAccountIDWaterTypeSupplyYearGet(waterAccountID: number, year: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<WaterAccountWaterTypeSupplyDto>>>;
-    public waterAccountsWaterAccountIDWaterTypeSupplyYearGet(waterAccountID: number, year: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    public waterAccountsWaterAccountIDWaterBudgetStatsYearsYearGet(waterAccountID: number, year: number, observe?: 'body', reportProgress?: boolean): Observable<WaterAccountBudgetStatDto>;
+    public waterAccountsWaterAccountIDWaterBudgetStatsYearsYearGet(waterAccountID: number, year: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<WaterAccountBudgetStatDto>>;
+    public waterAccountsWaterAccountIDWaterBudgetStatsYearsYearGet(waterAccountID: number, year: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<WaterAccountBudgetStatDto>>;
+    public waterAccountsWaterAccountIDWaterBudgetStatsYearsYearGet(waterAccountID: number, year: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         if (waterAccountID === null || waterAccountID === undefined) {
-            throw new Error('Required parameter waterAccountID was null or undefined when calling waterAccountsWaterAccountIDWaterTypeSupplyYearGet.');
+            throw new Error('Required parameter waterAccountID was null or undefined when calling waterAccountsWaterAccountIDWaterBudgetStatsYearsYearGet.');
         }
 
         if (year === null || year === undefined) {
-            throw new Error('Required parameter year was null or undefined when calling waterAccountsWaterAccountIDWaterTypeSupplyYearGet.');
+            throw new Error('Required parameter year was null or undefined when calling waterAccountsWaterAccountIDWaterBudgetStatsYearsYearGet.');
         }
 
         let headers = this.defaultHeaders;
@@ -622,7 +672,55 @@ export class WaterAccountService {
         const consumes: string[] = [
         ];
 
-        return this.httpClient.get<Array<WaterAccountWaterTypeSupplyDto>>(`${this.basePath}/water-accounts/${encodeURIComponent(String(waterAccountID))}/water-type-supply/${encodeURIComponent(String(year))}`,
+        return this.httpClient.get<WaterAccountBudgetStatDto>(`${this.basePath}/water-accounts/${encodeURIComponent(String(waterAccountID))}/water-budget-stats/years/${encodeURIComponent(String(year))}`,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        ).pipe(catchError((error: any) => { return this.apiService.handleError(error)}));
+    }
+
+    /**
+     * 
+     * 
+     * @param waterAccountID 
+     * @param year 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public waterAccountsWaterAccountIDWaterTypeMonthlySupplyYearsYearGet(waterAccountID: number, year: number, observe?: 'body', reportProgress?: boolean): Observable<Array<WaterAccountWaterTypeMonthlySupplyDto>>;
+    public waterAccountsWaterAccountIDWaterTypeMonthlySupplyYearsYearGet(waterAccountID: number, year: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<WaterAccountWaterTypeMonthlySupplyDto>>>;
+    public waterAccountsWaterAccountIDWaterTypeMonthlySupplyYearsYearGet(waterAccountID: number, year: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<WaterAccountWaterTypeMonthlySupplyDto>>>;
+    public waterAccountsWaterAccountIDWaterTypeMonthlySupplyYearsYearGet(waterAccountID: number, year: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+
+        if (waterAccountID === null || waterAccountID === undefined) {
+            throw new Error('Required parameter waterAccountID was null or undefined when calling waterAccountsWaterAccountIDWaterTypeMonthlySupplyYearsYearGet.');
+        }
+
+        if (year === null || year === undefined) {
+            throw new Error('Required parameter year was null or undefined when calling waterAccountsWaterAccountIDWaterTypeMonthlySupplyYearsYearGet.');
+        }
+
+        let headers = this.defaultHeaders;
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'text/plain',
+            'application/json',
+            'text/json',
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers = headers.set('Accept', httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+        ];
+
+        return this.httpClient.get<Array<WaterAccountWaterTypeMonthlySupplyDto>>(`${this.basePath}/water-accounts/${encodeURIComponent(String(waterAccountID))}/water-type-monthly-supply/years/${encodeURIComponent(String(year))}`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,

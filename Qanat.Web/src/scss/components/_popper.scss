@@ -4,7 +4,7 @@
     display: none;
     min-width: 300px;
     max-width: 300px;
-    z-index: 100;
+    z-index: 400;
 
     &[data-popper-placement^="right"] > [data-popper-arrow] {
         left: -5px;
@@ -33,9 +33,7 @@
             height: 10px;
             width: 10px;
             position: absolute;
-            transition:
-                transform 0.2s ease-out,
-                visibility 0.2s ease-out;
+            transition: transform 0.2s ease-out, visibility 0.2s ease-out;
             visibility: visible;
             transform: translateX(0px) rotate(45deg);
             transform-origin: center;

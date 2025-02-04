@@ -1,0 +1,276 @@
+@use "/src/scss/abstracts" as *;
+
+.support-sidebar {
+    &__header {
+        display: grid;
+        gap: $spacing-400;
+        place-items: center;
+        border-bottom: 1px solid $gray-100;
+        padding: $spacing-800 0;
+    }
+
+    &__title {
+        color: $blue-700;
+        font-size: $type-size-500;
+        font-weight: 600;
+    }
+
+    .support-logo {
+        ::ng-deep svg path {
+            fill: $blue-700;
+        }
+    }
+
+    .inbox-link:hover {
+        ::ng-deep svg.no-fill path {
+            stroke: $gray-0;
+        }
+    }
+}
+
+.support-page-header {
+    ::ng-deep {
+        .page-title {
+            display: flex;
+            align-items: center;
+            gap: $spacing-200;
+        }
+        name-tag {
+            display: flex;
+        }
+        .name-tag {
+            color: $blue-700 !important;
+            background: #f0f9fb !important;
+            border: 1px solid $blue-200 !important;
+            border-radius: $border-radius-200 !important;
+            text-transform: none !important;
+            letter-spacing: 0 !important;
+            font-size: 0.875rem !important;
+            line-height: 1;
+            font-weight: 500 !important;
+            padding: $spacing-100 $spacing-200 $spacing-050 !important;
+        }
+    }
+}
+
+.details {
+    border: solid 1px $gray-100;
+    border-radius: $spacing-050;
+    background-color: $gray-50;
+    padding: $spacing-500;
+    gap: $spacing-400;
+
+    &__header {
+        border-bottom: solid 1px $gray-200;
+        padding-bottom: $spacing-200;
+
+        h3 {
+            font-size: $type-size-400;
+            font-weight: 600;
+        }
+
+        a {
+            font-size: 0.875rem;
+            text-decoration: underline;
+            display: inline-block;
+
+            &:hover {
+                cursor: pointer;
+            }
+        }
+    }
+
+    &__body {
+        padding-top: 16px;
+        padding-bottom: 16px;
+
+        a:hover {
+            text-decoration: underline;
+        }
+    }
+
+    &__footer {
+        border-top: solid 1px $gray-200;
+        padding-top: $spacing-300;
+        color: $gray-500;
+        font-style: italic;
+        font-size: 0.875rem;
+    }
+
+    ::ng-deep {
+        key-value-pair.horizontal + key-value-pair.horizontal {
+            border-top: none;
+        }
+    }
+}
+
+.sub-nav {
+    border-bottom: solid 1px $gray-100;
+    display: flex;
+    justify-content: center;
+    gap: $spacing-600;
+
+    &__link {
+        display: inline-block;
+        padding: $spacing-100;
+        color: $gray-500;
+        font-weight: bold;
+        border-bottom: 2px solid transparent;
+        text-decoration: none;
+        font-size: 1rem;
+        line-height: 1em;
+
+        &:hover {
+            color: $blue-700;
+            cursor: pointer;
+        }
+
+        &.active {
+            color: $blue-700;
+            border-bottom-color: $blue-700;
+        }
+    }
+}
+
+.feed {
+    display: grid;
+    gap: $spacing-400;
+    padding: $spacing-600 0;
+
+    .date {
+        text-align: center;
+        color: $gray-400;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: flex;
+        gap: $spacing-200;
+        align-items: center;
+        justify-content: center;
+
+        &::before,
+        &::after {
+            display: block;
+            content: "";
+            height: 1px;
+            background: $gray-100;
+            flex: 1;
+        }
+    }
+
+    .notification {
+        color: $gray-950;
+        font-size: 1rem;
+        padding-bottom: $spacing-300;
+
+        .name {
+            font-weight: bold;
+        }
+
+        .time {
+            color: $gray-500;
+            font-size: 14px;
+            padding-left: $spacing-200;
+            font-weight: bold;
+        }
+    }
+
+    .ticket-body {
+        border: solid 1px $blue-200;
+        background-color: $blue-50;
+        border-radius: $spacing-100;
+        padding: $spacing-400;
+        font-size: 1rem;
+
+        ::ng-deep {
+            .horizontal {
+                border-top: none;
+                dt {
+                    flex-basis: 25%;
+                }
+
+                dd {
+                    flex-basis: 75%;
+                }
+            }
+        }
+    }
+}
+
+.avatar-display {
+    display: grid;
+    gap: $spacing-300;
+    grid-template-columns: $spacing-600 minmax(0, 1fr);
+
+    .user-initials {
+        transform: translateY(-8px);
+    }
+}
+
+.user-initials {
+    width: $spacing-600;
+    height: $spacing-600;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.875rem;
+    line-height: 0.875rem;
+    color: $gray-700;
+    background: $gray-50;
+    border: 1px solid $gray-200;
+
+    span {
+        transform: translateY(2px);
+    }
+
+    &.poster {
+        color: $blue-700;
+        background: $blue-50;
+        border: 1px solid $blue-200;
+    }
+}
+
+.original-ticket {
+    padding-bottom: $spacing-400;
+}
+
+.additional-notes {
+    display: grid;
+    gap: $spacing-600;
+}
+
+.additional-note {
+    display: grid;
+    gap: $spacing-400;
+}
+
+.response-body {
+    border: solid 1px $gray-light;
+    background-color: $gray-lighter;
+    border-radius: $spacing-100;
+    padding: $spacing-400;
+    color: $gray-950;
+    font-size: 1rem;
+}
+
+.internal-response-body {
+    border: solid 1px #decbec;
+    background-color: #f8f4fb;
+    border-radius: $spacing-100;
+    padding: $spacing-400;
+    color: $gray-950;
+    font-size: 1rem;
+}
+
+form {
+    padding-top: $spacing-600;
+    border-top: solid 1px $gray-200;
+}
+
+.btn-actions {
+    padding-top: $spacing-300;
+    display: flex;
+    justify-content: flex-end;
+    gap: $spacing-200;
+}

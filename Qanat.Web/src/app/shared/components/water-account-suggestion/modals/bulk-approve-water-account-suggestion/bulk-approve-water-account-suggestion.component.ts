@@ -4,25 +4,27 @@ import { IModal, ModalService } from "src/app/shared/services/modal/modal.servic
 import { ModalComponent } from "../../../modal/modal.component";
 import { CreateWaterAccountFromSuggestionDto, ParcelDisplayDto, ParcelWithGeoJSONDto } from "src/app/shared/generated/model/models";
 import { ReportingPeriodService } from "src/app/shared/generated/api/reporting-period.service";
-import { CustomGeoJSONLayer } from "../../../parcel-map/parcel-map.component";
+import { CustomGeoJSONLayer } from "../../../parcel/parcel-map/parcel-map.component";
 import { Alert } from "src/app/shared/models/alert";
 import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
 import { UntypedFormGroup, UntypedFormControl, Validators, FormsModule, ReactiveFormsModule } from "@angular/forms";
-import { NgFor, NgIf, DecimalPipe } from "@angular/common";
+import { NgFor, NgIf, DecimalPipe, AsyncPipe } from "@angular/common";
 import { IconComponent } from "src/app/shared/components/icon/icon.component";
 import { WaterAccountByGeographyService } from "src/app/shared/generated/api/water-account-by-geography.service";
+import { Observable, of, switchMap } from "rxjs";
 
 @Component({
     selector: "bulk-approve-water-account-suggestion",
     templateUrl: "./bulk-approve-water-account-suggestion.component.html",
     styleUrls: ["./bulk-approve-water-account-suggestion.component.scss"],
     standalone: true,
-    imports: [IconComponent, FormsModule, ReactiveFormsModule, NgFor, NgIf, DecimalPipe],
+    imports: [AsyncPipe, IconComponent, FormsModule, ReactiveFormsModule, NgFor, NgIf, DecimalPipe],
 })
 export class BulkApproveWaterAccountSuggestionComponent implements OnInit, IModal {
     modalComponentRef: ComponentRef<ModalComponent>;
     modalContext: BulkApproveWaterAccountSuggestionContext;
-    public availableYears: number[];
+
+    public availableYears$: Observable<number[]>;
 
     public formGroup = new UntypedFormGroup({
         waterYearSelection: new UntypedFormControl("", [Validators.required]),
@@ -43,9 +45,11 @@ export class BulkApproveWaterAccountSuggestionComponent implements OnInit, IModa
     ) {}
 
     ngOnInit(): void {
-        this.reportingPeriodService.geographiesGeographyIDReportingPeriodYearsGet(this.modalContext.GeographyID).subscribe((availableYears) => {
-            this.availableYears = availableYears.reverse();
-        });
+        this.availableYears$ = this.reportingPeriodService.geographiesGeographyIDReportingPeriodsGet(this.modalContext.GeographyID).pipe(
+            switchMap((reportingPeriods) => {
+                return of(reportingPeriods.map((x) => new Date(x.StartDate).getFullYear()));
+            })
+        );
     }
 
     close() {
@@ -61,7 +65,9 @@ export class BulkApproveWaterAccountSuggestionComponent implements OnInit, IModa
             .subscribe((response) => {
                 this.alertService.pushAlert(
                     new Alert(
-                        `Successfully approved ${this.modalContext.WaterAccountSuggestions.length} water account${this.modalContext.WaterAccountSuggestions.length == 1 ? "" : "s"}.`,
+                        `Successfully approved ${this.modalContext.WaterAccountSuggestions.length} water account${
+                            this.modalContext.WaterAccountSuggestions.length == 1 ? "" : "s"
+                        }.`,
                         AlertContext.Success
                     )
                 );

@@ -1,0 +1,79 @@
+<ng-container *ngIf="waterAccount$ | async as waterAccount">
+    <page-header [pageTitle]="'#' + waterAccount.WaterAccountNumber" [templateTitleAppend]="templateTitleAppend" icon="WaterAccounts" preTitle="Wells">
+        <ng-template #templateTitleAppend>
+            <span
+                class="water-account-name"
+                *ngIf="waterAccount.WaterAccountName?.length > 0 && waterAccount.WaterAccountName != waterAccount.WaterAccountNumber.toString()"
+                title="{{ waterAccount.WaterAccountName }}">
+                {{ waterAccount.WaterAccountName }}
+            </span>
+        </ng-template>
+    </page-header>
+
+    <div class="page-body grid-12" *ngIf="wells$ | async as wells; else isLoadingTemplate">
+        <ng-container *ngIf="wells.length > 0; else noWells">
+            <div class="g-col-12">
+                <qanat-map (onMapLoad)="handleMapReady($event)" mapHeight="700px">
+                    <ng-container *ngIf="mapIsReady">
+                        <wells-layer
+                            [wells]="wells"
+                            [displayOnLoad]="true"
+                            [map]="map"
+                            (popupOpened)="onMapSelectionChanged($event)"
+                            [layerControl]="layerControl"
+                            [highlightedWellID]="highlightedWellID">
+                        </wells-layer>
+
+                        <ng-container *ngIf="zoneGroups$ | async as zoneGroups">
+                            <zone-group-layer
+                                *ngFor="let zoneGroup of zoneGroups"
+                                [displayOnLoad]="false"
+                                [zoneGroupID]="zoneGroup.ZoneGroupID"
+                                [zoneGroupName]="zoneGroup.ZoneGroupName"
+                                [map]="map"
+                                [layerControl]="layerControl">
+                            </zone-group-layer>
+                        </ng-container>
+
+                        <ng-container *ngIf="externalMapLayers$ | async as externalMapLayers">
+                            <geography-external-map-layer
+                                *ngFor="let externalMapLayer of externalMapLayers"
+                                [map]="map"
+                                [layerControl]="layerControl"
+                                [externalMapLayer]="externalMapLayer">
+                            </geography-external-map-layer>
+                        </ng-container>
+                    </ng-container>
+                </qanat-map>
+            </div>
+            <div class="g-col-12">
+                <h3 class="module-title underline">All Wells</h3>
+                <div class="table-wrapper">
+                    <qanat-grid
+                        [rowData]="wells"
+                        [columnDefs]="columnDefs"
+                        downloadFileName="parcels"
+                        rowSelection="single"
+                        (gridReady)="onGridReady($event)"
+                        (selectionChanged)="onGridSelectionChanged($event)"
+                        height="500px"
+                        (filterChanged)="selectHighlightedWellIDRowNode()"
+                        [pagination]="true"></qanat-grid>
+                </div>
+            </div>
+        </ng-container>
+
+        <ng-template #noWells>
+            <div class="alert alert-info">
+                <div class="alert-content">
+                    <i class="fa fa-info"></i>
+                    There are no wells currently associated with this water account.
+                </div>
+            </div>
+        </ng-template>
+    </div>
+
+    <ng-template #isLoadingTemplate>
+        <div [loadingSpinner]="{ isLoading: true }" style="margin-top: 10rem"></div>
+    </ng-template>
+</ng-container>

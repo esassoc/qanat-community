@@ -1,8 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Qanat.API.Services;
@@ -20,30 +17,6 @@ public class FrequentlyAskedQuestionController : SitkaController<FrequentlyAsked
     public FrequentlyAskedQuestionController(QanatDbContext dbContext, ILogger<FrequentlyAskedQuestionController> logger, IOptions<QanatConfiguration> qanatConfiguration)
         : base(dbContext, logger, qanatConfiguration)
     {
-    }
-
-    [HttpGet("public/faq")]
-    [AllowAnonymous]
-    public ActionResult<List<FrequentlyAskedQuestionGridDto>> Get()
-    {
-        var faqs = FrequentlyAskedQuestions.GetAllFaqAsGridDto(_dbContext);
-        return Ok(faqs);
-    }
-
-    [HttpGet("public/faq/{frequentlyAskedQuestionID}")]
-    [AllowAnonymous]
-    public ActionResult<FrequentlyAskedQuestionGridDto> GetByID([FromRoute] int frequentlyAskedQuestionID)
-    {
-        var returnDto = FrequentlyAskedQuestions.GetFaqByIDAsGridDto(_dbContext, frequentlyAskedQuestionID);
-        return Ok(returnDto);
-    }
-
-    [HttpGet("public/faq/location/{faqDisplayQuestionLocationTypeID}")]
-    [AllowAnonymous]
-    public ActionResult<List<FrequentlyAskedQuestionLocationDisplayDto>> GetByLocationID([FromRoute] int faqDisplayQuestionLocationTypeID)
-    {
-        var frequentlyAskedQuestions = FrequentlyAskedQuestions.GetByLocationID(_dbContext, faqDisplayQuestionLocationTypeID);
-        return Ok(frequentlyAskedQuestions);
     }
 
     [HttpPost("faq")]

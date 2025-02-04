@@ -19,6 +19,7 @@ namespace Qanat.EFModels.Entities
         public static readonly WaterMeasurementCategoryTypeCalculated Calculated = WaterMeasurementCategoryTypeCalculated.Instance;
         public static readonly WaterMeasurementCategoryTypePrecipitationCredit PrecipitationCredit = WaterMeasurementCategoryTypePrecipitationCredit.Instance;
         public static readonly WaterMeasurementCategoryTypeManualAdjustment ManualAdjustment = WaterMeasurementCategoryTypeManualAdjustment.Instance;
+        public static readonly WaterMeasurementCategoryTypeSelfReported SelfReported = WaterMeasurementCategoryTypeSelfReported.Instance;
 
         public static readonly List<WaterMeasurementCategoryType> All;
         public static readonly List<WaterMeasurementCategoryTypeSimpleDto> AllAsSimpleDto;
@@ -30,8 +31,8 @@ namespace Qanat.EFModels.Entities
         /// </summary>
         static WaterMeasurementCategoryType()
         {
-            All = new List<WaterMeasurementCategoryType> { ET, Precip, Meter, SurfaceWater, Calculated, PrecipitationCredit, ManualAdjustment };
-            AllAsSimpleDto = new List<WaterMeasurementCategoryTypeSimpleDto> { ET.AsSimpleDto(), Precip.AsSimpleDto(), Meter.AsSimpleDto(), SurfaceWater.AsSimpleDto(), Calculated.AsSimpleDto(), PrecipitationCredit.AsSimpleDto(), ManualAdjustment.AsSimpleDto() };
+            All = new List<WaterMeasurementCategoryType> { ET, Precip, Meter, SurfaceWater, Calculated, PrecipitationCredit, ManualAdjustment, SelfReported };
+            AllAsSimpleDto = new List<WaterMeasurementCategoryTypeSimpleDto> { ET.AsSimpleDto(), Precip.AsSimpleDto(), Meter.AsSimpleDto(), SurfaceWater.AsSimpleDto(), Calculated.AsSimpleDto(), PrecipitationCredit.AsSimpleDto(), ManualAdjustment.AsSimpleDto(), SelfReported.AsSimpleDto() };
             AllLookupDictionary = new ReadOnlyDictionary<int, WaterMeasurementCategoryType>(All.ToDictionary(x => x.WaterMeasurementCategoryTypeID));
             AllAsSimpleDtoLookupDictionary = new ReadOnlyDictionary<int, WaterMeasurementCategoryTypeSimpleDto>(AllAsSimpleDto.ToDictionary(x => x.WaterMeasurementCategoryTypeID));
         }
@@ -114,6 +115,8 @@ namespace Qanat.EFModels.Entities
                     return Precip;
                 case WaterMeasurementCategoryTypeEnum.PrecipitationCredit:
                     return PrecipitationCredit;
+                case WaterMeasurementCategoryTypeEnum.SelfReported:
+                    return SelfReported;
                 case WaterMeasurementCategoryTypeEnum.SurfaceWater:
                     return SurfaceWater;
                 default:
@@ -130,7 +133,8 @@ namespace Qanat.EFModels.Entities
         SurfaceWater = 4,
         Calculated = 5,
         PrecipitationCredit = 6,
-        ManualAdjustment = 7
+        ManualAdjustment = 7,
+        SelfReported = 8
     }
 
     public partial class WaterMeasurementCategoryTypeET : WaterMeasurementCategoryType
@@ -173,5 +177,11 @@ namespace Qanat.EFModels.Entities
     {
         private WaterMeasurementCategoryTypeManualAdjustment(int waterMeasurementCategoryTypeID, string waterMeasurementCategoryTypeName, string waterMeasurementCategoryTypeDisplayName) : base(waterMeasurementCategoryTypeID, waterMeasurementCategoryTypeName, waterMeasurementCategoryTypeDisplayName) {}
         public static readonly WaterMeasurementCategoryTypeManualAdjustment Instance = new WaterMeasurementCategoryTypeManualAdjustment(7, @"Manual Adjustment", @"ManualAdjustment");
+    }
+
+    public partial class WaterMeasurementCategoryTypeSelfReported : WaterMeasurementCategoryType
+    {
+        private WaterMeasurementCategoryTypeSelfReported(int waterMeasurementCategoryTypeID, string waterMeasurementCategoryTypeName, string waterMeasurementCategoryTypeDisplayName) : base(waterMeasurementCategoryTypeID, waterMeasurementCategoryTypeName, waterMeasurementCategoryTypeDisplayName) {}
+        public static readonly WaterMeasurementCategoryTypeSelfReported Instance = new WaterMeasurementCategoryTypeSelfReported(8, @"Self Reported", @"SelfReported");
     }
 }

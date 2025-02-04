@@ -4,37 +4,29 @@
     <app-alert-display></app-alert-display>
 
     <div class="grid-12 activity-options">
-        <div class="g-col-6 update-parcels">
-            <h2 class="section-title">Geography Statistics</h2>
-            <div class="copy copy-3 pt-1 pb-2">
-                <p>View high level summary statistics.</p>
-            </div>
-            <fresca-button [routerLink]="['..', 'statistics']" cssClass="btn btn-primary" iconClass=""> Geography Statistics </fresca-button>
-        </div>
+        <ng-container *ngIf="geography$ | async as geography">
+            <div class="g-col-6 account-suggestions">
+                <h2 class="section-title">Water Account Budgets</h2>
+                <div class="copy copy-3 pt-1 pb-2">
+                    <p>View detailed reports of water use for each water account.</p>
+                </div>
 
-        <div class="g-col-6 account-suggestions">
-            <h2 class="section-title">Water Account Budgets</h2>
-            <div class="copy copy-3 pt-1 pb-2">
-                <p>View detailed reports of water use for each water account.</p>
+                <a class="btn btn-primary" [routerLink]="['..', 'water-account-budgets-report']">Water Account Budget</a>
             </div>
-
-            <fresca-button [routerLink]="['..', 'water-account-budgets-report']" cssClass="btn btn-primary" iconClass=""> Water Account Budget </fresca-button>
-        </div>
-        <div class="g-col-6 update-parcels">
-            <h2 class="section-title">Update Parcels</h2>
-            <div class="copy copy-3 pt-1 pb-2">
-                <p>Update the parcels in the platform from a zipped Esri file.</p>
+            <div class="g-col-6 update-parcels">
+                <h2 class="section-title">Geography Statistics</h2>
+                <div class="copy copy-3 pt-1 pb-2">
+                    <p>View high level summary statistics.</p>
+                </div>
+                <a class="btn btn-primary" [routerLink]="['..', 'statistics']">Geography Statistics</a>
             </div>
-            <fresca-button [routerLink]="['..', 'parcels', 'update']" cssClass="btn btn-primary" iconClass=""> Update Parcels </fresca-button>
-        </div>
-
-        <div class="g-col-6 account-suggestions">
-            <h2 class="section-title">Water Account Suggestions</h2>
-            <div class="copy copy-3 pt-1 pb-2">
-                <p>Review and approve or reject suggested water accounts.</p>
+            <div class="g-col-6" *ngIf="geography.AllowWaterMeasurementSelfReporting">
+                <h2 class="section-title">Review Self Reports</h2>
+                <div class="copy copy-3 pt-1 pb-2">
+                    <p>Review and approve water measurement self reports.</p>
+                </div>
+                <a class="btn btn-primary" [routerLink]="['/review-self-reports', geography.GeographyName.toLowerCase()]">Water Measurement Self Reporting</a>
             </div>
-
-            <fresca-button [routerLink]="['../water-accounts', 'water-account-suggestions']" cssClass="btn btn-primary" iconClass=""> Water Account Suggestions </fresca-button>
-        </div>
+        </ng-container>
     </div>
 </div>

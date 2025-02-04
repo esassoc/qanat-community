@@ -12,7 +12,7 @@
 
 import { FormControl, FormControlOptions, FormControlState, Validators } from "@angular/forms";
 export class WaterAccountCreateDto { 
-    WaterAccountName: string;
+    WaterAccountName?: string;
     ContactName: string;
     ContactAddress: string;
     constructor(obj?: any) {
@@ -21,21 +21,19 @@ export class WaterAccountCreateDto {
 }
 
 export interface WaterAccountCreateDtoForm { 
-    WaterAccountName: FormControl<string>;
+    WaterAccountName?: FormControl<string>;
     ContactName: FormControl<string>;
     ContactAddress: FormControl<string>;
 }
 
 export class WaterAccountCreateDtoFormControls { 
-    public static WaterAccountName = (value: FormControlState<string> | string = '', formControlOptions?: FormControlOptions | null) => new FormControl<string>(
+    public static WaterAccountName = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
         value,
         formControlOptions ?? 
         {
-            nonNullable: true,
+            nonNullable: false,
             validators: 
             [
-                Validators.required,
-                Validators.minLength(10),
                 Validators.maxLength(255),
             ],
         }

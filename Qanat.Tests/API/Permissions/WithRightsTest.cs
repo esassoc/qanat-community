@@ -17,7 +17,10 @@ using Qanat.EFModels.Entities;
 using Qanat.Models.DataTransferObjects;
 using VerifyMSTest;
 using System;
+using Newtonsoft.Json;
+using Qanat.Models.DataTransferObjects.Geography;
 using VerifyTests;
+using Qanat.Models.Security;
 
 namespace Qanat.Tests.API.Permissions
 {
@@ -71,10 +74,10 @@ namespace Qanat.Tests.API.Permissions
         /// endpoint in the protected resource maps in the app.module
         /// </summary>
         [TestMethod]
-        public void AllowAnonymousEndpointsShouldBePrefixedWithPublic()
+        public void AllowAnonymousEndpointsShouldBeInPublicController()
         {
             var controllerTypes = GetControllerTypes();
-            var controllerHttpMethods = controllerTypes.SelectMany(type => type.GetMethods())
+            var controllerHttpMethods = controllerTypes.Where(x => x.Name != "PublicController").SelectMany(type => type.GetMethods())
                 .Where(m => m.IsPublic && m.CustomAttributes.Any(ca => ca.AttributeType.BaseType == typeof(HttpMethodAttribute)));
 
             var actionMethodsWithAllowAnonymousAttribute = controllerHttpMethods.Where(m =>  m.GetCustomAttributes(typeof(AllowAnonymousAttribute)).Any());
@@ -95,7 +98,7 @@ namespace Qanat.Tests.API.Permissions
                 .Where(m => !m.GetCustomAttributes(typeof(RightsCheckerAttribute)).Any()).ToList();
 
             var assertMessage = "All Controllers need the RightsChecker: " + string.Join(", ", controllersWithoutRightsChecker.Select(c => c.FullName));
-            Assert.IsTrue(!controllersWithoutRightsChecker.Any(), assertMessage);
+            Assert.IsTrue(controllersWithoutRightsChecker.All(x => x.Name == "PublicController"), assertMessage);
         }
 
         [TestMethod]
@@ -227,7 +230,7 @@ namespace Qanat.Tests.API.Permissions
             var controllerHttpMethods = controllerTypes.SelectMany(type => type.GetMethods())
                 .Where(m => m.IsPublic && m.CustomAttributes.Any(ca => ca.AttributeType.BaseType == typeof(HttpMethodAttribute)));
 
-            var actionsWithMoreThanOneBaseAuthorizationAttribute = controllerHttpMethods.Where(m => m.GetCustomAttributes(typeof(BaseAuthorizationAttribute)).Count(g => g.GetType() != typeof(WithRoleFlagAttribute)) > 1);
+            var actionsWithMoreThanOneBaseAuthorizationAttribute = controllerHttpMethods.Where(m => m.GetCustomAttributes(typeof(BaseAuthorizationAttribute)).Count(g => g.GetType() != typeof(WithRoleFlagAttribute) && g.GetType() != typeof(WithGeographyRoleFlagAttribute)) > 1);
             var result = string.Join("\r\n", actionsWithMoreThanOneBaseAuthorizationAttribute.Select(c => $"{c.ReflectedType!.FullName}.{c.Name}()"));
             await Verifier.Verify(result);
         }
@@ -337,7 +340,10 @@ namespace Qanat.Tests.API.Permissions
         {
             var user = new UserDto()
             {
-                Role = role.AsRoleDto(),
+                RoleID = role.RoleID,
+                RoleDisplayName = role.RoleDisplayName,
+                Rights = JsonConvert.DeserializeObject<Dictionary<string, Rights>>(role.Rights),
+                Flags = JsonConvert.DeserializeObject<Dictionary<string, bool>>(role.Flags),
                 GeographyRights = geographyRoles?.ToDictionary(x => x.Key, x => x.Value.AsGeographyRights()),
                 WaterAccountRights = waterAccountRoles?.ToDictionary(x => x.Key, x => x.Value.AsWaterAccountRights()),
                 GeographyFlags = geographyRoles?.ToDictionary(x => x.Key, x => x.Value.AsGeographyFlags())

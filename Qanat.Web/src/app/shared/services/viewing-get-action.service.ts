@@ -1,23 +1,23 @@
 import { Injectable } from "@angular/core";
 import { ReplaySubject } from "rxjs";
-import { GETActionDto } from "../generated/model/get-action-dto";
+import { ScenarioRunDto } from "../generated/model/models";
 
 @Injectable({
     providedIn: "root",
 })
-export class ViewingGETActionService {
-    private _currentGETAction = new ReplaySubject<GETActionDto>(1);
-    public currentGetActionObservable = this._currentGETAction.asObservable();
+export class CurrentScenarioRunService {
+    private _currentScenarioRun = new ReplaySubject<ScenarioRunDto>(1);
+    public currentScenarioRunObservable = this._currentScenarioRun.asObservable();
 
     constructor() {}
 
     ngOnInit(): void {}
 
-    public loaded(getAction: GETActionDto): void {
-        this._currentGETAction.next(getAction);
+    public loaded(scenarioRun: ScenarioRunDto): void {
+        this._currentScenarioRun.next(scenarioRun);
     }
 
-    public unLoaded(): void {
-        this._currentGETAction.next(null);
+    public unloaded(): void {
+        this._currentScenarioRun.next(null);
     }
 }

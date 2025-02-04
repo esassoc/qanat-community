@@ -7,9 +7,6 @@ using Qanat.EFModels.Entities;
 using Qanat.Models.DataTransferObjects;
 using Qanat.Models.Security;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Authorization;
-using Qanat.API.Services.Attributes;
-using Qanat.API.Services.Filters;
 
 namespace Qanat.API.Controllers
 {
@@ -29,14 +26,6 @@ namespace Qanat.API.Controllers
         {
             var customRichTextDtos = CustomRichText.ListFieldDefinitions(_dbContext);
             return Ok(customRichTextDtos);
-        }
-
-        [HttpGet("public/customRichText/{customRichTextTypeID}")]
-        [AllowAnonymous]
-        public ActionResult<CustomRichTextDto> GetCustomRichText([FromRoute] int customRichTextTypeID, [FromQuery] int? geographyID)
-        {
-            var customRichTextDto = CustomRichText.GetByCustomRichTextTypeID(_dbContext, customRichTextTypeID, geographyID);
-            return RequireNotNullThrowNotFound(customRichTextDto, "CustomRichText", customRichTextTypeID);
         }
 
         [HttpPut("customRichText/{customRichTextTypeID}")]

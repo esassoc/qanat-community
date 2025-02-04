@@ -46,3 +46,23 @@
         }
     }
 }
+
+.model-tag {
+    display: inline-block;
+    max-width: 16rem;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    padding: 0.25rem 0.5rem;
+    padding-top: 6px;
+    background: rgba(240, 249, 251, 0.5);
+    color: #2c5f72;
+    border: 1px solid #b9e1e8;
+    border-radius: 0.25rem;
+    font-size: 1rem;
+    line-height: 1em;
+}
+
+.hidden {
+    display: none;
+}

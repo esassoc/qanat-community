@@ -18,6 +18,9 @@ import { CustomHttpUrlEncodingCodec }                        from '../encoder';
 
 import { Observable }                                        from 'rxjs';
 
+import { ParcelSearchDto } from '../model/parcel-search-dto';
+import { ParcelSearchSummaryDto } from '../model/parcel-search-summary-dto';
+import { WaterAccountSearchDto } from '../model/water-account-search-dto';
 import { WaterAccountSearchSummaryDto } from '../model/water-account-search-summary-dto';
 
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
@@ -64,25 +67,15 @@ export class SearchService {
     /**
      * 
      * 
-     * @param geographyID 
-     * @param searchString 
+     * @param parcelSearchDto 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public searchGeographyGeographyIDWaterAccountsGet(geographyID: number, searchString?: string, observe?: 'body', reportProgress?: boolean): Observable<WaterAccountSearchSummaryDto>;
-    public searchGeographyGeographyIDWaterAccountsGet(geographyID: number, searchString?: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<WaterAccountSearchSummaryDto>>;
-    public searchGeographyGeographyIDWaterAccountsGet(geographyID: number, searchString?: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<WaterAccountSearchSummaryDto>>;
-    public searchGeographyGeographyIDWaterAccountsGet(geographyID: number, searchString?: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    public searchParcelsPost(parcelSearchDto?: ParcelSearchDto, observe?: 'body', reportProgress?: boolean): Observable<ParcelSearchSummaryDto>;
+    public searchParcelsPost(parcelSearchDto?: ParcelSearchDto, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ParcelSearchSummaryDto>>;
+    public searchParcelsPost(parcelSearchDto?: ParcelSearchDto, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ParcelSearchSummaryDto>>;
+    public searchParcelsPost(parcelSearchDto?: ParcelSearchDto, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
-        if (geographyID === null || geographyID === undefined) {
-            throw new Error('Required parameter geographyID was null or undefined when calling searchGeographyGeographyIDWaterAccountsGet.');
-        }
-
-
-        let queryParameters = new HttpParams({encoder: new CustomHttpUrlEncodingCodec()});
-        if (searchString !== undefined && searchString !== null) {
-            queryParameters = queryParameters.set('searchString', <any>searchString);
-        }
 
         let headers = this.defaultHeaders;
 
@@ -99,11 +92,68 @@ export class SearchService {
 
         // to determine the Content-Type header
         const consumes: string[] = [
+            'application/json-patch+json',
+            'application/json',
+            'text/json',
+            'application/_*+json',
         ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected != undefined) {
+            headers = headers.set('Content-Type', httpContentTypeSelected);
+        }
 
-        return this.httpClient.get<WaterAccountSearchSummaryDto>(`${this.basePath}/search/geography/${encodeURIComponent(String(geographyID))}/water-accounts`,
+        return this.httpClient.post<ParcelSearchSummaryDto>(`${this.basePath}/search/parcels`,
+            parcelSearchDto,
             {
-                params: queryParameters,
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        ).pipe(catchError((error: any) => { return this.apiService.handleError(error)}));
+    }
+
+    /**
+     * 
+     * 
+     * @param waterAccountSearchDto 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public searchWaterAccountsPost(waterAccountSearchDto?: WaterAccountSearchDto, observe?: 'body', reportProgress?: boolean): Observable<WaterAccountSearchSummaryDto>;
+    public searchWaterAccountsPost(waterAccountSearchDto?: WaterAccountSearchDto, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<WaterAccountSearchSummaryDto>>;
+    public searchWaterAccountsPost(waterAccountSearchDto?: WaterAccountSearchDto, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<WaterAccountSearchSummaryDto>>;
+    public searchWaterAccountsPost(waterAccountSearchDto?: WaterAccountSearchDto, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+
+
+        let headers = this.defaultHeaders;
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'text/plain',
+            'application/json',
+            'text/json',
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers = headers.set('Accept', httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json-patch+json',
+            'application/json',
+            'text/json',
+            'application/_*+json',
+        ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected != undefined) {
+            headers = headers.set('Content-Type', httpContentTypeSelected);
+        }
+
+        return this.httpClient.post<WaterAccountSearchSummaryDto>(`${this.basePath}/search/water-accounts`,
+            waterAccountSearchDto,
+            {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
                 observe: observe,

@@ -1,4 +1,5 @@
-﻿using Qanat.Models.DataTransferObjects;
+﻿//TODO: DELETE ME
+using Qanat.Models.DataTransferObjects;
 
 namespace Qanat.EFModels.Entities;
 

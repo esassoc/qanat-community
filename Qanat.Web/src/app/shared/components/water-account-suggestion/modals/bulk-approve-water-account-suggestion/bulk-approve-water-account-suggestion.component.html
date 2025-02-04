@@ -20,14 +20,14 @@
                 <div class="field g-col-9">
                     <label class="field-label">Effective Year*</label>
                     <div class="form-check">
-                        <select class="form-check-input" id="effectiveYear" formControlName="waterYearSelection">
+                        <select class="form-check-input" id="effectiveYear" formControlName="waterYearSelection" *ngIf="availableYears$ | async as availableYears">
                             <option *ngFor="let year of availableYears" [value]="year">
                                 {{ year }}
                             </option>
                         </select>
                     </div>
                     <div class="alert alert-danger" *ngIf="formGroup.touched && formGroup.invalid">
-                        <div *ngIf="formGroup.waterYearSelection?.errors.required">Please choose an Effective Year</div>
+                        <div *ngIf="formGroup.controls.waterYearSelection?.errors.required">Please choose an Effective Year</div>
                     </div>
                 </div>
             </form>

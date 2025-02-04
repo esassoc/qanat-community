@@ -29,6 +29,8 @@ export class WaterAccountDto {
     Users?: Array<WaterAccountUserMinimalDto>;
     Parcels?: Array<ParcelDisplayDto>;
     WaterAccountNameAndNumber?: string;
+    Acres?: number;
+    IrrigatedAcres?: number;
     constructor(obj?: any) {
         Object.assign(this, obj);
     }
@@ -49,6 +51,8 @@ export interface WaterAccountDtoForm {
     Users?: FormControl<Array<WaterAccountUserMinimalDto>>;
     Parcels?: FormControl<Array<ParcelDisplayDto>>;
     WaterAccountNameAndNumber?: FormControl<string>;
+    Acres?: FormControl<number>;
+    IrrigatedAcres?: FormControl<number>;
 }
 
 export class WaterAccountDtoFormControls { 
@@ -183,6 +187,26 @@ export class WaterAccountDtoFormControls {
         }
     );
     public static WaterAccountNameAndNumber = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
+        value,
+        formControlOptions ?? 
+        {
+            nonNullable: false,
+            validators: 
+            [
+            ],
+        }
+    );
+    public static Acres = (value: FormControlState<number> | number = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<number>(
+        value,
+        formControlOptions ?? 
+        {
+            nonNullable: false,
+            validators: 
+            [
+            ],
+        }
+    );
+    public static IrrigatedAcres = (value: FormControlState<number> | number = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<number>(
         value,
         formControlOptions ?? 
         {

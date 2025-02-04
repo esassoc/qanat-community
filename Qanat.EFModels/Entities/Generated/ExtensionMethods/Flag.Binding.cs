@@ -14,11 +14,10 @@ namespace Qanat.EFModels.Entities
     {
         public static readonly FlagCanImpersonateUsers CanImpersonateUsers = FlagCanImpersonateUsers.Instance;
         public static readonly FlagHasManagerDashboard HasManagerDashboard = FlagHasManagerDashboard.Instance;
-        public static readonly FlagHasAdminDashboard HasAdminDashboard = FlagHasAdminDashboard.Instance;
+        public static readonly FlagIsSystemAdmin IsSystemAdmin = FlagIsSystemAdmin.Instance;
         public static readonly FlagCanClaimWaterAccounts CanClaimWaterAccounts = FlagCanClaimWaterAccounts.Instance;
         public static readonly FlagCanRegisterWells CanRegisterWells = FlagCanRegisterWells.Instance;
         public static readonly FlagCanReviewWells CanReviewWells = FlagCanReviewWells.Instance;
-        public static readonly FlagCanUseScenarioPlanner CanUseScenarioPlanner = FlagCanUseScenarioPlanner.Instance;
 
         public static readonly List<Flag> All;
         public static readonly List<FlagSimpleDto> AllAsSimpleDto;
@@ -30,8 +29,8 @@ namespace Qanat.EFModels.Entities
         /// </summary>
         static Flag()
         {
-            All = new List<Flag> { CanImpersonateUsers, HasManagerDashboard, HasAdminDashboard, CanClaimWaterAccounts, CanRegisterWells, CanReviewWells, CanUseScenarioPlanner };
-            AllAsSimpleDto = new List<FlagSimpleDto> { CanImpersonateUsers.AsSimpleDto(), HasManagerDashboard.AsSimpleDto(), HasAdminDashboard.AsSimpleDto(), CanClaimWaterAccounts.AsSimpleDto(), CanRegisterWells.AsSimpleDto(), CanReviewWells.AsSimpleDto(), CanUseScenarioPlanner.AsSimpleDto() };
+            All = new List<Flag> { CanImpersonateUsers, HasManagerDashboard, IsSystemAdmin, CanClaimWaterAccounts, CanRegisterWells, CanReviewWells };
+            AllAsSimpleDto = new List<FlagSimpleDto> { CanImpersonateUsers.AsSimpleDto(), HasManagerDashboard.AsSimpleDto(), IsSystemAdmin.AsSimpleDto(), CanClaimWaterAccounts.AsSimpleDto(), CanRegisterWells.AsSimpleDto(), CanReviewWells.AsSimpleDto() };
             AllLookupDictionary = new ReadOnlyDictionary<int, Flag>(All.ToDictionary(x => x.FlagID));
             AllAsSimpleDtoLookupDictionary = new ReadOnlyDictionary<int, FlagSimpleDto>(AllAsSimpleDto.ToDictionary(x => x.FlagID));
         }
@@ -110,12 +109,10 @@ namespace Qanat.EFModels.Entities
                     return CanRegisterWells;
                 case FlagEnum.CanReviewWells:
                     return CanReviewWells;
-                case FlagEnum.CanUseScenarioPlanner:
-                    return CanUseScenarioPlanner;
-                case FlagEnum.HasAdminDashboard:
-                    return HasAdminDashboard;
                 case FlagEnum.HasManagerDashboard:
                     return HasManagerDashboard;
+                case FlagEnum.IsSystemAdmin:
+                    return IsSystemAdmin;
                 default:
                     throw new ArgumentException("Unable to map Enum: {enumValue}");
             }
@@ -126,11 +123,10 @@ namespace Qanat.EFModels.Entities
     {
         CanImpersonateUsers = 1,
         HasManagerDashboard = 2,
-        HasAdminDashboard = 3,
+        IsSystemAdmin = 3,
         CanClaimWaterAccounts = 4,
         CanRegisterWells = 5,
-        CanReviewWells = 6,
-        CanUseScenarioPlanner = 7
+        CanReviewWells = 6
     }
 
     public partial class FlagCanImpersonateUsers : Flag
@@ -145,10 +141,10 @@ namespace Qanat.EFModels.Entities
         public static readonly FlagHasManagerDashboard Instance = new FlagHasManagerDashboard(2, @"HasManagerDashboard", @"HasManagerDashboard");
     }
 
-    public partial class FlagHasAdminDashboard : Flag
+    public partial class FlagIsSystemAdmin : Flag
     {
-        private FlagHasAdminDashboard(int flagID, string flagName, string flagDisplayName) : base(flagID, flagName, flagDisplayName) {}
-        public static readonly FlagHasAdminDashboard Instance = new FlagHasAdminDashboard(3, @"HasAdminDashboard", @"HasAdminDashboard");
+        private FlagIsSystemAdmin(int flagID, string flagName, string flagDisplayName) : base(flagID, flagName, flagDisplayName) {}
+        public static readonly FlagIsSystemAdmin Instance = new FlagIsSystemAdmin(3, @"IsSystemAdmin", @"IsSystemAdmin");
     }
 
     public partial class FlagCanClaimWaterAccounts : Flag
@@ -167,11 +163,5 @@ namespace Qanat.EFModels.Entities
     {
         private FlagCanReviewWells(int flagID, string flagName, string flagDisplayName) : base(flagID, flagName, flagDisplayName) {}
         public static readonly FlagCanReviewWells Instance = new FlagCanReviewWells(6, @"CanReviewWells", @"CanReviewWells");
-    }
-
-    public partial class FlagCanUseScenarioPlanner : Flag
-    {
-        private FlagCanUseScenarioPlanner(int flagID, string flagName, string flagDisplayName) : base(flagID, flagName, flagDisplayName) {}
-        public static readonly FlagCanUseScenarioPlanner Instance = new FlagCanUseScenarioPlanner(7, @"CanUseScenarioPlanner", @"CanUseScenarioPlanner");
     }
 }

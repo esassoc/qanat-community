@@ -1,0 +1,208 @@
+<div class="page-wrapper">
+    <app-alert-display></app-alert-display>
+
+    <ng-container *ngIf="currentUser$ | async; else isLoadingTemplate">
+        <page-header
+            pageTitle="{{ waterMeasurementType?.WaterMeasurementTypeName }} Self Reporting"
+            icon="WaterAccounts"
+            [customRichTextTypeID]="customRichTextTypeID"
+            [customRichTextTypeGeographyID]="waterAccount.Geography.GeographyID"
+            [templateAbove]="templateAbove"
+            [templateRight]="templateRight"
+            *ngIf="waterAccount">
+            <ng-template #templateAbove>
+                <div class="back">
+                    <a
+                        [routerLink]="['/water-accounts', waterAccount.WaterAccountID, 'water-measurement-self-reports']"
+                        [queryParams]="{ reportingPeriod: reportingYear }"
+                        class="back__link">
+                        Back to Self Reports
+                    </a>
+                </div>
+            </ng-template>
+            <ng-template #templateRight>
+                <div class="extra-info">
+                    <div class="field mr-4">
+                        <div class="field-label">Water Account</div>
+                        <div>
+                            #{{ waterAccount.WaterAccountNumber }}
+                            <span
+                                class="water-account-name"
+                                *ngIf="waterAccount.WaterAccountName?.length > 0 && waterAccount.WaterAccountName != '' + waterAccount.WaterAccountNumber">
+                                {{ waterAccount.WaterAccountName }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">Reporting Year</div>
+                        <div>
+                            {{ reportingYear }}
+                        </div>
+                    </div>
+                </div>
+            </ng-template>
+        </page-header>
+
+        <div class="page-body grid-12" *ngIf="!pageIsLoading; else isLoadingTemplate">
+            <div class="table-container g-col-12">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th class="left-aligned">APN</th>
+                            <th>Area (ac)</th>
+                            <th class="left-aligned">Irrigation Method</th>
+                            <th>Total (ac-ft)</th>
+                            <th class="month-input-column">NOV</th>
+                            <th class="month-input-column">DEC</th>
+                            <th class="month-input-column">JAN</th>
+                            <th class="month-input-column">FEB</th>
+                            <th class="month-input-column">MAR</th>
+                            <th class="month-input-column">APR</th>
+                            <th class="month-input-column">MAY</th>
+                            <th class="month-input-column">JUN</th>
+                            <th class="month-input-column">JUL</th>
+                            <th class="month-input-column">AUG</th>
+                            <th class="month-input-column">SEP</th>
+                            <th class="month-input-column">OCT</th>
+                        </tr>
+                    </thead>
+                    <tbody *ngIf="selfReport$ | async; else isLoadingTemplate">
+                        <tr *ngFor="let viewModel of lineItemViewModels">
+                            <td class="pl-2">{{ viewModel.Parcel.ParcelNumber }}</td>
+                            <td class="right-aligned">{{ viewModel.Parcel.ParcelArea | number: "1.2-2" }}</td>
+                            <td>
+                                <form-field
+                                    [formControl]="irrigationMethodControlByAPN[viewModel.Parcel.ParcelNumber]"
+                                    [formInputOptions]="irrigationMethodOptions"
+                                    [type]="FormFieldType.Select">
+                                </form-field>
+                            </td>
+                            <td [ngClass]="{ 'right-aligned': viewModel.LineItemTotal, 'center-aligned': !viewModel.LineItemTotal }">
+                                <span *ngIf="!viewModel.LineItemTotal"> - </span>
+                                <span *ngIf="viewModel.LineItemTotal">
+                                    {{ viewModel.LineItemTotal | number: "1.0-2" }}
+                                </span>
+                            </td>
+                            <td>
+                                <form-field [formControl]="viewModel.MonthFormControls['November']" [type]="FormFieldType.Number"></form-field>
+                            </td>
+                            <td>
+                                <form-field [formControl]="viewModel.MonthFormControls['December']" [type]="FormFieldType.Number"></form-field>
+                            </td>
+                            <td>
+                                <form-field [formControl]="viewModel.MonthFormControls['January']" [type]="FormFieldType.Number"></form-field>
+                            </td>
+                            <td>
+                                <form-field [formControl]="viewModel.MonthFormControls['February']" [type]="FormFieldType.Number"></form-field>
+                            </td>
+                            <td>
+                                <form-field [formControl]="viewModel.MonthFormControls['March']" [type]="FormFieldType.Number"></form-field>
+                            </td>
+                            <td>
+                                <form-field [formControl]="viewModel.MonthFormControls['April']" [type]="FormFieldType.Number"></form-field>
+                            </td>
+                            <td>
+                                <form-field [formControl]="viewModel.MonthFormControls['May']" [type]="FormFieldType.Number"></form-field>
+                            </td>
+                            <td>
+                                <form-field [formControl]="viewModel.MonthFormControls['June']" [type]="FormFieldType.Number"></form-field>
+                            </td>
+                            <td>
+                                <form-field [formControl]="viewModel.MonthFormControls['July']" [type]="FormFieldType.Number"></form-field>
+                            </td>
+                            <td>
+                                <form-field [formControl]="viewModel.MonthFormControls['August']" [type]="FormFieldType.Number"></form-field>
+                            </td>
+                            <td>
+                                <form-field [formControl]="viewModel.MonthFormControls['September']" [type]="FormFieldType.Number"></form-field>
+                            </td>
+                            <td>
+                                <form-field [formControl]="viewModel.MonthFormControls['October']" [type]="FormFieldType.Number"></form-field>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td>Account Total</td>
+                            <td class="right-aligned">{{ parcels | sum: "ParcelArea" | number: "1.2-2" }}</td>
+                            <td><!-- Blank column for spacing --></td>
+                            <td class="right-aligned">
+                                <ng-container *ngIf="lineItemTotalsSum != '-'">
+                                    {{ lineItemTotalsSum | number: "1.0-2" }}
+                                </ng-container>
+                                <ng-container *ngIf="lineItemTotalsSum == '-'">
+                                    {{ lineItemTotalsSum }}
+                                </ng-container>
+                            </td>
+                            <td class="right-aligned">{{ monthTotals["November"] | number: "1.0-2" }}</td>
+                            <td class="right-aligned">{{ monthTotals["December"] | number: "1.0-2" }}</td>
+                            <td class="right-aligned">{{ monthTotals["January"] | number: "1.0-2" }}</td>
+                            <td class="right-aligned">{{ monthTotals["February"] | number: "1.0-2" }}</td>
+                            <td class="right-aligned">{{ monthTotals["March"] | number: "1.0-2" }}</td>
+                            <td class="right-aligned">{{ monthTotals["April"] | number: "1.0-2" }}</td>
+                            <td class="right-aligned">{{ monthTotals["May"] | number: "1.0-2" }}</td>
+                            <td class="right-aligned">{{ monthTotals["June"] | number: "1.0-2" }}</td>
+                            <td class="right-aligned">{{ monthTotals["July"] | number: "1.0-2" }}</td>
+                            <td class="right-aligned">{{ monthTotals["August"] | number: "1.0-2" }}</td>
+                            <td class="right-aligned">{{ monthTotals["September"] | number: "1.0-2" }}</td>
+                            <td class="right-aligned">{{ monthTotals["October"] | number: "1.0-2" }}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <div class="g-col-6">
+                <!-- Blank for Spacing-->
+            </div>
+
+            <div class="g-col-6 grid-12 save-button-container" *ngIf="!pageIsLoading">
+                <div [ngClass]="[selfReport.WaterMeasurementSelfReportStatus.WaterMeasurementSelfReportStatusName]" class="status-container g-col-8" *ngIf="selfReport">
+                    {{ selfReport.WaterMeasurementSelfReportStatus.WaterMeasurementSelfReportStatusDisplayName }}
+                    <span *ngIf="selfReport.WaterMeasurementSelfReportStatus.WaterMeasurementSelfReportStatusName == 'Draft'">
+                        created on {{ selfReport.CreateDate | date: "medium" }}
+                    </span>
+                    <span *ngIf="selfReport.WaterMeasurementSelfReportStatus.WaterMeasurementSelfReportStatusName == 'Submitted'">
+                        on {{ selfReport.SubmittedDate | date: "medium" }}
+                    </span>
+                    <span *ngIf="selfReport.WaterMeasurementSelfReportStatus.WaterMeasurementSelfReportStatusName == 'Approved'">
+                        on {{ selfReport.ApprovedDate | date: "medium" }}
+                    </span>
+                    <span *ngIf="selfReport.WaterMeasurementSelfReportStatus.WaterMeasurementSelfReportStatusName == 'Returned'">
+                        on {{ selfReport.ReturnedDate | date: "medium" }}
+                    </span>
+                </div>
+
+                <div *ngIf="selfReport.WaterMeasurementSelfReportStatus.WaterMeasurementSelfReportStatusName != 'Approved'" class="g-col-4">
+                    <!-- Only show the save and submit buttons if the report is not approved -->
+                    <button class="btn btn-primary mr-3" (click)="save()" [buttonLoading]="isLoadingSubmit" [disabled]="isLoadingSubmit || !canSave">Save</button>
+                    <button
+                        class="btn btn-primary-outline"
+                        [routerLink]="['/water-accounts', waterAccount.WaterAccountID, 'water-measurement-self-reports']"
+                        [disabled]="isLoadingSubmit"
+                        *ngIf="waterAccount">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+
+            <div class="document-upload-container copy copy-1 g-col-12">Document Upload Coming Soon!</div>
+
+            <div class="submit-button-container g-col-12">
+                <button class="btn btn-primary" (click)="openSubmitModal()" [buttonLoading]="isLoadingSubmit" [disabled]="isLoadingSubmit || !canSubmit" *ngIf="showSubmitButton">
+                    Submit for Review
+                </button>
+            </div>
+        </div>
+    </ng-container>
+
+    <ng-template #isLoadingTemplate>
+        <div [loadingSpinner]="{ isLoading: true }" style="margin-top: 10rem"></div>
+    </ng-template>
+</div>
+
+<div class="admin-banner flex-end" *ngIf="showApproveButton || showReturnButton">
+    <button class="btn btn-primary mr-3" (click)="approve()" [buttonLoading]="isLoadingSubmit" [disabled]="isLoadingSubmit || !canApprove" *ngIf="showApproveButton">
+        Approve
+    </button>
+
+    <button class="btn btn-danger mr-3" (click)="return()" [buttonLoading]="isLoadingSubmit" [disabled]="isLoadingSubmit || !canReturn" *ngIf="showReturnButton">Return</button>
+</div>

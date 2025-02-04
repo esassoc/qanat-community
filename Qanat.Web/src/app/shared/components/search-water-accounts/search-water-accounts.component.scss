@@ -7,11 +7,18 @@
     position: relative;
     input {
         padding-left: 3rem;
+        padding-right: 3rem;
         font-family: inherit;
 
         &:disabled {
             background: #e5e5e5;
             cursor: not-allowed;
+        }
+
+        border-radius: 0;
+
+        &::placeholder {
+            font-size: 0.8rem;
         }
     }
     .search-prepend,
@@ -31,10 +38,21 @@
         top: 0;
         right: 0;
         button.clear {
-            margin-right: 15px;
+            margin-right: 8px;
             background: none;
             border: none;
             color: #444444;
+
+            icon {
+                display: block;
+                width: 10px;
+
+                ::ng-deep {
+                    svg {
+                        width: 100%;
+                    }
+                }
+            }
             &:hover {
                 color: #000;
             }
@@ -44,22 +62,21 @@
 
 .search-results {
     position: absolute;
-    z-index: 10;
-    box-shadow: 0px 4px 4px 0px #00000040;
+    z-index: 9999;
+    box-shadow: 0px 4px 12px 0px #00000040;
     background: #fff;
-    border-radius: 8px;
+
+    border: 1px solid $gray-200;
 
     .refine-search {
-        width: 400px;
+        width: 360px;
     }
-    ul {
-        max-height: 500px;
-        max-width: 500px;
-        overflow-y: auto;
 
-        @include desktop-small {
-            width: 400px;
-        }
+    ul {
+        max-height: 560px;
+        max-width: 360px;
+        overflow-y: auto;
+        z-index: 10;
 
         li {
             &:first-child button {
@@ -115,6 +132,10 @@
     .wa-id {
         font-size: $type-size-100;
         color: $gray-default;
+        overflow: hidden;
+        max-width: 10rem;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .wa-parcels,

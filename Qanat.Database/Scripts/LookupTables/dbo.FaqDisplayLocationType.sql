@@ -1,7 +1,8 @@
 ﻿MERGE INTO dbo.FaqDisplayLocationType AS Target
 USING (VALUES
 (1, 'GrowersGuide', 'Growers Guide'),
-(2, 'WaterManagerGuide', 'Water Manager Guide')
+(2, 'WaterManagerGuide', 'Water Manager Guide'),
+(3, 'RequestSupport', 'Request Support')
 )
 AS Source (FaqDisplayLocationTypeID, FaqDisplayLocationTypeName, FaqDisplayLocationTypeDisplayName)
 ON Target.FaqDisplayLocationTypeID = Source.FaqDisplayLocationTypeID

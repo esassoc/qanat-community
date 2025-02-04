@@ -1,4 +1,5 @@
-﻿namespace Qanat.EFModels.Entities;
+﻿//TODO: DELETE ME
+namespace Qanat.EFModels.Entities;
 
 public partial class GETAction
 {

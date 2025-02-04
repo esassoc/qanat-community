@@ -46,3 +46,6 @@ Qanat.Database/Scripts/PreReleaseScripts/*.sql
 
 Qanat.Web/srs/environments/environment.*
 !Qanat.Web/srs/environments/environment.template.ts
+/Qanat.Web/src/environments/environment.ts
+/Qanat.Web/src/environments/environment.qa.ts
+/Qanat.Web/src/environments/environment.prod.ts

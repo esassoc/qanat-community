@@ -1,0 +1,519 @@
+@use "/src/scss/abstracts" as *;
+
+.page-wrapper {
+    padding: $spacing-600;
+
+    ::ng-deep {
+        .page-header {
+            padding-bottom: 2rem;
+        }
+        .page-title span {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            color: $blue-700;
+            svg {
+                fill: $blue-700;
+            }
+        }
+    }
+}
+
+.steps {
+    .step {
+        margin-bottom: 4rem;
+        &-header {
+            display: flex;
+            align-items: center;
+            gap: $spacing-200;
+
+            padding: $spacing-400;
+            .circle-number {
+                border-radius: 50%;
+                width: 25px;
+                height: 25px;
+                background-color: #0d5b73;
+                color: #ffffff;
+                font-weight: bold;
+                text-align: center;
+                vertical-align: middle;
+                align-content: center;
+
+                &-wrapper {
+                    display: block;
+                    transform: translateY(1px);
+                }
+            }
+
+            &-text {
+                font-size: $type-size-500;
+                transform: translateY(2px);
+            }
+
+            .toggle {
+                position: absolute;
+                right: 0;
+                top: 0;
+                font-size: $type-size-500;
+                transform: rotate(90deg);
+                &:hover {
+                    cursor: pointer;
+                }
+            }
+
+            &:hover {
+                cursor: pointer;
+            }
+        }
+
+        &-header.open {
+            .toggle {
+                position: absolute;
+                right: 0;
+                top: 0;
+                font-size: $type-size-500;
+                transform: rotate(180deg);
+                &:hover {
+                    cursor: pointer;
+                }
+            }
+        }
+
+        &-description {
+            margin-top: -1rem;
+            margin-bottom: 1rem;
+        }
+
+        &-content {
+            &-form-container {
+                margin-top: 0.5rem;
+            }
+
+            .water-account-card-container {
+                min-height: 500px; //Map seems hardcoded to 500px, need this to match or else things below the fold will shift drastically on every selection.
+            }
+
+            .surface-water-container {
+                .surface-water-header-container {
+                    h5 {
+                        color: $gray-500;
+                    }
+                }
+            }
+
+            .secondary-table.table {
+                border-radius: 0;
+                border: none;
+                tbody tr > td:first-of-type {
+                    font-weight: unset;
+                }
+            }
+
+            .secondary-table {
+                th {
+                    background-color: $blue-100;
+                    color: $blue-700;
+                    border-bottom: 1px solid $blue-200;
+                    border-radius: 0;
+                    font-size: 16px;
+                    line-height: 16px;
+                    font-weight: bold;
+                }
+
+                tbody tr:nth-of-type(even) {
+                    background: $white;
+                }
+
+                tbody tr:nth-of-type(odd) {
+                    background: $gray-50;
+                }
+
+                tbody tr + tr td {
+                    border-top: none;
+                }
+
+                .mlrp-category {
+                    ::ng-deep {
+                        .field-definition-label {
+                            color: $blue-700;
+                            font-weight: bold;
+                            font-size: 20px;
+                        }
+
+                        .fa-question-circle {
+                            color: $blue-700;
+                            font-weight: bold;
+                            font-size: 20px;
+                        }
+                    }
+                }
+
+                .mlrp-description {
+                    color: $gray-800;
+                }
+
+                .mlrp-extra {
+                    color: $gray-800;
+                    span:first-of-type {
+                        font-weight: bold;
+                    }
+                }
+
+                .bold-td {
+                    font-weight: bold;
+                    font-size: 16px;
+                    line-height: 16px;
+                }
+
+                icon {
+                    position: relative;
+                    top: 3px;
+                    margin-right: $spacing-100;
+                }
+
+                icon.green-fill {
+                    color: $green-default;
+                    fill: $green-default;
+                }
+
+                icon.red-fill {
+                    color: $red-default;
+                    fill: $red-default;
+                }
+            }
+        }
+
+        &-content.output-content {
+            .baseline-scenario {
+                background-color: $gray-50;
+                color: $gray-950;
+                border: $gray-200 1px solid;
+                padding: $spacing-400;
+            }
+
+            .land-use-change-scenario {
+                background-color: $blue-50;
+                border: $blue-200 1px solid;
+                color: $blue-700;
+                padding: $spacing-400;
+            }
+
+            .savings-and-incentives {
+                background-color: $green-50;
+                border: $green-200 1px solid;
+                color: $green-600;
+                padding: $spacing-400;
+            }
+
+            h5 {
+                font-size: $type-size-400;
+            }
+
+            .tab-container {
+                margin-top: $spacing-400;
+
+                .tab-header {
+                    font-size: $type-size-300;
+                    font-weight: bold;
+                    color: $gray-950;
+                    padding: $spacing-400 0;
+                }
+
+                .tab-nav-panel.hidden {
+                    display: none;
+                }
+
+                .tab-nav {
+                    width: fit-content;
+                    .btn-sm {
+                        padding: 10px 15px 7px;
+                        border-right: 1px solid $gray-200;
+
+                        &:last-of-type {
+                            border-right: none;
+                        }
+                    }
+                }
+
+                .left-aligned {
+                    text-align: left !important;
+                }
+
+                .fee-structure-table {
+                    th {
+                        padding: $spacing-200;
+                    }
+
+                    .category-header {
+                        text-transform: uppercase;
+                        text-align: left;
+                        font-weight: bolder;
+                    }
+
+                    .light-gray-header {
+                        background-color: $gray-100;
+                        border: $gray-200 1px solid;
+                        color: $gray-950;
+                    }
+
+                    .light-blue-header {
+                        background-color: $blue-100;
+                        border: $blue-200 1px solid;
+                        color: $blue-700;
+                    }
+
+                    .lighter-gray-header {
+                        background-color: $gray-50;
+                        border-bottom: $gray-50 1px solid;
+                        color: $gray-950;
+                        text-align: left;
+                    }
+
+                    .lighter-blue-header {
+                        background-color: $blue-50;
+                        border-bottom: $blue-50 1px solid;
+                        color: $blue-700;
+                        text-align: left;
+                    }
+
+                    tbody tr:nth-child(even) {
+                        background-color: $gray-50;
+                    }
+
+                    thead {
+                        tr th {
+                            font-size: $type-size-150;
+                            border-bottom: 1px solid $gray-200;
+                            text-align: center;
+                        }
+
+                        tr:first-of-type th {
+                            font-size: $type-size-200;
+                        }
+                    }
+
+                    tbody {
+                        tr:not(:last-of-type) {
+                            border-top: 1px solid $gray-200;
+                            border-bottom: 1px solid $gray-200;
+                        }
+                        tr {
+                            td {
+                                font-weight: bold;
+                                font-size: $type-size-200;
+                                padding: $spacing-400 $spacing-200;
+                                text-align: right;
+                            }
+                        }
+                    }
+
+                    .overused {
+                        background-color: $red-lighter !important;
+                    }
+
+                    tfoot tr th {
+                        padding: $spacing-400;
+                        text-align: left;
+                    }
+
+                    tfoot tr {
+                        border-top: 1px solid $gray-800;
+                        td {
+                            padding: $spacing-400 $spacing-200;
+                            font-weight: bold;
+                            font-size: $type-size-200;
+                            text-align: right;
+                        }
+                    }
+                }
+
+                .selected-fee-structure-table {
+                    width: 100%;
+
+                    thead {
+                        tr:first-of-type {
+                            background-color: $gray-800;
+                        }
+                        tr:last-of-type {
+                            background-color: $gray-600;
+                        }
+
+                        tr {
+                            th {
+                                color: $white;
+                                font-size: $type-size-200;
+                                padding: $spacing-200 $spacing-100;
+                                text-align: center;
+                            }
+                        }
+                    }
+
+                    tbody {
+                        tr {
+                            border-bottom: 1px solid $gray-200;
+                            td {
+                                padding: $spacing-400 $spacing-200;
+                                text-align: right;
+                                font-weight: 500;
+                            }
+                        }
+
+                        tr:nth-child(even) {
+                            background-color: $gray-50;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    //hacky stuff I wish I didn't have to do
+    ::ng-deep {
+        .required::after {
+            display: none; //Hide the asterisk on required fields.
+        }
+
+        .field input[type="number"] {
+            text-align: right;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .units-wrapper {
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .units {
+            position: unset !important;
+            background-color: $gray-lighter;
+            color: $gray-950 !important;
+            border: 1px solid $gray-light;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+            border-top-right-radius: 4px;
+            border-bottom-right-radius: 4px;
+            border-left: none;
+            height: 3rem;
+            padding: 1rem;
+        }
+
+        .field-definition-title {
+            color: $gray-950;
+        }
+
+        .popover-body {
+            color: $gray-950;
+        }
+    }
+}
+
+.sub-header {
+    text-transform: uppercase;
+    font-size: $type-size-200;
+    letter-spacing: 0.05em;
+    font-weight: 500;
+    margin-bottom: $spacing-600;
+
+    &::after {
+        content: "";
+        display: block;
+        width: 100%;
+        height: 1px;
+        background-color: $gray-200;
+        transform: translateY(-8px);
+        z-index: 1;
+        position: relative;
+    }
+
+    span {
+        display: inline-block;
+        background: $white;
+        padding-right: $spacing-200;
+        z-index: 2;
+        position: relative;
+    }
+}
+
+.scenario-header {
+    border-bottom: 1px solid;
+    padding-bottom: $spacing-200;
+}
+
+.light-gray-border-bottom {
+    border-bottom-color: $gray-200;
+}
+
+.light-blue-border-bottom {
+    border-bottom-color: $blue-200;
+}
+
+.light-green-border-bottom {
+    border-bottom-color: $green-200;
+}
+
+.scenario-section {
+    margin-bottom: $spacing-400;
+
+    .content-header {
+        font-size: $type-size-200;
+        text-transform: uppercase;
+        margin: $spacing-400 0;
+    }
+
+    .content {
+        .content-row {
+            align-items: center;
+            min-height: $spacing-400;
+            margin-top: $spacing-200;
+        }
+
+        .content-row:not(:last-of-type) {
+            border-bottom: 1px solid $gray-200;
+        }
+
+        .emphasis {
+            font-weight: bold;
+        }
+
+        .right-aligned {
+            text-align: right;
+        }
+    }
+}
+
+.scenario-section:last-of-type {
+    margin-bottom: $spacing-200;
+}
+
+.no-bottom-border-important {
+    border-bottom: none !important;
+}
+
+.force-top-border-important {
+    border-top: 1px solid $gray-200 !important;
+    padding-top: $spacing-200;
+}
+
+.button-group {
+    padding: 0;
+    overflow: hidden;
+    width: auto;
+    margin-left: auto;
+    margin-right: auto;
+
+    &__item {
+        border: none;
+        border-radius: 0;
+    }
+}
+
+.expansion-panel {
+    display: none;
+
+    &.open {
+        display: block;
+    }
+}

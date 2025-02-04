@@ -16,14 +16,17 @@ namespace Qanat.EFModels.Entities
             public const int GeographyDescription = 500;
             public const int APNRegexPattern = 100;
             public const int APNRegexPatternDisplay = 50;
-            public const int OpenETShapeFilePath = 100;
-            public const int OpenETRasterTimeseriesMultipolygonColumnToUseAsIdentifier = 50;
             public const int Color = 9;
-            public const int SourceOfRecordExplanation = 500;
             public const int ContactEmail = 100;
             public const int ContactPhoneNumber = 30;
             public const int LandownerDashboardSupplyLabel = 200;
             public const int LandownerDashboardUsageLabel = 200;
+            public const int OpenETShapeFilePath = 100;
+            public const int OpenETRasterTimeseriesMultipolygonColumnToUseAsIdentifier = 50;
+            public const int SourceOfRecordExplanation = 500;
+            public const int WaterBudgetSlotAHeader = 255;
+            public const int WaterBudgetSlotBHeader = 255;
+            public const int WaterBudgetSlotCHeader = 255;
         }
     }
 }

@@ -13,7 +13,7 @@
 
         <!-- Number -->
         <ng-container *ngSwitchCase="FormFieldType.Number">
-            <div class="field-label" [class.required]="formControl | isRequired">
+            <div class="field-label" [class.required]="formControl | isRequired" *ngIf="fieldLabel">
                 {{ fieldLabel }}
             </div>
             <div class="units-wrapper">
@@ -72,11 +72,12 @@
 
         <!-- Select -->
         <ng-container *ngSwitchCase="FormFieldType.Select">
-            <label class="field-label" [class.required]="formControl | isRequired">
+            <label class="field-label" [class.required]="formControl | isRequired" *ngIf="fieldLabel">
                 {{ fieldLabel }}
             </label>
 
-            <select-dropdown *ngIf="formInputOptions; else noOptionsProvided" [formInputOptions]="formInputOptions" [formControl]="formControl"></select-dropdown>
+            <select-dropdown *ngIf="formInputOptions; else noOptionsProvided" [formInputOptions]="formInputOptions"
+                [formControl]="formControl"></select-dropdown>
             <ng-template #noOptionsProvided>
                 <span class="text-danger"> No "formInputOptions" were provided to this form field component </span>
             </ng-template>
@@ -101,14 +102,8 @@
                 {{ fieldLabel }}
             </div>
             <div class="custom-file-upload">
-                <input
-                    type="file"
-                    #fileUploadField
-                    (change)="onFileChange($event)"
-                    [accept]="uploadFileAccepts"
-                    [placeholder]="placeholder"
-                    [formControl]="formControl"
-                    [name]="name" />
+                <input type="file" #fileUploadField (change)="onFileChange($event)" [accept]="uploadFileAccepts" [placeholder]="placeholder"
+                    [formControl]="formControl" [name]="name" />
                 {{ formControl.value ? formControl.value.name : "No file chosen..." }}
                 <button type="button" class="btn btn-lg btn-primary" (click)="onClickFileUpload($event)">
                     <i class="fas fa-folder-open"></i>

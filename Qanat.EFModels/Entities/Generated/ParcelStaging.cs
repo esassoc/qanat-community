@@ -36,6 +36,8 @@ public partial class ParcelStaging
     [Unicode(false)]
     public string OwnerAddress { get; set; }
 
+    public double Acres { get; set; }
+
     public bool HasConflict { get; set; }
 
     [ForeignKey("GeographyID")]

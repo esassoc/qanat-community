@@ -1,7 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
-import { GETActionService } from "src/app/shared/generated/api/get-action.service";
 import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
 import { ModelSimpleDto } from "src/app/shared/generated/model/models";
 import { GroupByPipe } from "src/app/shared/pipes/group-by.pipe";
@@ -10,6 +9,7 @@ import { NgIf, NgFor, AsyncPipe, KeyValuePipe } from "@angular/common";
 import { RouterOutlet } from "@angular/router";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { ModelIndexCardComponent } from "src/app/shared/components/scenario-planner/model-index-card/model-index-card.component";
+import { ModelService } from "src/app/shared/generated/api/model.service";
 
 @Component({
     selector: "scenario-planner-index",
@@ -24,11 +24,15 @@ export class ScenarioPlannerIndexComponent implements OnInit {
     public modelGroups$: Observable<ReadonlyMap<string, ModelSimpleDto[]>>;
 
     constructor(
-        private getActionService: GETActionService,
+        private modelService: ModelService,
         private groupByPipe: GroupByPipe
     ) {}
 
     ngOnInit(): void {
-        this.modelGroups$ = this.getActionService.modelsGet().pipe(map((x) => this.groupByPipe.transform<ModelSimpleDto>(x, "ModelSubbasin")));
+        this.modelGroups$ = this.modelService.modelsGet().pipe(
+            map((x) => {
+                return this.groupByPipe.transform<ModelSimpleDto>(x, "ModelSubbasin");
+            })
+        );
     }
 }

@@ -33,19 +33,20 @@ public class ZoneGroupController : SitkaController<ZoneGroupController>
         return zoneGroupMinimalDtos;
     }
 
+    [HttpGet("geographies/{geographyID}/zone-groups-detailed")]
+    [WithGeographyRolePermission(PermissionEnum.ZoneGroupRights, RightsEnum.Read)]
+    public ActionResult<List<ZoneGroupDto>> GetDetailed([FromRoute] int geographyID)
+    {
+        var zoneGroupMinimalDtos = ZoneGroups.ListByGeographyAsDto(_dbContext, geographyID);
+        return zoneGroupMinimalDtos;
+    }
+
     [HttpGet("geographies/{geographyID}/zones")]
     [WithGeographyRolePermission(PermissionEnum.ZoneGroupRights, RightsEnum.Read)]
     public ActionResult<List<ZoneDetailedDto>> GetZones([FromRoute] int geographyID)
     {
         var zoneDetailedDtos = Zones.ListByGeographyIDAsZoneDetailedDto(_dbContext, geographyID);
         return zoneDetailedDtos;
-    }
-
-    [HttpGet("public/geography/{geographyID}/zone-group/{zoneGroupSlug}")]
-    [GeographyAllocationPlansPublic]
-    public ActionResult<ZoneGroupMinimalDto> GetByID([FromRoute] int geographyID, string zoneGroupSlug)
-    {
-        return ZoneGroups.GetByZoneGroupSlugAsMinimalDto(_dbContext, zoneGroupSlug, geographyID);
     }
 
     [HttpPost("zone-group/bounding-box")]

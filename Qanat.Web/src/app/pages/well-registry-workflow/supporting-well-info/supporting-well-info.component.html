@@ -49,11 +49,10 @@
                 [type]="FormFieldType.Number"></form-field>
             <form-field class="g-col-6" [formControl]="formGroup.controls.MotorHorsePower" fieldLabel="Motor/Engine" units="hp" [type]="FormFieldType.Number"></form-field>
             <form-field
-                *ngIf="fuelTypes$ | async"
                 class="g-col-6"
                 [required]="true"
                 [formControl]="formGroup.controls.FuelTypeID"
-                [formInputOptions]="fuelTypeOptions"
+                [formInputOptions]="FuelTypesSelectDropdownOptions"
                 fieldLabel="Fuel/Power"
                 [type]="FormFieldType.Radio"></form-field>
             <div class="g-col-6">

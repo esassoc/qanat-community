@@ -1,6 +1,6 @@
 <div class="model-run-card">
     <div class="thumbnail">
-        <scenario-image [scenario]="GETAction.Scenario"></scenario-image>
+        <scenario-image [scenario]="scenarioRun.Scenario"></scenario-image>
     </div>
 
     <div class="details">
@@ -9,19 +9,19 @@
         </div>
 
         <div class="info">
-            <h4>{{ GETAction.Scenario.ScenarioName }}</h4>
+            <h4>{{ scenarioRun.Scenario.ScenarioName }}</h4>
             <h3>
-                {{ GETAction.RunName }}
-                <name-tag [name]="GETAction.Model.ModelName"></name-tag>
+                {{ scenarioRun.RunName }}
+                <name-tag [name]="scenarioRun.Model.ModelName"></name-tag>
             </h3>
-            <get-action-status-bar [getAction]="GETAction"></get-action-status-bar>
+            <scenario-run-status-bar [scenarioRun]="scenarioRun"></scenario-run-status-bar>
         </div>
     </div>
 
     <div class="cta">
         <div class="mr-3">
             <a
-                [routerLink]="['/scenario-planner', 'models', GETAction.Model.ModelShortName, GETAction.Scenario.ScenarioShortName, GETAction.GETActionID]"
+                [routerLink]="['/scenario-planner', 'models', scenarioRun.Model.ModelShortName, scenarioRun.Scenario.ScenarioShortName, scenarioRun.ScenarioRunID]"
                 class="btn btn-primary-outline">
                 View Scenario Run
             </a>

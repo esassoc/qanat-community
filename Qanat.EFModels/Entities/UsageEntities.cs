@@ -102,28 +102,28 @@ public class UsageEntities
         {
             UsageEntityID = hierarchyDtoByID.UsageEntityID,
             GeographyID = hierarchyDtoByID.GeographyID,
-            WaterAccountID = hierarchyDtoByID.Parcel.WaterAccount.WaterAccountID,
+            WaterAccountID = hierarchyDtoByID.Parcel.WaterAccount?.WaterAccountID,
             ParcelID = hierarchyDtoByID.ParcelID
         };
     }
 
-    public static List<UsageEntityListItemDto> GetListByParcelID(QanatDbContext dbContext, int parcelID)
+    public static async Task<List<UsageEntityListItemDto>> GetListByParcelID(QanatDbContext dbContext, int parcelID)
     {
-        var parcel = dbContext.Parcels.AsNoTracking()
+        var parcel = await dbContext.Parcels.AsNoTracking()
             .Include(x => x.WaterAccount)
             .Include(x =>x.UsageEntities).ThenInclude(x => x.UsageEntityCrops)
-            .Single(x => x.ParcelID == parcelID);
+            .SingleAsync(x => x.ParcelID == parcelID);
 
         var usageEntities = parcel.UsageEntities.Select(usageEntity => new UsageEntityListItemDto
         {
             UsageEntityID = usageEntity.UsageEntityID,
             GeographyID = usageEntity.GeographyID,
-            WaterAccountID = usageEntity.Parcel.WaterAccount.WaterAccountID,
+            WaterAccountID = parcel.WaterAccount?.WaterAccountID,
             ParcelID = usageEntity.ParcelID,
             UsageEntityName = usageEntity.UsageEntityName,
             CropNames = usageEntity.UsageEntityCrops.Select(x => x.UsageEntityCropName).ToList(),
-            WaterAccountName = usageEntity.Parcel.WaterAccount.WaterAccountNameAndNumber(),
-            ParcelNumber = usageEntity.Parcel.ParcelNumber,
+            WaterAccountName = parcel.WaterAccount?.WaterAccountNumberAndName(),
+            ParcelNumber = parcel.ParcelNumber,
             Area = usageEntity.UsageEntityArea
         });
         
@@ -132,7 +132,7 @@ public class UsageEntities
 
     public static List<UsageEntitySimpleDto> ListByWaterAccountID(QanatDbContext dbContext, int waterAccountID)
     {
-        return  dbContext.UsageEntities.AsNoTracking()
+        return dbContext.UsageEntities.AsNoTracking()
             .Include(x => x.Parcel)
             .Where(x => x.Parcel.WaterAccountID == waterAccountID).Select(x => x.AsSimpleDto()).ToList();
     }
@@ -143,15 +143,16 @@ public class UsageEntities
             .Include(x => x.Parcel).ThenInclude(x => x.WaterAccount)
             .Include(x => x.UsageEntityCrops)
             .Single(x => x.UsageEntityID == usageEntityID);
+
         return new UsageEntityPopupDto
         {
             UsageEntityID = usageEntity.UsageEntityID,
             GeographyID = usageEntity.GeographyID,
-            WaterAccountID = usageEntity.Parcel.WaterAccount.WaterAccountID,
+            WaterAccountID = usageEntity.Parcel.WaterAccount?.WaterAccountID,
             ParcelID = usageEntity.ParcelID,
             UsageEntityName = usageEntity.UsageEntityName,
             CropNames = usageEntity.UsageEntityCrops.Select(x => x.UsageEntityCropName).ToList(),
-            WaterAccountName = usageEntity.Parcel.WaterAccount.WaterAccountNameAndNumber(),
+            WaterAccountName = usageEntity.Parcel.WaterAccount?.WaterAccountNumberAndName(),
             ParcelNumber = usageEntity.Parcel.ParcelNumber,
             Area = usageEntity.UsageEntityArea
         };

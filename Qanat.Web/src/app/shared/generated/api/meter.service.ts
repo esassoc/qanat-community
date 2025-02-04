@@ -20,7 +20,6 @@ import { Observable }                                        from 'rxjs';
 
 import { MeterGridDto } from '../model/meter-grid-dto';
 import { MeterLinkDisplayDto } from '../model/meter-link-display-dto';
-import { MeterStatusSimpleDto } from '../model/meter-status-simple-dto';
 
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
@@ -301,44 +300,6 @@ export class MeterService {
         ];
 
         return this.httpClient.get<Array<MeterGridDto>>(`${this.basePath}/geographies/${encodeURIComponent(String(geographyID))}/meters`,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        ).pipe(catchError((error: any) => { return this.apiService.handleError(error)}));
-    }
-
-    /**
-     * 
-     * 
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public meterStatusGet(observe?: 'body', reportProgress?: boolean): Observable<Array<MeterStatusSimpleDto>>;
-    public meterStatusGet(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<MeterStatusSimpleDto>>>;
-    public meterStatusGet(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<MeterStatusSimpleDto>>>;
-    public meterStatusGet(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-
-        let headers = this.defaultHeaders;
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'text/plain',
-            'application/json',
-            'text/json',
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers = headers.set('Accept', httpHeaderAcceptSelected);
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-        ];
-
-        return this.httpClient.get<Array<MeterStatusSimpleDto>>(`${this.basePath}/meter-status`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,

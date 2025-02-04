@@ -22,8 +22,6 @@ public partial class Geography
     [Unicode(false)]
     public string GeographyName { get; set; }
 
-    public int StartYear { get; set; }
-
     [Required]
     [StringLength(100)]
     [Unicode(false)]
@@ -43,33 +41,11 @@ public partial class Geography
     [Unicode(false)]
     public string APNRegexPatternDisplay { get; set; }
 
-    public bool IsOpenETActive { get; set; }
-
-    [StringLength(100)]
-    [Unicode(false)]
-    public string OpenETShapeFilePath { get; set; }
-
-    [StringLength(50)]
-    [Unicode(false)]
-    public string OpenETRasterTimeseriesMultipolygonColumnToUseAsIdentifier { get; set; }
-
-    public int CoordinateSystem { get; set; }
-
-    public int AreaToAcresConversionFactor { get; set; }
-
-    public bool IsDemoGeography { get; set; }
-
     public int? GSACanonicalID { get; set; }
 
     [StringLength(9)]
     [Unicode(false)]
     public string Color { get; set; }
-
-    public int? SourceOfRecordWaterMeasurementTypeID { get; set; }
-
-    [StringLength(500)]
-    [Unicode(false)]
-    public string SourceOfRecordExplanation { get; set; }
 
     [StringLength(100)]
     [Unicode(false)]
@@ -78,8 +54,6 @@ public partial class Geography
     [StringLength(30)]
     [Unicode(false)]
     public string ContactPhoneNumber { get; set; }
-
-    public int DefaultDisplayYear { get; set; }
 
     [Required]
     [StringLength(200)]
@@ -91,9 +65,57 @@ public partial class Geography
     [Unicode(false)]
     public string LandownerDashboardUsageLabel { get; set; }
 
+    public int CoordinateSystem { get; set; }
+
+    public int AreaToAcresConversionFactor { get; set; }
+
+    public int? DefaultReportingPeriodID { get; set; }
+
+    public bool IsOpenETActive { get; set; }
+
+    [StringLength(100)]
+    [Unicode(false)]
+    public string OpenETShapeFilePath { get; set; }
+
+    [StringLength(50)]
+    [Unicode(false)]
+    public string OpenETRasterTimeseriesMultipolygonColumnToUseAsIdentifier { get; set; }
+
+    public int? SourceOfRecordWaterMeasurementTypeID { get; set; }
+
+    [StringLength(500)]
+    [Unicode(false)]
+    public string SourceOfRecordExplanation { get; set; }
+
+    public bool ShowSupplyOnWaterBudgetComponent { get; set; }
+
+    [StringLength(255)]
+    [Unicode(false)]
+    public string WaterBudgetSlotAHeader { get; set; }
+
+    public int? WaterBudgetSlotAWaterMeasurementTypeID { get; set; }
+
+    [StringLength(255)]
+    [Unicode(false)]
+    public string WaterBudgetSlotBHeader { get; set; }
+
+    public int? WaterBudgetSlotBWaterMeasurementTypeID { get; set; }
+
+    [StringLength(255)]
+    [Unicode(false)]
+    public string WaterBudgetSlotCHeader { get; set; }
+
+    public int? WaterBudgetSlotCWaterMeasurementTypeID { get; set; }
+
+    public bool FeeCalculatorEnabled { get; set; }
+
+    public bool AllowWaterMeasurementSelfReporting { get; set; }
+
     public bool DisplayUsageGeometriesAsField { get; set; }
 
     public bool AllowLandownersToRequestAccountChanges { get; set; }
+
+    public bool IsDemoGeography { get; set; }
 
     [InverseProperty("Geography")]
     public virtual ICollection<AllocationPlan> AllocationPlans { get; set; } = new List<AllocationPlan>();
@@ -103,6 +125,10 @@ public partial class Geography
 
     [InverseProperty("Geography")]
     public virtual ICollection<CustomRichText> CustomRichTexts { get; set; } = new List<CustomRichText>();
+
+    [ForeignKey("DefaultReportingPeriodID")]
+    [InverseProperty("Geographies")]
+    public virtual ReportingPeriod DefaultReportingPeriod { get; set; }
 
     [InverseProperty("Geography")]
     public virtual ICollection<ExternalMapLayer> ExternalMapLayers { get; set; } = new List<ExternalMapLayer>();
@@ -119,6 +145,9 @@ public partial class Geography
 
     [InverseProperty("Geography")]
     public virtual ICollection<GeographyUser> GeographyUsers { get; set; } = new List<GeographyUser>();
+
+    [InverseProperty("Geography")]
+    public virtual ICollection<IrrigationMethod> IrrigationMethods { get; set; } = new List<IrrigationMethod>();
 
     [InverseProperty("Geography")]
     public virtual ICollection<Meter> Meters { get; set; } = new List<Meter>();
@@ -151,11 +180,14 @@ public partial class Geography
     public virtual ICollection<ReferenceWell> ReferenceWells { get; set; } = new List<ReferenceWell>();
 
     [InverseProperty("Geography")]
-    public virtual ReportingPeriod ReportingPeriod { get; set; }
+    public virtual ICollection<ReportingPeriod> ReportingPeriods { get; set; } = new List<ReportingPeriod>();
 
     [ForeignKey("SourceOfRecordWaterMeasurementTypeID")]
-    [InverseProperty("Geographies")]
+    [InverseProperty("GeographySourceOfRecordWaterMeasurementTypes")]
     public virtual WaterMeasurementType SourceOfRecordWaterMeasurementType { get; set; }
+
+    [InverseProperty("Geography")]
+    public virtual ICollection<SupportTicket> SupportTickets { get; set; } = new List<SupportTicket>();
 
     [InverseProperty("Geography")]
     public virtual ICollection<UploadedGdb> UploadedGdbs { get; set; } = new List<UploadedGdb>();
@@ -174,6 +206,21 @@ public partial class Geography
 
     [InverseProperty("Geography")]
     public virtual ICollection<WaterAccount> WaterAccounts { get; set; } = new List<WaterAccount>();
+
+    [ForeignKey("WaterBudgetSlotAWaterMeasurementTypeID")]
+    [InverseProperty("GeographyWaterBudgetSlotAWaterMeasurementTypes")]
+    public virtual WaterMeasurementType WaterBudgetSlotAWaterMeasurementType { get; set; }
+
+    [ForeignKey("WaterBudgetSlotBWaterMeasurementTypeID")]
+    [InverseProperty("GeographyWaterBudgetSlotBWaterMeasurementTypes")]
+    public virtual WaterMeasurementType WaterBudgetSlotBWaterMeasurementType { get; set; }
+
+    [ForeignKey("WaterBudgetSlotCWaterMeasurementTypeID")]
+    [InverseProperty("GeographyWaterBudgetSlotCWaterMeasurementTypes")]
+    public virtual WaterMeasurementType WaterBudgetSlotCWaterMeasurementType { get; set; }
+
+    [InverseProperty("Geography")]
+    public virtual ICollection<WaterMeasurementSelfReport> WaterMeasurementSelfReports { get; set; } = new List<WaterMeasurementSelfReport>();
 
     [InverseProperty("Geography")]
     public virtual ICollection<WaterMeasurementTypeDependency> WaterMeasurementTypeDependencies { get; set; } = new List<WaterMeasurementTypeDependency>();

@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -38,13 +37,6 @@ public class CustomAttributeController : SitkaController<CustomAttributeControll
     {
         CustomAttributes.MergeByGeographyIDAndTypeID(_dbContext, geographyID, customAttributeTypeID, customAttributeSimpleDtos);
         return Ok();
-    }
-
-    [HttpGet("custom-attributes/types")]
-    [Authorize]
-    public ActionResult<List<CustomAttributeTypeSimpleDto>> ListCustomAttributesTypes()
-    {
-        return Ok(CustomAttributeType.AllAsSimpleDto);
     }
 
     [HttpGet("custom-attributes/water-accounts/{waterAccountID}")]

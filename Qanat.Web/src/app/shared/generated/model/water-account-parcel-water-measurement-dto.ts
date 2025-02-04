@@ -15,6 +15,7 @@ import { FormControl, FormControlOptions, FormControlState, Validators } from "@
 export class WaterAccountParcelWaterMeasurementDto { 
     ParcelID?: number;
     ParcelNumber?: string;
+    ParcelArea?: number;
     UsageEntityArea?: number;
     WaterMeasurementTypeID?: number;
     WaterMeasurementTypeName?: string;
@@ -29,6 +30,7 @@ export class WaterAccountParcelWaterMeasurementDto {
 export interface WaterAccountParcelWaterMeasurementDtoForm { 
     ParcelID?: FormControl<number>;
     ParcelNumber?: FormControl<string>;
+    ParcelArea?: FormControl<number>;
     UsageEntityArea?: FormControl<number>;
     WaterMeasurementTypeID?: FormControl<number>;
     WaterMeasurementTypeName?: FormControl<string>;
@@ -49,6 +51,16 @@ export class WaterAccountParcelWaterMeasurementDtoFormControls {
         }
     );
     public static ParcelNumber = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
+        value,
+        formControlOptions ?? 
+        {
+            nonNullable: false,
+            validators: 
+            [
+            ],
+        }
+    );
+    public static ParcelArea = (value: FormControlState<number> | number = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<number>(
         value,
         formControlOptions ?? 
         {

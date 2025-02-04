@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter } from "@angular/core";
 import * as L from "leaflet";
+import { ScenarioObservationPointDto, ScenarioPumpingWellDto, ScenarioRechargeSiteDto } from "../../generated/model/models";
 
 @Component({
     selector: "scenario-map-marker-layer",
@@ -24,7 +25,7 @@ export class ScenarioMapMarkerLayerComponent {
         this.updateMarkerLayers();
     }
 
-    @Output() markerSelected = new EventEmitter<object>();
+    @Output() markerSelected = new EventEmitter<ScenarioRechargeSiteDto | ScenarioObservationPointDto | ScenarioPumpingWellDto>();
 
     private _markerObjects: Array<any>;
     private _selectedMarkerObject: any;

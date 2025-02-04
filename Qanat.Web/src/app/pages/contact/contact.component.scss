@@ -1,0 +1,233 @@
+@use "/src/scss/abstracts" as *;
+
+.rich-link {
+    display: grid;
+    gap: $spacing-400;
+    padding: $spacing-600;
+    border: 1px solid rgba($black, 0.1);
+    border-radius: $spacing-200;
+    height: 100%;
+
+    icon {
+        color: $primary;
+
+        ::ng-deep {
+            svg {
+                width: $spacing-400;
+                height: $spacing-400;
+            }
+        }
+    }
+
+    &-header {
+        display: grid;
+        gap: $spacing-200;
+    }
+
+    &-body {
+        color: $gray-900;
+
+        strong {
+            color: $gray-1000;
+        }
+    }
+}
+
+.section-spacing-top {
+    padding-top: $spacing-900;
+}
+
+.featured {
+    &__sidebar {
+        display: grid;
+        gap: $spacing-600;
+        align-items: start;
+    }
+}
+
+.feature {
+    border: 1px solid $gray-200;
+    border-radius: $border-radius-200;
+    box-shadow: 0px 2px 12px 0px rgba($gray-1000, 0.1);
+    display: grid;
+    align-items: center;
+
+    &__inline {
+        @include tablet {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .feature__photo {
+            aspect-ratio: 16 / 9;
+
+            @include tablet {
+                aspect-ratio: 4 / 3;
+            }
+
+            @include desktop-small {
+                aspect-ratio: 16 / 9;
+            }
+
+            @include desktop-medium {
+                aspect-ratio: 4 / 3;
+            }
+
+            img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+        }
+    }
+
+    &__info {
+        padding: $spacing-500 $spacing-600;
+        display: grid;
+        gap: $spacing-400;
+        align-content: start;
+    }
+
+    &__headline {
+        color: $blue-700;
+        font-weight: 600;
+        font-size: $type-size-400;
+    }
+
+    &__link {
+        justify-self: start;
+    }
+}
+
+.video-thumbnail {
+    &__link {
+        display: grid;
+
+        & > * {
+            grid-column: 1;
+            grid-row: 1;
+        }
+    }
+
+    &__btn {
+        z-index: 3;
+        align-self: center;
+        justify-self: center;
+    }
+
+    &__cover {
+        z-index: 1;
+        border-radius: $border-radius-200;
+    }
+
+    &__caption {
+        z-index: 2;
+        align-self: end;
+        width: 100%;
+        display: block;
+        padding: $spacing-300;
+        color: $gray-0;
+        background: rgba($blue-700, 0.7);
+        border-top: 1px solid $blue-700;
+        font-size: $type-size-300;
+        font-weight: 500;
+        border-bottom-left-radius: $border-radius-200;
+        border-bottom-right-radius: $border-radius-200;
+    }
+}
+
+.team {
+    padding: $spacing-600;
+}
+
+.people {
+    display: grid;
+    grid-template-columns: minmax(0, $spacing-800) minmax(0, 1fr);
+    align-items: center;
+    gap: $spacing-400;
+
+    &-list {
+        display: grid;
+        align-items: start;
+        gap: $spacing-500;
+    }
+
+    & + .people {
+        border-top: 1px solid $gray-100;
+        padding-top: $spacing-500;
+    }
+
+    &__photo {
+        img {
+            border-radius: 50%;
+        }
+    }
+
+    &__info {
+        display: grid;
+        align-items: start;
+        gap: $spacing-200;
+    }
+
+    &__name {
+        display: flex;
+        align-items: center;
+        gap: $spacing-200;
+        color: $blue-700;
+        font-size: $type-size-300;
+        flex-wrap: wrap;
+
+        &-label {
+            width: 100%;
+
+            @include tablet {
+                width: auto;
+            }
+        }
+    }
+
+    &__title {
+        font-style: italic;
+        color: $gray-500;
+        font-weight: normal;
+        font-size: $type-size-200;
+    }
+
+    &__linkedin {
+        display: block;
+        transform: translateY(-2px);
+    }
+
+    &__org {
+        &-link {
+            display: flex;
+            align-items: center;
+            gap: $spacing-200;
+
+            &:hover {
+                .people__org-label {
+                    text-decoration: underline;
+                }
+            }
+        }
+
+        &-icon {
+            width: $spacing-400;
+            height: $spacing-400;
+
+            img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+            }
+        }
+
+        &-label {
+            display: block;
+            color: $gray-700;
+            font-weight: normal;
+            font-size: $type-size-200;
+            line-height: 1rem;
+            transform: translateY(1px);
+        }
+    }
+}

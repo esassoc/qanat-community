@@ -63,7 +63,7 @@ public class OpenETSyncService
             return;
         }
 
-        var openETSyncHistory = OpenETSyncHistories.CreateNew(_qanatDbContext, year, month, openETDataTypeID, geography.GeographyID);
+        var openETSyncHistory = OpenETSyncHistories.GetByOpenETSyncHistoryID(_qanatDbContext, openETSyncHistoryID) ??  OpenETSyncHistories.CreateNew(_qanatDbContext, year, month, openETDataTypeID, geography.GeographyID);
         var targetWKT = await _gdalApiService.GdalSrsInfoGetWktForCoordinateSystem(geography.CoordinateSystem);
 
         if (!await RasterUpdatedSinceMinimumLastUpdatedDate(geography, month, year, openETDataTypeID, openETSyncHistory, targetWKT))
@@ -172,12 +172,12 @@ public class OpenETSyncService
             }
 
             var rasterMetadataResult = JsonSerializer.Deserialize<RasterMetadataDateIngested>(rasterMetadataBody);
-            if (string.IsNullOrEmpty(rasterMetadataResult.BuildDate) || !DateTime.TryParse(rasterMetadataResult.BuildDate, out var responseDate))
-            {
-                await OpenETSyncHistories.UpdateOpenETSyncEntityByID(_qanatDbContext, openETSyncHistory.OpenETSyncHistoryID, OpenETSyncResultTypeEnum.DataNotAvailable);
-                return false;
-            }
-
+            //MK 10/17/2024 -- The following if block was causing problems for larger geographies. The call to OpenET is successful but the response is empty. The raster still appears in our Google Drive in that case. 
+            //if (string.IsNullOrEmpty(rasterMetadataResult.BuildDate) || !DateTime.TryParse(rasterMetadataResult.BuildDate, out var responseDate))
+            //{
+            //    await OpenETSyncHistories.UpdateOpenETSyncEntityByID(_qanatDbContext, openETSyncHistory.OpenETSyncHistoryID, OpenETSyncResultTypeEnum.DataNotAvailable);
+            //    return false;
+            //}
             var openETSyncHistoriesThatWereSuccessful = _qanatDbContext.OpenETSyncHistories.AsNoTracking()
                 .Include(x => x.OpenETSync)
                 .Where(x => x.OpenETSync.GeographyID == openETSync.GeographyID
@@ -193,8 +193,9 @@ public class OpenETSyncService
                 return true;
             }
 
+            var parsed = DateTime.TryParse(rasterMetadataResult.BuildDate, out var responseDate);
             var mostRecentSyncHistory = openETSyncHistoriesThatWereSuccessful.OrderByDescending(x => x.UpdateDate).First();
-            if (responseDate > mostRecentSyncHistory.UpdateDate)
+            if (responseDate == default || responseDate > mostRecentSyncHistory.UpdateDate)
             {
                 return true;
             }

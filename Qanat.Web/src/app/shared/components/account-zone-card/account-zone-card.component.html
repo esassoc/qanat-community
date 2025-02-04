@@ -17,8 +17,8 @@
         </a>
     </div>
 
-    <div class="g-col-5">
-        <qanat-map (onMapLoad)="handleMapReady($event)" mapHeight="400px" [showLayerControl]="false" [boundingBox]="waterAccount.Geography.BoundingBox">
+    <div class="g-col-5" *ngIf="geography$ | async as geography">
+        <qanat-map (onMapLoad)="handleMapReady($event)" mapHeight="400px" [showLayerControl]="false" [boundingBox]="geography.BoundingBox">
             <zone-group-layer
                 *ngIf="mapIsReady"
                 [displayOnLoad]="true"

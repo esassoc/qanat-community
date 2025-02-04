@@ -43,11 +43,15 @@ public partial class QanatDbContext : DbContext
 
     public virtual DbSet<GeographyUser> GeographyUsers { get; set; }
 
+    public virtual DbSet<IrrigationMethod> IrrigationMethods { get; set; }
+
     public virtual DbSet<Meter> Meters { get; set; }
 
     public virtual DbSet<ModelBoundary> ModelBoundaries { get; set; }
 
     public virtual DbSet<ModelScenario> ModelScenarios { get; set; }
+
+    public virtual DbSet<ModelUser> ModelUsers { get; set; }
 
     public virtual DbSet<MonitoringWell> MonitoringWells { get; set; }
 
@@ -75,6 +79,16 @@ public partial class QanatDbContext : DbContext
 
     public virtual DbSet<ReportingPeriod> ReportingPeriods { get; set; }
 
+    public virtual DbSet<ScenarioRun> ScenarioRuns { get; set; }
+
+    public virtual DbSet<ScenarioRunFileResource> ScenarioRunFileResources { get; set; }
+
+    public virtual DbSet<ScenarioRunOutputFile> ScenarioRunOutputFiles { get; set; }
+
+    public virtual DbSet<SupportTicket> SupportTickets { get; set; }
+
+    public virtual DbSet<SupportTicketNote> SupportTicketNotes { get; set; }
+
     public virtual DbSet<UploadedGdb> UploadedGdbs { get; set; }
 
     public virtual DbSet<UploadedWellGdb> UploadedWellGdbs { get; set; }
@@ -100,6 +114,10 @@ public partial class QanatDbContext : DbContext
     public virtual DbSet<WaterAccountUserStaging> WaterAccountUserStagings { get; set; }
 
     public virtual DbSet<WaterMeasurement> WaterMeasurements { get; set; }
+
+    public virtual DbSet<WaterMeasurementSelfReport> WaterMeasurementSelfReports { get; set; }
+
+    public virtual DbSet<WaterMeasurementSelfReportLineItem> WaterMeasurementSelfReportLineItems { get; set; }
 
     public virtual DbSet<WaterMeasurementType> WaterMeasurementTypes { get; set; }
 
@@ -241,16 +259,13 @@ public partial class QanatDbContext : DbContext
             entity.HasKey(e => e.GeographyID).HasName("PK_Geography_GeographyID");
 
             entity.Property(e => e.GeographyID).ValueGeneratedNever();
-            entity.Property(e => e.DefaultDisplayYear).HasDefaultValue(2023);
             entity.Property(e => e.LandownerDashboardSupplyLabel).HasDefaultValue("Supply");
             entity.Property(e => e.LandownerDashboardUsageLabel).HasDefaultValue("Usage");
-            entity.Property(e => e.StartYear).HasDefaultValue(2016);
+            entity.Property(e => e.ShowSupplyOnWaterBudgetComponent).HasDefaultValue(true);
 
-            entity.HasOne(d => d.GeographyConfiguration).WithOne(p => p.Geography)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Geography_GeographyConfiguration_GeographyConfigurationID_GeographyConfigurationID");
+            entity.HasOne(d => d.GeographyConfiguration).WithOne(p => p.Geography).OnDelete(DeleteBehavior.ClientSetNull);
 
-            entity.HasOne(d => d.SourceOfRecordWaterMeasurementType).WithMany(p => p.Geographies).HasConstraintName("FK_Geography_WaterMeasurementType_SourceOfRecordWaterMeasurementTypeID_WaterMeasurementTypeID");
+            entity.HasOne(d => d.SourceOfRecordWaterMeasurementType).WithMany(p => p.GeographySourceOfRecordWaterMeasurementTypes).HasConstraintName("FK_Geography_WaterMeasurementType_SourceOfRecordWaterMeasurementTypeID_WaterMeasurementTypeID");
         });
 
         modelBuilder.Entity<GeographyAllocationPlanConfiguration>(entity =>
@@ -287,6 +302,13 @@ public partial class QanatDbContext : DbContext
             entity.HasOne(d => d.User).WithMany(p => p.GeographyUsers).OnDelete(DeleteBehavior.ClientSetNull);
         });
 
+        modelBuilder.Entity<IrrigationMethod>(entity =>
+        {
+            entity.HasKey(e => e.IrrigationMethodID).HasName("PK_IrrigationMethod_IrrigationMethodID");
+
+            entity.HasOne(d => d.Geography).WithMany(p => p.IrrigationMethods).OnDelete(DeleteBehavior.ClientSetNull);
+        });
+
         modelBuilder.Entity<Meter>(entity =>
         {
             entity.HasKey(e => e.MeterID).HasName("PK_Meter_MeterID");
@@ -302,6 +324,13 @@ public partial class QanatDbContext : DbContext
         modelBuilder.Entity<ModelScenario>(entity =>
         {
             entity.HasKey(e => e.ModelScenarioID).HasName("PK_ModelScenario_ModelScenarioID");
+        });
+
+        modelBuilder.Entity<ModelUser>(entity =>
+        {
+            entity.HasKey(e => e.ModelUserID).HasName("PK_ModelUser_ModelUserID");
+
+            entity.HasOne(d => d.User).WithMany(p => p.ModelUsers).OnDelete(DeleteBehavior.ClientSetNull);
         });
 
         modelBuilder.Entity<MonitoringWell>(entity =>
@@ -421,7 +450,52 @@ public partial class QanatDbContext : DbContext
         {
             entity.HasKey(e => e.ReportingPeriodID).HasName("PK_ReportingPeriod_ReportingPeriodID");
 
-            entity.HasOne(d => d.Geography).WithOne(p => p.ReportingPeriod).OnDelete(DeleteBehavior.ClientSetNull);
+            entity.HasOne(d => d.CreateUser).WithMany(p => p.ReportingPeriodCreateUsers).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.Geography).WithMany(p => p.ReportingPeriods).OnDelete(DeleteBehavior.ClientSetNull);
+        });
+
+        modelBuilder.Entity<ScenarioRun>(entity =>
+        {
+            entity.HasKey(e => e.ScenarioRunID).HasName("PK_ScenarioRun_ScenarioRunID");
+
+            entity.HasOne(d => d.User).WithMany(p => p.ScenarioRuns).OnDelete(DeleteBehavior.ClientSetNull);
+        });
+
+        modelBuilder.Entity<ScenarioRunFileResource>(entity =>
+        {
+            entity.HasKey(e => e.ScenarioRunFileResourceID).HasName("PK_ScenarioRunFileResource_ScenarioRunFileResourceID");
+
+            entity.HasOne(d => d.FileResource).WithMany(p => p.ScenarioRunFileResources).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.ScenarioRun).WithMany(p => p.ScenarioRunFileResources).OnDelete(DeleteBehavior.ClientSetNull);
+        });
+
+        modelBuilder.Entity<ScenarioRunOutputFile>(entity =>
+        {
+            entity.HasKey(e => e.ScenarioRunOutputFileID).HasName("PK_ScenarioRunOutputFile_ScenarioRunOutputFileID");
+
+            entity.HasOne(d => d.FileResource).WithMany(p => p.ScenarioRunOutputFiles).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.ScenarioRun).WithMany(p => p.ScenarioRunOutputFiles).OnDelete(DeleteBehavior.ClientSetNull);
+        });
+
+        modelBuilder.Entity<SupportTicket>(entity =>
+        {
+            entity.HasKey(e => e.SupportTicketID).HasName("PK_SupportTicket_SupportTicketID");
+
+            entity.HasOne(d => d.Geography).WithMany(p => p.SupportTickets).OnDelete(DeleteBehavior.ClientSetNull);
+        });
+
+        modelBuilder.Entity<SupportTicketNote>(entity =>
+        {
+            entity.HasKey(e => e.SupportTicketNoteID).HasName("PK_SupportTicketNote_SupportTicketNoteID");
+
+            entity.HasOne(d => d.CreateUser).WithMany(p => p.SupportTicketNotes)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_SupportTicketNote_User_UserID");
+
+            entity.HasOne(d => d.SupportTicket).WithMany(p => p.SupportTicketNotes).OnDelete(DeleteBehavior.ClientSetNull);
         });
 
         modelBuilder.Entity<UploadedGdb>(entity =>
@@ -472,6 +546,8 @@ public partial class QanatDbContext : DbContext
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasKey(e => e.UserID).HasName("PK_User_UserID");
+
+            entity.Property(e => e.ScenarioPlannerRoleID).HasDefaultValue(1);
         });
 
         modelBuilder.Entity<WaterAccount>(entity =>
@@ -561,6 +637,32 @@ public partial class QanatDbContext : DbContext
             entity.HasOne(d => d.Geography).WithMany(p => p.WaterMeasurements).OnDelete(DeleteBehavior.ClientSetNull);
         });
 
+        modelBuilder.Entity<WaterMeasurementSelfReport>(entity =>
+        {
+            entity.HasKey(e => e.WaterMeasurementSelfReportID).HasName("PK_WaterMeasurementSelfReport_WaterMeasurementSelfReportID");
+
+            entity.HasOne(d => d.CreateUser).WithMany(p => p.WaterMeasurementSelfReportCreateUsers).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.Geography).WithMany(p => p.WaterMeasurementSelfReports).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.WaterAccount).WithMany(p => p.WaterMeasurementSelfReports).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.WaterMeasurementType).WithMany(p => p.WaterMeasurementSelfReports).OnDelete(DeleteBehavior.ClientSetNull);
+        });
+
+        modelBuilder.Entity<WaterMeasurementSelfReportLineItem>(entity =>
+        {
+            entity.HasKey(e => e.WaterMeasurementSelfReportLineItemID).HasName("PK_WaterMeasurementSelfReportLineItem_WaterMeasurementSelfReportLineItemID");
+
+            entity.HasOne(d => d.CreateUser).WithMany(p => p.WaterMeasurementSelfReportLineItemCreateUsers).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.IrrigationMethod).WithMany(p => p.WaterMeasurementSelfReportLineItems).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.Parcel).WithMany(p => p.WaterMeasurementSelfReportLineItems).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.WaterMeasurementSelfReport).WithMany(p => p.WaterMeasurementSelfReportLineItems).OnDelete(DeleteBehavior.ClientSetNull);
+        });
+
         modelBuilder.Entity<WaterMeasurementType>(entity =>
         {
             entity.HasKey(e => e.WaterMeasurementTypeID).HasName("PK_WaterMeasurementType_WaterMeasurementTypeID");
@@ -584,6 +686,8 @@ public partial class QanatDbContext : DbContext
         modelBuilder.Entity<WaterType>(entity =>
         {
             entity.HasKey(e => e.WaterTypeID).HasName("PK_WaterType_WaterTypeID");
+
+            entity.Property(e => e.WaterTypeColor).HasDefaultValue("#7F3C8D");
 
             entity.HasOne(d => d.Geography).WithMany(p => p.WaterTypes).OnDelete(DeleteBehavior.ClientSetNull);
         });

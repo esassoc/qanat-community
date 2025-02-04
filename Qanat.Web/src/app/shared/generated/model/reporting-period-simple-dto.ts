@@ -14,9 +14,14 @@ import { FormControl, FormControlOptions, FormControlState, Validators } from "@
 export class ReportingPeriodSimpleDto { 
     ReportingPeriodID?: number;
     GeographyID?: number;
-    ReportingPeriodName?: string;
-    StartMonth?: number;
-    Interval?: string;
+    Name?: string;
+    StartDate?: string;
+    EndDate?: string;
+    ReadyForAccountHolders?: boolean;
+    CreateDate?: string;
+    CreateUserID?: number;
+    UpdateDate?: string;
+    UpdateUserID?: number;
     constructor(obj?: any) {
         Object.assign(this, obj);
     }
@@ -25,9 +30,14 @@ export class ReportingPeriodSimpleDto {
 export interface ReportingPeriodSimpleDtoForm { 
     ReportingPeriodID?: FormControl<number>;
     GeographyID?: FormControl<number>;
-    ReportingPeriodName?: FormControl<string>;
-    StartMonth?: FormControl<number>;
-    Interval?: FormControl<string>;
+    Name?: FormControl<string>;
+    StartDate?: FormControl<string>;
+    EndDate?: FormControl<string>;
+    ReadyForAccountHolders?: FormControl<boolean>;
+    CreateDate?: FormControl<string>;
+    CreateUserID?: FormControl<number>;
+    UpdateDate?: FormControl<string>;
+    UpdateUserID?: FormControl<number>;
 }
 
 export class ReportingPeriodSimpleDtoFormControls { 
@@ -51,7 +61,7 @@ export class ReportingPeriodSimpleDtoFormControls {
             ],
         }
     );
-    public static ReportingPeriodName = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
+    public static Name = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
         value,
         formControlOptions ?? 
         {
@@ -61,7 +71,7 @@ export class ReportingPeriodSimpleDtoFormControls {
             ],
         }
     );
-    public static StartMonth = (value: FormControlState<number> | number = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<number>(
+    public static StartDate = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
         value,
         formControlOptions ?? 
         {
@@ -71,7 +81,57 @@ export class ReportingPeriodSimpleDtoFormControls {
             ],
         }
     );
-    public static Interval = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
+    public static EndDate = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
+        value,
+        formControlOptions ?? 
+        {
+            nonNullable: false,
+            validators: 
+            [
+            ],
+        }
+    );
+    public static ReadyForAccountHolders = (value: FormControlState<boolean> | boolean = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<boolean>(
+        value,
+        formControlOptions ?? 
+        {
+            nonNullable: false,
+            validators: 
+            [
+            ],
+        }
+    );
+    public static CreateDate = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
+        value,
+        formControlOptions ?? 
+        {
+            nonNullable: false,
+            validators: 
+            [
+            ],
+        }
+    );
+    public static CreateUserID = (value: FormControlState<number> | number = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<number>(
+        value,
+        formControlOptions ?? 
+        {
+            nonNullable: false,
+            validators: 
+            [
+            ],
+        }
+    );
+    public static UpdateDate = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
+        value,
+        formControlOptions ?? 
+        {
+            nonNullable: false,
+            validators: 
+            [
+            ],
+        }
+    );
+    public static UpdateUserID = (value: FormControlState<number> | number = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<number>(
         value,
         formControlOptions ?? 
         {

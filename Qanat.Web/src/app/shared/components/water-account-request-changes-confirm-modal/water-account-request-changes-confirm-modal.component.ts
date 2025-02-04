@@ -7,11 +7,12 @@ import { NoteComponent } from "src/app/shared/components/note/note.component";
 import { CustomRichTextComponent } from "src/app/shared/components/custom-rich-text/custom-rich-text.component";
 import { FormsModule } from "@angular/forms";
 import { IconComponent } from "../icon/icon.component";
+import { NgForOf, NgIf } from "@angular/common";
 
 @Component({
     selector: "water-account-request-changes-confirm-modal",
     standalone: true,
-    imports: [IconComponent, NoteComponent, CustomRichTextComponent, FormsModule],
+    imports: [IconComponent, NoteComponent, CustomRichTextComponent, FormsModule, NgIf, NgForOf],
     templateUrl: "./water-account-request-changes-confirm-modal.component.html",
     styleUrl: "./water-account-request-changes-confirm-modal.component.scss",
 })

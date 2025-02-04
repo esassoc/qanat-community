@@ -8,6 +8,7 @@ namespace Qanat.EFModels.Entities
     {
         public int PrimaryKey => UserID;
         public Role Role => Role.AllLookupDictionary[RoleID];
+        public ScenarioPlannerRole ScenarioPlannerRole => ScenarioPlannerRole.AllLookupDictionary[ScenarioPlannerRoleID];
 
         public static class FieldLengths
         {

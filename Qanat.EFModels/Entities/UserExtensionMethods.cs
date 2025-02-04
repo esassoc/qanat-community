@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
 using Newtonsoft.Json;
 using Qanat.Models.DataTransferObjects;
 using Qanat.Models.Security;
@@ -18,7 +16,8 @@ public static partial class UserExtensionMethods
             LastName = user.LastName,
             Email = user.Email,
             Phone = user.Phone,
-            Role = user.Role.AsRoleDto(),
+            RoleID = user.Role.RoleID,
+            RoleDisplayName = user.Role.RoleDisplayName,
             CreateDate = user.CreateDate,
             UpdateDate = user.UpdateDate,
             LastActivityDate = user.LastActivityDate,
@@ -28,10 +27,10 @@ public static partial class UserExtensionMethods
             Company = user.Company,
             ImpersonatedUserGuid = user.ImpersonatedUserGuid,
             IsClientUser = user.IsClientUser,
-            GETRunCustomerID = user.GETRunCustomerID,
-            GETRunUserID = user.GETRunUserID,
             FullName = user.FullName,
             GeographyUser = user.GeographyUsers.Where(x => x.UserID == user.UserID).Select(x => x.AsSimpleDto()).ToList(),
+            Rights = JsonConvert.DeserializeObject<Dictionary<string, Rights>>(user.Role.Rights),
+            Flags = JsonConvert.DeserializeObject<Dictionary<string, bool>>(user.Role.Flags),
             GeographyRights = user.GeographyUsers.Select(x => new { x.GeographyID, Role = x.GeographyRole })
                 .ToDictionary(x => x.GeographyID, x => x.Role.AsGeographyRights()),
             GeographyFlags = user.GeographyUsers.Select(x => new { x.GeographyID, Role = x.GeographyRole })
@@ -40,7 +39,14 @@ public static partial class UserExtensionMethods
                 .ToDictionary(x => x.WaterAccountID, x => x.Role.AsWaterAccountRights()),
             WaterAccountFlags = user.WaterAccountUsers.Select(x => new { x.WaterAccountID, Role = x.WaterAccountRole })
                 .ToDictionary(x => x.WaterAccountID, x => x.Role.AsWaterAccountFlags()),
-            NumberOfWaterAccounts = user.WaterAccountUsers.Count
+            NumberOfWaterAccounts = user.WaterAccountUsers.Count,
+
+            ScenarioPlannerRoleID = user.ScenarioPlannerRoleID,
+            ScenarioPlannerRoleDisplayName = user.ScenarioPlannerRole.ScenarioPlannerRoleDisplayName,
+            Models = user.ModelUsers.OrderBy(x => x.Model.ModelName).Select(x => x.Model.AsSimpleDto()).ToList(),
+            ScenarioPlannerRights = JsonConvert.DeserializeObject<Dictionary<string, Rights>>(user.ScenarioPlannerRole.Rights),
+            GETRunCustomerID = user.GETRunCustomerID,
+            GETRunUserID = user.GETRunUserID,
         };
 
         return userDto;

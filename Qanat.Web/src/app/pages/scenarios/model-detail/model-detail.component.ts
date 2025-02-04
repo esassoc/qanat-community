@@ -5,11 +5,9 @@ import { Observable } from "rxjs";
 import { switchMap, tap } from "rxjs/operators";
 import { routeParams } from "src/app/app.routes";
 import { UtilityFunctionsService } from "src/app/shared/services/utility-functions.service";
-import { GETActionService } from "src/app/shared/generated/api/get-action.service";
 import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
 import { ModelEnum } from "src/app/shared/generated/enum/model-enum";
-import { GETActionDto } from "src/app/shared/generated/model/get-action-dto";
-import { ModelSimpleDto } from "src/app/shared/generated/model/models";
+import { ModelSimpleDto, ScenarioRunDto } from "src/app/shared/generated/model/models";
 import { environment } from "src/environments/environment";
 import { NgIf, NgFor, AsyncPipe } from "@angular/common";
 import { LoadingDirective } from "../../../shared/directives/loading.directive";
@@ -17,6 +15,7 @@ import { PageHeaderComponent } from "src/app/shared/components/page-header/page-
 import { ScenarioActionsHeroComponent } from "src/app/shared/components/scenario-planner/scenario-actions-hero/scenario-actions-hero.component";
 import { ModelRunCardComponent } from "src/app/shared/components/scenario-planner/model-run-card/model-run-card.component";
 import { QanatGridComponent } from "src/app/shared/components/qanat-grid/qanat-grid.component";
+import { ModelService } from "src/app/shared/generated/api/model.service";
 
 @Component({
     selector: "model-detail",
@@ -28,8 +27,8 @@ import { QanatGridComponent } from "src/app/shared/components/qanat-grid/qanat-g
 export class ModelDetailComponent implements OnInit {
     public model$: Observable<ModelSimpleDto>;
     public isLoading: boolean = false;
-    public allModelRuns$: Observable<GETActionDto[]>;
-    public latestModelRuns: GETActionDto[] = [];
+    public allModelRuns$: Observable<ScenarioRunDto[]>;
+    public latestModelRuns: ScenarioRunDto[] = [];
     public getDashboardUrl: string;
     public customRichTextID: number;
 
@@ -37,7 +36,7 @@ export class ModelDetailComponent implements OnInit {
 
     constructor(
         private route: ActivatedRoute,
-        private getActionService: GETActionService,
+        private modelService: ModelService,
         private utilityFunctionsService: UtilityFunctionsService
     ) {}
 
@@ -46,7 +45,7 @@ export class ModelDetailComponent implements OnInit {
         this.model$ = this.route.paramMap.pipe(
             switchMap((params) => {
                 const modelShortName = params.get(routeParams.modelShortName);
-                this.allModelRuns$ = this.getActionService.modelsModelShortNameActionsGet(modelShortName).pipe(
+                this.allModelRuns$ = this.modelService.modelsModelShortNameActionsGet(modelShortName).pipe(
                     tap((x) => {
                         this.latestModelRuns = x.slice(0, 3);
                         switch (x[0].Model.ModelID) {
@@ -61,7 +60,8 @@ export class ModelDetailComponent implements OnInit {
                         }
                     })
                 );
-                return this.getActionService.modelsModelShortNameGet(modelShortName);
+
+                return this.modelService.modelsModelShortNameGet(modelShortName);
             }),
             tap((x) => {
                 this.getDashboardUrl = environment.getDashboardUrl + "/Model/ModelDetails?modelID=" + x.GETModelID;
@@ -77,7 +77,7 @@ export class ModelDetailComponent implements OnInit {
             this.utilityFunctionsService.createLinkColumnDef("Scenario Run Name", "", "", {
                 ValueGetter: (params) => {
                     return {
-                        LinkValue: params.data.Model.ModelShortName + "/" + params.data.Scenario.ScenarioShortName + "/" + params.data.GETActionID,
+                        LinkValue: params.data.Model.ModelShortName + "/" + params.data.Scenario.ScenarioShortName + "/" + params.data.ScenarioRunID,
                         LinkDisplay: params.data.RunName,
                     };
                 },
@@ -85,8 +85,8 @@ export class ModelDetailComponent implements OnInit {
                 InRouterLink: "/scenario-planner/models/",
             }),
             this.utilityFunctionsService.createBasicColumnDef("Scenario", "Scenario.ScenarioName", { CustomDropdownFilterField: "Scenario.ScenarioName" }),
-            this.utilityFunctionsService.createBasicColumnDef("Status", "GETActionStatus.GETActionStatusDisplayName", {
-                CustomDropdownFilterField: "GETActionStatus.GETActionStatusDisplayName",
+            this.utilityFunctionsService.createBasicColumnDef("Status", "ScenarioRunStatus.ScenarioRunStatusDisplayName", {
+                CustomDropdownFilterField: "ScenarioRunStatus.ScenarioRunStatusDisplayName",
             }),
             this.utilityFunctionsService.createDateColumnDef("Last Updated", "LastUpdateDate", "short"),
             this.utilityFunctionsService.createDateColumnDef("Created", "CreateDate", "short", { Sort: "desc" }),

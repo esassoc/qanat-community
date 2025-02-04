@@ -23,15 +23,11 @@ export class DeleteAllocationPeriodModalComponent implements IModal {
     modalComponentRef: ComponentRef<ModalComponent>;
     public modalContext: AllocationPeriodContext;
 
-    constructor(
-        private modalService: ModalService,
-        private allocationPlanService: AllocationPlanService,
-        private alertService: AlertService
-    ) {}
+    constructor(private modalService: ModalService, private allocationPlanService: AllocationPlanService, private alertService: AlertService) {}
 
     save(): void {
         this.allocationPlanService
-            .allocationPlansGeographyIDAllocationPlanIDAllocationPlanPeriodIDDelete(
+            .geographiesGeographyIDAllocationPlansAllocationPlanIDAllocationPlanPeriodIDDelete(
                 this.modalContext.AllocationPlanManageDto.GeographyAllocationPlanConfiguration.GeographyID,
                 this.modalContext.AllocationPlanPeriodSimpleDto.AllocationPlanID,
                 this.modalContext.AllocationPlanPeriodSimpleDto.AllocationPlanPeriodID

@@ -19,4 +19,20 @@ public static partial class ZoneGroupExtensionMethods
         };
         return dto;
     }
+
+    public static ZoneGroupDto AsDto(this ZoneGroup zoneGroup)
+    {
+        var dto = new ZoneGroupDto()
+        {
+            ZoneGroupID = zoneGroup.ZoneGroupID,
+            GeographyID = zoneGroup.GeographyID,
+            ZoneGroupName = zoneGroup.ZoneGroupName,
+            ZoneGroupSlug = zoneGroup.ZoneGroupSlug,
+            ZoneGroupDescription = zoneGroup.ZoneGroupDescription,
+            SortOrder = zoneGroup.SortOrder,
+            ZoneList = zoneGroup.Zones.Select(x => x.AsDetailedDto()).OrderBy(x => x.SortOrder).ToList(),
+            HasAllocationPlan = zoneGroup.GeographyAllocationPlanConfigurations.Any()
+        };
+        return dto;
+    }
 }

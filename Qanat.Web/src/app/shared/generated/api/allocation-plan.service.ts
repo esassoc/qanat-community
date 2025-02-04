@@ -19,7 +19,6 @@ import { CustomHttpUrlEncodingCodec }                        from '../encoder';
 import { Observable }                                        from 'rxjs';
 
 import { AllocationPlanManageDto } from '../model/allocation-plan-manage-dto';
-import { AllocationPlanMinimalDto } from '../model/allocation-plan-minimal-dto';
 import { AllocationPlanPeriodUpsertDto } from '../model/allocation-plan-period-upsert-dto';
 import { AllocationPlanPreviewChangesDto } from '../model/allocation-plan-preview-changes-dto';
 import { GeographyAllocationPlanConfigurationDto } from '../model/geography-allocation-plan-configuration-dto';
@@ -64,56 +63,6 @@ export class AllocationPlanService {
         return false;
     }
 
-
-    /**
-     * 
-     * 
-     * @param geographyID 
-     * @param allocationPlanID 
-     * @param allocationPlanPeriodID 
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public allocationPlansGeographyIDAllocationPlanIDAllocationPlanPeriodIDDelete(geographyID: number, allocationPlanID: number, allocationPlanPeriodID: number, observe?: 'body', reportProgress?: boolean): Observable<any>;
-    public allocationPlansGeographyIDAllocationPlanIDAllocationPlanPeriodIDDelete(geographyID: number, allocationPlanID: number, allocationPlanPeriodID: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<any>>;
-    public allocationPlansGeographyIDAllocationPlanIDAllocationPlanPeriodIDDelete(geographyID: number, allocationPlanID: number, allocationPlanPeriodID: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<any>>;
-    public allocationPlansGeographyIDAllocationPlanIDAllocationPlanPeriodIDDelete(geographyID: number, allocationPlanID: number, allocationPlanPeriodID: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-
-        if (geographyID === null || geographyID === undefined) {
-            throw new Error('Required parameter geographyID was null or undefined when calling allocationPlansGeographyIDAllocationPlanIDAllocationPlanPeriodIDDelete.');
-        }
-
-        if (allocationPlanID === null || allocationPlanID === undefined) {
-            throw new Error('Required parameter allocationPlanID was null or undefined when calling allocationPlansGeographyIDAllocationPlanIDAllocationPlanPeriodIDDelete.');
-        }
-
-        if (allocationPlanPeriodID === null || allocationPlanPeriodID === undefined) {
-            throw new Error('Required parameter allocationPlanPeriodID was null or undefined when calling allocationPlansGeographyIDAllocationPlanIDAllocationPlanPeriodIDDelete.');
-        }
-
-        let headers = this.defaultHeaders;
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers = headers.set('Accept', httpHeaderAcceptSelected);
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-        ];
-
-        return this.httpClient.delete<any>(`${this.basePath}/allocation-plans/${encodeURIComponent(String(geographyID))}/${encodeURIComponent(String(allocationPlanID))}/${encodeURIComponent(String(allocationPlanPeriodID))}`,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        ).pipe(catchError((error: any) => { return this.apiService.handleError(error)}));
-    }
 
     /**
      * 
@@ -326,6 +275,56 @@ export class AllocationPlanService {
      * @param geographyID 
      * @param allocationPlanID 
      * @param allocationPlanPeriodID 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public geographiesGeographyIDAllocationPlansAllocationPlanIDAllocationPlanPeriodIDDelete(geographyID: number, allocationPlanID: number, allocationPlanPeriodID: number, observe?: 'body', reportProgress?: boolean): Observable<any>;
+    public geographiesGeographyIDAllocationPlansAllocationPlanIDAllocationPlanPeriodIDDelete(geographyID: number, allocationPlanID: number, allocationPlanPeriodID: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<any>>;
+    public geographiesGeographyIDAllocationPlansAllocationPlanIDAllocationPlanPeriodIDDelete(geographyID: number, allocationPlanID: number, allocationPlanPeriodID: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<any>>;
+    public geographiesGeographyIDAllocationPlansAllocationPlanIDAllocationPlanPeriodIDDelete(geographyID: number, allocationPlanID: number, allocationPlanPeriodID: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+
+        if (geographyID === null || geographyID === undefined) {
+            throw new Error('Required parameter geographyID was null or undefined when calling geographiesGeographyIDAllocationPlansAllocationPlanIDAllocationPlanPeriodIDDelete.');
+        }
+
+        if (allocationPlanID === null || allocationPlanID === undefined) {
+            throw new Error('Required parameter allocationPlanID was null or undefined when calling geographiesGeographyIDAllocationPlansAllocationPlanIDAllocationPlanPeriodIDDelete.');
+        }
+
+        if (allocationPlanPeriodID === null || allocationPlanPeriodID === undefined) {
+            throw new Error('Required parameter allocationPlanPeriodID was null or undefined when calling geographiesGeographyIDAllocationPlansAllocationPlanIDAllocationPlanPeriodIDDelete.');
+        }
+
+        let headers = this.defaultHeaders;
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers = headers.set('Accept', httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+        ];
+
+        return this.httpClient.delete<any>(`${this.basePath}/geographies/${encodeURIComponent(String(geographyID))}/allocation-plans/${encodeURIComponent(String(allocationPlanID))}/${encodeURIComponent(String(allocationPlanPeriodID))}`,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        ).pipe(catchError((error: any) => { return this.apiService.handleError(error)}));
+    }
+
+    /**
+     * 
+     * 
+     * @param geographyID 
+     * @param allocationPlanID 
+     * @param allocationPlanPeriodID 
      * @param allocationPlanPeriodUpsertDto 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
@@ -482,145 +481,6 @@ export class AllocationPlanService {
 
         return this.httpClient.post<any>(`${this.basePath}/geographies/${encodeURIComponent(String(geographyID))}/allocation-plans/${encodeURIComponent(String(copyToAllocationPlanID))}/copy-from/${encodeURIComponent(String(copyFromAllocationPlanID))}`,
             null,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        ).pipe(catchError((error: any) => { return this.apiService.handleError(error)}));
-    }
-
-    /**
-     * 
-     * 
-     * @param geographyID 
-     * @param waterTypeSlug 
-     * @param zoneSlug 
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public publicAllocationPlansGeographyIDWaterTypeSlugZoneSlugGet(geographyID: number, waterTypeSlug: string, zoneSlug: string, observe?: 'body', reportProgress?: boolean): Observable<AllocationPlanManageDto>;
-    public publicAllocationPlansGeographyIDWaterTypeSlugZoneSlugGet(geographyID: number, waterTypeSlug: string, zoneSlug: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<AllocationPlanManageDto>>;
-    public publicAllocationPlansGeographyIDWaterTypeSlugZoneSlugGet(geographyID: number, waterTypeSlug: string, zoneSlug: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<AllocationPlanManageDto>>;
-    public publicAllocationPlansGeographyIDWaterTypeSlugZoneSlugGet(geographyID: number, waterTypeSlug: string, zoneSlug: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-
-        if (geographyID === null || geographyID === undefined) {
-            throw new Error('Required parameter geographyID was null or undefined when calling publicAllocationPlansGeographyIDWaterTypeSlugZoneSlugGet.');
-        }
-
-        if (waterTypeSlug === null || waterTypeSlug === undefined) {
-            throw new Error('Required parameter waterTypeSlug was null or undefined when calling publicAllocationPlansGeographyIDWaterTypeSlugZoneSlugGet.');
-        }
-
-        if (zoneSlug === null || zoneSlug === undefined) {
-            throw new Error('Required parameter zoneSlug was null or undefined when calling publicAllocationPlansGeographyIDWaterTypeSlugZoneSlugGet.');
-        }
-
-        let headers = this.defaultHeaders;
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'text/plain',
-            'application/json',
-            'text/json',
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers = headers.set('Accept', httpHeaderAcceptSelected);
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-        ];
-
-        return this.httpClient.get<AllocationPlanManageDto>(`${this.basePath}/public/allocation-plans/${encodeURIComponent(String(geographyID))}/${encodeURIComponent(String(waterTypeSlug))}/${encodeURIComponent(String(zoneSlug))}`,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        ).pipe(catchError((error: any) => { return this.apiService.handleError(error)}));
-    }
-
-    /**
-     * 
-     * 
-     * @param geographyID 
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public publicGeographyGeographyIDAllocationPlanConfigurationDescriptionGet(geographyID: number, observe?: 'body', reportProgress?: boolean): Observable<string>;
-    public publicGeographyGeographyIDAllocationPlanConfigurationDescriptionGet(geographyID: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<string>>;
-    public publicGeographyGeographyIDAllocationPlanConfigurationDescriptionGet(geographyID: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<string>>;
-    public publicGeographyGeographyIDAllocationPlanConfigurationDescriptionGet(geographyID: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-
-        if (geographyID === null || geographyID === undefined) {
-            throw new Error('Required parameter geographyID was null or undefined when calling publicGeographyGeographyIDAllocationPlanConfigurationDescriptionGet.');
-        }
-
-        let headers = this.defaultHeaders;
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'text/plain',
-            'application/json',
-            'text/json',
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers = headers.set('Accept', httpHeaderAcceptSelected);
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-        ];
-
-        return this.httpClient.get<string>(`${this.basePath}/public/geography/${encodeURIComponent(String(geographyID))}/allocation-plan-configuration/description`,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        ).pipe(catchError((error: any) => { return this.apiService.handleError(error)}));
-    }
-
-    /**
-     * 
-     * 
-     * @param geographyID 
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public publicGeographyGeographyIDAllocationPlansGet(geographyID: number, observe?: 'body', reportProgress?: boolean): Observable<Array<AllocationPlanMinimalDto>>;
-    public publicGeographyGeographyIDAllocationPlansGet(geographyID: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<AllocationPlanMinimalDto>>>;
-    public publicGeographyGeographyIDAllocationPlansGet(geographyID: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<AllocationPlanMinimalDto>>>;
-    public publicGeographyGeographyIDAllocationPlansGet(geographyID: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-
-        if (geographyID === null || geographyID === undefined) {
-            throw new Error('Required parameter geographyID was null or undefined when calling publicGeographyGeographyIDAllocationPlansGet.');
-        }
-
-        let headers = this.defaultHeaders;
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'text/plain',
-            'application/json',
-            'text/json',
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers = headers.set('Accept', httpHeaderAcceptSelected);
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-        ];
-
-        return this.httpClient.get<Array<AllocationPlanMinimalDto>>(`${this.basePath}/public/geography/${encodeURIComponent(String(geographyID))}/allocation-plans`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,

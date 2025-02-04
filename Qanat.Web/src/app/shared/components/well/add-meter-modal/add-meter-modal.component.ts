@@ -1,6 +1,5 @@
 import { Component, ComponentRef, OnInit } from "@angular/core";
 import { FormGroup, ReactiveFormsModule } from "@angular/forms";
-import { Observable, tap } from "rxjs";
 import { ModalService } from "src/app/shared/services/modal/modal.service";
 import { IconComponent } from "src/app/shared/components/icon/icon.component";
 import { CommonModule } from "@angular/common";
@@ -8,12 +7,12 @@ import { MeterGridDtoForm, MeterGridDtoFormControls } from "src/app/shared/gener
 import { AlertService } from "src/app/shared/services/alert.service";
 import { Alert } from "src/app/shared/models/alert";
 import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
-import { MeterStatusSimpleDto } from "src/app/shared/generated/model/meter-status-simple-dto";
 import { MeterContext } from "../update-meter-modal/update-meter-modal.component";
 import { MeterService } from "src/app/shared/generated/api/meter.service";
 import { ModalComponent } from "../../modal/modal.component";
-import { FormFieldComponent, FormFieldType, FormInputOption } from "../../forms/form-field/form-field.component";
+import { FormFieldComponent, FormFieldType } from "../../forms/form-field/form-field.component";
 import { AlertDisplayComponent } from "../../alert-display/alert-display.component";
+import { MeterStatusesAsSelectDropdownOptions } from "src/app/shared/generated/enum/meter-status-enum";
 
 @Component({
     selector: "add-meter-modal",
@@ -27,8 +26,7 @@ export class AddMeterModalComponent implements OnInit {
     modalContext: MeterContext;
     public FormFieldType = FormFieldType;
 
-    public meterStatusesSelectOptions: FormInputOption[];
-    public meterStatuses$: Observable<MeterStatusSimpleDto[]>;
+    public MeterStatusSelectDropdownOptions = MeterStatusesAsSelectDropdownOptions;
 
     public formGroup = new FormGroup<MeterGridDtoForm>({
         SerialNumber: MeterGridDtoFormControls.SerialNumber(),
@@ -49,18 +47,6 @@ export class AddMeterModalComponent implements OnInit {
 
     ngOnInit(): void {
         this.formGroup.patchValue({ GeographyID: this.modalContext.GeographyID });
-
-        this.meterStatuses$ = this.meterService.meterStatusGet().pipe(
-            tap((meterStatuses) => {
-                this.meterStatusesSelectOptions = meterStatuses.map((status) => {
-                    return {
-                        Value: status.MeterStatusID,
-                        Label: status.MeterStatusDisplayName,
-                    } as FormInputOption;
-                });
-                this.meterStatusesSelectOptions = [{ Value: null, Label: "Select an Option", Disabled: true }, ...this.meterStatusesSelectOptions];
-            })
-        );
     }
 
     close() {

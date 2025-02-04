@@ -5,10 +5,8 @@ import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { IModal, ModalService } from "src/app/shared/services/modal/modal.service";
 import { ModalComponent } from "../../../modal/modal.component";
-import { WaterAccountContext } from "../update-water-account-info/update-water-account-info.component";
 import { FormGroup, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { FormFieldType, FormFieldComponent } from "../../../forms/form-field/form-field.component";
-import { SelectedGeographyService } from "src/app/shared/services/selected-geography.service";
 import { ParcelDisplayDto } from "src/app/shared/generated/model/parcel-display-dto";
 import { WaterAccountCreateDtoForm, WaterAccountCreateDtoFormControls } from "src/app/shared/generated/model/water-account-create-dto";
 import { CustomRichTextComponent } from "../../../custom-rich-text/custom-rich-text.component";
@@ -23,7 +21,7 @@ import { WaterAccountByGeographyService } from "src/app/shared/generated/api/wat
 })
 export class CreateWaterAccountComponent implements OnInit, IModal {
     modalComponentRef: ComponentRef<ModalComponent>;
-    modalContext: WaterAccountContext;
+    modalContext: GeographyContext;
 
     public FormFieldType = FormFieldType;
     public geographyID: number;
@@ -38,17 +36,10 @@ export class CreateWaterAccountComponent implements OnInit, IModal {
 
     public customRichTextID: CustomRichTextTypeEnum = CustomRichTextTypeEnum.ModalCreateNewWaterAccount;
 
-    constructor(
-        private modalService: ModalService,
-        private alertService: AlertService,
-        private waterAccountByGeographyService: WaterAccountByGeographyService,
-        private selectedGeographyService: SelectedGeographyService
-    ) {}
+    constructor(private modalService: ModalService, private alertService: AlertService, private waterAccountByGeographyService: WaterAccountByGeographyService) {}
 
     ngOnInit(): void {
-        this.selectedGeographyService.curentUserSelectedGeographyObservable.subscribe((geography) => {
-            this.geographyID = geography.GeographyID;
-        });
+        this.geographyID = this.modalContext.geographyID;
     }
 
     close() {
@@ -57,16 +48,20 @@ export class CreateWaterAccountComponent implements OnInit, IModal {
 
     save() {
         this.alertService.clearAlerts();
-        this.waterAccountByGeographyService.geographiesGeographyIDWaterAccountsPost(this.geographyID, this.formGroup.getRawValue()).subscribe(
-            (result) => {
+        this.waterAccountByGeographyService.geographiesGeographyIDWaterAccountsPost(this.geographyID, this.formGroup.getRawValue()).subscribe({
+            next: (result) => {
                 this.alertService.clearAlerts();
-                this.alertService.pushAlert(new Alert("Created new water account successfully.", AlertContext.Success));
+                this.alertService.pushAlert(new Alert("Water account successfully created.", AlertContext.Success));
                 this.modalService.close(this.modalComponentRef, result);
             },
-            (error) => {
-                this.alertService.pushAlert(new Alert("Error occurred while attempting to create the water account.", AlertContext.Success));
+            error: (error) => {
+                this.alertService.pushAlert(new Alert("An error occurred while attempting to create a water account.", AlertContext.Success));
                 this.modalService.close(this.modalComponentRef, null);
-            }
-        );
+            },
+        });
     }
+}
+
+export class GeographyContext {
+    public geographyID: number;
 }

@@ -12,7 +12,7 @@ export class WithRolePermissionDirective {
     @Input() set withRolePermission(rolePermissionCheck: RolePermissionCheck) {
         this.viewContainer.clear(); // always clear up front
         try {
-            if (AuthorizationHelper.hasRolePermission(rolePermissionCheck.permission, rolePermissionCheck.rights, rolePermissionCheck.currentUser)) {
+            if (rolePermissionCheck != null && AuthorizationHelper.hasRolePermission(rolePermissionCheck.permission, rolePermissionCheck.rights, rolePermissionCheck.currentUser)) {
                 this.viewContainer.createEmbeddedView(this.templateRef);
             } else {
                 this.viewContainer.clear();
@@ -23,10 +23,7 @@ export class WithRolePermissionDirective {
         }
     }
 
-    constructor(
-        private templateRef: TemplateRef<any>,
-        private viewContainer: ViewContainerRef
-    ) {}
+    constructor(private templateRef: TemplateRef<any>, private viewContainer: ViewContainerRef) {}
 }
 
 export interface RolePermissionCheck {

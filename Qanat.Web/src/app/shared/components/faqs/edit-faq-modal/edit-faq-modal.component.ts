@@ -11,6 +11,7 @@ import { FrequentlyAskedQuestionAdminFormDtoForm, FrequentlyAskedQuestionAdminFo
 import { SelectDropDownModule } from "ngx-select-dropdown";
 import { FormFieldComponent, FormFieldType, FormInputOption } from "../../forms/form-field/form-field.component";
 import { CommonModule } from "@angular/common";
+import { PublicService } from "src/app/shared/generated/api/public.service";
 
 @Component({
     selector: "edit-faq-modal",
@@ -47,7 +48,8 @@ export class EditFaqModalComponent implements IModal, OnInit {
     constructor(
         private modalService: ModalService,
         private alertService: AlertService,
-        private frequentlyAskedQuestionsService: FrequentlyAskedQuestionService
+        private frequentlyAskedQuestionsService: FrequentlyAskedQuestionService,
+        private publicService: PublicService
     ) {}
 
     changedDisplayLocations(event: any) {
@@ -60,7 +62,7 @@ export class EditFaqModalComponent implements IModal, OnInit {
     }
 
     ngOnInit(): void {
-        this.frequentlyAskedQuestion$ = this.frequentlyAskedQuestionsService.publicFaqFrequentlyAskedQuestionIDGet(this.modalContext.FrequentlyAskedQuestionID).pipe(
+        this.frequentlyAskedQuestion$ = this.publicService.publicFaqFrequentlyAskedQuestionIDGet(this.modalContext.FrequentlyAskedQuestionID).pipe(
             tap((faq) => {
                 this.formGroup.patchValue(faq);
                 this.formGroup.controls.FaqDisplayLocationTypeIDs.patchValue(faq.FaqDisplayLocations.map((x) => x.FaqDisplayLocationTypeID));

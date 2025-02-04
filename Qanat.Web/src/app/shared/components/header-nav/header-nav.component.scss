@@ -169,7 +169,10 @@
 
     .qa-warning-admin {
         padding: 1.25rem 1.5rem 1rem;
-        font-size: $type-size-200;
+        font-size: $type-size-150;
+        font-family: $overpass-mono;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
         text-align: center;
         color: $white;
         z-index: 1;
@@ -177,8 +180,9 @@
         color: $white;
 
         span.fa {
-            color: $yellow-default;
-            padding-right: 0.5rem;
+            color: $yellow-dark;
+            font-size: $type-size-100;
+            padding-right: $spacing-100;
         }
     }
 
@@ -426,17 +430,24 @@
 }
 
 .qa-warning {
-    margin: 0;
-    padding: 1rem;
-    font-size: $type-size-200;
-    background: $black;
+    padding: $spacing-400;
+    background: $gray-1000;
     text-align: center;
     color: $white;
     z-index: 1;
     position: relative;
 
-    span.fa {
-        padding-right: 0.5rem;
-        color: $red-default;
+    &__icon {
+        padding-right: $spacing-300;
+        color: $yellow-dark;
+        font-size: $type-size-100;
+    }
+
+    &__message {
+        font-family: $overpass-mono;
+        font-size: $type-size-150;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 500;
     }
 }

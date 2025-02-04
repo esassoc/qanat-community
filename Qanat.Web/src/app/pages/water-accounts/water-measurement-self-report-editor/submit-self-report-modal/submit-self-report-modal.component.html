@@ -1,0 +1,28 @@
+<div class="modal-header">
+    <div>
+        <h3 class="section-title">Submit Self Report</h3>
+    </div>
+    <button type="button" class="close" (click)="close()">
+        <i class="fa fa-times-circle"></i>
+    </button>
+</div>
+
+<div class="modal-body">
+    <note noteType="warning">
+        <div class="p-2">
+            <custom-rich-text [customRichTextTypeID]="customRichTextID" [geographyID]="modalContext.GeographyID"></custom-rich-text>
+        </div>
+    </note>
+    <div class="p-4">
+        <form class="form grid-12" #submitSelfReportForm="ngForm">
+            <form-field [formControl]="formControl" fieldLabel="I understand, acknowledge and agree to all the following:"
+                checkLabel="I declare that I am authorized to provide the information requested in this form, and all of the information and statements provided herein are true and correct to the best of my knowledge."
+                [type]="FormFieldType.Check"></form-field>
+        </form>
+    </div>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-primary" (click)="submit()" [disabled]="isLoadingSubmit || !formControl.value">Submit</button>
+    <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+</div>

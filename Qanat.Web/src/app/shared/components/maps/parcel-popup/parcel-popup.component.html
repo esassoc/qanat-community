@@ -9,12 +9,12 @@
         </div>
 
         <div class="popup-body">
-            <a [routerLink]="['/water-dashboard/parcels', parcel.ParcelID]">
+            <a [routerLink]="['/parcels', parcel.ParcelID]">
                 <parcel-title [parcelNumber]="parcel.ParcelNumber" [large]="true"></parcel-title>
             </a>
 
-            <span class="acres">{{ parcel.ParcelArea | number: "1.2-2" }} acres</span>
-            <a [routerLink]="['/water-dashboard/water-accounts', parcel.WaterAccountID]">
+            <span class="acres">{{ parcel.ParcelArea | number : "1.2-2" }} acres</span>
+            <a [routerLink]="['/water-accounts', parcel.WaterAccountID]">
                 <water-account-title
                     *ngIf="parcel.WaterAccountID"
                     [waterAccountName]="parcel.WaterAccountName"

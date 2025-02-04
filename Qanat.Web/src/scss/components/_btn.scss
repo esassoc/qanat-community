@@ -119,13 +119,13 @@
 
         &-outline {
             background: $white;
-            color: $primary;
-            border: 1px solid $primary;
+            color: $blue-700;
+            border: 1px solid $blue-700;
 
             &:hover {
-                background: $primary;
+                background: $blue-700;
                 color: $white;
-                border: 1px solid $primary;
+                border: 1px solid $blue-700;
                 svg path {
                     fill: $white;
                 }

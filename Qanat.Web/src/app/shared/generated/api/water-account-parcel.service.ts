@@ -18,7 +18,8 @@ import { CustomHttpUrlEncodingCodec }                        from '../encoder';
 
 import { Observable }                                        from 'rxjs';
 
-import { ParcelDetailDto } from '../model/parcel-detail-dto';
+import { ParcelIndexGridDto } from '../model/parcel-index-grid-dto';
+import { ParcelMinimalDto } from '../model/parcel-minimal-dto';
 import { WaterAccountMinimalDto } from '../model/water-account-minimal-dto';
 
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
@@ -69,9 +70,9 @@ export class WaterAccountParcelService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public waterAccountsWaterAccountIDParcelsGet(waterAccountID: number, observe?: 'body', reportProgress?: boolean): Observable<Array<ParcelDetailDto>>;
-    public waterAccountsWaterAccountIDParcelsGet(waterAccountID: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<ParcelDetailDto>>>;
-    public waterAccountsWaterAccountIDParcelsGet(waterAccountID: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<ParcelDetailDto>>>;
+    public waterAccountsWaterAccountIDParcelsGet(waterAccountID: number, observe?: 'body', reportProgress?: boolean): Observable<Array<ParcelIndexGridDto>>;
+    public waterAccountsWaterAccountIDParcelsGet(waterAccountID: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<ParcelIndexGridDto>>>;
+    public waterAccountsWaterAccountIDParcelsGet(waterAccountID: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<ParcelIndexGridDto>>>;
     public waterAccountsWaterAccountIDParcelsGet(waterAccountID: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         if (waterAccountID === null || waterAccountID === undefined) {
@@ -95,7 +96,55 @@ export class WaterAccountParcelService {
         const consumes: string[] = [
         ];
 
-        return this.httpClient.get<Array<ParcelDetailDto>>(`${this.basePath}/water-accounts/${encodeURIComponent(String(waterAccountID))}/parcels`,
+        return this.httpClient.get<Array<ParcelIndexGridDto>>(`${this.basePath}/water-accounts/${encodeURIComponent(String(waterAccountID))}/parcels`,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        ).pipe(catchError((error: any) => { return this.apiService.handleError(error)}));
+    }
+
+    /**
+     * 
+     * 
+     * @param waterAccountID 
+     * @param year 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public waterAccountsWaterAccountIDParcelsMinimalsYearsYearGet(waterAccountID: number, year: number, observe?: 'body', reportProgress?: boolean): Observable<Array<ParcelMinimalDto>>;
+    public waterAccountsWaterAccountIDParcelsMinimalsYearsYearGet(waterAccountID: number, year: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<ParcelMinimalDto>>>;
+    public waterAccountsWaterAccountIDParcelsMinimalsYearsYearGet(waterAccountID: number, year: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<ParcelMinimalDto>>>;
+    public waterAccountsWaterAccountIDParcelsMinimalsYearsYearGet(waterAccountID: number, year: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+
+        if (waterAccountID === null || waterAccountID === undefined) {
+            throw new Error('Required parameter waterAccountID was null or undefined when calling waterAccountsWaterAccountIDParcelsMinimalsYearsYearGet.');
+        }
+
+        if (year === null || year === undefined) {
+            throw new Error('Required parameter year was null or undefined when calling waterAccountsWaterAccountIDParcelsMinimalsYearsYearGet.');
+        }
+
+        let headers = this.defaultHeaders;
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'text/plain',
+            'application/json',
+            'text/json',
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers = headers.set('Accept', httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+        ];
+
+        return this.httpClient.get<Array<ParcelMinimalDto>>(`${this.basePath}/water-accounts/${encodeURIComponent(String(waterAccountID))}/parcels/minimals/years/${encodeURIComponent(String(year))}`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,

@@ -49,5 +49,11 @@ public partial class FileResource
     public virtual ICollection<OpenETSyncHistory> OpenETSyncHistories { get; set; } = new List<OpenETSyncHistory>();
 
     [InverseProperty("FileResource")]
+    public virtual ICollection<ScenarioRunFileResource> ScenarioRunFileResources { get; set; } = new List<ScenarioRunFileResource>();
+
+    [InverseProperty("FileResource")]
+    public virtual ICollection<ScenarioRunOutputFile> ScenarioRunOutputFiles { get; set; } = new List<ScenarioRunOutputFile>();
+
+    [InverseProperty("FileResource")]
     public virtual ICollection<WellRegistrationFileResource> WellRegistrationFileResources { get; set; } = new List<WellRegistrationFileResource>();
 }

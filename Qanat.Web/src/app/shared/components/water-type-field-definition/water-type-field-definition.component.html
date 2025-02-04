@@ -18,7 +18,7 @@
             <editor #tinyMceEditor [init]="tinyMceConfig" [(ngModel)]="editedContent"></editor>
             <div class="editor-buttons">
                 <button type="button" class="btn btn-sm btn-primary mt-1 mr-1 mb-1" (click)="saveEdit(waterType)">Save</button>
-                <button type="button" class="btn btn-sm btn-secondary mt-1 mb-1" (click)="cancelEdit(p)">Cancel</button>
+                <button type="button" class="btn btn-sm btn-secondary mt-1 mb-1" (click)="cancelEdit()">Cancel</button>
             </div>
         </div>
     </ng-template>

@@ -1,0 +1,240 @@
+<div class="dashboard">
+    <aside class="sidebar support-sidebar">
+        <div class="sidebar-header support-sidebar__header">
+            <icon class="support-logo" icon="SupportLogo"></icon>
+            <h2 class="support-sidebar__title">Support Desk</h2>
+        </div>
+
+        <div class="sidebar-body sticky">
+            <ul class="sidebar-nav">
+                <li class="sidebar-item">
+                    <a class="inbox-link sidebar-link flex-between" [routerLink]="['../']">
+                        <icon icon="Inbox"></icon>
+                        <span class="sidebar-link__label">Inbox</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </aside>
+
+    <main class="main" *ngIf="supportTicket$ | async as supportTicket">
+        <page-header
+            [pageTitle]="'Ticket: #' + supportTicketID"
+            [icon]="'Inbox'"
+            [class]="'support-page-header'"
+            [templateTitleAppend]="templateTitleAppend"
+            [templateAbove]="templateAbove">
+        </page-header>
+
+        <ng-template #templateTitleAppend>
+            <name-tag [name]="supportTicket.CreateUserFullName"></name-tag>
+        </ng-template>
+
+        <ng-template #templateAbove>
+            <div class="back">
+                <a [routerLink]="['../']" class="back__link">Back to Support Tickets</a>
+            </div>
+        </ng-template>
+
+        <div class="page-body statistics activity grid-12">
+            <div class="g-col-8">
+                <div class="sub-nav">
+                    <a class="sub-nav__link" [ngClass]="{ active: currentTab == 'Feed' }" (click)="changeTab('Feed')">Feed</a>
+                    <a class="sub-nav__link" [ngClass]="{ active: currentTab == 'Notes' }" (click)="changeTab('Notes')"
+                        >Notes
+                        <!--TODO: Display count of Notes --></a
+                    >
+                    <!-- <a class="sub-nav__link">Attachments</a> -->
+                </div>
+
+                <div *ngIf="currentTab == 'Feed'">
+                    <div class="feed">
+                        <div class="date">{{ supportTicket.DateCreated | date }}</div>
+
+                        <div class="original-ticket avatar-display">
+                            <div class="user-initials poster">
+                                <span>{{ getInitials(supportTicket.ContactFirstName, supportTicket.ContactLastName) }}</span>
+                            </div>
+
+                            <div class="original-ticket__info">
+                                <div class="notification">
+                                    <span class="name">{{ supportTicket.CreateUserFullName }}</span> created a ticket.
+                                    <span class="time">{{ supportTicket.DateCreated | date : "shortTime" }}</span>
+                                </div>
+                                <div class="ticket-body">
+                                    <key-value-pair-list>
+                                        <key-value-pair [horizontal]="true">
+                                            <ng-container key>Question Type:</ng-container>
+                                            <ng-container keyValue>
+                                                <div>{{ supportTicket.SupportTicketQuestionType.SupportTicketQuestionTypeDisplayName }}</div>
+                                            </ng-container>
+                                        </key-value-pair>
+                                        <key-value-pair [horizontal]="true">
+                                            <ng-container key>Body:</ng-container>
+                                            <ng-container keyValue>
+                                                <div class="copy copy-3 flow" [innerHTML]="loadHTML(supportTicket.Description)"></div>
+                                            </ng-container>
+                                        </key-value-pair>
+                                        <key-value-pair [horizontal]="true">
+                                            <ng-container key>Name:</ng-container>
+                                            <ng-container keyValue>
+                                                <div>{{ supportTicket.ContactFirstName }} {{ supportTicket.ContactLastName }}</div>
+                                            </ng-container>
+                                        </key-value-pair>
+                                        <key-value-pair [horizontal]="true" *ngIf="supportTicket.ContactEmail">
+                                            <ng-container key>Email:</ng-container>
+                                            <ng-container keyValue>
+                                                <div>{{ supportTicket.ContactEmail }}</div>
+                                            </ng-container>
+                                        </key-value-pair>
+                                        <key-value-pair [horizontal]="true" *ngIf="supportTicket.ContactPhoneNumber">
+                                            <ng-container key>Phone:</ng-container>
+                                            <ng-container keyValue>
+                                                <div>{{ supportTicket.ContactPhoneNumber | phone }}</div>
+                                            </ng-container>
+                                        </key-value-pair>
+                                        <key-value-pair [horizontal]="true">
+                                            <ng-container key>Date Created:</ng-container>
+                                            <ng-container keyValue>
+                                                <div>{{ supportTicket.DateCreated | date : "medium" }}</div>
+                                            </ng-container>
+                                        </key-value-pair>
+                                    </key-value-pair-list>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="additional-notes" *ngIf="supportTicketNotes$ | async as supportTicketNotes">
+                            <div class="additional-note" *ngFor="let supportTicketNote of supportTicketNotes">
+                                <div class="date">{{ supportTicketNote.CreateDate | date }}</div>
+
+                                <div class="additional-note__wrapper avatar-display">
+                                    <div class="user-initials">
+                                        <span>{{ getInitials(supportTicketNote.CreateUserFullName, supportTicketNote.CreateUserFullName.split(" ")[1]) }}</span>
+                                    </div>
+
+                                    <div class="additional-note__info">
+                                        <div class="notification">
+                                            <span class="name">{{ supportTicketNote.CreateUserFullName }}</span>
+                                            <span *ngIf="supportTicketNote.InternalNote; else response"> added an internal note.</span>
+                                            <ng-template #response> responded.</ng-template>
+                                            <span class="time">{{ supportTicketNote.CreateDate | date : "shortTime" }}</span>
+                                        </div>
+                                        <div
+                                            [ngClass]="{ 'internal-response-body': supportTicketNote.InternalNote }"
+                                            class="response-body copy copy-2"
+                                            [innerHTML]="loadHTML(supportTicketNote.Message)"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- <form [formGroup]="formGroup">
+                        <form-field
+                            [formControl]="formGroup.controls.Message"
+                            [fieldLabel]="'Respond to ' + supportTicket.CreateUserFullName"
+                            [required]="true"
+                            [type]="FormFieldType.RTE"></form-field>
+                    </form>
+                    <div class="btn-actions">
+                        <button type="submit" class="btn btn-sm btn-primary" [disabled]="isLoadingSubmit" [buttonLoading]="isLoadingSubmit" (click)="onSubmit(false)">Save</button>
+                        <a class="btn btn-sm btn-primary-outline" routerLink="..">Cancel</a>
+                    </div> -->
+                </div>
+
+                <div *ngIf="currentTab == 'Notes'">
+                    <div class="feed">
+                        <div class="additional-notes" *ngIf="supportTicketNotes$ | async as supportTicketNotes">
+                            <div *ngFor="let supportTicketNote of supportTicketNotes">
+                                <div class="additional-note" *ngIf="supportTicketNote.InternalNote">
+                                    <div class="date">{{ supportTicketNote.CreateDate | date }}</div>
+
+                                    <div class="additional-note__wrapper avatar-display">
+                                        <div class="user-initials">
+                                            <span>{{ getInitials(supportTicketNote.CreateUserFullName, supportTicketNote.CreateUserFullName) }}</span>
+                                        </div>
+
+                                        <div class="additional-note__info">
+                                            <div class="notification">
+                                                <span class="name">{{ supportTicketNote.CreateUserFullName }}</span>
+                                                <span *ngIf="supportTicketNote.InternalNote"> added an internal note.</span>
+                                                <span class="time">{{ supportTicketNote.CreateDate | date : "shortTime" }}</span>
+                                            </div>
+                                            <div class="internal-response-body copy copy-2" [innerHTML]="loadHTML(supportTicketNote.Message)"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <form [formGroup]="formGroup">
+                        <form-field [formControl]="formGroup.controls.Message" fieldLabel="Internal Note" [required]="true" [type]="FormFieldType.RTE"></form-field>
+                    </form>
+                    <div class="pt-2 flex-end">
+                        <button type="submit" class="btn btn-primary" [disabled]="isLoadingSubmit" [buttonLoading]="isLoadingSubmit" (click)="onSubmit(true)">Save</button>
+                        <a class="btn btn-primary-outline ml-2" routerLink="..">Cancel</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="details g-col-4">
+                <div class="details__header flex-between">
+                    <h3>Details</h3>
+                    <a (click)="openUpdateModal(supportTicket)">Edit</a>
+                </div>
+
+                <div class="details__body">
+                    <key-value-pair-list>
+                        <key-value-pair [horizontal]="true">
+                            <ng-container key>Geography</ng-container>
+                            <ng-container keyValue>
+                                <div>{{ supportTicket.GeographyName }}</div>
+                            </ng-container>
+                        </key-value-pair>
+                        <key-value-pair [horizontal]="true">
+                            <ng-container key>Reporter</ng-container>
+                            <ng-container keyValue>
+                                <div>{{ supportTicket.CreateUserFullName }}</div>
+                            </ng-container>
+                        </key-value-pair>
+                        <key-value-pair [horizontal]="true">
+                            <ng-container key>Assignee</ng-container>
+                            <ng-container keyValue>
+                                <div>{{ supportTicket.AssignedUserFullName }}</div>
+                            </ng-container>
+                        </key-value-pair>
+                        <key-value-pair [horizontal]="true">
+                            <ng-container key>Status</ng-container>
+                            <ng-container keyValue>
+                                <div>{{ supportTicket.SupportTicketStatus.SupportTicketStatusDisplayName }}</div>
+                            </ng-container>
+                        </key-value-pair>
+                        <key-value-pair [horizontal]="true">
+                            <ng-container key>Priority</ng-container>
+                            <ng-container keyValue>
+                                <div>{{ supportTicket.SupportTicketPriority.SupportTicketPriorityDisplayName }}</div>
+                            </ng-container>
+                        </key-value-pair>
+                        <key-value-pair [horizontal]="true">
+                            <ng-container key>Type</ng-container>
+                            <ng-container keyValue>
+                                <div>{{ supportTicket.SupportTicketQuestionType.SupportTicketQuestionTypeDisplayName }}</div>
+                            </ng-container>
+                        </key-value-pair>
+                        <key-value-pair [horizontal]="true">
+                            <ng-container key>Water Account</ng-container>
+                            <ng-container keyValue>
+                                <a *ngIf="supportTicket.WaterAccountID; else noWaterAccount" [routerLink]="['../../', 'water-accounts', supportTicket.WaterAccountID]"
+                                    >#{{ supportTicket.WaterAccountNumber }}</a
+                                >
+                                <ng-template #noWaterAccount> N/A </ng-template>
+                            </ng-container>
+                        </key-value-pair>
+                    </key-value-pair-list>
+                </div>
+
+                <div class="details__footer">Last Updated {{ supportTicket.DateUpdated | date }}</div>
+            </div>
+        </div>
+    </main>
+</div>

@@ -1,0 +1,93 @@
+<div class="full-width-page">
+    <page-header icon="Question" pageTitle="Questions & Support Desk" [customRichTextTypeID]="customRichTextID"></page-header>
+    <div class="page-body grid-12">
+        <app-alert-display></app-alert-display>
+        <form action="" class="form g-col-8" [formGroup]="formGroup">
+            <div class="grid-12 mt-4">
+                <h5 class="section-header">Contact Info</h5>
+                <form-field
+                    class="g-col-6"
+                    [formControl]="formGroup.controls.ContactFirstName"
+                    fieldLabel="Contact First Name"
+                    placeholder="First Name"
+                    [required]="true"
+                    [type]="FormFieldType.Text"></form-field>
+                <form-field
+                    class="g-col-6"
+                    [formControl]="formGroup.controls.ContactLastName"
+                    fieldLabel="Contact Last Name"
+                    placeholder="Last Name"
+                    [required]="true"
+                    [type]="FormFieldType.Text"></form-field>
+                <form-field
+                    class="g-col-6"
+                    [formControl]="formGroup.controls.ContactEmail"
+                    fieldLabel="Contact Email"
+                    placeholder="Email"
+                    [type]="FormFieldType.Text"
+                    [required]="true"></form-field>
+                <form-field
+                    class="g-col-6"
+                    [formControl]="formGroup.controls.ContactPhoneNumber"
+                    fieldLabel="Contact Phone Number"
+                    mask="(000) 000-0000"
+                    placeholder="e.g. (123) 456-7890"></form-field>
+            </div>
+            <div class="grid-12 mt-4" *ngIf="geographyOptions$ | async as geographyOptions">
+                <h5 class="section-header">Supporting Info</h5>
+                <form-field
+                    *ngIf="geographyData$ | async"
+                    class="g-col-6"
+                    [formInputOptions]="geographyOptions"
+                    [formControl]="formGroup.controls.GeographyID"
+                    [fieldLabel]="'Geography'"
+                    [required]="true"
+                    [type]="FormFieldType.Select"></form-field>
+                <div class="g-col-6" *ngIf="currentUser$ | async">
+                    <label class="field-label">Water Account</label>
+                    <search-water-accounts
+                        [geographyID]="formGroup.controls.GeographyID.value"
+                        [excludedWaterAccountIDs]="[]"
+                        formControlName="WaterAccount"></search-water-accounts>
+                </div>
+            </div>
+            <form-field
+                class="m-2 g-col-8"
+                [formInputOptions]="SupportTicketQuestionTypesSelectDropdownOptions"
+                [formControl]="formGroup.controls.SupportTicketQuestionTypeID"
+                [required]="true"
+                fieldLabel="Question Type"
+                [type]="FormFieldType.Select"></form-field>
+            <form-field
+                *ngIf="currentUser$ | async; else anonymous"
+                class="m-2 g-col-8"
+                [formControl]="formGroup.controls.Description"
+                fieldLabel="Message"
+                placeholder="Message"
+                [required]="true"
+                [type]="FormFieldType.RTE"></form-field>
+            <ng-template #anonymous>
+                <form-field
+                    class="m-2 g-col-8"
+                    [formControl]="formGroup.controls.Description"
+                    fieldLabel="Message"
+                    placeholder="Message"
+                    [required]="true"
+                    [type]="FormFieldType.Textarea"></form-field>
+            </ng-template>
+        </form>
+        <div class="faqs g-col-4">
+            <faq-display [faqDisplayLocationTypeID]="faqDisplayLocationID"></faq-display>
+        </div>
+    </div>
+    <div class="page-footer">
+        <button class="btn btn-primary mr-2" (click)="save()" [disabled]="formGroup.invalid">Submit</button>
+        <button class="btn btn-primary-outline" (click)="clear()">Clear</button>
+        <div class="mt-2">
+            <small
+                >This site is protected by reCAPTCHA and the Google <a href="https://policies.google.com/privacy">Privacy Policy</a> and
+                <a href="https://policies.google.com/terms">Terms of Service</a> apply.</small
+            >
+        </div>
+    </div>
+</div>

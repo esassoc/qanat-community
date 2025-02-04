@@ -44,7 +44,7 @@ public class AllocationPlans
     {
         var allocationPlan = GetManageImpl(dbContext)
             .SingleOrDefault(x => x.GeographyID == geographyID && x.Zone.ZoneSlug == zoneSlug && x.WaterType.WaterTypeSlug == waterTypeSlug);
-        return allocationPlan.AsManageDto();
+        return allocationPlan?.AsManageDto();
     }
 
     public static AllocationPlanManageDto GetAllocationPlanManageDto(QanatDbContext dbContext, int allocationPlanID)

@@ -13,7 +13,7 @@ import { Alert } from "src/app/shared/models/alert";
 import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
 import { WellRegistrationService } from "src/app/shared/generated/api/well-registration.service";
 import { ButtonComponent } from "../../../shared/components/button/button.component";
-import { ParcelTypeaheadComponent } from "../../../shared/components/parcel-typeahead/parcel-typeahead.component";
+import { ParcelTypeaheadComponent } from "../../../shared/components/parcel/parcel-typeahead/parcel-typeahead.component";
 import { NgIf, AsyncPipe } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";

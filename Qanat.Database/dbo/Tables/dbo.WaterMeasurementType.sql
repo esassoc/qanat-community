@@ -6,7 +6,8 @@ CREATE TABLE [dbo].[WaterMeasurementType]
     [IsActive]                              BIT                 NOT NULL,
     [WaterMeasurementTypeName]              VARCHAR(50)         NOT NULL,
     [SortOrder]                             INT                 NOT NULL,
-    [IsUserEditable]                        BIT                 NOT NULL,
+    [IsUserEditable]                        BIT                 NOT NULL,               --MK 12/9/24: CSV Uploadable would probably be a better name for this as far as I can tell.
+    [IsSelfReportable]  			        BIT                 NOT NULL DEFAULT(0),    --MK 12/9/24: Used on the Water Account self reporting form. I was bummed I couldn't reuse the bit above...
     [ShowToLandowner]                       BIT                 NOT NULL,
     
     [WaterMeasurementCalculationTypeID]     INT                 NULL,

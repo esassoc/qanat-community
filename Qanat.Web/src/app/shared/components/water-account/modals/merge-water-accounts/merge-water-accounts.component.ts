@@ -6,16 +6,15 @@ import { AlertService } from "src/app/shared/services/alert.service";
 import { IModal, ModalService } from "src/app/shared/services/modal/modal.service";
 import { ModalComponent } from "../../../modal/modal.component";
 import { WaterAccountContext } from "../update-water-account-info/update-water-account-info.component";
-import { Observable, Subscription, forkJoin, of } from "rxjs";
+import { Observable, Subscription, combineLatest, forkJoin, of } from "rxjs";
 import { WaterAccountDto } from "src/app/shared/generated/model/water-account-dto";
 import { WaterAccountService } from "src/app/shared/generated/api/water-account.service";
 import { switchMap, tap } from "rxjs/operators";
 import { FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { MergeWaterAccountsDto } from "src/app/shared/generated/model/merge-water-accounts-dto";
 import { ReportingPeriodService } from "src/app/shared/generated/api/reporting-period.service";
-import { ReportingPeriodSimpleDto } from "src/app/shared/generated/model/models";
+import { ReportingPeriodDto } from "src/app/shared/generated/model/models";
 import { SelectDropdownOption } from "../../../inputs/select-dropdown/select-dropdown.component";
-import { ParcelService } from "src/app/shared/generated/api/parcel.service";
 import { FormFieldType, FormFieldComponent } from "../../../forms/form-field/form-field.component";
 import { BtnGroupRadioInputComponent } from "../../../inputs/btn-group-radio-input/btn-group-radio-input.component";
 import { FieldDefinitionComponent } from "../../../field-definition/field-definition.component";
@@ -25,6 +24,7 @@ import { ParcelIconWithNumberComponent } from "../../../parcel/parcel-icon-with-
 import { SearchWaterAccountsComponent } from "../../../search-water-accounts/search-water-accounts.component";
 import { NgIf, NgFor, AsyncPipe, DatePipe } from "@angular/common";
 import { CustomRichTextComponent } from "../../../custom-rich-text/custom-rich-text.component";
+import { ParcelByGeographyService } from "src/app/shared/generated/api/parcel-by-geography.service";
 
 @Component({
     selector: "merge-water-accounts",
@@ -55,10 +55,15 @@ export class MergeWaterAccountsComponent implements OnInit, IModal, OnDestroy {
     public FormFieldType = FormFieldType;
 
     public geographyID: number;
-    public waterAccountDto$: Observable<WaterAccountDto>;
+    public waterAccount$: Observable<WaterAccountDto>;
     public customRichTextID: CustomRichTextTypeEnum = CustomRichTextTypeEnum.ModalMergeWaterAccounts;
 
-    public formGroup: FormGroup = new FormGroup({
+    public formGroup: FormGroup<{
+        primaryWaterAccount: FormControl<WaterAccountDto>;
+        secondaryWaterAccount: FormControl<WaterAccountDto>;
+        deleteMerge: FormControl<boolean>;
+        effectiveYear: FormControl<number>;
+    }> = new FormGroup({
         primaryWaterAccount: new FormControl<WaterAccountDto>(null, [Validators.required]),
         secondaryWaterAccount: new FormControl<WaterAccountDto>(null, [Validators.required]),
         deleteMerge: new FormControl<boolean>({ value: null, disabled: false }, [Validators.required]),
@@ -70,7 +75,8 @@ export class MergeWaterAccountsComponent implements OnInit, IModal, OnDestroy {
     public isLoadingSubmit: boolean = false;
     public excludedWaterAccountIDs: number[] = [];
 
-    public reportingPeriod: ReportingPeriodSimpleDto;
+    public reportingPeriods$: Observable<ReportingPeriodDto[]>;
+    public defaultReportingPeriod$: Observable<ReportingPeriodDto>;
     public reportingPeriodYears: number[];
 
     public effectiveYear: number;
@@ -82,34 +88,39 @@ export class MergeWaterAccountsComponent implements OnInit, IModal, OnDestroy {
         private alertService: AlertService,
         private reportingPeriodService: ReportingPeriodService,
         private waterAccountService: WaterAccountService,
-        private parcelService: ParcelService
+        private parcelByGeographyService: ParcelByGeographyService
     ) {}
 
     ngOnInit(): void {
-        this.waterAccountDto$ = this.waterAccountService.waterAccountsWaterAccountIDGet(this.modalContext.WaterAccountID).pipe(
+        this.waterAccount$ = this.waterAccountService.waterAccountsWaterAccountIDGet(this.modalContext.WaterAccountID).pipe(
             tap((x) => {
                 this.formGroup.controls.primaryWaterAccount.setValue(x);
                 this.geographyID = x.Geography.GeographyID;
             })
         );
 
-        type ReportingPeriodForkJoinResults = [number[], ReportingPeriodSimpleDto];
-        forkJoin<ReportingPeriodForkJoinResults>([
-            this.reportingPeriodService.geographiesGeographyIDReportingPeriodYearsGet(this.modalContext.GeographyID),
-            this.reportingPeriodService.geographiesGeographyIDReportingPeriodGet(this.modalContext.GeographyID),
-        ]).subscribe(([reportingPeriodYears, reportingPeriod]) => {
-            this.reportingPeriod = reportingPeriod;
-            this.reportingPeriodYears = reportingPeriodYears.reverse();
-        });
+        this.reportingPeriods$ = this.waterAccount$.pipe(
+            switchMap((waterAccount) => {
+                return this.reportingPeriodService.geographiesGeographyIDReportingPeriodsGet(waterAccount.Geography.GeographyID);
+            }),
+            tap((reportingPeriods) => {
+                this.reportingPeriodYears = reportingPeriods.map((x) => new Date(x.StartDate).getFullYear()).reverse();
+            })
+        );
 
-        this.effectiveYear$ = this.formGroup.controls.effectiveYear.valueChanges.pipe(
-            switchMap((x) => {
-                if (!this.reportingPeriod || !this.formGroup.controls.effectiveYear.value) return of(null);
+        this.defaultReportingPeriod$ = this.reportingPeriods$.pipe(
+            switchMap((reportingPeriods) => {
+                return of(reportingPeriods.find((x) => x.IsDefaultReportingPeriod));
+            })
+        );
 
-                const date = new Date();
-                date.setDate(1);
-                date.setMonth(this.reportingPeriod.StartMonth - 1);
-                date.setFullYear(this.reportingPeriod.StartMonth == 1 ? this.formGroup.controls.effectiveYear.value : this.formGroup.controls.effectiveYear.value - 1);
+        this.effectiveYear$ = combineLatest([this.defaultReportingPeriod$, this.formGroup.controls.effectiveYear.valueChanges]).pipe(
+            switchMap(([reportingPeriod, effectiveYear]) => {
+                if (!reportingPeriod || !effectiveYear) {
+                    return of(null);
+                }
+
+                const date = new Date(reportingPeriod.StartDate);
                 return of(date);
             })
         );
@@ -136,7 +147,7 @@ export class MergeWaterAccountsComponent implements OnInit, IModal, OnDestroy {
 
     updateEffectiveYearDropdownOptions() {
         const parcelIDs = this.formGroup.controls.secondaryWaterAccount.value.Parcels.map((x) => x.ParcelID);
-        this.parcelService.geographiesGeographyIDParcelsLatestEffectiveYearPost(this.geographyID, parcelIDs).subscribe((latestEffectiveYear) => {
+        this.parcelByGeographyService.geographiesGeographyIDParcelsLatestEffectiveYearPost(this.geographyID, parcelIDs).subscribe((latestEffectiveYear) => {
             const years = this.reportingPeriodYears.filter((x) => x >= latestEffectiveYear);
 
             let options = years.map((x) => ({ Value: x, Label: x.toString() }) as SelectDropdownOption);
@@ -192,9 +203,4 @@ export class MergeWaterAccountsComponent implements OnInit, IModal, OnDestroy {
                 }
             );
     }
-}
-
-interface ReportingPeriodsResult {
-    years: number[];
-    reportingPeriod: ReportingPeriodSimpleDto;
 }

@@ -25,6 +25,9 @@ public class QanatConfiguration
     public string YoloWRIDAPIUsername { get; set; }
     public string YoloWRIDAPIPassword { get; set; }
     public string GDALAPIBaseUrl { get; set; }
+    public string RecaptchaSecretKey { get; set; }
+    public string RecaptchaVerifyUrl { get; set; }
+    public double RecaptchaScoreThreshold { get; set; }
 }
 
 public class OpenETConfiguration

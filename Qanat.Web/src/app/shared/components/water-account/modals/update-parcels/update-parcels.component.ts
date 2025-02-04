@@ -7,24 +7,24 @@ import { IModal, ModalService } from "src/app/shared/services/modal/modal.servic
 import { ModalComponent } from "../../../modal/modal.component";
 import { WaterAccountContext } from "../update-water-account-info/update-water-account-info.component";
 import { WaterAccountService } from "src/app/shared/generated/api/water-account.service";
-import { Observable, forkJoin, of } from "rxjs";
+import { Observable, combineLatest, forkJoin, of } from "rxjs";
 import { switchMap, tap } from "rxjs/operators";
 import { WaterAccountDto } from "src/app/shared/generated/model/water-account-dto";
 import { UpdateWaterAccountParcelsDtoForm, UpdateWaterAccountParcelsDtoFormControls } from "src/app/shared/generated/model/update-water-account-parcels-dto";
 import { FormGroup, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { FormFieldType, FormFieldComponent } from "../../../forms/form-field/form-field.component";
-import { ParcelDisplayDto, ParcelWithGeoJSONDto, ReportingPeriodSimpleDto } from "src/app/shared/generated/model/models";
+import { ParcelDisplayDto, ParcelWithGeoJSONDto, ReportingPeriodDto } from "src/app/shared/generated/model/models";
 import { ReportingPeriodService } from "src/app/shared/generated/api/reporting-period.service";
 import { SelectDropdownOption } from "../../../inputs/select-dropdown/select-dropdown.component";
-import { ParcelService } from "src/app/shared/generated/api/parcel.service";
-import { CustomGeoJSONLayer, ParcelMapComponent } from "../../../parcel-map/parcel-map.component";
+import { CustomGeoJSONLayer, ParcelMapComponent } from "../../../parcel/parcel-map/parcel-map.component";
 import { MapPipe } from "../../../../pipes/map.pipe";
 import { NoteComponent } from "../../../note/note.component";
 import { ParcelIconWithNumberComponent } from "../../../parcel/parcel-icon-with-number/parcel-icon-with-number.component";
-import { ParcelTypeaheadComponent } from "../../../parcel-typeahead/parcel-typeahead.component";
+import { ParcelTypeaheadComponent } from "../../../parcel/parcel-typeahead/parcel-typeahead.component";
 import { IconComponent } from "src/app/shared/components/icon/icon.component";
 import { NgIf, NgFor, AsyncPipe, DatePipe } from "@angular/common";
 import { CustomRichTextComponent } from "../../../custom-rich-text/custom-rich-text.component";
+import { ParcelByGeographyService } from "src/app/shared/generated/api/parcel-by-geography.service";
 
 @Component({
     selector: "update-parcels",
@@ -62,8 +62,10 @@ export class UpdateParcelsComponent implements OnInit, IModal {
         ParcelIDs: UpdateWaterAccountParcelsDtoFormControls.ParcelIDs(),
     });
 
-    public reportingPeriod: ReportingPeriodSimpleDto;
+    public reportingPeriods$: Observable<ReportingPeriodDto[]>;
+    public defaultReportingPeriod$: Observable<ReportingPeriodDto>;
     public reportingPeriodYears: number[];
+
     public effectiveYearDropdownOptions: SelectDropdownOption[];
     public effectiveYear$: Observable<Date>;
     public parcelsWithGeoJSON$: Observable<ParcelWithGeoJSONDto[]>;
@@ -79,7 +81,7 @@ export class UpdateParcelsComponent implements OnInit, IModal {
         private modalService: ModalService,
         private waterAccountService: WaterAccountService,
         private reportingPeriodService: ReportingPeriodService,
-        private parcelService: ParcelService,
+        private parcelByGeographyService: ParcelByGeographyService,
         private alertService: AlertService
     ) {}
 
@@ -88,7 +90,7 @@ export class UpdateParcelsComponent implements OnInit, IModal {
             tap((waterAccount) => {
                 this.waterAccount = waterAccount;
 
-                this.parcelsWithGeoJSON$ = this.parcelService
+                this.parcelsWithGeoJSON$ = this.parcelByGeographyService
                     .geographiesGeographyIDParcelsGeojsonPost(
                         waterAccount.Geography.GeographyID,
                         waterAccount.Parcels.map((x) => x.ParcelID)
@@ -102,27 +104,28 @@ export class UpdateParcelsComponent implements OnInit, IModal {
             })
         );
 
-        // Define type for the emitted values
-        type ReportingPeriodForkJoinResults = [number[], ReportingPeriodSimpleDto];
+        this.reportingPeriods$ = this.waterAccount$.pipe(
+            switchMap((waterAccount) => {
+                return this.reportingPeriodService.geographiesGeographyIDReportingPeriodsGet(waterAccount.Geography.GeographyID);
+            }),
+            tap((reportingPeriods) => {
+                this.reportingPeriodYears = reportingPeriods.map((x) => new Date(x.StartDate).getFullYear()).reverse();
+            })
+        );
 
-        // Replace generic type with specific type
-        forkJoin<ReportingPeriodForkJoinResults>([
-            this.reportingPeriodService.geographiesGeographyIDReportingPeriodYearsGet(this.modalContext.GeographyID),
-            this.reportingPeriodService.geographiesGeographyIDReportingPeriodGet(this.modalContext.GeographyID),
-        ]).subscribe(([years, reportingPeriod]) => {
-            this.reportingPeriodYears = years.reverse();
-            this.updateEffectiveYearDropdownOptions(years);
-            this.reportingPeriod = reportingPeriod;
-        });
+        this.defaultReportingPeriod$ = this.reportingPeriods$.pipe(
+            switchMap((reportingPeriods) => {
+                return of(reportingPeriods.find((x) => x.IsDefaultReportingPeriod));
+            })
+        );
 
-        this.effectiveYear$ = this.formGroup.controls.EffectiveYear.valueChanges.pipe(
-            switchMap((x) => {
-                if (!this.reportingPeriod || !this.formGroup.controls.EffectiveYear.value) return of(null);
+        this.effectiveYear$ = combineLatest([this.defaultReportingPeriod$, this.formGroup.controls.EffectiveYear.valueChanges]).pipe(
+            switchMap(([reportingPeriod, effectiveYear]) => {
+                if (!reportingPeriod || !effectiveYear) {
+                    return of(null);
+                }
 
-                const date = new Date();
-                date.setDate(1);
-                date.setMonth(1);
-                date.setFullYear(this.reportingPeriod.StartMonth == 1 ? this.formGroup.controls.EffectiveYear.value : this.formGroup.controls.EffectiveYear.value - 1);
+                const date = new Date(reportingPeriod.StartDate);
                 return of(date);
             })
         );
@@ -158,10 +161,12 @@ export class UpdateParcelsComponent implements OnInit, IModal {
     addSelectedParcel() {
         if (!this.selectedParcel) return;
 
-        this.parcelService.geographiesGeographyIDParcelsGeojsonPost(this.waterAccount.Geography.GeographyID, [this.selectedParcel.ParcelID]).subscribe((parcelWithGeoJson) => {
-            this.updateParcelsTo([...this.waterAccountParcels, ...parcelWithGeoJson]);
-            this.selectedParcel = null;
-        });
+        this.parcelByGeographyService
+            .geographiesGeographyIDParcelsGeojsonPost(this.waterAccount.Geography.GeographyID, [this.selectedParcel.ParcelID])
+            .subscribe((parcelWithGeoJson) => {
+                this.updateParcelsTo([...this.waterAccountParcels, ...parcelWithGeoJson]);
+                this.selectedParcel = null;
+            });
     }
 
     removeParcel(parcel: ParcelWithGeoJSONDto) {
@@ -209,7 +214,7 @@ export class UpdateParcelsComponent implements OnInit, IModal {
         const removedParcelIDs = removedParcels.map((x) => x.ParcelID);
         parcelIDs = [...parcelIDs, ...removedParcelIDs];
 
-        this.parcelService.geographiesGeographyIDParcelsLatestEffectiveYearPost(this.waterAccount.Geography.GeographyID, parcelIDs).subscribe((latestEffectiveYear) => {
+        this.parcelByGeographyService.geographiesGeographyIDParcelsLatestEffectiveYearPost(this.waterAccount.Geography.GeographyID, parcelIDs).subscribe((latestEffectiveYear) => {
             const years = this.reportingPeriodYears.filter((x) => x >= latestEffectiveYear);
             this.updateEffectiveYearDropdownOptions(years);
         });
@@ -228,7 +233,7 @@ export class UpdateParcelsComponent implements OnInit, IModal {
             this.updateParcelsTo([...newParcels]);
         } else {
             // else add it
-            this.parcelService.geographiesGeographyIDParcelsGeojsonPost(this.waterAccount.Geography.GeographyID, [parcelIDClicked]).subscribe((parcelDisplayDto) => {
+            this.parcelByGeographyService.geographiesGeographyIDParcelsGeojsonPost(this.waterAccount.Geography.GeographyID, [parcelIDClicked]).subscribe((parcelDisplayDto) => {
                 this.updateParcelsTo([...this.waterAccountParcels, ...parcelDisplayDto]);
             });
         }

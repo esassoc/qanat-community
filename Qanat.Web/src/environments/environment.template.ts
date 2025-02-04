@@ -11,4 +11,5 @@ export const environment = {
     parcelBoundingBoxTop: 37.4718525078379,
     parcelBoundingBoxBottom: 37.0983621505508,
     datadogClientToken: null,
+    recaptchaV3SiteKey: null,
 };

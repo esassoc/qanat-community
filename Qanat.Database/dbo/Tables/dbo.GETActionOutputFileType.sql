@@ -1,4 +1,5 @@
-﻿CREATE TABLE [dbo].[GETActionOutputFileType] (
+﻿--TODO: DELETE ME, RENAMING GETACTION TO SCENARIORUN--
+CREATE TABLE [dbo].[GETActionOutputFileType] (
     [GETActionOutputFileTypeID]          INT           NOT NULL,
     [GETActionOutputFileTypeName]        VARCHAR (100) NOT NULL,
     [GETActionOutputFileTypeExtension] VARCHAR(10) NOT NULL,

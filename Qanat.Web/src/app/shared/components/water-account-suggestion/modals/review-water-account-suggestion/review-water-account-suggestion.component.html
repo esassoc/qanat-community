@@ -40,7 +40,7 @@
                     </ol>
                 </div>
                 <form-field
-                    *ngIf="reportingPeriods$ | async as selectDropdownOptions"
+                    *ngIf="reportingPeriodDropdownOptions$ | async as selectDropdownOptions"
                     [formControl]="formGroup.controls.EffectiveYear"
                     fieldLabel="Effective Year"
                     [type]="FormFieldType.Select"

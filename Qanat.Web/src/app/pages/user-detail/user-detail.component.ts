@@ -7,13 +7,11 @@ import { Alert } from "src/app/shared/models/alert";
 import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
 import { FlagEnum } from "src/app/shared/generated/enum/flag-enum";
 import { routeParams } from "src/app/app.routes";
-import { RoleEnum } from "src/app/shared/generated/enum/role-enum";
 import { tap } from "rxjs/operators";
 import { ConfirmService } from "src/app/shared/services/confirm/confirm.service";
-import { GeographySimpleDto, GeographyUserDto, UserDto, WaterAccountUserMinimalDto, WellRegistrationMinimalDto } from "src/app/shared/generated/model/models";
+import { GeographySimpleDto, GeographyUserDto, UserDto, WaterAccountUserMinimalDto, WellRegistrationUserDetailDto } from "src/app/shared/generated/model/models";
 import { UserService } from "src/app/shared/generated/api/user.service";
 import { ImpersonationService } from "src/app/shared/generated/api/impersonation.service";
-import { GeographyService } from "src/app/shared/generated/api/geography.service";
 import { ColDef, GridApi, GridReadyEvent } from "ag-grid-community";
 import { UtilityFunctionsService } from "src/app/shared/services/utility-functions.service";
 import { ModalOptions, ModalService, ModalSizeEnum, ModalThemeEnum } from "src/app/shared/services/modal/modal.service";
@@ -24,7 +22,7 @@ import { GeographyRoleEnum } from "src/app/shared/generated/enum/geography-role-
 import { UpdateUserInformationModalComponent, UserContext } from "./modals/update-user-information-modal/update-user-information-modal.component";
 import { AddWaterAccountUserModalComponent } from "./modals/add-water-account-user-modal/add-water-account-user-modal.component";
 import { AlertDisplayComponent } from "../../shared/components/alert-display/alert-display.component";
-import { NgIf, NgFor, AsyncPipe } from "@angular/common";
+import { NgIf, NgFor, AsyncPipe, NgClass } from "@angular/common";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { KeyValuePairListComponent } from "src/app/shared/components/key-value-pair-list/key-value-pair-list.component";
 import { KeyValuePairComponent } from "src/app/shared/components/key-value-pair/key-value-pair.component";
@@ -34,6 +32,9 @@ import {
     UpdateWaterAccountUserRoleContext,
     UpdateWaterAccountUserRoleModalComponent,
 } from "src/app/shared/components/update-water-account-user-role-modal/update-water-account-user-role-modal.component";
+import { AuthorizationHelper } from "src/app/shared/helpers/authorization-helper";
+import { environment } from "src/environments/environment";
+import { env } from "process";
 
 @Component({
     selector: "template-user-detail",
@@ -53,7 +54,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
 
     public userWaterAccounts$: Observable<WaterAccountUserMinimalDto[]>;
     public userGeographyPermissions$: Observable<GeographyUserDto[]>;
-    public wellRegistrations$: Observable<WellRegistrationMinimalDto[]>;
+    public wellRegistrations$: Observable<WellRegistrationUserDetailDto[]>;
     public userIsAdmin: boolean = false;
     public geographiesWhereUserIsWaterManager: GeographySimpleDto[];
 
@@ -61,7 +62,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     public isGeographyWaterManagerDictionary: { [key: number]: string } = {};
 
     public waterAccountGridColumnDefs: ColDef[];
-    public waterAccountsCSVDownloadColIDsToExclude = ["0"];
+    public waterAccountCSVDownloadColIDsToExclude = ["0"];
     public waterAccountGridApi: GridApi;
 
     public wellRegistrationGridColumnDefs: ColDef[];
@@ -79,7 +80,6 @@ export class UserDetailComponent implements OnInit, OnDestroy {
         private authenticationService: AuthenticationService,
         private cdr: ChangeDetectorRef,
         private alertService: AlertService,
-        private geographyService: GeographyService,
         private confirmService: ConfirmService,
         private utilityFunctionsService: UtilityFunctionsService,
         private modalService: ModalService,
@@ -94,17 +94,17 @@ export class UserDetailComponent implements OnInit, OnDestroy {
         this.userAndCurrentUser$ = forkJoin([userAction, this.authenticationService.getCurrentUser()]).pipe(
             tap((x) => {
                 this.user = x[0];
-                this.userIsAdmin = this.user.Role.RoleID == RoleEnum.SystemAdmin;
+                this.userIsAdmin = AuthorizationHelper.isSystemAdministrator(this.user);
                 this.currentUser = x[1];
                 this.isCurrentUser = this.user.UserID == this.currentUser.UserID;
-                this.currentUserIsAdmin = this.currentUser.Role.RoleID == RoleEnum.SystemAdmin;
-                this.canImpersonateUser = this.authenticationService.hasFlag(this.currentUser, FlagEnum.CanImpersonateUsers);
+                this.currentUserIsAdmin = AuthorizationHelper.isSystemAdministrator(this.currentUser);
+                this.canImpersonateUser = !environment.production && this.authenticationService.hasFlag(this.currentUser, FlagEnum.CanImpersonateUsers);
 
                 this.getWaterAccounts();
 
                 this.wellRegistrations$ = this.userService.usersUserIDWellRegistrationsGet(this.user.UserID);
 
-                this.userGeographyPermissions$ = this.geographyService.userUserIDPermissionsGet(this.user.UserID).pipe(
+                this.userGeographyPermissions$ = this.userService.userUserIDPermissionsGet(this.user.UserID).pipe(
                     tap((userGeographyPermissions) => {
                         const tempDictionary = {};
 
@@ -211,7 +211,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
         this.cdr.detach();
     }
 
-    updateUserInformationModal() {
+    updateUserInformationModal(systemRoleUpdate: boolean) {
         this.modalService
             .open(
                 UpdateUserInformationModalComponent,
@@ -222,6 +222,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
                 } as ModalOptions,
                 {
                     User: this.user,
+                    SystemRoleEdit: systemRoleUpdate,
                 } as UserContext
             )
             .instance.result.then((result) => {
@@ -240,7 +241,6 @@ export class UserDetailComponent implements OnInit, OnDestroy {
                         ActionName: "Update Role",
                         ActionIcon: "fas fa-long-arrow-alt-right",
                         ActionHandler: () => {
-                            console.log("Update role.", params.data);
                             this.updateWaterAccountRoleForUserModal(params.data);
                         },
                     },
@@ -265,7 +265,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
                 ValueGetter: (params) => {
                     return { LinkValue: `${params.data.WaterAccount.WaterAccountID}/water-budget`, LinkDisplay: params.data.WaterAccount.WaterAccountNumber };
                 },
-                InRouterLink: "/water-dashboard/water-accounts/",
+                InRouterLink: "/water-accounts/",
                 FieldDefinitionType: "WaterAccount",
                 FieldDefinitionLabelOverride: "Water Account #",
             }),
@@ -376,9 +376,12 @@ export class UserDetailComponent implements OnInit, OnDestroy {
             }),
             this.utilityFunctionsService.createLinkColumnDef("Well Name", "WellName", "WellID", {
                 ValueGetter: (params) => {
-                    return { LinkValue: params.data.WellRegistrationID, LinkDisplay: params.data.WellName ?? "Unnamed Well" };
+                    return {
+                        LinkValue: `${params.data.Geography.GeographyName.toLowerCase()}/well-registrations/${params.data.WellRegistrationID}`,
+                        LinkDisplay: params.data.WellName ?? "Unnamed Well",
+                    };
                 },
-                InRouterLink: "well-registrations/",
+                InRouterLink: "/wells/",
                 FieldDefinitionType: "WellName",
                 FieldDefinitionLabelOverride: "Well Name",
             }),

@@ -2,7 +2,6 @@ import { Component, Input, OnInit } from "@angular/core";
 import { Observable, map } from "rxjs";
 import { AuthenticationService } from "src/app/shared/services/authentication.service";
 import { RolePermissionCheck, WithRolePermissionDirective } from "src/app/shared/directives/with-role-permission.directive";
-import { FrequentlyAskedQuestionService } from "src/app/shared/generated/api/frequently-asked-question.service";
 import { FaqDisplayLocationTypeEnum } from "src/app/shared/generated/enum/faq-display-location-type-enum";
 import { PermissionEnum } from "src/app/shared/generated/enum/permission-enum";
 import { FrequentlyAskedQuestionSimpleDto } from "src/app/shared/generated/model/frequently-asked-question-simple-dto";
@@ -13,14 +12,15 @@ import { ModalService, ModalSizeEnum, ModalThemeEnum } from "src/app/shared/serv
 import { FAQContext } from "../edit-faq-modal/edit-faq-modal.component";
 import { IconComponent } from "src/app/shared/components/icon/icon.component";
 import { FrequentlyAskedQuestionDisplayComponent } from "src/app/shared/components/frequently-asked-question-display/frequently-asked-question-display.component";
-import { AsyncPipe } from "@angular/common";
+import { AsyncPipe, NgFor } from "@angular/common";
+import { PublicService } from "src/app/shared/generated/api/public.service";
 
 @Component({
     selector: "faq-display",
     standalone: true,
     templateUrl: "./faq-display.component.html",
     styleUrl: "./faq-display.component.scss",
-    imports: [WithRolePermissionDirective, IconComponent, FrequentlyAskedQuestionDisplayComponent, WithRolePermissionDirective, AsyncPipe],
+    imports: [WithRolePermissionDirective, IconComponent, FrequentlyAskedQuestionDisplayComponent, WithRolePermissionDirective, AsyncPipe, NgFor],
 })
 export class FaqDisplayComponent implements OnInit {
     faqs$: Observable<FrequentlyAskedQuestionSimpleDto[]>;
@@ -28,11 +28,7 @@ export class FaqDisplayComponent implements OnInit {
     rolePermissionCheck$: Observable<RolePermissionCheck>;
     @Input() faqDisplayLocationTypeID: FaqDisplayLocationTypeEnum;
 
-    constructor(
-        private authenticationService: AuthenticationService,
-        private faqService: FrequentlyAskedQuestionService,
-        private modalService: ModalService
-    ) {}
+    constructor(private authenticationService: AuthenticationService, private publicService: PublicService, private modalService: ModalService) {}
 
     ngOnInit(): void {
         this.rolePermissionCheck$ = this.authenticationService.getCurrentUser().pipe(
@@ -48,7 +44,7 @@ export class FaqDisplayComponent implements OnInit {
     }
 
     loadFAQs() {
-        this.faqs$ = this.faqService.publicFaqLocationFaqDisplayQuestionLocationTypeIDGet(this.faqDisplayLocationTypeID);
+        this.faqs$ = this.publicService.publicFaqLocationFaqDisplayQuestionLocationTypeIDGet(this.faqDisplayLocationTypeID);
     }
 
     public openEditModal() {

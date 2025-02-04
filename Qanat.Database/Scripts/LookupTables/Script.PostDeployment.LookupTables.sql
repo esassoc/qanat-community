@@ -28,8 +28,6 @@ GO
 GO
 :r ".\dbo.GETActionStatus.sql"
 GO
-:r ".\dbo.MenuItem.sql"
-GO
 :r ".\dbo.MeterStatus.sql"
 GO
 :r ".\dbo.Model.sql"
@@ -50,7 +48,19 @@ GO
 GO
 :r ".\dbo.Scenario.sql"
 GO
+:r ".\dbo.ScenarioPlannerRole.sql"
+GO
+:r ".\dbo.ScenarioRunOutputFileType.sql"
+GO
+:r ".\dbo.ScenarioRunStatus.sql"
+GO
 :r ".\dbo.State.sql"
+GO
+:r ".\dbo.SupportTicketPriority.sql"
+GO
+:r ".\dbo.SupportTicketQuestionType.sql"
+GO
+:r ".\dbo.SupportTicketStatus.sql"
 GO
 :r ".\dbo.UnitType.sql"
 GO
@@ -59,6 +69,8 @@ GO
 :r ".\dbo.WaterMeasurementCalculationType.sql"
 GO
 :r ".\dbo.WaterMeasurementCategoryType.sql"
+GO
+:r ".\dbo.WaterMeasurementSelfReportStatus.sql"
 GO
 :r ".\dbo.WellRegistrationContactType.sql"
 GO

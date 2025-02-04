@@ -19,12 +19,4 @@ public class StateController : SitkaController<StateController>
         : base(dbContext, logger, qanatConfiguration)
     {
     }
-
-    [HttpGet("public/states")]
-    [AllowAnonymous]
-    public ActionResult<List<StateSimpleDto>> List()
-    {
-        var stateList = State.AllAsSimpleDto;
-        return Ok(stateList);
-    }
 }

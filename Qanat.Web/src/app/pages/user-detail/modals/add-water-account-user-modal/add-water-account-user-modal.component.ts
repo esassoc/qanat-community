@@ -6,12 +6,12 @@ import { ModalComponent } from "src/app/shared/components/modal/modal.component"
 import { WaterAccountUserMinimalDto, WaterAccountUserMinimalDtoForm } from "src/app/shared/generated/model/water-account-user-minimal-dto";
 import { IModal, ModalService } from "src/app/shared/services/modal/modal.service";
 import { UserContext } from "../update-user-information-modal/update-user-information-modal.component";
-import { WaterAccountUserService } from "src/app/shared/generated/api/water-account-user.service";
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from "@angular/forms";
 import { WaterAccountService } from "src/app/shared/generated/api/water-account.service";
 import { CommonModule } from "@angular/common";
 import { SelectDropDownModule } from "ngx-select-dropdown";
 import { LoadingDirective } from "src/app/shared/directives/loading.directive";
+import { WaterAccountRolesAsSelectDropdownOptions } from "src/app/shared/generated/enum/water-account-role-enum";
 
 @Component({
     selector: "add-water-account-user-modal",
@@ -50,14 +50,13 @@ export class AddWaterAccountUserModalComponent implements OnInit, IModal {
 
     public isLoadingWaterAccounts: boolean = true;
 
-    public roleDropDownOptions$: Observable<SelectDropdownOption[]>;
+    public WaterAccountRolesSelectDropDownOptions = WaterAccountRolesAsSelectDropdownOptions;
 
     public isLoadingSubmit = false;
 
     constructor(
         private modalService: ModalService,
         private waterAccountService: WaterAccountService,
-        private waterAccountUserService: WaterAccountUserService
     ) {}
 
     ngOnInit(): void {
@@ -68,15 +67,6 @@ export class AddWaterAccountUserModalComponent implements OnInit, IModal {
                     return { Value: x.WaterAccountID, Label: "#" + x.WaterAccountNumber } as SelectDropdownOption;
                 });
                 return waterAccountOptions;
-            })
-        );
-
-        this.roleDropDownOptions$ = this.waterAccountUserService.waterAccountRolesGet().pipe(
-            map((roles) => {
-                const roleOptions = roles.map((x) => {
-                    return { Value: x.WaterAccountRoleID, Label: x.WaterAccountRoleDisplayName } as SelectDropdownOption;
-                });
-                return roleOptions;
             })
         );
     }

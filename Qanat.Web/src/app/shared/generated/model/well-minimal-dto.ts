@@ -27,6 +27,7 @@ export class WellMinimalDto {
     WellStatusDisplayName?: string;
     ParcelNumber?: string;
     IrrigatesParcels?: Array<ParcelMinimalDto>;
+    WaterAccountID?: number;
     Notes?: string;
     constructor(obj?: any) {
         Object.assign(this, obj);
@@ -48,6 +49,7 @@ export interface WellMinimalDtoForm {
     WellStatusDisplayName?: FormControl<string>;
     ParcelNumber?: FormControl<string>;
     IrrigatesParcels?: FormControl<Array<ParcelMinimalDto>>;
+    WaterAccountID?: FormControl<number>;
     Notes?: FormControl<string>;
 }
 
@@ -183,6 +185,16 @@ export class WellMinimalDtoFormControls {
         }
     );
     public static IrrigatesParcels = (value: FormControlState<Array<ParcelMinimalDto>> | Array<ParcelMinimalDto> = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<Array<ParcelMinimalDto>>(
+        value,
+        formControlOptions ?? 
+        {
+            nonNullable: false,
+            validators: 
+            [
+            ],
+        }
+    );
+    public static WaterAccountID = (value: FormControlState<number> | number = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<number>(
         value,
         formControlOptions ?? 
         {

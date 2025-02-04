@@ -21,7 +21,6 @@ import { Observable }                                        from 'rxjs';
 import { AddUserByEmailDto } from '../model/add-user-by-email-dto';
 import { OnboardWaterAccountPINDto } from '../model/onboard-water-account-pin-dto';
 import { OnboardingWaterAccountDto } from '../model/onboarding-water-account-dto';
-import { WaterAccountRoleSimpleDto } from '../model/water-account-role-simple-dto';
 import { WaterAccountUserMinimalDto } from '../model/water-account-user-minimal-dto';
 
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
@@ -336,44 +335,6 @@ export class WaterAccountUserService {
 
         return this.httpClient.put<Array<WaterAccountUserMinimalDto>>(`${this.basePath}/user/${encodeURIComponent(String(userID))}/water-accounts`,
             waterAccountUserMinimalDto,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        ).pipe(catchError((error: any) => { return this.apiService.handleError(error)}));
-    }
-
-    /**
-     * 
-     * 
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public waterAccountRolesGet(observe?: 'body', reportProgress?: boolean): Observable<Array<WaterAccountRoleSimpleDto>>;
-    public waterAccountRolesGet(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<WaterAccountRoleSimpleDto>>>;
-    public waterAccountRolesGet(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<WaterAccountRoleSimpleDto>>>;
-    public waterAccountRolesGet(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-
-        let headers = this.defaultHeaders;
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'text/plain',
-            'application/json',
-            'text/json',
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers = headers.set('Accept', httpHeaderAcceptSelected);
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-        ];
-
-        return this.httpClient.get<Array<WaterAccountRoleSimpleDto>>(`${this.basePath}/water-account-roles`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,

@@ -15,6 +15,7 @@ import { AlertDisplayComponent } from "../../../shared/components/alert-display/
 import { LoadingDirective } from "../../../shared/directives/loading.directive";
 import { NgIf, NgFor, AsyncPipe } from "@angular/common";
 import { RichLinkComponent } from "src/app/shared/components/rich-link/rich-link.component";
+import { PageLoadingComponent } from "src/app/shared/components/page-loading/page-loading.component";
 
 @Component({
     selector: "homepage-user-portal",
@@ -64,7 +65,7 @@ export class HomepageUserPortalComponent implements OnInit {
     }
 
     private getNoWaterAccountsText(): string {
-        if (this.authenticationService.currentUserHasFlag(FlagEnum.HasAdminDashboard)) {
+        if (this.authenticationService.currentUserHasFlag(FlagEnum.IsSystemAdmin)) {
             return "As a Platform Admin, you have access to all Water Accounts within the platform.";
         } else if (this.authenticationService.currentUserHasFlag(FlagEnum.HasManagerDashboard)) {
             return "As a Water Manager, you have access to all Water Accounts within your managed geographies.";

@@ -4,6 +4,7 @@ import { MonitoringWellMeasurementDataDto } from "src/app/shared/generated/model
 import { default as vegaEmbed, VisualizationSpec } from "vega-embed";
 import { NgIf, DatePipe } from "@angular/common";
 import { LoadingDirective } from "../../../directives/loading.directive";
+import { PublicService } from "src/app/shared/generated/api/public.service";
 
 @Component({
     selector: "vega-monitoring-wells-measurement-chart",
@@ -24,14 +25,14 @@ export class VegaMonitoringWellsMeasurementChartComponent implements OnInit {
     public showAcreFeet: boolean = false;
     public isLoading: boolean = true;
 
-    constructor(private monitoringWellService: MonitoringWellService) {}
+    constructor(private publicService: PublicService) {}
 
     ngOnInit(): void {
         this.getChartData();
     }
 
     private getChartData() {
-        this.monitoringWellService.geographiesGeographyIDMonitoringWellSiteCodeGet(this.geographyID, this.siteCode).subscribe((monitoringWellMeasurements) => {
+        this.publicService.publicGeographiesGeographyIDMonitoringWellSiteCodeGet(this.geographyID, this.siteCode).subscribe((monitoringWellMeasurements) => {
             this.chartData = monitoringWellMeasurements;
 
             if (monitoringWellMeasurements.length == 0) {

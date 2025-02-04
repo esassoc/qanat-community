@@ -18,7 +18,8 @@ import { CustomHttpUrlEncodingCodec }                        from '../encoder';
 
 import { Observable }                                        from 'rxjs';
 
-import { ReportingPeriodSimpleDto } from '../model/reporting-period-simple-dto';
+import { ReportingPeriodDto } from '../model/reporting-period-dto';
+import { ReportingPeriodUpsertDto } from '../model/reporting-period-upsert-dto';
 
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
@@ -68,13 +69,13 @@ export class ReportingPeriodService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public geographiesGeographyIDReportingPeriodGet(geographyID: number, observe?: 'body', reportProgress?: boolean): Observable<ReportingPeriodSimpleDto>;
-    public geographiesGeographyIDReportingPeriodGet(geographyID: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ReportingPeriodSimpleDto>>;
-    public geographiesGeographyIDReportingPeriodGet(geographyID: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ReportingPeriodSimpleDto>>;
-    public geographiesGeographyIDReportingPeriodGet(geographyID: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    public geographiesGeographyIDReportingPeriodsGet(geographyID: number, observe?: 'body', reportProgress?: boolean): Observable<Array<ReportingPeriodDto>>;
+    public geographiesGeographyIDReportingPeriodsGet(geographyID: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<ReportingPeriodDto>>>;
+    public geographiesGeographyIDReportingPeriodsGet(geographyID: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<ReportingPeriodDto>>>;
+    public geographiesGeographyIDReportingPeriodsGet(geographyID: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         if (geographyID === null || geographyID === undefined) {
-            throw new Error('Required parameter geographyID was null or undefined when calling geographiesGeographyIDReportingPeriodGet.');
+            throw new Error('Required parameter geographyID was null or undefined when calling geographiesGeographyIDReportingPeriodsGet.');
         }
 
         let headers = this.defaultHeaders;
@@ -94,7 +95,7 @@ export class ReportingPeriodService {
         const consumes: string[] = [
         ];
 
-        return this.httpClient.get<ReportingPeriodSimpleDto>(`${this.basePath}/geographies/${encodeURIComponent(String(geographyID))}/reporting-period`,
+        return this.httpClient.get<Array<ReportingPeriodDto>>(`${this.basePath}/geographies/${encodeURIComponent(String(geographyID))}/reporting-periods`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
@@ -108,17 +109,17 @@ export class ReportingPeriodService {
      * 
      * 
      * @param geographyID 
-     * @param reportingPeriodSimpleDto 
+     * @param reportingPeriodUpsertDto 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public geographiesGeographyIDReportingPeriodUpdatePost(geographyID: number, reportingPeriodSimpleDto?: ReportingPeriodSimpleDto, observe?: 'body', reportProgress?: boolean): Observable<ReportingPeriodSimpleDto>;
-    public geographiesGeographyIDReportingPeriodUpdatePost(geographyID: number, reportingPeriodSimpleDto?: ReportingPeriodSimpleDto, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ReportingPeriodSimpleDto>>;
-    public geographiesGeographyIDReportingPeriodUpdatePost(geographyID: number, reportingPeriodSimpleDto?: ReportingPeriodSimpleDto, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ReportingPeriodSimpleDto>>;
-    public geographiesGeographyIDReportingPeriodUpdatePost(geographyID: number, reportingPeriodSimpleDto?: ReportingPeriodSimpleDto, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    public geographiesGeographyIDReportingPeriodsPost(geographyID: number, reportingPeriodUpsertDto?: ReportingPeriodUpsertDto, observe?: 'body', reportProgress?: boolean): Observable<ReportingPeriodDto>;
+    public geographiesGeographyIDReportingPeriodsPost(geographyID: number, reportingPeriodUpsertDto?: ReportingPeriodUpsertDto, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ReportingPeriodDto>>;
+    public geographiesGeographyIDReportingPeriodsPost(geographyID: number, reportingPeriodUpsertDto?: ReportingPeriodUpsertDto, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ReportingPeriodDto>>;
+    public geographiesGeographyIDReportingPeriodsPost(geographyID: number, reportingPeriodUpsertDto?: ReportingPeriodUpsertDto, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         if (geographyID === null || geographyID === undefined) {
-            throw new Error('Required parameter geographyID was null or undefined when calling geographiesGeographyIDReportingPeriodUpdatePost.');
+            throw new Error('Required parameter geographyID was null or undefined when calling geographiesGeographyIDReportingPeriodsPost.');
         }
 
 
@@ -147,8 +148,8 @@ export class ReportingPeriodService {
             headers = headers.set('Content-Type', httpContentTypeSelected);
         }
 
-        return this.httpClient.post<ReportingPeriodSimpleDto>(`${this.basePath}/geographies/${encodeURIComponent(String(geographyID))}/reporting-period/update`,
-            reportingPeriodSimpleDto,
+        return this.httpClient.post<ReportingPeriodDto>(`${this.basePath}/geographies/${encodeURIComponent(String(geographyID))}/reporting-periods`,
+            reportingPeriodUpsertDto,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
@@ -162,16 +163,21 @@ export class ReportingPeriodService {
      * 
      * 
      * @param geographyID 
+     * @param reportingPeriodID 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public geographiesGeographyIDReportingPeriodYearsGet(geographyID: number, observe?: 'body', reportProgress?: boolean): Observable<Array<number>>;
-    public geographiesGeographyIDReportingPeriodYearsGet(geographyID: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<number>>>;
-    public geographiesGeographyIDReportingPeriodYearsGet(geographyID: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<number>>>;
-    public geographiesGeographyIDReportingPeriodYearsGet(geographyID: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    public geographiesGeographyIDReportingPeriodsReportingPeriodIDGet(geographyID: number, reportingPeriodID: number, observe?: 'body', reportProgress?: boolean): Observable<ReportingPeriodDto>;
+    public geographiesGeographyIDReportingPeriodsReportingPeriodIDGet(geographyID: number, reportingPeriodID: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ReportingPeriodDto>>;
+    public geographiesGeographyIDReportingPeriodsReportingPeriodIDGet(geographyID: number, reportingPeriodID: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ReportingPeriodDto>>;
+    public geographiesGeographyIDReportingPeriodsReportingPeriodIDGet(geographyID: number, reportingPeriodID: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         if (geographyID === null || geographyID === undefined) {
-            throw new Error('Required parameter geographyID was null or undefined when calling geographiesGeographyIDReportingPeriodYearsGet.');
+            throw new Error('Required parameter geographyID was null or undefined when calling geographiesGeographyIDReportingPeriodsReportingPeriodIDGet.');
+        }
+
+        if (reportingPeriodID === null || reportingPeriodID === undefined) {
+            throw new Error('Required parameter reportingPeriodID was null or undefined when calling geographiesGeographyIDReportingPeriodsReportingPeriodIDGet.');
         }
 
         let headers = this.defaultHeaders;
@@ -191,7 +197,7 @@ export class ReportingPeriodService {
         const consumes: string[] = [
         ];
 
-        return this.httpClient.get<Array<number>>(`${this.basePath}/geographies/${encodeURIComponent(String(geographyID))}/reporting-period/years`,
+        return this.httpClient.get<ReportingPeriodDto>(`${this.basePath}/geographies/${encodeURIComponent(String(geographyID))}/reporting-periods/${encodeURIComponent(String(reportingPeriodID))}`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
@@ -204,13 +210,25 @@ export class ReportingPeriodService {
     /**
      * 
      * 
+     * @param geographyID 
+     * @param reportingPeriodID 
+     * @param reportingPeriodUpsertDto 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public reportingPeriodsYearsGet(observe?: 'body', reportProgress?: boolean): Observable<Array<number>>;
-    public reportingPeriodsYearsGet(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<number>>>;
-    public reportingPeriodsYearsGet(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<number>>>;
-    public reportingPeriodsYearsGet(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    public geographiesGeographyIDReportingPeriodsReportingPeriodIDPut(geographyID: number, reportingPeriodID: number, reportingPeriodUpsertDto?: ReportingPeriodUpsertDto, observe?: 'body', reportProgress?: boolean): Observable<ReportingPeriodDto>;
+    public geographiesGeographyIDReportingPeriodsReportingPeriodIDPut(geographyID: number, reportingPeriodID: number, reportingPeriodUpsertDto?: ReportingPeriodUpsertDto, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ReportingPeriodDto>>;
+    public geographiesGeographyIDReportingPeriodsReportingPeriodIDPut(geographyID: number, reportingPeriodID: number, reportingPeriodUpsertDto?: ReportingPeriodUpsertDto, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ReportingPeriodDto>>;
+    public geographiesGeographyIDReportingPeriodsReportingPeriodIDPut(geographyID: number, reportingPeriodID: number, reportingPeriodUpsertDto?: ReportingPeriodUpsertDto, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+
+        if (geographyID === null || geographyID === undefined) {
+            throw new Error('Required parameter geographyID was null or undefined when calling geographiesGeographyIDReportingPeriodsReportingPeriodIDPut.');
+        }
+
+        if (reportingPeriodID === null || reportingPeriodID === undefined) {
+            throw new Error('Required parameter reportingPeriodID was null or undefined when calling geographiesGeographyIDReportingPeriodsReportingPeriodIDPut.');
+        }
+
 
         let headers = this.defaultHeaders;
 
@@ -227,9 +245,18 @@ export class ReportingPeriodService {
 
         // to determine the Content-Type header
         const consumes: string[] = [
+            'application/json-patch+json',
+            'application/json',
+            'text/json',
+            'application/_*+json',
         ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected != undefined) {
+            headers = headers.set('Content-Type', httpContentTypeSelected);
+        }
 
-        return this.httpClient.get<Array<number>>(`${this.basePath}/reporting-periods/years`,
+        return this.httpClient.put<ReportingPeriodDto>(`${this.basePath}/geographies/${encodeURIComponent(String(geographyID))}/reporting-periods/${encodeURIComponent(String(reportingPeriodID))}`,
+            reportingPeriodUpsertDto,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,

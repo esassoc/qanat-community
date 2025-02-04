@@ -9,10 +9,13 @@ public static partial class WaterAccountExtensionMethods
 {
     public static WaterAccountDto AsWaterAccountDto(this WaterAccount waterAccount)
     {
+        var totalParcelAcreage = waterAccount.Parcels?.Sum(x => x.ParcelArea);
+        var totalIrrigatedAcreage = waterAccount.Parcels?.SelectMany(x => x.UsageEntities).Sum(x => x.UsageEntityArea);
+
         var waterAccountDto = new WaterAccountDto()
         {
             WaterAccountID = waterAccount.WaterAccountID,
-            Geography = waterAccount.Geography.AsSimpleDto(),
+            Geography = waterAccount.Geography.AsSimpleDtoWithDefaultYear(),
             WaterAccountNumber = waterAccount.WaterAccountNumber,
             WaterAccountName = waterAccount.WaterAccountName,
             Notes = waterAccount.Notes,
@@ -23,9 +26,12 @@ public static partial class WaterAccountExtensionMethods
             ContactName = waterAccount.ContactName,
             ContactAddress = waterAccount.ContactAddress,
             Users = waterAccount.WaterAccountUsers.Select(x => x.AsWaterAccountUserMinimalDto()).ToList(),
-            WaterAccountNameAndNumber = waterAccount.WaterAccountNameAndNumber(),
-            Parcels = waterAccount.Parcels?.Select(x => x.AsDisplayDto()).ToList()
+            WaterAccountNameAndNumber = waterAccount.WaterAccountNumberAndName(),
+            Parcels = waterAccount.Parcels?.Select(x => x.AsDisplayDto()).ToList(),
+            Acres = totalParcelAcreage ?? 0,
+            IrrigatedAcres = totalIrrigatedAcreage ?? 0
         };
+
         return waterAccountDto;
     }
 
@@ -43,7 +49,7 @@ public static partial class WaterAccountExtensionMethods
             CreateDate = waterAccount.CreateDate,
             ContactName = waterAccount.ContactName,
             ContactAddress = waterAccount.ContactAddress,
-            WaterAccountNameAndNumber = waterAccount.WaterAccountNameAndNumber(),
+            WaterAccountNameAndNumber = waterAccount.WaterAccountNumberAndName(),
             Geography = waterAccount.Geography?.AsSimpleDto()
         };
         return dto;
@@ -96,13 +102,12 @@ public static partial class WaterAccountExtensionMethods
             CreateDate = waterAccount.CreateDate,
             ContactName = waterAccount.ContactName,
             ContactAddress = waterAccount.ContactAddress,
-            WaterAccountNameAndNumber = waterAccount.WaterAccountNameAndNumber(),
+            WaterAccountNameAndNumber = waterAccount.WaterAccountNumberAndName(),
             Parcels = waterAccount.Parcels?.Select(x => x.AsDisplayDto()).ToList()
         };
     }
 
-
-    public static string WaterAccountNameAndNumber(this WaterAccount waterAccount)
+    public static string WaterAccountNumberAndName(this WaterAccount waterAccount)
     {
         return waterAccount.WaterAccountName == null ? $"#{waterAccount.WaterAccountNumber}" : $"#{waterAccount.WaterAccountNumber} ({waterAccount.WaterAccountName})";
     }

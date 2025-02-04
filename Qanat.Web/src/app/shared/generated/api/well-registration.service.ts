@@ -20,7 +20,6 @@ import { Observable }                                        from 'rxjs';
 
 import { BeginWellRegistryRequestDto } from '../model/begin-well-registry-request-dto';
 import { ConfirmWellRegistrationLocationDto } from '../model/confirm-well-registration-location-dto';
-import { FuelTypeSimpleDto } from '../model/fuel-type-simple-dto';
 import { ParcelDisplayDto } from '../model/parcel-display-dto';
 import { SubmittedWellRegistrationListItemDto } from '../model/submitted-well-registration-list-item-dto';
 import { WellRegistrationBasicInfoFormDto } from '../model/well-registration-basic-info-form-dto';
@@ -32,7 +31,6 @@ import { WellRegistrationIrrigatedParcelsRequestDto } from '../model/well-regist
 import { WellRegistrationIrrigatedParcelsResponseDto } from '../model/well-registration-irrigated-parcels-response-dto';
 import { WellRegistrationLocationDto } from '../model/well-registration-location-dto';
 import { WellRegistrationMinimalDto } from '../model/well-registration-minimal-dto';
-import { WellRegistrationWaterUseTypeSimpleDto } from '../model/well-registration-water-use-type-simple-dto';
 import { WellRegistrySupportingInfoDto } from '../model/well-registry-supporting-info-dto';
 import { WellRegistryWorkflowProgressDto } from '../model/well-registry-workflow-progress-dto';
 
@@ -251,82 +249,6 @@ export class WellRegistrationService {
         ];
 
         return this.httpClient.get<Array<SubmittedWellRegistrationListItemDto>>(`${this.basePath}/geographies/${encodeURIComponent(String(geographyID))}/well-registrations/submitted`,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        ).pipe(catchError((error: any) => { return this.apiService.handleError(error)}));
-    }
-
-    /**
-     * 
-     * 
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public wellRegistrationsPumpFuelTypesGet(observe?: 'body', reportProgress?: boolean): Observable<Array<FuelTypeSimpleDto>>;
-    public wellRegistrationsPumpFuelTypesGet(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<FuelTypeSimpleDto>>>;
-    public wellRegistrationsPumpFuelTypesGet(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<FuelTypeSimpleDto>>>;
-    public wellRegistrationsPumpFuelTypesGet(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-
-        let headers = this.defaultHeaders;
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'text/plain',
-            'application/json',
-            'text/json',
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers = headers.set('Accept', httpHeaderAcceptSelected);
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-        ];
-
-        return this.httpClient.get<Array<FuelTypeSimpleDto>>(`${this.basePath}/well-registrations/pump-fuel-types`,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        ).pipe(catchError((error: any) => { return this.apiService.handleError(error)}));
-    }
-
-    /**
-     * 
-     * 
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public wellRegistrationsWaterUseTypesGet(observe?: 'body', reportProgress?: boolean): Observable<Array<WellRegistrationWaterUseTypeSimpleDto>>;
-    public wellRegistrationsWaterUseTypesGet(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<WellRegistrationWaterUseTypeSimpleDto>>>;
-    public wellRegistrationsWaterUseTypesGet(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<WellRegistrationWaterUseTypeSimpleDto>>>;
-    public wellRegistrationsWaterUseTypesGet(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-
-        let headers = this.defaultHeaders;
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'text/plain',
-            'application/json',
-            'text/json',
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers = headers.set('Accept', httpHeaderAcceptSelected);
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-        ];
-
-        return this.httpClient.get<Array<WellRegistrationWaterUseTypeSimpleDto>>(`${this.basePath}/well-registrations/water-use-types`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,

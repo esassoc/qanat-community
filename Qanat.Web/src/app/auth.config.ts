@@ -1,31 +1,29 @@
 import { LogLevel, Configuration, BrowserCacheLocation } from "@azure/msal-browser";
 
 const isIE = window.navigator.userAgent.indexOf("MSIE ") > -1 || window.navigator.userAgent.indexOf("Trident/") > -1;
-
-//Fill this out using your b2c values.
 export const b2cPolicies = {
     names: {
-        signUpSignIn: "signUpSignIn",
-        editProfile: "editProfile",
-        passwordReset: "passwordReset",
-        signUp: "signUp",
-        changeLogin: "changeLogin",
+        signUpSignIn: "B2C_1A_DISPLAYCONTROL_SENDGRID_SIGNIN",
+        editProfile: "B2C_1_EditProfile",
+        passwordReset: "B2C_1A_DISPLAYCONTROL_SENDGRID_PASSWORDRESET",
+        signUp: "B2C_1A_DisplayControl_sendgrid_Signup",
+        changeLogin: "B2C_1A_DisplayControl_sendgrid_ChangeLogin",
     },
     authorities: {
         signUpSignIn: {
-            authority: "signUpSignIn",
+            authority: "https://groundwateraccounting.b2clogin.com/groundwateraccounting.onmicrosoft.com/b2c_1a_displaycontrol_sendgrid_signin/",
         },
         signUp: {
-            authority: "signUp",
+            authority: "https://groundwateraccounting.b2clogin.com/groundwateraccounting.onmicrosoft.com/b2c_1a_displaycontrol_sendgrid_signup/",
         },
         editProfile: {
-            authority: "editProfile",
+            authority: "https://groundwateraccounting.b2clogin.com/groundwateraccounting.onmicrosoft.com/b2c_1a_displaycontrol_sendgrid_profileedit/",
         },
         passwordReset: {
-            authority: "passwordReset",
+            authority: "https://groundwateraccounting.b2clogin.com/groundwateraccounting.onmicrosoft.com/b2c_1a_displaycontrol_sendgrid_passwordreset/",
         },
         changeLogin: {
-            authority: "changeLogin",
+            authority: "https://groundwateraccounting.b2clogin.com/groundwateraccounting.onmicrosoft.com/b2c_1a_displaycontrol_sendgrid_changelogin/",
         },
     },
     authorityDomain: "groundwateraccounting.b2clogin.com",
@@ -40,7 +38,7 @@ export const b2cPolicies = {
 export const msalConfig: Configuration = {
     auth: {
         //One ClientID per applicaiton, create this in the Azure B2C Page and update her for new apps.
-        clientId: "clientId", // This is the ONLY mandatory field that you need to supply.
+        clientId: "e7263cf6-f8e8-4135-9f84-f01c8604f542", // This is the ONLY mandatory field that you need to supply.
         authority: b2cPolicies.authorities.signUpSignIn.authority, // Defaults to "https://login.microsoftonline.com/common"
         knownAuthorities: [b2cPolicies.authorityDomain], // Mark your B2C tenant's domain as trusted.
         redirectUri: "/", // Points to window.location.origin. You must register this URI on Azure portal/App Registration.

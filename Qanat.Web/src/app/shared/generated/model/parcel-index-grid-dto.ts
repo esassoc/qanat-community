@@ -10,7 +10,6 @@
  * Do not edit the class manually.
  */
 import { WellLinkDisplayDto } from '././well-link-display-dto';
-import { ZoneDisplayDto } from '././zone-display-dto';
 
 import { FormControl, FormControlOptions, FormControlState, Validators } from "@angular/forms";
 export class ParcelIndexGridDto { 
@@ -22,11 +21,12 @@ export class ParcelIndexGridDto {
     ParcelStatusDisplayName?: string;
     OwnerName?: string;
     OwnerAddress?: string;
+    WaterAccountID?: number;
     WaterAccountNumber?: number;
     WaterAccountName?: string;
     WellsOnParcel?: Array<WellLinkDisplayDto>;
     IrrigatedByWells?: Array<WellLinkDisplayDto>;
-    Zones?: Array<ZoneDisplayDto>;
+    ZoneIDs?: string;
     CustomAttributes?: { [key: string]: string; };
     constructor(obj?: any) {
         Object.assign(this, obj);
@@ -42,11 +42,12 @@ export interface ParcelIndexGridDtoForm {
     ParcelStatusDisplayName?: FormControl<string>;
     OwnerName?: FormControl<string>;
     OwnerAddress?: FormControl<string>;
+    WaterAccountID?: FormControl<number>;
     WaterAccountNumber?: FormControl<number>;
     WaterAccountName?: FormControl<string>;
     WellsOnParcel?: FormControl<Array<WellLinkDisplayDto>>;
     IrrigatedByWells?: FormControl<Array<WellLinkDisplayDto>>;
-    Zones?: FormControl<Array<ZoneDisplayDto>>;
+    ZoneIDs?: FormControl<string>;
     CustomAttributes?: FormControl<{ [key: string]: string; }>;
 }
 
@@ -131,6 +132,16 @@ export class ParcelIndexGridDtoFormControls {
             ],
         }
     );
+    public static WaterAccountID = (value: FormControlState<number> | number = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<number>(
+        value,
+        formControlOptions ?? 
+        {
+            nonNullable: false,
+            validators: 
+            [
+            ],
+        }
+    );
     public static WaterAccountNumber = (value: FormControlState<number> | number = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<number>(
         value,
         formControlOptions ?? 
@@ -171,7 +182,7 @@ export class ParcelIndexGridDtoFormControls {
             ],
         }
     );
-    public static Zones = (value: FormControlState<Array<ZoneDisplayDto>> | Array<ZoneDisplayDto> = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<Array<ZoneDisplayDto>>(
+    public static ZoneIDs = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
         value,
         formControlOptions ?? 
         {

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Qanat.EFModels.Entities;
 using Qanat.Models.DataTransferObjects;
+using Qanat.Models.DataTransferObjects.Geography;
 
 namespace Qanat.API.Services;
 
@@ -209,9 +210,8 @@ public class HierarchyContext
 
                 if (UsageEntityHierarchyDto?.WaterAccountID != null)
                 {
-                    WaterAccountDto = WaterAccounts.GetByIDAsDto(_dbContext, UsageEntityHierarchyDto.WaterAccountID);
+                    WaterAccountDto = WaterAccounts.GetByIDAsDto(_dbContext, UsageEntityHierarchyDto.WaterAccountID.Value);
                 }
-
 
                 UsageEntityIDFromPath = usageEntityID;
             }

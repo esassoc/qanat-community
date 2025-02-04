@@ -7,6 +7,7 @@ using Qanat.API.Services.Attributes;
 using Qanat.API.Services.Authorization;
 using Qanat.EFModels.Entities;
 using Qanat.Models.DataTransferObjects;
+using Qanat.Models.DataTransferObjects.Geography;
 using Qanat.Models.DataTransferObjects.User;
 using Qanat.Models.Security;
 using System.Collections.Generic;
@@ -46,14 +47,16 @@ namespace Qanat.API.Controllers
         public ActionResult<UserDto> GetByUserID([FromRoute] int userID)
         {
             var userDto = Users.GetByUserID(_dbContext, userID);
-            return RequireNotNullThrowNotFound(userDto, "User", userID);
+            return RequireNotNullLogIfNotFound(userDto, "User", userID);
         }
 
         [HttpGet("pending-users")]
         [WithRolePermission(PermissionEnum.UserRights, RightsEnum.Read)]
         public ActionResult<List<UserDto>> GetAllPendingUsers()
         {
-            var pendingUsersDtos = _dbContext.Users.Include(x => x.WaterAccountUsers).AsNoTracking()
+            var pendingUsersDtos = _dbContext.Users.AsNoTracking()
+                .Include(x => x.WaterAccountUsers)
+                .Include(x => x.ModelUsers)
                 .Where(x => x.RoleID == (int)RoleEnum.PendingLogin)
                 .Select(x => x.AsUserDto()).ToList();
             return Ok(pendingUsersDtos);
@@ -64,8 +67,7 @@ namespace Qanat.API.Controllers
         [WithRolePermission(PermissionEnum.UserRights, RightsEnum.Update)]
         public async Task<ActionResult<UserDto>> UpdateUser([FromRoute] int userID, [FromBody] UserUpsertDto userUpsertDto)
         {
-            var validationMessages =
-                Users.ValidateUpdate(_dbContext, userUpsertDto, userID);
+            var validationMessages = Users.ValidateUpdate(_dbContext, userUpsertDto, userID);
             validationMessages.ForEach(vm => { ModelState.AddModelError(vm.Type, vm.Message); });
 
             if (!ModelState.IsValid)
@@ -73,14 +75,7 @@ namespace Qanat.API.Controllers
                 return BadRequest(ModelState);
             }
 
-            var role = Role.AllLookupDictionary[userUpsertDto.RoleID.GetValueOrDefault()];
-            if (role == null)
-            {
-                return BadRequest($"Could not find a System Role with the ID {userUpsertDto.RoleID}");
-            }
-
             var updatedUserDto = await Users.UpdateUserEntity(_dbContext, userID, userUpsertDto);
-
             return Ok(updatedUserDto);
         }
 
@@ -122,21 +117,21 @@ namespace Qanat.API.Controllers
 
         [HttpGet("user/well-registrations")]
         [WithRoleFlag(FlagEnum.CanRegisterWells)]
-        public ActionResult<List<WellRegistrationMinimalDto>> ListWellRegistrationsForCurrentUser()
+        public ActionResult<List<WellRegistrationUserDetailDto>> ListWellRegistrationsForCurrentUser()
         {
             var user = UserContext.GetUserFromHttpContext(_dbContext, HttpContext);
-            var wellRegistrationMinimalDtos = WellRegistrations.ListByUserAsWellRegistrationUserDetailDto(_dbContext, user.UserID);
-            return Ok(wellRegistrationMinimalDtos);
+            var wellRegistrationDtos = WellRegistrations.ListByUserAsWellRegistrationUserDetailDto(_dbContext, user.UserID);
+            return Ok(wellRegistrationDtos);
         }
 
         //MK 7/18/2024 - I waffled on adding this to this controller or the well registration controller. Might be a case where we'd want a UserWellRegistrationController or something similar?
         [HttpGet("users/{userID}/well-registrations")]
         [EntityNotFound(typeof(User), "userID")]
         [WithRolePermission(PermissionEnum.UserRights, RightsEnum.Read)]
-        public ActionResult<List<WellRegistrationMinimalDto>> ListWellRegistrationsForUser([FromRoute] int userID)
+        public ActionResult<List<WellRegistrationUserDetailDto>> ListWellRegistrationsForUser([FromRoute] int userID)
         {
-            var wellRegistrationMinimalDtos = WellRegistrations.ListByUserAsWellRegistrationUserDetailDto(_dbContext, userID);
-            return Ok(wellRegistrationMinimalDtos);
+            var wellRegistrationDtos = WellRegistrations.ListByUserAsWellRegistrationUserDetailDto(_dbContext, userID);
+            return Ok(wellRegistrationDtos);
         }
 
         [HttpGet("geographies/{geographyID}/users/{userID}/water-accounts")]
@@ -163,6 +158,21 @@ namespace Qanat.API.Controllers
 
             await WaterAccounts.ApplyRequestedWaterAccountChanges(_dbContext, geographyID, userID, requestDto);
             return Ok();
+        }
+
+        [HttpGet("user/{userID}/permissions")]
+        [WithRolePermission(PermissionEnum.GeographyRights, RightsEnum.Read)]
+        public ActionResult<List<GeographyUserDto>> GetGeographyPermissionsForUser([FromRoute] int userID)
+        {
+            var permissions = _dbContext.GeographyUsers
+                .Include(x => x.Geography)
+                .Include(x => x.User)
+                .Where(x => x.UserID == userID)
+                .OrderBy(x => x.Geography.GeographyDisplayName)
+                .Select(x => x.AsGeographyUserDto())
+                .ToList();
+
+            return Ok(permissions);
         }
     }
 }

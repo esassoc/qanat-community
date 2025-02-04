@@ -1,8 +1,8 @@
 <header class="site-header">
     <div *ngIf="!hasManageMenu()">
         <div *ngIf="showTestingWarning()" class="qa-warning">
-            <span class="fa fa-warning"></span>
-            {{ testingWarningText() }}
+            <span class="qa-warning__icon fa fa-warning"></span>
+            <span class="qa-warning__message">{{ testingWarningText() }}</span>
         </div>
     </div>
 
@@ -27,11 +27,18 @@
                     </a>
                 </li>
 
+                <li class="admin-nav__item configure">
+                    <a routerLink="/support-tickets" class="admin-nav__link" role="button" routerLinkActive="active">
+                        <icon icon="Question"></icon>
+                        <span class="admin-nav__link-label">Support Desk</span>
+                    </a>
+                </li>
+
                 <li
                     class="admin-nav__item admin"
                     *withFlag="{
                         currentUser: currentUser,
-                        flag: FlagEnum.HasAdminDashboard
+                        flag: FlagEnum.IsSystemAdmin,
                     }">
                     <a routerLink="/platform-admin" class="admin-nav__link" role="button" routerLinkActive="active">
                         <icon icon="Configure"></icon>
@@ -62,7 +69,7 @@
     </nav>
 
     <nav class="site-nav">
-        <a href="/" class="site-logo">
+        <a [routerLink]="['/']" class="site-logo">
             <icon icon="Logo"></icon>
         </a>
 
@@ -87,7 +94,7 @@
                 <i class="fas fa-times-circle"></i>
             </button>
 
-            <a href="/" class="site-logo-mobile">
+            <a [routerLink]="['/']" class="site-logo-mobile">
                 <icon icon="Logo"></icon>
             </a>
 
@@ -96,7 +103,7 @@
                     class="nav-item dropdown"
                     *withFlag="{
                         currentUser: currentUser,
-                        flag: FlagEnum.CanClaimWaterAccounts
+                        flag: FlagEnum.CanClaimWaterAccounts,
                     }">
                     <ng-container *ngIf="geographySummaries$ | async">
                         <a
@@ -129,9 +136,7 @@
                                         <div class="water-account" *ngFor="let waterAccount of waterAccounts.slice(0, 3)">
                                             <div class="water-account__geography">{{ waterAccount.GeographyName }} Geography</div>
                                             <div class="water-account__number">
-                                                <a
-                                                    class="water-account__number-label"
-                                                    [routerLink]="['water-dashboard', 'water-accounts', waterAccount.WaterAccountID, 'water-budget']">
+                                                <a class="water-account__number-label" [routerLink]="['water-accounts', waterAccount.WaterAccountID, 'water-budget']">
                                                     #{{ waterAccount.WaterAccountNumber }}
                                                 </a>
                                                 <div *ngFor="let zone of waterAccount.Zones">
@@ -174,7 +179,7 @@
                         </div>
                         <ng-template #waterDashboard>
                             <a
-                                href="water-dashboard/water-accounts"
+                                [routerLink]="['water-dashboard', 'water-accounts']"
                                 class="nav-link dropdown-toggle"
                                 role="button"
                                 data-toggle="dropdown"
@@ -189,10 +194,10 @@
 
                 <li
                     class="nav-item"
-                    *withGeographyFlag="{
+                    *withScenarioPlannerRolePermission="{
                         currentUser: currentUser,
-                        forAnyGeography: true,
-                        flag: FlagEnum.CanUseScenarioPlanner
+                        permission: PermissionEnum.ModelRights,
+                        rights: RightsEnum.Read,
                     }">
                     <a [routerLink]="['/scenario-planner', 'models']" class="nav-link" role="button" routerLinkActive="active">
                         <icon icon="ScenarioPlanner"></icon>
@@ -207,30 +212,11 @@
                     </a>
                 </li>
 
-                <li class="nav-item dropdown" routerLinkActive="active">
-                    <a
-                        href="javascript:void(0);"
-                        [dropdownToggle]="learnMoreToggle"
-                        class="nav-link dropdown-toggle"
-                        role="button"
-                        data-toggle="dropdown"
-                        aria-haspopup="true"
-                        aria-expanded="false">
-                        <icon icon="Info"></icon>
-                        <span class="nav-link__label">
-                            Learn More
-                            <icon icon="AngleDown"></icon>
-                        </span>
+                <li class="nav-item">
+                    <a [routerLink]="['/help']" class="nav-link" role="button" routerLinkActive="active">
+                        <icon icon="Question"></icon>
+                        <span class="nav-link__label">Help</span>
                     </a>
-
-                    <div #learnMoreToggle class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <div class="dropdown-divider"></div>
-                        <!--<a routerLink="/getting-started" class="dropdown-item">Getting Started</a>-->
-                        <a routerLink="/grower-guide" class="dropdown-item">Guide for Growers</a>
-                        <a routerLink="/manager-guide" class="dropdown-item"> Guide for Water Managers </a>
-                        <a routerLink="/frequently-asked-questions" class="dropdown-item">FAQ</a>
-                        <a routerLink="/acknowledgements" class="dropdown-item">Acknowledgements</a>
-                    </div>
                 </li>
             </ul>
 

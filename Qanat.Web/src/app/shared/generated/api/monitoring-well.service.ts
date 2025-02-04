@@ -18,9 +18,7 @@ import { CustomHttpUrlEncodingCodec }                        from '../encoder';
 
 import { Observable }                                        from 'rxjs';
 
-import { MonitoringWellDataDto } from '../model/monitoring-well-data-dto';
 import { MonitoringWellMeasurementDataDto } from '../model/monitoring-well-measurement-data-dto';
-import { MonitoringWellMeasurementDto } from '../model/monitoring-well-measurement-dto';
 
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
@@ -97,97 +95,6 @@ export class MonitoringWellService {
         ];
 
         return this.httpClient.get<Array<MonitoringWellMeasurementDataDto>>(`${this.basePath}/geographies/${encodeURIComponent(String(geographyID))}/monitoring-well-measurements`,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        ).pipe(catchError((error: any) => { return this.apiService.handleError(error)}));
-    }
-
-    /**
-     * 
-     * 
-     * @param geographyID 
-     * @param siteCode 
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public geographiesGeographyIDMonitoringWellSiteCodeGet(geographyID: number, siteCode: string, observe?: 'body', reportProgress?: boolean): Observable<Array<MonitoringWellMeasurementDto>>;
-    public geographiesGeographyIDMonitoringWellSiteCodeGet(geographyID: number, siteCode: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<MonitoringWellMeasurementDto>>>;
-    public geographiesGeographyIDMonitoringWellSiteCodeGet(geographyID: number, siteCode: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<MonitoringWellMeasurementDto>>>;
-    public geographiesGeographyIDMonitoringWellSiteCodeGet(geographyID: number, siteCode: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-
-        if (geographyID === null || geographyID === undefined) {
-            throw new Error('Required parameter geographyID was null or undefined when calling geographiesGeographyIDMonitoringWellSiteCodeGet.');
-        }
-
-        if (siteCode === null || siteCode === undefined) {
-            throw new Error('Required parameter siteCode was null or undefined when calling geographiesGeographyIDMonitoringWellSiteCodeGet.');
-        }
-
-        let headers = this.defaultHeaders;
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'text/plain',
-            'application/json',
-            'text/json',
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers = headers.set('Accept', httpHeaderAcceptSelected);
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-        ];
-
-        return this.httpClient.get<Array<MonitoringWellMeasurementDto>>(`${this.basePath}/geographies/${encodeURIComponent(String(geographyID))}/monitoring-well/${encodeURIComponent(String(siteCode))}`,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        ).pipe(catchError((error: any) => { return this.apiService.handleError(error)}));
-    }
-
-    /**
-     * 
-     * 
-     * @param geographyID 
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public geographiesGeographyIDMonitoringWellsGet(geographyID: number, observe?: 'body', reportProgress?: boolean): Observable<Array<MonitoringWellDataDto>>;
-    public geographiesGeographyIDMonitoringWellsGet(geographyID: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<MonitoringWellDataDto>>>;
-    public geographiesGeographyIDMonitoringWellsGet(geographyID: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<MonitoringWellDataDto>>>;
-    public geographiesGeographyIDMonitoringWellsGet(geographyID: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-
-        if (geographyID === null || geographyID === undefined) {
-            throw new Error('Required parameter geographyID was null or undefined when calling geographiesGeographyIDMonitoringWellsGet.');
-        }
-
-        let headers = this.defaultHeaders;
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'text/plain',
-            'application/json',
-            'text/json',
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers = headers.set('Accept', httpHeaderAcceptSelected);
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-        ];
-
-        return this.httpClient.get<Array<MonitoringWellDataDto>>(`${this.basePath}/geographies/${encodeURIComponent(String(geographyID))}/monitoring-wells`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,

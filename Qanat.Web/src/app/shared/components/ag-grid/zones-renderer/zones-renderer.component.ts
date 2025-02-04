@@ -1,7 +1,7 @@
 import { Component } from "@angular/core";
 import { ICellRendererParams } from "ag-grid-community";
-import { ZoneMinimalDto } from "src/app/shared/generated/model/zone-minimal-dto";
 import { NgFor } from "@angular/common";
+import { ZoneMinimalDto } from "src/app/shared/generated/model/zone-minimal-dto";
 
 @Component({
     selector: "zones-renderer",

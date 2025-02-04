@@ -12,10 +12,7 @@ import { GeographyService } from "src/app/shared/generated/api/geography.service
     styleUrls: ["./usage-entities-layer.component.scss"],
 })
 export class UsageEntitiesLayerComponent extends MapLayerBase {
-    constructor(
-        private wfsService: WfsService,
-        private geographyService: GeographyService
-    ) {
+    constructor(private wfsService: WfsService, private geographyService: GeographyService) {
         super();
     }
     @Input({ required: true }) geographyID: number;

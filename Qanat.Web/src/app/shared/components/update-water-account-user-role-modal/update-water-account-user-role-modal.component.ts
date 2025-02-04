@@ -4,14 +4,13 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from "@angula
 import { SelectDropDownModule } from "ngx-select-dropdown";
 import { ModalComponent } from "src/app/shared/components/modal/modal.component";
 import { IModal, ModalService } from "src/app/shared/services/modal/modal.service";
-import { Observable, map } from "rxjs";
-import { SelectDropdownOption } from "src/app/shared/components/inputs/select-dropdown/select-dropdown.component";
 import { WaterAccountUserService } from "src/app/shared/generated/api/water-account-user.service";
 import { WaterAccountUserMinimalDto, WaterAccountUserMinimalDtoForm } from "src/app/shared/generated/model/water-account-user-minimal-dto";
 import { WaterAccountRoleSimpleDto } from "src/app/shared/generated/model/water-account-role-simple-dto";
 import { RoleEnum } from "src/app/shared/generated/enum/role-enum";
 import { FormFieldComponent, FormFieldType } from "src/app/shared/components/forms/form-field/form-field.component";
 import { IconComponent } from "../icon/icon.component";
+import { WaterAccountRolesAsSelectDropdownOptions } from "../../generated/enum/water-account-role-enum";
 
 @Component({
     selector: "update-water-account-user-role-modal",
@@ -35,7 +34,7 @@ export class UpdateWaterAccountUserRoleModalComponent implements OnInit, IModal 
     });
 
     public modalContext: UpdateWaterAccountUserRoleContext;
-    public roleDropDownOptions$: Observable<SelectDropdownOption[]>;
+    public WaterAccountRolesSelectDropdownOptions = WaterAccountRolesAsSelectDropdownOptions;
     public waterAccountRoles: WaterAccountRoleSimpleDto[];
 
     public isLoadingSubmit = false;
@@ -47,24 +46,9 @@ export class UpdateWaterAccountUserRoleModalComponent implements OnInit, IModal 
     ) {}
 
     ngOnInit(): void {
-        this.roleDropDownOptions$ = this.waterAccountUserService.waterAccountRolesGet().pipe(
-            map((roles) => {
-                const roleOptions = roles.map((x) => {
-                    return { Value: x, Label: x.WaterAccountRoleDisplayName } as SelectDropdownOption;
-                });
-
-                // Find the matching role for the modal context
-                const selectedRole = roleOptions.find(
-                    (option) => option.Value && option.Value.WaterAccountRoleID === this.modalContext.WaterAccountUser.WaterAccountRole.WaterAccountRoleID
-                );
-                if (selectedRole) {
-                    this.formGroup.controls.WaterAccountRole.setValue(selectedRole.Value);
-                }
-
-                this.waterAccountRoles = roles;
-                return roleOptions;
-            })
-        );
+        this.formGroup.patchValue({
+            WaterAccountRole: { WaterAccountRoleID: this.modalContext.WaterAccountUser.WaterAccountRole.WaterAccountRoleID},
+        });
 
         this.userDisplayName =
             this.modalContext.WaterAccountUser.User.RoleID == RoleEnum.PendingLogin

@@ -1,0 +1,28 @@
+<div class="modal-header">
+    <h2>
+        <icon icon="Parcels"></icon>
+        Update Parcel Acreage
+    </h2>
+    <button type="button" class="close" (click)="close()">
+        <i class="fa fa-times-circle"></i>
+    </button>
+</div>
+
+<div class="modal-body parcel-update">
+    <form action="" class="grid-12" [formGroup]="formGroup" *ngIf="parcel$ | async as parcel">
+
+        <form-field [formControl]="formGroup.controls.Acres" [type]="FormFieldType.Number" units="Acres">
+        </form-field>
+
+        <note>
+            Are you sure you want to update the acres for parcel
+            <strong>{{ parcel.ParcelNumber }}</strong>
+            ?
+        </note>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-primary" (click)="save()" [class.disabled]="!formGroup.valid">Update Acres</button>
+    <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+</div>

@@ -31,11 +31,9 @@ namespace Qanat.API.Services
             }
 
             var userGuid = Guid.Parse(claimsPrincipal.Claims.Single(c => c.Type == ClaimsConstants.Sub).Value);
-            var keystoneUser = Users.GetByUserGuid(dbContext, userGuid);
-
-            keystoneUser = ImpersonationService.RetrieveImpersonatedUserIfImpersonating(dbContext, keystoneUser);
-
-            return keystoneUser;
+            var user = Users.GetByUserGuid(dbContext, userGuid);
+            user = ImpersonationService.RetrieveImpersonatedUserIfImpersonating(dbContext, user);
+            return user;
         }
     }
 }

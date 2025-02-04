@@ -3,10 +3,7 @@
 .cdk-drag-preview {
     box-sizing: border-box;
     border-radius: 4px;
-    box-shadow:
-        0 5px 5px -3px rgba(0, 0, 0, 0.2),
-        0 8px 10px 1px rgba(0, 0, 0, 0.14),
-        0 3px 14px 2px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
 }
 
 .cdk-drag-placeholder {
@@ -42,9 +39,25 @@
         }
     }
 
-    &__status {
+    &__status,
+    &__color {
         @include desktop-medium {
             margin-left: auto;
         }
+    }
+}
+
+input[type="color"] {
+    width: 3rem;
+    height: 2.5rem;
+    border-color: $gray-light;
+    border-radius: $spacing-050;
+
+    &.new-color {
+        height: 3rem;
+    }
+
+    &::-webkit-color-swatch {
+        border-color: $gray-light;
     }
 }

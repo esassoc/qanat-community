@@ -1,4 +1,4 @@
-<page-header *ngIf="currentGeography$ | async" [customRichTextTypeID]="customRichTextTypeID" pageTitle="Meter Data Configuration" icon="Wells" [templateRight]="templateRight">
+<page-header *ngIf="geography$ | async" [customRichTextTypeID]="customRichTextTypeID" pageTitle="Meter Data Configuration" icon="Wells" [templateRight]="templateRight">
     <ng-template #templateRight>
         <label class="switch">
             <input type="checkbox" [(ngModel)]="isEnabled" (change)="onToggle()" />

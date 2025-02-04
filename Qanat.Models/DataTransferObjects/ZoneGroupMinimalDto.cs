@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace Qanat.Models.DataTransferObjects;
 
 public class ZoneGroupMinimalDto
@@ -13,4 +11,3 @@ public class ZoneGroupMinimalDto
     public List<ZoneMinimalDto> ZoneList { get; set; }
     public bool HasAllocationPlan { get; set; }
 }
-

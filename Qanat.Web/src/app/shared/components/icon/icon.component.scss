@@ -9,3 +9,10 @@ svg {
         fill: currentColor;
     }
 }
+
+svg.no-fill {
+    path {
+        fill: none;
+        stroke: currentColor;
+    }
+}

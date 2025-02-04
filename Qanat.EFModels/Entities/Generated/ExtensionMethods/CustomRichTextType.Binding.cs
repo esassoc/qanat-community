@@ -107,7 +107,7 @@ namespace Qanat.EFModels.Entities
         public static readonly CustomRichTextTypeGeographyWaterLevels GeographyWaterLevels = CustomRichTextTypeGeographyWaterLevels.Instance;
         public static readonly CustomRichTextTypeGeographySupport GeographySupport = CustomRichTextTypeGeographySupport.Instance;
         public static readonly CustomRichTextTypeMonitoringWellsGrid MonitoringWellsGrid = CustomRichTextTypeMonitoringWellsGrid.Instance;
-        public static readonly CustomRichTextTypeWaterAccountDashboard WaterAccountDashboard = CustomRichTextTypeWaterAccountDashboard.Instance;
+        public static readonly CustomRichTextTypeWaterDashboardWaterAccounts WaterDashboardWaterAccounts = CustomRichTextTypeWaterDashboardWaterAccounts.Instance;
         public static readonly CustomRichTextTypeAddAWellScenario AddAWellScenario = CustomRichTextTypeAddAWellScenario.Instance;
         public static readonly CustomRichTextTypeAllocationPlanEdit AllocationPlanEdit = CustomRichTextTypeAllocationPlanEdit.Instance;
         public static readonly CustomRichTextTypeAllocationPlansConfigure AllocationPlansConfigure = CustomRichTextTypeAllocationPlansConfigure.Instance;
@@ -200,6 +200,32 @@ namespace Qanat.EFModels.Entities
         public static readonly CustomRichTextTypeConfigureCustomAttributes ConfigureCustomAttributes = CustomRichTextTypeConfigureCustomAttributes.Instance;
         public static readonly CustomRichTextTypeConfigureWaterManagers ConfigureWaterManagers = CustomRichTextTypeConfigureWaterManagers.Instance;
         public static readonly CustomRichTextTypeRasterUploadGuidance RasterUploadGuidance = CustomRichTextTypeRasterUploadGuidance.Instance;
+        public static readonly CustomRichTextTypeWaterDashboardParcels WaterDashboardParcels = CustomRichTextTypeWaterDashboardParcels.Instance;
+        public static readonly CustomRichTextTypeWaterDashboardWells WaterDashboardWells = CustomRichTextTypeWaterDashboardWells.Instance;
+        public static readonly CustomRichTextTypeRequestSupport RequestSupport = CustomRichTextTypeRequestSupport.Instance;
+        public static readonly CustomRichTextTypeFeeCalculatorStepOne FeeCalculatorStepOne = CustomRichTextTypeFeeCalculatorStepOne.Instance;
+        public static readonly CustomRichTextTypeFeeCalculatorSurfaceWater FeeCalculatorSurfaceWater = CustomRichTextTypeFeeCalculatorSurfaceWater.Instance;
+        public static readonly CustomRichTextTypeFeeCalculatorStepTwo FeeCalculatorStepTwo = CustomRichTextTypeFeeCalculatorStepTwo.Instance;
+        public static readonly CustomRichTextTypeFeeCalculatorStepThree FeeCalculatorStepThree = CustomRichTextTypeFeeCalculatorStepThree.Instance;
+        public static readonly CustomRichTextTypeFeeCalculatorAboutFeeStructures FeeCalculatorAboutFeeStructures = CustomRichTextTypeFeeCalculatorAboutFeeStructures.Instance;
+        public static readonly CustomRichTextTypeFeeCalculatorIncentivePayment FeeCalculatorIncentivePayment = CustomRichTextTypeFeeCalculatorIncentivePayment.Instance;
+        public static readonly CustomRichTextTypeFeeCalculatorWhatIsConsumedGroundwater FeeCalculatorWhatIsConsumedGroundwater = CustomRichTextTypeFeeCalculatorWhatIsConsumedGroundwater.Instance;
+        public static readonly CustomRichTextTypeFeeCalculatorYourData FeeCalculatorYourData = CustomRichTextTypeFeeCalculatorYourData.Instance;
+        public static readonly CustomRichTextTypeFeeCalculatorAcres FeeCalculatorAcres = CustomRichTextTypeFeeCalculatorAcres.Instance;
+        public static readonly CustomRichTextTypeFeeCalculatorFallowingSelfDirected FeeCalculatorFallowingSelfDirected = CustomRichTextTypeFeeCalculatorFallowingSelfDirected.Instance;
+        public static readonly CustomRichTextTypeFeeCalculatorCoverCroppingSelfDirected FeeCalculatorCoverCroppingSelfDirected = CustomRichTextTypeFeeCalculatorCoverCroppingSelfDirected.Instance;
+        public static readonly CustomRichTextTypeFeeCalculatorTemporaryFallowingLandFallowingProgram FeeCalculatorTemporaryFallowingLandFallowingProgram = CustomRichTextTypeFeeCalculatorTemporaryFallowingLandFallowingProgram.Instance;
+        public static readonly CustomRichTextTypeFeeCalculatorRotationalExtendedFallowingMLRP FeeCalculatorRotationalExtendedFallowingMLRP = CustomRichTextTypeFeeCalculatorRotationalExtendedFallowingMLRP.Instance;
+        public static readonly CustomRichTextTypeFeeCalculatorRotationalExtendedFallowingInDesignatedBufferZonesMLRP FeeCalculatorRotationalExtendedFallowingInDesignatedBufferZonesMLRP = CustomRichTextTypeFeeCalculatorRotationalExtendedFallowingInDesignatedBufferZonesMLRP.Instance;
+        public static readonly CustomRichTextTypeFeeCalculatorOrchardSwaleRewildingMLRP FeeCalculatorOrchardSwaleRewildingMLRP = CustomRichTextTypeFeeCalculatorOrchardSwaleRewildingMLRP.Instance;
+        public static readonly CustomRichTextTypeFeeCalculatorFloodplainReconnectionAndRelatedSpreadingAndRechargeMLRP FeeCalculatorFloodplainReconnectionAndRelatedSpreadingAndRechargeMLRP = CustomRichTextTypeFeeCalculatorFloodplainReconnectionAndRelatedSpreadingAndRechargeMLRP.Instance;
+        public static readonly CustomRichTextTypeFeeCalculatorFloodflowSpreadingOnNonFloodplainLandsMLRP FeeCalculatorFloodflowSpreadingOnNonFloodplainLandsMLRP = CustomRichTextTypeFeeCalculatorFloodflowSpreadingOnNonFloodplainLandsMLRP.Instance;
+        public static readonly CustomRichTextTypeFeeCalculatorStorageOrRechargeBasinsMLRP FeeCalculatorStorageOrRechargeBasinsMLRP = CustomRichTextTypeFeeCalculatorStorageOrRechargeBasinsMLRP.Instance;
+        public static readonly CustomRichTextTypeLandingPageFeeCalculator LandingPageFeeCalculator = CustomRichTextTypeLandingPageFeeCalculator.Instance;
+        public static readonly CustomRichTextTypeNewsAndAnnouncements NewsAndAnnouncements = CustomRichTextTypeNewsAndAnnouncements.Instance;
+        public static readonly CustomRichTextTypeReviewSelfReportList ReviewSelfReportList = CustomRichTextTypeReviewSelfReportList.Instance;
+        public static readonly CustomRichTextTypeSubmitSelfReportDisclaimer SubmitSelfReportDisclaimer = CustomRichTextTypeSubmitSelfReportDisclaimer.Instance;
+        public static readonly CustomRichTextTypeSelfReportEditorInstructions SelfReportEditorInstructions = CustomRichTextTypeSelfReportEditorInstructions.Instance;
 
         public static readonly List<CustomRichTextType> All;
         public static readonly List<CustomRichTextTypeSimpleDto> AllAsSimpleDto;
@@ -211,8 +237,8 @@ namespace Qanat.EFModels.Entities
         /// </summary>
         static CustomRichTextType()
         {
-            All = new List<CustomRichTextType> { PlatformOverview, Disclaimer, Homepage, Help, LabelsAndDefinitionsList, ManageUserParcels, Training, CustomPages, MailMergeReport, ParcelList, OnboardOverview, OnboardWaterAccountPINs, OnboardClaimParcels, WellRegistryIntro, TagList, BulkTagParcels, WaterAccounts, WaterTransactions, WaterTransactionCreate, WaterTransactionBulkCreate, WaterTransactionCSVUploadSupply, WaterTransactionHistory, WaterAccount, Tag, WaterAccountPIN, SupplyType, TotalSupply, TotalUsage, TransactionType, EffectiveDate, ReportingPeriodConfiguration, WaterSupplyConfiguration, WaterLevelsConfiguration, TradingConfiguration, ScenariosConfiguration, WellRegistryConfiguration, PermissionsConfiguration, GeospatialDataConfiguration, CustomPagesConfiguration, UpdateParcelsUpload, UpdateParcelsReviewParcels, UpdateParcelsConfirm, AccountReconciliation, Footer, EditAccounts, EditUsers, AccountActivity, UsageByParcel, AccountMap, ChangeParcelOwnership, WellBulkUpload, WellName, CountyWellPermitNo, StateWCRNo, WellDepth, DateDrilled, WaterTransactionCsvUploadUsage, APNColumn, ValueColumn, UsageType, Wells, ExternalMapLayers, ExternalMapLayersType, ExternalMapLayersEdit, ExternalMapLayersName, ExternalMapLayersMinimumZoom, OurGeographies, PopUpField, OpenETSyncIntegration, OpenETInstructions, UsageEstimates, LastSuccessfulSyncDate, LastSyncDate, DateFinalized, EstimateDate, ZoneGroupsEdit, ZoneGroupConfiguration, ZoneGroupCSVUploader, ZoneColumn, ZoneGroupList, HomeAboutCopy, WaterAccountBudgetReport, CustomPageEditProperties, ZoneGroupUsageChart, ModalUpdateWaterAccountInformation, ModalCreateNewWaterAccount, ModalAddParcelToWaterAccount, ModalMergeWaterAccounts, ModalUpdateWaterAccountParcels, WaterAccountMergeType, GeographyAbout, GeographyAllocations, GeographyWaterLevels, GeographySupport, MonitoringWellsGrid, WaterAccountDashboard, AddAWellScenario, AllocationPlanEdit, AllocationPlansConfigure, CloneAllocationPlan, AccountAllocationPlans, RechargeScenario, PostToSupply, OpenETSyncVariable, LandownerParcelIndex, ScenarioPlanner, ScenarioPlannerGET, ScenarioPlannerScenarioRuns, ActivityCenter, WaterAccountSuggestions, ModalReviewWaterAccountSuggestion, WellRegistryConfigurationPage, WellRegistryMapYourWell, WellRegistryConfirmWellLocation, WellRegistryIrrigatedParcels, WellRegistryContacts, WellRegistryBasicInformation, WellRegistrySupportingInformation, WellRegistryAttachments, WellRegistrySubmit, WellRegistryFieldWellName, WellRegistryFieldSWN, WellRegistryFieldWCR, WellRegistryFieldCountyWellPermit, WellRegistryFieldDateDrilled, WellRegistryFieldWaterUseDescriptionAgricultural, WellRegistryFieldWaterUseDescriptionStockWatering, WellRegistryFieldWaterUseDescriptionDomestic, WellRegistryFieldWaterUseDescriptionPublicMunicipal, WellRegistryFieldWaterUseDescriptionPrivateMunicipal, WellRegistryFieldWaterUseDescriptionOther, WellRegistryFieldTopOfPerforations, WellRegistryFieldBottomOfPerforations, WellRegistryFieldMaxiumumFlow, WellRegistryFieldTypicalFlow, ManageReviewSubmittedWells, LandownerWellList, ManageAllWellRegistrations, FormAsteriskExplanation, WellRegistryIncompleteText, ReferenceWellsList, ReferenceWellsUploader, LandingPageBody, LandingPageUserCard, LandingPageParcelCard, LandingPageWellCard, LandingPageWaterAccountCard, LandingPageOverview, LandingPageAllocationPlans, LandingPageWaterLevels, LandingPageContact, ConfigureLandingPage, HomepageUpdateProfileLink, HomepageGrowerGuideLink, HomepageGeographiesLink, HomepageClaimWaterAccountsPanel, ParcelStatus, OnboardOverviewContent, ParcelBulkActions, MeterList, SerialNumber, MeterConfiguration, Acknowledgements, AdminGeographyEditForm, LandingPageConfigure, MeterDataConfigure, AllocationPlanConfigureCard, WellStatus, UpdateWellInfo, UpdateWellLocation, UpdateWellIrrigatedParcels, AdminFAQ, GeneralFAQ, WaterAccountCustomAttributesEdit, ParcelCustomAttributesEdit, WaterDashboardLink, WaterManagerGuideLink, ReviewParcelChanges, WaterAccountRequestChanges, WaterAccountRequestChangesCertification, ConsolidateWaterAccountsDisclaimer, KernScenarioModel, MercedWaterResourcesModel, YoloScenarioModel, ConfigureGeographySetup, ConfigureCustomAttributes, ConfigureWaterManagers, RasterUploadGuidance };
-            AllAsSimpleDto = new List<CustomRichTextTypeSimpleDto> { PlatformOverview.AsSimpleDto(), Disclaimer.AsSimpleDto(), Homepage.AsSimpleDto(), Help.AsSimpleDto(), LabelsAndDefinitionsList.AsSimpleDto(), ManageUserParcels.AsSimpleDto(), Training.AsSimpleDto(), CustomPages.AsSimpleDto(), MailMergeReport.AsSimpleDto(), ParcelList.AsSimpleDto(), OnboardOverview.AsSimpleDto(), OnboardWaterAccountPINs.AsSimpleDto(), OnboardClaimParcels.AsSimpleDto(), WellRegistryIntro.AsSimpleDto(), TagList.AsSimpleDto(), BulkTagParcels.AsSimpleDto(), WaterAccounts.AsSimpleDto(), WaterTransactions.AsSimpleDto(), WaterTransactionCreate.AsSimpleDto(), WaterTransactionBulkCreate.AsSimpleDto(), WaterTransactionCSVUploadSupply.AsSimpleDto(), WaterTransactionHistory.AsSimpleDto(), WaterAccount.AsSimpleDto(), Tag.AsSimpleDto(), WaterAccountPIN.AsSimpleDto(), SupplyType.AsSimpleDto(), TotalSupply.AsSimpleDto(), TotalUsage.AsSimpleDto(), TransactionType.AsSimpleDto(), EffectiveDate.AsSimpleDto(), ReportingPeriodConfiguration.AsSimpleDto(), WaterSupplyConfiguration.AsSimpleDto(), WaterLevelsConfiguration.AsSimpleDto(), TradingConfiguration.AsSimpleDto(), ScenariosConfiguration.AsSimpleDto(), WellRegistryConfiguration.AsSimpleDto(), PermissionsConfiguration.AsSimpleDto(), GeospatialDataConfiguration.AsSimpleDto(), CustomPagesConfiguration.AsSimpleDto(), UpdateParcelsUpload.AsSimpleDto(), UpdateParcelsReviewParcels.AsSimpleDto(), UpdateParcelsConfirm.AsSimpleDto(), AccountReconciliation.AsSimpleDto(), Footer.AsSimpleDto(), EditAccounts.AsSimpleDto(), EditUsers.AsSimpleDto(), AccountActivity.AsSimpleDto(), UsageByParcel.AsSimpleDto(), AccountMap.AsSimpleDto(), ChangeParcelOwnership.AsSimpleDto(), WellBulkUpload.AsSimpleDto(), WellName.AsSimpleDto(), CountyWellPermitNo.AsSimpleDto(), StateWCRNo.AsSimpleDto(), WellDepth.AsSimpleDto(), DateDrilled.AsSimpleDto(), WaterTransactionCsvUploadUsage.AsSimpleDto(), APNColumn.AsSimpleDto(), ValueColumn.AsSimpleDto(), UsageType.AsSimpleDto(), Wells.AsSimpleDto(), ExternalMapLayers.AsSimpleDto(), ExternalMapLayersType.AsSimpleDto(), ExternalMapLayersEdit.AsSimpleDto(), ExternalMapLayersName.AsSimpleDto(), ExternalMapLayersMinimumZoom.AsSimpleDto(), OurGeographies.AsSimpleDto(), PopUpField.AsSimpleDto(), OpenETSyncIntegration.AsSimpleDto(), OpenETInstructions.AsSimpleDto(), UsageEstimates.AsSimpleDto(), LastSuccessfulSyncDate.AsSimpleDto(), LastSyncDate.AsSimpleDto(), DateFinalized.AsSimpleDto(), EstimateDate.AsSimpleDto(), ZoneGroupsEdit.AsSimpleDto(), ZoneGroupConfiguration.AsSimpleDto(), ZoneGroupCSVUploader.AsSimpleDto(), ZoneColumn.AsSimpleDto(), ZoneGroupList.AsSimpleDto(), HomeAboutCopy.AsSimpleDto(), WaterAccountBudgetReport.AsSimpleDto(), CustomPageEditProperties.AsSimpleDto(), ZoneGroupUsageChart.AsSimpleDto(), ModalUpdateWaterAccountInformation.AsSimpleDto(), ModalCreateNewWaterAccount.AsSimpleDto(), ModalAddParcelToWaterAccount.AsSimpleDto(), ModalMergeWaterAccounts.AsSimpleDto(), ModalUpdateWaterAccountParcels.AsSimpleDto(), WaterAccountMergeType.AsSimpleDto(), GeographyAbout.AsSimpleDto(), GeographyAllocations.AsSimpleDto(), GeographyWaterLevels.AsSimpleDto(), GeographySupport.AsSimpleDto(), MonitoringWellsGrid.AsSimpleDto(), WaterAccountDashboard.AsSimpleDto(), AddAWellScenario.AsSimpleDto(), AllocationPlanEdit.AsSimpleDto(), AllocationPlansConfigure.AsSimpleDto(), CloneAllocationPlan.AsSimpleDto(), AccountAllocationPlans.AsSimpleDto(), RechargeScenario.AsSimpleDto(), PostToSupply.AsSimpleDto(), OpenETSyncVariable.AsSimpleDto(), LandownerParcelIndex.AsSimpleDto(), ScenarioPlanner.AsSimpleDto(), ScenarioPlannerGET.AsSimpleDto(), ScenarioPlannerScenarioRuns.AsSimpleDto(), ActivityCenter.AsSimpleDto(), WaterAccountSuggestions.AsSimpleDto(), ModalReviewWaterAccountSuggestion.AsSimpleDto(), WellRegistryConfigurationPage.AsSimpleDto(), WellRegistryMapYourWell.AsSimpleDto(), WellRegistryConfirmWellLocation.AsSimpleDto(), WellRegistryIrrigatedParcels.AsSimpleDto(), WellRegistryContacts.AsSimpleDto(), WellRegistryBasicInformation.AsSimpleDto(), WellRegistrySupportingInformation.AsSimpleDto(), WellRegistryAttachments.AsSimpleDto(), WellRegistrySubmit.AsSimpleDto(), WellRegistryFieldWellName.AsSimpleDto(), WellRegistryFieldSWN.AsSimpleDto(), WellRegistryFieldWCR.AsSimpleDto(), WellRegistryFieldCountyWellPermit.AsSimpleDto(), WellRegistryFieldDateDrilled.AsSimpleDto(), WellRegistryFieldWaterUseDescriptionAgricultural.AsSimpleDto(), WellRegistryFieldWaterUseDescriptionStockWatering.AsSimpleDto(), WellRegistryFieldWaterUseDescriptionDomestic.AsSimpleDto(), WellRegistryFieldWaterUseDescriptionPublicMunicipal.AsSimpleDto(), WellRegistryFieldWaterUseDescriptionPrivateMunicipal.AsSimpleDto(), WellRegistryFieldWaterUseDescriptionOther.AsSimpleDto(), WellRegistryFieldTopOfPerforations.AsSimpleDto(), WellRegistryFieldBottomOfPerforations.AsSimpleDto(), WellRegistryFieldMaxiumumFlow.AsSimpleDto(), WellRegistryFieldTypicalFlow.AsSimpleDto(), ManageReviewSubmittedWells.AsSimpleDto(), LandownerWellList.AsSimpleDto(), ManageAllWellRegistrations.AsSimpleDto(), FormAsteriskExplanation.AsSimpleDto(), WellRegistryIncompleteText.AsSimpleDto(), ReferenceWellsList.AsSimpleDto(), ReferenceWellsUploader.AsSimpleDto(), LandingPageBody.AsSimpleDto(), LandingPageUserCard.AsSimpleDto(), LandingPageParcelCard.AsSimpleDto(), LandingPageWellCard.AsSimpleDto(), LandingPageWaterAccountCard.AsSimpleDto(), LandingPageOverview.AsSimpleDto(), LandingPageAllocationPlans.AsSimpleDto(), LandingPageWaterLevels.AsSimpleDto(), LandingPageContact.AsSimpleDto(), ConfigureLandingPage.AsSimpleDto(), HomepageUpdateProfileLink.AsSimpleDto(), HomepageGrowerGuideLink.AsSimpleDto(), HomepageGeographiesLink.AsSimpleDto(), HomepageClaimWaterAccountsPanel.AsSimpleDto(), ParcelStatus.AsSimpleDto(), OnboardOverviewContent.AsSimpleDto(), ParcelBulkActions.AsSimpleDto(), MeterList.AsSimpleDto(), SerialNumber.AsSimpleDto(), MeterConfiguration.AsSimpleDto(), Acknowledgements.AsSimpleDto(), AdminGeographyEditForm.AsSimpleDto(), LandingPageConfigure.AsSimpleDto(), MeterDataConfigure.AsSimpleDto(), AllocationPlanConfigureCard.AsSimpleDto(), WellStatus.AsSimpleDto(), UpdateWellInfo.AsSimpleDto(), UpdateWellLocation.AsSimpleDto(), UpdateWellIrrigatedParcels.AsSimpleDto(), AdminFAQ.AsSimpleDto(), GeneralFAQ.AsSimpleDto(), WaterAccountCustomAttributesEdit.AsSimpleDto(), ParcelCustomAttributesEdit.AsSimpleDto(), WaterDashboardLink.AsSimpleDto(), WaterManagerGuideLink.AsSimpleDto(), ReviewParcelChanges.AsSimpleDto(), WaterAccountRequestChanges.AsSimpleDto(), WaterAccountRequestChangesCertification.AsSimpleDto(), ConsolidateWaterAccountsDisclaimer.AsSimpleDto(), KernScenarioModel.AsSimpleDto(), MercedWaterResourcesModel.AsSimpleDto(), YoloScenarioModel.AsSimpleDto(), ConfigureGeographySetup.AsSimpleDto(), ConfigureCustomAttributes.AsSimpleDto(), ConfigureWaterManagers.AsSimpleDto(), RasterUploadGuidance.AsSimpleDto() };
+            All = new List<CustomRichTextType> { PlatformOverview, Disclaimer, Homepage, Help, LabelsAndDefinitionsList, ManageUserParcels, Training, CustomPages, MailMergeReport, ParcelList, OnboardOverview, OnboardWaterAccountPINs, OnboardClaimParcels, WellRegistryIntro, TagList, BulkTagParcels, WaterAccounts, WaterTransactions, WaterTransactionCreate, WaterTransactionBulkCreate, WaterTransactionCSVUploadSupply, WaterTransactionHistory, WaterAccount, Tag, WaterAccountPIN, SupplyType, TotalSupply, TotalUsage, TransactionType, EffectiveDate, ReportingPeriodConfiguration, WaterSupplyConfiguration, WaterLevelsConfiguration, TradingConfiguration, ScenariosConfiguration, WellRegistryConfiguration, PermissionsConfiguration, GeospatialDataConfiguration, CustomPagesConfiguration, UpdateParcelsUpload, UpdateParcelsReviewParcels, UpdateParcelsConfirm, AccountReconciliation, Footer, EditAccounts, EditUsers, AccountActivity, UsageByParcel, AccountMap, ChangeParcelOwnership, WellBulkUpload, WellName, CountyWellPermitNo, StateWCRNo, WellDepth, DateDrilled, WaterTransactionCsvUploadUsage, APNColumn, ValueColumn, UsageType, Wells, ExternalMapLayers, ExternalMapLayersType, ExternalMapLayersEdit, ExternalMapLayersName, ExternalMapLayersMinimumZoom, OurGeographies, PopUpField, OpenETSyncIntegration, OpenETInstructions, UsageEstimates, LastSuccessfulSyncDate, LastSyncDate, DateFinalized, EstimateDate, ZoneGroupsEdit, ZoneGroupConfiguration, ZoneGroupCSVUploader, ZoneColumn, ZoneGroupList, HomeAboutCopy, WaterAccountBudgetReport, CustomPageEditProperties, ZoneGroupUsageChart, ModalUpdateWaterAccountInformation, ModalCreateNewWaterAccount, ModalAddParcelToWaterAccount, ModalMergeWaterAccounts, ModalUpdateWaterAccountParcels, WaterAccountMergeType, GeographyAbout, GeographyAllocations, GeographyWaterLevels, GeographySupport, MonitoringWellsGrid, WaterDashboardWaterAccounts, AddAWellScenario, AllocationPlanEdit, AllocationPlansConfigure, CloneAllocationPlan, AccountAllocationPlans, RechargeScenario, PostToSupply, OpenETSyncVariable, LandownerParcelIndex, ScenarioPlanner, ScenarioPlannerGET, ScenarioPlannerScenarioRuns, ActivityCenter, WaterAccountSuggestions, ModalReviewWaterAccountSuggestion, WellRegistryConfigurationPage, WellRegistryMapYourWell, WellRegistryConfirmWellLocation, WellRegistryIrrigatedParcels, WellRegistryContacts, WellRegistryBasicInformation, WellRegistrySupportingInformation, WellRegistryAttachments, WellRegistrySubmit, WellRegistryFieldWellName, WellRegistryFieldSWN, WellRegistryFieldWCR, WellRegistryFieldCountyWellPermit, WellRegistryFieldDateDrilled, WellRegistryFieldWaterUseDescriptionAgricultural, WellRegistryFieldWaterUseDescriptionStockWatering, WellRegistryFieldWaterUseDescriptionDomestic, WellRegistryFieldWaterUseDescriptionPublicMunicipal, WellRegistryFieldWaterUseDescriptionPrivateMunicipal, WellRegistryFieldWaterUseDescriptionOther, WellRegistryFieldTopOfPerforations, WellRegistryFieldBottomOfPerforations, WellRegistryFieldMaxiumumFlow, WellRegistryFieldTypicalFlow, ManageReviewSubmittedWells, LandownerWellList, ManageAllWellRegistrations, FormAsteriskExplanation, WellRegistryIncompleteText, ReferenceWellsList, ReferenceWellsUploader, LandingPageBody, LandingPageUserCard, LandingPageParcelCard, LandingPageWellCard, LandingPageWaterAccountCard, LandingPageOverview, LandingPageAllocationPlans, LandingPageWaterLevels, LandingPageContact, ConfigureLandingPage, HomepageUpdateProfileLink, HomepageGrowerGuideLink, HomepageGeographiesLink, HomepageClaimWaterAccountsPanel, ParcelStatus, OnboardOverviewContent, ParcelBulkActions, MeterList, SerialNumber, MeterConfiguration, Acknowledgements, AdminGeographyEditForm, LandingPageConfigure, MeterDataConfigure, AllocationPlanConfigureCard, WellStatus, UpdateWellInfo, UpdateWellLocation, UpdateWellIrrigatedParcels, AdminFAQ, GeneralFAQ, WaterAccountCustomAttributesEdit, ParcelCustomAttributesEdit, WaterDashboardLink, WaterManagerGuideLink, ReviewParcelChanges, WaterAccountRequestChanges, WaterAccountRequestChangesCertification, ConsolidateWaterAccountsDisclaimer, KernScenarioModel, MercedWaterResourcesModel, YoloScenarioModel, ConfigureGeographySetup, ConfigureCustomAttributes, ConfigureWaterManagers, RasterUploadGuidance, WaterDashboardParcels, WaterDashboardWells, RequestSupport, FeeCalculatorStepOne, FeeCalculatorSurfaceWater, FeeCalculatorStepTwo, FeeCalculatorStepThree, FeeCalculatorAboutFeeStructures, FeeCalculatorIncentivePayment, FeeCalculatorWhatIsConsumedGroundwater, FeeCalculatorYourData, FeeCalculatorAcres, FeeCalculatorFallowingSelfDirected, FeeCalculatorCoverCroppingSelfDirected, FeeCalculatorTemporaryFallowingLandFallowingProgram, FeeCalculatorRotationalExtendedFallowingMLRP, FeeCalculatorRotationalExtendedFallowingInDesignatedBufferZonesMLRP, FeeCalculatorOrchardSwaleRewildingMLRP, FeeCalculatorFloodplainReconnectionAndRelatedSpreadingAndRechargeMLRP, FeeCalculatorFloodflowSpreadingOnNonFloodplainLandsMLRP, FeeCalculatorStorageOrRechargeBasinsMLRP, LandingPageFeeCalculator, NewsAndAnnouncements, ReviewSelfReportList, SubmitSelfReportDisclaimer, SelfReportEditorInstructions };
+            AllAsSimpleDto = new List<CustomRichTextTypeSimpleDto> { PlatformOverview.AsSimpleDto(), Disclaimer.AsSimpleDto(), Homepage.AsSimpleDto(), Help.AsSimpleDto(), LabelsAndDefinitionsList.AsSimpleDto(), ManageUserParcels.AsSimpleDto(), Training.AsSimpleDto(), CustomPages.AsSimpleDto(), MailMergeReport.AsSimpleDto(), ParcelList.AsSimpleDto(), OnboardOverview.AsSimpleDto(), OnboardWaterAccountPINs.AsSimpleDto(), OnboardClaimParcels.AsSimpleDto(), WellRegistryIntro.AsSimpleDto(), TagList.AsSimpleDto(), BulkTagParcels.AsSimpleDto(), WaterAccounts.AsSimpleDto(), WaterTransactions.AsSimpleDto(), WaterTransactionCreate.AsSimpleDto(), WaterTransactionBulkCreate.AsSimpleDto(), WaterTransactionCSVUploadSupply.AsSimpleDto(), WaterTransactionHistory.AsSimpleDto(), WaterAccount.AsSimpleDto(), Tag.AsSimpleDto(), WaterAccountPIN.AsSimpleDto(), SupplyType.AsSimpleDto(), TotalSupply.AsSimpleDto(), TotalUsage.AsSimpleDto(), TransactionType.AsSimpleDto(), EffectiveDate.AsSimpleDto(), ReportingPeriodConfiguration.AsSimpleDto(), WaterSupplyConfiguration.AsSimpleDto(), WaterLevelsConfiguration.AsSimpleDto(), TradingConfiguration.AsSimpleDto(), ScenariosConfiguration.AsSimpleDto(), WellRegistryConfiguration.AsSimpleDto(), PermissionsConfiguration.AsSimpleDto(), GeospatialDataConfiguration.AsSimpleDto(), CustomPagesConfiguration.AsSimpleDto(), UpdateParcelsUpload.AsSimpleDto(), UpdateParcelsReviewParcels.AsSimpleDto(), UpdateParcelsConfirm.AsSimpleDto(), AccountReconciliation.AsSimpleDto(), Footer.AsSimpleDto(), EditAccounts.AsSimpleDto(), EditUsers.AsSimpleDto(), AccountActivity.AsSimpleDto(), UsageByParcel.AsSimpleDto(), AccountMap.AsSimpleDto(), ChangeParcelOwnership.AsSimpleDto(), WellBulkUpload.AsSimpleDto(), WellName.AsSimpleDto(), CountyWellPermitNo.AsSimpleDto(), StateWCRNo.AsSimpleDto(), WellDepth.AsSimpleDto(), DateDrilled.AsSimpleDto(), WaterTransactionCsvUploadUsage.AsSimpleDto(), APNColumn.AsSimpleDto(), ValueColumn.AsSimpleDto(), UsageType.AsSimpleDto(), Wells.AsSimpleDto(), ExternalMapLayers.AsSimpleDto(), ExternalMapLayersType.AsSimpleDto(), ExternalMapLayersEdit.AsSimpleDto(), ExternalMapLayersName.AsSimpleDto(), ExternalMapLayersMinimumZoom.AsSimpleDto(), OurGeographies.AsSimpleDto(), PopUpField.AsSimpleDto(), OpenETSyncIntegration.AsSimpleDto(), OpenETInstructions.AsSimpleDto(), UsageEstimates.AsSimpleDto(), LastSuccessfulSyncDate.AsSimpleDto(), LastSyncDate.AsSimpleDto(), DateFinalized.AsSimpleDto(), EstimateDate.AsSimpleDto(), ZoneGroupsEdit.AsSimpleDto(), ZoneGroupConfiguration.AsSimpleDto(), ZoneGroupCSVUploader.AsSimpleDto(), ZoneColumn.AsSimpleDto(), ZoneGroupList.AsSimpleDto(), HomeAboutCopy.AsSimpleDto(), WaterAccountBudgetReport.AsSimpleDto(), CustomPageEditProperties.AsSimpleDto(), ZoneGroupUsageChart.AsSimpleDto(), ModalUpdateWaterAccountInformation.AsSimpleDto(), ModalCreateNewWaterAccount.AsSimpleDto(), ModalAddParcelToWaterAccount.AsSimpleDto(), ModalMergeWaterAccounts.AsSimpleDto(), ModalUpdateWaterAccountParcels.AsSimpleDto(), WaterAccountMergeType.AsSimpleDto(), GeographyAbout.AsSimpleDto(), GeographyAllocations.AsSimpleDto(), GeographyWaterLevels.AsSimpleDto(), GeographySupport.AsSimpleDto(), MonitoringWellsGrid.AsSimpleDto(), WaterDashboardWaterAccounts.AsSimpleDto(), AddAWellScenario.AsSimpleDto(), AllocationPlanEdit.AsSimpleDto(), AllocationPlansConfigure.AsSimpleDto(), CloneAllocationPlan.AsSimpleDto(), AccountAllocationPlans.AsSimpleDto(), RechargeScenario.AsSimpleDto(), PostToSupply.AsSimpleDto(), OpenETSyncVariable.AsSimpleDto(), LandownerParcelIndex.AsSimpleDto(), ScenarioPlanner.AsSimpleDto(), ScenarioPlannerGET.AsSimpleDto(), ScenarioPlannerScenarioRuns.AsSimpleDto(), ActivityCenter.AsSimpleDto(), WaterAccountSuggestions.AsSimpleDto(), ModalReviewWaterAccountSuggestion.AsSimpleDto(), WellRegistryConfigurationPage.AsSimpleDto(), WellRegistryMapYourWell.AsSimpleDto(), WellRegistryConfirmWellLocation.AsSimpleDto(), WellRegistryIrrigatedParcels.AsSimpleDto(), WellRegistryContacts.AsSimpleDto(), WellRegistryBasicInformation.AsSimpleDto(), WellRegistrySupportingInformation.AsSimpleDto(), WellRegistryAttachments.AsSimpleDto(), WellRegistrySubmit.AsSimpleDto(), WellRegistryFieldWellName.AsSimpleDto(), WellRegistryFieldSWN.AsSimpleDto(), WellRegistryFieldWCR.AsSimpleDto(), WellRegistryFieldCountyWellPermit.AsSimpleDto(), WellRegistryFieldDateDrilled.AsSimpleDto(), WellRegistryFieldWaterUseDescriptionAgricultural.AsSimpleDto(), WellRegistryFieldWaterUseDescriptionStockWatering.AsSimpleDto(), WellRegistryFieldWaterUseDescriptionDomestic.AsSimpleDto(), WellRegistryFieldWaterUseDescriptionPublicMunicipal.AsSimpleDto(), WellRegistryFieldWaterUseDescriptionPrivateMunicipal.AsSimpleDto(), WellRegistryFieldWaterUseDescriptionOther.AsSimpleDto(), WellRegistryFieldTopOfPerforations.AsSimpleDto(), WellRegistryFieldBottomOfPerforations.AsSimpleDto(), WellRegistryFieldMaxiumumFlow.AsSimpleDto(), WellRegistryFieldTypicalFlow.AsSimpleDto(), ManageReviewSubmittedWells.AsSimpleDto(), LandownerWellList.AsSimpleDto(), ManageAllWellRegistrations.AsSimpleDto(), FormAsteriskExplanation.AsSimpleDto(), WellRegistryIncompleteText.AsSimpleDto(), ReferenceWellsList.AsSimpleDto(), ReferenceWellsUploader.AsSimpleDto(), LandingPageBody.AsSimpleDto(), LandingPageUserCard.AsSimpleDto(), LandingPageParcelCard.AsSimpleDto(), LandingPageWellCard.AsSimpleDto(), LandingPageWaterAccountCard.AsSimpleDto(), LandingPageOverview.AsSimpleDto(), LandingPageAllocationPlans.AsSimpleDto(), LandingPageWaterLevels.AsSimpleDto(), LandingPageContact.AsSimpleDto(), ConfigureLandingPage.AsSimpleDto(), HomepageUpdateProfileLink.AsSimpleDto(), HomepageGrowerGuideLink.AsSimpleDto(), HomepageGeographiesLink.AsSimpleDto(), HomepageClaimWaterAccountsPanel.AsSimpleDto(), ParcelStatus.AsSimpleDto(), OnboardOverviewContent.AsSimpleDto(), ParcelBulkActions.AsSimpleDto(), MeterList.AsSimpleDto(), SerialNumber.AsSimpleDto(), MeterConfiguration.AsSimpleDto(), Acknowledgements.AsSimpleDto(), AdminGeographyEditForm.AsSimpleDto(), LandingPageConfigure.AsSimpleDto(), MeterDataConfigure.AsSimpleDto(), AllocationPlanConfigureCard.AsSimpleDto(), WellStatus.AsSimpleDto(), UpdateWellInfo.AsSimpleDto(), UpdateWellLocation.AsSimpleDto(), UpdateWellIrrigatedParcels.AsSimpleDto(), AdminFAQ.AsSimpleDto(), GeneralFAQ.AsSimpleDto(), WaterAccountCustomAttributesEdit.AsSimpleDto(), ParcelCustomAttributesEdit.AsSimpleDto(), WaterDashboardLink.AsSimpleDto(), WaterManagerGuideLink.AsSimpleDto(), ReviewParcelChanges.AsSimpleDto(), WaterAccountRequestChanges.AsSimpleDto(), WaterAccountRequestChangesCertification.AsSimpleDto(), ConsolidateWaterAccountsDisclaimer.AsSimpleDto(), KernScenarioModel.AsSimpleDto(), MercedWaterResourcesModel.AsSimpleDto(), YoloScenarioModel.AsSimpleDto(), ConfigureGeographySetup.AsSimpleDto(), ConfigureCustomAttributes.AsSimpleDto(), ConfigureWaterManagers.AsSimpleDto(), RasterUploadGuidance.AsSimpleDto(), WaterDashboardParcels.AsSimpleDto(), WaterDashboardWells.AsSimpleDto(), RequestSupport.AsSimpleDto(), FeeCalculatorStepOne.AsSimpleDto(), FeeCalculatorSurfaceWater.AsSimpleDto(), FeeCalculatorStepTwo.AsSimpleDto(), FeeCalculatorStepThree.AsSimpleDto(), FeeCalculatorAboutFeeStructures.AsSimpleDto(), FeeCalculatorIncentivePayment.AsSimpleDto(), FeeCalculatorWhatIsConsumedGroundwater.AsSimpleDto(), FeeCalculatorYourData.AsSimpleDto(), FeeCalculatorAcres.AsSimpleDto(), FeeCalculatorFallowingSelfDirected.AsSimpleDto(), FeeCalculatorCoverCroppingSelfDirected.AsSimpleDto(), FeeCalculatorTemporaryFallowingLandFallowingProgram.AsSimpleDto(), FeeCalculatorRotationalExtendedFallowingMLRP.AsSimpleDto(), FeeCalculatorRotationalExtendedFallowingInDesignatedBufferZonesMLRP.AsSimpleDto(), FeeCalculatorOrchardSwaleRewildingMLRP.AsSimpleDto(), FeeCalculatorFloodplainReconnectionAndRelatedSpreadingAndRechargeMLRP.AsSimpleDto(), FeeCalculatorFloodflowSpreadingOnNonFloodplainLandsMLRP.AsSimpleDto(), FeeCalculatorStorageOrRechargeBasinsMLRP.AsSimpleDto(), LandingPageFeeCalculator.AsSimpleDto(), NewsAndAnnouncements.AsSimpleDto(), ReviewSelfReportList.AsSimpleDto(), SubmitSelfReportDisclaimer.AsSimpleDto(), SelfReportEditorInstructions.AsSimpleDto() };
             AllLookupDictionary = new ReadOnlyDictionary<int, CustomRichTextType>(All.ToDictionary(x => x.CustomRichTextTypeID));
             AllAsSimpleDtoLookupDictionary = new ReadOnlyDictionary<int, CustomRichTextTypeSimpleDto>(AllAsSimpleDto.ToDictionary(x => x.CustomRichTextTypeID));
         }
@@ -359,6 +385,42 @@ namespace Qanat.EFModels.Entities
                     return ExternalMapLayersName;
                 case CustomRichTextTypeEnum.ExternalMapLayersType:
                     return ExternalMapLayersType;
+                case CustomRichTextTypeEnum.FeeCalculatorAboutFeeStructures:
+                    return FeeCalculatorAboutFeeStructures;
+                case CustomRichTextTypeEnum.FeeCalculatorAcres:
+                    return FeeCalculatorAcres;
+                case CustomRichTextTypeEnum.FeeCalculatorCoverCroppingSelfDirected:
+                    return FeeCalculatorCoverCroppingSelfDirected;
+                case CustomRichTextTypeEnum.FeeCalculatorFallowingSelfDirected:
+                    return FeeCalculatorFallowingSelfDirected;
+                case CustomRichTextTypeEnum.FeeCalculatorFloodflowSpreadingOnNonFloodplainLandsMLRP:
+                    return FeeCalculatorFloodflowSpreadingOnNonFloodplainLandsMLRP;
+                case CustomRichTextTypeEnum.FeeCalculatorFloodplainReconnectionAndRelatedSpreadingAndRechargeMLRP:
+                    return FeeCalculatorFloodplainReconnectionAndRelatedSpreadingAndRechargeMLRP;
+                case CustomRichTextTypeEnum.FeeCalculatorIncentivePayment:
+                    return FeeCalculatorIncentivePayment;
+                case CustomRichTextTypeEnum.FeeCalculatorOrchardSwaleRewildingMLRP:
+                    return FeeCalculatorOrchardSwaleRewildingMLRP;
+                case CustomRichTextTypeEnum.FeeCalculatorRotationalExtendedFallowingInDesignatedBufferZonesMLRP:
+                    return FeeCalculatorRotationalExtendedFallowingInDesignatedBufferZonesMLRP;
+                case CustomRichTextTypeEnum.FeeCalculatorRotationalExtendedFallowingMLRP:
+                    return FeeCalculatorRotationalExtendedFallowingMLRP;
+                case CustomRichTextTypeEnum.FeeCalculatorStepOne:
+                    return FeeCalculatorStepOne;
+                case CustomRichTextTypeEnum.FeeCalculatorStepThree:
+                    return FeeCalculatorStepThree;
+                case CustomRichTextTypeEnum.FeeCalculatorStepTwo:
+                    return FeeCalculatorStepTwo;
+                case CustomRichTextTypeEnum.FeeCalculatorStorageOrRechargeBasinsMLRP:
+                    return FeeCalculatorStorageOrRechargeBasinsMLRP;
+                case CustomRichTextTypeEnum.FeeCalculatorSurfaceWater:
+                    return FeeCalculatorSurfaceWater;
+                case CustomRichTextTypeEnum.FeeCalculatorTemporaryFallowingLandFallowingProgram:
+                    return FeeCalculatorTemporaryFallowingLandFallowingProgram;
+                case CustomRichTextTypeEnum.FeeCalculatorWhatIsConsumedGroundwater:
+                    return FeeCalculatorWhatIsConsumedGroundwater;
+                case CustomRichTextTypeEnum.FeeCalculatorYourData:
+                    return FeeCalculatorYourData;
                 case CustomRichTextTypeEnum.Footer:
                     return Footer;
                 case CustomRichTextTypeEnum.FormAsteriskExplanation:
@@ -401,6 +463,8 @@ namespace Qanat.EFModels.Entities
                     return LandingPageConfigure;
                 case CustomRichTextTypeEnum.LandingPageContact:
                     return LandingPageContact;
+                case CustomRichTextTypeEnum.LandingPageFeeCalculator:
+                    return LandingPageFeeCalculator;
                 case CustomRichTextTypeEnum.LandingPageOverview:
                     return LandingPageOverview;
                 case CustomRichTextTypeEnum.LandingPageParcelCard:
@@ -451,6 +515,8 @@ namespace Qanat.EFModels.Entities
                     return ModalUpdateWaterAccountParcels;
                 case CustomRichTextTypeEnum.MonitoringWellsGrid:
                     return MonitoringWellsGrid;
+                case CustomRichTextTypeEnum.NewsAndAnnouncements:
+                    return NewsAndAnnouncements;
                 case CustomRichTextTypeEnum.OnboardClaimParcels:
                     return OnboardClaimParcels;
                 case CustomRichTextTypeEnum.OnboardOverview:
@@ -493,8 +559,12 @@ namespace Qanat.EFModels.Entities
                     return ReferenceWellsUploader;
                 case CustomRichTextTypeEnum.ReportingPeriodConfiguration:
                     return ReportingPeriodConfiguration;
+                case CustomRichTextTypeEnum.RequestSupport:
+                    return RequestSupport;
                 case CustomRichTextTypeEnum.ReviewParcelChanges:
                     return ReviewParcelChanges;
+                case CustomRichTextTypeEnum.ReviewSelfReportList:
+                    return ReviewSelfReportList;
                 case CustomRichTextTypeEnum.ScenarioPlanner:
                     return ScenarioPlanner;
                 case CustomRichTextTypeEnum.ScenarioPlannerGET:
@@ -503,10 +573,14 @@ namespace Qanat.EFModels.Entities
                     return ScenarioPlannerScenarioRuns;
                 case CustomRichTextTypeEnum.ScenariosConfiguration:
                     return ScenariosConfiguration;
+                case CustomRichTextTypeEnum.SelfReportEditorInstructions:
+                    return SelfReportEditorInstructions;
                 case CustomRichTextTypeEnum.SerialNumber:
                     return SerialNumber;
                 case CustomRichTextTypeEnum.StateWCRNo:
                     return StateWCRNo;
+                case CustomRichTextTypeEnum.SubmitSelfReportDisclaimer:
+                    return SubmitSelfReportDisclaimer;
                 case CustomRichTextTypeEnum.SupplyType:
                     return SupplyType;
                 case CustomRichTextTypeEnum.Tag:
@@ -549,8 +623,6 @@ namespace Qanat.EFModels.Entities
                     return WaterAccountBudgetReport;
                 case CustomRichTextTypeEnum.WaterAccountCustomAttributesEdit:
                     return WaterAccountCustomAttributesEdit;
-                case CustomRichTextTypeEnum.WaterAccountDashboard:
-                    return WaterAccountDashboard;
                 case CustomRichTextTypeEnum.WaterAccountMergeType:
                     return WaterAccountMergeType;
                 case CustomRichTextTypeEnum.WaterAccountPIN:
@@ -565,6 +637,12 @@ namespace Qanat.EFModels.Entities
                     return WaterAccountSuggestions;
                 case CustomRichTextTypeEnum.WaterDashboardLink:
                     return WaterDashboardLink;
+                case CustomRichTextTypeEnum.WaterDashboardParcels:
+                    return WaterDashboardParcels;
+                case CustomRichTextTypeEnum.WaterDashboardWaterAccounts:
+                    return WaterDashboardWaterAccounts;
+                case CustomRichTextTypeEnum.WaterDashboardWells:
+                    return WaterDashboardWells;
                 case CustomRichTextTypeEnum.WaterLevelsConfiguration:
                     return WaterLevelsConfiguration;
                 case CustomRichTextTypeEnum.WaterManagerGuideLink:
@@ -764,7 +842,7 @@ namespace Qanat.EFModels.Entities
         GeographyWaterLevels = 93,
         GeographySupport = 94,
         MonitoringWellsGrid = 95,
-        WaterAccountDashboard = 96,
+        WaterDashboardWaterAccounts = 96,
         AddAWellScenario = 97,
         AllocationPlanEdit = 98,
         AllocationPlansConfigure = 99,
@@ -856,7 +934,33 @@ namespace Qanat.EFModels.Entities
         ConfigureGeographySetup = 185,
         ConfigureCustomAttributes = 186,
         ConfigureWaterManagers = 187,
-        RasterUploadGuidance = 188
+        RasterUploadGuidance = 188,
+        WaterDashboardParcels = 189,
+        WaterDashboardWells = 190,
+        RequestSupport = 191,
+        FeeCalculatorStepOne = 192,
+        FeeCalculatorSurfaceWater = 193,
+        FeeCalculatorStepTwo = 194,
+        FeeCalculatorStepThree = 195,
+        FeeCalculatorAboutFeeStructures = 196,
+        FeeCalculatorIncentivePayment = 197,
+        FeeCalculatorWhatIsConsumedGroundwater = 198,
+        FeeCalculatorYourData = 199,
+        FeeCalculatorAcres = 200,
+        FeeCalculatorFallowingSelfDirected = 201,
+        FeeCalculatorCoverCroppingSelfDirected = 202,
+        FeeCalculatorTemporaryFallowingLandFallowingProgram = 203,
+        FeeCalculatorRotationalExtendedFallowingMLRP = 204,
+        FeeCalculatorRotationalExtendedFallowingInDesignatedBufferZonesMLRP = 205,
+        FeeCalculatorOrchardSwaleRewildingMLRP = 206,
+        FeeCalculatorFloodplainReconnectionAndRelatedSpreadingAndRechargeMLRP = 207,
+        FeeCalculatorFloodflowSpreadingOnNonFloodplainLandsMLRP = 208,
+        FeeCalculatorStorageOrRechargeBasinsMLRP = 209,
+        LandingPageFeeCalculator = 210,
+        NewsAndAnnouncements = 211,
+        ReviewSelfReportList = 212,
+        SubmitSelfReportDisclaimer = 213,
+        SelfReportEditorInstructions = 214
     }
 
     public partial class CustomRichTextTypePlatformOverview : CustomRichTextType
@@ -1429,10 +1533,10 @@ namespace Qanat.EFModels.Entities
         public static readonly CustomRichTextTypeMonitoringWellsGrid Instance = new CustomRichTextTypeMonitoringWellsGrid(95, @"MonitoringWellsGrid", @"MonitoringWellsGrid", 1);
     }
 
-    public partial class CustomRichTextTypeWaterAccountDashboard : CustomRichTextType
+    public partial class CustomRichTextTypeWaterDashboardWaterAccounts : CustomRichTextType
     {
-        private CustomRichTextTypeWaterAccountDashboard(int customRichTextTypeID, string customRichTextTypeName, string customRichTextTypeDisplayName, int? contentTypeID) : base(customRichTextTypeID, customRichTextTypeName, customRichTextTypeDisplayName, contentTypeID) {}
-        public static readonly CustomRichTextTypeWaterAccountDashboard Instance = new CustomRichTextTypeWaterAccountDashboard(96, @"WaterAccountDashboard", @"Water Account Dashboard", 1);
+        private CustomRichTextTypeWaterDashboardWaterAccounts(int customRichTextTypeID, string customRichTextTypeName, string customRichTextTypeDisplayName, int? contentTypeID) : base(customRichTextTypeID, customRichTextTypeName, customRichTextTypeDisplayName, contentTypeID) {}
+        public static readonly CustomRichTextTypeWaterDashboardWaterAccounts Instance = new CustomRichTextTypeWaterDashboardWaterAccounts(96, @"WaterDashboardWaterAccounts", @"Water Dashboard Water Accounts", 1);
     }
 
     public partial class CustomRichTextTypeAddAWellScenario : CustomRichTextType
@@ -1985,5 +2089,161 @@ namespace Qanat.EFModels.Entities
     {
         private CustomRichTextTypeRasterUploadGuidance(int customRichTextTypeID, string customRichTextTypeName, string customRichTextTypeDisplayName, int? contentTypeID) : base(customRichTextTypeID, customRichTextTypeName, customRichTextTypeDisplayName, contentTypeID) {}
         public static readonly CustomRichTextTypeRasterUploadGuidance Instance = new CustomRichTextTypeRasterUploadGuidance(188, @"RasterUploadGuidance", @"Raster Upload Guidance", 1);
+    }
+
+    public partial class CustomRichTextTypeWaterDashboardParcels : CustomRichTextType
+    {
+        private CustomRichTextTypeWaterDashboardParcels(int customRichTextTypeID, string customRichTextTypeName, string customRichTextTypeDisplayName, int? contentTypeID) : base(customRichTextTypeID, customRichTextTypeName, customRichTextTypeDisplayName, contentTypeID) {}
+        public static readonly CustomRichTextTypeWaterDashboardParcels Instance = new CustomRichTextTypeWaterDashboardParcels(189, @"WaterDashboardParcels", @"Water Dashboard Parcels", 1);
+    }
+
+    public partial class CustomRichTextTypeWaterDashboardWells : CustomRichTextType
+    {
+        private CustomRichTextTypeWaterDashboardWells(int customRichTextTypeID, string customRichTextTypeName, string customRichTextTypeDisplayName, int? contentTypeID) : base(customRichTextTypeID, customRichTextTypeName, customRichTextTypeDisplayName, contentTypeID) {}
+        public static readonly CustomRichTextTypeWaterDashboardWells Instance = new CustomRichTextTypeWaterDashboardWells(190, @"WaterDashboardWells", @"Water Dashboard Wells", 1);
+    }
+
+    public partial class CustomRichTextTypeRequestSupport : CustomRichTextType
+    {
+        private CustomRichTextTypeRequestSupport(int customRichTextTypeID, string customRichTextTypeName, string customRichTextTypeDisplayName, int? contentTypeID) : base(customRichTextTypeID, customRichTextTypeName, customRichTextTypeDisplayName, contentTypeID) {}
+        public static readonly CustomRichTextTypeRequestSupport Instance = new CustomRichTextTypeRequestSupport(191, @"RequestSupport", @"Request Support", 1);
+    }
+
+    public partial class CustomRichTextTypeFeeCalculatorStepOne : CustomRichTextType
+    {
+        private CustomRichTextTypeFeeCalculatorStepOne(int customRichTextTypeID, string customRichTextTypeName, string customRichTextTypeDisplayName, int? contentTypeID) : base(customRichTextTypeID, customRichTextTypeName, customRichTextTypeDisplayName, contentTypeID) {}
+        public static readonly CustomRichTextTypeFeeCalculatorStepOne Instance = new CustomRichTextTypeFeeCalculatorStepOne(192, @"FeeCalculatorStepOne", @"Fee Calculator Step One", 1);
+    }
+
+    public partial class CustomRichTextTypeFeeCalculatorSurfaceWater : CustomRichTextType
+    {
+        private CustomRichTextTypeFeeCalculatorSurfaceWater(int customRichTextTypeID, string customRichTextTypeName, string customRichTextTypeDisplayName, int? contentTypeID) : base(customRichTextTypeID, customRichTextTypeName, customRichTextTypeDisplayName, contentTypeID) {}
+        public static readonly CustomRichTextTypeFeeCalculatorSurfaceWater Instance = new CustomRichTextTypeFeeCalculatorSurfaceWater(193, @"FeeCalculatorSurfaceWater", @"DO YOU RECEIVE SURFACE WATER?", 3);
+    }
+
+    public partial class CustomRichTextTypeFeeCalculatorStepTwo : CustomRichTextType
+    {
+        private CustomRichTextTypeFeeCalculatorStepTwo(int customRichTextTypeID, string customRichTextTypeName, string customRichTextTypeDisplayName, int? contentTypeID) : base(customRichTextTypeID, customRichTextTypeName, customRichTextTypeDisplayName, contentTypeID) {}
+        public static readonly CustomRichTextTypeFeeCalculatorStepTwo Instance = new CustomRichTextTypeFeeCalculatorStepTwo(194, @"FeeCalculatorStepTwo", @"Fee Calculator Step Two", 1);
+    }
+
+    public partial class CustomRichTextTypeFeeCalculatorStepThree : CustomRichTextType
+    {
+        private CustomRichTextTypeFeeCalculatorStepThree(int customRichTextTypeID, string customRichTextTypeName, string customRichTextTypeDisplayName, int? contentTypeID) : base(customRichTextTypeID, customRichTextTypeName, customRichTextTypeDisplayName, contentTypeID) {}
+        public static readonly CustomRichTextTypeFeeCalculatorStepThree Instance = new CustomRichTextTypeFeeCalculatorStepThree(195, @"FeeCalculatorStepThree", @"Fee Calculator Step Three", 1);
+    }
+
+    public partial class CustomRichTextTypeFeeCalculatorAboutFeeStructures : CustomRichTextType
+    {
+        private CustomRichTextTypeFeeCalculatorAboutFeeStructures(int customRichTextTypeID, string customRichTextTypeName, string customRichTextTypeDisplayName, int? contentTypeID) : base(customRichTextTypeID, customRichTextTypeName, customRichTextTypeDisplayName, contentTypeID) {}
+        public static readonly CustomRichTextTypeFeeCalculatorAboutFeeStructures Instance = new CustomRichTextTypeFeeCalculatorAboutFeeStructures(196, @"FeeCalculatorAboutFeeStructures", @"Fee Calculator About Fee Structures", 1);
+    }
+
+    public partial class CustomRichTextTypeFeeCalculatorIncentivePayment : CustomRichTextType
+    {
+        private CustomRichTextTypeFeeCalculatorIncentivePayment(int customRichTextTypeID, string customRichTextTypeName, string customRichTextTypeDisplayName, int? contentTypeID) : base(customRichTextTypeID, customRichTextTypeName, customRichTextTypeDisplayName, contentTypeID) {}
+        public static readonly CustomRichTextTypeFeeCalculatorIncentivePayment Instance = new CustomRichTextTypeFeeCalculatorIncentivePayment(197, @"FeeCalculatorIncentivePayment", @"Incentive Payment", 3);
+    }
+
+    public partial class CustomRichTextTypeFeeCalculatorWhatIsConsumedGroundwater : CustomRichTextType
+    {
+        private CustomRichTextTypeFeeCalculatorWhatIsConsumedGroundwater(int customRichTextTypeID, string customRichTextTypeName, string customRichTextTypeDisplayName, int? contentTypeID) : base(customRichTextTypeID, customRichTextTypeName, customRichTextTypeDisplayName, contentTypeID) {}
+        public static readonly CustomRichTextTypeFeeCalculatorWhatIsConsumedGroundwater Instance = new CustomRichTextTypeFeeCalculatorWhatIsConsumedGroundwater(198, @"FeeCalculatorWhatIsConsumedGroundwater", @"What is Consumed Groundwater?", 1);
+    }
+
+    public partial class CustomRichTextTypeFeeCalculatorYourData : CustomRichTextType
+    {
+        private CustomRichTextTypeFeeCalculatorYourData(int customRichTextTypeID, string customRichTextTypeName, string customRichTextTypeDisplayName, int? contentTypeID) : base(customRichTextTypeID, customRichTextTypeName, customRichTextTypeDisplayName, contentTypeID) {}
+        public static readonly CustomRichTextTypeFeeCalculatorYourData Instance = new CustomRichTextTypeFeeCalculatorYourData(199, @"FeeCalculatorYourData", @"Your Data", 1);
+    }
+
+    public partial class CustomRichTextTypeFeeCalculatorAcres : CustomRichTextType
+    {
+        private CustomRichTextTypeFeeCalculatorAcres(int customRichTextTypeID, string customRichTextTypeName, string customRichTextTypeDisplayName, int? contentTypeID) : base(customRichTextTypeID, customRichTextTypeName, customRichTextTypeDisplayName, contentTypeID) {}
+        public static readonly CustomRichTextTypeFeeCalculatorAcres Instance = new CustomRichTextTypeFeeCalculatorAcres(200, @"FeeCalculatorAcres", @"Acres", 1);
+    }
+
+    public partial class CustomRichTextTypeFeeCalculatorFallowingSelfDirected : CustomRichTextType
+    {
+        private CustomRichTextTypeFeeCalculatorFallowingSelfDirected(int customRichTextTypeID, string customRichTextTypeName, string customRichTextTypeDisplayName, int? contentTypeID) : base(customRichTextTypeID, customRichTextTypeName, customRichTextTypeDisplayName, contentTypeID) {}
+        public static readonly CustomRichTextTypeFeeCalculatorFallowingSelfDirected Instance = new CustomRichTextTypeFeeCalculatorFallowingSelfDirected(201, @"FeeCalculatorFallowingSelfDirected", @"Fallowing (Self-Directed)", 3);
+    }
+
+    public partial class CustomRichTextTypeFeeCalculatorCoverCroppingSelfDirected : CustomRichTextType
+    {
+        private CustomRichTextTypeFeeCalculatorCoverCroppingSelfDirected(int customRichTextTypeID, string customRichTextTypeName, string customRichTextTypeDisplayName, int? contentTypeID) : base(customRichTextTypeID, customRichTextTypeName, customRichTextTypeDisplayName, contentTypeID) {}
+        public static readonly CustomRichTextTypeFeeCalculatorCoverCroppingSelfDirected Instance = new CustomRichTextTypeFeeCalculatorCoverCroppingSelfDirected(202, @"FeeCalculatorCoverCroppingSelfDirected", @"Cover Cropping (Self-Directed)", 3);
+    }
+
+    public partial class CustomRichTextTypeFeeCalculatorTemporaryFallowingLandFallowingProgram : CustomRichTextType
+    {
+        private CustomRichTextTypeFeeCalculatorTemporaryFallowingLandFallowingProgram(int customRichTextTypeID, string customRichTextTypeName, string customRichTextTypeDisplayName, int? contentTypeID) : base(customRichTextTypeID, customRichTextTypeName, customRichTextTypeDisplayName, contentTypeID) {}
+        public static readonly CustomRichTextTypeFeeCalculatorTemporaryFallowingLandFallowingProgram Instance = new CustomRichTextTypeFeeCalculatorTemporaryFallowingLandFallowingProgram(203, @"FeeCalculatorTemporaryFallowingLandFallowingProgram", @"Temporary Fallowing (Land Fallowing Program)", 3);
+    }
+
+    public partial class CustomRichTextTypeFeeCalculatorRotationalExtendedFallowingMLRP : CustomRichTextType
+    {
+        private CustomRichTextTypeFeeCalculatorRotationalExtendedFallowingMLRP(int customRichTextTypeID, string customRichTextTypeName, string customRichTextTypeDisplayName, int? contentTypeID) : base(customRichTextTypeID, customRichTextTypeName, customRichTextTypeDisplayName, contentTypeID) {}
+        public static readonly CustomRichTextTypeFeeCalculatorRotationalExtendedFallowingMLRP Instance = new CustomRichTextTypeFeeCalculatorRotationalExtendedFallowingMLRP(204, @"FeeCalculatorRotationalExtendedFallowingMLRP", @"Rotational Extended Fallowing (MLRP)", 3);
+    }
+
+    public partial class CustomRichTextTypeFeeCalculatorRotationalExtendedFallowingInDesignatedBufferZonesMLRP : CustomRichTextType
+    {
+        private CustomRichTextTypeFeeCalculatorRotationalExtendedFallowingInDesignatedBufferZonesMLRP(int customRichTextTypeID, string customRichTextTypeName, string customRichTextTypeDisplayName, int? contentTypeID) : base(customRichTextTypeID, customRichTextTypeName, customRichTextTypeDisplayName, contentTypeID) {}
+        public static readonly CustomRichTextTypeFeeCalculatorRotationalExtendedFallowingInDesignatedBufferZonesMLRP Instance = new CustomRichTextTypeFeeCalculatorRotationalExtendedFallowingInDesignatedBufferZonesMLRP(205, @"FeeCalculatorRotationalExtendedFallowingInDesignatedBufferZonesMLRP", @"Rotational Extended Fallowing in Designated Buffer Zones (MLRP)", 3);
+    }
+
+    public partial class CustomRichTextTypeFeeCalculatorOrchardSwaleRewildingMLRP : CustomRichTextType
+    {
+        private CustomRichTextTypeFeeCalculatorOrchardSwaleRewildingMLRP(int customRichTextTypeID, string customRichTextTypeName, string customRichTextTypeDisplayName, int? contentTypeID) : base(customRichTextTypeID, customRichTextTypeName, customRichTextTypeDisplayName, contentTypeID) {}
+        public static readonly CustomRichTextTypeFeeCalculatorOrchardSwaleRewildingMLRP Instance = new CustomRichTextTypeFeeCalculatorOrchardSwaleRewildingMLRP(206, @"FeeCalculatorOrchardSwaleRewildingMLRP", @"Orchard Swale Rewilding (MLRP)", 3);
+    }
+
+    public partial class CustomRichTextTypeFeeCalculatorFloodplainReconnectionAndRelatedSpreadingAndRechargeMLRP : CustomRichTextType
+    {
+        private CustomRichTextTypeFeeCalculatorFloodplainReconnectionAndRelatedSpreadingAndRechargeMLRP(int customRichTextTypeID, string customRichTextTypeName, string customRichTextTypeDisplayName, int? contentTypeID) : base(customRichTextTypeID, customRichTextTypeName, customRichTextTypeDisplayName, contentTypeID) {}
+        public static readonly CustomRichTextTypeFeeCalculatorFloodplainReconnectionAndRelatedSpreadingAndRechargeMLRP Instance = new CustomRichTextTypeFeeCalculatorFloodplainReconnectionAndRelatedSpreadingAndRechargeMLRP(207, @"FeeCalculatorFloodplainReconnectionAndRelatedSpreadingAndRechargeMLRP", @"Floodplain Reconnection and Related Spreading and Recharge (MLRP)", 3);
+    }
+
+    public partial class CustomRichTextTypeFeeCalculatorFloodflowSpreadingOnNonFloodplainLandsMLRP : CustomRichTextType
+    {
+        private CustomRichTextTypeFeeCalculatorFloodflowSpreadingOnNonFloodplainLandsMLRP(int customRichTextTypeID, string customRichTextTypeName, string customRichTextTypeDisplayName, int? contentTypeID) : base(customRichTextTypeID, customRichTextTypeName, customRichTextTypeDisplayName, contentTypeID) {}
+        public static readonly CustomRichTextTypeFeeCalculatorFloodflowSpreadingOnNonFloodplainLandsMLRP Instance = new CustomRichTextTypeFeeCalculatorFloodflowSpreadingOnNonFloodplainLandsMLRP(208, @"FeeCalculatorFloodflowSpreadingOnNonFloodplainLandsMLRP", @"Floodflow Spreading on Non-Floodplain Lands (MLRP)", 3);
+    }
+
+    public partial class CustomRichTextTypeFeeCalculatorStorageOrRechargeBasinsMLRP : CustomRichTextType
+    {
+        private CustomRichTextTypeFeeCalculatorStorageOrRechargeBasinsMLRP(int customRichTextTypeID, string customRichTextTypeName, string customRichTextTypeDisplayName, int? contentTypeID) : base(customRichTextTypeID, customRichTextTypeName, customRichTextTypeDisplayName, contentTypeID) {}
+        public static readonly CustomRichTextTypeFeeCalculatorStorageOrRechargeBasinsMLRP Instance = new CustomRichTextTypeFeeCalculatorStorageOrRechargeBasinsMLRP(209, @"FeeCalculatorStorageOrRechargeBasinsMLRP", @"Storage or Recharge Basins (MLRP)", 3);
+    }
+
+    public partial class CustomRichTextTypeLandingPageFeeCalculator : CustomRichTextType
+    {
+        private CustomRichTextTypeLandingPageFeeCalculator(int customRichTextTypeID, string customRichTextTypeName, string customRichTextTypeDisplayName, int? contentTypeID) : base(customRichTextTypeID, customRichTextTypeName, customRichTextTypeDisplayName, contentTypeID) {}
+        public static readonly CustomRichTextTypeLandingPageFeeCalculator Instance = new CustomRichTextTypeLandingPageFeeCalculator(210, @"LandingPageFeeCalculator", @"Fee Calculator", 1);
+    }
+
+    public partial class CustomRichTextTypeNewsAndAnnouncements : CustomRichTextType
+    {
+        private CustomRichTextTypeNewsAndAnnouncements(int customRichTextTypeID, string customRichTextTypeName, string customRichTextTypeDisplayName, int? contentTypeID) : base(customRichTextTypeID, customRichTextTypeName, customRichTextTypeDisplayName, contentTypeID) {}
+        public static readonly CustomRichTextTypeNewsAndAnnouncements Instance = new CustomRichTextTypeNewsAndAnnouncements(211, @"NewsAndAnnouncements", @"News and Announcements", 1);
+    }
+
+    public partial class CustomRichTextTypeReviewSelfReportList : CustomRichTextType
+    {
+        private CustomRichTextTypeReviewSelfReportList(int customRichTextTypeID, string customRichTextTypeName, string customRichTextTypeDisplayName, int? contentTypeID) : base(customRichTextTypeID, customRichTextTypeName, customRichTextTypeDisplayName, contentTypeID) {}
+        public static readonly CustomRichTextTypeReviewSelfReportList Instance = new CustomRichTextTypeReviewSelfReportList(212, @"ReviewSelfReportList", @"Review Self Report List", 1);
+    }
+
+    public partial class CustomRichTextTypeSubmitSelfReportDisclaimer : CustomRichTextType
+    {
+        private CustomRichTextTypeSubmitSelfReportDisclaimer(int customRichTextTypeID, string customRichTextTypeName, string customRichTextTypeDisplayName, int? contentTypeID) : base(customRichTextTypeID, customRichTextTypeName, customRichTextTypeDisplayName, contentTypeID) {}
+        public static readonly CustomRichTextTypeSubmitSelfReportDisclaimer Instance = new CustomRichTextTypeSubmitSelfReportDisclaimer(213, @"SubmitSelfReportDisclaimer", @"Submit Self Report Disclaimer", 1);
+    }
+
+    public partial class CustomRichTextTypeSelfReportEditorInstructions : CustomRichTextType
+    {
+        private CustomRichTextTypeSelfReportEditorInstructions(int customRichTextTypeID, string customRichTextTypeName, string customRichTextTypeDisplayName, int? contentTypeID) : base(customRichTextTypeID, customRichTextTypeName, customRichTextTypeDisplayName, contentTypeID) {}
+        public static readonly CustomRichTextTypeSelfReportEditorInstructions Instance = new CustomRichTextTypeSelfReportEditorInstructions(214, @"SelfReportEditorInstructions", @"Self Report Editor Instructions", 1);
     }
 }

@@ -17,7 +17,6 @@ public static class Users
             .OrderBy(x => x.LastName)
             .ThenBy(x => x.FirstName)
             .Select(x => x.AsUserDto()).AsEnumerable();
-
     }
 
     public static IEnumerable<UserDto> ListByRole(QanatDbContext dbContext, RoleEnum roleEnum)
@@ -57,7 +56,6 @@ public static class Users
     public static List<UserDto> GetByUserID(QanatDbContext dbContext, List<int> userIDs)
     {
         return GetUserImpl(dbContext).Where(x => userIDs.Contains(x.UserID)).Select(x => x.AsUserDto()).ToList();
-
     }
 
     public static UserDto GetByUserGuid(QanatDbContext dbContext, Guid userGuid)
@@ -73,6 +71,7 @@ public static class Users
             .Include(x => x.GeographyUsers)
                 .ThenInclude(x => x.Geography)
             .Include(x => x.WaterAccountUsers)
+            .Include(x => x.ModelUsers)
             .AsNoTracking();
     }
 
@@ -80,6 +79,49 @@ public static class Users
     {
         var user = GetUserImpl(dbContext).SingleOrDefault(x => x.Email == email);
         return user?.AsUserDto();
+    }
+
+    public static List<ErrorMessage> ValidateUpdate(QanatDbContext dbContext, UserUpsertDto userUpsertDto, int userID)
+    {
+        var result = new List<ErrorMessage>();
+        if (!userUpsertDto.RoleID.HasValue)
+        {
+            result.Add(new ErrorMessage() { Type = "Role ID", Message = "Role ID is required." });
+        }
+
+        var role = Role.AllLookupDictionary[userUpsertDto.RoleID.GetValueOrDefault()];
+        if (role == null)
+        {
+            result.Add(new ErrorMessage() { Type = "Role ID", Message = $"A Role with the ID of {userUpsertDto.RoleID} could not be found." });
+        }
+
+        if (!userUpsertDto.ScenarioPlannerRoleID.HasValue)
+        {
+            result.Add(new ErrorMessage() { Type = "Scenario Planner Role ID", Message = "Scenario Planner Role ID is required." });
+        }
+
+        var scenarioPlannerRole = ScenarioPlannerRole.AllLookupDictionary[userUpsertDto.ScenarioPlannerRoleID.GetValueOrDefault()];
+        if (scenarioPlannerRole == null)
+        {
+            result.Add(new ErrorMessage() { Type = "Scenario Planner Role ID", Message = $"A Scenario Planner Role with the ID of {userUpsertDto.ScenarioPlannerRoleID} could not be found." });
+            return result;
+        }
+
+        if (userUpsertDto.ScenarioPlannerRoleID == ScenarioPlannerRole.NoAccess.ScenarioPlannerRoleID && userUpsertDto.ModelIDs.Any())
+        {
+            result.Add(new ErrorMessage() { Type = "Models", Message = "Models cannot be assigned to a user with no access to the Scenario Planner." });
+        }
+
+        foreach (var modelID in userUpsertDto.ModelIDs)
+        {
+            var model = Model.All.FirstOrDefault(x => x.ModelID == modelID);
+            if (model == null)
+            {
+                result.Add(new ErrorMessage(){ Type="Model ID", Message = $"A Model with the ID of {modelID} could not be found."});
+            }
+        }
+
+        return result;
     }
 
     public static async Task<UserDto> UpdateUserEntity(QanatDbContext dbContext, int userID, UserUpsertDto userEditDto)
@@ -94,25 +136,39 @@ public static class Users
 
         user.RoleID = userEditDto.RoleID.Value;
         user.IsActive = userEditDto.RoleID.HasValue && userEditDto.RoleID != (int)RoleEnum.NoAccess;
-        user.ReceiveSupportEmails = userEditDto.RoleID.Value == 1 && userEditDto.ReceiveSupportEmails;
+        user.ReceiveSupportEmails = userEditDto.RoleID.GetValueOrDefault(0) == Role.SystemAdmin.PrimaryKey && userEditDto.ReceiveSupportEmails;
+
+        user.ScenarioPlannerRoleID = userEditDto.ScenarioPlannerRoleID ?? ScenarioPlannerRole.NoAccess.ScenarioPlannerRoleID;
         user.GETRunCustomerID = userEditDto.GETRunCustomerID;
         user.GETRunUserID = userEditDto.GETRunUserID;
         user.UpdateDate = DateTime.UtcNow;
+
+        //Clear out userIDs if roleID is no access to remove access from models.
+        if (user.ScenarioPlannerRoleID == ScenarioPlannerRole.NoAccess.ScenarioPlannerRoleID)
+        {
+            userEditDto.ModelIDs.Clear();
+        }
+
+        await UpdateModelUsersForUser(dbContext, userID, userEditDto.ModelIDs);
 
         await dbContext.SaveChangesAsync();
         await dbContext.Entry(user).ReloadAsync();
         return GetByUserID(dbContext, userID);
     }
 
-    public static List<ErrorMessage> ValidateUpdate(QanatDbContext dbContext, UserUpsertDto userEditDto, int userID)
+    private static async Task UpdateModelUsersForUser(QanatDbContext dbContext, int userID, List<int> modelIDs)
     {
-        var result = new List<ErrorMessage>();
-        if (!userEditDto.RoleID.HasValue)
+        var existingModelUsers = dbContext.ModelUsers.Where(x => x.UserID == userID).ToList();
+        var modelUsersToAdd = modelIDs.Except(existingModelUsers.Select(x => x.ModelID)).Select(x => new ModelUser()
         {
-            result.Add(new ErrorMessage() { Type = "Role ID", Message = "Role ID is required." });
-        }
+            ModelID = x,
+            UserID = userID
+        }).ToList();
 
-        return result;
+        await dbContext.ModelUsers.AddRangeAsync(modelUsersToAdd);
+
+        var modelUsersToRemove = existingModelUsers.Where(x => !modelIDs.Contains(x.ModelID)).ToList();
+        dbContext.ModelUsers.RemoveRange(modelUsersToRemove);
     }
 
     public static UserDto UpdateClaims(QanatDbContext dbContext, int? userID, ClaimsPrincipal claims)
@@ -133,7 +189,6 @@ public static class Users
 
         if (user == null)
         {
-
             user = new User
             {
                 UserGuid = userGuid,
@@ -177,20 +232,13 @@ public static class Users
         dbContext.SaveChanges();
         dbContext.Entry(user).Reload();
 
-
         return GetByUserID(dbContext, user.UserID);
     }
 
     public static bool ValidateAllExist(QanatDbContext dbContext, List<WaterAccountUserMinimalDto> waterAccountUsers)
     {
         var userIDList = waterAccountUsers.Select(x => x.User.UserID);
-
         return dbContext.Users.Count(x => userIDList.Contains(x.UserID)) == waterAccountUsers.Distinct().Count();
-    }
-
-    public static bool CheckIfUsersAreAdministrators(QanatDbContext dbContext, List<int> userIDs)
-    {
-        return dbContext.Users.Any(x => userIDs.Contains(x.UserID) && x.RoleID == (int)RoleEnum.SystemAdmin);
     }
 
     public static int GetNumberOfWellRegistrationsForUser(QanatDbContext dbContext, int userID, int geographyID)
@@ -199,7 +247,10 @@ public static class Users
             .Include(x => x.Parcel).ThenInclude(x => x.ParcelGeometry)
             .Include(x => x.Geography)
             .Where(x => x.CreateUserID == userID && x.GeographyID == geographyID);
-        return wellRegistrations.Any() ? wellRegistrations.Count() : 0;
+
+        return wellRegistrations.Any() 
+            ? wellRegistrations.Count() 
+            : 0;
     }
 
     public static int GetNumberOfWaterAccountForUser(QanatDbContext dbContext, int userID, int geographyID)

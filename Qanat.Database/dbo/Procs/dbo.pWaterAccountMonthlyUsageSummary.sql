@@ -37,7 +37,7 @@ FROM (
 ) months
 cross join #reportingPeriods rp
 
-select m.ParcelID, m.ParcelNumber, m.WaterMeasurementTypeID, m.WaterMeasurementTypeName, m.WaterMeasurementCategoryTypeName, m.WaterMeasurementTypeSortOrder, m.EffectiveDate
+select m.ParcelID, m.ParcelNumber, m.ParcelArea, m.WaterMeasurementTypeID, m.WaterMeasurementTypeName, m.WaterMeasurementCategoryTypeName, m.WaterMeasurementTypeSortOrder, m.EffectiveDate
 , u.CurrentUsageAmount, u.CurrentUsageAmount / m.UsageEntityArea as CurrentUsageAmountDepth
 , uavg.AverageUsageAmount, uavg.AverageUsageAmount / m.UsageEntityArea as AverageUsageAmountDepth
 , case when CurrentUsageAmount is null then null else sum(CurrentUsageAmount) over(partition by m.ParcelID, m.ParcelNumber, m.WaterMeasurementTypeID order by m.EffectiveDate rows unbounded preceding) end as CurrentCumulativeUsageAmount

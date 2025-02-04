@@ -19,13 +19,14 @@ import { CustomHttpUrlEncodingCodec }                        from '../encoder';
 import { Observable }                                        from 'rxjs';
 
 import { GeographyLandingPageDto } from '../model/geography-landing-page-dto';
+import { GeographyUserDto } from '../model/geography-user-dto';
 import { UnassignedUserReportDto } from '../model/unassigned-user-report-dto';
 import { UserDetailedDto } from '../model/user-detailed-dto';
 import { UserDto } from '../model/user-dto';
 import { UserGeographySummaryDto } from '../model/user-geography-summary-dto';
 import { UserUpsertDto } from '../model/user-upsert-dto';
 import { WaterAccountParcelsRequestChangesDto } from '../model/water-account-parcels-request-changes-dto';
-import { WellRegistrationMinimalDto } from '../model/well-registration-minimal-dto';
+import { WellRegistrationUserDetailDto } from '../model/well-registration-user-detail-dto';
 
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
@@ -291,12 +292,55 @@ export class UserService {
     /**
      * 
      * 
+     * @param userID 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public userWellRegistrationsGet(observe?: 'body', reportProgress?: boolean): Observable<Array<WellRegistrationMinimalDto>>;
-    public userWellRegistrationsGet(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<WellRegistrationMinimalDto>>>;
-    public userWellRegistrationsGet(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<WellRegistrationMinimalDto>>>;
+    public userUserIDPermissionsGet(userID: number, observe?: 'body', reportProgress?: boolean): Observable<Array<GeographyUserDto>>;
+    public userUserIDPermissionsGet(userID: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<GeographyUserDto>>>;
+    public userUserIDPermissionsGet(userID: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<GeographyUserDto>>>;
+    public userUserIDPermissionsGet(userID: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+
+        if (userID === null || userID === undefined) {
+            throw new Error('Required parameter userID was null or undefined when calling userUserIDPermissionsGet.');
+        }
+
+        let headers = this.defaultHeaders;
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'text/plain',
+            'application/json',
+            'text/json',
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers = headers.set('Accept', httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+        ];
+
+        return this.httpClient.get<Array<GeographyUserDto>>(`${this.basePath}/user/${encodeURIComponent(String(userID))}/permissions`,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        ).pipe(catchError((error: any) => { return this.apiService.handleError(error)}));
+    }
+
+    /**
+     * 
+     * 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public userWellRegistrationsGet(observe?: 'body', reportProgress?: boolean): Observable<Array<WellRegistrationUserDetailDto>>;
+    public userWellRegistrationsGet(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<WellRegistrationUserDetailDto>>>;
+    public userWellRegistrationsGet(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<WellRegistrationUserDetailDto>>>;
     public userWellRegistrationsGet(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         let headers = this.defaultHeaders;
@@ -316,7 +360,7 @@ export class UserService {
         const consumes: string[] = [
         ];
 
-        return this.httpClient.get<Array<WellRegistrationMinimalDto>>(`${this.basePath}/user/well-registrations`,
+        return this.httpClient.get<Array<WellRegistrationUserDetailDto>>(`${this.basePath}/user/well-registrations`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
@@ -544,9 +588,9 @@ export class UserService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public usersUserIDWellRegistrationsGet(userID: number, observe?: 'body', reportProgress?: boolean): Observable<Array<WellRegistrationMinimalDto>>;
-    public usersUserIDWellRegistrationsGet(userID: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<WellRegistrationMinimalDto>>>;
-    public usersUserIDWellRegistrationsGet(userID: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<WellRegistrationMinimalDto>>>;
+    public usersUserIDWellRegistrationsGet(userID: number, observe?: 'body', reportProgress?: boolean): Observable<Array<WellRegistrationUserDetailDto>>;
+    public usersUserIDWellRegistrationsGet(userID: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<WellRegistrationUserDetailDto>>>;
+    public usersUserIDWellRegistrationsGet(userID: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<WellRegistrationUserDetailDto>>>;
     public usersUserIDWellRegistrationsGet(userID: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         if (userID === null || userID === undefined) {
@@ -570,7 +614,7 @@ export class UserService {
         const consumes: string[] = [
         ];
 
-        return this.httpClient.get<Array<WellRegistrationMinimalDto>>(`${this.basePath}/users/${encodeURIComponent(String(userID))}/well-registrations`,
+        return this.httpClient.get<Array<WellRegistrationUserDetailDto>>(`${this.basePath}/users/${encodeURIComponent(String(userID))}/well-registrations`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,

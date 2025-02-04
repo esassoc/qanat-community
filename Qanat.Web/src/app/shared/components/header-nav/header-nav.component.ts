@@ -16,6 +16,10 @@ import { RouterLink, RouterLinkActive } from "@angular/router";
 import { DropdownToggleCloseDirective } from "../../directives/dropdown-toggle-close.directive";
 import { NgIf, NgFor, AsyncPipe, DecimalPipe } from "@angular/common";
 import { IconComponent } from "../icon/icon.component";
+import { AuthorizationHelper } from "../../helpers/authorization-helper";
+import { WithScenarioPlannerRolePermissionDirective } from "../../directives/with-scenario-planner-role-permission.directive";
+import { RightsEnum } from "../../models/enums/rights.enum";
+import { PermissionEnum } from "../../generated/enum/permission-enum";
 
 @Component({
     selector: "header-nav",
@@ -31,13 +35,15 @@ import { IconComponent } from "../icon/icon.component";
         WithFlagDirective,
         DropdownToggleDirective,
         NgFor,
-        WithGeographyFlagDirective,
+        WithScenarioPlannerRolePermissionDirective,
         AsyncPipe,
         DecimalPipe,
     ],
 })
 export class HeaderNavComponent implements OnInit, OnDestroy {
     private watchUserChangeSubscription: any;
+    public RightsEnum = RightsEnum;
+    public PermissionEnum = PermissionEnum;
     public FlagEnum = FlagEnum;
     currentUser: UserDto;
 
@@ -65,9 +71,10 @@ export class HeaderNavComponent implements OnInit, OnDestroy {
             this.currentUser = currentUser;
             this.showWaterDashboardDropdown = !(
                 (currentUser.GeographyUser.length > 0 && currentUser.GeographyUser.find((x) => x.GeographyRoleID == GeographyRoleEnum.WaterManager) != undefined) ||
-                currentUser.Role.RoleID == RoleEnum.SystemAdmin
+                AuthorizationHelper.isSystemAdministrator(this.currentUser)
             );
         });
+
         this.geographySummaries$ = this.userService.userGeographySummaryGet().pipe(
             tap((geographySummaries) => {
                 this.waterAccounts = geographySummaries.flatMap((x) => x.WaterAccounts).sort((x) => x.Area);

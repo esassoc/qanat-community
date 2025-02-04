@@ -9,10 +9,10 @@ import { ModalService } from "src/app/shared/services/modal/modal.service";
 import { ModalComponent } from "../../modal/modal.component";
 import { CommonModule } from "@angular/common";
 import { IconComponent } from "src/app/shared/components/icon/icon.component";
-import { MeterStatusSimpleDto } from "src/app/shared/generated/model/meter-status-simple-dto";
 import { MeterService } from "src/app/shared/generated/api/meter.service";
-import { FormFieldComponent, FormFieldType, FormInputOption } from "../../forms/form-field/form-field.component";
+import { FormFieldComponent, FormFieldType } from "../../forms/form-field/form-field.component";
 import { AlertDisplayComponent } from "../../alert-display/alert-display.component";
+import { MeterStatusesAsSelectDropdownOptions } from "src/app/shared/generated/enum/meter-status-enum";
 
 @Component({
     selector: "update-meter-modal",
@@ -26,8 +26,7 @@ export class UpdateMeterModalComponent implements OnInit {
     public modalContext: MeterContext;
     public FormFieldType = FormFieldType;
 
-    public meterStatusesSelectOptions: FormInputOption[];
-    public meterStatuses$: Observable<MeterStatusSimpleDto[]>;
+    public MeterStatusSelectDropdownOptions = MeterStatusesAsSelectDropdownOptions;
     public meter$: Observable<MeterGridDto>;
 
     public formGroup = new FormGroup<MeterGridDtoForm>({
@@ -39,28 +38,14 @@ export class UpdateMeterModalComponent implements OnInit {
         MeterStatusID: MeterGridDtoFormControls.MeterID(),
         MeterStatus: MeterGridDtoFormControls.MeterStatus(),
         GeographyID: MeterGridDtoFormControls.GeographyID(),
+        WellIDs: MeterGridDtoFormControls.WellIDs(),
     });
 
     public isLoadingSubmit = false;
 
-    constructor(
-        private modalService: ModalService,
-        private meterService: MeterService,
-        private alertService: AlertService
-    ) {}
+    constructor(private modalService: ModalService, private meterService: MeterService, private alertService: AlertService) {}
 
     ngOnInit(): void {
-        this.meterStatuses$ = this.meterService.meterStatusGet().pipe(
-            tap((meterStatuses) => {
-                this.meterStatusesSelectOptions = meterStatuses.map((status) => {
-                    return {
-                        Value: status.MeterStatusID,
-                        Label: status.MeterStatusDisplayName,
-                    } as FormInputOption;
-                });
-            })
-        );
-
         this.meter$ = this.meterService.geographiesGeographyIDMeterMeterIDGet(this.modalContext.GeographyID, this.modalContext.MeterID).pipe(
             tap((meter) => {
                 this.formGroup.setValue(meter);

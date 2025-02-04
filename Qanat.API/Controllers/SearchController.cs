@@ -1,13 +1,10 @@
-﻿using System.Collections.Generic;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Qanat.API.Services;
 using Qanat.API.Services.Authorization;
 using Qanat.EFModels.Entities;
 using Qanat.Models.DataTransferObjects;
-using Qanat.Models.Security;
 
 namespace Qanat.API.Controllers;
 
@@ -21,12 +18,21 @@ public class SearchController : SitkaController<SearchController>
     {
     }
 
-    [HttpGet("search/geography/{geographyID}/water-accounts")]
-    [WithGeographyRolePermission(PermissionEnum.WaterAccountRights, RightsEnum.Read)]
-    public ActionResult<WaterAccountSearchSummaryDto> SearchWaterAccounts([FromQuery] string searchString, [FromRoute] int geographyID)
+    [HttpPost("search/water-accounts")]
+    [WithRoleFlag(FlagEnum.CanClaimWaterAccounts)]
+    public ActionResult<WaterAccountSearchSummaryDto> SearchWaterAccounts([FromBody] WaterAccountSearchDto waterAccountSearchDto)
     {
+        var user = UserContext.GetUserFromHttpContext(_dbContext, HttpContext);
+        var results = WaterAccounts.GetBySearchString(_dbContext, waterAccountSearchDto.GeographyID, waterAccountSearchDto.SearchString, user);
+        return Ok(results);
+    }
 
-        var results = WaterAccounts.GetBySearchString(_dbContext, geographyID, searchString);
+    [HttpPost("search/parcels")]
+    [WithRoleFlag(FlagEnum.CanClaimWaterAccounts)]
+    public ActionResult<ParcelSearchSummaryDto> SearchParcels([FromBody] ParcelSearchDto parcelSearchDto)
+    {
+        var user = UserContext.GetUserFromHttpContext(_dbContext, HttpContext);
+        var results = Parcels.GetBySearchString(_dbContext, parcelSearchDto.GeographyID, parcelSearchDto.SearchString, user);
         return Ok(results);
     }
 }

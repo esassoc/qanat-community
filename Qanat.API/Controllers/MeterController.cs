@@ -7,7 +7,6 @@ using Qanat.EFModels.Entities;
 using Qanat.Models.DataTransferObjects;
 using Qanat.Models.Security;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Authorization;
 
 namespace Qanat.API.Controllers;
 
@@ -41,13 +40,6 @@ public class MeterController : SitkaController<MeterController>
         return Meters.GetByIDAsGridDto(_dbContext, meterID);
     }
 
-
-    [HttpGet("meter-status")]
-    [Authorize]
-    public ActionResult<List<MeterStatusSimpleDto>> GetMeterStatus()
-    {
-        return MeterStatus.AllAsSimpleDto;
-    }
 
     [HttpPost("geographies/{geographyID}/meter")]
     [WithGeographyRolePermission(PermissionEnum.WellRights, RightsEnum.Create)]

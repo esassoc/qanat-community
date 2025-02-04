@@ -11,10 +11,13 @@ as return
                 NewOwnerName, 
                 OldOwnerAddress,
                 NewOwnerAddress,
+                OldAcres,
+                NewAcres,
                 ParcelStatusID,
                 cast(case when isnull(NewOwnerName, '') != isnull(OldOwnerName, '') then 1 else 0 end as bit) as HasOwnerNameChange,
                 cast(case when isnull(NewOwnerAddress, '') != isnull(OldOwnerAddress, '') then 1 else 0 end as bit) as HasOwnerAddressChange,
                 cast(case when isnull(NewGeometryText, '') != isnull(OldGeometryText, '') then 1 else 0 end as bit) as HasGeometryChange,
+                cast(case when isnull(NewAcres, '') != isnull(OldAcres, '') then 1 else 0 end as bit) as HasAcresChange,
                 cast(case when ParcelID is null then 1 else 0 end as bit) as IsNew
     from
     (
@@ -28,6 +31,8 @@ as return
                 new.OwnerName as NewOwnerName, 
                 curr.OwnerAddress as OldOwnerAddress,
                 new.OwnerAddress as NewOwnerAddress,
+				curr.Acres as OldAcres,
+				new.Acres as NewAcres,
 		        case 
                     when curr.ParcelID is null then 3 -- new parcel, set to Unassigned
                     when new.ParcelStagingID is null then 2  -- no longer exists, so mark as inactive
@@ -35,7 +40,7 @@ as return
 	    from dbo.ParcelStaging new
 	    full outer join 
         (
-			    select p.GeographyID, p.ParcelID, p.ParcelStatusID, p.OwnerName, p.OwnerAddress, p.ParcelNumber, pg.Geometry4326
+			    select p.GeographyID, p.ParcelID, p.ParcelStatusID, p.OwnerName, p.OwnerAddress, p.ParcelNumber, pg.Geometry4326, p.ParcelArea as Acres
 			    from  dbo.Parcel p
 			    join	dbo.ParcelGeometry pg on p.ParcelID = pg.ParcelID and p.GeographyID = pg.GeographyID
 			    where p.GeographyID = @geographyID

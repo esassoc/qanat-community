@@ -1,0 +1,497 @@
+<div class="page-wrapper">
+    <page-header [pageTitle]="(inputsTS ? inputsTS.Geography.GeographyName + ' ' : '') + 'Fee Calculator'" icon="Calculator"> </page-header>
+    <div class="page-body grid-12">
+        <app-alert-display></app-alert-display>
+
+        <div class="steps">
+            <div class="step grid-12">
+                <div class="step-header" [expandCollapse]="step1Container" [startOpen]="true">
+                    <div class="circle-number">
+                        <span class="circle-number-wrapper">1</span>
+                    </div>
+                    <h4 class="step-header-text">Start your Scenario</h4>
+                    <div class="toggle">
+                        <i class="fas fa-angle-up"></i>
+                    </div>
+                </div>
+                <div class="expansion-panel" #step1Container>
+                    <div class="step-description copy copy-2 g-col-8">
+                        <custom-rich-text
+                            [customRichTextTypeID]="CustomRichTextTypeEnum.FeeCalculatorStepOne"
+                            [geographyID]="inputsTS.Geography.GeographyID"
+                            [showInfoIcon]="false"
+                            *ngIf="inputsTS"></custom-rich-text>
+                    </div>
+                    <div class="step-content grid-12" [loadingSpinner]="{ isLoading: isLoadingInputs }">
+                        <ng-container *ngIf="inputs$ | async">
+                            <div class="step-content-form-container g-col-4 grid-12">
+                                <form class="form grid-8" [formGroup]="inputFormGroup">
+                                    <div class="field g-col-12">
+                                        <form-field
+                                            [required]="true"
+                                            [formControl]="inputFormGroup.controls.WaterAccountID"
+                                            [formInputOptions]="waterAccountOptions"
+                                            fieldLabel="Water Account"
+                                            [type]="FormFieldType.Select"></form-field>
+                                    </div>
+
+                                    <div class="field g-col-12">
+                                        <form-field
+                                            [required]="true"
+                                            [formControl]="inputFormGroup.controls.ReportingYear"
+                                            [formInputOptions]="yearOptions"
+                                            fieldLabel="Baseline Water Use"
+                                            [type]="FormFieldType.Select"></form-field>
+                                    </div>
+
+                                    <div class="field g-col-12">
+                                        <form-field
+                                            [required]="true"
+                                            [formControl]="inputFormGroup.controls.FeeStructureID"
+                                            [formInputOptions]="feeStructureOptions"
+                                            fieldLabel="Using Fee Structure For"
+                                            [type]="FormFieldType.Select"></form-field>
+                                    </div>
+
+                                    <div class="field g-col-4">
+                                        <label class="field-label" for="surfaceWaterToggleControl">
+                                            <field-definition fieldDefinitionType="FeeCalculatorSurfaceWater" [inline]="false"></field-definition>
+                                        </label>
+                                        <form-field
+                                            [required]="true"
+                                            [formControl]="surfaceWaterToggleControl"
+                                            toggleTrue="Yes"
+                                            toggleFalse="No"
+                                            [type]="FormFieldType.Toggle"></form-field>
+                                    </div>
+                                    <ng-container *ngIf="showSurfaceWaterFields">
+                                        <div class="g-col-4">
+                                            <!--Blank for spacing.-->
+                                        </div>
+                                        <div class="field g-col-4">
+                                            <form-field
+                                                [required]="true"
+                                                [formControl]="inputFormGroup.controls.SurfaceWaterDelivered"
+                                                [fieldLabel]="inputsTS.InitialInputs.ReportingYear + ' DELIVERY'"
+                                                [type]="FormFieldType.Number"
+                                                units="Acre-Feet"></form-field>
+                                        </div>
+
+                                        <div class="field g-col-4">
+                                            <form-field
+                                                [required]="true"
+                                                [formControl]="inputFormGroup.controls.SurfaceWaterIrrigationEfficiency"
+                                                fieldLabel="IRRIGATION EFFICIENCY"
+                                                [type]="FormFieldType.Number"
+                                                units="%"></form-field>
+                                        </div>
+                                    </ng-container>
+                                </form>
+                            </div>
+
+                            <div class="water-account-card-container g-col-8">
+                                <water-account-card [(waterAccountID)]="inputsTS.InitialInputs.WaterAccountID" [displayActions]="false" *ngIf="inputsTS"> </water-account-card>
+                            </div>
+                        </ng-container>
+                    </div>
+                </div>
+            </div>
+            <div class="step grid-12">
+                <div class="step-header" [expandCollapse]="step2Container" [startOpen]="true">
+                    <div class="circle-number">
+                        <span class="circle-number-wrapper">2</span>
+                    </div>
+                    <h4 class="step-header-text">Explore MLRP and Fallowing Options</h4>
+                    <div class="toggle">
+                        <i class="fas fa-angle-up"></i>
+                    </div>
+                </div>
+                <div class="expansion-panel" #step2Container>
+                    <div class="step-description copy copy-2 g-col-8">
+                        <custom-rich-text
+                            [customRichTextTypeID]="CustomRichTextTypeEnum.FeeCalculatorStepTwo"
+                            [geographyID]="inputsTS.Geography.GeographyID"
+                            [showInfoIcon]="false"
+                            *ngIf="inputsTS"></custom-rich-text>
+                    </div>
+
+                    <div class="step-content" [loadingSpinner]="{ isLoading: isLoadingInputs }">
+                        <table class="table secondary-table" *ngIf="inputsTS">
+                            <colgroup>
+                                <col style="width: 55%" />
+                                <col style="width: 15%" />
+                                <col style="width: 15%" />
+                                <col style="width: 15%" />
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th>Option</th>
+                                    <th>Disposition of Allocation</th>
+                                    <th>
+                                        <field-definition fieldDefinitionType="FeeCalculatorIncentivePayment" [inline]="false"></field-definition>
+                                    </th>
+                                    <th>
+                                        <field-definition fieldDefinitionType="FeeCalculatorAcres" [inline]="false"></field-definition>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let mlrp of inputsTS.MLRPIncentives">
+                                    <td>
+                                        <div class="mlrp-category">
+                                            <field-definition
+                                                [fieldDefinitionType]="mlrp.FieldDefinitionType"
+                                                [inline]="false"
+                                                *ngIf="inputsTS.Geography.GeographyID"></field-definition>
+                                        </div>
+                                        <div class="mlrp-description copy copy-2 mt-2">
+                                            {{ mlrp.Description }}
+                                        </div>
+                                    </td>
+                                    <td class="bold-td">
+                                        <ng-container *ngIf="mlrp.KeepsAllocation"> <icon icon="CircleCheckmark" class="green-fill"></icon> Retained </ng-container>
+                                        <ng-container *ngIf="!mlrp.KeepsAllocation"> <icon icon="CircleX" class="red-fill"></icon> Forfeited </ng-container>
+                                    </td>
+                                    <td class="bold-td">{{ mlrp.IncentivePaymentLabel }}</td>
+                                    <td>
+                                        <form-field
+                                            [required]="false"
+                                            [formControl]="mlrpIncentiveAcreControls[mlrp.Name]"
+                                            fieldLabel=""
+                                            [type]="FormFieldType.Number"
+                                            units="Acres"></form-field>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="step grid-12">
+                <div class="step-header" [expandCollapse]="step3Container" [startOpen]="true">
+                    <div class="circle-number">
+                        <span class="circle-number-wrapper">3</span>
+                    </div>
+                    <h4 class="step-header-text">View Fee & Usage Calculations</h4>
+                    <div class="toggle">
+                        <i class="fas fa-angle-up"></i>
+                    </div>
+                </div>
+                <div class="expansion-panel" #step3Container>
+                    <div class="step-description copy copy-2 g-col-8">
+                        <custom-rich-text
+                            [customRichTextTypeID]="CustomRichTextTypeEnum.FeeCalculatorStepThree"
+                            [geographyID]="inputsTS.Geography.GeographyID"
+                            [showInfoIcon]="false"
+                            *ngIf="inputsTS"></custom-rich-text>
+                    </div>
+                    <div class="step-content output-content g-col-12 grid-12" [loadingSpinner]="{ isLoading: isLoadingInputs }">
+                        <div class="g-col-12 tab-container" *ngIf="output">
+                            <div class="button-group tab-nav mb-4">
+                                <button class="button-group__item btn-sm" [class.active]="selectedPanel === 'Summary'" (click)="toggleSelectedPanel('Summary')">Summary</button>
+                                <button
+                                    class="button-group__item btn-sm"
+                                    [class.active]="selectedPanel === 'FeeStructureReport'"
+                                    (click)="toggleSelectedPanel('FeeStructureReport')">
+                                    {{ selectedFeeStructure.Name }} Fee Structure Report
+                                </button>
+                                <!-- <button class="button-group__item btn-sm" [class.active]="selectedPanel === 'YourData'"
+                                    (click)="toggleSelectedPanel('YourData')">Your Data</button> -->
+                                <button
+                                    class="button-group__item btn-sm"
+                                    [class.active]="selectedPanel === 'WhatIsConsumedGroundwater'"
+                                    (click)="toggleSelectedPanel('WhatIsConsumedGroundwater')">
+                                    What is Consumed Groundwater?
+                                </button>
+                            </div>
+                            <div class="tab-nav-panel grid-12" [class.hidden]="selectedPanel !== 'Summary'">
+                                <div class="g-col-4 baseline-scenario" [loadingSpinner]="{ isLoading: isLoadingOutput }">
+                                    <h5 class="scenario-header light-gray-border-bottom"><icon icon="LineChartTrendingUp"> </icon> Baseline Scenario</h5>
+                                    <fee-calculator-scenario-display
+                                        [scenario]="output.BaselineScenario"
+                                        *ngIf="output && output.BaselineScenario"></fee-calculator-scenario-display>
+                                </div>
+                                <div class="g-col-4 land-use-change-scenario" [loadingSpinner]="{ isLoading: isLoadingOutput }">
+                                    <h5 class="scenario-header light-blue-border-bottom"><icon icon="LineChartTrendingDown"></icon> Land Use Change Scenario</h5>
+                                    <fee-calculator-scenario-display
+                                        [scenario]="output.LandUseChangeScenario"
+                                        *ngIf="output && output.LandUseChangeScenario"></fee-calculator-scenario-display>
+                                </div>
+                                <div class="g-col-4 savings-and-incentives" [loadingSpinner]="{ isLoading: isLoadingOutput }">
+                                    <h5 class="scenario-header light-green-border-bottom"><icon icon="Dollar"></icon> Savings & Incentives</h5>
+                                    <div class="scenario-section" *ngIf="output && output.SavingsAndIncentives">
+                                        <div class="content">
+                                            <div class="content-row grid-12">
+                                                <div class="g-col-8 copy copy-3 emphasis">Fee Reduction Total</div>
+                                                <div class="emphasis g-col-1 copy copy-3">$</div>
+                                                <div class="emphasis g-col-3 copy copy-2 right-aligned">
+                                                    {{ output.SavingsAndIncentives.FeeReductionTotal | number: "1.2-2" }}
+                                                </div>
+                                            </div>
+
+                                            <div class="content-row grid-12">
+                                                <div class="g-col-8 copy copy-3 ml-4">$/Acre-Foot</div>
+                                                <div class="g-col-1 copy copy-3">$</div>
+                                                <div class="g-col-3 copy copy-2 right-aligned">
+                                                    {{ output.SavingsAndIncentives.FeeReductionPerAcreFoot | number: "1.2-2" }}
+                                                </div>
+                                            </div>
+
+                                            <div class="content-row grid-12">
+                                                <div class="g-col-8 copy copy-3 ml-4">$/Parcel Acre</div>
+                                                <div class="g-col-1 copy copy-3">$</div>
+                                                <div class="g-col-3 copy copy-2 right-aligned">
+                                                    {{ output.SavingsAndIncentives.FeeReductionPerParcelAcre | number: "1.2-2" }}
+                                                </div>
+                                            </div>
+
+                                            <div class="content-row grid-12">
+                                                <div class="g-col-8 copy copy-3 ml-4">$/Irrigated Acre</div>
+                                                <div class="g-col-1 copy copy-3">$</div>
+                                                <div class="g-col-3 copy copy-2 right-aligned">
+                                                    {{ output.SavingsAndIncentives.FeeReductionPerIrrigatedAcre | number: "1.2-2" }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="scenario-section" *ngIf="output && output.SavingsAndIncentives">
+                                        <div class="content">
+                                            <div class="content-row grid-12">
+                                                <div class="g-col-8 copy copy-3 emphasis">MLRP Incentives Total</div>
+                                                <div class="g-col-1 emphasis">$</div>
+                                                <div class="g-col-3 copy copy-2 emphasis right-aligned">
+                                                    {{ output.SavingsAndIncentives.MLRPIncentiveTotal | number: "1.0-0" }}
+                                                </div>
+                                            </div>
+                                            <div class="content-row grid-12" *ngFor="let mlrpBreakdown of output.SavingsAndIncentives.MLRPIncentiveBreakdown">
+                                                <div class="g-col-8 copy copy-3 ml-4">
+                                                    {{ mlrpBreakdown.Name }}
+                                                </div>
+                                                <div class="g-col-1">$</div>
+                                                <div class="g-col-3 copy copy-2 right-aligned">
+                                                    {{ mlrpBreakdown.IncentivePayment | number: "1.0-0" }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-nav-panel grid-12" [class.hidden]="selectedPanel !== 'FeeStructureReport'">
+                                <table class="fee-structure-table g-col-12">
+                                    <colgroup>
+                                        <col style="width: 7.5%" />
+                                        <col style="width: 9.25%" />
+                                        <col style="width: 9.25%" />
+                                        <col style="width: 9.25%" />
+                                        <col style="width: 9.25%" />
+                                        <col style="width: 9.25%" />
+                                        <col style="width: 9.25%" />
+                                        <col style="width: 9.25%" />
+                                        <col style="width: 9.25%" />
+                                        <col style="width: 9.25%" />
+                                        <col style="width: 9.25%" />
+                                    </colgroup>
+                                    <thead>
+                                        <tr>
+                                            <th class="no-bottom-border-important"></th>
+                                            <th class="light-gray-header" colspan="5">Baseline Scenario</th>
+                                            <th class="light-blue-header" colspan="5">Land Use Change Scenario</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="category-header left-aligned">Category</th>
+                                            <th class="lighter-gray-header">Allocation (AF)</th>
+                                            <th class="lighter-gray-header">Amount of Category Used (AF)</th>
+                                            <th class="lighter-gray-header">Remaining Allocation (AF)</th>
+                                            <th class="lighter-gray-header">Remaining GW Consumption (AF)</th>
+                                            <th class="lighter-gray-header">Fee</th>
+                                            <th class="lighter-blue-header">Allocation (AF)</th>
+                                            <th class="lighter-blue-header">Amount of Category Used (AF)</th>
+                                            <th class="lighter-blue-header">Remaining Allocation (AF)</th>
+                                            <th class="lighter-blue-header">Remaining GW Consumption (AF)</th>
+                                            <th class="lighter-blue-header">Fee</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let category of mergedFeeStructureReportData" [ngClass]="{ overused: category.IsOverused }">
+                                            <td class="left-aligned">
+                                                {{ category.Name }}
+                                            </td>
+                                            <td>
+                                                <span *ngIf="!category.Baseline.TotalAllocationInAcreFeet">--</span>
+                                                <span *ngIf="category.Baseline.TotalAllocationInAcreFeet">
+                                                    {{ category.Baseline.TotalAllocationInAcreFeet | number: "1.0-0" }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                {{ category.Baseline.AllocationUsedInAcreFeet | number: "1.0-0" }} ({{
+                                                    category.Baseline.AllocationUsedInPercent | number: "1.0-0"
+                                                }}% {{ category.IsOverused && category.Baseline.AllocationUsedInPercent > 0 ? " Over" : "" }})
+                                            </td>
+                                            <td>
+                                                <span *ngIf="!category.Baseline.AllocationRemainingInAcreFeet && category.Baseline.AllocationRemainingInAcreFeet != 0">--</span>
+                                                <span *ngIf="category.Baseline.AllocationRemainingInAcreFeet || category.Baseline.AllocationRemainingInAcreFeet == 0">
+                                                    {{ category.Baseline.AllocationRemainingInAcreFeet | number: "1.0-0" }}
+                                                    ({{ category.Baseline.AllocationRemainingInPercent | number: "1.0-0" }}%)
+                                                </span>
+                                            </td>
+                                            <td>
+                                                {{ category.Baseline.RemainingGroundwaterConsumptionInAcreFeet | number: "1.0-0" }}
+                                            </td>
+                                            <td>
+                                                <span *ngIf="!category.Baseline.Fee">--</span>
+                                                <span *ngIf="category.Baseline.Fee">${{ category.Baseline.Fee | number: "1.0-0" }}</span>
+                                            </td>
+                                            <td>
+                                                <span *ngIf="!category.LandUseChange.TotalAllocationInAcreFeet">--</span>
+                                                <span *ngIf="category.LandUseChange.TotalAllocationInAcreFeet">{{
+                                                    category.LandUseChange.TotalAllocationInAcreFeet | number: "1.0-0"
+                                                }}</span>
+                                            </td>
+                                            <td>
+                                                {{ category.LandUseChange.AllocationUsedInAcreFeet | number: "1.0-0" }}
+                                                ({{ category.LandUseChange.AllocationUsedInPercent | number: "1.0-0" }}%
+                                                {{ category.IsOverused && category.LandUseChange.AllocationUsedInPercent > 0 ? " Over" : "" }})
+                                            </td>
+                                            <td>
+                                                <span *ngIf="!category.LandUseChange.AllocationRemainingInAcreFeet && category.LandUseChange.AllocationRemainingInAcreFeet != 0"
+                                                    >--</span
+                                                >
+                                                <span *ngIf="category.LandUseChange.AllocationRemainingInAcreFeet || category.LandUseChange.AllocationRemainingInAcreFeet == 0">
+                                                    {{ category.LandUseChange.AllocationRemainingInAcreFeet | number: "1.0-0" }}
+                                                    ({{ category.LandUseChange.AllocationRemainingInPercent | number: "1.0-0" }}%)
+                                                </span>
+                                            </td>
+                                            <td>
+                                                {{ category.LandUseChange.RemainingGroundwaterConsumptionInAcreFeet | number: "1.0-0" }}
+                                            </td>
+                                            <td>
+                                                <span *ngIf="!category.LandUseChange.Fee">--</span>
+                                                <span *ngIf="category.LandUseChange.Fee">${{ category.LandUseChange.Fee | number: "1.0-0" }}</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <th class="left-aligned">Total</th>
+                                            <td>{{ output.BaselineScenario.TotalAllocationInAcreFeet | number: "1.0-0" }}</td>
+                                            <td>{{ output.BaselineScenario.TotalAnnualConsumedGroundwaterInAcreFeet | number: "1.0-0" }}</td>
+                                            <td>
+                                                {{ output.BaselineScenario.TotalRemainingAllocationInAcreFeet | number: "1.0-0" }}
+                                            </td>
+                                            <td>
+                                                <span *ngIf="!output.BaselineScenario.TotalRemainingGroundwaterConsumption">--</span>
+                                                <span *ngIf="output.BaselineScenario.TotalRemainingGroundwaterConsumption">
+                                                    {{ output.BaselineScenario.TotalRemainingGroundwaterConsumption | number: "1.0-0" }}
+                                                </span>
+                                            </td>
+                                            <td>${{ output.BaselineScenario.EstimatedFeeTotal | number: "1.0-0" }}</td>
+                                            <td>{{ output.LandUseChangeScenario.TotalAllocationInAcreFeet | number: "1.0-0" }}</td>
+                                            <td>{{ output.LandUseChangeScenario.TotalAnnualConsumedGroundwaterInAcreFeet | number: "1.0-0" }}</td>
+                                            <td>
+                                                {{ output.LandUseChangeScenario.TotalRemainingAllocationInAcreFeet | number: "1.0-0" }}
+                                            </td>
+                                            <td>
+                                                <span *ngIf="!output.LandUseChangeScenario.TotalRemainingGroundwaterConsumption">--</span>
+                                                <span *ngIf="output.LandUseChangeScenario.TotalRemainingGroundwaterConsumption">
+                                                    {{ output.LandUseChangeScenario.TotalRemainingGroundwaterConsumption | number: "1.0-0" }}
+                                                </span>
+                                            </td>
+                                            <td>${{ output.LandUseChangeScenario.EstimatedFeeTotal | number: "1.0-0" }}</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                                <div class="g-col-4">
+                                    <h6 class="tab-header">About Fee Structures</h6>
+                                    <custom-rich-text
+                                        [customRichTextTypeID]="CustomRichTextTypeEnum.FeeCalculatorAboutFeeStructures"
+                                        [geographyID]="inputsTS.Geography.GeographyID"
+                                        [showInfoIcon]="false"
+                                        *ngIf="inputsTS"></custom-rich-text>
+                                </div>
+                                <div class="g-col-8">
+                                    <h6 class="tab-header">{{ selectedFeeStructure.Description }}</h6>
+
+                                    <table class="selected-fee-structure-table">
+                                        <colgroup>
+                                            <col style="width: 10%" />
+                                            <col style="width: 60%" />
+                                            <col style="width: 10%" />
+                                            <col style="width: 10%" />
+                                            <col style="width: 10%" />
+                                        </colgroup>
+                                        <thead>
+                                            <tr>
+                                                <th colspan="2">
+                                                    <!-- Blank for spacing-->
+                                                </th>
+                                                <th colspan="3">Consumed Groundwater (AF/ac)</th>
+                                            </tr>
+                                            <tr>
+                                                <th>Category</th>
+                                                <th>Description</th>
+                                                <th>Threshold</th>
+                                                <th>Amount</th>
+                                                <th>Total Fee/AF</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngFor="let feeCategory of selectedFeeStructure.Categories">
+                                                <td class="left-aligned" style="font-weight: bold">
+                                                    {{ feeCategory.Name }}
+                                                </td>
+                                                <td class="left-aligned">
+                                                    {{ feeCategory.Description }}
+                                                </td>
+                                                <td>
+                                                    <span *ngIf="feeCategory.ThresholdCeiling"> {{ feeCategory.ThresholdFloor }}-{{ feeCategory.ThresholdCeiling }} AF/ac </span>
+                                                    <span *ngIf="!feeCategory.ThresholdCeiling"> &LT; {{ feeCategory.ThresholdFloor }} AF/ac </span>
+                                                </td>
+                                                <td>
+                                                    <span *ngIf="feeCategory.AllocationMultiplier"> {{ feeCategory.AllocationMultiplier }} AF/ac </span>
+                                                </td>
+                                                <td>
+                                                    <span *ngIf="feeCategory.TotalFeePerAcreFoot"> ${{ feeCategory.TotalFeePerAcreFoot }} </span>
+                                                    <span *ngIf="!feeCategory.TotalFeePerAcreFoot"> -- </span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="tab-nav-panel grid-12" [class.hidden]="selectedPanel !== 'YourData'">
+                                <!--MK 11/12/2024 -- Need the selectedPanel check on the div below as well or else the grid tries to render in a hidden container and the columns are all messed up -->
+                                <div class="g-col-12" *ngIf="inputsTS && waterMeasurements && selectedPanel === 'YourData'">
+                                    <h6 class="tab-header">Your {{ inputsTS.InitialInputs.ReportingYear }} Data</h6>
+                                    <div class="mb-2">
+                                        <custom-rich-text
+                                            [customRichTextTypeID]="CustomRichTextTypeEnum.FeeCalculatorYourData"
+                                            [geographyID]="inputsTS.Geography.GeographyID"
+                                            [showInfoIcon]="false"
+                                            *ngIf="inputsTS.InitialInputs.ReportingYear"></custom-rich-text>
+                                    </div>
+                                    <water-account-parcel-water-measurements-grid
+                                        [geographyID]="inputsTS.Geography.GeographyID"
+                                        [showAcreFeet]="true"
+                                        [(waterAccountParcelWaterMeasurements)]="waterMeasurements"
+                                        [showWaterAccountRollup]="true"
+                                        [filterToWaterMeasurementTypeIDs]="inputsTS.FilterGridToWaterMeasurementTypeIDs"></water-account-parcel-water-measurements-grid>
+                                </div>
+                            </div>
+
+                            <div class="tab-nav-panel" [class.hidden]="selectedPanel !== 'WhatIsConsumedGroundwater'">
+                                <h6 class="tab-header">What is Consumed Groundwater?</h6>
+                                <custom-rich-text
+                                    [customRichTextTypeID]="CustomRichTextTypeEnum.FeeCalculatorWhatIsConsumedGroundwater"
+                                    [geographyID]="inputsTS.Geography.GeographyID"
+                                    [showInfoIcon]="false"
+                                    *ngIf="inputsTS"></custom-rich-text>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

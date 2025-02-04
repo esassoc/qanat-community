@@ -1,9 +1,8 @@
 import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
 import { CommonModule } from "@angular/common";
-import { GETActionDto } from "src/app/shared/generated/model/get-action-dto";
 import { default as vegaEmbed, VisualizationSpec, vega } from "vega-embed";
 import { LeafletHelperService } from "src/app/shared/services/leaflet-helper.service";
-import { GetActionResult } from "src/app/shared/generated/model/get-action-result";
+import { ScenarioRunDto, ScenarioRunResult } from "../../generated/model/models";
 
 @Component({
     selector: "time-series-output-chart",
@@ -13,8 +12,8 @@ import { GetActionResult } from "src/app/shared/generated/model/get-action-resul
     styleUrls: ["./time-series-output-chart.component.scss"],
 })
 export class TimeSeriesOutputChartComponent implements OnInit {
-    @Input() getActionResult: GetActionResult;
-    @Input() getAction: GETActionDto;
+    @Input() scenarioRunResult: ScenarioRunResult;
+    @Input() scenarioRun: ScenarioRunDto;
 
     private vegaView: any;
 
@@ -44,8 +43,8 @@ export class TimeSeriesOutputChartComponent implements OnInit {
         let currentColorIndex = 0;
         const colorRange = [];
 
-        this.getActionResult.PointsOfInterest.forEach((input) => {
-            const rows = input.GetActionResultTimeSeriesOutputs.map((x) => {
+        this.scenarioRunResult.PointsOfInterest.forEach((input) => {
+            const rows = input.ScenarioRunResultTimeSeriesOutputs.map((x) => {
                 return { Name: input.Name, Date: x.Date, Value: x.Value, Order: currentColorIndex };
             });
 

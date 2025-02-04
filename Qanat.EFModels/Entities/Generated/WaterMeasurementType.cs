@@ -28,6 +28,8 @@ public partial class WaterMeasurementType
 
     public bool IsUserEditable { get; set; }
 
+    public bool IsSelfReportable { get; set; }
+
     public bool ShowToLandowner { get; set; }
 
     public int? WaterMeasurementCalculationTypeID { get; set; }
@@ -35,12 +37,24 @@ public partial class WaterMeasurementType
     [Unicode(false)]
     public string CalculationJSON { get; set; }
 
-    [InverseProperty("SourceOfRecordWaterMeasurementType")]
-    public virtual ICollection<Geography> Geographies { get; set; } = new List<Geography>();
-
     [ForeignKey("GeographyID")]
     [InverseProperty("WaterMeasurementTypes")]
     public virtual Geography Geography { get; set; }
+
+    [InverseProperty("SourceOfRecordWaterMeasurementType")]
+    public virtual ICollection<Geography> GeographySourceOfRecordWaterMeasurementTypes { get; set; } = new List<Geography>();
+
+    [InverseProperty("WaterBudgetSlotAWaterMeasurementType")]
+    public virtual ICollection<Geography> GeographyWaterBudgetSlotAWaterMeasurementTypes { get; set; } = new List<Geography>();
+
+    [InverseProperty("WaterBudgetSlotBWaterMeasurementType")]
+    public virtual ICollection<Geography> GeographyWaterBudgetSlotBWaterMeasurementTypes { get; set; } = new List<Geography>();
+
+    [InverseProperty("WaterBudgetSlotCWaterMeasurementType")]
+    public virtual ICollection<Geography> GeographyWaterBudgetSlotCWaterMeasurementTypes { get; set; } = new List<Geography>();
+
+    [InverseProperty("WaterMeasurementType")]
+    public virtual ICollection<WaterMeasurementSelfReport> WaterMeasurementSelfReports { get; set; } = new List<WaterMeasurementSelfReport>();
 
     [InverseProperty("DependsOnWaterMeasurementType")]
     public virtual ICollection<WaterMeasurementTypeDependency> WaterMeasurementTypeDependencyDependsOnWaterMeasurementTypes { get; set; } = new List<WaterMeasurementTypeDependency>();

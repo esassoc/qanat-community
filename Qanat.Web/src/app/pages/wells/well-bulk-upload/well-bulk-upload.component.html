@@ -1,0 +1,64 @@
+<div class="full-width-page">
+    <page-header icon="Wells" [templateAbove]="templateAbove"> </page-header>
+
+    <ng-template #templateAbove>
+        <div class="back">
+            <a routerLink="/water-dashboard/wells" class="back__link">Back to All Wells</a>
+        </div>
+    </ng-template>
+
+    <div class="page-body grid-12">
+        <app-alert-display></app-alert-display>
+
+        <div class="g-col-8" *ngIf="geography$ | async as geography">
+            <form class="form" [formGroup]="newParcelLayerForm">
+                <div class="module-header mb-4">
+                    <h3 class="module-title underline">File Upload</h3>
+                </div>
+
+                <div class="field">
+                    <label class="required field-label">File</label>
+                    <div class="file-upload-wrapper pb-2">
+                        <label for="gdbUploadForParcelLayer" class="custom-file-upload">
+                            <input
+                                type="file"
+                                name="gdbUploadForParcelLayer"
+                                [id]="fileUploadElementID"
+                                (change)="onGDBFileChange($event)"
+                                class="form-control custom-file-input"
+                                aria-describedby="gdbUploadForParcelLayerHelp" />
+                            {{ getInputFileForGDB() }}
+                            <button type="button" class="btn btn-lg btn-primary" (click)="onClickFileUpload()">
+                                <i class="fas fa-folder-open"></i>
+                                Browse
+                            </button>
+                        </label>
+                    </div>
+
+                    <div class="copy copy-3 pt-2">
+                        <em>
+                            Maximum total file size should not exceed 500MB. Accepted extensions:
+                            <strong>.gdb.zip</strong>
+                        </em>
+                    </div>
+                </div>
+
+                <div *ngIf="f.gdbUploadForParcelLayer.touched && f.gdbUploadForParcelLayer.invalid" class="alert alert-danger">
+                    <div *ngIf="f.gdbUploadForParcelLayer.errors.required">Please select a file to upload.</div>
+                </div>
+                <div class="mt-5 flex-end">
+                    <fresca-button (onClick)="onSubmitGDB(geography)" [disabled]="isLoadingSubmit || f.gdbUploadForParcelLayer.invalid">
+                        <span *ngIf="isLoadingSubmit" class="fa fa-spinner loading-spinner mr-1"></span>
+                        <span>Save</span>
+                    </fresca-button>
+                </div>
+            </form>
+        </div>
+
+        <div class="sidebar-help g-col-4">
+            <custom-rich-text [customRichTextTypeID]="customRichTextType"></custom-rich-text>
+        </div>
+    </div>
+
+    <div class="page-footer"></div>
+</div>

@@ -1,0 +1,134 @@
+<ng-container *ngIf="currentUser$ | async">
+    <ng-container *ngIf="geography$ | async as geography">
+        <water-dashboard-nav [geography]="geography"></water-dashboard-nav>
+
+        <div class="full-width-page" *ngIf="currentUser$ | async">
+            <page-header [customRichTextTypeID]="richTextID" icon="Wells" [templateBottomRight]="templateBottomRight" preTitle="Water Dashboard"></page-header>
+
+            <ng-template #templateBottomRight>
+                <button
+                    [routerLink]="['/well-registry', geography?.GeographyName.toLowerCase(), 'new']"
+                    class="btn btn-orange"
+                    [disabled]="!geography || !geography.GeographyConfiguration.WellRegistryEnabled"
+                    preTitle="Water Dashboard">
+                    Register a Well
+                </button>
+            </ng-template>
+
+            <div class="page-body" *ngIf="currentUserGeographies$ | async as currentUserGeographies" [loadingSpinner]="{ isLoading: isLoading && firstLoad, loadingHeight: 700 }">
+                <app-alert-display></app-alert-display>
+
+                <ng-container *ngIf="!currentUserHasNoGeographies; else noWaterAccountsMessage">
+                    <ng-container *ngIf="wells$ | async as wells">
+                        <qanat-grid-header [grid]="gridRef" [rowDataCount]="wells?.length" [leftAlignClearFiltersButton]="true" [disableGlobalFilter]="selectedPanel === 'Map'">
+                            <div customGridActionsCenter>
+                                <div class="button-group tab-nav">
+                                    <button class="button-group__item btn-sm" [class.active]="selectedPanel === 'Grid'" (click)="toggleSelectedPanel('Grid')">
+                                        <icon icon="BulletedList"></icon>
+                                        Grid
+                                    </button>
+                                    <button class="button-group__item btn-sm" [class.active]="selectedPanel === 'Hybrid'" (click)="toggleSelectedPanel('Hybrid')">
+                                        <icon icon="Layout"></icon>
+                                        Hybrid
+                                    </button>
+                                    <button class="button-group__item btn-sm" [class.active]="selectedPanel === 'Map'" (click)="toggleSelectedPanel('Map')">
+                                        <icon icon="VerticalMap"></icon>
+                                        Map
+                                    </button>
+                                </div>
+                            </div>
+                            <div customGridActionsRight>
+                                <div class="form-field" class="geography-selector">
+                                    <div class="field">
+                                        <select name="Geography" [(ngModel)]="currentGeography" (ngModelChange)="onGeographySelected($event)" [compareWith]="compareGeography">
+                                            <option *ngFor="let geography of currentUserGeographies" [ngValue]="geography">
+                                                {{ geography.GeographyName }}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </qanat-grid-header>
+
+                        <div
+                            class="grid-12 mt-3"
+                            [loadingSpinner]="{
+                                isLoading: isLoading && !firstLoad,
+                                loadingHeight: 500,
+                            }">
+                            <div
+                                class="tab-nav-panel"
+                                [class.g-col-6]="selectedPanel === 'Hybrid'"
+                                [class.g-col-12]="selectedPanel === 'Grid'"
+                                [class.hidden]="selectedPanel === 'Map'">
+                                <qanat-grid
+                                    height="675px"
+                                    [rowData]="wells"
+                                    [columnDefs]="columnDefs$ | async"
+                                    [overrideDefaultGridHeader]="true"
+                                    rowSelection="single"
+                                    (gridReady)="onGridReady($event)"
+                                    (gridRefReady)="onGridRefReady($event)"
+                                    (selectionChanged)="onGridSelectionChanged()"
+                                    downloadFileName="{{ geography.GeographyName.toLowerCase() }}-wells"></qanat-grid>
+                            </div>
+
+                            <div
+                                class="tab-nav-panel"
+                                [class.g-col-6]="selectedPanel === 'Hybrid'"
+                                [class.g-col-12]="selectedPanel === 'Map'"
+                                [class.hidden]="selectedPanel === 'Grid'">
+                                <qanat-map (onMapLoad)="handleMapReady($event)" mapHeight="700px">
+                                    <ng-container *ngIf="mapIsReady">
+                                        <wells-layer
+                                            [wells]="wells"
+                                            [displayOnLoad]="true"
+                                            [map]="map"
+                                            (popupOpened)="onMapSelectionChanged($event)"
+                                            [layerControl]="layerControl"
+                                            [highlightedWellID]="selectedWellID"></wells-layer>
+
+                                        <parcel-layer
+                                            [geographyID]="geography.GeographyID"
+                                            [parcelIDs]="parcelIDs$ | async"
+                                            [map]="map"
+                                            [layerControl]="layerControl"
+                                            [displayOnLoad]="true"></parcel-layer>
+
+                                        <zone-group-layer
+                                            *ngFor="let zoneGroup of zoneGroups$ | async"
+                                            [displayOnLoad]="false"
+                                            [zoneGroupID]="zoneGroup.ZoneGroupID"
+                                            [zoneGroupName]="zoneGroup.ZoneGroupName"
+                                            [map]="map"
+                                            [layerControl]="layerControl">
+                                        </zone-group-layer>
+
+                                        <gsa-boundaries [displayOnLoad]="false" [map]="map" [geographyID]="geography.GeographyID" [layerControl]="layerControl"> </gsa-boundaries>
+
+                                        <geography-external-map-layer
+                                            *ngFor="let externalMapLayer of externalMapLayers$ | async"
+                                            [map]="map"
+                                            [layerControl]="layerControl"
+                                            [externalMapLayer]="externalMapLayer">
+                                        </geography-external-map-layer>
+                                    </ng-container>
+                                </qanat-map>
+                            </div>
+                        </div>
+                    </ng-container>
+                </ng-container>
+
+                <ng-template #noWaterAccountsMessage>
+                    <div class="alert alert-info">
+                        <div class="alert-content">
+                            <i class="fa fa-info"></i>
+                            Your user profile does not currently have access to any Wells. Claim Water Accounts to get started or contact a water manager for your geography for
+                            assistance.
+                        </div>
+                    </div>
+                </ng-template>
+            </div>
+        </div>
+    </ng-container>
+</ng-container>

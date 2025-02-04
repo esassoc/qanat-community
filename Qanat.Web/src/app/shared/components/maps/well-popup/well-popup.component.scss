@@ -6,7 +6,7 @@
 }
 
 .popup-wrapper {
-    width: 24rem;
+    width: 15rem;
     display: grid;
     gap: 1rem;
     padding: 1.5rem;
@@ -63,7 +63,6 @@ parcels-icon {
     font-size: $type-size-300;
 }
 
-.link a {
-    font-size: $type-size-150;
-    text-decoration: underline;
+.well-detail-button {
+    margin-top: $spacing-100;
 }

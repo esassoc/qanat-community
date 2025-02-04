@@ -1,7 +1,6 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from "@angular/core";
 import { ReportingPeriodService } from "../../generated/api/reporting-period.service";
-import { Observable } from "rxjs";
-import { ReportingPeriodSimpleDto } from "../../generated/model/reporting-period-simple-dto";
+import { Observable, of, switchMap } from "rxjs";
 import { FormsModule } from "@angular/forms";
 import { NgIf, NgFor, AsyncPipe } from "@angular/common";
 
@@ -19,7 +18,6 @@ export class ReportingPeriodSelectComponent implements OnInit, OnChanges {
     @Output() selectionChanged = new EventEmitter<number>();
 
     public selectedYear: number;
-    public $reportingPeriod: Observable<ReportingPeriodSimpleDto>;
     public $reportingPeriodYears: Observable<number[]>;
 
     constructor(private reportingPeriodService: ReportingPeriodService) {}
@@ -30,19 +28,22 @@ export class ReportingPeriodSelectComponent implements OnInit, OnChanges {
             return;
         }
 
-        this.selectedYear = this.defaultDisplayYear ?? new Date().getFullYear();
-
+        this.selectedYear = this.defaultDisplayYear ?? new Date().getUTCFullYear();
         this.refreshReportingPeriod();
     }
 
     private refreshReportingPeriod() {
-        this.$reportingPeriod = this.reportingPeriodService.geographiesGeographyIDReportingPeriodGet(this.geographyID);
-        this.$reportingPeriodYears = this.reportingPeriodService.geographiesGeographyIDReportingPeriodYearsGet(this.geographyID);
+        this.$reportingPeriodYears = this.reportingPeriodService.geographiesGeographyIDReportingPeriodsGet(this.geographyID).pipe(
+            switchMap((reportingPeriods) => {
+                return of(reportingPeriods.map((x) => new Date(x.StartDate).getUTCFullYear()));
+            })
+        );
     }
 
     ngOnChanges(changes: SimpleChanges): void {
         if (Object.keys(changes).includes("geographyID")) {
             this.refreshReportingPeriod();
+            this.selectedYear = this.defaultDisplayYear ?? new Date().getUTCFullYear();
         }
     }
 

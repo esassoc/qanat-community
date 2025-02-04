@@ -59,22 +59,6 @@ public class WellRegistrationController : SitkaController<WellRegistrationContro
 
     #region WellRegistryWorkflow
 
-    [HttpGet("well-registrations/water-use-types")]
-    [WithRoleFlag(FlagEnum.CanRegisterWells)]
-    public ActionResult<List<WellRegistrationWaterUseTypeSimpleDto>> ListWellWaterUseTypes()
-    {
-        var dtos = WellRegistrationWaterUseType.AllAsSimpleDto;
-        return dtos;
-    }
-
-    [HttpGet("well-registrations/pump-fuel-types")]
-    [WithRoleFlag(FlagEnum.CanRegisterWells)]
-    public ActionResult<List<FuelTypeSimpleDto>> ListPumpFuelTypes()
-    {
-        var dtos = FuelType.AllAsSimpleDto;
-        return Ok(dtos);
-    }
-
     [HttpPost("geographies/{geographyID}/well-registrations")]
     [WithRoleFlag(FlagEnum.CanRegisterWells)]
     public ActionResult<WellRegistrationMinimalDto> CreateWellRegistration([FromRoute] int geographyID, [FromBody] BeginWellRegistryRequestDto requestDto)

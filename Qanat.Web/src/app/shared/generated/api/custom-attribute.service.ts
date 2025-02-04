@@ -19,7 +19,6 @@ import { CustomHttpUrlEncodingCodec }                        from '../encoder';
 import { Observable }                                        from 'rxjs';
 
 import { CustomAttributeSimpleDto } from '../model/custom-attribute-simple-dto';
-import { CustomAttributeTypeSimpleDto } from '../model/custom-attribute-type-simple-dto';
 import { EntityCustomAttributesDto } from '../model/entity-custom-attributes-dto';
 
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
@@ -148,44 +147,6 @@ export class CustomAttributeService {
 
         return this.httpClient.post<any>(`${this.basePath}/custom-attributes/parcels/${encodeURIComponent(String(parcelID))}`,
             entityCustomAttributesDto,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        ).pipe(catchError((error: any) => { return this.apiService.handleError(error)}));
-    }
-
-    /**
-     * 
-     * 
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public customAttributesTypesGet(observe?: 'body', reportProgress?: boolean): Observable<Array<CustomAttributeTypeSimpleDto>>;
-    public customAttributesTypesGet(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<CustomAttributeTypeSimpleDto>>>;
-    public customAttributesTypesGet(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<CustomAttributeTypeSimpleDto>>>;
-    public customAttributesTypesGet(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-
-        let headers = this.defaultHeaders;
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'text/plain',
-            'application/json',
-            'text/json',
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers = headers.set('Accept', httpHeaderAcceptSelected);
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-        ];
-
-        return this.httpClient.get<Array<CustomAttributeTypeSimpleDto>>(`${this.basePath}/custom-attributes/types`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,

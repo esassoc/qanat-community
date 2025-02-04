@@ -19,6 +19,7 @@ export class WaterMeasurementTypeSimpleDto {
     WaterMeasurementTypeName?: string;
     SortOrder?: number;
     IsUserEditable?: boolean;
+    IsSelfReportable?: boolean;
     ShowToLandowner?: boolean;
     WaterMeasurementCalculationTypeID?: number;
     CalculationJSON?: string;
@@ -35,6 +36,7 @@ export interface WaterMeasurementTypeSimpleDtoForm {
     WaterMeasurementTypeName?: FormControl<string>;
     SortOrder?: FormControl<number>;
     IsUserEditable?: FormControl<boolean>;
+    IsSelfReportable?: FormControl<boolean>;
     ShowToLandowner?: FormControl<boolean>;
     WaterMeasurementCalculationTypeID?: FormControl<number>;
     CalculationJSON?: FormControl<string>;
@@ -102,6 +104,16 @@ export class WaterMeasurementTypeSimpleDtoFormControls {
         }
     );
     public static IsUserEditable = (value: FormControlState<boolean> | boolean = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<boolean>(
+        value,
+        formControlOptions ?? 
+        {
+            nonNullable: false,
+            validators: 
+            [
+            ],
+        }
+    );
+    public static IsSelfReportable = (value: FormControlState<boolean> | boolean = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<boolean>(
         value,
         formControlOptions ?? 
         {

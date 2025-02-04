@@ -14,6 +14,7 @@ namespace Qanat.EFModels.Entities
     {
         public static readonly FaqDisplayLocationTypeGrowersGuide GrowersGuide = FaqDisplayLocationTypeGrowersGuide.Instance;
         public static readonly FaqDisplayLocationTypeWaterManagerGuide WaterManagerGuide = FaqDisplayLocationTypeWaterManagerGuide.Instance;
+        public static readonly FaqDisplayLocationTypeRequestSupport RequestSupport = FaqDisplayLocationTypeRequestSupport.Instance;
 
         public static readonly List<FaqDisplayLocationType> All;
         public static readonly List<FaqDisplayLocationTypeSimpleDto> AllAsSimpleDto;
@@ -25,8 +26,8 @@ namespace Qanat.EFModels.Entities
         /// </summary>
         static FaqDisplayLocationType()
         {
-            All = new List<FaqDisplayLocationType> { GrowersGuide, WaterManagerGuide };
-            AllAsSimpleDto = new List<FaqDisplayLocationTypeSimpleDto> { GrowersGuide.AsSimpleDto(), WaterManagerGuide.AsSimpleDto() };
+            All = new List<FaqDisplayLocationType> { GrowersGuide, WaterManagerGuide, RequestSupport };
+            AllAsSimpleDto = new List<FaqDisplayLocationTypeSimpleDto> { GrowersGuide.AsSimpleDto(), WaterManagerGuide.AsSimpleDto(), RequestSupport.AsSimpleDto() };
             AllLookupDictionary = new ReadOnlyDictionary<int, FaqDisplayLocationType>(All.ToDictionary(x => x.FaqDisplayLocationTypeID));
             AllAsSimpleDtoLookupDictionary = new ReadOnlyDictionary<int, FaqDisplayLocationTypeSimpleDto>(AllAsSimpleDto.ToDictionary(x => x.FaqDisplayLocationTypeID));
         }
@@ -99,6 +100,8 @@ namespace Qanat.EFModels.Entities
             {
                 case FaqDisplayLocationTypeEnum.GrowersGuide:
                     return GrowersGuide;
+                case FaqDisplayLocationTypeEnum.RequestSupport:
+                    return RequestSupport;
                 case FaqDisplayLocationTypeEnum.WaterManagerGuide:
                     return WaterManagerGuide;
                 default:
@@ -110,7 +113,8 @@ namespace Qanat.EFModels.Entities
     public enum FaqDisplayLocationTypeEnum
     {
         GrowersGuide = 1,
-        WaterManagerGuide = 2
+        WaterManagerGuide = 2,
+        RequestSupport = 3
     }
 
     public partial class FaqDisplayLocationTypeGrowersGuide : FaqDisplayLocationType
@@ -123,5 +127,11 @@ namespace Qanat.EFModels.Entities
     {
         private FaqDisplayLocationTypeWaterManagerGuide(int faqDisplayLocationTypeID, string faqDisplayLocationTypeName, string faqDisplayLocationTypeDisplayName) : base(faqDisplayLocationTypeID, faqDisplayLocationTypeName, faqDisplayLocationTypeDisplayName) {}
         public static readonly FaqDisplayLocationTypeWaterManagerGuide Instance = new FaqDisplayLocationTypeWaterManagerGuide(2, @"WaterManagerGuide", @"Water Manager Guide");
+    }
+
+    public partial class FaqDisplayLocationTypeRequestSupport : FaqDisplayLocationType
+    {
+        private FaqDisplayLocationTypeRequestSupport(int faqDisplayLocationTypeID, string faqDisplayLocationTypeName, string faqDisplayLocationTypeDisplayName) : base(faqDisplayLocationTypeID, faqDisplayLocationTypeName, faqDisplayLocationTypeDisplayName) {}
+        public static readonly FaqDisplayLocationTypeRequestSupport Instance = new FaqDisplayLocationTypeRequestSupport(3, @"RequestSupport", @"Request Support");
     }
 }

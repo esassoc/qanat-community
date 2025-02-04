@@ -1,4 +1,4 @@
-<div *ngIf="geography">
+<div *ngIf="geography$ | async as geography">
     <page-header
         icon="LineChart"
         [templateTitleAppend]="templateTitleAppend"
@@ -19,15 +19,24 @@
             </button>
         </div>
 
-        <div *ngIf="geography">
-            <parcel-map
-                mapID="parcelMap"
-                mapHeight="400px"
-                [displayParcelLayerOnLoad]="false"
-                [geographyID]="geography.GeographyID"
-                [displayMonitoringWellsOnLoad]="true"
-                [boundingBoxInput]="geography.BoundingBox"></parcel-map>
-        </div>
+        <qanat-map class="location-card" (onMapLoad)="handleMapReady($event)" mapHeight="400px">
+            <ng-container *ngIf="mapIsReady">
+                <gsa-boundaries
+                    *ngIf="geography$ | async as geography"
+                    [displayOnLoad]="true"
+                    [map]="map"
+                    [controlTitle]="geography.GeographyDisplayName"
+                    [geographyID]="geography.GeographyID"
+                    [layerControl]="layerControl"></gsa-boundaries>
+
+                <monitoring-wells-layer
+                    [map]="map"
+                    [layerControl]="layerControl"
+                    [displayOnLoad]="true"
+                    [editingMap]="false"
+                    [geographyID]="geography.GeographyID"></monitoring-wells-layer>
+            </ng-container>
+        </qanat-map>
 
         <div class="info pt-3">
             <h2 class="section-title primary">Monitoring Wells Database</h2>
@@ -43,7 +52,7 @@
                 [columnDefs]="columnDefs"
                 downloadFileName="monitoring-well-measurements"
                 [pagination]="true"
-                (filterChanged)="selecthighlightedMonitoringWellIDRowNode()"></qanat-grid>
+                (filterChanged)="selectHighlightedMonitoringWellIDRowNode()"></qanat-grid>
         </div>
     </div>
 </div>

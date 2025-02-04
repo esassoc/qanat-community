@@ -3,260 +3,99 @@
 </ng-container>
 
 <ng-template #notSignedIn>
-    <section class="hero">
-        <div class="hero__info">
-            <span class="hero__name">Groundwater Accounting Platform</span>
-            <h1 class="hero__title">
-                <span class="line line-1">Creating a sustainable future</span>
-                <br />
-                <span class="line line-2">for water resources</span>
-            </h1>
-        </div>
+    <div class="page-body | grid-12">
+        <div class="welcome-col | g-col-8">
+            <section class="hero">
+                <div class="hero__photo">
+                    <img src="../assets/main/home/hero.jpg" alt="Photo of California farmlands" />
+                </div>
 
-        <div class="hero__photo">
-            <img src="../assets/main/home/hero.jpg" alt="Photo of California farmlands" />
-        </div>
+                <div class="hero__info">
+                    <span class="hero__name">Groundwater Accounting Platform</span>
+                    <h1 class="hero__title">
+                        <span class="line line-1">Creating a sustainable future</span>
+                        <br />
+                        <span class="line line-2">for water resources</span>
+                    </h1>
+                </div>
 
-        <div class="hero__actions card">
-            <div class="card-header">
-                <h3 class="card-title">Welcome.</h3>
-            </div>
+                <div class="hero__actions welcome-card">
+                    <div class="card-header welcome-card-header">
+                        <h3 class="card-title">Welcome.</h3>
+                    </div>
 
-            <div class="card-body">
-                <div class="logged-out">
-                    <div class="hero__btns">
-                        <div class="hero__btns-wrapper">
-                            <a (click)="login()" class="btn btn-primary">Sign In</a>
-                        </div>
+                    <div class="card-body">
+                        <div class="logged-out">
+                            <div class="hero__btns">
+                                <div class="hero__btns-wrapper">
+                                    <a (click)="login()" class="btn btn-primary">Sign In</a>
+                                </div>
 
-                        <div class="hero__btns-wrapper">
-                            <a (click)="signUp()" class="btn btn-secondary-outline"> Create an Account </a>
+                                <div class="hero__btns-wrapper">
+                                    <a (click)="signUp()" class="btn btn-primary-outline"> Create an Account </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </section>
+        </div>
+
+        <div class="about-col | g-col-4">
+            <div class="rich-link">
+                <div class="rich-link-header">
+                    <icon class="page-header-icon" icon="Info"></icon>
+                    <h3>About the Platform</h3>
+                </div>
+
+                <div class="rich-link-body copy copy-3">
+                    <p>
+                        The Groundwater Accounting Platform enables water managers, landowners, and water users to track groundwater availability and usage with user-friendly
+                        dashboards and workflows
+                    </p>
+                </div>
+
+                <div class="rich-link-footer">
+                    <a [routerLink]="['/help']" class="btn btn-primary-outline btn-sm">Learn more</a>
+                </div>
+            </div>
+
+            <div class="rich-link">
+                <div class="rich-link-header">
+                    <icon class="page-header-icon" icon="Contact"></icon>
+                    <h3>Bring the Platform to Your GSA</h3>
+                </div>
+
+                <div class="rich-link-body copy copy-3">
+                    <p>
+                        Interested in bringing the Groundwater Accounting Platform to your community and growers? Want access to a demo instance of the platform, to meet with us
+                        for a 1-on-1 demo, or simply want more information?
+                    </p>
+                </div>
+
+                <div class="rich-link-footer">
+                    <a [routerLink]="['/contact']" class="btn btn-primary-outline btn-sm">Contact us</a>
+                </div>
+            </div>
+
+            <div class="rich-link">
+                <div class="rich-link-header">
+                    <icon class="page-header-icon" icon="Question"></icon>
+                    <h3>Frequently Asked Questions</h3>
+                </div>
+
+                <div class="rich-link-body copy copy-3">
+                    <p>Get the answers to our most common questions about the platform and how to use it.</p>
+                </div>
+
+                <div class="rich-link-footer">
+                    <a [routerLink]="['/frequently-asked-questions']" class="btn btn-primary-outline btn-sm">View FAQs</a>
+                </div>
             </div>
         </div>
-    </section>
+    </div>
 
     <section class="alert-container grid-12">
         <app-alert-display></app-alert-display>
     </section>
 </ng-template>
-
-<section class="about grid-12">
-    <div class="sub-header">
-        <h4 class="sub-header__title">About the Platform</h4>
-    </div>
-
-    <div class="about__photo">
-        <img src="../assets/main/images/grower-water-budget-small.png" alt="Groundwater Accounting Platform screenshot" />
-    </div>
-
-    <div class="about__copy copy copy-1">
-        <custom-rich-text [customRichTextTypeID]="CustomRichTextTypeEnum.HomeAboutCopy"></custom-rich-text>
-    </div>
-</section>
-
-<section class="problem grid-12">
-    <div class="sub-header">
-        <h4 class="sub-header__title">The Problem</h4>
-        <h2 class="section-title">Why is the platform needed?</h2>
-    </div>
-
-    <div class="problem__feature">
-        <div class="problem__photo">
-            <img src="../assets/main/home/drought-sign.jpg" alt="Photo of California farmlands" />
-        </div>
-
-        <div class="problem__info">
-            <div class="problem__headline">
-                <h3 class="problem__title">California's reliance on groundwater during extreme environmental conditions</h3>
-            </div>
-
-            <div class="problem__copy copy copy-2">
-                <p>
-                    Water is critical to a vibrant and prosperous California. As the State's water infrastructure ages and climate change strains California's water resources, it
-                    is critical that State and local agencies, and communities have the information and tools necessary to manage irregular and unpredictable water supplies.
-                </p>
-            </div>
-
-            <!--
-            <div class="problem__cta cta">
-                <a href="https://water.ca.gov/Programs/Groundwater-Management/Bulletin-118" target="blank" class="btn btn-primary-outline">Learn more</a>
-            </div>
-            -->
-        </div>
-    </div>
-
-    <div class="problem__feature">
-        <div class="problem__photo">
-            <img src="../assets/main/home/drought-water.jpg" alt="Photo of California farmlands" />
-        </div>
-
-        <div class="problem__info">
-            <div class="problem__headline">
-                <h3 class="problem__title">Overdrafting impacts people, communities, and businesses</h3>
-            </div>
-
-            <div class="problem__copy copy copy-2">
-                <p>
-                    In the midst of a severe drought, groundwater pumping increased, and wells were dug deeper and deeper. Groundwater overpumping caused wells to dry up and land
-                    to sink, leading communities to run out of drinking water and millions of dollars of infrastructure damage.
-                </p>
-            </div>
-            <!--    
-            <div class="problem__cta cta">
-                <a href="#" class="btn btn-primary-outline">Learn more</a>
-            </div>
-            -->
-        </div>
-    </div>
-
-    <div class="problem__feature">
-        <div class="problem__photo">
-            <img src="../assets/main/home/drought-lake.jpg" alt="Photo of California farmlands" />
-        </div>
-
-        <div class="problem__info">
-            <div class="problem__headline">
-                <h3 class="problem__title">Avoiding the worst case scenarios</h3>
-            </div>
-
-            <div class="problem__copy copy copy-2">
-                <p>
-                    Without sustainable groundwater practices, California is susceptible to irreversible outcomes like land subsidence, seawater intrusion, degraded water quality,
-                    and depleted groundwater aquifers.
-                </p>
-            </div>
-
-            <!--
-            <div class="problem__cta cta">
-                <a href="#" class="btn btn-primary-outline">Learn more</a>
-            </div>
-            -->
-        </div>
-    </div>
-</section>
-
-<section class="solution grid-12">
-    <div class="sub-header">
-        <h4 class="sub-header__title">The Solution</h4>
-        <h2 class="section-title">You can’t manage what you can’t measure</h2>
-    </div>
-
-    <div class="solution__feature">
-        <div class="solution__photo">
-            <img src="../assets/main/home/sgma.jpg" alt="Photo of California farmlands" />
-        </div>
-
-        <div class="solution__info">
-            <div class="solution__headline">
-                <h3 class="solution__title">
-                    <strong>SGMA:</strong>
-                    the Sustainable Groundwater Management Act requires local agencies to better understand, track and account for groundwater use across designated basins.
-                </h3>
-            </div>
-
-            <div class="solution__copy copy copy-2">
-                <p>
-                    In 2014, the California Legislature passed the Sustainable Groundwater Management Act (SGMA) establishing a statewide framework to protect groundwater resources
-                    over the long-term. It requires local agencies to form groundwater sustainability agencies (GSAs) in priority basins and to develop and implement groundwater
-                    sustainability plans (GSPs) to mitigate undesirable outcomes over the 20 year plan implementation horizon.
-                </p>
-            </div>
-
-            <!--
-            <div class="solution__cta cta">
-                <a href="#" class="btn btn-primary-outline">Learn more</a>
-            </div>
-            -->
-        </div>
-    </div>
-
-    <div class="solution__feature">
-        <div class="solution__photo">
-            <img src="../assets/main/images/manager-zones-small.png" alt="Groundwater Accounting Platform screenshot" />
-        </div>
-
-        <div class="solution__info">
-            <div class="solution__headline">
-                <h3 class="solution__title">
-                    <strong>The Groundwater Accounting Platform</strong>
-                    enables water managers, growers, and water users across California to track water availability and use in near real-time.
-                </h3>
-            </div>
-
-            <div class="solution__copy copy copy-2">
-                <p>
-                    Climate change and population growth are driving many communities to make tough decisions about water use. It is more important than ever that water managers
-                    and agricultural water users have access to the best possible data to guide these decisions and balance supply and demand. To chart a sustainable future for
-                    water resources, the open-source Groundwater Accounting Platform was developed to provide an easy to use, cost-effective option for groundwater accounting.
-                </p>
-            </div>
-
-            <!--
-            <div class="solution__cta cta">
-                <a href="#" class="btn btn-primary-outline">Learn more</a>
-            </div>
-            -->
-        </div>
-    </div>
-
-    <div class="solution__feature">
-        <div class="solution__photo">
-            <img src="../assets/main/home/local-authority.jpg" alt="Photo of California farmlands" />
-        </div>
-
-        <div class="solution__info">
-            <div class="solution__headline">
-                <h3 class="solution__title">
-                    <strong>Tools for Local Authority</strong>
-                    are built into the Groundwater Accounting Platform.
-                </h3>
-            </div>
-
-            <div class="solution__copy copy copy-2">
-                <p>
-                    The Groundwater Accounting Platform integrates information from OpenET and other sources, along with scenario planning functionality, allowing GSAs to plan and
-                    prepare under different scenarios. The tool can be used to support local decision-making by providing district managers and landowners with a state-supported
-                    accounting tool that communicate water budgets and accounting under SGMA.
-                </p>
-            </div>
-
-            <!--
-            <div class="solution__cta cta">
-                <a href="#" class="btn btn-primary-outline">Learn more</a>
-            </div>
-            -->
-        </div>
-    </div>
-
-    <div class="solution__feature">
-        <div class="solution__photo">
-            <img src="../assets/main/images/manager-scenario-planner-small.png" alt="Groundwater Accounting Platform screenshot" />
-        </div>
-
-        <div class="solution__info">
-            <div class="solution__headline">
-                <h3 class="solution__title">
-                    <strong>Scenario Planning</strong>
-                    is integrated into the Platform using the open-source Groundwater Evaluation Toolbox.
-                </h3>
-            </div>
-
-            <div class="solution__copy copy copy-2">
-                <p>
-                    The Groundwater Accounting Platform includes scenario planning functionality using the open-source Groundwater Evaluation Toolbox (GET), developed by Olsson.
-                    This addition enables users to run model scenarios to assess the impacts of pumping, water trading, recharge, and other potential management scenarios. These
-                    scenario runs can support refinement of existing water budgets and the management actions to achieve long-term groundwater sustainability.
-                </p>
-            </div>
-
-            <!--
-            <div class="solution__cta cta">
-                <a href="#" class="btn btn-primary-outline">Learn more</a>
-            </div>
-            -->
-        </div>
-    </div>
-</section>

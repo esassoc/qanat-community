@@ -2,11 +2,10 @@
 USING (VALUES
 (1, 'CanImpersonateUsers', 'CanImpersonateUsers'),
 (2, 'HasManagerDashboard', 'HasManagerDashboard'),
-(3, 'HasAdminDashboard', 'HasAdminDashboard'),
+(3, 'IsSystemAdmin', 'IsSystemAdmin'),
 (4, 'CanClaimWaterAccounts', 'CanClaimWaterAccounts'),
 (5, 'CanRegisterWells', 'CanRegisterWells'),
-(6, 'CanReviewWells', 'CanReviewWells'),
-(7, 'CanUseScenarioPlanner', 'CanUseScenarioPlanner')
+(6, 'CanReviewWells', 'CanReviewWells')
 )
 AS Source (FlagID, FlagName, FlagDisplayName)
 ON Target.FlagID = Source.FlagID

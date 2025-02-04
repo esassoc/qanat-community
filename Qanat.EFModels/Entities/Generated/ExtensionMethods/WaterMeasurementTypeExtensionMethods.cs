@@ -20,6 +20,7 @@ namespace Qanat.EFModels.Entities
                 WaterMeasurementTypeName = waterMeasurementType.WaterMeasurementTypeName,
                 SortOrder = waterMeasurementType.SortOrder,
                 IsUserEditable = waterMeasurementType.IsUserEditable,
+                IsSelfReportable = waterMeasurementType.IsSelfReportable,
                 ShowToLandowner = waterMeasurementType.ShowToLandowner,
                 WaterMeasurementCalculationTypeID = waterMeasurementType.WaterMeasurementCalculationTypeID,
                 CalculationJSON = waterMeasurementType.CalculationJSON

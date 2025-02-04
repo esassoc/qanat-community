@@ -1,0 +1,42 @@
+<div class="dashboard">
+    <aside class="sidebar support-sidebar">
+        <div class="sidebar-header support-sidebar__header">
+            <icon class="support-logo" icon="SupportLogo"></icon>
+            <h2 class="support-sidebar__title">Support Desk</h2>
+        </div>
+
+        <div class="sidebar-body sticky">
+            <ul class="sidebar-nav">
+                <li class="sidebar-item">
+                    <a class="inbox-link sidebar-link flex-between">
+                        <icon icon="Inbox"></icon>
+                        <span class="sidebar-link__label">Inbox</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </aside>
+
+    <main class="main">
+        <page-header [pageTitle]="'Inbox'" [icon]="'Inbox'" [templateRight]="templateRight"> </page-header>
+
+        <ng-template #templateRight>
+            <button class="btn btn-primary" (click)="openCreateNewModal()">+ Add Support Ticket</button>
+        </ng-template>
+        <app-alert-display></app-alert-display>
+        <!-- <custom-rich-text [customRichTextTypeID]="customRichTextID"></custom-rich-text> -->
+        <div>
+            <qanat-grid
+                *ngIf="supportTicketDtos$ | async as supportTicketDtos"
+                [rowData]="supportTicketDtos"
+                [columnDefs]="columnDefs"
+                downloadFileName="support-tickets"
+                rowSelection="multiple"
+                [suppressRowClickSelection]="true"
+                [pagination]="true"
+                [sizeColumnsToFitGrid]="true"
+                (gridReady)="onGridReady($event)">
+            </qanat-grid>
+        </div>
+    </main>
+</div>

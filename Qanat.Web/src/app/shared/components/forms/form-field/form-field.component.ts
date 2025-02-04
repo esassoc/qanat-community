@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output, ViewChild } from "@angular/core";
-import { FormControl, NG_VALUE_ACCESSOR, FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { FormControl, NG_VALUE_ACCESSOR, FormsModule, ReactiveFormsModule, AbstractControl } from "@angular/forms";
 import { TinyMceConfigPipe } from "../../../pipes/tiny-mce-config.pipe";
 import { RequiredPipe } from "../../../pipes/required.pipe";
 import { InputErrorsComponent } from "../../inputs/input-errors/input-errors.component";
@@ -122,4 +122,5 @@ export interface FormInputOption {
     Value: any;
     Label: string;
     Disabled: boolean | null | undefined;
+    Group?: string | null | undefined;
 }

@@ -10,9 +10,15 @@
 
         <water-account-title [waterAccountName]="waterAccount.WaterAccountName" [waterAccountNumber]="waterAccount.WaterAccountNumber.toString()"></water-account-title>
 
+        <div class="contact-info">
+            <div class="contact-header">Contact</div>
+            <div>{{ waterAccount?.ContactName }}</div>
+            <div>{{ waterAccount?.ContactAddress }}</div>
+        </div>
+
         <div class="popup-body">
             <div>
-                <a class="btn btn-primary" [routerLink]="['/water-dashboard/water-accounts', waterAccount.WaterAccountID]"> View Water Account </a>
+                <a class="btn btn-primary btn-sm" [routerLink]="['/water-accounts', waterAccount.WaterAccountID]"> View Water Account </a>
             </div>
         </div>
     </ng-container>

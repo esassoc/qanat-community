@@ -17,6 +17,7 @@ import { QanatGridComponent } from "src/app/shared/components/qanat-grid/qanat-g
 import { NgIf, AsyncPipe } from "@angular/common";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { AlertDisplayComponent } from "src/app/shared/components/alert-display/alert-display.component";
+import { PublicService } from "src/app/shared/generated/api/public.service";
 
 @Component({
     selector: "admin-frequently-asked-questions",
@@ -35,6 +36,7 @@ export class AdminFrequentlyAskedQuestionsComponent implements OnInit {
 
     constructor(
         private frequentlyAskedQuestionsService: FrequentlyAskedQuestionService,
+        private publicService: PublicService,
         private utilityFunctionsService: UtilityFunctionsService,
         private modalService: ModalService,
         private viewContainerRef: ViewContainerRef,
@@ -48,7 +50,7 @@ export class AdminFrequentlyAskedQuestionsComponent implements OnInit {
     }
 
     loadFAQs() {
-        this.frequentlyAskedQuestions$ = forkJoin([this.frequentlyAskedQuestionsService.publicFaqGet(), this.frequentlyAskedQuestionsService.faqDisplayLocationsGet()]).pipe(
+        this.frequentlyAskedQuestions$ = forkJoin([this.publicService.publicFaqGet(), this.frequentlyAskedQuestionsService.faqDisplayLocationsGet()]).pipe(
             tap((x) => {
                 this.faqDisplayLocationTypes = x[1];
             }),

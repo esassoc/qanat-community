@@ -1,11 +1,10 @@
 import { Component, ComponentRef, OnInit } from "@angular/core";
 import { ModalComponent } from "../../modal/modal.component";
-import { FormFieldType, FormInputOption, FormFieldComponent } from "../../forms/form-field/form-field.component";
+import { FormFieldType, FormFieldComponent } from "../../forms/form-field/form-field.component";
 import { ManagerWellUpdateRequestDtoForm, ManagerWellUpdateRequestDtoFormControls } from "src/app/shared/generated/model/manager-well-update-request-dto";
 import { FormGroup, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { Observable, tap } from "rxjs";
 import { WellService } from "src/app/shared/generated/api/well.service";
-import { WellStatusSimpleDto } from "src/app/shared/generated/model/well-status-simple-dto";
 import { WellContext } from "../delete-well-modal/delete-well-modal.component";
 import { ModalService } from "src/app/shared/services/modal/modal.service";
 import { AlertService } from "src/app/shared/services/alert.service";
@@ -18,6 +17,7 @@ import { AlertDisplayComponent } from "../../alert-display/alert-display.compone
 import { CustomRichTextComponent } from "../../custom-rich-text/custom-rich-text.component";
 import { IconComponent } from "src/app/shared/components/icon/icon.component";
 import { NgIf, AsyncPipe } from "@angular/common";
+import { WellStatusesAsSelectDropdownOptions } from "src/app/shared/generated/enum/well-status-enum";
 
 @Component({
     selector: "update-well-info-modal",
@@ -32,11 +32,10 @@ export class UpdateWellInfoModalComponent implements OnInit {
     public FormFieldType = FormFieldType;
 
     public well$: Observable<WellMinimalDto>;
-    public wellStatus$: Observable<WellStatusSimpleDto[]>;
-    public wellStatusOptions: FormInputOption[];
 
     public isLoadingSubmit = false;
     public customRichTextTypeID = CustomRichTextTypeEnum.UpdateWellInfo;
+    public WellStatusOptions = WellStatusesAsSelectDropdownOptions;
 
     public formGroup = new FormGroup<ManagerWellUpdateRequestDtoForm>({
         WellID: ManagerWellUpdateRequestDtoFormControls.WellID(),
@@ -65,17 +64,6 @@ export class UpdateWellInfoModalComponent implements OnInit {
                     WellDepth: well.WellDepth,
                     WellStatusID: well.WellStatusID,
                     Notes: well.Notes,
-                });
-            })
-        );
-
-        this.wellStatus$ = this.wellService.wellStatusGet().pipe(
-            tap((wellStatus) => {
-                this.wellStatusOptions = wellStatus.map((status) => {
-                    return {
-                        Value: status.WellStatusID,
-                        Label: status.WellStatusDisplayName,
-                    } as FormInputOption;
                 });
             })
         );

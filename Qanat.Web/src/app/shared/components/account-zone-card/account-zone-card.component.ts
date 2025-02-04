@@ -1,37 +1,45 @@
-import { Component, OnInit, Input } from "@angular/core";
-import { WaterAccountDto, ZoneGroupMinimalDto, ZoneMinimalDto } from "../../generated/model/models";
+import { Component, OnInit, Input, OnChanges, SimpleChanges } from "@angular/core";
+import { GeographyDto, WaterAccountDto, ZoneGroupMinimalDto, ZoneMinimalDto } from "../../generated/model/models";
 import { QanatMapComponent, QanatMapInitEvent } from "src/app/shared/components/leaflet/qanat-map/qanat-map.component";
 import { Control, Map } from "leaflet";
 import { RouterLink } from "@angular/router";
-import { NgIf } from "@angular/common";
+import { AsyncPipe, NgIf } from "@angular/common";
 import { ZoneGroupLayerComponent } from "../leaflet/layers/zone-group-layer/zone-group-layer.component";
+import { Observable } from "rxjs";
+import { GeographyService } from "../../generated/api/geography.service";
 
 @Component({
     selector: "account-zone-card",
     templateUrl: "./account-zone-card.component.html",
     styleUrls: ["./account-zone-card.component.scss"],
     standalone: true,
-    imports: [NgIf, RouterLink, QanatMapComponent, ZoneGroupLayerComponent],
+    imports: [AsyncPipe, NgIf, RouterLink, QanatMapComponent, ZoneGroupLayerComponent],
 })
-export class AccountZoneCardComponent implements OnInit {
+export class AccountZoneCardComponent implements OnInit, OnChanges {
     @Input() waterAccount: WaterAccountDto;
     @Input() zoneGroup: ZoneGroupMinimalDto;
     @Input() zoneID: number;
 
     public zone: ZoneMinimalDto;
 
-    constructor() {}
+    public geography$: Observable<GeographyDto>;
+
+    constructor(private geographyService: GeographyService) {}
 
     ngOnInit(): void {
-        console.log(this.waterAccount);
         this.zone = this.zoneGroup.ZoneList?.find((x) => x.ZoneID == this.zoneID);
+    }
+
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes && changes.waterAccount && changes.waterAccount.currentValue) {
+            this.geography$ = this.geographyService.geographiesGeographyIDGet(changes.waterAccount.currentValue.Geography.GeographyID);
+        }
     }
 
     public map: Map;
     public layerControl: Control.Layers;
     public mapIsReady: boolean = false;
     handleMapReady(event: QanatMapInitEvent): void {
-        console.log("test");
         this.map = event.map;
         this.layerControl = event.layerControl;
         this.mapIsReady = true;

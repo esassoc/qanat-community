@@ -47,27 +47,27 @@
     &__actions {
         background: $white;
         box-shadow: $shadow-200;
-        margin: 2rem;
-        padding: $spacing-600 $spacing-700;
-        border-radius: $spacing-200;
-        border: 1px solid rgba($black, 0.1);
+        padding: $spacing-600;
+        border-radius: $spacing-100;
+        border: 1px solid $gray-200;
+        margin-top: $spacing-600;
 
         @include desktop-small {
-            grid-column: 1;
-            grid-row: 1;
             z-index: 3;
-            max-width: 42rem;
-            width: 85%;
+            width: 100%;
+            max-width: 30rem;
+            margin: 0 $spacing-600;
+
             align-self: end;
-            justify-self: center;
-            transform: translateY(6rem);
+            justify-self: start;
+            transform: translateY(-25%);
         }
 
         .welcome-card-header {
             color: $primary;
             border-bottom: 1px solid rgba($black, 0.1);
             padding-bottom: $spacing-300;
-            margin-bottom: $spacing-400;
+            margin-bottom: $spacing-500;
         }
 
         .section-title {
@@ -81,8 +81,6 @@
 }
 
 .quick-links {
-    margin-top: 6rem;
-
     .quick-links-grid {
         align-items: stretch;
         gap: $spacing-400;

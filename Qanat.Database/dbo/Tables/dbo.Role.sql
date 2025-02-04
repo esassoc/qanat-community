@@ -6,7 +6,9 @@
     [SortOrder]       INT           NOT NULL,
     [Rights]          NVARCHAR(MAX) NOT NULL DEFAULT '{}',
     [Flags]           NVARCHAR(MAX) NOT NULL DEFAULT '{}',
+
     CONSTRAINT [PK_Role_RoleID] PRIMARY KEY CLUSTERED ([RoleID] ASC),
+
     CONSTRAINT [AK_Role_RoleDisplayName] UNIQUE NONCLUSTERED ([RoleDisplayName] ASC),
     CONSTRAINT [AK_Role_RoleName] UNIQUE NONCLUSTERED ([RoleName] ASC)
 );

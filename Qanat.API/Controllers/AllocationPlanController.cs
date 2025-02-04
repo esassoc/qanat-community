@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -21,16 +20,6 @@ public class AllocationPlanController : SitkaController<AllocationPlanController
     public AllocationPlanController(QanatDbContext dbContext, ILogger<AllocationPlanController> logger, IOptions<QanatConfiguration> qanatConfiguration) : base(dbContext, logger, qanatConfiguration)
     {
     }
-
-    [HttpGet("public/geography/{geographyID}/allocation-plans")]
-    [EntityNotFound(typeof(Geography), "geographyID")]
-    [GeographyAllocationPlansPublic]
-    public ActionResult<List<AllocationPlanMinimalDto>> ListAllocationPlansByGeographyID([FromRoute] int geographyID)
-    {
-        var allocationPlanMinimalDtos = AllocationPlans.ListByGeographyIDAsMinimalDto(_dbContext, geographyID);
-        return allocationPlanMinimalDtos;
-    }
-
 
     [HttpGet("geographies/{geographyID}/allocation-plan-configuration")]
     [EntityNotFound(typeof(Geography), "geographyID")]
@@ -136,29 +125,6 @@ public class AllocationPlanController : SitkaController<AllocationPlanController
         return isValid;
     }
 
-    [HttpGet("public/geography/{geographyID}/allocation-plan-configuration/description")]
-    [EntityNotFound(typeof(Geography), "geographyID")]
-    [GeographyAllocationPlansPublic]
-    public ActionResult<string> GetAllocationPlanConfigurationDescriptionByGeographyID([FromRoute] int geographyID)
-    {
-        var geographyAllocationPlanConfiguration = GeographyAllocationPlanConfigurations.GetByGeographyID(_dbContext, geographyID);
-        return Ok(geographyAllocationPlanConfiguration.AllocationPlansDescription);
-    }
-
-    [HttpGet("public/allocation-plans/{geographyID}/{waterTypeSlug}/{zoneSlug}")]
-    [GeographyAllocationPlansPublic]
-    public ActionResult<AllocationPlanManageDto> GetAllocationPlanByWaterTypeSlugAndZoneSlug([FromRoute] int geographyID, [FromRoute] string waterTypeSlug, [FromRoute] string zoneSlug)
-    {
-        var allocationPlan = AllocationPlans.GetAllocationPlanManageDto(_dbContext, geographyID, waterTypeSlug, zoneSlug);
-        if (allocationPlan == null)
-        {
-            return NotFound(
-                $"Could not find an Allocation Plan with the waterTypeSlug of \"{waterTypeSlug}\" and the zoneSlug of \"{zoneSlug}\"");
-        }
-
-        return Ok(allocationPlan);
-    }
-
     [HttpPost("geographies/{geographyID}/allocation-plans/{allocationPlanID}")]
     [WithRoleFlag(FlagEnum.CanClaimWaterAccounts)]
     [WithGeographyRolePermission(PermissionEnum.AllocationPlanRights, RightsEnum.Create)]
@@ -223,7 +189,7 @@ public class AllocationPlanController : SitkaController<AllocationPlanController
         return Ok();
     }
 
-    [HttpDelete("allocation-plans/{geographyID}/{allocationPlanID}/{allocationPlanPeriodID}")]
+    [HttpDelete("geographies/{geographyID}/allocation-plans/{allocationPlanID}/{allocationPlanPeriodID}")]
     [WithRoleFlag(FlagEnum.CanClaimWaterAccounts)]
     [WithGeographyRolePermission(PermissionEnum.AllocationPlanRights, RightsEnum.Delete)]
     [EntityNotFound(typeof(AllocationPlanPeriod), "allocationPlanPeriodID")]

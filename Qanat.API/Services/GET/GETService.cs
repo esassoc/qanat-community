@@ -47,26 +47,25 @@ public class GETService
         }
     }
 
-    public async Task StartNewCustomScenarioRun(int getActionID, int? getRunCustomerID, int? getRunUserID)
+    public async Task StartNewCustomScenarioRun(int scenarioRunID, int? getRunCustomerID, int? getRunUserID)
     {
-        var getAction = GETActions.GetByID(_dbContext, getActionID);
-        var getScenarioID = _dbContext.ModelScenarios.Single(x =>
-            x.ModelID == getAction.ModelID && x.ScenarioID == getAction.ScenarioID).GETScenarioID;
+        var scenarioRun = ScenarioRuns.GetByID(_dbContext, scenarioRunID);
+        var scenarioID = _dbContext.ModelScenarios.Single(x => x.ModelID == scenarioRun.ModelID && x.ScenarioID == scenarioRun.ScenarioID).GETScenarioID;
 
-        if (getAction == null)
+        if (scenarioRun == null)
         {
             return;
         }
 
         if (!await IsAPIResponsive())
         {
-            GETActions.MarkAsTerminalWithIntegrationFailure(_dbContext, getAction);
+            ScenarioRuns.MarkAsTerminalWithIntegrationFailure(_dbContext, scenarioRun);
             return;
         }
 
         var customerID = getRunCustomerID ?? _qanatConfiguration.GETRunCustomerID;
         var userID = getRunUserID ?? _qanatConfiguration.GETRunUserID;
-        var model = new GETNewRunModel(getActionID, getAction, customerID, userID, getScenarioID);
+        var model = new GETNewRunModel(scenarioRunID, scenarioRun, customerID, userID, scenarioID);
 
         // for the custom scenario runs we need to submit as "multipart/form-data"
         var multipartFormData = new MultipartFormDataContent
@@ -75,9 +74,9 @@ public class GETService
             { new StringContent(JsonSerializer.Serialize(model), Encoding.UTF8, "application/json"), "\"request\"" }
         };
 
-        if (getAction.GETActionFileResources.Any())
+        if (scenarioRun.ScenarioRunFileResources.Any())
         {
-            foreach (var fileResource in getAction.GETActionFileResources.Select(x => x.FileResource))
+            foreach (var fileResource in scenarioRun.ScenarioRunFileResources.Select(x => x.FileResource))
             {
                 var stream = await _fileService.GetFileStreamFromBlobStorage(fileResource.FileResourceCanonicalName);
                 var fileContent = new StreamContent(stream);
@@ -97,48 +96,48 @@ public class GETService
         {
             var errorMessage = await response.Content.ReadAsStringAsync();
             _logger.LogError(errorMessage);
-            GETActions.MarkAsTerminalWithIntegrationFailure(_dbContext, getAction);
+            ScenarioRuns.MarkAsTerminalWithIntegrationFailure(_dbContext, scenarioRun);
             return;
         }
 
         var getRunResponseModel = await JsonSerializer.DeserializeAsync<GETRunResponseModel>(await response.Content.ReadAsStreamAsync());
 
-        getAction.LastUpdateDate = DateTime.UtcNow;
-        getAction.GETRunID = getRunResponseModel.RunID;
-        getAction.GETActionStatusID = ConvertGETRunStatusIDToGETActionStatusID(getRunResponseModel).GETActionStatusID;
+        scenarioRun.LastUpdateDate = DateTime.UtcNow;
+        scenarioRun.GETRunID = getRunResponseModel.RunID;
+        scenarioRun.ScenarioRunStatusID = ConvertGETRunStatusIDToGETActionStatusID(getRunResponseModel).ScenarioRunStatusID;
         await _dbContext.SaveChangesAsync();
     }
 
-    private GETActionStatus ConvertGETRunStatusIDToGETActionStatusID(GETRunResponseModel getRunResponseModel)
+    private ScenarioRunStatus ConvertGETRunStatusIDToGETActionStatusID(GETRunResponseModel getRunResponseModel)
     {
-        var getActionStatus = GETActionStatus.All.SingleOrDefault(x => x.GETRunStatusID == getRunResponseModel.RunStatus.RunStatusID);
-        if (getActionStatus == null)
+        var scenarioRunStatus = ScenarioRunStatus.All.SingleOrDefault(x => x.GETRunStatusID == getRunResponseModel.RunStatus.RunStatusID);
+        if (scenarioRunStatus == null)
         {
-            _logger.LogError($"GETRunStatus {getRunResponseModel.RunStatus.RunStatusDisplayName} (ID: {getRunResponseModel.RunStatus.RunStatusID}) not mapped to any GETActionStatus");
-            return GETActionStatus.SystemError;
+            _logger.LogError($"GETRunStatus {getRunResponseModel.RunStatus.RunStatusDisplayName} (ID: {getRunResponseModel.RunStatus.RunStatusID}) not mapped to any ScenarioRunStatus");
+            return ScenarioRunStatus.SystemError;
         }
-        return getActionStatus;
+
+        return scenarioRunStatus;
     }
 
-    public async Task UpdateCurrentlyRunningRunStatus(int getActionID, int? getRunCustomerID)
+    public async Task UpdateCurrentlyRunningRunStatus(int scenarioRunID, int? getRunCustomerID)
     {
-        var getAction = GETActions.GetByID(_dbContext, getActionID);
-
-        if (getAction == null)
+        var scenarioRun = ScenarioRuns.GetByID(_dbContext, scenarioRunID);
+        if (scenarioRun == null)
         {
-            _logger.LogError($"getAction with {getActionID} was not found.");
+            _logger.LogError($"getAction with {scenarioRunID} was not found.");
             return;
         }
 
         if (!await IsAPIResponsive())
         {
-            GETActions.MarkAsTerminalWithIntegrationFailure(_dbContext, getAction);
+            ScenarioRuns.MarkAsTerminalWithIntegrationFailure(_dbContext, scenarioRun);
             _logger.LogError("GET Api was non-responsive");
             return;
         }
 
         var customerID = getRunCustomerID ?? _qanatConfiguration.GETRunCustomerID;
-        var getRunDetailModel = new GETRunDetailModel(getAction.GETRunID.Value, customerID);
+        var getRunDetailModel = new GETRunDetailModel(scenarioRun.GETRunID.Value, customerID);
         var response = await _httpClient.PostAsJsonAsync("GetRunStatus", getRunDetailModel);
 
         if (!response.IsSuccessStatusCode)
@@ -153,61 +152,58 @@ public class GETService
         var runResponseString = JsonSerializer.Serialize(getRunResponseModel);
         _logger.LogInformation($"Retrieved getRunResponseModel with {runResponseString}");
 
-        getAction.LastUpdateDate = DateTime.UtcNow;
-        getAction.GETActionStatusID = ConvertGETRunStatusIDToGETActionStatusID(getRunResponseModel).GETActionStatusID;
+        scenarioRun.LastUpdateDate = DateTime.UtcNow;
+        scenarioRun.ScenarioRunStatusID = ConvertGETRunStatusIDToGETActionStatusID(getRunResponseModel).ScenarioRunStatusID;
 
         if (getRunResponseModel.RunStatus.RunStatusID == GETActionStatus.Complete.GETRunStatusID)
         {
-            foreach (var outputFileType in GETActionOutputFileType.All)
+            foreach (var outputFileType in ScenarioRunOutputFileType.All)
             {
                 RunResultResponseModel runResultResponseModel = null;
 
-                _logger.LogInformation($"Trying to retrieve the {outputFileType.GETActionOutputFileTypeName} output file for {getAction.GETActionID} (GET RunID:{getAction.GETRunID}).");
+                _logger.LogInformation($"Trying to retrieve the {outputFileType.ScenarioRunOutputFileTypeName} output file for {scenarioRun.ScenarioRunID} (GET RunID:{scenarioRun.GETRunID}).");
 
                 // skip the file download if we already have it. AFAIK they should never change after the run finishes...
-                if (getAction.GETActionOutputFiles.Any(x =>
-                        x.GETActionOutputFileTypeID == outputFileType.GETActionOutputFileTypeID))
+                if (scenarioRun.ScenarioRunOutputFiles.Any(x => x.ScenarioRunOutputFileTypeID == outputFileType.ScenarioRunOutputFileTypeID))
                 {
-                    _logger.LogWarning($"The {outputFileType.GETActionOutputFileTypeName} output file already exists for {getAction.GETActionID} (GET RunID:{getAction.GETRunID}). It will be overwritten.");
+                    _logger.LogWarning($"The {outputFileType.ScenarioRunOutputFileTypeName} output file already exists for {scenarioRun.ScenarioRunID} (GET RunID:{scenarioRun.GETRunID}). It will be overwritten.");
                     //continue;
                 }
-                getAction.LastUpdateDate = DateTime.UtcNow;
+                scenarioRun.LastUpdateDate = DateTime.UtcNow;
                 switch (outputFileType.ToEnum)
                 {
-                    case GETActionOutputFileTypeEnum.GroundWaterBudget:
-                        runResultResponseModel = await RetrieveResultImpl(getAction, outputFileType.GETActionOutputFileTypeName, outputFileType.GETActionOutputFileTypeExtension, customerID);
+                    case ScenarioRunOutputFileTypeEnum.GroundWaterBudget:
+                        runResultResponseModel = await RetrieveResultImpl(scenarioRun, outputFileType.ScenarioRunOutputFileTypeName, outputFileType.ScenarioRunOutputFileTypeExtension, customerID);
                         break;
-                    case GETActionOutputFileTypeEnum.TimeSeriesData:
-                        runResultResponseModel = await RetrieveResultImpl(getAction, outputFileType.GETActionOutputFileTypeName, outputFileType.GETActionOutputFileTypeExtension, customerID);
+                    case ScenarioRunOutputFileTypeEnum.TimeSeriesData:
+                        runResultResponseModel = await RetrieveResultImpl(scenarioRun, outputFileType.ScenarioRunOutputFileTypeName, outputFileType.ScenarioRunOutputFileTypeExtension, customerID);
                         break;
-                    case GETActionOutputFileTypeEnum.WaterBudget:
-                        runResultResponseModel = await RetrieveResultImpl(getAction, outputFileType.GETActionOutputFileTypeName, outputFileType.GETActionOutputFileTypeExtension, customerID);
+                    case ScenarioRunOutputFileTypeEnum.WaterBudget:
+                        runResultResponseModel = await RetrieveResultImpl(scenarioRun, outputFileType.ScenarioRunOutputFileTypeName, outputFileType.ScenarioRunOutputFileTypeExtension, customerID);
                         break;
-                    case GETActionOutputFileTypeEnum.PointsofInterest:
-                        runResultResponseModel = await RetrieveResultImpl(getAction, outputFileType.GETActionOutputFileTypeName, outputFileType.GETActionOutputFileTypeExtension, customerID);
+                    case ScenarioRunOutputFileTypeEnum.PointsofInterest:
+                        runResultResponseModel = await RetrieveResultImpl(scenarioRun, outputFileType.ScenarioRunOutputFileTypeName, outputFileType.ScenarioRunOutputFileTypeExtension, customerID);
                         break;
                 }
 
                 if (runResultResponseModel != null)
                 {
-                    var existingOutputFile = getAction.GETActionOutputFiles.SingleOrDefault(x =>
-                        x.GETActionOutputFileTypeID == outputFileType.GETActionOutputFileTypeID);
+                    var existingOutputFile = scenarioRun.ScenarioRunOutputFiles.SingleOrDefault(x => x.ScenarioRunOutputFileTypeID == outputFileType.ScenarioRunOutputFileTypeID);
                     if (existingOutputFile != null)
                     {
-                        _dbContext.GETActionOutputFiles.Remove(existingOutputFile);
+                        _dbContext.ScenarioRunOutputFiles.Remove(existingOutputFile);
                         _dbContext.FileResources.Remove(existingOutputFile.FileResource);
                         _fileService.DeleteFileStreamFromBlobStorage(existingOutputFile.FileResource.FileResourceCanonicalName);
                     }
 
                     _logger.LogInformation("Retrieved runResultResponseModel, trying to create file resource.");
-                    var outputFileResource =
-                        await CreateOutputFileResource(runResultResponseModel, outputFileType, getAction);
+                    var outputFileResource =  await CreateOutputFileResource(runResultResponseModel, outputFileType, scenarioRun);
 
-                    getAction.GETActionOutputFiles.Add(new GETActionOutputFile()
+                    scenarioRun.ScenarioRunOutputFiles.Add(new ScenarioRunOutputFile()
                     {
                         FileResourceID = outputFileResource.FileResourceID,
-                        GETActionID = getActionID,
-                        GETActionOutputFileTypeID = outputFileType.GETActionOutputFileTypeID
+                        ScenarioRunID = scenarioRunID,
+                        ScenarioRunOutputFileTypeID = outputFileType.ScenarioRunOutputFileTypeID
                     });
                 }
             }
@@ -217,20 +213,20 @@ public class GETService
         await _dbContext.SaveChangesAsync();
     }
 
-    private async Task<FileResource> CreateOutputFileResource(RunResultResponseModel runResultResponseModel, GETActionOutputFileType outputFileType, GETAction getAction)
+    private async Task<FileResource> CreateOutputFileResource(RunResultResponseModel runResultResponseModel, ScenarioRunOutputFileType outputFileType, ScenarioRun scenarioRun)
     {
         return await _fileService.CreateFileResource(
             _dbContext,
             new MemoryStream(Encoding.UTF8.GetBytes(runResultResponseModel.FileDetails)),
-            $"{outputFileType.GETActionOutputFileTypeName}{outputFileType.GETActionOutputFileTypeExtension}",
-            getAction.UserID);
+            $"{outputFileType.ScenarioRunOutputFileTypeName}{outputFileType.ScenarioRunOutputFileTypeExtension}",
+            scenarioRun.UserID);
     }
 
 
-    private async Task<RunResultResponseModel> RetrieveResultImpl(GETAction getAction, string outputFileName, string outputFileExtension, int getRunCustomerID)
+    private async Task<RunResultResponseModel> RetrieveResultImpl(ScenarioRun scenarioRun, string outputFileName, string outputFileExtension, int getRunCustomerID)
     {
         _logger.LogInformation($"Trying to retrieve the {outputFileName}{outputFileExtension} output file.");
-        var retrieveResultModel = new RetrieveResultModel(getAction.GETRunID.Value, getRunCustomerID, outputFileName, outputFileExtension);
+        var retrieveResultModel = new RetrieveResultModel(scenarioRun.GETRunID.Value, getRunCustomerID, outputFileName, outputFileExtension);
 
         var response = await _httpClient.PostAsJsonAsync("RetrieveResult", retrieveResultModel);
 

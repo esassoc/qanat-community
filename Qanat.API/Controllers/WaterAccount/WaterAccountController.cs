@@ -19,9 +19,10 @@ namespace Qanat.API.Controllers;
 [Route("water-accounts")]
 public class WaterAccountController : SitkaController<WaterAccountController>
 {
-    public WaterAccountController(QanatDbContext dbContext, ILogger<WaterAccountController> logger,
-        IOptions<QanatConfiguration> qanatConfiguration) : base(dbContext, logger, qanatConfiguration)
+    private readonly UserDto _callingUser;
+    public WaterAccountController(QanatDbContext dbContext, ILogger<WaterAccountController> logger, IOptions<QanatConfiguration> qanatConfiguration, [FromServices] UserDto callingUser) : base(dbContext, logger, qanatConfiguration)
     {
+        _callingUser = callingUser;
     }
 
     [HttpGet]
@@ -45,8 +46,7 @@ public class WaterAccountController : SitkaController<WaterAccountController>
     [HttpPut("{waterAccountID}")]
     [EntityNotFound(typeof(WaterAccount), "waterAccountID")]
     [WithRoleFlag(FlagEnum.CanClaimWaterAccounts)]
-    public ActionResult<WaterAccountDto> UpdateWaterAccount([FromRoute] int waterAccountID,
-        [FromBody] WaterAccountUpdateDto waterAccountUpdateDto)
+    public ActionResult<WaterAccountDto> UpdateWaterAccount([FromRoute] int waterAccountID, [FromBody] WaterAccountUpdateDto waterAccountUpdateDto)
     {
         var waterAccountDto = WaterAccounts.UpdateAccountEntity(_dbContext, waterAccountID, waterAccountUpdateDto);
         return Ok(waterAccountDto);
@@ -85,16 +85,6 @@ public class WaterAccountController : SitkaController<WaterAccountController>
             GeographyUsers.AddGeographyNormalUsersIfAbsent(_dbContext, addedUserIDs, updatedAccount.GeographyID);
         }
 
-
-        //var addedUsers = Users.GetByUserID(_dbContext, addedUserIDs);
-
-        //var smtpClient = HttpContext.RequestServices.GetRequiredService<SitkaSmtpClientService>();
-        //var mailMessages = GenerateAddedUserEmails(_rioConfiguration.WEB_URL, updatedAccount, addedUsers);
-        /*foreach (var mailMessage in mailMessages)
-        {
-            await SendEmailMessage(smtpClient, mailMessage);
-        }*/
-
         return Ok(updatedAccount);
     }
 
@@ -102,33 +92,42 @@ public class WaterAccountController : SitkaController<WaterAccountController>
     [EntityNotFound(typeof(WaterAccount), "waterAccountID")]
     [EntityNotFound(typeof(WaterAccount), "secondaryWaterAccountID")]
     [WithGeographyRolePermission(PermissionEnum.WaterAccountRights, RightsEnum.Update)]
-    public async Task<ActionResult<WaterAccountMinimalDto>> MergeWaterAccounts([FromRoute] int waterAccountID, 
-        [FromRoute] int secondaryWaterAccountID, [FromBody] MergeWaterAccountsDto mergeDto)
+    public async Task<ActionResult<WaterAccountMinimalDto>> MergeWaterAccounts([FromRoute] int waterAccountID, [FromRoute] int secondaryWaterAccountID, [FromBody] MergeWaterAccountsDto mergeDto)
     {
-        var errors = WaterAccounts.ValidateMergeWaterAccounts(_dbContext, waterAccountID, secondaryWaterAccountID,
-            mergeDto);
+        var errors = WaterAccounts.ValidateMergeWaterAccounts(_dbContext, waterAccountID, secondaryWaterAccountID, mergeDto);
         errors.ForEach(vm => { ModelState.AddModelError(vm.Type, vm.Message); });
+
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
 
-        var primaryAccount =
-            await WaterAccounts.MergeWaterAccounts(_dbContext, waterAccountID, secondaryWaterAccountID, mergeDto);
-
+        var primaryAccount = await WaterAccounts.MergeWaterAccounts(_dbContext, waterAccountID, secondaryWaterAccountID, mergeDto, _callingUser);
         return Ok(primaryAccount);
     }
 
-    [HttpGet("{waterAccountID}/water-type-supply/{year}")]
+    [HttpGet("{waterAccountID}/water-budget-stats/years/{year}")]
+    [EntityNotFound(typeof(WaterAccount), "waterAccountID")]
+    [EntityNotFound(typeof(ReportingPeriod), "reportingPeriodID")]
+    [WithWaterAccountRolePermission(PermissionEnum.WaterAccountRights, RightsEnum.Read)]
+    public async Task<ActionResult<WaterAccountBudgetStatDto>> GetWaterMeasurementStatsForWaterBudget([FromRoute] int waterAccountID, [FromRoute] int year)
+    {
+        var waterAccount = WaterAccounts.GetByIDAsMinimalDto(_dbContext, waterAccountID);
+        var budgetStats = await WaterMeasurements.GetWaterMeasurementStatsForWaterBudget(_dbContext, waterAccount.Geography.GeographyID, waterAccountID, year, _callingUser);
+        return Ok(budgetStats);
+    }
+
+
+    [HttpGet("{waterAccountID}/water-type-monthly-supply/years/{year}")]
     [EntityNotFound(typeof(WaterAccount), "waterAccountID")]
     [WithWaterAccountRolePermission(PermissionEnum.WaterTransactionRights, RightsEnum.Read)]
-    public ActionResult<List<WaterAccountWaterTypeSupplyDto>> GetWaterTypeSupplyFromAccountID([FromRoute] int waterAccountID, [FromRoute] int year)
+    public ActionResult<List<WaterAccountWaterTypeMonthlySupplyDto>> GetWaterTypeSupplyFromAccountID([FromRoute] int waterAccountID, [FromRoute] int year)
     {
-        var waterAccountTotalWaterTypeSupplyDtos = WaterTypeSupplies.ListByYearAndWaterAccount(_dbContext, year, waterAccountID);
+        var waterAccountTotalWaterTypeSupplyDtos = WaterTypeMonthlySupplies.ListByYearAndWaterAccount(_dbContext, year, waterAccountID);
         return Ok(waterAccountTotalWaterTypeSupplyDtos);
     }
 
-    [HttpGet("{waterAccountID}/parcel-supplies/{year}/monthlyUsageSummary")]
+    [HttpGet("{waterAccountID}/parcel-supplies/years/{year}/monthly-usage-summary")]
     [EntityNotFound(typeof(WaterAccount), "waterAccountID")]
     [WithWaterAccountRolePermission(PermissionEnum.WaterTransactionRights, RightsEnum.Read)]
     public ActionResult<List<WaterAccountParcelWaterMeasurementDto>> GetMonthlyUsageSummaryForWaterAccountAndReportingPeriod([FromRoute] int waterAccountID, [FromRoute] int year)
@@ -138,12 +137,20 @@ public class WaterAccountController : SitkaController<WaterAccountController>
         return Ok(waterAccountParcelWaterMeasurementDtos);
     }
 
+    [HttpGet("{waterAccountID}/recent-effective-dates/years/{year}")]
+    [EntityNotFound(typeof(WaterAccount), "waterAccountID")]
+    [WithWaterAccountRolePermission(PermissionEnum.WaterTransactionRights, RightsEnum.Read)]
+    public ActionResult<MostRecentEffectiveDatesDto> GetMostRecentSupplyAndUsageDateByAccountID([FromRoute] int waterAccountID, int year)
+    {
+        var mostRecentEffectiveDates = WaterAccountMostRecentEffectiveDate.GetMostRecentEffectiveDatesByWaterAccount(_dbContext, waterAccountID, year);
+        return Ok(mostRecentEffectiveDates);
+    }
+
     [HttpPatch("{waterAccountID}/update-parcels")]
     [EntityNotFound(typeof(WaterAccount), "waterAccountID")]
     [WithGeographyRolePermission(PermissionEnum.WaterAccountRights, RightsEnum.Update)]
     public async Task<ActionResult<WaterAccountMinimalDto>> UpdateWaterAccountParcels([FromRoute] int waterAccountID, [FromBody] UpdateWaterAccountParcelsDto dto)
     {
-        // Validate
         var errors = WaterAccounts.ValidateUpdateWaterAccountParcels(_dbContext, waterAccountID, dto);
         errors.ForEach(vm => { ModelState.AddModelError(vm.Type, vm.Message); });
         if (!ModelState.IsValid)

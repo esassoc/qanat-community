@@ -1,11 +1,15 @@
-<div class="statistics__filter year">
-    <h5 class="statistics__filter-label" *ngIf="$reportingPeriod | async as reportingPeriod">
-        {{ reportingPeriod.ReportingPeriodName }}
-    </h5>
+<div class="statistics__filter year" *ngIf="$reportingPeriodYears | async as reportingPeriodYears">
+    <h5 class="statistics__filter-label">Reporting Period</h5>
 
-    <select *ngIf="$reportingPeriodYears | async as reportingPeriodYears" name="reporting-period-years" [(ngModel)]="selectedYear" (change)="onSelectionChanged()">
-        <option *ngFor="let year of reportingPeriodYears" [value]="year">
-            {{ year }}
-        </option>
-    </select>
+    <ng-container *ngIf="reportingPeriodYears.length > 0; else noYears">
+        <select name="reporting-period-years" [(ngModel)]="selectedYear" (change)="onSelectionChanged()">
+            <option *ngFor="let year of reportingPeriodYears" [value]="year">
+                {{ year }}
+            </option>
+        </select>
+    </ng-container>
+
+    <ng-template #noYears>
+        <p>No Valid Reporting Period Configured for Geography</p>
+    </ng-template>
 </div>

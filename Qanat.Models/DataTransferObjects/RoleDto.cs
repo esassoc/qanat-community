@@ -1,6 +1,6 @@
 ﻿namespace Qanat.Models.DataTransferObjects;
 
-public partial class RoleDto
+public class RoleDto
 {
     public int RoleID { get; set; }
     public string RoleName { get; set; }

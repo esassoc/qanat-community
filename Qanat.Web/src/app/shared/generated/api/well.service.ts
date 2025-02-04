@@ -32,7 +32,6 @@ import { WellLocationDto } from '../model/well-location-dto';
 import { WellLocationPreviewDto } from '../model/well-location-preview-dto';
 import { WellMinimalDto } from '../model/well-minimal-dto';
 import { WellPopupDto } from '../model/well-popup-dto';
-import { WellStatusSimpleDto } from '../model/well-status-simple-dto';
 
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
@@ -448,44 +447,6 @@ export class WellService {
         ];
 
         return this.httpClient.get<Array<WellMinimalDto>>(`${this.basePath}/water-accounts/${encodeURIComponent(String(waterAccountID))}/wells`,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        ).pipe(catchError((error: any) => { return this.apiService.handleError(error)}));
-    }
-
-    /**
-     * 
-     * 
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public wellStatusGet(observe?: 'body', reportProgress?: boolean): Observable<Array<WellStatusSimpleDto>>;
-    public wellStatusGet(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<WellStatusSimpleDto>>>;
-    public wellStatusGet(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<WellStatusSimpleDto>>>;
-    public wellStatusGet(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-
-        let headers = this.defaultHeaders;
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'text/plain',
-            'application/json',
-            'text/json',
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers = headers.set('Accept', httpHeaderAcceptSelected);
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-        ];
-
-        return this.httpClient.get<Array<WellStatusSimpleDto>>(`${this.basePath}/well-status`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,

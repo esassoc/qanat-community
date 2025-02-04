@@ -1,13 +1,20 @@
-import { Component, Input, OnDestroy, OnInit } from "@angular/core";
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from "@angular/core";
 import { FormControl, NG_VALUE_ACCESSOR, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { Observable, of, timer } from "rxjs";
 import { debounce, map, switchMap, tap } from "rxjs/operators";
 import { SearchService } from "../../generated/api/search.service";
-import { WaterAccountDto, WaterAccountSearchResultWithMatchedFieldsDto, WaterAccountSearchSummaryDto } from "../../generated/model/models";
+import {
+    WaterAccountDto,
+    WaterAccountSearchDto,
+    WaterAccountSearchResultDto,
+    WaterAccountSearchResultWithMatchedFieldsDto,
+    WaterAccountSearchSummaryDto,
+} from "../../generated/model/models";
 import { CommaJoinPipe } from "../../pipes/comma-join.pipe";
 import { SumPipe } from "../../pipes/sum.pipe";
 import { HighlightDirective } from "../../directives/highlight.directive";
 import { NgIf, NgFor, AsyncPipe, DecimalPipe } from "@angular/common";
+import { IconComponent } from "../icon/icon.component";
 
 @Component({
     selector: "search-water-accounts",
@@ -21,18 +28,22 @@ import { NgIf, NgFor, AsyncPipe, DecimalPipe } from "@angular/common";
         },
     ],
     standalone: true,
-    imports: [FormsModule, ReactiveFormsModule, NgIf, NgFor, HighlightDirective, AsyncPipe, DecimalPipe, SumPipe, CommaJoinPipe],
+    imports: [FormsModule, ReactiveFormsModule, NgIf, NgFor, HighlightDirective, AsyncPipe, DecimalPipe, SumPipe, CommaJoinPipe, IconComponent],
 })
 export class SearchWaterAccountsComponent implements OnInit, OnDestroy {
     @Input() geographyID: number;
     @Input() excludedWaterAccountIDs: number[] = [];
+    @Input() isPartOfForm: boolean = true;
+    @Output() change = new EventEmitter<WaterAccountSearchResultDto>();
 
     public searchString = new FormControl({ value: null, disabled: false });
     public searchResults$: Observable<WaterAccountSearchSummaryDto>;
     public allSearchResults: WaterAccountSearchResultWithMatchedFieldsDto[] = [];
-    public val: WaterAccountDto = null;
+    public val: WaterAccountSearchResultDto = null;
     public isSearching: boolean = false;
     public highlightedSearchResult: WaterAccountSearchResultWithMatchedFieldsDto;
+    public currentWaterAccount: WaterAccountSearchResultDto;
+    private searchCleared: boolean = false;
 
     constructor(private searchService: SearchService) {}
 
@@ -50,9 +61,15 @@ export class SearchWaterAccountsComponent implements OnInit, OnDestroy {
             }),
             switchMap((searchString) => {
                 this.isSearching = true;
-                if (!searchString) return of(new WaterAccountSearchSummaryDto());
-                if (searchString && searchString.length > 1 && searchString != this.val?.WaterAccountName) {
-                    return this.searchService.searchGeographyGeographyIDWaterAccountsGet(this.geographyID, searchString);
+                if (this.searchCleared && !searchString) {
+                    return of(new WaterAccountSearchSummaryDto());
+                }
+                this.searchCleared = false;
+                if (searchString != this.val?.WaterAccountName) {
+                    const waterAccountSearchDto = new WaterAccountSearchDto();
+                    waterAccountSearchDto.GeographyID = this.geographyID;
+                    waterAccountSearchDto.SearchString = searchString;
+                    return this.searchService.searchWaterAccountsPost(waterAccountSearchDto);
                 }
                 return of(new WaterAccountSearchSummaryDto());
             }),
@@ -67,6 +84,18 @@ export class SearchWaterAccountsComponent implements OnInit, OnDestroy {
                 this.highlightedSearchResult = x?.WaterAccountSearchResults?.length > 0 ? x.WaterAccountSearchResults[0] : null;
             })
         );
+    }
+
+    toggleDropdown() {
+        this.searchCleared = false;
+        if (this.val == this.currentWaterAccount) {
+            this.val = null;
+            this.searchString.patchValue("");
+        } else {
+            this.val = this.currentWaterAccount;
+        }
+
+        this.change.emit(this.val);
     }
 
     selectNext(): void {
@@ -98,10 +127,13 @@ export class SearchWaterAccountsComponent implements OnInit, OnDestroy {
     clearSearch() {
         this.searchString.reset();
         this.value = null;
+        this.currentWaterAccount = null;
+        this.searchCleared = true;
     }
 
     selectWaterAccount(result: WaterAccountSearchResultWithMatchedFieldsDto) {
         this.value = result.WaterAccount;
+        this.change.emit(result.WaterAccount);
     }
 
     // begin ControlValueAccessor
@@ -110,9 +142,12 @@ export class SearchWaterAccountsComponent implements OnInit, OnDestroy {
     onChange: any = () => {};
     onTouch: any = () => {};
 
-    set value(val: WaterAccountDto) {
+    set value(val: WaterAccountSearchResultDto) {
         // this value is updated by programmatic changes if( val !== undefined && this.val !== val){
         this.val = val;
+        if (this.val) {
+            this.currentWaterAccount = val;
+        }
         this.onChange(val);
         this.onTouch(val);
         if (val) {

@@ -68,19 +68,19 @@ public class ParcelHistories
                     },
                     new()
                     {
-                        FieldName = "GIS Area (Acres)",
-                        FieldShortName = "GIS Area",
-                        CurrentFieldValue = Math.Round(currentParcelHistory.ParcelArea, 2).ToString(CultureInfo.CurrentCulture),
-                        PreviousFieldValue = previousParcelHistory != null 
-                            ? Math.Round(previousParcelHistory.ParcelArea, 2).ToString(CultureInfo.CurrentCulture)
+                        FieldName = "Parcel Area (acres)",
+                        FieldShortName = "Parcel Area",
+                        CurrentFieldValue = Math.Round(currentParcelHistory.ParcelArea, 4, MidpointRounding.ToEven).ToString(CultureInfo.CurrentCulture),
+                        PreviousFieldValue = previousParcelHistory != null
+                            ? Math.Round(previousParcelHistory.ParcelArea, 4, MidpointRounding.ToEven).ToString(CultureInfo.CurrentCulture)
                             : null
                     },
                     new()
                     {
                         FieldName = "Water Account",
                         FieldShortName = "Water Account",
-                        CurrentFieldValue = currentParcelHistory.WaterAccount?.WaterAccountNameAndNumber(),
-                        PreviousFieldValue = previousParcelHistory?.WaterAccount?.WaterAccountNameAndNumber()
+                        CurrentFieldValue = currentParcelHistory.WaterAccount?.WaterAccountNumberAndName(),
+                        PreviousFieldValue = previousParcelHistory?.WaterAccount?.WaterAccountNumberAndName()
                     }
                 }
             });
@@ -91,21 +91,15 @@ public class ParcelHistories
 
     public static async Task MarkAsReviewedByParcelIDs(QanatDbContext dbContext, List<int> parcelIDs)
     {
-        var parcelHistories = dbContext.ParcelHistories
-            .Where(x => parcelIDs.Contains(x.ParcelID)).ToList();
-
-        foreach (var parcelHistory in parcelHistories)
-        {
-            parcelHistory.IsReviewed = true;
-            parcelHistory.ReviewDate = DateTime.UtcNow;
-        }
-
-        await dbContext.SaveChangesAsync();
+        await dbContext.ParcelHistories
+            .Where(x => parcelIDs.Contains(x.ParcelID)).ExecuteUpdateAsync(x => x
+                .SetProperty(y => y.IsReviewed, y => true)
+                .SetProperty(y => y.ReviewDate, y => DateTime.UtcNow));
     }
 
     public static ParcelHistory CreateNew(Parcel parcel, int userID, int effectiveYear)
     {
-        return new ParcelHistory()
+        var parcelHistory = new ParcelHistory()
         {
             GeographyID = parcel.GeographyID,
             ParcelID = parcel.ParcelID,
@@ -121,5 +115,6 @@ public class ParcelHistories
             ReviewDate = DateTime.UtcNow,
             WaterAccountID = parcel.WaterAccountID
         };
+        return parcelHistory;
     }
 }

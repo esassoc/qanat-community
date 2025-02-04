@@ -17,6 +17,7 @@ import { FormFieldComponent, FormFieldType } from "src/app/shared/components/for
 import { CustomRichTextComponent } from "src/app/shared/components/custom-rich-text/custom-rich-text.component";
 import { NoteComponent } from "src/app/shared/components/note/note.component";
 import { AllocationPlanMinimalDto } from "src/app/shared/generated/model/allocation-plan-minimal-dto";
+import { PublicService } from "../../generated/api/public.service";
 
 @Component({
     selector: "copy-existing-allocation-plan-modal",
@@ -44,12 +45,13 @@ export class CopyExistingAllocationPlanModalComponent implements OnInit, IModal 
     constructor(
         private modalService: ModalService,
         private allocationPlanService: AllocationPlanService,
+        private publicService: PublicService,
         private alertService: AlertService
     ) {}
 
     ngOnInit(): void {
-        this.allocationPlanDropdownOptions$ = this.allocationPlanService
-            .publicGeographyGeographyIDAllocationPlansGet(this.modalContext.AllocationPlanManageDto.GeographyAllocationPlanConfiguration.GeographyID)
+        this.allocationPlanDropdownOptions$ = this.publicService
+            .publicGeographiesGeographyIDAllocationPlansGet(this.modalContext.AllocationPlanManageDto.GeographyAllocationPlanConfiguration.GeographyID)
             .pipe(
                 switchMap((plans) => {
                     return of([

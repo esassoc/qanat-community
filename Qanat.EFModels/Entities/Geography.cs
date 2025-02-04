@@ -7,7 +7,7 @@ public partial class Geography
 {
     public double[] GetBoundaryAsDoubleArray(string targetWKT)
     {
-        var envelope = GeographyBoundary.BoundingBox.ProjectToSrid(CoordinateSystem, targetWKT).ProjectTo4326(targetWKT).EnvelopeInternal;
+        var envelope = GeographyBoundary.GSABoundary.ProjectToSrid(CoordinateSystem, targetWKT).ProjectTo4326(targetWKT).Envelope.Buffer(Geographies.GSABoundaryBuffer).EnvelopeInternal;
         var geometryArray = new[]
         {
             envelope.MinX, envelope.MaxY,

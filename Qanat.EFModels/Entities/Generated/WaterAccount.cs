@@ -54,6 +54,9 @@ public partial class WaterAccount
     public virtual ICollection<Parcel> Parcels { get; set; } = new List<Parcel>();
 
     [InverseProperty("WaterAccount")]
+    public virtual ICollection<SupportTicket> SupportTickets { get; set; } = new List<SupportTicket>();
+
+    [InverseProperty("WaterAccount")]
     public virtual WaterAccountCustomAttribute WaterAccountCustomAttribute { get; set; }
 
     [InverseProperty("WaterAccountNavigation")]
@@ -73,4 +76,7 @@ public partial class WaterAccount
 
     [InverseProperty("WaterAccount")]
     public virtual ICollection<WaterAccountUser> WaterAccountUsers { get; set; } = new List<WaterAccountUser>();
+
+    [InverseProperty("WaterAccount")]
+    public virtual ICollection<WaterMeasurementSelfReport> WaterMeasurementSelfReports { get; set; } = new List<WaterMeasurementSelfReport>();
 }

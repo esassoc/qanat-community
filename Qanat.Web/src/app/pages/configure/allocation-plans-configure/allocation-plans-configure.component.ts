@@ -1,20 +1,18 @@
-import { Component, OnInit, OnDestroy, ViewChild, AfterViewChecked } from "@angular/core";
+import { Component, OnInit, ViewChild, AfterViewChecked } from "@angular/core";
 import { SafeHtml } from "@angular/platform-browser";
 import { EditorComponent, TINYMCE_SCRIPT_SRC } from "@tinymce/tinymce-angular";
-import { forkJoin, Observable, Subscription, tap } from "rxjs";
+import { combineLatest, Observable, switchMap, tap } from "rxjs";
 import { ConfirmService } from "src/app/shared/services/confirm/confirm.service";
 import { ConfirmOptions } from "src/app/shared/services/confirm/confirm-options";
 import { AllocationPlanService } from "src/app/shared/generated/api/allocation-plan.service";
-import { WaterTypeService } from "src/app/shared/generated/api/water-type.service";
 import { ZoneGroupService } from "src/app/shared/generated/api/zone-group.service";
 import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
 import { AllocationPlanPreviewChangesDto } from "src/app/shared/generated/model/allocation-plan-preview-changes-dto";
-import { GeographyAllocationPlanConfigurationDto, WaterTypeSimpleDto, ZoneGroupMinimalDto } from "src/app/shared/generated/model/models";
+import { GeographyAllocationPlanConfigurationDto, GeographyMinimalDto, WaterTypeSimpleDto, ZoneGroupMinimalDto } from "src/app/shared/generated/model/models";
 import TinyMCEHelpers from "src/app/shared/helpers/tiny-mce-helpers";
 import { Alert } from "src/app/shared/models/alert";
 import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
 import { AlertService } from "src/app/shared/services/alert.service";
-import { SelectedGeographyService } from "src/app/shared/services/selected-geography.service";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
 import { NgxMaskDirective, provideNgxMask } from "ngx-mask";
 import { AlertDisplayComponent } from "../../../shared/components/alert-display/alert-display.component";
@@ -22,6 +20,10 @@ import { LoadingDirective } from "../../../shared/directives/loading.directive";
 import { FormsModule } from "@angular/forms";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { NgIf, NgFor, AsyncPipe } from "@angular/common";
+import { WaterTypeByGeographyService } from "src/app/shared/generated/api/water-type-by-geography.service";
+import { CurrentGeographyService } from "src/app/shared/services/current-geography.service";
+import { routeParams } from "src/app/app.routes";
+import { GeographyService } from "src/app/shared/generated/api/geography.service";
 
 @Component({
     selector: "allocation-plans-configure",
@@ -31,11 +33,11 @@ import { NgIf, NgFor, AsyncPipe } from "@angular/common";
     imports: [NgIf, PageHeaderComponent, FormsModule, LoadingDirective, AlertDisplayComponent, NgFor, NgxMaskDirective, EditorComponent, RouterLink, AsyncPipe],
     providers: [{ provide: TINYMCE_SCRIPT_SRC, useValue: "tinymce/tinymce.min.js" }, provideNgxMask()],
 })
-export class AllocationPlansConfigureComponent implements OnInit, AfterViewChecked, OnDestroy {
+export class AllocationPlansConfigureComponent implements OnInit, AfterViewChecked {
     @ViewChild("tinyMceEditor") tinyMceEditor: EditorComponent;
     public tinyMceConfig: object;
 
-    public selectedGeography$ = Subscription.EMPTY;
+    public geography$: Observable<GeographyMinimalDto>;
     private geographyID: number;
 
     public model: GeographyAllocationPlanConfigurationDto;
@@ -53,28 +55,38 @@ export class AllocationPlansConfigureComponent implements OnInit, AfterViewCheck
     constructor(
         private router: Router,
         private route: ActivatedRoute,
-        private selectedGeographyService: SelectedGeographyService,
+        private currentGeographyService: CurrentGeographyService,
+        private geographyService: GeographyService,
         private allocationPlanService: AllocationPlanService,
         private zoneGroupService: ZoneGroupService,
-        private waterTypeService: WaterTypeService,
+        private waterTypeByGeographyService: WaterTypeByGeographyService,
         private alertService: AlertService,
         private confirmService: ConfirmService
     ) {}
 
     ngOnInit(): void {
-        this.selectedGeography$ = this.selectedGeographyService.curentUserSelectedGeographyObservable.subscribe((geography) => {
-            this.geographyID = geography.GeographyID;
-            this.getDataForGeographyID();
-        });
-    }
-
-    private getDataForGeographyID() {
-        this.allocationPlan$ = forkJoin([
-            this.allocationPlanService.geographiesGeographyIDAllocationPlanConfigurationGet(this.geographyID),
-            this.zoneGroupService.geographiesGeographyIDZoneGroupsGet(this.geographyID),
-            this.waterTypeService.geographiesGeographyIDWaterTypesActiveGet(this.geographyID),
-        ]).pipe(
-            tap(([allocationPlan, zoneGroups, waterTypes]) => {
+        this.allocationPlan$ = this.route.params.pipe(
+            switchMap((params) => {
+                const geographyName = params[routeParams.geographyName];
+                this.model = null;
+                this.modelOnLoad = null;
+                this.zoneGroups = null;
+                this.waterTypes = null;
+                this.waterTypeSelected = {};
+                return this.geographyService.geographiesGeographyNameGeographyNameMinimalGet(geographyName);
+            }),
+            tap((geography) => {
+                this.currentGeographyService.setCurrentGeography(geography);
+                this.geographyID = geography.GeographyID;
+            }),
+            switchMap((geography) => {
+                return combineLatest({
+                    allocationPlan: this.allocationPlanService.geographiesGeographyIDAllocationPlanConfigurationGet(geography.GeographyID),
+                    zoneGroups: this.zoneGroupService.geographiesGeographyIDZoneGroupsGet(geography.GeographyID),
+                    waterTypes: this.waterTypeByGeographyService.geographiesGeographyIDWaterTypesActiveGet(geography.GeographyID),
+                });
+            }),
+            tap(({ allocationPlan, zoneGroups, waterTypes }) => {
                 this.zoneGroups = zoneGroups;
                 this.waterTypes = waterTypes;
                 this.waterTypes.forEach((x) => (this.waterTypeSelected[x.WaterTypeID] = false));
@@ -88,6 +100,7 @@ export class AllocationPlansConfigureComponent implements OnInit, AfterViewCheck
                     this.model = allocationPlan;
                     this.model.WaterTypeIDs.forEach((x) => (this.waterTypeSelected[x] = true));
                 }
+
                 this.modelOnLoad = JSON.stringify(this.model);
             })
         );
@@ -97,10 +110,6 @@ export class AllocationPlansConfigureComponent implements OnInit, AfterViewCheck
         // We need to use ngAfterViewInit because the image upload needs a reference to the component
         // to setup the blobCache for image base64 encoding
         this.tinyMceConfig = TinyMCEHelpers.DefaultInitConfig(this.tinyMceEditor);
-    }
-
-    ngOnDestroy(): void {
-        this.selectedGeography$.unsubscribe();
     }
 
     canExit() {
@@ -143,12 +152,18 @@ export class AllocationPlansConfigureComponent implements OnInit, AfterViewCheck
             (deletingAllocationPlanChanges.length == 0
                 ? ""
                 : "This update will delete the following Allocation Plans and all associated Allocation Periods:" +
-                  `<ul class="mt-3">${deletingAllocationPlanChanges.map((x) => `<li><b>${x.AllocationPlanDisplayName}</b> (${x.TotalPeriodsCount} Allocation Period${x.TotalPeriodsCount == 1 ? "" : "s"})</li>`)}</ul>` +
+                  `<ul class="mt-3">${deletingAllocationPlanChanges.map(
+                      (x) => `<li><b>${x.AllocationPlanDisplayName}</b> (${x.TotalPeriodsCount} Allocation Period${x.TotalPeriodsCount == 1 ? "" : "s"})</li>`
+                  )}</ul>` +
                   "<br /><br />") +
             (dateRangeConflictChanges.length == 0
                 ? ""
-                : `<p>This update will ${deletingAllocationPlanChanges.length > 0 ? "also " : ""} delete Allocation Periods from the following Allocation Plans due to conflicting date ranges:</p>` +
-                  `<ul class="mt-3">${dateRangeConflictChanges.map((x) => `<li><b>${x.AllocationPlanDisplayName}</b> (Deleting ${x.PeriodsToDeleteCount} of ${x.TotalPeriodsCount} Allocation Periods)</li>`)}</ul>` +
+                : `<p>This update will ${
+                      deletingAllocationPlanChanges.length > 0 ? "also " : ""
+                  } delete Allocation Periods from the following Allocation Plans due to conflicting date ranges:</p>` +
+                  `<ul class="mt-3">${dateRangeConflictChanges.map(
+                      (x) => `<li><b>${x.AllocationPlanDisplayName}</b> (Deleting ${x.PeriodsToDeleteCount} of ${x.TotalPeriodsCount} Allocation Periods)</li>`
+                  )}</ul>` +
                   "<br /><br />") +
             "Are you sure you wish to proceed?";
 

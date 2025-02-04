@@ -19,6 +19,7 @@ export class ParcelUpdateExpectedResultsDto {
     NumParcelsToBeUpdated?: number;
     NumParcelsWithUpdatedGeometries?: number;
     NumParcelsWithOwnerOrAddressChange?: number;
+    NumParcelsWithAcresChange?: number;
     constructor(obj?: any) {
         Object.assign(this, obj);
     }
@@ -32,6 +33,7 @@ export interface ParcelUpdateExpectedResultsDtoForm {
     NumParcelsToBeUpdated?: FormControl<number>;
     NumParcelsWithUpdatedGeometries?: FormControl<number>;
     NumParcelsWithOwnerOrAddressChange?: FormControl<number>;
+    NumParcelsWithAcresChange?: FormControl<number>;
 }
 
 export class ParcelUpdateExpectedResultsDtoFormControls { 
@@ -96,6 +98,16 @@ export class ParcelUpdateExpectedResultsDtoFormControls {
         }
     );
     public static NumParcelsWithOwnerOrAddressChange = (value: FormControlState<number> | number = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<number>(
+        value,
+        formControlOptions ?? 
+        {
+            nonNullable: false,
+            validators: 
+            [
+            ],
+        }
+    );
+    public static NumParcelsWithAcresChange = (value: FormControlState<number> | number = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<number>(
         value,
         formControlOptions ?? 
         {

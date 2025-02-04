@@ -5,7 +5,6 @@ import { Observable } from "rxjs";
 import { tap } from "rxjs/operators";
 import { routeParams } from "src/app/app.routes";
 import { AuthenticationService } from "src/app/shared/services/authentication.service";
-import { GeographyService } from "src/app/shared/generated/api/geography.service";
 import { WaterAccountUserService } from "src/app/shared/generated/api/water-account-user.service";
 import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
 import { GeographyDto } from "src/app/shared/generated/model/geography-dto";
@@ -20,6 +19,7 @@ import { FieldDefinitionComponent } from "../../../../shared/components/field-de
 import { ButtonComponent } from "../../../../shared/components/button/button.component";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { NgIf, NgFor, AsyncPipe } from "@angular/common";
+import { PublicService } from "src/app/shared/generated/api/public.service";
 
 @Component({
     selector: "onboard-water-account-pins",
@@ -43,14 +43,14 @@ export class OnboardWaterAccountPINsComponent implements OnInit {
         private waterAccountUserService: WaterAccountUserService,
         private alertService: AlertService,
         private route: ActivatedRoute,
-        private geographyService: GeographyService
+        private publicService: PublicService
     ) {}
 
     ngOnInit(): void {
         this.currentUser$ = this.authenticationService.getCurrentUser();
 
         const geographyName = this.route.snapshot.paramMap.get(routeParams.geographyName);
-        this.geography$ = this.geographyService.publicGeographyNameGeographyNameGet(geographyName).pipe(
+        this.geography$ = this.publicService.publicGeographiesNameGeographyNameGet(geographyName).pipe(
             tap((geography) => {
                 this.geographyID = geography.GeographyID;
                 this.claimedWaterAccountPINs$ = this.waterAccountUserService.geographiesGeographyIDWaterAccountPINsGet(this.geographyID);

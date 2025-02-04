@@ -145,13 +145,6 @@ public class WaterAccountUserController : SitkaController<WaterAccountUserContro
         return Ok();
     }
 
-    [HttpGet("water-account-roles")]
-    [WithRoleFlag(FlagEnum.CanClaimWaterAccounts)]
-    public ActionResult<List<WaterAccountRoleSimpleDto>> GetWaterAccountRoles()
-    {
-        return Ok(WaterAccountRole.AllAsSimpleDto);
-    }
-
     [HttpPost("water-accounts/{waterAccountID}/inviting-user/{invitingUserID}")]
     [EntityNotFound(typeof(WaterAccount), "waterAccountID")]
     [WithWaterAccountRolePermission(PermissionEnum.WaterAccountUserRights, RightsEnum.Create)]

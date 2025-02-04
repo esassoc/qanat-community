@@ -34,7 +34,9 @@ export class VegaParcelUsageChartComponent implements OnInit {
         this.waterMeasurementService.geographiesGeographyIDWaterMeasurementsParcelsParcelIDChartDataGet(this.parcel.GeographyID, this.parcel.ParcelID).subscribe((response) => {
             this.allChartData = response;
             this.isLoading = false;
-            this.setupChart();
+            if (this.allChartData.length != 0) {
+                this.setupChart();
+            }
         });
     }
 
@@ -173,22 +175,10 @@ export class VegaParcelUsageChartComponent implements OnInit {
         this.downloadErrorMessage = null;
         this.isDownloading = true;
 
-        this.waterMeasurementService.geographiesGeographyIDWaterMeasurementsParcelsParcelIDGet(this.parcel.GeographyID, this.parcel.ParcelID).subscribe((result) => {
+        this.waterMeasurementService.geographiesGeographyIDWaterMeasurementsParcelsParcelIDExcelDownloadGet(this.parcel.GeographyID, this.parcel.ParcelID).subscribe((result) => {
             this.handleDownloadSuccess(result, `${this.parcel.ParcelNumber}_waterMeasurements`, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
                 (error) => this.handleDownloadError(error);
         });
-        //   {
-        //   next: (result) => {
-        //     //FileResponseHelper.downloadBlobResponse(result, `${this.parcel.ParcelNumber}_waterMeasurements`);
-        //   },
-        //   error: (error) => {
-        //     this.downloadError = true;
-        //     //Because our return type is ArrayBuffer, the message will be ugly. Convert it and display
-        //     const decodedString = String.fromCharCode.apply(null, new Uint8Array(error.error) as any);
-        //     this.downloadErrorMessage = decodedString;
-        //   },
-        //   complete: () => this.isDownloading = false
-        // });
     }
 
     private handleDownloadSuccess(result, fileName, contentType) {

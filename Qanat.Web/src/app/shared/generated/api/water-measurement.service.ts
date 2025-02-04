@@ -71,21 +71,21 @@ export class WaterMeasurementService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public geographiesGeographyIDWaterMeasurementsCalculationsYearMonthPost(geographyID: number, year: number, month: number, observe?: 'body', reportProgress?: boolean): Observable<any>;
-    public geographiesGeographyIDWaterMeasurementsCalculationsYearMonthPost(geographyID: number, year: number, month: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<any>>;
-    public geographiesGeographyIDWaterMeasurementsCalculationsYearMonthPost(geographyID: number, year: number, month: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<any>>;
-    public geographiesGeographyIDWaterMeasurementsCalculationsYearMonthPost(geographyID: number, year: number, month: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    public geographiesGeographyIDWaterMeasurementsCalculationsYearsYearMonthsMonthPost(geographyID: number, year: number, month: number, observe?: 'body', reportProgress?: boolean): Observable<any>;
+    public geographiesGeographyIDWaterMeasurementsCalculationsYearsYearMonthsMonthPost(geographyID: number, year: number, month: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<any>>;
+    public geographiesGeographyIDWaterMeasurementsCalculationsYearsYearMonthsMonthPost(geographyID: number, year: number, month: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<any>>;
+    public geographiesGeographyIDWaterMeasurementsCalculationsYearsYearMonthsMonthPost(geographyID: number, year: number, month: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         if (geographyID === null || geographyID === undefined) {
-            throw new Error('Required parameter geographyID was null or undefined when calling geographiesGeographyIDWaterMeasurementsCalculationsYearMonthPost.');
+            throw new Error('Required parameter geographyID was null or undefined when calling geographiesGeographyIDWaterMeasurementsCalculationsYearsYearMonthsMonthPost.');
         }
 
         if (year === null || year === undefined) {
-            throw new Error('Required parameter year was null or undefined when calling geographiesGeographyIDWaterMeasurementsCalculationsYearMonthPost.');
+            throw new Error('Required parameter year was null or undefined when calling geographiesGeographyIDWaterMeasurementsCalculationsYearsYearMonthsMonthPost.');
         }
 
         if (month === null || month === undefined) {
-            throw new Error('Required parameter month was null or undefined when calling geographiesGeographyIDWaterMeasurementsCalculationsYearMonthPost.');
+            throw new Error('Required parameter month was null or undefined when calling geographiesGeographyIDWaterMeasurementsCalculationsYearsYearMonthsMonthPost.');
         }
 
         let headers = this.defaultHeaders;
@@ -102,7 +102,7 @@ export class WaterMeasurementService {
         const consumes: string[] = [
         ];
 
-        return this.httpClient.post<any>(`${this.basePath}/geographies/${encodeURIComponent(String(geographyID))}/water-measurements/calculations/${encodeURIComponent(String(year))}/${encodeURIComponent(String(month))}`,
+        return this.httpClient.post<any>(`${this.basePath}/geographies/${encodeURIComponent(String(geographyID))}/water-measurements/calculations/years/${encodeURIComponent(String(year))}/months/${encodeURIComponent(String(month))}`,
             null,
             {
                 withCredentials: this.configuration.withCredentials,
@@ -167,7 +167,7 @@ export class WaterMeasurementService {
             formParams = formParams.append('UploadedFile', <any>uploadedFile) || formParams;
         }
 
-        return this.httpClient.post<any>(`${this.basePath}/geographies/${encodeURIComponent(String(geographyID))}/water-measurements/csv/headers`,
+        return this.httpClient.post<any>(`${this.basePath}/geographies/${encodeURIComponent(String(geographyID))}/water-measurements/csv-headers`,
             convertFormParamsToString ? formParams.toString() : formParams,
             {
                 withCredentials: this.configuration.withCredentials,
@@ -292,50 +292,6 @@ export class WaterMeasurementService {
      * 
      * 
      * @param geographyID 
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public geographiesGeographyIDWaterMeasurementsGet(geographyID: number, observe?: 'body', reportProgress?: boolean): Observable<Blob>;
-    public geographiesGeographyIDWaterMeasurementsGet(geographyID: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Blob>>;
-    public geographiesGeographyIDWaterMeasurementsGet(geographyID: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Blob>>;
-    public geographiesGeographyIDWaterMeasurementsGet(geographyID: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-
-        if (geographyID === null || geographyID === undefined) {
-            throw new Error('Required parameter geographyID was null or undefined when calling geographiesGeographyIDWaterMeasurementsGet.');
-        }
-
-        let headers = this.defaultHeaders;
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'text/plain',
-            'application/json',
-            'text/json',
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers = headers.set('Accept', httpHeaderAcceptSelected);
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-        ];
-
-        return this.httpClient.get(`${this.basePath}/geographies/${encodeURIComponent(String(geographyID))}/water-measurements`,
-            {
-                responseType: "blob",
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        ).pipe(catchError((error: any) => { return this.apiService.handleError(error)}));
-    }
-
-    /**
-     * 
-     * 
-     * @param geographyID 
      * @param parcelID 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
@@ -388,17 +344,17 @@ export class WaterMeasurementService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public geographiesGeographyIDWaterMeasurementsParcelsParcelIDGet(geographyID: number, parcelID: number, observe?: 'body', reportProgress?: boolean): Observable<Blob>;
-    public geographiesGeographyIDWaterMeasurementsParcelsParcelIDGet(geographyID: number, parcelID: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Blob>>;
-    public geographiesGeographyIDWaterMeasurementsParcelsParcelIDGet(geographyID: number, parcelID: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Blob>>;
-    public geographiesGeographyIDWaterMeasurementsParcelsParcelIDGet(geographyID: number, parcelID: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    public geographiesGeographyIDWaterMeasurementsParcelsParcelIDExcelDownloadGet(geographyID: number, parcelID: number, observe?: 'body', reportProgress?: boolean): Observable<Blob>;
+    public geographiesGeographyIDWaterMeasurementsParcelsParcelIDExcelDownloadGet(geographyID: number, parcelID: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Blob>>;
+    public geographiesGeographyIDWaterMeasurementsParcelsParcelIDExcelDownloadGet(geographyID: number, parcelID: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Blob>>;
+    public geographiesGeographyIDWaterMeasurementsParcelsParcelIDExcelDownloadGet(geographyID: number, parcelID: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         if (geographyID === null || geographyID === undefined) {
-            throw new Error('Required parameter geographyID was null or undefined when calling geographiesGeographyIDWaterMeasurementsParcelsParcelIDGet.');
+            throw new Error('Required parameter geographyID was null or undefined when calling geographiesGeographyIDWaterMeasurementsParcelsParcelIDExcelDownloadGet.');
         }
 
         if (parcelID === null || parcelID === undefined) {
-            throw new Error('Required parameter parcelID was null or undefined when calling geographiesGeographyIDWaterMeasurementsParcelsParcelIDGet.');
+            throw new Error('Required parameter parcelID was null or undefined when calling geographiesGeographyIDWaterMeasurementsParcelsParcelIDExcelDownloadGet.');
         }
 
         let headers = this.defaultHeaders;
@@ -418,7 +374,7 @@ export class WaterMeasurementService {
         const consumes: string[] = [
         ];
 
-        return this.httpClient.get(`${this.basePath}/geographies/${encodeURIComponent(String(geographyID))}/water-measurements/parcels/${encodeURIComponent(String(parcelID))}`,
+        return this.httpClient.get(`${this.basePath}/geographies/${encodeURIComponent(String(geographyID))}/water-measurements/parcels/${encodeURIComponent(String(parcelID))}/excel-download`,
             {
                 responseType: "blob",
                 withCredentials: this.configuration.withCredentials,
@@ -525,13 +481,13 @@ export class WaterMeasurementService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public geographiesGeographyIDWaterMeasurementsTypesSourceOfRecordGet(geographyID: number, observe?: 'body', reportProgress?: boolean): Observable<WaterMeasurementTypeSimpleDto>;
-    public geographiesGeographyIDWaterMeasurementsTypesSourceOfRecordGet(geographyID: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<WaterMeasurementTypeSimpleDto>>;
-    public geographiesGeographyIDWaterMeasurementsTypesSourceOfRecordGet(geographyID: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<WaterMeasurementTypeSimpleDto>>;
-    public geographiesGeographyIDWaterMeasurementsTypesSourceOfRecordGet(geographyID: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    public geographiesGeographyIDWaterMeasurementsSourceOfRecordGet(geographyID: number, observe?: 'body', reportProgress?: boolean): Observable<WaterMeasurementTypeSimpleDto>;
+    public geographiesGeographyIDWaterMeasurementsSourceOfRecordGet(geographyID: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<WaterMeasurementTypeSimpleDto>>;
+    public geographiesGeographyIDWaterMeasurementsSourceOfRecordGet(geographyID: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<WaterMeasurementTypeSimpleDto>>;
+    public geographiesGeographyIDWaterMeasurementsSourceOfRecordGet(geographyID: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         if (geographyID === null || geographyID === undefined) {
-            throw new Error('Required parameter geographyID was null or undefined when calling geographiesGeographyIDWaterMeasurementsTypesSourceOfRecordGet.');
+            throw new Error('Required parameter geographyID was null or undefined when calling geographiesGeographyIDWaterMeasurementsSourceOfRecordGet.');
         }
 
         let headers = this.defaultHeaders;
@@ -551,8 +507,57 @@ export class WaterMeasurementService {
         const consumes: string[] = [
         ];
 
-        return this.httpClient.get<WaterMeasurementTypeSimpleDto>(`${this.basePath}/geographies/${encodeURIComponent(String(geographyID))}/water-measurements/types/source-of-record`,
+        return this.httpClient.get<WaterMeasurementTypeSimpleDto>(`${this.basePath}/geographies/${encodeURIComponent(String(geographyID))}/water-measurements/source-of-record`,
             {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        ).pipe(catchError((error: any) => { return this.apiService.handleError(error)}));
+    }
+
+    /**
+     * 
+     * 
+     * @param geographyID 
+     * @param year 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public geographiesGeographyIDWaterMeasurementsYearsYearExcelDownloadGet(geographyID: number, year: number, observe?: 'body', reportProgress?: boolean): Observable<Blob>;
+    public geographiesGeographyIDWaterMeasurementsYearsYearExcelDownloadGet(geographyID: number, year: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Blob>>;
+    public geographiesGeographyIDWaterMeasurementsYearsYearExcelDownloadGet(geographyID: number, year: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Blob>>;
+    public geographiesGeographyIDWaterMeasurementsYearsYearExcelDownloadGet(geographyID: number, year: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+
+        if (geographyID === null || geographyID === undefined) {
+            throw new Error('Required parameter geographyID was null or undefined when calling geographiesGeographyIDWaterMeasurementsYearsYearExcelDownloadGet.');
+        }
+
+        if (year === null || year === undefined) {
+            throw new Error('Required parameter year was null or undefined when calling geographiesGeographyIDWaterMeasurementsYearsYearExcelDownloadGet.');
+        }
+
+        let headers = this.defaultHeaders;
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'text/plain',
+            'application/json',
+            'text/json',
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers = headers.set('Accept', httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+        ];
+
+        return this.httpClient.get(`${this.basePath}/geographies/${encodeURIComponent(String(geographyID))}/water-measurements/years/${encodeURIComponent(String(year))}/excel-download`,
+            {
+                responseType: "blob",
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
                 observe: observe,

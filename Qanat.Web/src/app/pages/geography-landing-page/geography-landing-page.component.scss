@@ -12,3 +12,12 @@ h2 {
 .about-grid {
     gap: $spacing-400;
 }
+
+.fee-calculator-header {
+    ::ng-deep {
+        svg {
+            height: 17px;
+            width: 16px;
+        }
+    }
+}

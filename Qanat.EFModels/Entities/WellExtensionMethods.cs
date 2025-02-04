@@ -24,6 +24,7 @@ public static partial class WellExtensionMethods
             WellStatusDisplayName = well.WellStatus.WellStatusDisplayName,
             ParcelNumber = well.Parcel?.ParcelNumber,
             IrrigatesParcels = well.WellIrrigatedParcels.Select(x => x.Parcel.AsParcelMinimalDto()).ToList(),
+            WaterAccountID = well.Parcel?.WaterAccountID,
             Notes = well.Notes
         };
     }

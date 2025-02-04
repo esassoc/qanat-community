@@ -2,7 +2,6 @@ import { ChangeDetectorRef, Component, OnInit, OnDestroy } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { routeParams } from "src/app/app.routes";
 import { forkJoin } from "rxjs";
-import { StateService } from "src/app/shared/generated/api/state.service";
 import { StateSimpleDto, WellRegistrationContactsUpsertDto } from "src/app/shared/generated/model/models";
 import { WellRegistryWorkflowProgressService } from "src/app/shared/services/well-registry-workflow-progress.service";
 import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
@@ -19,6 +18,7 @@ import { AlertDisplayComponent } from "../../../shared/components/alert-display/
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { WorkflowBodyComponent } from "src/app/shared/components/workflow-body/workflow-body.component";
 import { NgxMaskDirective, provideNgxMask } from "ngx-mask";
+import { PublicService } from "src/app/shared/generated/api/public.service";
 
 @Component({
     selector: "well-contacts",
@@ -43,7 +43,7 @@ export class WellContactsComponent implements OnInit, IDeactivateComponent, OnDe
         private route: ActivatedRoute,
         private cdr: ChangeDetectorRef,
         private wellRegistrationService: WellRegistrationService,
-        private stateService: StateService,
+        private publicService: PublicService,
         private wellRegistryProgressService: WellRegistryWorkflowProgressService,
         private alertService: AlertService
     ) {}
@@ -58,7 +58,7 @@ export class WellContactsComponent implements OnInit, IDeactivateComponent, OnDe
             this.wellID = parseInt(id);
             forkJoin({
                 wellRegistrationContacts: this.wellRegistrationService.wellRegistrationsWellRegistrationIDContactsGet(this.wellID),
-                states: this.stateService.publicStatesGet(),
+                states: this.publicService.publicStatesGet(),
             }).subscribe(({ wellRegistrationContacts, states }) => {
                 this.model = wellRegistrationContacts;
                 this.originalModel = JSON.stringify(wellRegistrationContacts);

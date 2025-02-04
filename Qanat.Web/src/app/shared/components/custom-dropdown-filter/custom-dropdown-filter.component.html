@@ -13,7 +13,8 @@
     </div>
     <div id="filter-options">
         <label *ngFor="let element of getDropdownValues()" class="filter-option" for="{{ element }}" class="filter-option p-2">
-            <input type="checkbox" name="{{ element }}" id="{{ element }}" class="mr-2" [(ngModel)]="state.filterOptions[element]" (ngModelChange)="updateFilter()" />
+            <input type="checkbox" name="{{ element }}" id="{{ element }}" class="mr-2" [(ngModel)]="state.filterOptions[element]"
+                (ngModelChange)="updateFilter()" />
 
             <span *ngIf="element === ''"><em>(None)</em></span>
             {{ element }}

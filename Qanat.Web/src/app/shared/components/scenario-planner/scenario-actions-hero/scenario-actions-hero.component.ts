@@ -3,9 +3,9 @@ import { CommonModule } from "@angular/common";
 import { Observable } from "rxjs";
 import { ScenarioEnum } from "src/app/shared/generated/enum/scenario-enum";
 import { IconComponent } from "../../icon/icon.component";
-import { GETActionService } from "src/app/shared/generated/api/get-action.service";
 import { ScenarioSimpleDto } from "src/app/shared/generated/model/models";
 import { RouterLink } from "@angular/router";
+import { ScenarioService } from "src/app/shared/generated/api/scenario.service";
 
 @Component({
     selector: "scenario-actions-hero",
@@ -18,9 +18,9 @@ export class ScenarioActionsHeroComponent implements OnInit {
     readonly ScenarioEnum = ScenarioEnum;
     public scenarios$: Observable<ScenarioSimpleDto[]>;
 
-    constructor(private getActionService: GETActionService) {}
+    constructor(private scenarioService: ScenarioService) {}
 
     ngOnInit(): void {
-        this.scenarios$ = this.getActionService.scenariosGet();
+        this.scenarios$ = this.scenarioService.scenariosGet();
     }
 }

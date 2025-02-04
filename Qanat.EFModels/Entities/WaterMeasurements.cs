@@ -123,7 +123,6 @@ public static class WaterMeasurements
         return waterMeasurements.Select(x => x.AsWaterMeasurementDto()).ToList();
     }
 
-
     public static async Task<List<WaterMeasurementDto>> CreateWaterMeasurements(QanatDbContext dbContext, List<WaterMeasurement> waterMeasurements)
     {
         dbContext.WaterMeasurements.AddRange(waterMeasurements);
@@ -139,5 +138,58 @@ public static class WaterMeasurements
 
         dbContext.WaterMeasurements.RemoveRange(waterMeasurements);
         await dbContext.SaveChangesAsync();
+    }
+
+    public static async Task<WaterAccountBudgetStatDto> GetWaterMeasurementStatsForWaterBudget(QanatDbContext dbContext, int geographyID, int waterAccountID, int reportedYear, UserDto callingUser)
+    {
+        var usageEntitiesForWaterAccount = await dbContext.UsageEntities.AsNoTracking()
+            .Include(x => x.Parcel)
+            .Where(x => x.GeographyID == geographyID)
+            .Where(x => x.Parcel.WaterAccountID == waterAccountID)
+            .Select(x => x.UsageEntityName)
+            .ToListAsync();
+
+        var geography = Geographies.GetByID(dbContext, geographyID);
+        var waterMeasurementTypeIDsToFilterTo = new List<int?>()
+        {
+            geography.WaterBudgetSlotAWaterMeasurementTypeID,
+            geography.WaterBudgetSlotBWaterMeasurementTypeID,
+            geography.WaterBudgetSlotCWaterMeasurementTypeID
+        }.Where(x => x.HasValue);
+
+        var reportingPeriodDto = await ReportingPeriods.GetByGeographyIDAndYearAsync(dbContext, geographyID, reportedYear, callingUser);
+        if (reportingPeriodDto == null)
+        {
+            return new WaterAccountBudgetStatDto();
+        }
+
+        var reportingPeriodStart = reportingPeriodDto.StartDate;
+        var reportingPeriodEnd = reportingPeriodDto.EndDate;
+
+        var waterMeasurements = await dbContext.WaterMeasurements.AsNoTracking()
+            .Include(x => x.WaterMeasurementType)
+            .Where(x => x.GeographyID == geographyID )
+            .Where(x => usageEntitiesForWaterAccount.Contains(x.UsageEntityName))
+            .Where(x => waterMeasurementTypeIDsToFilterTo.Contains(x.WaterMeasurementTypeID))
+            .Where(x => x.ReportedDate >= reportingPeriodStart && x.ReportedDate <= reportingPeriodEnd)
+            .ToListAsync();
+
+        var waterMeasurementsSlotA = waterMeasurements.Where(x => x.WaterMeasurementTypeID == geography.WaterBudgetSlotAWaterMeasurementTypeID);
+        var slotAValueInAcreFeet = waterMeasurementsSlotA.Sum(x => x.ReportedValueInAcreFeet);
+
+        var waterMeasurementsSlotB = waterMeasurements .Where(x => x.WaterMeasurementTypeID == geography.WaterBudgetSlotBWaterMeasurementTypeID);
+        var slotBValueInAcreFeet = waterMeasurementsSlotB.Sum(x => x.ReportedValueInAcreFeet);
+
+        var waterMeasurementsSlotC = waterMeasurements.Where(x => x.WaterMeasurementTypeID == geography.WaterBudgetSlotCWaterMeasurementTypeID);
+        var slotCValueInAcreFeet = waterMeasurementsSlotC.Sum(x => x.ReportedValueInAcreFeet);
+
+        var result = new WaterAccountBudgetStatDto()
+        {
+            SlotAValueInAcreFeet = slotAValueInAcreFeet,
+            SlotBValueInAcreFeet = slotBValueInAcreFeet,
+            SlotCValueInAcreFeet = slotCValueInAcreFeet
+        };
+
+        return result;
     }
 }

@@ -3,7 +3,7 @@
         <div class="water-account-header-body">
             <h2 class="section-title underline">
                 <icon icon="WaterAccounts"></icon>
-                <a class="account-name-link pl-2" [routerLink]="['./', waterAccount.WaterAccountID]"> #{{ waterAccount.WaterAccountNumber }} </a>
+                <a class="account-name-link pl-2" [routerLink]="['/water-accounts', waterAccount.WaterAccountID]"> #{{ waterAccount.WaterAccountNumber }} </a>
                 <small class="text-muted account-id">{{ waterAccount.WaterAccountName }}</small>
             </h2>
             <div class="grid-12">
@@ -16,9 +16,6 @@
                         <h3 class="module-title text-muted">Contact Address</h3>
                         <p>{{ waterAccount.ContactAddress }}</p>
                     </div>
-                    <div class="metadata-item">
-                        <a [routerLink]="['./', waterAccount.WaterAccountID]" class="btn btn-primary"> Users & Settings </a>
-                    </div>
                 </div>
                 <div class="g-col-6">
                     <div class="metadata-item">
@@ -28,6 +25,14 @@
                                 <parcel-icon-with-number [parcel]="parcel"></parcel-icon-with-number>
                             </div>
                         </div>
+                    </div>
+                    <div class="metadata-item">
+                        <h3 class="module-title text-muted">Acres</h3>
+                        <p>{{ waterAccount.Acres | number : "1.2-2" }} ac</p>
+                    </div>
+                    <div class="metadata-item">
+                        <h3 class="module-title text-muted">Irrigated Acres</h3>
+                        <p>{{ waterAccount.IrrigatedAcres | number : "1.2-2" }} ac</p>
                     </div>
                 </div>
             </div>
@@ -56,12 +61,42 @@
         </div>
     </div>
     <div class="g-col-5 water-account-map">
-        <parcel-map
-            [mapID]="mapID"
-            mapHeight="500px"
-            [selectedParcelIDs]="selectedParcelIDs"
-            [highlightParcelOnClick]="false"
-            [collapsedLayerControl]="true"
-            [geographyID]="waterAccount.Geography.GeographyID"></parcel-map>
+        <qanat-map class="location-card" (onMapLoad)="handleMapReady($event)" mapHeight="500px">
+            <ng-container *ngIf="mapIsReady">
+                <parcel-layer
+                    *ngIf="selectedParcelIDs"
+                    [geographyID]="waterAccount.Geography.GeographyID"
+                    [parcelIDs]="selectedParcelIDs"
+                    [map]="map"
+                    [layerControl]="layerControl"
+                    [displayOnLoad]="true"
+                    controlTitle="Water Account Parcels">
+                </parcel-layer>
+
+                <geography-parcels-layer [displayOnLoad]="false" [geographyID]="waterAccount.Geography.GeographyID" [map]="map" parcelStyle="parcel" [layerControl]="layerControl">
+                </geography-parcels-layer>
+
+                <wells-layer *ngIf="wells$ | async as wells" [wells]="wells" [displayOnLoad]="false" [map]="map" [layerControl]="layerControl" controlTitle="Water Account Wells">
+                </wells-layer>
+
+                <ng-container *ngIf="zoneGroups$ | async as zoneGroups">
+                    <zone-group-layer
+                        *ngFor="let zoneGroup of zoneGroups"
+                        [displayOnLoad]="false"
+                        [zoneGroupID]="zoneGroup.ZoneGroupID"
+                        [zoneGroupName]="zoneGroup.ZoneGroupName"
+                        [map]="map"
+                        [layerControl]="layerControl">
+                    </zone-group-layer>
+                </ng-container>
+
+                <gsa-boundaries
+                    [displayOnLoad]="false"
+                    [map]="map"
+                    [controlTitle]="waterAccount.Geography.GeographyDisplayName"
+                    [geographyID]="waterAccount.Geography.GeographyID"
+                    [layerControl]="layerControl"></gsa-boundaries>
+            </ng-container>
+        </qanat-map>
     </div>
 </div>

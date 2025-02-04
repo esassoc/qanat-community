@@ -1,6 +1,6 @@
 <page-header icon="Allocations" [customRichTextTypeID]="customRichTextID"></page-header>
 
-<div class="page-body" *ngIf="selectedGeography$ | async as geography">
+<div class="page-body" *ngIf="geography$ | async as geography">
     <app-alert-display></app-alert-display>
     <ng-container *ngIf="allocationPlans$ | async as allocationPlans">
         <allocation-plan-select

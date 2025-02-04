@@ -3,12 +3,13 @@
         <div class="popup-body">
             <icon icon="Wells"></icon>
             <span class="well-name pl-1">{{ well.WellName ?? "Unnamed Well" }}</span>
-            <span class="link pl-2" *ngIf="well.WellRegistrationID">
-                <a [routerLink]="['/profile', 'well-registrations', well?.WellRegistrationID]"> Registration Details </a>
-            </span>
             <div class="parcel-number p-1">
                 <icon icon="Parcels"></icon>
                 <span>{{ well.Parcel.ParcelNumber }}</span>
+            </div>
+
+            <div class="well-detail-button">
+                <button class="btn btn-primary btn-sm" [routerLink]="['/wells', well.WellID]">View Well</button>
             </div>
         </div>
     </ng-container>

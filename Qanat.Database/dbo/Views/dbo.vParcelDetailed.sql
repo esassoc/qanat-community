@@ -4,7 +4,7 @@ as
 select p.GeographyID, p.ParcelID, p.ParcelNumber, p.ParcelArea, p.OwnerName, p.OwnerAddress
         , ps.ParcelStatusID, ps.ParcelStatusDisplayName
         , wa.WaterAccountID, wa.WaterAccountName, wa.WaterAccountNumber, wa.WaterAccountPIN
-        , pca.CustomAttributes, pzs.Zones
+        , pca.CustomAttributes, pzs.ZoneIDs
 		, wop.WellsOnParcel, ibw.IrrigatedByWells
 
 from dbo.Parcel p
@@ -13,7 +13,7 @@ left join dbo.ParcelCustomAttribute pca on p.ParcelID = pca.ParcelID
 left join dbo.WaterAccount wa on p.WaterAccountID = wa.WaterAccountID
 left join 
 (
-    select ParcelID, '[' + STRING_AGG(cast(concat('{"ZoneID":', z.ZoneID, ',"ZoneGroupID":', z.ZoneGroupID, ',"ZoneName":"', z.ZoneName, '", "ZoneColor":"', z.ZoneColor, '", "ZoneAccentColor":"', z.ZoneAccentColor, '"}') as nvarchar(max)), ',') WITHIN GROUP (ORDER BY z.ZoneID) + ']' as Zones
+    select ParcelID, STRING_AGG(cast(z.ZoneID as nvarchar(max)), ',') WITHIN GROUP (ORDER BY z.ZoneGroupID) as ZoneIDs
     from dbo.ParcelZone pz
     join dbo.[Zone] z on pz.ZoneID = z.ZoneID
     group by pz.ParcelID

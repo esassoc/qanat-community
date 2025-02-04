@@ -29,6 +29,14 @@ public class ZoneGroups
             .Select(x => x.AsZoneGroupMinimalDto()).ToList();
     }
 
+    public static List<ZoneGroupDto> ListByGeographyAsDto(QanatDbContext dbContext, int geographyID)
+    {
+        return GetImplWithTracking(dbContext)
+            .AsNoTracking().Where(x => x.GeographyID == geographyID)
+            .OrderBy(x => x.SortOrder)
+            .Select(x => x.AsDto()).ToList();
+    }
+
     public static ZoneGroup GetByZoneGroupSlug(QanatDbContext dbContext, string zoneGroupSlug, int geographyID)
     {
         return GetImplWithTracking(dbContext).AsNoTracking()

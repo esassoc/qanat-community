@@ -1,19 +1,10 @@
 <div class="map-wrapper pb-5">
     <qanat-map (onMapLoad)="handleMapReady($event)" mapHeight="500px">
         <ng-container *ngIf="mapIsReady">
-            <geography-parcels-layer
-                [displayOnLoad]="true"
-                [geographyID]="geographyID"
-                [map]="map"
-                parcelStyle="parcel_labeled"
+            <geography-parcels-layer [displayOnLoad]="true" [geographyID]="geographyID" [map]="map" parcelStyle="parcel_labeled"
                 [layerControl]="layerControl"></geography-parcels-layer>
-            <highlighted-parcels-layer
-                [displayOnLoad]="true"
-                [map]="map"
-                [geographyID]="geographyID"
-                [highlightedParcelIDs]="irrigatedParcelIDs"
-                (onHighlightedParcelClick)="clickedOnHighlightedParcel($event)"
-                (onNonHighlightedParcelClick)="clickedOnNonHighlightedParcel($event)"
+            <highlighted-parcels-layer [displayOnLoad]="true" [map]="map" [geographyID]="geographyID" [highlightedParcelIDs]="irrigatedParcelIDs"
+                (onHighlightedParcelClick)="clickedOnHighlightedParcel($event)" (onNonHighlightedParcelClick)="clickedOnNonHighlightedParcel($event)"
                 [layerControl]="layerControl"></highlighted-parcels-layer>
         </ng-container>
     </qanat-map>
@@ -28,27 +19,16 @@
         <div class="field-label">All Parcels</div>
 
         <div class="parcel-list">
-            <ng-select
-                class="search"
-                [(ngModel)]="parcelSearchModel"
-                [typeahead]="parcelInputs$"
-                [minTermLength]="2"
-                [loading]="searchLoading"
-                (add)="onSelected($event)"
-                [multiple]="true"
-                placeholder="Search APNs"
-                typeToSearchText="Begin typing to search">
+            <ng-select class="search" [(ngModel)]="parcelSearchModel" [typeahead]="parcelInputs$" [minTermLength]="2" [loading]="searchLoading"
+                (add)="onSelected($event)" [multiple]="true" placeholder="Search APNs" typeToSearchText="Begin typing to search">
                 <ng-option *ngFor="let parcel of parcels$ | async" [value]="parcel" [disabled]="isIrrigatedParcel[parcel.ParcelID]">
                     {{ parcel.ParcelNumber }}
                     <span *ngIf="isIrrigatedParcel[parcel.ParcelID]">(Already Added)</span>
                 </ng-option>
             </ng-select>
 
-            <div
-                class="list-item flex-between p-2"
-                *ngFor="let parcel of selectedParcels; let i = index"
-                [class.recently-active]="isIrrigatedParcel[parcel.ParcelID] == false"
-                (click)="highlightParcel(parcel.ParcelID)">
+            <div class="list-item flex-between p-2" *ngFor="let parcel of selectedParcels; let i = index"
+                [class.recently-active]="isIrrigatedParcel[parcel.ParcelID] == false" (click)="highlightParcel(parcel.ParcelID)">
                 <div>
                     {{ parcel.ParcelNumber }}
                     <span *ngIf="isIrrigatedParcel[parcel.ParcelID] == false" class="small"> Recently Deleted </span>
@@ -67,11 +47,8 @@
             <div *ngIf="irrigatedParcels?.length === 0" class="no-parcels copy copy-4">
                 <p><em>This user hasn't claimed any parcels yet</em></p>
             </div>
-            <div
-                class="list-item flex-between p-2"
-                *ngFor="let parcel of irrigatedParcels; let i = index"
-                [ngClass]="{ 'recently-active': i < recentlyAddedCount, 'no-border': i == 0 }"
-                (click)="highlightParcel(parcel.ParcelID)">
+            <div class="list-item flex-between p-2" *ngFor="let parcel of irrigatedParcels; let i = index"
+                [ngClass]="{ 'recently-active': i < recentlyAddedCount, 'no-border': i == 0 }" (click)="highlightParcel(parcel.ParcelID)">
                 <div>
                     {{ parcel.ParcelNumber }}
                     <span *ngIf="i < recentlyAddedCount" class="small">Recently Added</span>

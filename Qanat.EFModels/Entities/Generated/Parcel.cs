@@ -79,6 +79,9 @@ public partial class Parcel
     public virtual ICollection<WaterAccountReconciliation> WaterAccountReconciliationParcels { get; set; } = new List<WaterAccountReconciliation>();
 
     [InverseProperty("Parcel")]
+    public virtual ICollection<WaterMeasurementSelfReportLineItem> WaterMeasurementSelfReportLineItems { get; set; } = new List<WaterMeasurementSelfReportLineItem>();
+
+    [InverseProperty("Parcel")]
     public virtual ICollection<WellIrrigatedParcel> WellIrrigatedParcels { get; set; } = new List<WellIrrigatedParcel>();
 
     [InverseProperty("Parcel")]

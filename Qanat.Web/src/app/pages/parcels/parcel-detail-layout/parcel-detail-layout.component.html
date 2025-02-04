@@ -1,0 +1,56 @@
+<div class="dashboard">
+    <ng-container *ngIf="currentParcel$ | async as currentParcel; else isLoadingTemplate">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a routerLink="/water-dashboard">
+                    <geography-logo [geographyID]="currentParcel?.GeographyID"></geography-logo>
+                </a>
+            </div>
+            <div class="sidebar-body sticky-nav">
+                <div class="sidebar-body__wrapper">
+                    <h3 class="sidebar-body__title">
+                        <icon icon="Parcels"></icon>
+                        Parcel
+                    </h3>
+                    <div class="sidebar-body__switcher">
+                        <span class="dropdown sidebar-body__current">
+                            <a
+                                href="javascript:void(0);"
+                                [dropdownToggle]="parcelToggle"
+                                [title]="currentParcel.ParcelNumber"
+                                class="dropdown-toggle"
+                                role="button"
+                                data-toggle="dropdown"
+                                aria-haspopup="true"
+                                aria-expanded="false"
+                                (click)="parcelSwitcher.toggleDropdown()">
+                                <span class="label">{{ currentParcel.ParcelNumber }}</span>
+
+                                <icon icon="AngleDown"></icon>
+                            </a>
+
+                            <div #parcelToggle class="dropdown-menu">
+                                <search-parcels
+                                    #parcelSwitcher
+                                    [isPartOfForm]="false"
+                                    [excludedParcelIDs]="[currentParcel.ParcelID]"
+                                    (change)="changedParcel($event, currentParcel)"></search-parcels>
+                            </div>
+                        </span>
+                    </div>
+                </div>
+
+                <dashboard-menu *ngIf="pageMenu$ | async as pageMenu" [dashboardMenu]="pageMenu" [viewingDetailPage]="true"></dashboard-menu>
+            </div>
+        </aside>
+
+        <main class="main">
+            <router-outlet #manageOutlet="outlet"></router-outlet>
+        </main>
+    </ng-container>
+
+    <ng-template #isLoadingTemplate>
+        <aside class="sidebar" [loadingSpinner]="{ isLoading: true }"></aside>
+        <main class="main" [loadingSpinner]="{ isLoading: true }"></main>
+    </ng-template>
+</div>

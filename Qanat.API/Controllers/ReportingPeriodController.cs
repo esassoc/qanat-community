@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Qanat.API.Services;
@@ -16,87 +15,67 @@ namespace Qanat.API.Controllers;
 
 [ApiController]
 [RightsChecker]
-public class ReportingPeriodController : SitkaController<ReportingPeriodController>
-{
-    public ReportingPeriodController(QanatDbContext dbContext, ILogger<ReportingPeriodController> logger, IOptions<QanatConfiguration> qanatConfiguration) : base(dbContext, logger, qanatConfiguration)
-    {
-    }
+[Route("geographies/{geographyID}/reporting-periods")]
+public class ReportingPeriodController(QanatDbContext dbContext, ILogger<ReportingPeriodController> logger, IOptions<QanatConfiguration> qanatConfiguration, [FromServices] UserDto callingUser)
+    : SitkaController<ReportingPeriodController>(dbContext, logger, qanatConfiguration)
 
-    [HttpGet("geographies/{geographyID}/reporting-period")]
+{
+    [HttpPost]
     [EntityNotFound(typeof(Geography), "geographyID")]
-    [WithGeographyRolePermission(PermissionEnum.ReportingPeriodRights, RightsEnum.Read)]
-    public ActionResult<ReportingPeriodSimpleDto> GetReportingPeriodForGeography([FromRoute] int geographyID)
+    [WithRoleFlag(FlagEnum.IsSystemAdmin)]
+    [WithGeographyRolePermission(PermissionEnum.ReportingPeriodRights, RightsEnum.Create)]
+    public async Task<ActionResult<ReportingPeriodDto>> Create(int geographyID, ReportingPeriodUpsertDto reportingPeriodUpsertDto)
     {
-        var reportingPeriod = ReportingPeriods.GetReportingPeriodForGeographyAsSimpleDto(_dbContext, geographyID);
+        var validationErrors = await ReportingPeriods.ValidateCreateAsync(_dbContext, geographyID, reportingPeriodUpsertDto);
+        if (validationErrors.Any() || !ModelState.IsValid)
+        {
+            validationErrors.ForEach(ve => ModelState.AddModelError(ve.Type, ve.Message));
+            return BadRequest(ModelState);
+        }
+
+        var reportingPeriod = await ReportingPeriods.CreateAsync(_dbContext, geographyID, reportingPeriodUpsertDto, callingUser);
         return Ok(reportingPeriod);
     }
 
-    [HttpGet("geographies/{geographyID}/reporting-period/years")]
+    [HttpGet]
     [EntityNotFound(typeof(Geography), "geographyID")]
     [WithGeographyRolePermission(PermissionEnum.ReportingPeriodRights, RightsEnum.Read)]
-    public ActionResult<List<int>> GetYearsForReportingPeriod([FromRoute] int geographyID)
+    public async Task<ActionResult<List<ReportingPeriodDto>>> ListByGeographyID(int geographyID)
     {
-        var reportingPeriod = ReportingPeriods.GetByGeographyID(_dbContext, geographyID);
+        var reportingPeriods = await ReportingPeriods.ListByGeographyIDAsync(_dbContext, geographyID, callingUser);
+        return Ok(reportingPeriods);
+    }
+
+    [HttpGet("{reportingPeriodID}")]
+    [EntityNotFound(typeof(Geography), "geographyID")]
+    [EntityNotFound(typeof(ReportingPeriod), "reportingPeriodID")]
+    [WithGeographyRolePermission(PermissionEnum.ReportingPeriodRights, RightsEnum.Read)]
+    public async Task<ActionResult<ReportingPeriodDto>> Get(int geographyID, int reportingPeriodID)
+    {
+        var reportingPeriod = await ReportingPeriods.GetAsync(_dbContext, geographyID, reportingPeriodID, callingUser);
         if (reportingPeriod == null)
         {
-            return BadRequest(
-                ("A reporting period has not been configured for this geography. Please update settings on the Configure dashboard.")
-            );
+            return NotFound();
         }
 
-        var startingYear = Geographies.GetByID(_dbContext, reportingPeriod.GeographyID).StartYear;
-        var currentYear = DateTime.Now.Year;
-
-        var allYearsInReportingPeriod = new List<int>();
-        for (var i = currentYear; i >= startingYear; i--)
-            allYearsInReportingPeriod.Add(i);
-
-        return Ok(allYearsInReportingPeriod);
+        return Ok(reportingPeriod);
     }
 
-    [HttpGet("reporting-periods/years")]
-    [WithRoleFlag(FlagEnum.CanClaimWaterAccounts)]
-    public ActionResult<List<int>> GetYearsForAllReportingPeriods()
-    {
-        var startingYear = _dbContext.Geographies.AsNoTracking().ToList()
-            .MinBy(x => x.StartYear)?.StartYear;
-        var currentYear = DateTime.Now.Year;
-
-        var allYearsInAllReportingPeriods = new List<int>();
-        for (var i = currentYear; i >= startingYear; i--)
-            allYearsInAllReportingPeriods.Add(i);
-
-        return Ok(allYearsInAllReportingPeriods);
-    }
-
-    [HttpPost("geographies/{geographyID}/reporting-period/update")]
+    [HttpPut("{reportingPeriodID}")]
     [EntityNotFound(typeof(Geography), "geographyID")]
+    [EntityNotFound(typeof(ReportingPeriod), "reportingPeriodID")]
+    [WithRoleFlag(FlagEnum.IsSystemAdmin)]
     [WithGeographyRolePermission(PermissionEnum.ReportingPeriodRights, RightsEnum.Update)]
-    public ActionResult<ReportingPeriodSimpleDto> UpdateReportingPeriod([FromBody] ReportingPeriodSimpleDto reportingPeriodSimpleDto, [FromRoute] int geographyID)
+    public async Task<ActionResult<ReportingPeriodDto>> Update(int geographyID, int reportingPeriodID, ReportingPeriodUpsertDto reportingPeriodUpsertDto)
     {
-        var existingReportingPeriod = _dbContext.ReportingPeriods.SingleOrDefault(x => x.GeographyID == geographyID);
-
-        if (existingReportingPeriod != null)
+        var validationErrors = await ReportingPeriods.ValidateUpdateAsync(_dbContext, geographyID, reportingPeriodUpsertDto, reportingPeriodID);
+        if (validationErrors.Any() || !ModelState.IsValid)
         {
-            existingReportingPeriod.ReportingPeriodName = reportingPeriodSimpleDto.ReportingPeriodName;
-            existingReportingPeriod.StartMonth = reportingPeriodSimpleDto.StartMonth;
-            existingReportingPeriod.Interval = reportingPeriodSimpleDto.Interval;
-        }
-        else
-        {
-            var newReportingPeriod = new ReportingPeriod()
-            {
-                GeographyID = geographyID,
-                ReportingPeriodName = reportingPeriodSimpleDto.ReportingPeriodName,
-                StartMonth = reportingPeriodSimpleDto.StartMonth,
-                Interval = reportingPeriodSimpleDto.Interval
-            };
-
-            _dbContext.ReportingPeriods.Add(newReportingPeriod);
+            validationErrors.ForEach(ve => ModelState.AddModelError(ve.Type, ve.Message));
+            return BadRequest(ModelState);
         }
 
-        _dbContext.SaveChanges();
-
-        return Ok(ReportingPeriods.GetByGeographyID(_dbContext, geographyID));
+        var updatedReportingPeriod = await ReportingPeriods.UpdateAsync(_dbContext, geographyID, reportingPeriodID, reportingPeriodUpsertDto, callingUser);
+        return Ok(updatedReportingPeriod);
     }
 }

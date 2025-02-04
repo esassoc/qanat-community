@@ -28,7 +28,7 @@ WORKDIR /src/Qanat.Web/
 
 RUN npm cache clean --force
 RUN npm uninstall   -g angular-cli
-RUN npm install     -g @angular/cli@16.2.8
+RUN npm install     -g @angular/cli@17.3.6
 RUN npm ci
 
 ARG env

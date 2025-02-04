@@ -15,28 +15,37 @@ export class GeographySimpleDto {
     GeographyID?: number;
     GeographyConfigurationID?: number;
     GeographyName?: string;
-    StartYear?: number;
     GeographyDisplayName?: string;
     GeographyDescription?: string;
     APNRegexPattern?: string;
     APNRegexPatternDisplay?: string;
+    GSACanonicalID?: number;
+    Color?: string;
+    ContactEmail?: string;
+    ContactPhoneNumber?: string;
+    LandownerDashboardSupplyLabel?: string;
+    LandownerDashboardUsageLabel?: string;
+    CoordinateSystem?: number;
+    AreaToAcresConversionFactor?: number;
+    DefaultReportingPeriodID?: number;
     IsOpenETActive?: boolean;
     OpenETShapeFilePath?: string;
     OpenETRasterTimeseriesMultipolygonColumnToUseAsIdentifier?: string;
-    CoordinateSystem?: number;
-    AreaToAcresConversionFactor?: number;
-    IsDemoGeography?: boolean;
-    GSACanonicalID?: number;
-    Color?: string;
     SourceOfRecordWaterMeasurementTypeID?: number;
     SourceOfRecordExplanation?: string;
-    ContactEmail?: string;
-    ContactPhoneNumber?: string;
-    DefaultDisplayYear?: number;
-    LandownerDashboardSupplyLabel?: string;
-    LandownerDashboardUsageLabel?: string;
+    ShowSupplyOnWaterBudgetComponent?: boolean;
+    WaterBudgetSlotAHeader?: string;
+    WaterBudgetSlotAWaterMeasurementTypeID?: number;
+    WaterBudgetSlotBHeader?: string;
+    WaterBudgetSlotBWaterMeasurementTypeID?: number;
+    WaterBudgetSlotCHeader?: string;
+    WaterBudgetSlotCWaterMeasurementTypeID?: number;
+    FeeCalculatorEnabled?: boolean;
+    AllowWaterMeasurementSelfReporting?: boolean;
     DisplayUsageGeometriesAsField?: boolean;
     AllowLandownersToRequestAccountChanges?: boolean;
+    IsDemoGeography?: boolean;
+    DefaultDisplayYear?: number;
     constructor(obj?: any) {
         Object.assign(this, obj);
     }
@@ -46,28 +55,37 @@ export interface GeographySimpleDtoForm {
     GeographyID?: FormControl<number>;
     GeographyConfigurationID?: FormControl<number>;
     GeographyName?: FormControl<string>;
-    StartYear?: FormControl<number>;
     GeographyDisplayName?: FormControl<string>;
     GeographyDescription?: FormControl<string>;
     APNRegexPattern?: FormControl<string>;
     APNRegexPatternDisplay?: FormControl<string>;
+    GSACanonicalID?: FormControl<number>;
+    Color?: FormControl<string>;
+    ContactEmail?: FormControl<string>;
+    ContactPhoneNumber?: FormControl<string>;
+    LandownerDashboardSupplyLabel?: FormControl<string>;
+    LandownerDashboardUsageLabel?: FormControl<string>;
+    CoordinateSystem?: FormControl<number>;
+    AreaToAcresConversionFactor?: FormControl<number>;
+    DefaultReportingPeriodID?: FormControl<number>;
     IsOpenETActive?: FormControl<boolean>;
     OpenETShapeFilePath?: FormControl<string>;
     OpenETRasterTimeseriesMultipolygonColumnToUseAsIdentifier?: FormControl<string>;
-    CoordinateSystem?: FormControl<number>;
-    AreaToAcresConversionFactor?: FormControl<number>;
-    IsDemoGeography?: FormControl<boolean>;
-    GSACanonicalID?: FormControl<number>;
-    Color?: FormControl<string>;
     SourceOfRecordWaterMeasurementTypeID?: FormControl<number>;
     SourceOfRecordExplanation?: FormControl<string>;
-    ContactEmail?: FormControl<string>;
-    ContactPhoneNumber?: FormControl<string>;
-    DefaultDisplayYear?: FormControl<number>;
-    LandownerDashboardSupplyLabel?: FormControl<string>;
-    LandownerDashboardUsageLabel?: FormControl<string>;
+    ShowSupplyOnWaterBudgetComponent?: FormControl<boolean>;
+    WaterBudgetSlotAHeader?: FormControl<string>;
+    WaterBudgetSlotAWaterMeasurementTypeID?: FormControl<number>;
+    WaterBudgetSlotBHeader?: FormControl<string>;
+    WaterBudgetSlotBWaterMeasurementTypeID?: FormControl<number>;
+    WaterBudgetSlotCHeader?: FormControl<string>;
+    WaterBudgetSlotCWaterMeasurementTypeID?: FormControl<number>;
+    FeeCalculatorEnabled?: FormControl<boolean>;
+    AllowWaterMeasurementSelfReporting?: FormControl<boolean>;
     DisplayUsageGeometriesAsField?: FormControl<boolean>;
     AllowLandownersToRequestAccountChanges?: FormControl<boolean>;
+    IsDemoGeography?: FormControl<boolean>;
+    DefaultDisplayYear?: FormControl<number>;
 }
 
 export class GeographySimpleDtoFormControls { 
@@ -92,16 +110,6 @@ export class GeographySimpleDtoFormControls {
         }
     );
     public static GeographyName = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
-        value,
-        formControlOptions ?? 
-        {
-            nonNullable: false,
-            validators: 
-            [
-            ],
-        }
-    );
-    public static StartYear = (value: FormControlState<number> | number = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<number>(
         value,
         formControlOptions ?? 
         {
@@ -151,6 +159,96 @@ export class GeographySimpleDtoFormControls {
             ],
         }
     );
+    public static GSACanonicalID = (value: FormControlState<number> | number = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<number>(
+        value,
+        formControlOptions ?? 
+        {
+            nonNullable: false,
+            validators: 
+            [
+            ],
+        }
+    );
+    public static Color = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
+        value,
+        formControlOptions ?? 
+        {
+            nonNullable: false,
+            validators: 
+            [
+            ],
+        }
+    );
+    public static ContactEmail = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
+        value,
+        formControlOptions ?? 
+        {
+            nonNullable: false,
+            validators: 
+            [
+            ],
+        }
+    );
+    public static ContactPhoneNumber = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
+        value,
+        formControlOptions ?? 
+        {
+            nonNullable: false,
+            validators: 
+            [
+            ],
+        }
+    );
+    public static LandownerDashboardSupplyLabel = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
+        value,
+        formControlOptions ?? 
+        {
+            nonNullable: false,
+            validators: 
+            [
+            ],
+        }
+    );
+    public static LandownerDashboardUsageLabel = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
+        value,
+        formControlOptions ?? 
+        {
+            nonNullable: false,
+            validators: 
+            [
+            ],
+        }
+    );
+    public static CoordinateSystem = (value: FormControlState<number> | number = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<number>(
+        value,
+        formControlOptions ?? 
+        {
+            nonNullable: false,
+            validators: 
+            [
+            ],
+        }
+    );
+    public static AreaToAcresConversionFactor = (value: FormControlState<number> | number = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<number>(
+        value,
+        formControlOptions ?? 
+        {
+            nonNullable: false,
+            validators: 
+            [
+            ],
+        }
+    );
+    public static DefaultReportingPeriodID = (value: FormControlState<number> | number = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<number>(
+        value,
+        formControlOptions ?? 
+        {
+            nonNullable: false,
+            validators: 
+            [
+            ],
+        }
+    );
     public static IsOpenETActive = (value: FormControlState<boolean> | boolean = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<boolean>(
         value,
         formControlOptions ?? 
@@ -181,56 +279,6 @@ export class GeographySimpleDtoFormControls {
             ],
         }
     );
-    public static CoordinateSystem = (value: FormControlState<number> | number = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<number>(
-        value,
-        formControlOptions ?? 
-        {
-            nonNullable: false,
-            validators: 
-            [
-            ],
-        }
-    );
-    public static AreaToAcresConversionFactor = (value: FormControlState<number> | number = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<number>(
-        value,
-        formControlOptions ?? 
-        {
-            nonNullable: false,
-            validators: 
-            [
-            ],
-        }
-    );
-    public static IsDemoGeography = (value: FormControlState<boolean> | boolean = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<boolean>(
-        value,
-        formControlOptions ?? 
-        {
-            nonNullable: false,
-            validators: 
-            [
-            ],
-        }
-    );
-    public static GSACanonicalID = (value: FormControlState<number> | number = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<number>(
-        value,
-        formControlOptions ?? 
-        {
-            nonNullable: false,
-            validators: 
-            [
-            ],
-        }
-    );
-    public static Color = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
-        value,
-        formControlOptions ?? 
-        {
-            nonNullable: false,
-            validators: 
-            [
-            ],
-        }
-    );
     public static SourceOfRecordWaterMeasurementTypeID = (value: FormControlState<number> | number = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<number>(
         value,
         formControlOptions ?? 
@@ -251,7 +299,7 @@ export class GeographySimpleDtoFormControls {
             ],
         }
     );
-    public static ContactEmail = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
+    public static ShowSupplyOnWaterBudgetComponent = (value: FormControlState<boolean> | boolean = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<boolean>(
         value,
         formControlOptions ?? 
         {
@@ -261,7 +309,7 @@ export class GeographySimpleDtoFormControls {
             ],
         }
     );
-    public static ContactPhoneNumber = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
+    public static WaterBudgetSlotAHeader = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
         value,
         formControlOptions ?? 
         {
@@ -271,7 +319,7 @@ export class GeographySimpleDtoFormControls {
             ],
         }
     );
-    public static DefaultDisplayYear = (value: FormControlState<number> | number = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<number>(
+    public static WaterBudgetSlotAWaterMeasurementTypeID = (value: FormControlState<number> | number = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<number>(
         value,
         formControlOptions ?? 
         {
@@ -281,7 +329,7 @@ export class GeographySimpleDtoFormControls {
             ],
         }
     );
-    public static LandownerDashboardSupplyLabel = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
+    public static WaterBudgetSlotBHeader = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
         value,
         formControlOptions ?? 
         {
@@ -291,7 +339,47 @@ export class GeographySimpleDtoFormControls {
             ],
         }
     );
-    public static LandownerDashboardUsageLabel = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
+    public static WaterBudgetSlotBWaterMeasurementTypeID = (value: FormControlState<number> | number = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<number>(
+        value,
+        formControlOptions ?? 
+        {
+            nonNullable: false,
+            validators: 
+            [
+            ],
+        }
+    );
+    public static WaterBudgetSlotCHeader = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
+        value,
+        formControlOptions ?? 
+        {
+            nonNullable: false,
+            validators: 
+            [
+            ],
+        }
+    );
+    public static WaterBudgetSlotCWaterMeasurementTypeID = (value: FormControlState<number> | number = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<number>(
+        value,
+        formControlOptions ?? 
+        {
+            nonNullable: false,
+            validators: 
+            [
+            ],
+        }
+    );
+    public static FeeCalculatorEnabled = (value: FormControlState<boolean> | boolean = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<boolean>(
+        value,
+        formControlOptions ?? 
+        {
+            nonNullable: false,
+            validators: 
+            [
+            ],
+        }
+    );
+    public static AllowWaterMeasurementSelfReporting = (value: FormControlState<boolean> | boolean = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<boolean>(
         value,
         formControlOptions ?? 
         {
@@ -312,6 +400,26 @@ export class GeographySimpleDtoFormControls {
         }
     );
     public static AllowLandownersToRequestAccountChanges = (value: FormControlState<boolean> | boolean = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<boolean>(
+        value,
+        formControlOptions ?? 
+        {
+            nonNullable: false,
+            validators: 
+            [
+            ],
+        }
+    );
+    public static IsDemoGeography = (value: FormControlState<boolean> | boolean = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<boolean>(
+        value,
+        formControlOptions ?? 
+        {
+            nonNullable: false,
+            validators: 
+            [
+            ],
+        }
+    );
+    public static DefaultDisplayYear = (value: FormControlState<number> | number = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<number>(
         value,
         formControlOptions ?? 
         {

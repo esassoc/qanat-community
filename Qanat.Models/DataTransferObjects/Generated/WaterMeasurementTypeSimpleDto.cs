@@ -14,6 +14,7 @@ namespace Qanat.Models.DataTransferObjects
         public string WaterMeasurementTypeName { get; set; }
         public int SortOrder { get; set; }
         public bool IsUserEditable { get; set; }
+        public bool IsSelfReportable { get; set; }
         public bool ShowToLandowner { get; set; }
         public int? WaterMeasurementCalculationTypeID { get; set; }
         public string CalculationJSON { get; set; }

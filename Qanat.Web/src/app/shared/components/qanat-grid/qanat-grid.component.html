@@ -6,12 +6,8 @@
     [disableGlobalFilter]="disableGlobalFilter"
     [multiSelectEnabled]="multiSelectEnabled">
     <ng-content select="[customGridActionsLeft]" ngProjectAs="[customGridActionsLeft]"></ng-content>
-    <ng-content
-        select="[customGridActionsCenter]"
-        ngProjectAs="[customGridActionsCenter]"></ng-content>
-    <ng-content
-        select="[customGridActionsRight]"
-        ngProjectAs="[customGridActionsRight]"></ng-content>
+    <ng-content select="[customGridActionsCenter]" ngProjectAs="[customGridActionsCenter]"></ng-content>
+    <ng-content select="[customGridActionsRight]" ngProjectAs="[customGridActionsRight]"></ng-content>
 </qanat-grid-header>
 
 <div class="table-responsive">
@@ -42,16 +38,15 @@
         (firstDataRendered)="onFirstDataRendered($event)"
         (gridColumnsChanged)="onGridColumnsChanged($event)"
         (selectionChanged)="this.onSelectionChanged($event)"
-        (filterChanged)="onFilterChanged($event)"></ag-grid-angular>
+        (filterChanged)="onFilterChanged($event)"
+        (rowDataUpdated)="onRowDataUpdated($event)"></ag-grid-angular>
 
     <div class="table-footer flex-between">
         <div *ngIf="!hideDownloadButton" class="download-button">
             <qanat-csv-download-button [grid]="gridref" [fileName]="downloadFileName" [colIDsToExclude]="colIDsToExclude"></qanat-csv-download-button>
         </div>
 
-        <pagination-controls
-            *ngIf="gridLoaded && pagination"
-            [grid]="gridref"></pagination-controls>
+        <pagination-controls *ngIf="gridLoaded && pagination" [grid]="gridref"></pagination-controls>
 
         <div class="row-count-data">
             Total Records: {{ rowData?.length | number }}

@@ -21,7 +21,8 @@ namespace Qanat.EFModels.Entities
                 WaterTypeDefinition = waterType.WaterTypeDefinition,
                 IsSourcedFromApi = waterType.IsSourcedFromApi,
                 SortOrder = waterType.SortOrder,
-                WaterTypeSlug = waterType.WaterTypeSlug
+                WaterTypeSlug = waterType.WaterTypeSlug,
+                WaterTypeColor = waterType.WaterTypeColor
             };
             return dto;
         }

@@ -104,6 +104,10 @@ icon {
             padding: 7px 8px 4px 8px;
             border-radius: 1rem;
             transform: translateY(-1px);
+            max-width: 6rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
     }
 

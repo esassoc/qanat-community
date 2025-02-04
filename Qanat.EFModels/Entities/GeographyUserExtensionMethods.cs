@@ -1,4 +1,4 @@
-﻿using Qanat.Models.DataTransferObjects;
+﻿using Qanat.Models.DataTransferObjects.Geography;
 
 namespace Qanat.EFModels.Entities;
 

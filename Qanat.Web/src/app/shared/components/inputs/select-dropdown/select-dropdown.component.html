@@ -1,5 +1,16 @@
 <select name="Test" [formControl]="formControl">
-    <option *ngFor="let option of formInputOptions" [ngValue]="option.Value" [disabled]="option.Disabled">
-        {{ option.Label }}
-    </option>
+    <ng-container *ngIf="groupedOptions?.length; else nonGroupedOptions">
+        <ng-container *ngFor="let group of groupedOptions">
+            <optgroup [label]="group.GroupName">
+                <option *ngFor="let option of group.Options" [ngValue]="option.Value" [disabled]="option.Disabled">
+                    {{ option.Label }}
+                </option>
+            </optgroup>
+        </ng-container>
+    </ng-container>
+    <ng-template #nonGroupedOptions>
+        <option *ngFor="let option of formInputOptions" [ngValue]="option.Value" [disabled]="option.Disabled">
+            {{ option.Label }}
+        </option>
+    </ng-template>
 </select>

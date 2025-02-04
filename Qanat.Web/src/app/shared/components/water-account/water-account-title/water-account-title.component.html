@@ -3,7 +3,7 @@
         <icon icon="WaterAccounts"></icon>
         <span class="water-account-title__name">
             #{{ waterAccountNumber }}
-            <span class="water-account-title__id">
+            <span class="water-account-title__id" *ngIf="waterAccountName && waterAccountName != waterAccountNumber">
                 {{ nameLength ? waterAccountName.substring(0, nameLength) : waterAccountName }}{{ nameLength && waterAccountName.length > nameLength ? "..." : "" }}
             </span>
         </span>

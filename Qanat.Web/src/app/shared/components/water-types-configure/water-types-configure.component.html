@@ -16,6 +16,11 @@
                         <span class="toggle" for="project-water"></span>
                     </label>
                 </div>
+
+                <div class="reorderable__color" *ngIf="!isUsageConfiguration">
+                    <label class="field-label small required" style="display: flex">Color</label>
+                    <input [ngModelOptions]="{ standalone: true }" type="color" [(ngModel)]="waterType.WaterTypeColor" />
+                </div>
             </div>
         </div>
 

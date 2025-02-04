@@ -1,6 +1,6 @@
 # Qanat Platform Documentation
 
-Welcome to the Qanat Platform! This guide provides comprehensive instructions for setting up and building the project locally. For any questions, please contact info@groundwateraccounting.org.
+Welcome to the Groundwater Accounting Platform (codename Qanat)! This guide provides comprehensive instructions for setting up and building the project locally. For any questions, please contact info@groundwateraccounting.org.
 
 ---
 

@@ -6,7 +6,7 @@ import { AlertService } from "./alert.service";
 import { Alert } from "../models/alert";
 import { AlertContext } from "../models/enums/alert-context.enum";
 import { ImpersonationService } from "../generated/api/impersonation.service";
-import { Inject, Injectable } from "@angular/core";
+import { Inject, Injectable, OnDestroy } from "@angular/core";
 import { MsalBroadcastService, MsalGuardConfiguration, MsalService, MSAL_GUARD_CONFIG } from "@azure/msal-angular";
 import { AuthenticationResult, EventMessage, EventType, InteractionStatus, InteractionType, PopupRequest, RedirectRequest } from "@azure/msal-browser";
 import { b2cPolicies } from "../../auth.config";
@@ -16,12 +16,13 @@ import { PermissionEnum } from "../generated/enum/permission-enum";
 import { RightsEnum } from "../models/enums/rights.enum";
 import { FlagEnum } from "../generated/enum/flag-enum";
 import { GeographyDto } from "../generated/model/geography-dto";
+import { AuthorizationHelper } from "../helpers/authorization-helper";
 
 @Injectable({
     providedIn: "root",
 })
 // todo: audit this class -> remove direct role references, move authorization functions elsewhere
-export class AuthenticationService {
+export class AuthenticationService implements OnDestroy {
     private currentUser: UserDto;
     private claimsUser: any;
     private readonly _destroying$ = new Subject<void>();
@@ -99,7 +100,6 @@ export class AuthenticationService {
 
     private getUser(claims: any) {
         const globalID = claims.sub;
-
         this.userClaimsService.userClaimsGlobalIDGet(globalID).subscribe(
             (result) => {
                 this.updateUser(result);
@@ -261,12 +261,12 @@ export class AuthenticationService {
     // todo: when clearing out these direct role references, do a global search for "RoleID =="
 
     public isUserUnassigned(user: UserDto): boolean {
-        const role = user && user.Role ? user.Role.RoleID : null;
+        const role = user && user.RoleID ? user.RoleID : null;
         return role === RoleEnum.NoAccess && user.IsActive;
     }
 
     public isUserRoleDisabled(user: UserDto): boolean {
-        const role = user && user.Role ? user.Role.RoleID : null;
+        const role = user && user.RoleID ? user.RoleID : null;
         return role === RoleEnum.NoAccess && !user.IsActive;
     }
 
@@ -282,18 +282,18 @@ export class AuthenticationService {
         if (roleIDs.length === 0) {
             return false;
         }
-        const roleID = this.currentUser && this.currentUser.Role ? this.currentUser.Role.RoleID : null;
+        const roleID = this.currentUser && this.currentUser.RoleID ? this.currentUser.RoleID : null;
         return roleIDs.includes(roleID);
     }
 
     public isUserAnAdministrator(user: UserDto): boolean {
-        const role = user && user.Role ? user.Role.RoleID : null;
+        const role = user && user.RoleID ? user.RoleID : null;
         return role === RoleEnum.SystemAdmin;
     }
 
     // todo: rights
     public isUserALandOwner(user: UserDto): boolean {
-        const role = user && user.Role ? user.Role.RoleID : null;
+        const role = user && user.RoleID ? user.RoleID : null;
         return role === RoleEnum.Normal;
     }
 
@@ -328,7 +328,7 @@ export class AuthenticationService {
         );
     }
 
-    // todo: move out of authentication service into authorization service (or something of the sort)
+    // todo: remove from authentication service and replace calls with authorization helper
 
     public hasPermission(user: UserDto, permission: PermissionEnum, rights: RightsEnum): boolean {
         const permissionName = PermissionEnum[permission];
@@ -366,6 +366,10 @@ export class AuthenticationService {
         const hasGeographyPermission = user && rightsToGeography[permissionName] ? rightsToGeography[permissionName][rights] : false;
 
         return hasGeographyPermission;
+    }
+
+    public currentUserHasGeographyPermission(permission: PermissionEnum, rights: RightsEnum, geographyID: number) {
+        return this.hasGeographyPermission(this.currentUser, permission, rights, geographyID);
     }
 
     public hasWaterAccountPermission(user: UserDto, permission: PermissionEnum, rights: RightsEnum, waterAccountID: number): boolean {
@@ -417,6 +421,10 @@ export class AuthenticationService {
         return hasFlag;
     }
 
+    public currentUserHasGeographyFlagForGeographyID(flag: FlagEnum, geographyID: number) {
+        return this.hasGeographyFlagForGeographyID(this.currentUser, flag, geographyID);
+    }
+
     public hasWaterAccountFlag(user: UserDto, flag: FlagEnum): boolean {
         const flagName = FlagEnum[flag];
         let flagFound = false;
@@ -441,11 +449,15 @@ export class AuthenticationService {
     }
 
     public currentUserCanRequestWaterAccountChanges(geography: GeographyDto): boolean {
-        if (this.isCurrentUserAnAdministrator()) {
+        if (AuthorizationHelper.isSystemAdministrator(this.currentUser)) {
             return true;
         }
 
         return geography.AllowLandownersToRequestAccountChanges;
+    }
+
+    isCurrentUserAWaterManagerForGeography(geography: GeographyDto): boolean {
+        return this.hasGeographyPermission(this.currentUser, PermissionEnum.WaterAccountRights, RightsEnum.Update, geography.GeographyID);
     }
 
     ngOnDestroy(): void {

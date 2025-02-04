@@ -1,23 +1,24 @@
 <ng-container *ngIf="userAndCurrentUser$ | async as userAndCurrentUser">
     <div class="full-height-wrapper user-detail">
-        <page-header [pageTitle]="user?.FullName" [preTitle]="'User'" [icon]="'User'"></page-header>
+        <page-header [pageTitle]="user?.FullName" [preTitle]="'User'" [icon]="'User'" [templateRight]="pageHeaderTemplateRight">
+            <ng-template #pageHeaderTemplateRight>
+                <button *ngIf="!isCurrentUser && canImpersonateUser" class="btn btn-secondary-outline" (click)="impersonateUser(user?.UserID)">
+                    <span class="fas fa-user"></span>
+                    Impersonate
+                </button>
+            </ng-template>
+        </page-header>
 
         <div class="page-body grid-12">
             <app-alert-display></app-alert-display>
             <ng-container *ngIf="userWaterAccounts$ | async as waterAccounts">
-                <div class="card g-col-12">
+                <div class="user-info card g-col-6">
                     <div class="card-header flex-between">
                         <h3 class="card-title">User Information</h3>
-                        <div class="card-actions">
-                            <button *ngIf="!isCurrentUser && canImpersonateUser" class="btn btn-secondary-outline" (click)="impersonateUser(user?.UserID)">
-                                <span class="fas fa-user"></span>
-                                Impersonate
-                            </button>
-                        </div>
                     </div>
 
                     <div class="card-body grid-12">
-                        <key-value-pair-list class="g-col-6">
+                        <key-value-pair-list>
                             <key-value-pair>
                                 <ng-container key>Full Name</ng-container>
                                 <ng-container keyValue>
@@ -35,8 +36,8 @@
                             <key-value-pair>
                                 <ng-container key>Platform Role</ng-container>
                                 <ng-container keyValue>
-                                    <div>{{ user?.Role?.RoleDisplayName }}</div>
-                                    <em *ngIf="!user?.Role?.RoleDisplayName" class="text-muted"> Not Available </em>
+                                    <div>{{ user?.RoleDisplayName }}</div>
+                                    <em *ngIf="!user?.RoleDisplayName" class="text-muted"> Not Available </em>
                                 </ng-container>
                             </key-value-pair>
                             <key-value-pair *ngIf="userGeographyPermissions$ | async as userGeographyPermissions">
@@ -84,28 +85,11 @@
                                 </ng-container>
                             </key-value-pair>
                         </key-value-pair-list>
-
-                        <key-value-pair-list class="g-col-6">
-                            <key-value-pair>
-                                <ng-container key>GET Customer ID</ng-container>
-                                <ng-container keyValue>
-                                    {{ user?.GETRunCustomerID }}
-                                    <em *ngIf="!user?.GETRunCustomerID" class="text-muted">None</em>
-                                </ng-container>
-                            </key-value-pair>
-                            <key-value-pair>
-                                <ng-container key>GET User ID</ng-container>
-                                <ng-container keyValue>
-                                    {{ user?.GETRunUserID }}
-                                    <em *ngIf="!user?.GETRunUserID" class="text-muted">None</em>
-                                </ng-container>
-                            </key-value-pair>
-                        </key-value-pair-list>
                     </div>
                     <div class="card-footer">
                         <div *ngIf="currentUserIsAdmin">
                             <icon icon="Info"></icon>
-                            <a (click)="updateUserInformationModal()">Update User Information</a>
+                            <a (click)="updateUserInformationModal(true)">Update User Information</a>
                         </div>
                         <div *ngIf="isCurrentUser && displayProfileEdit">
                             <icon icon="Info"></icon>
@@ -114,6 +98,62 @@
                         <div *ngIf="isCurrentUser && displayProfileEdit">
                             <icon icon="Info"></icon>
                             <a (click)="updateEmailAddress()">Update My Email Address</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="get-configuration card g-col-6">
+                    <div class="card-header flex-between">
+                        <h3 class="card-title">Scenario Planner Access</h3>
+                    </div>
+                    <div class="card-body grid-12">
+                        <key-value-pair-list class="g-col-6" *ngIf="!userIsAdmin; else userIsAdminAndHasAccessImplicltyMessage">
+                            <key-value-pair-list class="g-col-6">
+                                <key-value-pair>
+                                    <ng-container key>Role</ng-container>
+                                    <ng-container keyValue>
+                                        {{ user?.ScenarioPlannerRoleDisplayName }}
+                                    </ng-container>
+                                </key-value-pair>
+                                <key-value-pair>
+                                    <ng-container key>Model Access</ng-container>
+                                    <ng-container keyValue>
+                                        <div class="flex-wrap">
+                                            <span class="model-tag" *ngFor="let model of user?.Models; let i = index">
+                                                {{ model.ModelName }}
+                                            </span>
+                                        </div>
+                                        <em *ngIf="!user?.Models || user?.Models.length == 0" class="text-muted">No Associated Models</em>
+                                    </ng-container>
+                                </key-value-pair>
+
+                                <key-value-pair>
+                                    <ng-container key>GET Customer ID</ng-container>
+                                    <ng-container keyValue>
+                                        {{ user?.GETRunCustomerID }}
+                                        <em *ngIf="!user?.GETRunCustomerID" class="text-muted">None</em>
+                                    </ng-container>
+                                </key-value-pair>
+                                <key-value-pair>
+                                    <ng-container key>GET User ID</ng-container>
+                                    <ng-container keyValue>
+                                        {{ user?.GETRunUserID }}
+                                        <em *ngIf="!user?.GETRunUserID" class="text-muted">None</em>
+                                    </ng-container>
+                                </key-value-pair>
+                            </key-value-pair-list>
+                        </key-value-pair-list>
+
+                        <ng-template #userIsAdminAndHasAccessImplicltyMessage>
+                            <div class="copy copy-3">
+                                <span *ngIf="!isCurrentUser">As an administrator {{ this.user.FullName }} has access to all models and scenario runs.</span>
+                                <span *ngIf="isCurrentUser">As an administrator you have access to all models and scenario runs.</span>
+                            </div>
+                        </ng-template>
+                    </div>
+                    <div class="card-footer" *ngIf="!userIsAdmin">
+                        <div *ngIf="currentUserIsAdmin">
+                            <icon icon="ScenarioPlanner"></icon>
+                            <a (click)="updateUserInformationModal(false)">Update Scenario Planner Access</a>
                         </div>
                     </div>
                 </div>
@@ -133,8 +173,8 @@
                             [colIDsToExclude]="waterAccountCSVDownloadColIDsToExclude"
                             height="500px"
                             *ngIf="!userIsAdmin">
-                            <div customGridActions class="custom-grid-actions" *ngIf="currentUserIsAdmin">
-                                <button customGridActions class="btn btn-primary btn-sm" (click)="addWaterAccountUserModal()">+ Add Water Account</button>
+                            <div customGridActionsRight class="custom-grid-actions" *ngIf="currentUserIsAdmin">
+                                <button class="btn btn-primary btn-sm" (click)="addWaterAccountUserModal()">+ Add Water Account</button>
                             </div>
                         </qanat-grid>
                         <div class="copy copy-3" *ngIf="userIsAdmin">

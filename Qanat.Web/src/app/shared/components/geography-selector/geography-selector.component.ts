@@ -1,9 +1,9 @@
 import { Component, EventEmitter, OnInit, Output } from "@angular/core";
 import { Observable } from "rxjs";
 import { GeographyDto } from "../../generated/model/geography-dto";
-import { GeographyService } from "../../generated/api/geography.service";
 import { GeographyLogoComponent } from "../geography-logo/geography-logo.component";
 import { NgIf, NgFor, AsyncPipe } from "@angular/common";
+import { PublicService } from "../../generated/api/public.service";
 
 @Component({
     selector: "geography-selector",
@@ -17,10 +17,10 @@ export class GeographySelectorComponent implements OnInit {
 
     public geographies$: Observable<GeographyDto[]>;
 
-    constructor(private geographyService: GeographyService) {}
+    constructor(private publicService: PublicService) {}
 
     ngOnInit(): void {
-        this.geographies$ = this.geographyService.publicGeographiesGet();
+        this.geographies$ = this.publicService.publicGeographiesGet();
     }
 
     public onGeographySelected(geography: GeographyDto) {

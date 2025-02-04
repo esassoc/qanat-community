@@ -147,4 +147,47 @@ export class WaterMeasurementTypeService {
         ).pipe(catchError((error: any) => { return this.apiService.handleError(error)}));
     }
 
+    /**
+     * 
+     * 
+     * @param geographyID 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public geographiesGeographyIDWaterMeasurementTypesSelfReportableGet(geographyID: number, observe?: 'body', reportProgress?: boolean): Observable<Array<WaterMeasurementTypeSimpleDto>>;
+    public geographiesGeographyIDWaterMeasurementTypesSelfReportableGet(geographyID: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<WaterMeasurementTypeSimpleDto>>>;
+    public geographiesGeographyIDWaterMeasurementTypesSelfReportableGet(geographyID: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<WaterMeasurementTypeSimpleDto>>>;
+    public geographiesGeographyIDWaterMeasurementTypesSelfReportableGet(geographyID: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+
+        if (geographyID === null || geographyID === undefined) {
+            throw new Error('Required parameter geographyID was null or undefined when calling geographiesGeographyIDWaterMeasurementTypesSelfReportableGet.');
+        }
+
+        let headers = this.defaultHeaders;
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'text/plain',
+            'application/json',
+            'text/json',
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers = headers.set('Accept', httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+        ];
+
+        return this.httpClient.get<Array<WaterMeasurementTypeSimpleDto>>(`${this.basePath}/geographies/${encodeURIComponent(String(geographyID))}/water-measurement-types/self-reportable`,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        ).pipe(catchError((error: any) => { return this.apiService.handleError(error)}));
+    }
+
 }

@@ -8,7 +8,10 @@
                         <icon icon="WaterAccounts"></icon>
                         #{{ waterAccount.WaterAccountNumber }}
 
-                        <span class="water-account-name" title="{{ waterAccount.WaterAccountName }}">
+                        <span
+                            class="water-account-name"
+                            title="{{ waterAccount.WaterAccountName }}"
+                            *ngIf="waterAccount.WaterAccountName?.length > 0 && waterAccount.WaterAccountName != '' + waterAccount.WaterAccountNumber">
                             {{ waterAccount.WaterAccountName }}
                         </span>
                     </h2>

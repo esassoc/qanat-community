@@ -1,0 +1,70 @@
+<div class="modal-header">
+    <h3 class="section-title">Update Support Ticket</h3>
+    <button type="button" class="close" (click)="close()">
+        <i class="fa fa-times-circle"></i>
+    </button>
+</div>
+
+<div class="modal-body grid-12">
+    <form action="" class="form grid-12" [formGroup]="formGroup">
+        <form-field
+            class="g-col-6"
+            [formControl]="formGroup.controls.ContactFirstName"
+            fieldLabel="Contact First Name"
+            placeholder="First Name"
+            [required]="true"
+            [type]="FormFieldType.Text"></form-field>
+        <form-field
+            class="g-col-6"
+            [formControl]="formGroup.controls.ContactLastName"
+            fieldLabel="Contact Last Name"
+            placeholder="Last Name"
+            [type]="FormFieldType.Text"></form-field>
+        <form-field class="g-col-6" [formControl]="formGroup.controls.ContactEmail" fieldLabel="Contact Email" placeholder="Email" [type]="FormFieldType.Text"></form-field>
+        <form-field
+            class="g-col-6"
+            [formControl]="formGroup.controls.ContactPhoneNumber"
+            fieldLabel="Contact Phone Number"
+            mask="(000) 000-0000"
+            placeholder="e.g. (123) 456-7890"></form-field>
+        <form-field
+            *ngIf="geographyOptions$ | async as geographyOptions"
+            class="g-col-6"
+            [formInputOptions]="geographyOptions"
+            [formControl]="formGroup.controls.GeographyID"
+            [fieldLabel]="'Geography'"
+            [required]="true"
+            [type]="FormFieldType.Select"></form-field>
+        <div class="g-col-6">
+            <label class="field-label">Water Account</label>
+            <search-water-accounts [geographyID]="formGroup.controls.GeographyID.value" [excludedWaterAccountIDs]="[]" formControlName="WaterAccount"></search-water-accounts>
+        </div>
+        <form-field
+            class="g-col-6"
+            *ngIf="users$ | async"
+            [formInputOptions]="userOptions[formGroup.controls.GeographyID.value]"
+            [formControl]="formGroup.controls.AssignedUserID"
+            [fieldLabel]="'Assigned User'"
+            [type]="FormFieldType.Select"></form-field>
+
+        <form-field
+            class="g-col-6"
+            [formInputOptions]="SupportTicketPrioritiesSelectDropdownOptions"
+            [formControl]="formGroup.controls.SupportTicketPriorityID"
+            [fieldLabel]="'Priority'"
+            [required]="true"
+            [type]="FormFieldType.Select"></form-field>
+        <form-field
+            class="m-2"
+            [formControl]="formGroup.controls.Description"
+            fieldLabel="Description"
+            placeholder="Description"
+            [required]="true"
+            [type]="FormFieldType.RTE"></form-field>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-primary" (click)="save()" [disabled]="formGroup.invalid">Update</button>
+    <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+</div>

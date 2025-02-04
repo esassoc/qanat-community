@@ -1,0 +1,24 @@
+<div class="full-width-page">
+    <page-header [customRichTextTypeID]="customRichTextId" [templateAbove]="templateAbove"></page-header>
+
+    <ng-template #templateAbove>
+        <div class="back">
+            <a routerLink="/water-dashboard/wells" class="back__link">Back to All Wells</a>
+        </div>
+    </ng-template>
+
+    <div class="page-body">
+        <app-alert-display></app-alert-display>
+
+        <qanat-grid
+            *ngIf="allWells$ | async as wells; else isLoading"
+            [rowData]="wells"
+            [colIDsToExclude]="['0']"
+            [downloadFileName]="geography.GeographyName + '-well-registrations'"
+            [columnDefs]="colDefs"></qanat-grid>
+
+        <ng-template #isLoading>
+            <div [loadingSpinner]="{ loadingHeight: 720, isLoading: true }"></div>
+        </ng-template>
+    </div>
+</div>

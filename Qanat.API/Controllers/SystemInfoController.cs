@@ -21,7 +21,7 @@ namespace Qanat.API.Controllers
         {
         }
 
-        [HttpGet("/", Name = "GetSystemInfo")]  // MCS: the pattern seems to be to allow anonymous access to this endpoint
+        [HttpGet("/", Name = "GetSystemInfo")]
         [AllowAnonymous]
         [LogIgnore]
         public ActionResult<SystemInfoDto> GetSystemInfo([FromServices] IWebHostEnvironment environment)

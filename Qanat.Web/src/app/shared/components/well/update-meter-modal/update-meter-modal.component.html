@@ -11,7 +11,7 @@
 
     <div class="modal-body">
         <app-alert-display></app-alert-display>
-        <form action="" class="form" [formGroup]="formGroup" *ngIf="meterStatuses$ | async as meterStatuses">
+        <form action="" class="form" [formGroup]="formGroup">
             <div class="mb-3">
                 <form-field
                     [formControl]="formGroup.controls.SerialNumber"
@@ -25,7 +25,7 @@
                     [formControl]="formGroup.controls.MeterStatusID"
                     fieldLabel="Meter Status"
                     [type]="FormFieldType.Select"
-                    [formInputOptions]="meterStatusesSelectOptions"
+                    [formInputOptions]="MeterStatusSelectDropdownOptions"
                     required></form-field>
             </div>
             <div class="mb-3">

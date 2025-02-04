@@ -54,7 +54,7 @@ export class AppComponent {
                 this.renderer.removeClass(this._document.body, this.userRoleClassName);
             }
 
-            const role = RoleEnum[this.currentUser.Role.RoleID];
+            const role = RoleEnum[this.currentUser.RoleID];
             if (role) {
                 this.userRoleClassName = "role-" + this.utilityFunctionService.stringToKebabCase(role);
                 this.renderer.addClass(this._document.body, this.userRoleClassName);

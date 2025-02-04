@@ -51,4 +51,25 @@ export class AuthorizationHelper {
 
         return hasWaterAccountRolePermission || this.hasGeographyRolePermission(geographyID, permissionEnum, rightsEnum, user);
     }
+
+    public static hasScenarioPlannerRolePermission(permissionEnum: PermissionEnum, rightsEnum: RightsEnum, user: UserDto): boolean {
+        const permissionName = PermissionEnum[permissionEnum];
+
+        if (user.ScenarioPlannerRights[permissionName][rightsEnum]) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public static isSystemAdministrator(user: UserDto): boolean {
+        const isSystemAdmin = this.hasFlag(FlagEnum.IsSystemAdmin, user);
+        return isSystemAdmin;
+    }
+
+    public static isSystemAdministratorOrGeographyManager(user: UserDto, geographyID: number): boolean {
+        const isSystemAdmin = this.isSystemAdministrator(user);
+        const isGeographyManager = this.hasGeographyFlag(geographyID, FlagEnum.HasManagerDashboard, user);
+        return isSystemAdmin || isGeographyManager;
+    }
 }

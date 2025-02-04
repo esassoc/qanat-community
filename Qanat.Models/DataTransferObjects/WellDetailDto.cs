@@ -1,4 +1,6 @@
-﻿namespace Qanat.Models.DataTransferObjects;
+﻿using Qanat.Models.DataTransferObjects.Geography;
+
+namespace Qanat.Models.DataTransferObjects;
 
 public class WellDetailDto
 {

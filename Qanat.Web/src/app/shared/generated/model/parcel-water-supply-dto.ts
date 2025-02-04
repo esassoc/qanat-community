@@ -9,7 +9,6 @@
  * https://github.com/swagger-api/swagger-codegen.git
  * Do not edit the class manually.
  */
-import { ZoneMinimalDto } from '././zone-minimal-dto';
 
 import { FormControl, FormControlOptions, FormControlState, Validators } from "@angular/forms";
 export class ParcelWaterSupplyDto { 
@@ -18,7 +17,7 @@ export class ParcelWaterSupplyDto {
     ParcelArea?: number;
     ParcelStatusDisplayName?: string;
     WaterSupplyByWaterType?: { [key: string]: number; };
-    Zones?: Array<ZoneMinimalDto>;
+    ZoneIDs?: string;
     constructor(obj?: any) {
         Object.assign(this, obj);
     }
@@ -30,7 +29,7 @@ export interface ParcelWaterSupplyDtoForm {
     ParcelArea?: FormControl<number>;
     ParcelStatusDisplayName?: FormControl<string>;
     WaterSupplyByWaterType?: FormControl<{ [key: string]: number; }>;
-    Zones?: FormControl<Array<ZoneMinimalDto>>;
+    ZoneIDs?: FormControl<string>;
 }
 
 export class ParcelWaterSupplyDtoFormControls { 
@@ -84,7 +83,7 @@ export class ParcelWaterSupplyDtoFormControls {
             ],
         }
     );
-    public static Zones = (value: FormControlState<Array<ZoneMinimalDto>> | Array<ZoneMinimalDto> = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<Array<ZoneMinimalDto>>(
+    public static ZoneIDs = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
         value,
         formControlOptions ?? 
         {

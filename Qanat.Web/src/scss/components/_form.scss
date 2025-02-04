@@ -2,11 +2,11 @@
 
 .form {
     &.grid-12 {
-        gap: 3rem 2rem;
+        gap: 2rem 1.5rem;
     }
 
     &__actions {
         border-top: 1px solid rgba($black, 0.1);
-        padding-top: 1rem;
+        padding-top: 0.5rem;
     }
 }

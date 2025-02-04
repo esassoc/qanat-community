@@ -5,11 +5,11 @@
 }
 
 .popup-wrapper {
-    width: 475px;
+    width: 320px;
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    padding: 24px 32px 32px 32px;
+    padding: 24px;
     & > * {
         font-family: $overpass;
     }
@@ -36,6 +36,16 @@
 water-account-title {
     border-bottom: 1px solid rgba($black, 0.05);
     padding-bottom: 1rem;
+}
+
+.contact-info {
+    padding-bottom: $spacing-100;
+
+    .contact-header {
+        text-transform: uppercase;
+        font-weight: 800;
+        padding-bottom: $spacing-100;
+    }
 }
 
 .popup-body {

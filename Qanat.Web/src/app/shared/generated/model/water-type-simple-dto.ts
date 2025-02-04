@@ -21,6 +21,7 @@ export class WaterTypeSimpleDto {
     IsSourcedFromApi?: boolean;
     SortOrder?: number;
     WaterTypeSlug?: string;
+    WaterTypeColor?: string;
     constructor(obj?: any) {
         Object.assign(this, obj);
     }
@@ -36,6 +37,7 @@ export interface WaterTypeSimpleDtoForm {
     IsSourcedFromApi?: FormControl<boolean>;
     SortOrder?: FormControl<number>;
     WaterTypeSlug?: FormControl<string>;
+    WaterTypeColor?: FormControl<string>;
 }
 
 export class WaterTypeSimpleDtoFormControls { 
@@ -120,6 +122,16 @@ export class WaterTypeSimpleDtoFormControls {
         }
     );
     public static WaterTypeSlug = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
+        value,
+        formControlOptions ?? 
+        {
+            nonNullable: false,
+            validators: 
+            [
+            ],
+        }
+    );
+    public static WaterTypeColor = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
         value,
         formControlOptions ?? 
         {

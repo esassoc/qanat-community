@@ -8,10 +8,10 @@
     position: relative;
 
     &-toggle {
-        padding-left: $spacing-500;
+        padding-left: $spacing-200;
         display: flex;
         gap: $spacing-200;
-        color: $gray-dark;
+        color: $teal-default;
         font-size: $type-size-150;
 
         &:hover {

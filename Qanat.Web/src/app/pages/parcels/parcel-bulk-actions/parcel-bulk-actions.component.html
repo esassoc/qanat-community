@@ -1,0 +1,35 @@
+<div class="full-width-page">
+    <div class="list-view">
+        <page-header icon="Parcels" [customRichTextTypeID]="richTextTypeID" [templateAbove]="templateAbove"></page-header>
+
+        <ng-template #templateAbove>
+            <div class="back">
+                <a routerLink="/water-dashboard/parcels" class="back__link">Back to All Parcels</a>
+            </div>
+        </ng-template>
+
+        <div class="page-body grid-12" *ngIf="geography$ | async">
+            <app-alert-display></app-alert-display>
+
+            <qanat-grid
+                [rowData]="parcels"
+                [columnDefs]="columnDefs"
+                downloadFileName="parcels"
+                rowSelection="multiple"
+                [suppressRowClickSelection]="true"
+                [pagination]="true"
+                (gridReady)="onGridReady($event)"
+                (selectionChanged)="onSelectionChanged()">
+                <div customGridActionsRight>
+                    <button
+                        (click)="changeStatus()"
+                        class="btn btn-sm btn-primary"
+                        [disabled]="isLoadingSubmit || selectedParcelIDs?.length === 0"
+                        [loadingSpinner]="{ isLoading: isLoadingSubmit }">
+                        Change Status
+                    </button>
+                </div>
+            </qanat-grid>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,76 @@
+<page-header icon="Measurements" pageTitle="Water Measurements" [customRichTextTypeID]="richTextTypeID"></page-header>
+
+<div class="page-body" *ngIf="geography$ | async as geography">
+    <app-alert-display></app-alert-display>
+
+    <div class="transaction-options grid-12" *ngIf="currentUser$ | async as currentUser">
+        <div class="g-col-12" *ngIf="geography.DisplayUsageGeometriesAsField">
+            <h2 class="section-title">Upload Usage Entity GDB</h2>
+            <div class="copy copy-3 pt-1 pb-2">
+                <p>Upload a valid GDB containing usage entities.</p>
+            </div>
+
+            <a class="btn btn-primary" [routerLink]="['parcels', 'upload-usage-entity-gdb']">Upload Usage Entity GDB</a>
+        </div>
+
+        <div class="g-col-6 border-right" *ngIf="canCreateTransactions(geography)">
+            <h2 class="section-title">Upload Water Measurements (CSV)</h2>
+            <div class="copy copy-3 pt-1 pb-2">
+                <p>Upload water measurements for multiple parcels by uploading a comma-separated spreadsheet containing water measurements per Parcel.</p>
+            </div>
+
+            <a class="btn btn-primary" [routerLink]="['upload-water-measurements']">Upload Water Measurement Data (CSV)</a>
+        </div>
+
+        <div class="g-col-6" *ngIf="canCreateTransactions(geography)">
+            <h2 class="section-title">Upload Raster (TIF)</h2>
+            <div class="copy copy-3 pt-1 pb-2">
+                <p>Upload a valid raster file to create water measurements.</p>
+            </div>
+
+            <a class="btn btn-primary" [routerLink]="['raster-upload']">Upload Raster (TIF)</a>
+        </div>
+
+        <div class="g-col-6 border-right">
+            <h2 class="section-title">OpenET Integration</h2>
+            <div class="copy copy-3 pt-1 pb-2">
+                <p></p>
+            </div>
+
+            <a class="btn btn-primary" [routerLink]="['openet-integration']">OpenET Integration</a>
+        </div>
+
+        <div class="g-col-6" *ngIf="geography.AllowWaterMeasurementSelfReporting">
+            <h2 class="section-title">Review Self-Reports</h2>
+            <div class="copy copy-3 pt-1 pb-2">
+                <p>Review and Approve Water Measurement self-reports submitted by water account holders.</p>
+            </div>
+
+            <a [routerLink]="['/review-self-reports', geography.GeographyName.toLowerCase()]" class="btn btn-primary">Review Self-Reports</a>
+        </div>
+
+        <div class="g-col-6">
+            <h2 class="section-title">Refresh Water Measurement Calculations</h2>
+            <div class="copy copy-3 pt-1 pb-2">
+                <p>Refresh all water measurement calculations for a specified year.</p>
+            </div>
+
+            <fresca-button (click)="refreshWaterMeasurementCalculations(geography)" cssClass="btn btn-primary" iconClass="" [disabled]="isDownloading">
+                <span *ngIf="isDownloading" class="fa fa-spinner loading-spinner"></span>
+                Refresh Water Measurement Calculations
+            </fresca-button>
+        </div>
+
+        <div class="g-col-6 border-right download">
+            <h2 class="section-title">Download Water Measurement Data</h2>
+            <div class="copy copy-3 pt-1 pb-2">
+                <p>Download all water measurements from the platform for all configured water measurement data sources.</p>
+            </div>
+
+            <fresca-button (click)="openDownloadWaterMeasurementsModal(geography)" cssClass="btn btn-primary" iconClass="" [disabled]="isDownloading">
+                <span *ngIf="isDownloading" class="fa fa-spinner loading-spinner"></span>
+                Download Water Measurement Data
+            </fresca-button>
+        </div>
+    </div>
+</div>

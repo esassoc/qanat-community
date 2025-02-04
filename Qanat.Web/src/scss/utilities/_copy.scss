@@ -77,3 +77,9 @@
         color: $primary;
     }
 }
+
+.flow {
+    & > * + * {
+        margin-block-start: var(--flow-spacer, 1rem);
+    }
+}

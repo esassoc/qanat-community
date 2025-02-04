@@ -11,7 +11,7 @@
             <h3 class="card-title">Custom Water Supply Types</h3>
         </div>
 
-        <div class="card-body">
+        <div class="card-body" [loadingSpinner]="{ isLoading: isLoading }">
             <div class="inline-help mb-4">
                 <div class="icon">
                     <i class="fa fa-info-circle"></i>
@@ -25,7 +25,9 @@
                 </div>
             </div>
 
-            <water-types-configure [waterTypes]="waterTypes" [currentUser]="currentUser" [geographyID]="geographyID"></water-types-configure>
+            <ng-container *ngIf="waterTypes$ | async">
+                <water-types-configure [waterTypes]="waterTypes" [currentUser]="currentUser" [geographyID]="geographyID"></water-types-configure>
+            </ng-container>
         </div>
 
         <div class="card-footer flex-end">

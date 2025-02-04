@@ -1,7 +1,7 @@
-<div class="dashboard" *ngIf="currentGeography$ | async as currentSelectedGeography">
+<div class="dashboard" *ngIf="geography$ | async as currentSelectedGeography">
     <aside class="sidebar">
         <div class="sidebar-header">
-            <a [routerLink]="'/manage/' + currentSelectedGeography.GeographyID">
+            <a [routerLink]="['/supply-and-usage', currentSelectedGeography.GeographyName.toLowerCase()]">
                 <geography-logo [geographyID]="currentSelectedGeography.GeographyID"></geography-logo>
             </a>
         </div>
@@ -13,16 +13,13 @@
                 </h3>
 
                 <div class="sidebar-body__switcher">
-                    <h4 class="sidebar-body__current">
-                        <icon icon="Geography-Alt"></icon>
-                        {{ currentSelectedGeography.GeographyName }}
-                    </h4>
-
                     <geography-switcher></geography-switcher>
                 </div>
             </div>
 
-            <dashboard-menu [dashboardMenu]="supplyAndUsageMenu" [viewingDetailPage]="viewingDetailPage"></dashboard-menu>
+            <ng-container *ngIf="supplyAndUsageMenu$ | async as menu">
+                <dashboard-menu [dashboardMenu]="menu" [viewingDetailPage]="false"></dashboard-menu>
+            </ng-container>
         </div>
     </aside>
 

@@ -1,0 +1,18 @@
+<div class="modal-header">
+    <h3>Download {{ modalContext.GeographyName }} Water Measurements</h3>
+    <button type="button" class="close" (click)="close()">
+        <i class="fa fa-times-circle"></i>
+    </button>
+</div>
+
+<div class="modal-body grid-12">
+    <reporting-period-select
+        [geographyID]="modalContext.GeographyID"
+        [defaultDisplayYear]="modalContext.GeographyStartYear"
+        (selectionChanged)="updateReportingYear($event)"></reporting-period-select>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-primary" (click)="download()" [disabled]="!reportingYear">Download</button>
+    <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+</div>

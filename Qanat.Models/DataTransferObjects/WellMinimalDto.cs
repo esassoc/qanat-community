@@ -16,5 +16,6 @@ public class WellMinimalDto
     public string WellStatusDisplayName { get; set; }
     public string ParcelNumber { get; set; }
     public List<ParcelMinimalDto> IrrigatesParcels { get; set; }
+    public int? WaterAccountID { get; set; }
     public string Notes { get; set; }
 }

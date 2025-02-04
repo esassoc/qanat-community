@@ -1,8 +1,8 @@
 <div class="popover">
     <h3 class="popover-header" *ngIf="title">
-        <ng-template *ngIf="titleIsTemplate(); else simpleTitle" [ngTemplateOutlet]="title"></ng-template>
+        <ng-template *ngIf="titleAsTemplate; else simpleTitle" [ngTemplateOutlet]="titleAsTemplate"></ng-template>
         <ng-template #simpleTitle>
-            {{ title }}
+            <ng-container>{{ title }}</ng-container>
         </ng-template>
     </h3>
     <div class="popover-body">

@@ -41,7 +41,7 @@
                 [type]="FormFieldType.Date"></form-field>
         </div>
 
-        <ng-container formArrayName="WaterUseTypes" *ngIf="wellRegistrationWaterUseTypes$ | async as wellRegistrationWaterUseTypes">
+        <ng-container formArrayName="WaterUseTypes">
             <h2 class="section-title underline text-primary mt-4">
                 <span class="required flex">Water Use Type</span>
             </h2>
@@ -50,7 +50,7 @@
                     <div [formGroup]="control" class="grid-12">
                         <form-field
                             [formControl]="control.controls.Checked"
-                            [fieldLabel]="wellRegistrationWaterUseTypes[i].WellRegistrationWaterUseTypeDisplayName"
+                            [fieldLabel]="WellRegistrationWaterUseTypes[i].DisplayName"
                             toggleTrue="Yes"
                             toggleFalse="No"
                             [type]="FormFieldType.Toggle"></form-field>
@@ -59,7 +59,7 @@
                             [@inOutAnimation]
                             [formControl]="control.controls.Description"
                             fieldLabel="Water Use Description"
-                            [fieldDefinitionName]="'WellRegistryFieldWaterUseDescription' + wellRegistrationWaterUseTypes[i].WellRegistrationWaterUseTypeName"
+                            [fieldDefinitionName]="'WellRegistryFieldWaterUseDescription' + WellRegistrationWaterUseTypes[i].Name"
                             [required]="true"
                             [type]="FormFieldType.Textarea"></form-field>
                     </div>

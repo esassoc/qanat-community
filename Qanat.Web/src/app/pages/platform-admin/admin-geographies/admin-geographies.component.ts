@@ -1,5 +1,4 @@
 import { Component, OnInit } from "@angular/core";
-import { ActivatedRoute, Router } from "@angular/router";
 import { ColDef } from "ag-grid-community";
 import { Observable, map, tap } from "rxjs";
 import { UtilityFunctionsService } from "src/app/shared/services/utility-functions.service";
@@ -13,6 +12,7 @@ import { QanatGridComponent } from "src/app/shared/components/qanat-grid/qanat-g
 import { NgIf, AsyncPipe, DatePipe } from "@angular/common";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { AlertDisplayComponent } from "src/app/shared/components/alert-display/alert-display.component";
+import { PublicService } from "src/app/shared/generated/api/public.service";
 
 @Component({
     selector: "admin-geographies",
@@ -32,19 +32,18 @@ export class AdminGeographiesComponent implements OnInit {
 
     constructor(
         private geographyService: GeographyService,
+        private publicService: PublicService,
         private alertService: AlertService,
         private monitoringWellService: MonitoringWellService,
-        private utilityFunctionsService: UtilityFunctionsService,
-        private route: ActivatedRoute,
-        private router: Router
+        private utilityFunctionsService: UtilityFunctionsService
     ) {}
 
     ngOnInit(): void {
         this.geographies$ = this.geographyService
-            .publicGeographiesGet()
+            .geographiesGet()
             .pipe(map((geographies) => geographies.sort((a, b) => (a.GeographyDisplayName > b.GeographyDisplayName ? 1 : -1))));
 
-        this.geographyBoundaries$ = this.geographyService
+        this.geographyBoundaries$ = this.publicService
             .publicGeographyBoundariesGet()
             .pipe(
                 tap(
@@ -71,9 +70,6 @@ export class AdminGeographiesComponent implements OnInit {
             this.utilityFunctionsService.createPhoneNumberColumnDef("Contact Phone", "ContactPhoneNumber"),
             { headerName: "Is Demo Geography?", valueGetter: (params) => (params.data.IsDemoGeography ? "Yes" : "No") },
             { headerName: "Display Usage Geometries as Field?", valueGetter: (params) => (params.data.DisplayUsageGeometriesAsField ? "Yes" : "No") },
-            this.utilityFunctionsService.createMultiLinkColumnDef("Water Managers", "WaterManagers", "UserID", "FullName", {
-                InRouterLink: "/admin/users/",
-            }),
         ];
     }
 

@@ -9,6 +9,16 @@
     text-transform: none;
 }
 
+::ng-deep .popover-body {
+    padding: $spacing-500 !important;
+
+    ul {
+        li {
+            list-style: disc;
+        }
+    }
+}
+
 .inline-display {
     align-items: start;
     column-gap: 0.8rem;

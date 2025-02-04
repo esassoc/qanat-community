@@ -1,0 +1,22 @@
+<page-header pageTitle="Water Account Budget Report" icon="Budget" [customRichTextTypeID]="richTextTypeID"></page-header>
+
+<div class="page-body" [loadingSpinner]="{ isLoading: isLoading }">
+    <app-alert-display></app-alert-display>
+
+    <div class="grid-12 ai-fe mb-3" *ngIf="geography$ | async as geography">
+        <ng-container *ngIf="waterTypes$ | async">
+            <ng-container *ngIf="selectedYear$ | async as selectedYear">
+                <div class="field g-col-3">
+                    <reporting-period-select
+                        [geographyID]="geography.GeographyID"
+                        [defaultDisplayYear]="selectedYear"
+                        (selectionChanged)="updateSelectedYear($event)"></reporting-period-select>
+                </div>
+
+                <ng-container *ngIf="waterAccountBudgetReports$ | async as waterAccountBudgetReports">
+                    <qanat-grid [rowData]="waterAccountBudgetReports" [columnDefs]="columnDefs" downloadFileName="water-account-budgets-{{ selectedYear }}"></qanat-grid>
+                </ng-container>
+            </ng-container>
+        </ng-container>
+    </div>
+</div>

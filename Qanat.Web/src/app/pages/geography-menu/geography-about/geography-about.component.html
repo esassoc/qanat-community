@@ -16,6 +16,8 @@
                 [controlTitle]="geography.GeographyDisplayName"
                 [geographyID]="geography.GeographyID"
                 [layerControl]="layerControl"></gsa-boundaries>
+
+            <monitoring-wells-layer [map]="map" [layerControl]="layerControl" [displayOnLoad]="true" [editingMap]="false"></monitoring-wells-layer>
         </ng-container>
     </qanat-map>
 

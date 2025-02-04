@@ -5,7 +5,6 @@ using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Geometries.Prepared;
 using NetTopologySuite.IO.Converters;
-using Newtonsoft.Json;
 using Qanat.Common.JsonConverters;
 using JsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;
 using JsonSerializer = System.Text.Json.JsonSerializer;
@@ -119,7 +118,6 @@ public static class GeoJsonSerializer
     {
         await using var createStream = File.Create(fileOutput);
         await JsonSerializer.SerializeAsync(createStream, objectToSerialize, jsonSerializerOptions);
-        await createStream.DisposeAsync();
     }
 
     public static void SerializeToFile<T>(T objectToSerialize, string fileOutput, JsonSerializerOptions jsonSerializerOptions)
@@ -221,18 +219,9 @@ public static class GeoJsonSerializer
 
     public static string ToGeoJSON(this Geometry geometry, JsonSerializerOptions? options = null)
     {
-        var serializer = NetTopologySuite.IO.GeoJsonSerializer.Create();
-        using var stringWriter = new StringWriter();
-        using var jsonWriter = new JsonTextWriter(stringWriter);
-        serializer.Serialize(jsonWriter, geometry);
-        return stringWriter.ToString();
+        options ??= DefaultSerializerOptions;
 
-        //todo: switch to System.Text.Json
-        //options ??= CreateDefaultJSONSerializerOptions(4);
-
-        //using var ms = new MemoryStream();
-        //using (var writer = new Utf8JsonWriter(ms))
-        //    JsonSerializer.Serialize(writer, geometry, options);
-        //return Encoding.UTF8.GetString(ms.ToArray());
+        var result = JsonSerializer.Serialize(geometry, options);
+        return result;
     }
 }

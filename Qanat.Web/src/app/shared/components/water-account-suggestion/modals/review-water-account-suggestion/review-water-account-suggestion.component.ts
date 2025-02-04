@@ -12,22 +12,22 @@ import {
     CreateWaterAccountFromSuggestionDtoFormControls,
     ParcelDisplayDto,
     ParcelWithGeoJSONDto,
-    ReportingPeriodSimpleDto,
+    ReportingPeriodDto,
 } from "src/app/shared/generated/model/models";
 import { ReportingPeriodService } from "src/app/shared/generated/api/reporting-period.service";
 import { SelectDropdownOption } from "../../../inputs/select-dropdown/select-dropdown.component";
-import { ParcelService } from "src/app/shared/generated/api/parcel.service";
-import { CustomGeoJSONLayer, ParcelMapComponent } from "../../../parcel-map/parcel-map.component";
+import { CustomGeoJSONLayer, ParcelMapComponent } from "../../../parcel/parcel-map/parcel-map.component";
 import { Alert } from "src/app/shared/models/alert";
 import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
 import { MapPipe } from "../../../../pipes/map.pipe";
 import { RouterLink } from "@angular/router";
 import { ParcelIconWithNumberComponent } from "../../../parcel/parcel-icon-with-number/parcel-icon-with-number.component";
 import { NgFor, NgIf, AsyncPipe } from "@angular/common";
-import { ParcelTypeaheadComponent } from "../../../parcel-typeahead/parcel-typeahead.component";
+import { ParcelTypeaheadComponent } from "../../../parcel/parcel-typeahead/parcel-typeahead.component";
 import { CustomRichTextComponent } from "../../../custom-rich-text/custom-rich-text.component";
 import { IconComponent } from "src/app/shared/components/icon/icon.component";
 import { WaterAccountByGeographyService } from "src/app/shared/generated/api/water-account-by-geography.service";
+import { ParcelByGeographyService } from "src/app/shared/generated/api/parcel-by-geography.service";
 
 @Component({
     selector: "review-water-account-suggestion",
@@ -65,8 +65,8 @@ export class ReviewWaterAccountSuggestionComponent implements OnInit, IModal {
         ContactAddress: CreateWaterAccountFromSuggestionDtoFormControls.ContactAddress(),
     });
 
-    public reportingPeriods$: Observable<any>;
-    public reportingPeriod: ReportingPeriodSimpleDto;
+    public reportingPeriodDropdownOptions$: Observable<SelectDropdownOption[]>;
+    public reportingPeriod: ReportingPeriodDto;
     public effectiveYear$: Observable<number>;
     public parcelsWithGeoJSON$: Observable<ParcelWithGeoJSONDto[]>;
 
@@ -81,7 +81,7 @@ export class ReviewWaterAccountSuggestionComponent implements OnInit, IModal {
         private modalService: ModalService,
         private waterAccountByGeographyService: WaterAccountByGeographyService,
         private reportingPeriodService: ReportingPeriodService,
-        private parcelService: ParcelService,
+        private parcelByGeographyService: ParcelByGeographyService,
         private alertService: AlertService
     ) {}
 
@@ -89,14 +89,14 @@ export class ReviewWaterAccountSuggestionComponent implements OnInit, IModal {
         this.formGroup.controls.WaterAccountName.setValue(this.modalContext.WaterAccountName);
         this.formGroup.controls.ContactName.setValue(this.modalContext.ContactName);
         this.formGroup.controls.ContactAddress.setValue(this.modalContext.ContactAddress);
-        this.parcelsWithGeoJSON$ = this.parcelService.geographiesGeographyIDParcelsGeojsonPost(this.modalContext.GeographyID, this.modalContext.ParcelIDList).pipe(
+        this.parcelsWithGeoJSON$ = this.parcelByGeographyService.geographiesGeographyIDParcelsGeojsonPost(this.modalContext.GeographyID, this.modalContext.ParcelIDList).pipe(
             tap((parcels) => {
                 this.originalWaterAccountParcels = [...parcels];
                 this.updateParcelsTo([...parcels]);
             })
         );
 
-        this.reportingPeriods$ = this.reportingPeriodService.geographiesGeographyIDReportingPeriodYearsGet(this.modalContext.GeographyID).pipe(
+        this.reportingPeriodDropdownOptions$ = this.reportingPeriodService.geographiesGeographyIDReportingPeriodsGet(this.modalContext.GeographyID).pipe(
             map((x) => {
                 let options = x.map((y) => ({ Value: y, Label: y.toString() }) as SelectDropdownOption).reverse();
                 // insert an empty option at the front
@@ -137,7 +137,7 @@ export class ReviewWaterAccountSuggestionComponent implements OnInit, IModal {
     addSelectedParcel() {
         if (!this.selectedParcel) return;
 
-        this.parcelService.geographiesGeographyIDParcelsGeojsonPost(this.modalContext.GeographyID, [this.selectedParcel.ParcelID]).subscribe((parcelWithGeoJson) => {
+        this.parcelByGeographyService.geographiesGeographyIDParcelsGeojsonPost(this.modalContext.GeographyID, [this.selectedParcel.ParcelID]).subscribe((parcelWithGeoJson) => {
             this.updateParcelsTo([...this.waterAccountParcels, ...parcelWithGeoJson]);
             this.selectedParcel = null;
         });
@@ -193,7 +193,7 @@ export class ReviewWaterAccountSuggestionComponent implements OnInit, IModal {
             this.updateParcelsTo([...newParcels]);
         } else {
             // else add it
-            this.parcelService.geographiesGeographyIDParcelsGeojsonPost(this.modalContext.GeographyID, [parcelIDClicked]).subscribe((parcelDisplayDto) => {
+            this.parcelByGeographyService.geographiesGeographyIDParcelsGeojsonPost(this.modalContext.GeographyID, [parcelIDClicked]).subscribe((parcelDisplayDto) => {
                 this.updateParcelsTo([...this.waterAccountParcels, ...parcelDisplayDto]);
             });
         }

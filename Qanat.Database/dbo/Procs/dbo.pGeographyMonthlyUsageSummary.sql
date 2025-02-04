@@ -29,43 +29,46 @@ FROM (
 ) months
 cross join #reportingPeriods rp
 
-select m.ParcelID, m.ParcelNumber, m.WaterMeasurementTypeID, m.WaterMeasurementTypeName, m.WaterMeasurementCategoryTypeName, m.WaterMeasurementTypeSortOrder, m.EffectiveDate
-, u.CurrentUsageAmount, u.CurrentUsageAmount / m.UsageEntityArea as CurrentUsageAmountDepth
-, uavg.AverageUsageAmount, uavg.AverageUsageAmount / m.UsageEntityArea as AverageUsageAmountDepth
-, case when CurrentUsageAmount is null then null else sum(CurrentUsageAmount) over(partition by m.WaterMeasurementTypeID order by m.EffectiveDate rows unbounded preceding) end as CurrentCumulativeUsageAmount
-, case when AverageUsageAmount is null then null else sum(AverageUsageAmount) over(partition by m.WaterMeasurementTypeID order by m.EffectiveDate rows unbounded preceding) end as AverageCumulativeUsageAmount
+declare @WaterMeasurementTypeID int, @WaterMeasurementTypeName varchar(100), @WaterMeasurementCategoryTypeName varchar(100), @WaterMeasurementTypeSortOrder int
+select @WaterMeasurementTypeID = WaterMeasurementTypeID, @WaterMeasurementTypeName = WaterMeasurementTypeName, @WaterMeasurementCategoryTypeName = wmct.WaterMeasurementCategoryTypeDisplayName, @WaterMeasurementTypeSortOrder = wmt.SortOrder
+from dbo.[Geography] g 
+join dbo.WaterMeasurementType wmt on g.SourceOfRecordWaterMeasurementTypeID = wmt.WaterMeasurementTypeID
+join dbo.WaterMeasurementCategoryType wmct on wmt.WaterMeasurementCategoryTypeID = wmct.WaterMeasurementCategoryTypeID
+where g.GeographyID = @geographyID
+
+
+select m.ParcelID, m.ParcelNumber, @WaterMeasurementTypeID as WaterMeasurementTypeID, @WaterMeasurementTypeName as WaterMeasurementTypeName, @WaterMeasurementCategoryTypeName as WaterMeasurementCategoryTypeName, @WaterMeasurementTypeSortOrder as WaterMeasurementTypeSortOrder, m.EffectiveDate
+, u.CurrentUsageAmount
+, CASE WHEN m.UsageEntityArea != 0 THEN u.CurrentUsageAmount / m.UsageEntityArea ELSE NULL END as CurrentUsageAmountDepth
+, uavg.AverageUsageAmount
+, CASE WHEN m.UsageEntityArea != 0 THEN uavg.AverageUsageAmount / m.UsageEntityArea ELSE NULL END as AverageUsageAmountDepth
+, case when CurrentUsageAmount is null then null else sum(CurrentUsageAmount) over(order by m.EffectiveDate rows unbounded preceding) end as CurrentCumulativeUsageAmount
+, case when AverageUsageAmount is null then null else sum(AverageUsageAmount) over(order by m.EffectiveDate rows unbounded preceding) end as AverageCumulativeUsageAmount
 , m.UsageEntityArea
 from 
 (
-    select ParcelID, ParcelNumber, UsageEntityArea, EffectiveDate, WaterMeasurementTypeID, WaterMeasurementTypeName, WaterMeasurementCategoryTypeDisplayName as WaterMeasurementCategoryTypeName, WaterMeasurementTypeSortOrder
+    select ParcelID, ParcelNumber, UsageEntityArea, EffectiveDate
     from 
     #waterAccountParcels
     cross join #effectiveDates
-    cross join 
-    (
-        select WaterMeasurementTypeID, WaterMeasurementTypeName, wmct.WaterMeasurementCategoryTypeDisplayName, wmt.SortOrder as WaterMeasurementTypeSortOrder
-        from dbo.WaterMeasurementType wmt
-        join dbo.WaterMeasurementCategoryType wmct on wmt.WaterMeasurementCategoryTypeID = wmct.WaterMeasurementCategoryTypeID
-        where GeographyID = @geographyID
-    ) wmts
 ) m
 left join (
-	select ParcelID, WaterMeasurementTypeID, EffectiveMonth, sum(UsageSum) / count(EffectiveYear) as AverageUsageAmount
+	select ParcelID, WaterMeasurementTypeID, EffectiveMonth, CASE WHEN count(EffectiveYear) != 0 THEN sum(UsageSum) / count(EffectiveYear) ELSE NULL END as AverageUsageAmount
 	from (
 		select wap.ParcelID, wmsor.WaterMeasurementTypeID, month(wmsor.ReportedDate) as EffectiveMonth, year(wmsor.ReportedDate) as EffectiveYear, sum(wmsor.ReportedValueInAcreFeet) as UsageSum
-		from dbo.vWaterMeasurement wmsor
+		from dbo.vWaterMeasurementSourceOfRecord wmsor
 		join #waterAccountParcels wap on wmsor.ParcelID = wap.ParcelID
 		group by wap.ParcelID, wmsor.WaterMeasurementTypeID, month(wmsor.ReportedDate), year(wmsor.ReportedDate)
 	) plmy
 	group by ParcelID, WaterMeasurementTypeID, EffectiveMonth
-) uavg on m.ParcelID = uavg.ParcelID and m.WaterMeasurementTypeID = uavg.WaterMeasurementTypeID and month(m.EffectiveDate) = uavg.EffectiveMonth
+) uavg on m.ParcelID = uavg.ParcelID and month(m.EffectiveDate) = uavg.EffectiveMonth
 left join (
 	select wap.ParcelID, wmsor.WaterMeasurementTypeID, cast(concat(month(wmsor.ReportedDate), '/1/', year(wmsor.ReportedDate)) as DateTime) as EffectiveDate, sum(wmsor.ReportedValueInAcreFeet) as CurrentUsageAmount
-	from dbo.vWaterMeasurement wmsor
+	from dbo.vWaterMeasurementSourceOfRecord wmsor
     join #reportingPeriods rp on wmsor.GeographyID = rp.GeographyID and wmsor.ReportedDate between rp.StartDate and rp.EndDate
 	join #waterAccountParcels wap on wmsor.ParcelID = wap.ParcelID
-	group by wap.ParcelID, wmsor.WaterMeasurementTypeID, cast(concat(month(wmsor.ReportedDate), '/1/', year(wmsor.ReportedDate)) as DateTime)
-) u on m.ParcelID = u.ParcelID and m.WaterMeasurementTypeID = u.WaterMeasurementTypeID and m.EffectiveDate = u.EffectiveDate
-order by m.WaterMeasurementTypeSortOrder, m.EffectiveDate
+    group by wap.ParcelID, wmsor.WaterMeasurementTypeID, cast(concat(month(wmsor.ReportedDate), '/1/', year(wmsor.ReportedDate)) as DateTime)
+) u on m.ParcelID = u.ParcelID and m.EffectiveDate = u.EffectiveDate
+order by WaterMeasurementTypeSortOrder, m.EffectiveDate, m.ParcelID
 
 end

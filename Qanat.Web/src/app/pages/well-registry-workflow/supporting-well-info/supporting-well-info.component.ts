@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from "@angular/core";
-import { FormGroup, FormBuilder, FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { FormGroup, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
 import { Observable, tap } from "rxjs";
 import { routeParams } from "src/app/app.routes";
@@ -7,9 +7,8 @@ import { inOutAnimation } from "src/app/shared/animations/in-out.animation";
 import { FormFieldType, FormInputOption } from "src/app/shared/components/forms/form-field/form-field.component";
 import { WellRegistrationService } from "src/app/shared/generated/api/well-registration.service";
 import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
-import { FuelTypeEnum } from "src/app/shared/generated/enum/fuel-type-enum";
+import { FuelTypeEnum, FuelTypesAsSelectDropdownOptions } from "src/app/shared/generated/enum/fuel-type-enum";
 import {
-    FuelTypeSimpleDto,
     WellRegistrySupportingInfoDto,
     WellRegistrySupportingInfoDtoForm,
     WellRegistrySupportingInfoDtoFormControls,
@@ -51,10 +50,10 @@ export class SupportingWellInfoComponent implements OnInit, OnDestroy, IDeactiva
     public formAsteriskExplanationID = CustomRichTextTypeEnum.FormAsteriskExplanation;
 
     public isLoadingSubmit: boolean = false;
-    public wellID;
+    public wellID: number;
     public FormFieldType = FormFieldType;
     public supportingWellInfo$: Observable<WellRegistrySupportingInfoDto>;
-    public fuelTypes$: Observable<FuelTypeSimpleDto[]>;
+    public FuelTypesSelectDropdownOptions = FuelTypesAsSelectDropdownOptions;
 
     public formGroup: FormGroup<WellRegistrySupportingInfoDtoForm> = new FormGroup<WellRegistrySupportingInfoDtoForm>({
         WellDepth: WellRegistrySupportingInfoDtoFormControls.WellDepth(),
@@ -96,7 +95,6 @@ export class SupportingWellInfoComponent implements OnInit, OnDestroy, IDeactiva
         private router: Router,
         private route: ActivatedRoute,
         private cdr: ChangeDetectorRef,
-        private formBuilder: FormBuilder,
         private wellRegistryProgressService: WellRegistryWorkflowProgressService,
         private alertService: AlertService
     ) {}
@@ -107,12 +105,6 @@ export class SupportingWellInfoComponent implements OnInit, OnDestroy, IDeactiva
 
     ngOnInit(): void {
         this.wellID = this.route.snapshot.paramMap.get(routeParams.wellRegistrationID) ? parseInt(this.route.snapshot.paramMap.get(routeParams.wellRegistrationID)) : null;
-
-        this.fuelTypes$ = this.wellRegistrationService.wellRegistrationsPumpFuelTypesGet().pipe(
-            tap((x) => {
-                this.fuelTypeOptions = x.map((y) => ({ Value: y.FuelTypeID, Disabled: false, Label: y.FuelTypeDisplayName }) as FormInputOption);
-            })
-        );
 
         this.formGroup.controls.FuelTypeID.valueChanges.subscribe((x) => {
             if (x != FuelTypeEnum.Other) {

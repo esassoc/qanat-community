@@ -16,7 +16,7 @@
                 <div class="latest-runs">
                     <h2 class="section-title primary">Latest Scenario Runs</h2>
                     <div *ngIf="latestModelRuns.length > 0; else noModelRuns" class="grid-12">
-                        <model-run-card *ngFor="let latestModelRun of latestModelRuns" [GETAction]="latestModelRun">
+                        <model-run-card *ngFor="let latestModelRun of latestModelRuns" [scenarioRun]="latestModelRun">
                             {{ latestModelRun.RunName }}
                         </model-run-card>
                     </div>
@@ -31,12 +31,7 @@
                 </ng-template>
 
                 <div class="all-runs">
-                    <qanat-grid
-                        [rowData]="allModelRuns"
-                        [columnDefs]="columnDefs"
-                        [sizeColumnsToFitGrid]="true"
-                        downloadFileName="scenario-runs"
-                        (gridReady)="onGridReady($event)"></qanat-grid>
+                    <qanat-grid [rowData]="allModelRuns" [columnDefs]="columnDefs" [sizeColumnsToFitGrid]="true" downloadFileName="scenario-runs"></qanat-grid>
                 </div>
             </ng-container>
         </div>

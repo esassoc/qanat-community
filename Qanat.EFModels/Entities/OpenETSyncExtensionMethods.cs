@@ -11,7 +11,7 @@ public static partial class OpenETSyncExtensionMethods
         var openETSyncDto = new OpenETSyncDto()
         {
             OpenETSyncID = openETSync.OpenETSyncID,
-            Geography = openETSync.Geography.AsGeographyDto(),
+            Geography = openETSync.Geography.AsDto(),
             OpenETDataType = openETSync.OpenETDataType.AsSimpleDto(),
             Year = openETSync.Year,
             Month = openETSync.Month,

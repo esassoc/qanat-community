@@ -28,6 +28,14 @@ public class WaterMeasurementTypes
             .Select(x => x.AsSimpleDto()).ToList();
     }
 
+    public static List<WaterMeasurementTypeSimpleDto> ListActiveAndSelfReportableAsSimpleDto(QanatDbContext dbContext, int geographyID)
+    {
+        return dbContext.WaterMeasurementTypes.AsNoTracking()
+            .Where(x => x.GeographyID == geographyID && x.IsActive && x.IsSelfReportable)
+            .OrderBy(x => x.SortOrder)
+            .Select(x => x.AsSimpleDto()).ToList();
+    }
+
     public static List<WaterMeasurementType> ListByGeographyIDAndWaterMeasurementTypeNames(QanatDbContext dbContext, int geographyID, List<string> waterMeasurementTypeNames)
     {
         return dbContext.WaterMeasurementTypes.AsNoTracking()

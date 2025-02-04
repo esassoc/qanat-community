@@ -8,5 +8,5 @@ CREATE TABLE [dbo].[WaterAccountParcel](
     CONSTRAINT [AK_WaterAccountParcel_WaterAccountID_ParcelID_EffectiveYear] UNIQUE ([WaterAccountID], [ParcelID], [EffectiveYear]),
 	constraint [FK_WaterAccountParcel_WaterAccount_WaterAccountID_GeographyID] foreign key ([WaterAccountID], [GeographyID]) references dbo.[WaterAccount]([WaterAccountID], [GeographyID]),
 	constraint [FK_WaterAccountParcel_Parcel_ParcelID_GeographyID] foreign key ([ParcelID], [GeographyID]) references dbo.[Parcel]([ParcelID], [GeographyID]),
-	CONSTRAINT [CHK_WaterAccountParcel_EndDate_GreaterThan_EffectiveYear] CHECK (EndYear is null or (EndYear > EffectiveYear))
+	CONSTRAINT [CHK_WaterAccountParcel_EndDate_GreaterThan_EffectiveYear] CHECK (EndYear is null or (EndYear >= EffectiveYear))
 )

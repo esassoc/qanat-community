@@ -14,6 +14,7 @@ import { SelectDropDownModule } from "ngx-select-dropdown";
 import { FrequentlyAskedQuestionGridDto } from "src/app/shared/generated/model/models";
 import { IconComponent } from "src/app/shared/components/icon/icon.component";
 import { LoadingDirective } from "src/app/shared/directives/loading.directive";
+import { PublicService } from "src/app/shared/generated/api/public.service";
 
 @Component({
     selector: "faq-display-edit-modal",
@@ -44,7 +45,8 @@ export class FaqDisplayEditModalComponent implements IModal, OnInit {
     constructor(
         private modalService: ModalService,
         private alertService: AlertService,
-        private frequentlyAskedQuestionsService: FrequentlyAskedQuestionService
+        private frequentlyAskedQuestionsService: FrequentlyAskedQuestionService,
+        private publicService: PublicService
     ) {}
 
     close() {
@@ -52,14 +54,12 @@ export class FaqDisplayEditModalComponent implements IModal, OnInit {
     }
 
     ngOnInit(): void {
-        this.frequentlyAskedQuestionForPage$ = this.frequentlyAskedQuestionsService
-            .publicFaqLocationFaqDisplayQuestionLocationTypeIDGet(this.modalContext.FaqDisplayLocationTypeID)
-            .pipe(
-                tap((faqs) => {
-                    this.selectedFaqsModel = faqs;
-                })
-            );
-        this.frequentlyAskedQuestions$ = this.frequentlyAskedQuestionsService.publicFaqGet();
+        this.frequentlyAskedQuestionForPage$ = this.publicService.publicFaqLocationFaqDisplayQuestionLocationTypeIDGet(this.modalContext.FaqDisplayLocationTypeID).pipe(
+            tap((faqs) => {
+                this.selectedFaqsModel = faqs;
+            })
+        );
+        this.frequentlyAskedQuestions$ = this.publicService.publicFaqGet();
     }
 
     save() {

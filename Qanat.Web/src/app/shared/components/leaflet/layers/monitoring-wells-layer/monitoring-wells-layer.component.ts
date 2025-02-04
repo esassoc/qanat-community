@@ -18,13 +18,11 @@ import { AfterViewInit, Component, Input, OnChanges } from "@angular/core";
 export class MonitoringWellsLayerComponent extends MapLayerBase implements AfterViewInit, OnChanges {
     @Input() layerControl: L.Control;
     @Input() editingMap: boolean = false;
+    @Input() geographyID?: number;
 
     public layer: L.Layer;
 
-    constructor(
-        private wfsService: WfsService,
-        private modalService: ModalService
-    ) {
+    constructor(private wfsService: WfsService, private modalService: ModalService) {
         super();
     }
 
@@ -51,7 +49,7 @@ export class MonitoringWellsLayerComponent extends MapLayerBase implements After
             fillOpacity: 0.8,
             interactive: !this.editingMap,
         };
-        const cqlFilter = "GeographyID is not null";
+        const cqlFilter = this.geographyID ? `GeographyID = ${this.geographyID}` : "GeographyID is not null";
 
         this.wfsService.getGeoserverWFSLayer(null, "Qanat:MonitoringWells", cqlFilter).subscribe((response) => {
             const geoJson = L.geoJSON(response, {
@@ -63,7 +61,6 @@ export class MonitoringWellsLayerComponent extends MapLayerBase implements After
 
             geoJson.on("click", (e) => {
                 if (this.editingMap) return;
-
                 this.modalService
                     .open(MonitoringWellMeasurementChartComponent, null, { ModalSize: ModalSizeEnum.ExtraLarge, ModalTheme: ModalThemeEnum.Light, TopLayer: false }, {
                         GeographyID: e.layer.feature.properties.GeographyID,

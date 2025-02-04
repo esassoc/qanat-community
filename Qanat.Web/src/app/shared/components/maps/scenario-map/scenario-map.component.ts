@@ -1,9 +1,9 @@
-import { AfterViewInit, Component, Input, Output, OnInit, EventEmitter, OnDestroy } from "@angular/core";
+import { AfterViewInit, Component, Input, Output, OnInit, EventEmitter, OnDestroy, ChangeDetectorRef, NgZone, AfterViewChecked } from "@angular/core";
 import * as L from "leaflet";
 import GestureHandling from "leaflet-gesture-handling";
-import { GETActionService } from "src/app/shared/generated/api/get-action.service";
 import { LeafletHelperService } from "src/app/shared/services/leaflet-helper.service";
 import { QanatMapInitEvent } from "src/app/shared/components/leaflet/qanat-map/qanat-map.component";
+import { ModelService } from "src/app/shared/generated/api/model.service";
 
 @Component({
     selector: "scenario-map",
@@ -11,7 +11,7 @@ import { QanatMapInitEvent } from "src/app/shared/components/leaflet/qanat-map/q
     styleUrls: ["./scenario-map.component.scss"],
     standalone: true,
 })
-export class ScenarioMapComponent implements OnInit, AfterViewInit, OnDestroy {
+export class ScenarioMapComponent implements OnInit, AfterViewInit, OnDestroy, AfterViewChecked {
     @Input() modelShortName: string;
     @Input() selecting: boolean = false;
 
@@ -24,8 +24,10 @@ export class ScenarioMapComponent implements OnInit, AfterViewInit, OnDestroy {
     public layerControl: L.Control;
 
     constructor(
-        private getActionService: GETActionService,
-        private leafletHelperService: LeafletHelperService
+        private modelService: ModelService,
+        private leafletHelperService: LeafletHelperService,
+        private cdr: ChangeDetectorRef,
+        private zone: NgZone
     ) {}
 
     ngOnDestroy(): void {
@@ -34,37 +36,48 @@ export class ScenarioMapComponent implements OnInit, AfterViewInit, OnDestroy {
         this.map = null;
     }
 
-    ngOnInit(): void {
-        this.getActionService.modelsModelShortNameBoundaryGet(this.modelShortName).subscribe((modelBoundary) => {
-            const geoJsonObject = JSON.parse(modelBoundary.GeoJson);
+    ngOnInit(): void {}
 
+    ngAfterViewInit(): void {
+        this.modelService.modelsModelShortNameBoundaryGet(this.modelShortName).subscribe((modelBoundary) => {
+            const mapOptions: L.MapOptions = {
+                minZoom: 6,
+                maxZoom: 17,
+                layers: [this.tileLayers.Aerial],
+                fullscreenControl: true,
+                gestureHandling: true,
+            } as L.MapOptions;
+
+            if (!this.map) {
+                this.map = L.map(this.mapID, mapOptions);
+            }
+
+            L.Map.addInitHook("addHandler", "gestureHandling", GestureHandling);
+
+            this.layerControl = new L.Control.Layers(this.tileLayers, null, { collapsed: false });
+            this.layerControl.addTo(this.map);
+
+            this.mapReady.emit(new QanatMapInitEvent(this.map, this.layerControl, this.mapID));
+            const geoJsonObject = JSON.parse(modelBoundary.GeoJson);
             if (geoJsonObject) {
                 const leafletGeoJson = L.geoJson(geoJsonObject, { interactive: true, style: { className: "boundary" } })
                     .addTo(this.map)
                     .on("click", (event: L.LeafletEvent) => this.onMapSelect(event.latlng));
-                this.map.fitBounds(leafletGeoJson.getBounds());
+
+                let bounds = leafletGeoJson.getBounds();
+                if (bounds && bounds.isValid()) {
+                    this.map.fitBounds(bounds);
+                }
             } else {
                 this.leafletHelperService.fitMapToDefaultBoundingBox(this.map);
             }
         });
     }
 
-    ngAfterViewInit(): void {
-        const mapOptions: L.MapOptions = {
-            minZoom: 6,
-            maxZoom: 17,
-            layers: [this.tileLayers.Aerial],
-            fullscreenControl: true,
-            gestureHandling: true,
-        } as L.MapOptions;
-
-        this.map = L.map(this.mapID, mapOptions);
-        L.Map.addInitHook("addHandler", "gestureHandling", GestureHandling);
-
-        this.layerControl = new L.Control.Layers(this.tileLayers, null, { collapsed: false });
-        this.layerControl.addTo(this.map);
-
-        this.mapReady.emit(new QanatMapInitEvent(this.map, this.layerControl, this.mapID));
+    ngAfterViewChecked(): void {
+        if (this.map) {
+            this.map.invalidateSize();
+        }
     }
 
     private onMapSelect(latlng: L.latlng) {

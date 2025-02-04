@@ -1,0 +1,198 @@
+<div class="full-width-page">
+    <div class="page-header centered">
+        <h1 class="page-title">
+            <icon class="page-header-icon" icon="Question"></icon>
+            Help Center
+        </h1>
+    </div>
+
+    <section class="featured grid-12">
+        <div class="featured__main g-col-6">
+            <div class="feature feature__block">
+                <div class="feature__photo">
+                    <img src="assets/main/images/help-center-support-desk.jpg" alt="Orchard" />
+                </div>
+
+                <div class="feature__info">
+                    <h3 class="feature__headline">Have a question? Need support?</h3>
+
+                    <div class="feature__copy copy copy-3">
+                        <p>
+                            Submit a question to ask about GSA policy, get help with your user profile, learn how to interpret your supply and usage data, or seek assistance
+                            accessing your Water Accounts and data.
+                        </p>
+                    </div>
+
+                    <a href="mailto:info@groundwateraccounting.org" class="feature__link btn btn-primary btn-sm">Email us</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="featured__sidebar g-col-6">
+            <div class="feature feature__inline">
+                <div class="feature__photo">
+                    <img src="assets/main/images/help-center-contact.jpg" alt="Farmer in a field" />
+                </div>
+
+                <div class="feature__info">
+                    <h3 class="feature__headline">Bring the Platform to Your GSA</h3>
+
+                    <div class="feature__copy copy copy-3">
+                        <p>Interested in bringing the Groundwater Accounting Platform to your area? Get in touch and let's chat.</p>
+                    </div>
+
+                    <a [routerLink]="['/contact']" class="feature__link btn btn-primary btn-sm">Contact Us</a>
+                </div>
+            </div>
+
+            <div class="feature feature__inline">
+                <div class="feature__photo">
+                    <img src="assets/main/images/help-center-about.jpg" alt="Cotton picker" />
+                </div>
+
+                <div class="feature__info">
+                    <h3 class="feature__headline">About the Platform</h3>
+
+                    <div class="feature__copy copy copy-3">
+                        <p>Discover more about the Groundwater Accounting Platform and its features, benefits, and capabilities.</p>
+                    </div>
+
+                    <a [routerLink]="['/about']" class="feature__link btn btn-primary btn-sm">Learn more</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="resources grid-12 section-spacing-top">
+        <h2 class="divider-header g-col-12">Resources</h2>
+
+        <div class="rich-link g-col-4">
+            <div class="rich-link-header">
+                <icon class="page-header-icon" icon="Question"></icon>
+                <h3>Frequently Asked Questions</h3>
+            </div>
+
+            <div class="rich-link-body copy copy-3">
+                <p>Get the answers to our most common questions about the platform and how to use it.</p>
+            </div>
+
+            <div class="rich-link-footer">
+                <a [routerLink]="['/frequently-asked-questions']" class="btn btn-primary-outline btn-sm">View FAQs</a>
+            </div>
+        </div>
+
+        <div class="rich-link g-col-4">
+            <div class="rich-link-header">
+                <icon class="page-header-icon" icon="Guide"></icon>
+                <h3>Guide for Growers</h3>
+            </div>
+
+            <div class="rich-link-body copy copy-3">
+                <p>Explore the platform as a grower, focused on Water Accounts and their supply and usage.</p>
+            </div>
+
+            <div class="rich-link-footer">
+                <a [routerLink]="['/grower-guide']" class="btn btn-primary-outline btn-sm">Explore</a>
+            </div>
+        </div>
+
+        <div class="rich-link g-col-4">
+            <div class="rich-link-header">
+                <icon class="page-header-icon" icon="Guide"></icon>
+                <h3>Guide for Water Managers</h3>
+            </div>
+
+            <div class="rich-link-body copy copy-3">
+                <p>Explore the platform as a GSA water manager, looking at the configuration and management tools.</p>
+            </div>
+
+            <div class="rich-link-footer">
+                <a [routerLink]="['/manager-guide']" class="btn btn-primary-outline btn-sm">Explore</a>
+            </div>
+        </div>
+
+        <div class="rich-link g-col-4">
+            <div class="rich-link-header">
+                <icon class="page-header-icon" icon="News"></icon>
+                <h3>News & Announcements</h3>
+            </div>
+
+            <div class="rich-link-body copy copy-3">
+                <p>Get the latest updates on the Platform, it features, and its upcoming offerings.</p>
+            </div>
+
+            <div class="rich-link-footer">
+                <a [routerLink]="['/news-and-announcements']" class="btn btn-primary-outline btn-sm">Read more</a>
+            </div>
+        </div>
+
+        <div class="rich-link g-col-4">
+            <div class="rich-link-header">
+                <icon class="page-header-icon" icon="Star"></icon>
+                <h3>Acknowledgements</h3>
+            </div>
+
+            <div class="rich-link-body copy copy-3">
+                <p>Discover the partners, funders, users, and collaborators for the Platform.</p>
+            </div>
+
+            <div class="rich-link-footer">
+                <a [routerLink]="['/acknowledgements']" class="btn btn-primary-outline btn-sm">Explore</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="open-source grid-12 section-spacing-top">
+        <h2 class="divider-header g-col-12">Open-Source Community</h2>
+        <div class="rich-link g-col-4">
+            <div class="rich-link-header">
+                <icon class="page-header-icon" icon="Code"></icon>
+                <h3>Our Platform is Open-Source</h3>
+            </div>
+
+            <div class="rich-link-body copy copy-3">
+                <p>
+                    The Groundwater Accounting Platform is an open-source platform, which means the underlying technology is available to others to build upon or use how you
+                    choose. The project is licensed under the <strong>GNU Affero General Public License v3.0 (AGPL-3.0).</strong>
+                </p>
+            </div>
+
+            <div class="rich-link-footer">
+                <a href="https://github.com/sitkatech/qanat-community" class="btn btn-primary-outline btn-sm" target="blank">View the Code on Github</a>
+            </div>
+        </div>
+
+        <div class="rich-link g-col-4">
+            <div class="rich-link-header">
+                <img src="assets/main/logos/get-icon.png" alt="GET Logo" />
+                <h3>Groundwater Evaluation Toolbox</h3>
+            </div>
+
+            <div class="rich-link-body copy copy-3">
+                <p>
+                    The Groundwater Evaluation Toolbox (GET) allows you to use groundwater models to answer water management questions, in real time, conveniently at your computer
+                    with an easy-to-use interface that lets you run as many hypothetical scenarios as desired.
+                </p>
+            </div>
+
+            <div class="rich-link-footer">
+                <a href="https://get.olsson.com/" class="btn btn-primary-outline btn-sm" target="blank">Learn more</a>
+            </div>
+        </div>
+
+        <div class="rich-link g-col-4">
+            <div class="rich-link-header">
+                <icon class="page-header-icon" icon="License"></icon>
+                <h3>License & Copyright</h3>
+            </div>
+
+            <div class="rich-link-body copy copy-3">
+                <p>Learn more about the Platform's GNU Affero General Public License (AGPL).</p>
+            </div>
+
+            <div class="rich-link-footer">
+                <a [routerLink]="['/license']" class="btn btn-primary-outline btn-sm" target="blank">Learn more</a>
+            </div>
+        </div>
+    </section>
+</div>

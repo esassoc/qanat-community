@@ -94,17 +94,24 @@
         padding: 0.25rem;
     }
 
-    .ag-icon-menu:before {
-        font-family: "FontAwesome";
-        font-size: 0.75rem;
-        content: "\f0b0";
-        display: block;
+    .ag-icon-filter::before {
+        content: "";
     }
 
-    .ag-icon-filter:before {
+    .ag-filter-active .ag-icon-filter:before {
         font-family: "FontAwesome";
         content: "*";
         color: $orange-default;
+        position: relative;
+        left: -10px;
+    }
+
+    .ag-icon-filter:after {
+        font-family: "FontAwesome";
+        font-size: 0.75rem;
+        content: "\f0b0" !important;
+        display: block;
+        color: #fff;
     }
 
     .ag-icon-asc:before,

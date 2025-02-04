@@ -23,6 +23,7 @@ namespace Qanat.Models.DataTransferObjects
         public string Company { get; set; }
         public Guid? ImpersonatedUserGuid { get; set; }
         public bool IsClientUser { get; set; }
+        public int ScenarioPlannerRoleID { get; set; }
         public int? GETRunCustomerID { get; set; }
         public int? GETRunUserID { get; set; }
     }

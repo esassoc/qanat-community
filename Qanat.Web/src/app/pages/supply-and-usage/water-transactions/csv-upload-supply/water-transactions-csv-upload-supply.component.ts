@@ -1,37 +1,35 @@
 import { Component, OnInit, Inject, ChangeDetectorRef } from "@angular/core";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
-import { DOCUMENT, NgIf } from "@angular/common";
+import { AsyncPipe, DOCUMENT, NgIf } from "@angular/common";
 import { AuthenticationService } from "src/app/shared/services/authentication.service";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
 import { Alert } from "src/app/shared/models/alert";
 import { UserDto } from "src/app/shared/generated/model/user-dto";
 import { WaterTypeSimpleDto } from "src/app/shared/generated/model/water-type-simple-dto";
-import { WaterTypeService } from "src/app/shared/generated/api/water-type.service";
-import { ParcelSupplyService } from "src/app/shared/generated/api/parcel-supply.service";
 import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
-import { Subscription } from "rxjs";
-import { SelectedGeographyService } from "src/app/shared/services/selected-geography.service";
+import { Observable, switchMap, tap } from "rxjs";
 import { NgSelectModule } from "@ng-select/ng-select";
 import { FormsModule } from "@angular/forms";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { AlertDisplayComponent } from "src/app/shared/components/alert-display/alert-display.component";
 import { ButtonComponent } from "src/app/shared/components/button/button.component";
 import { FieldDefinitionComponent } from "src/app/shared/components/field-definition/field-definition.component";
+import { WaterTypeByGeographyService } from "src/app/shared/generated/api/water-type-by-geography.service";
+import { ParcelSupplyByGeographyService } from "src/app/shared/generated/api/parcel-supply-by-geography.service";
+import { CurrentGeographyService } from "src/app/shared/services/current-geography.service";
+import { GeographyMinimalDto } from "src/app/shared/generated/model/models";
 
 @Component({
     selector: "water-transactions-csv-upload-supply",
     templateUrl: "./water-transactions-csv-upload-supply.component.html",
     styleUrls: ["./water-transactions-csv-upload-supply.component.scss"],
     standalone: true,
-    imports: [PageHeaderComponent, RouterLink, AlertDisplayComponent, FormsModule, ButtonComponent, NgSelectModule, FieldDefinitionComponent, NgIf],
+    imports: [AsyncPipe, PageHeaderComponent, RouterLink, AlertDisplayComponent, FormsModule, ButtonComponent, NgSelectModule, FieldDefinitionComponent, NgIf],
 })
 export class WaterTransactionsCsvUploadSupplyComponent implements OnInit {
-    public geographyID: number;
-    private selectedGeography$: Subscription = Subscription.EMPTY;
-    private currentUser: UserDto;
-
-    public waterTypes: WaterTypeSimpleDto[];
+    public geography$: Observable<GeographyMinimalDto>;
+    public waterTypes$: Observable<WaterTypeSimpleDto[]>;
 
     public fileUpload: File;
     public fileUploadElementID = "file-upload";
@@ -43,39 +41,22 @@ export class WaterTransactionsCsvUploadSupplyComponent implements OnInit {
     public richTextTypeID = CustomRichTextTypeEnum.WaterTransactionCSVUploadSupply;
 
     constructor(
-        private authenticationService: AuthenticationService,
         private router: Router,
         private route: ActivatedRoute,
-        private cdr: ChangeDetectorRef,
-        private ParcelSupplyService: ParcelSupplyService,
-        private waterTypeService: WaterTypeService,
+        private parcelSupplyByGeographyService: ParcelSupplyByGeographyService,
+        private waterTypeByGeographyService: WaterTypeByGeographyService,
         private alertService: AlertService,
-        private selectedGeographyService: SelectedGeographyService,
+        private currentGeographyService: CurrentGeographyService,
         @Inject(DOCUMENT) private document: Document
     ) {}
 
     ngOnInit(): void {
-        this.selectedGeography$ = this.selectedGeographyService.curentUserSelectedGeographyObservable.subscribe((geography) => {
-            this.geographyID = geography.GeographyID;
-            this.getDataForGeographyID(this.geographyID);
-        });
-    }
-
-    private getDataForGeographyID(geographyID: number): void {
-        this.authenticationService.getCurrentUser().subscribe((currentUser) => {
-            this.currentUser = currentUser;
-
-            this.waterTypeService.geographiesGeographyIDWaterTypesActiveGet(geographyID).subscribe((waterTypes) => {
-                this.waterTypes = waterTypes;
-            });
-
-            this.cdr.detectChanges();
-        });
-    }
-
-    ngOnDestroy() {
-        this.cdr.detach();
-        this.selectedGeography$.unsubscribe();
+        this.geography$ = this.currentGeographyService.getCurrentGeography();
+        this.waterTypes$ = this.geography$.pipe(
+            switchMap((geography) => {
+                return this.waterTypeByGeographyService.geographiesGeographyIDWaterTypesGet(geography.GeographyID);
+            })
+        );
     }
 
     public onFileUploadChange(event: any) {
@@ -114,7 +95,7 @@ export class WaterTransactionsCsvUploadSupplyComponent implements OnInit {
         return isValid;
     }
 
-    public onSubmit() {
+    public onSubmit(geography: GeographyMinimalDto) {
         this.isLoadingSubmit = true;
         this.alertService.clearAlerts();
 
@@ -123,7 +104,7 @@ export class WaterTransactionsCsvUploadSupplyComponent implements OnInit {
             return;
         }
 
-        this.ParcelSupplyService.geographiesGeographyIDParcelSuppliesCsvPost(this.geographyID, this.fileUpload, this.effectiveDate, this.waterTypeID).subscribe(
+        this.parcelSupplyByGeographyService.geographiesGeographyIDParcelSuppliesCsvPost(geography.GeographyID, this.fileUpload, this.effectiveDate, this.waterTypeID).subscribe(
             (response) => {
                 this.isLoadingSubmit = false;
 
@@ -132,9 +113,7 @@ export class WaterTransactionsCsvUploadSupplyComponent implements OnInit {
                 });
             },
             (error) => {
-                console.log(error);
                 this.isLoadingSubmit = false;
-                this.cdr.detectChanges();
 
                 if (error.error?.UploadedFile) {
                     this.fileUpload = null;

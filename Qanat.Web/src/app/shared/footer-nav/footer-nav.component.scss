@@ -1,46 +1,41 @@
 @use "/src/scss/abstracts" as *;
 
 .site-footer {
-    background-color: $primary;
-    font-size: $type-size-200;
-    color: $white;
-    padding: 2rem;
+    background-color: $blue-700;
+    color: $gray-0;
+    padding: $spacing-700 $spacing-600;
 
-    .credits {
-        @include desktop-small {
-            grid-column: 4 / span 6;
-            text-align: center;
-        }
+    &__links {
+        display: grid;
+        gap: $spacing-200;
     }
 
-    .copy-3 {
-        line-height: 1.5em;
-    }
-
-    .ck {
-        a {
-            color: unset;
-        }
-    }
-
-    .btn-secondary-outline {
-        color: $white;
-        border-color: $white;
+    &__link {
+        display: block;
+        font-size: $type-size-200;
+        text-decoration: none;
 
         &:hover {
-            background: $white;
-            color: $primary;
+            text-decoration: underline;
         }
     }
-}
-
-custom-rich-text a {
-    color: $white;
 }
 
 .system-info {
-    display: flex;
-    gap: 2rem;
-    color: #fff;
-    justify-content: center;
+    display: inline-flex;
+    gap: $spacing-300;
+    justify-content: flex-end;
+
+    &__detail {
+        display: block;
+        font-size: $type-size-050;
+        font-family: $overpass-mono;
+        text-transform: uppercase;
+        line-height: 1;
+        letter-spacing: 0.05em;
+        background: rgba($gray-0, 0.05);
+        padding: $spacing-300;
+        padding-bottom: 10px;
+        border-radius: $border-radius-200;
+    }
 }

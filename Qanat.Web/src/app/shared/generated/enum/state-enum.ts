@@ -2,6 +2,9 @@
 //  This file is generated. Your changes will be lost.
 //  Source Table: [dbo].[State]
 
+import { LookupTableEntry } from "src/app/shared/models/lookup-table-entry";
+import { SelectDropdownOption } from "src/app/shared/components/inputs/select-dropdown/select-dropdown.component"
+
 export enum StateEnum {
   Alabama = 1,
   Alaska = 2,
@@ -54,3 +57,57 @@ export enum StateEnum {
   Wisconsin = 49,
   Wyoming = 50
 }
+
+export const States: LookupTableEntry[]  = [
+  { Name: "Alabama", DisplayName: "Alabama", Value: 1 },
+  { Name: "Alaska", DisplayName: "Alaska", Value: 2 },
+  { Name: "Arizona", DisplayName: "Arizona", Value: 3 },
+  { Name: "Arkansas", DisplayName: "Arkansas", Value: 4 },
+  { Name: "California", DisplayName: "California", Value: 5 },
+  { Name: "Colorado", DisplayName: "Colorado", Value: 6 },
+  { Name: "Connecticut", DisplayName: "Connecticut", Value: 7 },
+  { Name: "Delaware", DisplayName: "Delaware", Value: 8 },
+  { Name: "Florida", DisplayName: "Florida", Value: 9 },
+  { Name: "Georgia", DisplayName: "Georgia", Value: 10 },
+  { Name: "Hawaii", DisplayName: "Hawaii", Value: 11 },
+  { Name: "Idaho", DisplayName: "Idaho", Value: 12 },
+  { Name: "Illinois", DisplayName: "Illinois", Value: 13 },
+  { Name: "Indiana", DisplayName: "Indiana", Value: 14 },
+  { Name: "Iowa", DisplayName: "Iowa", Value: 15 },
+  { Name: "Kansas", DisplayName: "Kansas", Value: 16 },
+  { Name: "Kentucky", DisplayName: "Kentucky", Value: 17 },
+  { Name: "Louisiana", DisplayName: "Louisiana", Value: 18 },
+  { Name: "Maine", DisplayName: "Maine", Value: 19 },
+  { Name: "Maryland", DisplayName: "Maryland", Value: 20 },
+  { Name: "Massachusetts", DisplayName: "Massachusetts", Value: 21 },
+  { Name: "Michigan", DisplayName: "Michigan", Value: 22 },
+  { Name: "Minnesota", DisplayName: "Minnesota", Value: 23 },
+  { Name: "Mississippi", DisplayName: "Mississippi", Value: 24 },
+  { Name: "Missouri", DisplayName: "Missouri", Value: 25 },
+  { Name: "Montana", DisplayName: "Montana", Value: 26 },
+  { Name: "Nebraska", DisplayName: "Nebraska", Value: 27 },
+  { Name: "Nevada", DisplayName: "Nevada", Value: 28 },
+  { Name: "New Hampshire", DisplayName: "New Hampshire", Value: 29 },
+  { Name: "New Jersey", DisplayName: "New Jersey", Value: 30 },
+  { Name: "New Mexico", DisplayName: "New Mexico", Value: 31 },
+  { Name: "New York", DisplayName: "New York", Value: 32 },
+  { Name: "North Carolina", DisplayName: "North Carolina", Value: 33 },
+  { Name: "North Dakota", DisplayName: "North Dakota", Value: 34 },
+  { Name: "Ohio", DisplayName: "Ohio", Value: 35 },
+  { Name: "Oklahoma", DisplayName: "Oklahoma", Value: 36 },
+  { Name: "Oregon", DisplayName: "Oregon", Value: 37 },
+  { Name: "Pennsylvania", DisplayName: "Pennsylvania", Value: 38 },
+  { Name: "Rhode Island", DisplayName: "Rhode Island", Value: 39 },
+  { Name: "South Carolina", DisplayName: "South Carolina", Value: 40 },
+  { Name: "South Dakota", DisplayName: "South Dakota", Value: 41 },
+  { Name: "Tennessee", DisplayName: "Tennessee", Value: 42 },
+  { Name: "Texas", DisplayName: "Texas", Value: 43 },
+  { Name: "Utah", DisplayName: "Utah", Value: 44 },
+  { Name: "Vermont", DisplayName: "Vermont", Value: 45 },
+  { Name: "Virginia", DisplayName: "Virginia", Value: 46 },
+  { Name: "Washington", DisplayName: "Washington", Value: 47 },
+  { Name: "West Virginia", DisplayName: "West Virginia", Value: 48 },
+  { Name: "Wisconsin", DisplayName: "Wisconsin", Value: 49 },
+  { Name: "Wyoming", DisplayName: "Wyoming", Value: 50 }
+];
+export const StatesAsSelectDropdownOptions = [{ Value: null, Label: "- Select -", Disabled: true }, ...States.map((x) => ({ Value: x.Value, Label: x.DisplayName } as SelectDropdownOption))];

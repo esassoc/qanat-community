@@ -3,8 +3,8 @@ import { CommonModule } from "@angular/common";
 import { Observable } from "rxjs";
 import { ScenarioEnum } from "src/app/shared/generated/enum/scenario-enum";
 import { IconComponent } from "../../../icon/icon.component";
-import { GETActionService } from "src/app/shared/generated/api/get-action.service";
 import { ScenarioSimpleDto } from "src/app/shared/generated/model/models";
+import { ScenarioService } from "src/app/shared/generated/api/scenario.service";
 
 @Component({
     selector: "scenario-image",
@@ -18,9 +18,9 @@ export class ScenarioImageComponent implements OnInit {
     readonly ScenarioEnum = ScenarioEnum;
 
     public image$: Observable<string>;
-    constructor(private getActionService: GETActionService) {}
+    constructor(private scenarioService: ScenarioService) {}
 
     ngOnInit(): void {
-        this.image$ = this.getActionService.scenariosScenarioIDImageGet(this.scenario.ScenarioID);
+        this.image$ = this.scenarioService.scenariosScenarioIDImageGet(this.scenario.ScenarioID);
     }
 }

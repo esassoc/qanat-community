@@ -6,19 +6,22 @@
     </ng-template>
 </page-header>
 
-<div class="page-body">
+<div class="page-body" *ngIf="geography$ | async as geography">
     <app-alert-display></app-alert-display>
 
     <div class="form grid-9 mb-4">
         <div class="field g-col-half">
-            <reporting-period-select [geographyID]="geographyID" [defaultDisplayYear]="selectedYear" (selectionChanged)="changeSelectedYear($event)"></reporting-period-select>
+            <reporting-period-select
+                [geographyID]="geography.GeographyID"
+                [defaultDisplayYear]="selectedYear$ | async"
+                (selectionChanged)="changeSelectedYear($event)"></reporting-period-select>
         </div>
     </div>
     <div>
         <qanat-grid
             height="500px"
-            [rowData]="parcelWaterSupplyAndUsages"
-            [columnDefs]="columnDefs"
+            [rowData]="parcelSupply$ | async"
+            [columnDefs]="columnDefs$ | async"
             rowSelection="multiple"
             [rowMultiSelectWithClick]="true"
             (selectionChanged)="onSelectionChanged($event)"
@@ -30,7 +33,13 @@
     <form class="form pt-4 mb-3 grid-9" *ngIf="model">
         <div class="field">
             <label class="d-block required field-label">Supply Type</label>
-            <ng-select class="form-control" name="waterType" [(ngModel)]="model.WaterTypeID" [items]="waterTypes" bindLabel="WaterTypeName" bindValue="WaterTypeID"></ng-select>
+            <ng-select
+                class="form-control"
+                name="waterType"
+                [(ngModel)]="model.WaterTypeID"
+                [items]="waterTypes$ | async"
+                bindLabel="WaterTypeName"
+                bindValue="WaterTypeID"></ng-select>
             <field-definition fieldDefinitionType="SupplyType"></field-definition>
         </div>
 
@@ -53,8 +62,8 @@
     </form>
 </div>
 
-<div class="page-footer">
-    <fresca-button class="ml-auto" (click)="onSubmit()" [disabled]="isLoadingSubmit || noParcelsSelected">
+<div class="page-footer" *ngIf="geography$ | async as geography">
+    <fresca-button class="ml-auto" (click)="onSubmit(geography)" [disabled]="isLoadingSubmit || noParcelsSelected">
         <span *ngIf="isLoadingSubmit" class="fa fa-spinner loading-spinner"></span>
         Save
     </fresca-button>

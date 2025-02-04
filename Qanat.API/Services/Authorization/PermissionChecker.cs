@@ -137,5 +137,27 @@ namespace Qanat.API.Services.Authorization
 
             return hasRights;
         }
+
+        public static bool HasScenarioPlannerPermission(UserDto user, PermissionEnum permission, RightsEnum rights)
+        {
+            if (user == null)
+            {
+                return false;
+            }
+
+            short mask = 0;
+            var permissionName = Enum.GetName(typeof(PermissionEnum), permission);
+
+            if (!string.IsNullOrEmpty(permissionName))
+            {
+                if (user.ScenarioPlannerRights.TryGetValue(permissionName, out var right))
+                {
+                    mask = right;
+                }
+            }
+
+            var rightEnum = (RightsEnum)mask;
+            return rightEnum.HasFlag(rights);
+        }
     }
 }

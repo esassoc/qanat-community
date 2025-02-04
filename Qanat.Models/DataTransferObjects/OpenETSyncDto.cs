@@ -1,4 +1,5 @@
 using System;
+using Qanat.Models.DataTransferObjects.Geography;
 
 namespace Qanat.Models.DataTransferObjects;
 

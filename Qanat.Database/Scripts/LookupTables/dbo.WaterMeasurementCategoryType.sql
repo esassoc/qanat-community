@@ -6,7 +6,8 @@ USING (VALUES
 (4, 'SurfaceWater', 'Surface Water'),
 (5, 'Calculated', 'Calculated'),
 (6, 'Precipitation Credit', 'PrecipitationCredit'),
-(7, 'Manual Adjustment', 'ManualAdjustment')
+(7, 'Manual Adjustment', 'ManualAdjustment'),
+(8, 'Self Reported', 'SelfReported')
 )
 AS Source (WaterMeasurementCategoryTypeID, WaterMeasurementCategoryTypeName, WaterMeasurementCategoryTypeDisplayName)
 ON Target.WaterMeasurementCategoryTypeID = Source.WaterMeasurementCategoryTypeID

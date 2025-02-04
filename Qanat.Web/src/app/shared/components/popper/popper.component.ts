@@ -11,12 +11,15 @@ import { NgIf, NgTemplateOutlet } from "@angular/common";
 export class PopperComponent implements OnInit {
     @Input() context: TemplateRef<any>;
     @Input() title: TemplateRef<any> | string;
-
     constructor() {}
 
     ngOnInit(): void {}
 
-    titleIsTemplate(): boolean {
-        return this.title instanceof TemplateRef;
+    get titleAsTemplate(): TemplateRef<any> | null {
+        return this.title instanceof TemplateRef ? this.title : null;
+    }
+
+    get titleAsString(): string | null {
+        return typeof this.title === "string" ? this.title : null;
     }
 }

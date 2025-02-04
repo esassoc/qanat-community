@@ -1,7 +1,6 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild, ViewContainerRef } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { routeParams } from "src/app/app.routes";
-import { GeographyService } from "src/app/shared/generated/api/geography.service";
 import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
 import { BoundingBoxDto } from "src/app/shared/generated/model/bounding-box-dto";
 import { AgGridAngular } from "ag-grid-angular";
@@ -26,28 +25,49 @@ import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
 import { MonitoringWellDataDto } from "src/app/shared/generated/model/monitoring-well-data-dto";
 import { GeographyEnum } from "src/app/shared/models/enums/geography.enum";
 import { GeographyWithBoundingBoxDto } from "src/app/shared/generated/model/geography-with-bounding-box-dto";
-import { NgIf } from "@angular/common";
+import { AsyncPipe, NgIf } from "@angular/common";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { QanatGridComponent } from "src/app/shared/components/qanat-grid/qanat-grid.component";
 import { AlertDisplayComponent } from "src/app/shared/components/alert-display/alert-display.component";
 import { CustomRichTextComponent } from "src/app/shared/components/custom-rich-text/custom-rich-text.component";
 import { ModelNameTagComponent } from "src/app/shared/components/name-tag/name-tag.component";
-import { ParcelMapComponent } from "src/app/shared/components/parcel-map/parcel-map.component";
 import { ButtonLoadingDirective } from "src/app/shared/directives/button-loading.directive";
+import { QanatMapComponent, QanatMapInitEvent } from "src/app/shared/components/leaflet/qanat-map/qanat-map.component";
+import { GsaBoundariesComponent } from "src/app/shared/components/leaflet/layers/gsa-boundaries/gsa-boundaries.component";
+import { MonitoringWellsLayerComponent } from "src/app/shared/components/leaflet/layers/monitoring-wells-layer/monitoring-wells-layer.component";
+import * as L from "leaflet";
+import { Observable, tap } from "rxjs";
+import { PublicService } from "src/app/shared/generated/api/public.service";
+import { AuthorizationHelper } from "src/app/shared/helpers/authorization-helper";
+import { FlagEnum } from "src/app/shared/generated/enum/flag-enum";
 
 @Component({
     selector: "geography-groundwater-levels",
     templateUrl: "./geography-groundwater-levels.component.html",
     styleUrls: ["./geography-groundwater-levels.component.scss"],
     standalone: true,
-    imports: [NgIf, PageHeaderComponent, ModelNameTagComponent, AlertDisplayComponent, ButtonLoadingDirective, ParcelMapComponent, CustomRichTextComponent, QanatGridComponent],
+    imports: [
+        NgIf,
+        PageHeaderComponent,
+        ModelNameTagComponent,
+        AlertDisplayComponent,
+        ButtonLoadingDirective,
+        CustomRichTextComponent,
+        QanatGridComponent,
+        QanatMapComponent,
+        GsaBoundariesComponent,
+        MonitoringWellsLayerComponent,
+        AsyncPipe,
+    ],
 })
 export class GeographyGroundwaterLevelsComponent implements OnInit, OnDestroy {
     @ViewChild("monitoringWellsGrid") monitoringWellsGrid: AgGridAngular;
 
     private currentUser: UserDto;
 
+    public geography$: Observable<GeographyWithBoundingBoxDto>;
     public geography: GeographyWithBoundingBoxDto;
+
     public customRichTextTypeID = CustomRichTextTypeEnum.GeographyWaterLevels;
     public monitoringWellsCustomRichTextTypeID = CustomRichTextTypeEnum.MonitoringWellsGrid;
     public isLoading = true;
@@ -64,14 +84,18 @@ export class GeographyGroundwaterLevelsComponent implements OnInit, OnDestroy {
     public set highlightedMonitoringWellID(value: number) {
         if (value != this._highlightedMonitoringWellID) {
             this._highlightedMonitoringWellID = value;
-            this.selecthighlightedMonitoringWellIDRowNode();
+            this.selectHighlightedMonitoringWellIDRowNode();
         }
     }
 
+    public map: L.Map;
+    public layerControl: L.layerControl;
+    public mapIsReady: boolean = false;
+
     constructor(
-        private geographyService: GeographyService,
         private route: ActivatedRoute,
         private monitoringWellService: MonitoringWellService,
+        private publicService: PublicService,
         private cdr: ChangeDetectorRef,
         private utilityFunctionsService: UtilityFunctionsService,
         private modalService: ModalService,
@@ -85,24 +109,45 @@ export class GeographyGroundwaterLevelsComponent implements OnInit, OnDestroy {
         this.authenticationService.getCurrentUser().subscribe((currentUser) => (this.currentUser = currentUser));
 
         const geographyName = this.route.snapshot.paramMap.get(routeParams.geographyName);
+        this.geography$ = this.publicService.publicGeographiesBoundingBoxGeographyNameGet(geographyName).pipe(
+            tap((geography) => {
+                this.isLoading = false;
+                this.geography = geography;
+                this.fitGeographyBounds();
 
-        this.geographyService.publicGeographyBoundingBoxGeographyNameGet(geographyName).subscribe((geography) => {
-            this.geography = geography;
-
-            this.updateGridData();
-            this.createColumnDefs();
-            this.isLoading = false;
-        });
+                this.createColumnDefs();
+                this.updateGridData();
+            })
+        );
     }
 
     ngOnDestroy(): void {
         this.cdr.detach();
     }
 
+    handleMapReady(event: QanatMapInitEvent): void {
+        this.map = event.map;
+        this.layerControl = event.layerControl;
+        this.mapIsReady = true;
+        this.fitGeographyBounds();
+        this.cdr.detectChanges();
+    }
+
+    fitGeographyBounds() {
+        if (!this.mapIsReady) return;
+        if (!this.geography) return;
+
+        if (this.geography.BoundingBox?.Left && this.geography.BoundingBox.Right && this.geography.BoundingBox.Top && this.geography.BoundingBox.Bottom) {
+            this.map.fitBounds([
+                [this.geography.BoundingBox.Bottom, this.geography.BoundingBox.Left],
+                [this.geography.BoundingBox.Top, this.geography.BoundingBox.Right],
+            ]);
+        }
+    }
+
     public updateGridData(): void {
-        this.monitoringWellService.geographiesGeographyIDMonitoringWellsGet(this.geography.GeographyID).subscribe((monitoringWells) => {
+        this.publicService.publicGeographiesGeographyIDMonitoringWellsGet(this.geography.GeographyID).subscribe((monitoringWells) => {
             this.monitoringWellData = monitoringWells;
-            this.monitoringWellsGrid.api.hideOverlay();
             this.cdr.detectChanges();
         });
     }
@@ -149,7 +194,7 @@ export class GeographyGroundwaterLevelsComponent implements OnInit, OnDestroy {
             .instance.result.then((result) => {});
     }
 
-    public selecthighlightedMonitoringWellIDRowNode() {
+    public selectHighlightedMonitoringWellIDRowNode() {
         this.monitoringWellsGrid.api.forEachNodeAfterFilterAndSort((rowNode, index) => {
             if (rowNode.data.MonitoringWellID == this.highlightedMonitoringWellID) {
                 rowNode.setSelected(true);
@@ -164,7 +209,7 @@ export class GeographyGroundwaterLevelsComponent implements OnInit, OnDestroy {
 
     public currentUserHasMonitoringWellUpdatePermissions() {
         if (!this.currentUser) return false;
-        if (this.authenticationService.isCurrentUserAnAdministrator()) return true;
+        if (AuthorizationHelper.isSystemAdministrator(this.currentUser)) return true;
 
         return this.authenticationService.hasGeographyPermission(this.currentUser, PermissionEnum.MonitoringWellRights, RightsEnum.Update, this.geography.GeographyID);
     }

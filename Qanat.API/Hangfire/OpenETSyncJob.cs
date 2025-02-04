@@ -38,8 +38,12 @@ public class OpenETSyncJob : ScheduledBackgroundJobBase<OpenETSyncJob>
         var newOpenETSyncs = new List<OpenETSync>();
         foreach (var geography in geographies)
         {
+            var geographyReportingPeriods = DbContext.ReportingPeriods.AsNoTracking().Where(x => x.GeographyID == geography.GeographyID);
+            var geographyStartingReportingPeriod = geographyReportingPeriods.MinBy(x => x.StartDate);
+            var geographyStartYear = geographyStartingReportingPeriod.StartDate.Year;
+
             var existingOpenETSyncs = geography.OpenETSyncs.ToDictionary(x => $"{x.Year}_{x.Month}_{x.OpenETDataTypeID}");
-            for (var year = geography.StartYear; year <= currentYear; year++)
+            for (var year = geographyStartYear; year <= currentYear; year++)
             {
                 var finalMonth = year == currentYear ? today.Month - 1 : 12;
                 for (var month = 1; month <= finalMonth; month++)

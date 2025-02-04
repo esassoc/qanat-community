@@ -1,9 +1,8 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, OnDestroy } from "@angular/core";
 import { ActivatedRoute, RouterLink } from "@angular/router";
 import { Observable, Subscription } from "rxjs";
 import { routeParams } from "src/app/app.routes";
 import { AuthenticationService } from "src/app/shared/services/authentication.service";
-import { GeographyService } from "src/app/shared/generated/api/geography.service";
 import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
 import { GeographyDto, UserDto } from "src/app/shared/generated/model/models";
 import { ButtonComponent } from "../../../../shared/components/button/button.component";
@@ -11,6 +10,7 @@ import { CustomRichTextComponent } from "../../../../shared/components/custom-ri
 import { AlertDisplayComponent } from "../../../../shared/components/alert-display/alert-display.component";
 import { NgIf, AsyncPipe } from "@angular/common";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
+import { PublicService } from "src/app/shared/generated/api/public.service";
 
 @Component({
     selector: "onboard-overview",
@@ -19,7 +19,7 @@ import { PageHeaderComponent } from "src/app/shared/components/page-header/page-
     standalone: true,
     imports: [PageHeaderComponent, NgIf, AlertDisplayComponent, CustomRichTextComponent, ButtonComponent, RouterLink, AsyncPipe],
 })
-export class OnboardOverviewComponent implements OnInit {
+export class OnboardOverviewComponent implements OnInit, OnDestroy {
     private currentUserSubscription: Subscription;
     public currentUser: UserDto;
 
@@ -28,11 +28,7 @@ export class OnboardOverviewComponent implements OnInit {
     public mainCustomRichTextID: CustomRichTextTypeEnum = CustomRichTextTypeEnum.OnboardOverviewContent;
     public sidebarCustomRichTextID: CustomRichTextTypeEnum = CustomRichTextTypeEnum.OnboardOverview;
 
-    constructor(
-        private authenticationService: AuthenticationService,
-        private route: ActivatedRoute,
-        private geographyService: GeographyService
-    ) {}
+    constructor(private authenticationService: AuthenticationService, private route: ActivatedRoute, private publicService: PublicService) {}
 
     ngOnInit(): void {
         this.currentUserSubscription = this.authenticationService.currentUserSetObservable.subscribe((user) => {
@@ -40,7 +36,7 @@ export class OnboardOverviewComponent implements OnInit {
         });
 
         const geographyName = this.route.snapshot.paramMap.get(routeParams.geographyName);
-        this.geography$ = this.geographyService.publicGeographyNameGeographyNameGet(geographyName);
+        this.geography$ = this.publicService.publicGeographiesNameGeographyNameGet(geographyName);
     }
 
     ngOnDestroy(): void {

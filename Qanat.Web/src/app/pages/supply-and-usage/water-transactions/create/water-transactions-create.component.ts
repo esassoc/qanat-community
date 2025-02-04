@@ -7,36 +7,46 @@ import { ParcelSupplyUpsertDto } from "src/app/shared/generated/model/parcel-sup
 import { Alert } from "src/app/shared/models/alert";
 import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
 import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
-import { Subscription } from "rxjs";
-import { SelectedGeographyService } from "src/app/shared/services/selected-geography.service";
-import { ParcelMinimalDto, UserDto, WaterTypeSimpleDto } from "src/app/shared/generated/model/models";
+import { Observable, switchMap, tap } from "rxjs";
+import { ParcelMinimalDto, UserDto, GeographyMinimalDto, WaterTypeSimpleDto } from "src/app/shared/generated/model/models";
 import { ParcelService } from "src/app/shared/generated/api/parcel.service";
-import { ParcelSupplyService } from "src/app/shared/generated/api/parcel-supply.service";
-import { WaterTypeService } from "src/app/shared/generated/api/water-type.service";
-import { NgIf } from "@angular/common";
+import { AsyncPipe, NgIf } from "@angular/common";
 import { NgSelectModule } from "@ng-select/ng-select";
 import { FormsModule } from "@angular/forms";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { AlertDisplayComponent } from "src/app/shared/components/alert-display/alert-display.component";
 import { ButtonComponent } from "src/app/shared/components/button/button.component";
 import { FieldDefinitionComponent } from "src/app/shared/components/field-definition/field-definition.component";
-import { ParcelTypeaheadComponent } from "src/app/shared/components/parcel-typeahead/parcel-typeahead.component";
+import { ParcelTypeaheadComponent } from "src/app/shared/components/parcel/parcel-typeahead/parcel-typeahead.component";
+import { WaterTypeByGeographyService } from "src/app/shared/generated/api/water-type-by-geography.service";
+import { ParcelSupplyByGeographyService } from "src/app/shared/generated/api/parcel-supply-by-geography.service";
+import { CurrentGeographyService } from "src/app/shared/services/current-geography.service";
 
 @Component({
     selector: "water-transactions-create",
     templateUrl: "./water-transactions-create.component.html",
     styleUrls: ["./water-transactions-create.component.scss"],
     standalone: true,
-    imports: [PageHeaderComponent, RouterLink, AlertDisplayComponent, FormsModule, ParcelTypeaheadComponent, NgSelectModule, FieldDefinitionComponent, ButtonComponent, NgIf],
+    imports: [
+        AsyncPipe,
+        PageHeaderComponent,
+        RouterLink,
+        AlertDisplayComponent,
+        FormsModule,
+        ParcelTypeaheadComponent,
+        NgSelectModule,
+        FieldDefinitionComponent,
+        ButtonComponent,
+        NgIf,
+    ],
 })
 export class WaterTransactionsCreateComponent implements OnInit {
-    private selectedGeography$: Subscription = Subscription.EMPTY;
-    public geographyID: number;
+    public geography$: Observable<GeographyMinimalDto>;
 
-    public currentUser: UserDto;
+    public currentUser$: Observable<UserDto>;
+    public waterTypes$: Observable<WaterTypeSimpleDto[]>;
 
     public selectedParcel: ParcelMinimalDto;
-    public waterTypes: WaterTypeSimpleDto[];
     public model: ParcelSupplyUpsertDto;
 
     public isLoadingSubmit: boolean = false;
@@ -45,54 +55,43 @@ export class WaterTransactionsCreateComponent implements OnInit {
     constructor(
         private route: ActivatedRoute,
         private router: Router,
-        private cdr: ChangeDetectorRef,
-        private authenticationService: AuthenticationService,
         private parcelService: ParcelService,
-        private ParcelSupplyService: ParcelSupplyService,
-        private waterTypeService: WaterTypeService,
+        private parcelSupplyByGeographyService: ParcelSupplyByGeographyService,
+        private waterTypeByGeographyService: WaterTypeByGeographyService,
         private alertService: AlertService,
-        private selectedGeographyService: SelectedGeographyService
+        private currentGeographyService: CurrentGeographyService
     ) {}
 
     ngOnInit(): void {
-        this.selectedGeography$ = this.selectedGeographyService.curentUserSelectedGeographyObservable.subscribe((geography) => {
-            this.geographyID = geography.GeographyID;
-            this.getDataForGeographyID(this.geographyID);
-        });
-    }
+        this.geography$ = this.currentGeographyService.getCurrentGeography().pipe(
+            tap((geography) => {
+                // Reset the model when the geography changes
+                this.model = new ParcelSupplyUpsertDto();
+                this.model.ParcelIDs = new Array<number>();
 
-    private getDataForGeographyID(geographyID: number): void {
-        this.authenticationService.getCurrentUser().subscribe((currentUser) => {
-            this.currentUser = currentUser;
+                const id = parseInt(this.route.snapshot.paramMap.get(routeParams.parcelID));
+                if (id) {
+                    this.parcelService.parcelsParcelIDGet(id).subscribe((parcel) => {
+                        this.selectedParcel = parcel;
+                    });
+                } else {
+                    this.selectedParcel = new ParcelMinimalDto();
+                }
+            })
+        );
 
-            this.model = new ParcelSupplyUpsertDto();
-            this.model.ParcelIDs = new Array<number>();
-
-            const id = parseInt(this.route.snapshot.paramMap.get(routeParams.parcelID));
-            if (id) {
-                this.parcelService.parcelsParcelIDGet(id).subscribe((parcel) => {
-                    this.selectedParcel = parcel;
-                });
-            } else {
-                this.selectedParcel = new ParcelMinimalDto();
-            }
-
-            this.waterTypeService.geographiesGeographyIDWaterTypesActiveGet(geographyID).subscribe((waterTypes) => {
-                this.waterTypes = waterTypes;
-            });
-        });
-    }
-
-    ngOnDestroy() {
-        this.cdr.detach();
-        this.selectedGeography$.unsubscribe();
+        this.waterTypes$ = this.geography$.pipe(
+            switchMap((geography) => {
+                return this.waterTypeByGeographyService.geographiesGeographyIDWaterTypesActiveGet(geography.GeographyID);
+            })
+        );
     }
 
     public onSelectedParcelChanged(selectedParcel: ParcelMinimalDto) {
         this.selectedParcel = selectedParcel;
     }
 
-    public onSubmit(): void {
+    public onSubmit(geography: GeographyMinimalDto): void {
         if (!this.selectedParcel?.ParcelID) {
             this.alertService.pushAlert(new Alert("The APN field is required.", AlertContext.Danger));
             return;
@@ -102,14 +101,14 @@ export class WaterTransactionsCreateComponent implements OnInit {
         this.alertService.clearAlerts();
         this.model.ParcelIDs.push(this.selectedParcel.ParcelID);
 
-        this.ParcelSupplyService.geographiesGeographyIDParcelSuppliesPost(this.geographyID, this.model).subscribe({
+        this.parcelSupplyByGeographyService.geographiesGeographyIDParcelSuppliesPost(geography.GeographyID, this.model).subscribe({
             next: () => {
                 this.router.navigate(["../"], { relativeTo: this.route }).then((x) => {
                     this.alertService.pushAlert(new Alert("Your transaction was successfully created.", AlertContext.Success));
                 });
             },
             error: () => {
-                this.cdr.detectChanges();
+                this.alertService.pushAlert(new Alert("An error occurred while creating the transaction.", AlertContext.Danger));
             },
             complete: () => (this.isLoadingSubmit = false),
         });

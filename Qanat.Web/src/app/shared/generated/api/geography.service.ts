@@ -18,13 +18,10 @@ import { CustomHttpUrlEncodingCodec }                        from '../encoder';
 
 import { Observable }                                        from 'rxjs';
 
-import { AdminGeographyUpdateRequestDto } from '../model/admin-geography-update-request-dto';
 import { GeographyBoundarySimpleDto } from '../model/geography-boundary-simple-dto';
 import { GeographyDto } from '../model/geography-dto';
-import { GeographySimpleDto } from '../model/geography-simple-dto';
-import { GeographyUserDto } from '../model/geography-user-dto';
-import { GeographyWithBoundingBoxDto } from '../model/geography-with-bounding-box-dto';
-import { UploadUsageEntityGdbResponseDto } from '../model/upload-usage-entity-gdb-response-dto';
+import { GeographyForAdminEditorsDto } from '../model/geography-for-admin-editors-dto';
+import { GeographyMinimalDto } from '../model/geography-minimal-dto';
 import { UserDto } from '../model/user-dto';
 
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
@@ -74,9 +71,9 @@ export class GeographyService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public geographiesCurrentUserGet(observe?: 'body', reportProgress?: boolean): Observable<Array<GeographySimpleDto>>;
-    public geographiesCurrentUserGet(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<GeographySimpleDto>>>;
-    public geographiesCurrentUserGet(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<GeographySimpleDto>>>;
+    public geographiesCurrentUserGet(observe?: 'body', reportProgress?: boolean): Observable<Array<GeographyMinimalDto>>;
+    public geographiesCurrentUserGet(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<GeographyMinimalDto>>>;
+    public geographiesCurrentUserGet(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<GeographyMinimalDto>>>;
     public geographiesCurrentUserGet(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         let headers = this.defaultHeaders;
@@ -96,7 +93,7 @@ export class GeographyService {
         const consumes: string[] = [
         ];
 
-        return this.httpClient.get<Array<GeographySimpleDto>>(`${this.basePath}/geographies/current-user`,
+        return this.httpClient.get<Array<GeographyMinimalDto>>(`${this.basePath}/geographies/current-user`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
@@ -110,70 +107,17 @@ export class GeographyService {
      * 
      * 
      * @param geographyID 
-     * @param adminGeographyUpdateRequestDto 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public geographiesGeographyIDEditPut(geographyID: number, adminGeographyUpdateRequestDto?: AdminGeographyUpdateRequestDto, observe?: 'body', reportProgress?: boolean): Observable<any>;
-    public geographiesGeographyIDEditPut(geographyID: number, adminGeographyUpdateRequestDto?: AdminGeographyUpdateRequestDto, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<any>>;
-    public geographiesGeographyIDEditPut(geographyID: number, adminGeographyUpdateRequestDto?: AdminGeographyUpdateRequestDto, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<any>>;
-    public geographiesGeographyIDEditPut(geographyID: number, adminGeographyUpdateRequestDto?: AdminGeographyUpdateRequestDto, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    public geographiesGeographyIDEffectiveYearsGet(geographyID: number, observe?: 'body', reportProgress?: boolean): Observable<Array<number>>;
+    public geographiesGeographyIDEffectiveYearsGet(geographyID: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<number>>>;
+    public geographiesGeographyIDEffectiveYearsGet(geographyID: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<number>>>;
+    public geographiesGeographyIDEffectiveYearsGet(geographyID: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         if (geographyID === null || geographyID === undefined) {
-            throw new Error('Required parameter geographyID was null or undefined when calling geographiesGeographyIDEditPut.');
+            throw new Error('Required parameter geographyID was null or undefined when calling geographiesGeographyIDEffectiveYearsGet.');
         }
-
-
-        let headers = this.defaultHeaders;
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers = headers.set('Accept', httpHeaderAcceptSelected);
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-            'application/json-patch+json',
-            'application/json',
-            'text/json',
-            'application/_*+json',
-        ];
-        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
-        if (httpContentTypeSelected != undefined) {
-            headers = headers.set('Content-Type', httpContentTypeSelected);
-        }
-
-        return this.httpClient.put<any>(`${this.basePath}/geographies/${encodeURIComponent(String(geographyID))}/edit`,
-            adminGeographyUpdateRequestDto,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        ).pipe(catchError((error: any) => { return this.apiService.handleError(error)}));
-    }
-
-    /**
-     * 
-     * 
-     * @param geographyID 
-     * @param userDto 
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public geographiesGeographyIDEditWaterManagersPut(geographyID: number, userDto?: Array<UserDto>, observe?: 'body', reportProgress?: boolean): Observable<GeographyDto>;
-    public geographiesGeographyIDEditWaterManagersPut(geographyID: number, userDto?: Array<UserDto>, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<GeographyDto>>;
-    public geographiesGeographyIDEditWaterManagersPut(geographyID: number, userDto?: Array<UserDto>, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<GeographyDto>>;
-    public geographiesGeographyIDEditWaterManagersPut(geographyID: number, userDto?: Array<UserDto>, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-
-        if (geographyID === null || geographyID === undefined) {
-            throw new Error('Required parameter geographyID was null or undefined when calling geographiesGeographyIDEditWaterManagersPut.');
-        }
-
 
         let headers = this.defaultHeaders;
 
@@ -190,18 +134,9 @@ export class GeographyService {
 
         // to determine the Content-Type header
         const consumes: string[] = [
-            'application/json-patch+json',
-            'application/json',
-            'text/json',
-            'application/_*+json',
         ];
-        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
-        if (httpContentTypeSelected != undefined) {
-            headers = headers.set('Content-Type', httpContentTypeSelected);
-        }
 
-        return this.httpClient.put<GeographyDto>(`${this.basePath}/geographies/${encodeURIComponent(String(geographyID))}/edit-water-managers`,
-            userDto,
+        return this.httpClient.get<Array<number>>(`${this.basePath}/geographies/${encodeURIComponent(String(geographyID))}/effectiveYears`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
@@ -258,17 +193,17 @@ export class GeographyService {
      * 
      * 
      * @param geographyID 
-     * @param file 
+     * @param geographyForAdminEditorsDto 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public geographiesGeographyIDUploadUsageEntityGdbPost(geographyID: number, file?: Blob, observe?: 'body', reportProgress?: boolean): Observable<UploadUsageEntityGdbResponseDto>;
-    public geographiesGeographyIDUploadUsageEntityGdbPost(geographyID: number, file?: Blob, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<UploadUsageEntityGdbResponseDto>>;
-    public geographiesGeographyIDUploadUsageEntityGdbPost(geographyID: number, file?: Blob, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<UploadUsageEntityGdbResponseDto>>;
-    public geographiesGeographyIDUploadUsageEntityGdbPost(geographyID: number, file?: Blob, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    public geographiesGeographyIDPut(geographyID: number, geographyForAdminEditorsDto?: GeographyForAdminEditorsDto, observe?: 'body', reportProgress?: boolean): Observable<any>;
+    public geographiesGeographyIDPut(geographyID: number, geographyForAdminEditorsDto?: GeographyForAdminEditorsDto, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<any>>;
+    public geographiesGeographyIDPut(geographyID: number, geographyForAdminEditorsDto?: GeographyForAdminEditorsDto, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<any>>;
+    public geographiesGeographyIDPut(geographyID: number, geographyForAdminEditorsDto?: GeographyForAdminEditorsDto, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         if (geographyID === null || geographyID === undefined) {
-            throw new Error('Required parameter geographyID was null or undefined when calling geographiesGeographyIDUploadUsageEntityGdbPost.');
+            throw new Error('Required parameter geographyID was null or undefined when calling geographiesGeographyIDPut.');
         }
 
 
@@ -276,9 +211,57 @@ export class GeographyService {
 
         // to determine the Accept header
         let httpHeaderAccepts: string[] = [
-            'text/plain',
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers = headers.set('Accept', httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json-patch+json',
             'application/json',
             'text/json',
+            'application/_*+json',
+        ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected != undefined) {
+            headers = headers.set('Content-Type', httpContentTypeSelected);
+        }
+
+        return this.httpClient.put<any>(`${this.basePath}/geographies/${encodeURIComponent(String(geographyID))}`,
+            geographyForAdminEditorsDto,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        ).pipe(catchError((error: any) => { return this.apiService.handleError(error)}));
+    }
+
+    /**
+     * 
+     * 
+     * @param geographyID 
+     * @param file 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public geographiesGeographyIDUploadParcelGdbPost(geographyID: number, file?: Blob, observe?: 'body', reportProgress?: boolean): Observable<any>;
+    public geographiesGeographyIDUploadParcelGdbPost(geographyID: number, file?: Blob, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<any>>;
+    public geographiesGeographyIDUploadParcelGdbPost(geographyID: number, file?: Blob, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<any>>;
+    public geographiesGeographyIDUploadParcelGdbPost(geographyID: number, file?: Blob, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+
+        if (geographyID === null || geographyID === undefined) {
+            throw new Error('Required parameter geographyID was null or undefined when calling geographiesGeographyIDUploadParcelGdbPost.');
+        }
+
+
+        let headers = this.defaultHeaders;
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
         ];
         const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
         if (httpHeaderAcceptSelected != undefined) {
@@ -308,8 +291,186 @@ export class GeographyService {
             formParams = formParams.append('File', <any>file) || formParams;
         }
 
-        return this.httpClient.post<UploadUsageEntityGdbResponseDto>(`${this.basePath}/geographies/${encodeURIComponent(String(geographyID))}/upload-usage-entity-gdb`,
+        return this.httpClient.post<any>(`${this.basePath}/geographies/${encodeURIComponent(String(geographyID))}/upload-parcel-gdb`,
             convertFormParamsToString ? formParams.toString() : formParams,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        ).pipe(catchError((error: any) => { return this.apiService.handleError(error)}));
+    }
+
+    /**
+     * 
+     * 
+     * @param geographyID 
+     * @param userDto 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public geographiesGeographyIDWaterManagersPut(geographyID: number, userDto?: Array<UserDto>, observe?: 'body', reportProgress?: boolean): Observable<GeographyDto>;
+    public geographiesGeographyIDWaterManagersPut(geographyID: number, userDto?: Array<UserDto>, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<GeographyDto>>;
+    public geographiesGeographyIDWaterManagersPut(geographyID: number, userDto?: Array<UserDto>, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<GeographyDto>>;
+    public geographiesGeographyIDWaterManagersPut(geographyID: number, userDto?: Array<UserDto>, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+
+        if (geographyID === null || geographyID === undefined) {
+            throw new Error('Required parameter geographyID was null or undefined when calling geographiesGeographyIDWaterManagersPut.');
+        }
+
+
+        let headers = this.defaultHeaders;
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'text/plain',
+            'application/json',
+            'text/json',
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers = headers.set('Accept', httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json-patch+json',
+            'application/json',
+            'text/json',
+            'application/_*+json',
+        ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected != undefined) {
+            headers = headers.set('Content-Type', httpContentTypeSelected);
+        }
+
+        return this.httpClient.put<GeographyDto>(`${this.basePath}/geographies/${encodeURIComponent(String(geographyID))}/water-managers`,
+            userDto,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        ).pipe(catchError((error: any) => { return this.apiService.handleError(error)}));
+    }
+
+    /**
+     * 
+     * 
+     * @param geographyName 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public geographiesGeographyNameGeographyNameForAdminEditorGet(geographyName: string, observe?: 'body', reportProgress?: boolean): Observable<GeographyForAdminEditorsDto>;
+    public geographiesGeographyNameGeographyNameForAdminEditorGet(geographyName: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<GeographyForAdminEditorsDto>>;
+    public geographiesGeographyNameGeographyNameForAdminEditorGet(geographyName: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<GeographyForAdminEditorsDto>>;
+    public geographiesGeographyNameGeographyNameForAdminEditorGet(geographyName: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+
+        if (geographyName === null || geographyName === undefined) {
+            throw new Error('Required parameter geographyName was null or undefined when calling geographiesGeographyNameGeographyNameForAdminEditorGet.');
+        }
+
+        let headers = this.defaultHeaders;
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'text/plain',
+            'application/json',
+            'text/json',
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers = headers.set('Accept', httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+        ];
+
+        return this.httpClient.get<GeographyForAdminEditorsDto>(`${this.basePath}/geographies/geography-name/${encodeURIComponent(String(geographyName))}/for-admin-editor`,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        ).pipe(catchError((error: any) => { return this.apiService.handleError(error)}));
+    }
+
+    /**
+     * 
+     * 
+     * @param geographyName 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public geographiesGeographyNameGeographyNameMinimalGet(geographyName: string, observe?: 'body', reportProgress?: boolean): Observable<GeographyMinimalDto>;
+    public geographiesGeographyNameGeographyNameMinimalGet(geographyName: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<GeographyMinimalDto>>;
+    public geographiesGeographyNameGeographyNameMinimalGet(geographyName: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<GeographyMinimalDto>>;
+    public geographiesGeographyNameGeographyNameMinimalGet(geographyName: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+
+        if (geographyName === null || geographyName === undefined) {
+            throw new Error('Required parameter geographyName was null or undefined when calling geographiesGeographyNameGeographyNameMinimalGet.');
+        }
+
+        let headers = this.defaultHeaders;
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'text/plain',
+            'application/json',
+            'text/json',
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers = headers.set('Accept', httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+        ];
+
+        return this.httpClient.get<GeographyMinimalDto>(`${this.basePath}/geographies/geography-name/${encodeURIComponent(String(geographyName))}/minimal`,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        ).pipe(catchError((error: any) => { return this.apiService.handleError(error)}));
+    }
+
+    /**
+     * 
+     * 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public geographiesGet(observe?: 'body', reportProgress?: boolean): Observable<Array<GeographyDto>>;
+    public geographiesGet(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<GeographyDto>>>;
+    public geographiesGet(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<GeographyDto>>>;
+    public geographiesGet(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+
+        let headers = this.defaultHeaders;
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'text/plain',
+            'application/json',
+            'text/json',
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers = headers.set('Accept', httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+        ];
+
+        return this.httpClient.get<Array<GeographyDto>>(`${this.basePath}/geographies`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
@@ -349,254 +510,6 @@ export class GeographyService {
 
         return this.httpClient.put<Array<GeographyBoundarySimpleDto>>(`${this.basePath}/geographies/gsa-boundaries`,
             null,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        ).pipe(catchError((error: any) => { return this.apiService.handleError(error)}));
-    }
-
-    /**
-     * 
-     * 
-     * @param geographyName 
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public geographyGeographyNameEditGet(geographyName: string, observe?: 'body', reportProgress?: boolean): Observable<AdminGeographyUpdateRequestDto>;
-    public geographyGeographyNameEditGet(geographyName: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<AdminGeographyUpdateRequestDto>>;
-    public geographyGeographyNameEditGet(geographyName: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<AdminGeographyUpdateRequestDto>>;
-    public geographyGeographyNameEditGet(geographyName: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-
-        if (geographyName === null || geographyName === undefined) {
-            throw new Error('Required parameter geographyName was null or undefined when calling geographyGeographyNameEditGet.');
-        }
-
-        let headers = this.defaultHeaders;
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'text/plain',
-            'application/json',
-            'text/json',
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers = headers.set('Accept', httpHeaderAcceptSelected);
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-        ];
-
-        return this.httpClient.get<AdminGeographyUpdateRequestDto>(`${this.basePath}/geography/${encodeURIComponent(String(geographyName))}/edit`,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        ).pipe(catchError((error: any) => { return this.apiService.handleError(error)}));
-    }
-
-    /**
-     * 
-     * 
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public publicGeographiesGet(observe?: 'body', reportProgress?: boolean): Observable<Array<GeographyDto>>;
-    public publicGeographiesGet(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<GeographyDto>>>;
-    public publicGeographiesGet(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<GeographyDto>>>;
-    public publicGeographiesGet(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-
-        let headers = this.defaultHeaders;
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'text/plain',
-            'application/json',
-            'text/json',
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers = headers.set('Accept', httpHeaderAcceptSelected);
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-        ];
-
-        return this.httpClient.get<Array<GeographyDto>>(`${this.basePath}/public/geographies`,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        ).pipe(catchError((error: any) => { return this.apiService.handleError(error)}));
-    }
-
-    /**
-     * 
-     * 
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public publicGeographyBoundariesGet(observe?: 'body', reportProgress?: boolean): Observable<Array<GeographyBoundarySimpleDto>>;
-    public publicGeographyBoundariesGet(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<GeographyBoundarySimpleDto>>>;
-    public publicGeographyBoundariesGet(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<GeographyBoundarySimpleDto>>>;
-    public publicGeographyBoundariesGet(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-
-        let headers = this.defaultHeaders;
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'text/plain',
-            'application/json',
-            'text/json',
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers = headers.set('Accept', httpHeaderAcceptSelected);
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-        ];
-
-        return this.httpClient.get<Array<GeographyBoundarySimpleDto>>(`${this.basePath}/public/geographyBoundaries`,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        ).pipe(catchError((error: any) => { return this.apiService.handleError(error)}));
-    }
-
-    /**
-     * 
-     * 
-     * @param geographyName 
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public publicGeographyBoundingBoxGeographyNameGet(geographyName: string, observe?: 'body', reportProgress?: boolean): Observable<GeographyWithBoundingBoxDto>;
-    public publicGeographyBoundingBoxGeographyNameGet(geographyName: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<GeographyWithBoundingBoxDto>>;
-    public publicGeographyBoundingBoxGeographyNameGet(geographyName: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<GeographyWithBoundingBoxDto>>;
-    public publicGeographyBoundingBoxGeographyNameGet(geographyName: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-
-        if (geographyName === null || geographyName === undefined) {
-            throw new Error('Required parameter geographyName was null or undefined when calling publicGeographyBoundingBoxGeographyNameGet.');
-        }
-
-        let headers = this.defaultHeaders;
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'text/plain',
-            'application/json',
-            'text/json',
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers = headers.set('Accept', httpHeaderAcceptSelected);
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-        ];
-
-        return this.httpClient.get<GeographyWithBoundingBoxDto>(`${this.basePath}/public/geography/boundingBox/${encodeURIComponent(String(geographyName))}`,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        ).pipe(catchError((error: any) => { return this.apiService.handleError(error)}));
-    }
-
-    /**
-     * 
-     * 
-     * @param geographyName 
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public publicGeographyNameGeographyNameGet(geographyName: string, observe?: 'body', reportProgress?: boolean): Observable<GeographyDto>;
-    public publicGeographyNameGeographyNameGet(geographyName: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<GeographyDto>>;
-    public publicGeographyNameGeographyNameGet(geographyName: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<GeographyDto>>;
-    public publicGeographyNameGeographyNameGet(geographyName: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-
-        if (geographyName === null || geographyName === undefined) {
-            throw new Error('Required parameter geographyName was null or undefined when calling publicGeographyNameGeographyNameGet.');
-        }
-
-        let headers = this.defaultHeaders;
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'text/plain',
-            'application/json',
-            'text/json',
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers = headers.set('Accept', httpHeaderAcceptSelected);
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-        ];
-
-        return this.httpClient.get<GeographyDto>(`${this.basePath}/public/geography/name/${encodeURIComponent(String(geographyName))}`,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        ).pipe(catchError((error: any) => { return this.apiService.handleError(error)}));
-    }
-
-    /**
-     * 
-     * 
-     * @param userID 
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public userUserIDPermissionsGet(userID: number, observe?: 'body', reportProgress?: boolean): Observable<Array<GeographyUserDto>>;
-    public userUserIDPermissionsGet(userID: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<GeographyUserDto>>>;
-    public userUserIDPermissionsGet(userID: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<GeographyUserDto>>>;
-    public userUserIDPermissionsGet(userID: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-
-        if (userID === null || userID === undefined) {
-            throw new Error('Required parameter userID was null or undefined when calling userUserIDPermissionsGet.');
-        }
-
-        let headers = this.defaultHeaders;
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'text/plain',
-            'application/json',
-            'text/json',
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers = headers.set('Accept', httpHeaderAcceptSelected);
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-        ];
-
-        return this.httpClient.get<Array<GeographyUserDto>>(`${this.basePath}/user/${encodeURIComponent(String(userID))}/permissions`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,

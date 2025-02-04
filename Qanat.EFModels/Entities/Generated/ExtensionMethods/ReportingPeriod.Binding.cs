@@ -11,8 +11,7 @@ namespace Qanat.EFModels.Entities
 
         public static class FieldLengths
         {
-            public const int ReportingPeriodName = 50;
-            public const int Interval = 20;
+            public const int Name = 255;
         }
     }
 }

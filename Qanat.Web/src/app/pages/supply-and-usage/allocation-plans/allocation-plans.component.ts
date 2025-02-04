@@ -1,15 +1,14 @@
 import { Component, OnInit } from "@angular/core";
 import { Observable } from "rxjs";
-import { tap } from "rxjs/operators";
-import { AllocationPlanService } from "src/app/shared/generated/api/allocation-plan.service";
+import { switchMap, tap } from "rxjs/operators";
 import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
-import { GeographyDto } from "src/app/shared/generated/model/geography-dto";
-import { AllocationPlanMinimalDto } from "src/app/shared/generated/model/models";
-import { SelectedGeographyService } from "src/app/shared/services/selected-geography.service";
+import { AllocationPlanMinimalDto, GeographyMinimalDto } from "src/app/shared/generated/model/models";
 import { NgIf, AsyncPipe } from "@angular/common";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { AllocationPlanSelectComponent } from "src/app/shared/components/allocation-plan-select/allocation-plan-select.component";
 import { AlertDisplayComponent } from "src/app/shared/components/alert-display/alert-display.component";
+import { PublicService } from "src/app/shared/generated/api/public.service";
+import { CurrentGeographyService } from "src/app/shared/services/current-geography.service";
 
 @Component({
     selector: "allocation-plans",
@@ -20,17 +19,21 @@ import { AlertDisplayComponent } from "src/app/shared/components/alert-display/a
 })
 export class AllocationPlansComponent implements OnInit {
     public customRichTextID = CustomRichTextTypeEnum.AllocationPlanEdit;
-    public selectedGeography$: Observable<GeographyDto>;
+    public geography$: Observable<GeographyMinimalDto>;
     public allocationPlans$: Observable<AllocationPlanMinimalDto[]>;
 
     constructor(
-        private selectedGeographyService: SelectedGeographyService,
-        private allocationPlanService: AllocationPlanService
+        private currentGeographyService: CurrentGeographyService,
+        private publicService: PublicService
     ) {}
 
     ngOnInit(): void {
-        this.selectedGeography$ = this.selectedGeographyService.curentUserSelectedGeographyObservable.pipe(
-            tap((geography) => (this.allocationPlans$ = this.allocationPlanService.publicGeographyGeographyIDAllocationPlansGet(geography.GeographyID)))
+        this.geography$ = this.currentGeographyService.getCurrentGeography();
+
+        this.allocationPlans$ = this.geography$.pipe(
+            switchMap((geography) => {
+                return this.publicService.publicGeographiesGeographyIDAllocationPlansGet(geography.GeographyID);
+            })
         );
     }
 }

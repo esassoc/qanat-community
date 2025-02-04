@@ -1,9 +1,8 @@
 import { Component, OnInit } from "@angular/core";
-import { IsActiveMatchOptions, Router, RouterLink, RouterOutlet } from "@angular/router";
-import { Observable } from "rxjs";
+import { ActivatedRoute, IsActiveMatchOptions, Router, RouterLink, RouterOutlet } from "@angular/router";
+import { Observable, of } from "rxjs";
 import { GeographyDto } from "src/app/shared/generated/model/geography-dto";
-import { SelectedGeographyService } from "src/app/shared/services/selected-geography.service";
-import { share, tap } from "rxjs/operators";
+import { filter, share, switchMap, tap } from "rxjs/operators";
 import { OpenETConfigurationService } from "src/app/shared/generated/api/open-et-configuration.service";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { GeographySwitcherComponent } from "../../../shared/components/geography-switcher/geography-switcher.component";
@@ -11,6 +10,10 @@ import { IconComponent } from "src/app/shared/components/icon/icon.component";
 import { GeographyLogoComponent } from "../../../shared/components/geography-logo/geography-logo.component";
 import { NgIf, AsyncPipe } from "@angular/common";
 import { DashboardMenu, DashboardMenuComponent } from "src/app/shared/components/dashboard-menu/dashboard-menu.component";
+import { CurrentGeographyService } from "src/app/shared/services/current-geography.service";
+import { routeParams } from "src/app/app.routes";
+import { GeographyService } from "src/app/shared/generated/api/geography.service";
+import { GeographyMinimalDto } from "src/app/shared/generated/model/geography-minimal-dto";
 
 @Component({
     selector: "qanat-supply-and-usage-menu-layout",
@@ -21,40 +24,61 @@ import { DashboardMenu, DashboardMenuComponent } from "src/app/shared/components
 })
 export class SupplyAndUsageMenuLayoutComponent implements OnInit {
     public isOpenETActive$: Observable<boolean>;
-    public currentGeography$: Observable<GeographyDto>;
-    public viewingDetailPage: boolean = false;
     public supplyAndUsageMenu: DashboardMenu;
+
+    public geography$: Observable<GeographyMinimalDto>;
+    public supplyAndUsageMenu$: Observable<DashboardMenu>;
 
     public routerLinkActiveOptions = {
         exact: false,
     };
 
     constructor(
-        private selectedGeographyService: SelectedGeographyService,
-        private router: Router,
-        private openETConfigurationService: OpenETConfigurationService
+        private currentGeographyService: CurrentGeographyService,
+        private geographyService: GeographyService,
+        private route: ActivatedRoute,
+        private router: Router
     ) {}
 
     ngOnInit(): void {
-        this.currentGeography$ = this.selectedGeographyService.curentUserSelectedGeographyObservable.pipe(
-            share(),
-            tap((geographyDto) => {
-                if (geographyDto) {
-                    this.buildMenu(geographyDto);
-                    this.isOpenETActive$ = this.openETConfigurationService.geographiesGeographyIDOpenEtConfigurationGet(geographyDto.GeographyID);
-                    if (this.router.routerState.snapshot.url == "/supply-and-usage") {
-                        this.redirectToGeography(geographyDto.GeographyName);
-                    }
+        this.geography$ = this.route.params.pipe(
+            switchMap((params) => {
+                const geographyName = params[routeParams.geographyName];
+                if (geographyName) {
+                    return this.geographyService.geographiesGeographyNameGeographyNameMinimalGet(geographyName).pipe(
+                        tap((geography) => {
+                            this.currentGeographyService.setCurrentGeography(geography);
+                            this.buildMenu(geography);
+                        })
+                    );
+                } else {
+                    return this.currentGeographyService.getCurrentGeography().pipe(
+                        tap((geography) => {
+                            if (geography) {
+                                this.buildMenu(geography);
+                                this.redirectToGeography(geography.GeographyName);
+                            }
+                        })
+                    );
                 }
+            })
+        );
+
+        this.supplyAndUsageMenu$ = this.geography$.pipe(
+            switchMap((geography) => {
+                if (geography) {
+                    this.buildMenu(geography);
+                }
+                return of(this.supplyAndUsageMenu);
             })
         );
     }
 
     redirectToGeography(geographyName: string) {
-        this.router.navigateByUrl(`/supply-and-usage/${geographyName.toLowerCase()}`);
+        this.router.navigate(["/supply-and-usage", geographyName.toLowerCase(), "activity-center"]);
     }
 
-    buildMenu(geography: GeographyDto) {
+    buildMenu(geography: GeographyMinimalDto) {
         const geographySlug = geography.GeographyName.toLowerCase();
         const menu = {
             menuItems: [

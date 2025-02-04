@@ -29,6 +29,7 @@ namespace Qanat.EFModels.Entities
                 Company = user.Company,
                 ImpersonatedUserGuid = user.ImpersonatedUserGuid,
                 IsClientUser = user.IsClientUser,
+                ScenarioPlannerRoleID = user.ScenarioPlannerRoleID,
                 GETRunCustomerID = user.GETRunCustomerID,
                 GETRunUserID = user.GETRunUserID
             };

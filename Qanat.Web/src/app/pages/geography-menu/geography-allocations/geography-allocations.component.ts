@@ -3,9 +3,6 @@ import { ActivatedRoute } from "@angular/router";
 import { Observable } from "rxjs";
 import { tap } from "rxjs/operators";
 import { routeParams } from "src/app/app.routes";
-import { AllocationPlanService } from "src/app/shared/generated/api/allocation-plan.service";
-import { GeographyService } from "src/app/shared/generated/api/geography.service";
-import { ZoneGroupService } from "src/app/shared/generated/api/zone-group.service";
 import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
 import { GeographyDto } from "src/app/shared/generated/model/geography-dto";
 import { AllocationPlanMinimalDto, ZoneGroupMinimalDto } from "src/app/shared/generated/model/models";
@@ -18,6 +15,7 @@ import { AlertDisplayComponent } from "src/app/shared/components/alert-display/a
 import { AllocationPlanSelectComponent } from "src/app/shared/components/allocation-plan-select/allocation-plan-select.component";
 import { ModelNameTagComponent } from "src/app/shared/components/name-tag/name-tag.component";
 import { ZoneGroupMapLegendComponent } from "src/app/shared/components/zone-group-map-legend/zone-group-map-legend.component";
+import { PublicService } from "src/app/shared/generated/api/public.service";
 
 @Component({
     selector: "geography-allocations",
@@ -44,23 +42,18 @@ export class GeographyAllocationsComponent implements OnInit {
     public customRichTextTypeID = CustomRichTextTypeEnum.GeographyAllocations;
     public isLoading = true;
 
-    constructor(
-        private geographyService: GeographyService,
-        private route: ActivatedRoute,
-        private allocationPlanService: AllocationPlanService,
-        private zoneGroupService: ZoneGroupService
-    ) {}
+    constructor(private publicService: PublicService, private route: ActivatedRoute) {}
 
     ngOnInit(): void {
         const geographyName = this.route.snapshot.paramMap.get(routeParams.geographyName);
-        this.geographyService.publicGeographyNameGeographyNameGet(geographyName).subscribe((geography) => {
+        this.publicService.publicGeographiesNameGeographyNameGet(geographyName).subscribe((geography) => {
             this.geography = geography;
             this.isLoading = false;
 
-            this.allocationPlans$ = this.allocationPlanService.publicGeographyGeographyIDAllocationPlansGet(geography.GeographyID).pipe(
+            this.allocationPlans$ = this.publicService.publicGeographiesGeographyIDAllocationPlansGet(geography.GeographyID).pipe(
                 tap((allocationPlans) => {
                     if (allocationPlans.length > 0) {
-                        this.zoneGroup$ = this.zoneGroupService.publicGeographyGeographyIDZoneGroupZoneGroupSlugGet(this.geography.GeographyID, allocationPlans[0].ZoneGroupSlug);
+                        this.zoneGroup$ = this.publicService.publicGeographiesGeographyIDZoneGroupZoneGroupSlugGet(this.geography.GeographyID, allocationPlans[0].ZoneGroupSlug);
                     }
                 })
             );

@@ -13,6 +13,7 @@ namespace Qanat.EFModels.Entities
         {
             public const int WaterTypeName = 50;
             public const int WaterTypeSlug = 50;
+            public const int WaterTypeColor = 7;
         }
     }
 }

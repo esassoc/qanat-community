@@ -18,6 +18,7 @@ export class ParcelLayerUpdateDto {
     ParcelNumberColumn?: string;
     OwnerNameColumn?: string;
     OwnerAddressColumn?: string;
+    AcreColumn?: string;
     constructor(obj?: any) {
         Object.assign(this, obj);
     }
@@ -30,6 +31,7 @@ export interface ParcelLayerUpdateDtoForm {
     ParcelNumberColumn?: FormControl<string>;
     OwnerNameColumn?: FormControl<string>;
     OwnerAddressColumn?: FormControl<string>;
+    AcreColumn?: FormControl<string>;
 }
 
 export class ParcelLayerUpdateDtoFormControls { 
@@ -84,6 +86,16 @@ export class ParcelLayerUpdateDtoFormControls {
         }
     );
     public static OwnerAddressColumn = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
+        value,
+        formControlOptions ?? 
+        {
+            nonNullable: false,
+            validators: 
+            [
+            ],
+        }
+    );
+    public static AcreColumn = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
         value,
         formControlOptions ?? 
         {

@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -540,13 +539,6 @@ public class WellController : SitkaController<WellController>
         WellMeters.RemoveWellMeter(_dbContext, wellMeter, requestDto);
 
         return Ok();
-    }
-
-    [HttpGet("well-status")]
-    [Authorize]
-    public ActionResult<List<WellStatusSimpleDto>> ListWellStatus()
-    {
-        return Ok(WellStatus.AllAsSimpleDto);
     }
 
     [HttpGet("water-accounts/{waterAccountID}/wells")]

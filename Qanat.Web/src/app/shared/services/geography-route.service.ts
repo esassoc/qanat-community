@@ -2,8 +2,8 @@ import { Injectable, OnDestroy } from "@angular/core";
 import { filter, map, ReplaySubject, startWith, Subscription, switchMap, tap } from "rxjs";
 import { GeographyDto } from "../generated/model/models";
 import { ActivatedRoute, NavigationEnd, Router } from "@angular/router";
-import { GeographyService } from "../generated/api/geography.service";
 import { routeParams } from "src/app/app.routes";
+import { PublicService } from "../generated/api/public.service";
 
 @Injectable({
     providedIn: "root",
@@ -17,16 +17,12 @@ export class GeographyRouteService implements OnDestroy {
     private geographiesSub: Subscription = Subscription.EMPTY;
     private routerSub: Subscription = Subscription.EMPTY;
 
-    constructor(
-        private route: ActivatedRoute,
-        private geographyService: GeographyService,
-        private router: Router
-    ) {
+    constructor(private route: ActivatedRoute, private publicService: PublicService, private router: Router) {
         this.fetchGeographies();
     }
 
     fetchGeographies(): void {
-        this.geographiesSub = this.geographyService.publicGeographiesGet().subscribe((geographies) => {
+        this.geographiesSub = this.publicService.publicGeographiesGet().subscribe((geographies) => {
             this.geographies = geographies;
             this.routerSub = this.router.events
                 .pipe(

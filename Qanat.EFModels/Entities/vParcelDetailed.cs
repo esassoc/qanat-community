@@ -49,7 +49,7 @@ public class vParcelDetailed
 
     public string CustomAttributes { get; set; }
 
-    public List<ZoneDisplayDto> Zones { get; } = [];
+    public string ZoneIDs { get; set; }
 
     public List<WellLinkDisplayDto> WellsOnParcel { get; } = [];
 

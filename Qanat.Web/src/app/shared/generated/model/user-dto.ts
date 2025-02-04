@@ -9,9 +9,9 @@
  * https://github.com/swagger-api/swagger-codegen.git
  * Do not edit the class manually.
  */
-import { RoleDto } from '././role-dto';
 import { GeographyUserSimpleDto } from '././geography-user-simple-dto';
 import { Rights } from '././rights';
+import { ModelSimpleDto } from '././model-simple-dto';
 
 import { FormControl, FormControlOptions, FormControlState, Validators } from "@angular/forms";
 export class UserDto { 
@@ -21,7 +21,8 @@ export class UserDto {
     LastName?: string;
     Email?: string;
     Phone?: string;
-    Role?: RoleDto;
+    RoleID?: number;
+    RoleDisplayName?: string;
     CreateDate?: string;
     UpdateDate?: string;
     LastActivityDate?: string;
@@ -33,14 +34,18 @@ export class UserDto {
     ImpersonatedUserGuid?: string;
     IsClientUser?: boolean;
     FullName?: string;
-    readonly Rights?: { [key: string]: Rights; };
-    readonly Flags?: { [key: string]: boolean; };
+    Rights?: { [key: string]: Rights; };
+    Flags?: { [key: string]: boolean; };
     GeographyRights?: { [key: string]: { [key: string]: Rights; }; };
     GeographyFlags?: { [key: string]: { [key: string]: boolean; }; };
     WaterAccountRights?: { [key: string]: { [key: string]: Rights; }; };
     WaterAccountFlags?: { [key: string]: { [key: string]: boolean; }; };
     NumberOfWaterAccounts?: number;
     GeographyUser?: Array<GeographyUserSimpleDto>;
+    ScenarioPlannerRoleID?: number;
+    ScenarioPlannerRoleDisplayName?: string;
+    Models?: Array<ModelSimpleDto>;
+    ScenarioPlannerRights?: { [key: string]: Rights; };
     GETRunCustomerID?: number;
     GETRunUserID?: number;
     constructor(obj?: any) {
@@ -55,7 +60,8 @@ export interface UserDtoForm {
     LastName?: FormControl<string>;
     Email?: FormControl<string>;
     Phone?: FormControl<string>;
-    Role?: FormControl<RoleDto>;
+    RoleID?: FormControl<number>;
+    RoleDisplayName?: FormControl<string>;
     CreateDate?: FormControl<string>;
     UpdateDate?: FormControl<string>;
     LastActivityDate?: FormControl<string>;
@@ -75,6 +81,10 @@ export interface UserDtoForm {
     WaterAccountFlags?: FormControl<{ [key: string]: { [key: string]: boolean; }; }>;
     NumberOfWaterAccounts?: FormControl<number>;
     GeographyUser?: FormControl<Array<GeographyUserSimpleDto>>;
+    ScenarioPlannerRoleID?: FormControl<number>;
+    ScenarioPlannerRoleDisplayName?: FormControl<string>;
+    Models?: FormControl<Array<ModelSimpleDto>>;
+    ScenarioPlannerRights?: FormControl<{ [key: string]: Rights; }>;
     GETRunCustomerID?: FormControl<number>;
     GETRunUserID?: FormControl<number>;
 }
@@ -140,7 +150,17 @@ export class UserDtoFormControls {
             ],
         }
     );
-    public static Role = (value: FormControlState<RoleDto> | RoleDto = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<RoleDto>(
+    public static RoleID = (value: FormControlState<number> | number = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<number>(
+        value,
+        formControlOptions ?? 
+        {
+            nonNullable: false,
+            validators: 
+            [
+            ],
+        }
+    );
+    public static RoleDisplayName = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
         value,
         formControlOptions ?? 
         {
@@ -331,6 +351,46 @@ export class UserDtoFormControls {
         }
     );
     public static GeographyUser = (value: FormControlState<Array<GeographyUserSimpleDto>> | Array<GeographyUserSimpleDto> = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<Array<GeographyUserSimpleDto>>(
+        value,
+        formControlOptions ?? 
+        {
+            nonNullable: false,
+            validators: 
+            [
+            ],
+        }
+    );
+    public static ScenarioPlannerRoleID = (value: FormControlState<number> | number = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<number>(
+        value,
+        formControlOptions ?? 
+        {
+            nonNullable: false,
+            validators: 
+            [
+            ],
+        }
+    );
+    public static ScenarioPlannerRoleDisplayName = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
+        value,
+        formControlOptions ?? 
+        {
+            nonNullable: false,
+            validators: 
+            [
+            ],
+        }
+    );
+    public static Models = (value: FormControlState<Array<ModelSimpleDto>> | Array<ModelSimpleDto> = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<Array<ModelSimpleDto>>(
+        value,
+        formControlOptions ?? 
+        {
+            nonNullable: false,
+            validators: 
+            [
+            ],
+        }
+    );
+    public static ScenarioPlannerRights = (value: FormControlState<{ [key: string]: Rights; }> | { [key: string]: Rights; } = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<{ [key: string]: Rights; }>(
         value,
         formControlOptions ?? 
         {

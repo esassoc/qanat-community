@@ -19,6 +19,7 @@ import { CustomHttpUrlEncodingCodec }                        from '../encoder';
 import { Observable }                                        from 'rxjs';
 
 import { CreateWaterAccountFromSuggestionDto } from '../model/create-water-account-from-suggestion-dto';
+import { ParcelMinimalDto } from '../model/parcel-minimal-dto';
 import { UserDto } from '../model/user-dto';
 import { WaterAccountBudgetReportDto } from '../model/water-account-budget-report-dto';
 import { WaterAccountCreateDto } from '../model/water-account-create-dto';
@@ -446,6 +447,59 @@ export class WaterAccountByGeographyService {
         ];
 
         return this.httpClient.get<Array<UserDto>>(`${this.basePath}/geographies/${encodeURIComponent(String(geographyID))}/water-accounts/water-account-holders`,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        ).pipe(catchError((error: any) => { return this.apiService.handleError(error)}));
+    }
+
+    /**
+     * 
+     * 
+     * @param geographyID 
+     * @param waterAccountID 
+     * @param year 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public geographiesGeographyIDWaterAccountsWaterAccountIDParcelsYearsYearGet(geographyID: number, waterAccountID: number, year: number, observe?: 'body', reportProgress?: boolean): Observable<Array<ParcelMinimalDto>>;
+    public geographiesGeographyIDWaterAccountsWaterAccountIDParcelsYearsYearGet(geographyID: number, waterAccountID: number, year: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<ParcelMinimalDto>>>;
+    public geographiesGeographyIDWaterAccountsWaterAccountIDParcelsYearsYearGet(geographyID: number, waterAccountID: number, year: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<ParcelMinimalDto>>>;
+    public geographiesGeographyIDWaterAccountsWaterAccountIDParcelsYearsYearGet(geographyID: number, waterAccountID: number, year: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+
+        if (geographyID === null || geographyID === undefined) {
+            throw new Error('Required parameter geographyID was null or undefined when calling geographiesGeographyIDWaterAccountsWaterAccountIDParcelsYearsYearGet.');
+        }
+
+        if (waterAccountID === null || waterAccountID === undefined) {
+            throw new Error('Required parameter waterAccountID was null or undefined when calling geographiesGeographyIDWaterAccountsWaterAccountIDParcelsYearsYearGet.');
+        }
+
+        if (year === null || year === undefined) {
+            throw new Error('Required parameter year was null or undefined when calling geographiesGeographyIDWaterAccountsWaterAccountIDParcelsYearsYearGet.');
+        }
+
+        let headers = this.defaultHeaders;
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'text/plain',
+            'application/json',
+            'text/json',
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers = headers.set('Accept', httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+        ];
+
+        return this.httpClient.get<Array<ParcelMinimalDto>>(`${this.basePath}/geographies/${encodeURIComponent(String(geographyID))}/water-accounts/${encodeURIComponent(String(waterAccountID))}/parcels/years/${encodeURIComponent(String(year))}`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,

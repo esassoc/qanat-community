@@ -1,4 +1,5 @@
-﻿CREATE TABLE [dbo].[GETActionOutputFile]
+﻿--TODO: DELETE ME, RENAMING GETACTION TO SCENARIORUN--
+CREATE TABLE [dbo].[GETActionOutputFile]
 (
 	[GETActionOutputFileID] int not null identity(1,1) constraint PK_GETActionOutputFile_GETActionOutputFileID primary key,
 	[GETActionOutputFileTypeID] int not null constraint FK_GETActionOutputFile_GETActionOutputFileType_GETActionOutputFileTypeID foreign key references dbo.GETActionOutputFileType(GETActionOutputFileTypeID),

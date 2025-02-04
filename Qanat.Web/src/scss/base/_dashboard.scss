@@ -62,6 +62,7 @@
                 gap: $spacing-300 0;
                 padding: $spacing-400 $spacing-600;
                 align-items: center;
+                justify-items: end;
                 background: $gray-lighter;
                 border-top: 1px solid $gray-light;
                 position: relative;
@@ -69,6 +70,13 @@
 
                 @container (min-width: 375px) {
                     grid-template-columns: repeat(2, minmax(0, 1fr));
+                }
+            }
+
+            //1663px seems like a good breakpoint for the switcher to move to the left after manual testing.
+            @media (max-aspect-ratio: 4/3), (max-width: 1663px) {
+                &__wrapper {
+                    justify-items: start;
                 }
             }
 
@@ -90,10 +98,7 @@
             &__switcher {
                 display: grid;
                 gap: $spacing-100;
-
-                @container (min-width: 375px) {
-                    transform: translateY(2px);
-                }
+                transform: translateY(1px);
             }
 
             &__current {
@@ -255,6 +260,7 @@
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
+                margin-right: auto;
             }
 
             .caret {
@@ -376,16 +382,15 @@
             }
 
             &:hover {
-                background: $teal-lighter;
-                color: $blue-default;
+                text-decoration: none;
+                color: $white;
+                background: $secondary;
             }
 
             &.active {
                 font-weight: bold;
-
-                &:hover {
-                    color: $black;
-                }
+                color: $white;
+                background: $secondary;
             }
 
             .sidebar-link-badge {
@@ -419,7 +424,7 @@
             grid-column: 5 / span 8;
 
             .outlet-container {
-                padding: 4rem 4rem 4rem 2rem;
+                padding: 2rem 4rem 4rem 2rem;
             }
         }
 
@@ -434,12 +439,43 @@
         z-index: 1;
 
         @include desktop-small {
-            padding: 4rem 4rem 4rem 2rem;
+            padding: 2rem 4rem 4rem 2rem;
             grid-column: 5 / span 8;
         }
 
         @include desktop-medium {
             grid-column: 4 / span 9;
+        }
+    }
+}
+
+.entity-switcher {
+    display: flex;
+    align-items: center;
+    z-index: 10;
+
+    .search-prepend {
+        icon {
+            svg path {
+                color: $blue-700;
+            }
+        }
+    }
+
+    form {
+        width: 100%;
+    }
+
+    .field input[type="text"] {
+        width: 100%;
+        border: none;
+        border-top: 1px solid $gray-200;
+        border-radius: unset;
+    }
+
+    .clear icon {
+        svg {
+            width: 8px;
         }
     }
 }

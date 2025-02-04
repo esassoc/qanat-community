@@ -16,7 +16,7 @@
 
         <app-alert-display></app-alert-display>
 
-        <form action="" class="form grid-12" [formGroup]="formGroup" *ngIf="wellStatus$ | async">
+        <form action="" class="form grid-12" [formGroup]="formGroup">
             <form-field
                 class="g-col-6"
                 [formControl]="formGroup.controls.StateWCRNumber"
@@ -55,7 +55,7 @@
                 name="wellStatus"
                 fieldLabel="Well Status"
                 [type]="FormFieldType.Select"
-                [formInputOptions]="wellStatusOptions"
+                [formInputOptions]="WellStatusOptions"
                 fieldDefinitionName="WellStatus"
                 required></form-field>
 

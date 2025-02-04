@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ViewChild, AfterViewChecked } from "@angular/core";
+import { Component, OnInit, Input, ViewChild, AfterViewChecked, ChangeDetectorRef, OnDestroy } from "@angular/core";
 import { AuthenticationService } from "src/app/shared/services/authentication.service";
 import { AlertService } from "../../services/alert.service";
 import { Alert } from "../../models/alert";
@@ -18,6 +18,7 @@ import { FormsModule } from "@angular/forms";
 import { NgIf } from "@angular/common";
 import { LoadingDirective } from "../../directives/loading.directive";
 import { IconComponent } from "../icon/icon.component";
+import { PublicService } from "../../generated/api/public.service";
 
 @Component({
     selector: "custom-rich-text",
@@ -27,7 +28,7 @@ import { IconComponent } from "../icon/icon.component";
     imports: [LoadingDirective, NgIf, IconComponent, FormsModule, EditorComponent],
     providers: [{ provide: TINYMCE_SCRIPT_SRC, useValue: "tinymce/tinymce.min.js" }],
 })
-export class CustomRichTextComponent implements OnInit, AfterViewChecked {
+export class CustomRichTextComponent implements OnInit, AfterViewChecked, OnDestroy {
     @Input() geographyID: number = null;
     public GeographyEnum = GeographyEnum;
     @Input() customRichTextTypeID: number;
@@ -51,9 +52,11 @@ export class CustomRichTextComponent implements OnInit, AfterViewChecked {
 
     constructor(
         private customRichTextService: CustomRichTextService,
+        private publicService: PublicService,
         private authenticationService: AuthenticationService,
         private alertService: AlertService,
-        private sanitizer: DomSanitizer
+        private sanitizer: DomSanitizer,
+        private cdr: ChangeDetectorRef
     ) {}
 
     ngAfterViewChecked(): void {
@@ -67,13 +70,13 @@ export class CustomRichTextComponent implements OnInit, AfterViewChecked {
             this.currentUser = currentUser;
         });
 
-        this.customRichTextService.publicCustomRichTextCustomRichTextTypeIDGet(this.customRichTextTypeID, this.geographyID).subscribe((x) => {
+        this.publicService.publicCustomRichTextsCustomRichTextTypeIDGet(this.customRichTextTypeID, this.geographyID).subscribe((x) => {
             this.loadCustomRichText(x);
-
-            if (x.CustomRichTextType?.ContentTypeID == ContentTypeEnum.FormInstructions) {
-                this.showTitle = true;
-            }
         });
+    }
+
+    ngOnDestroy(): void {
+        this.cdr.detach();
     }
 
     private loadCustomRichText(customRichText: CustomRichTextDto) {
@@ -84,7 +87,12 @@ export class CustomRichTextComponent implements OnInit, AfterViewChecked {
         this.editedContent = customRichText.CustomRichTextContent;
         this.isEmptyContent = customRichText.IsEmptyContent;
 
+        if (customRichText.CustomRichTextType?.ContentTypeID == ContentTypeEnum.FormInstructions) {
+            this.showTitle = true;
+        }
+
         this.isLoading = false;
+        this.cdr.detectChanges();
     }
 
     public showEditButton(): boolean {

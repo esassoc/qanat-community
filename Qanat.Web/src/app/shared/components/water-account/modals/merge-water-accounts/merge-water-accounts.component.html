@@ -9,7 +9,7 @@
     <form action="" class="form" [formGroup]="formGroup">
         <div class="form-top">
             <div class="primary-water-account water-account">
-                <div class="field" *ngIf="waterAccountDto$ | async as waterAccount">
+                <div class="field" *ngIf="waterAccount$ | async as waterAccount">
                     <search-water-accounts
                         class="mb-4"
                         [geographyID]="waterAccount.Geography.GeographyID"
@@ -77,14 +77,13 @@
                         id="deleteMerge"
                         [options]="[
                             { label: 'Preserve Merge', value: false },
-                            { label: 'Delete Merge', value: true }
+                            { label: 'Delete Merge', value: true },
                         ]"></btn-group-radio-input>
                 </div>
                 <note *ngIf="formGroup.controls.deleteMerge.value" class="my-3 flex-start">
                     <em>
                         You have selected the Delete Merge. This will delete the water account to be merged, and transfer all water account history to the primary water account.
-                        <strong>This action cannot be undone</strong>
-                        . Are you sure you want to perform this action?
+                        <strong>This action cannot be undone</strong>. Are you sure you want to perform this action?
                     </em>
                 </note>
             </div>

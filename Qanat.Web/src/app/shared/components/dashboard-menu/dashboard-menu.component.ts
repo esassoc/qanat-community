@@ -1,7 +1,7 @@
 import { Component, Input } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { slideAnimation } from "src/app/shared/animations/slide.animation";
-import { IsActiveMatchOptions, RouterLink, RouterLinkActive } from "@angular/router";
+import { IsActiveMatchOptions, Params, RouterLink, RouterLinkActive } from "@angular/router";
 import { GeographyFlagCheck, WithGeographyFlagDirective } from "src/app/shared/directives/with-geography-flag.directive";
 import { IconComponent, IconInterface } from "../icon/icon.component";
 
@@ -52,5 +52,7 @@ export class DashboardMenuItem implements IDashboardMenuItem {
     isDisabled?: boolean = false;
     cssClasses?: string;
     routerLinkActiveOptions?: IsActiveMatchOptions;
+    queryParams: Params;
     withGeographyFlag: GeographyFlagCheck;
+    hidden?: boolean = false; //MK 10/10/2024 -- This is used so that we can have a menu that is styled like a submenu but is not actually a submenu (see WaterDetailLayoutComponent for an example).
 }

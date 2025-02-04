@@ -1,32 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
+using Qanat.Models.DataTransferObjects;
 
 namespace Qanat.EFModels.Entities;
 
 public static partial class ReportingPeriodExtensionMethods
 {
-    public static DateTime StartOfReportingPeriodForYear(this ReportingPeriod reportingPeriod, int year)
+    public static ReportingPeriodDto AsDto(this ReportingPeriod reportingPeriod)
     {
-        return new DateTime(reportingPeriod.StartMonth == 1 ? year : year - 1, reportingPeriod.StartMonth, 1);
-    }
-
-    public static DateTime StartOfReportingPeriodForCurrentYear(this ReportingPeriod reportingPeriod, DateTime? currentDateOverride = null)
-    {
-        var currentDate = currentDateOverride ?? DateTime.UtcNow;
-
-        if (reportingPeriod.StartMonth == 1)
+        var reportingPeriodDto = new ReportingPeriodDto()
         {
-            return new DateTime(currentDate.Year, 1, 1);
-        }
+            ReportingPeriodID = reportingPeriod.ReportingPeriodID,
+            Geography = reportingPeriod.Geography.AsSimpleDto(),
+            Name = reportingPeriod.Name,
+            StartDate = reportingPeriod.StartDate,
+            EndDate = reportingPeriod.EndDate,
+            ReadyForAccountHolders = reportingPeriod.ReadyForAccountHolders,
+            CreateDate = reportingPeriod.CreateDate,
+            CreateUser = reportingPeriod.CreateUser.AsSimpleDto(),
+            UpdateDate = reportingPeriod.UpdateDate,
+            UpdateUser = reportingPeriod.UpdateUser?.AsSimpleDto()
+        };
 
-        var cutOffDate = new DateTime(currentDate.Year, reportingPeriod.StartMonth, 1);
-        if (currentDate >= cutOffDate)
-        {
-            return new DateTime(currentDate.AddYears(1).Year, reportingPeriod.StartMonth, 1);
-        }
-
-        return new DateTime(currentDate.Year, reportingPeriod.StartMonth, 1);
+        return reportingPeriodDto;
     }
-
-
 }

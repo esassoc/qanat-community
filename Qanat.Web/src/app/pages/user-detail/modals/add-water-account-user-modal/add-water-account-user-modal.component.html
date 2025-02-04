@@ -20,11 +20,11 @@
                 *ngIf="waterAccountDropDownOptions$ | async as waterAccountDropDownOptions"></ngx-select-dropdown>
         </div>
 
-        <div class="mb-3" *ngIf="roleDropDownOptions$ | async as roleDropDownOptions">
+        <div class="mb-3">
             <form-field
                 [formControl]="formGroup.controls.WaterAccountRoleID"
                 fieldLabel="Water Account Role"
-                [formInputOptions]="roleDropDownOptions"
+                [formInputOptions]="WaterAccountRolesSelectDropDownOptions"
                 [type]="FormFieldType.Select"></form-field>
         </div>
     </form>

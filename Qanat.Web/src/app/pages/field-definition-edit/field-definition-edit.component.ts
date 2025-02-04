@@ -15,6 +15,7 @@ import { FormsModule } from "@angular/forms";
 import { AlertDisplayComponent } from "../../shared/components/alert-display/alert-display.component";
 import { NgIf } from "@angular/common";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
+import { PublicService } from "src/app/shared/generated/api/public.service";
 
 @Component({
     selector: "qanat-field-definition-edit",
@@ -40,6 +41,7 @@ export class FieldDefinitionEditComponent implements OnInit, AfterViewInit, OnDe
         private router: Router,
         private alertService: AlertService,
         private customRichTextService: CustomRichTextService,
+        private publicService: PublicService,
         private authenticationService: AuthenticationService,
         private cdr: ChangeDetectorRef
     ) {}
@@ -55,7 +57,7 @@ export class FieldDefinitionEditComponent implements OnInit, AfterViewInit, OnDe
             this.currentUser = currentUser;
             const id = parseInt(this.route.snapshot.paramMap.get(routeParams.fieldDefinitionID));
             if (id) {
-                this.customRichTextService.publicCustomRichTextCustomRichTextTypeIDGet(id).subscribe((fieldDefinition) => {
+                this.publicService.publicCustomRichTextsCustomRichTextTypeIDGet(id).subscribe((fieldDefinition) => {
                     this.fieldDefinition = fieldDefinition;
                     this.originalFieldDefinitionValue = fieldDefinition.CustomRichTextContent;
                 });

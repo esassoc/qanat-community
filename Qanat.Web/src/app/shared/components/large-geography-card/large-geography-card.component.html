@@ -17,11 +17,9 @@
     <div class="geography-card-body" *ngIf="userGeographySummary.WaterAccounts">
         <div class="water-account" *ngFor="let waterAccount of userGeographySummary.WaterAccounts.slice(0, 3)">
             <div class="water-account__number">
-                <a class="water-account__number-label" [routerLink]="['water-dashboard', 'water-accounts', waterAccount.WaterAccountID, 'water-budget']">
-                    #{{ waterAccount.WaterAccountNumber }}
-                </a>
+                <a class="water-account__number-label" [routerLink]="['water-accounts', waterAccount.WaterAccountID, 'water-budget']"> #{{ waterAccount.WaterAccountNumber }} </a>
                 <div *ngFor="let zone of waterAccount.Zones">
-                    <span class="zone" [style.background-color]="zone.ZoneColor" [style.color]="zone.ZoneAccentColor">
+                    <span class="zone" [style.background-color]="zone.ZoneColor" [style.color]="zone.ZoneAccentColor" title="{{ zone.ZoneName }}">
                         {{ zone.ZoneName }}
                     </span>
                 </div>

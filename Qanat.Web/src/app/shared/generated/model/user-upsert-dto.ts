@@ -14,6 +14,8 @@ import { FormControl, FormControlOptions, FormControlState, Validators } from "@
 export class UserUpsertDto { 
     RoleID: number;
     ReceiveSupportEmails: boolean;
+    ScenarioPlannerRoleID: number;
+    ModelIDs?: Array<number>;
     GETRunCustomerID?: number;
     GETRunUserID?: number;
     constructor(obj?: any) {
@@ -24,6 +26,8 @@ export class UserUpsertDto {
 export interface UserUpsertDtoForm { 
     RoleID: FormControl<number>;
     ReceiveSupportEmails: FormControl<boolean>;
+    ScenarioPlannerRoleID: FormControl<number>;
+    ModelIDs?: FormControl<Array<number>>;
     GETRunCustomerID?: FormControl<number>;
     GETRunUserID?: FormControl<number>;
 }
@@ -48,6 +52,27 @@ export class UserUpsertDtoFormControls {
             validators: 
             [
                 Validators.required,
+            ],
+        }
+    );
+    public static ScenarioPlannerRoleID = (value: FormControlState<number> | number = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<number>(
+        value,
+        formControlOptions ?? 
+        {
+            nonNullable: true,
+            validators: 
+            [
+                Validators.required,
+            ],
+        }
+    );
+    public static ModelIDs = (value: FormControlState<Array<number>> | Array<number> = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<Array<number>>(
+        value,
+        formControlOptions ?? 
+        {
+            nonNullable: false,
+            validators: 
+            [
             ],
         }
     );

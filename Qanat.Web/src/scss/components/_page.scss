@@ -17,6 +17,23 @@
         .page-title {
             padding-bottom: 0;
         }
+
+        &.centered {
+            text-align: center;
+
+            icon {
+                display: block;
+                margin: 0 auto $spacing-500 auto;
+                width: $spacing-500;
+                height: $spacing-500;
+
+                svg {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: contain;
+                }
+            }
+        }
     }
 
     &-body {

@@ -3,11 +3,17 @@ RETURNS TABLE
 AS
 RETURN
 (
-    select g.GeographyID, g.GeographyName, g.GeographyDisplayName, rp.ReportingPeriodID, rp.ReportingPeriodName, StartMonth, 
-		dateadd(year, (case when StartMonth = 1 then 0 else -1 end), cast(concat(StartMonth, '/1/', @year) as DateTime)) as StartDate,
-		dateadd(second, -1, dateadd(year, (case when StartMonth = 1 then 1 else 0 end), cast(concat(StartMonth, '/1/', @year) as DateTime))) as EndDate
-    from dbo.ReportingPeriod rp
-    join dbo.[Geography] g on rp.GeographyID = g.GeographyID
+    SELECT
+        G.GeographyID
+    ,   G.GeographyName
+    ,   G.GeographyDisplayName
+    ,   RP.ReportingPeriodID
+    ,   RP.[Name]               as ReportingPeriodName
+    ,   MONTH(RP.StartDate)     as StartMonth
+    ,   RP.StartDate            as StartDate
+    ,   RP.EndDate              as EndDate
+    FROM dbo.ReportingPeriod    RP
+    JOIN dbo.[Geography]        G on rp.GeographyID = g.GeographyID
+    WHERE YEAR(RP.EndDate) = @year
 )
-
 GO

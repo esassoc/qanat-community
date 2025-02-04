@@ -4,14 +4,15 @@
     </ng-template>
 </page-header>
 
-<div class="page-body">
+<div class="page-body" [loadingSpinner]="{ isLoading: isLoading }">
     <app-alert-display></app-alert-display>
     <div class="flex-end mb-4">
         <button class="btn btn-primary btn-rounded" [routerLink]="['create']">+ New Geospatial Data Layer</button>
     </div>
+
     <qanat-grid
         height="300px"
-        [rowData]="geospatialData"
+        [rowData]="geospatialData$ | async"
         [columnDefs]="columnDefs"
         downloadFileName="geospatial-data"
         [colIDsToExclude]="csvDownloadColIDsToExclude"
@@ -24,8 +25,13 @@
             Geospatial Data Layers are available on all maps within the platform. This map can be used to test and confirm the Geospatial Data Layers configuration.
         </div>
 
-        <div class="map-wrapper" *ngIf="geography">
-            <parcel-map mapID="parcelMap" mapHeight="540px" [cqlFilter]="mapCqlFilter" [boundingBoxInput]="geography?.BoundingBox" [geographyID]="geographyID"></parcel-map>
+        <div class="map-wrapper" *ngIf="geography$ | async as geography">
+            <parcel-map
+                mapID="parcelMap"
+                mapHeight="540px"
+                [cqlFilter]="mapCqlFilter"
+                [boundingBoxInput]="geography.BoundingBox"
+                [geographyID]="geography.GeographyID"></parcel-map>
         </div>
     </div>
 </div>

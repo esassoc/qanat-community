@@ -1,7 +1,6 @@
 import { Component } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { routeParams } from "src/app/app.routes";
-import { GeographyService } from "src/app/shared/generated/api/geography.service";
 import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
 import { GeographyWithBoundingBoxDto } from "src/app/shared/generated/model/geography-with-bounding-box-dto";
 import * as L from "leaflet";
@@ -14,23 +13,32 @@ import { GsaBoundariesComponent } from "src/app/shared/components/leaflet/layers
 import { AlertDisplayComponent } from "src/app/shared/components/alert-display/alert-display.component";
 import { CustomRichTextComponent } from "src/app/shared/components/custom-rich-text/custom-rich-text.component";
 import { ModelNameTagComponent } from "src/app/shared/components/name-tag/name-tag.component";
+import { MonitoringWellsLayerComponent } from "src/app/shared/components/leaflet/layers/monitoring-wells-layer/monitoring-wells-layer.component";
+import { PublicService } from "src/app/shared/generated/api/public.service";
 
 @Component({
     selector: "geography-about",
     templateUrl: "./geography-about.component.html",
     styleUrls: ["./geography-about.component.scss"],
     standalone: true,
-    imports: [NgIf, PageHeaderComponent, ModelNameTagComponent, AlertDisplayComponent, QanatMapComponent, GsaBoundariesComponent, CustomRichTextComponent, AsyncPipe],
+    imports: [
+        NgIf,
+        PageHeaderComponent,
+        ModelNameTagComponent,
+        AlertDisplayComponent,
+        QanatMapComponent,
+        GsaBoundariesComponent,
+        CustomRichTextComponent,
+        AsyncPipe,
+        MonitoringWellsLayerComponent,
+    ],
 })
 export class GeographyAboutComponent {
     public geography$: Observable<GeographyWithBoundingBoxDto>;
     public customRichTextTypeID = CustomRichTextTypeEnum.GeographyAbout;
     public isLoading = true;
 
-    constructor(
-        private geographyService: GeographyService,
-        private route: ActivatedRoute
-    ) {}
+    constructor(private publicService: PublicService, private route: ActivatedRoute) {}
 
     // the map stuff
     public map: L.Map;
@@ -42,7 +50,7 @@ export class GeographyAboutComponent {
         this.layerControl = event.layerControl;
         this.mapIsReady = true;
         const geographyName = this.route.snapshot.paramMap.get(routeParams.geographyName);
-        this.geography$ = this.geographyService.publicGeographyBoundingBoxGeographyNameGet(geographyName).pipe(
+        this.geography$ = this.publicService.publicGeographiesBoundingBoxGeographyNameGet(geographyName).pipe(
             tap((geography) => {
                 this.isLoading = false;
                 if (geography.BoundingBox?.Left && geography.BoundingBox.Right && geography.BoundingBox.Top && geography.BoundingBox.Bottom) {

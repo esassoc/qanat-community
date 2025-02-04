@@ -1,0 +1,29 @@
+@use "/src/scss/abstracts" as *;
+
+.support-sidebar {
+    &__header {
+        display: grid;
+        gap: $spacing-400;
+        place-items: center;
+        border-bottom: 1px solid $gray-100;
+        padding: $spacing-800 0;
+    }
+
+    &__title {
+        color: $blue-700;
+        font-size: $type-size-500;
+        font-weight: 600;
+    }
+
+    .support-logo {
+        ::ng-deep svg path {
+            fill: $blue-700;
+        }
+    }
+
+    .inbox-link:hover {
+        ::ng-deep svg.no-fill path {
+            stroke: $gray-0;
+        }
+    }
+}

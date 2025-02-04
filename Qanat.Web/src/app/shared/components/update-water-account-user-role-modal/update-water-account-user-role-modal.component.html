@@ -12,8 +12,8 @@
 
 <div class="modal-body">
     <form action="" class="form" [formGroup]="formGroup">
-        <div class="mb-3" *ngIf="roleDropDownOptions$ | async as roleDropDownOptions">
-            <form-field [formControl]="formGroup.controls.WaterAccountRole" fieldLabel="Role" [formInputOptions]="roleDropDownOptions" [type]="FormFieldType.Select"></form-field>
+        <div class="mb-3">
+            <form-field [formControl]="formGroup.controls.WaterAccountRole" fieldLabel="Role" [formInputOptions]="WaterAccountRolesSelectDropdownOptions" [type]="FormFieldType.Select"></form-field>
         </div>
     </form>
 </div>

@@ -6,7 +6,7 @@
 </div>
 
 <div class="modal-body">
-    <form action="" class="form" [formGroup]="formGroup">
+    <form action="" class="form" [formGroup]="formGroup" class="grid-12">
         <form-field [formControl]="formGroup.controls.WaterAccountName" fieldLabel="Water Account Name" placeholder="Water Account Name" [type]="FormFieldType.Text"></form-field>
 
         <form-field [formControl]="formGroup.controls.ContactName" fieldLabel="Contact Name" placeholder="Contact Name" [type]="FormFieldType.Text"></form-field>
@@ -20,6 +20,6 @@
 </div>
 
 <div class="modal-footer">
-    <button class="btn btn-primary" (click)="save()" [disabled]="formGroup.invalid">Update Info & Save</button>
+    <button class="btn btn-primary" (click)="save()" [disabled]="formGroup.invalid">Save</button>
     <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
 </div>

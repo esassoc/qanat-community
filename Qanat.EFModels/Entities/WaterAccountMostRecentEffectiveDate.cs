@@ -14,23 +14,22 @@ namespace Qanat.EFModels.Entities
         public DateTime? MostRecentUsageEffectiveDate { get; set; }
 
 
-        public static MostRecentEffectiveDates GetMostRecentEffectiveDatesByAccount(
-            QanatDbContext dbContext, int geographyID, int waterAccountID, int year)
+        public static MostRecentEffectiveDatesDto GetMostRecentEffectiveDatesByWaterAccount(
+            QanatDbContext dbContext, int waterAccountID, int year)
         {
-            var geographyIDParam = new SqlParameter("geographyID", geographyID);
             var waterAccountIDParam = new SqlParameter("waterAccountID", waterAccountID);
             var yearParam = new SqlParameter("year", year);
             var waterAccountMostRecentEffectiveDates = dbContext.WaterAccountMostRecentEffectiveDate
-                .FromSqlRaw($"EXECUTE dbo.pWaterAccountMostRecentEffectiveDate @geographyID, @waterAccountID, @year",
-                    geographyIDParam, waterAccountIDParam, yearParam).ToList();
-            var mostRecentEffectiveDateDto = new MostRecentEffectiveDates();
+                .FromSqlRaw($"EXECUTE dbo.pWaterAccountMostRecentEffectiveDate @waterAccountID, @year",
+                    waterAccountIDParam, yearParam).ToList();
+            var mostRecentEffectiveDateDto = new MostRecentEffectiveDatesDto();
             var waterAccountMostRecentEffectiveDate = waterAccountMostRecentEffectiveDates
                 .FirstOrDefault();
 
             if (waterAccountMostRecentEffectiveDate != null)
             {
-                mostRecentEffectiveDateDto.MostRecentSupplyEffectiveDate = waterAccountMostRecentEffectiveDate.MostRecentSupplyEffectiveDate?.ToShortDateString();
-                mostRecentEffectiveDateDto.MostRecentUsageEffectiveDate = waterAccountMostRecentEffectiveDate.MostRecentUsageEffectiveDate?.ToShortDateString();
+                mostRecentEffectiveDateDto.MostRecentSupplyEffectiveDate = waterAccountMostRecentEffectiveDate.MostRecentSupplyEffectiveDate;
+                mostRecentEffectiveDateDto.MostRecentUsageEffectiveDate = waterAccountMostRecentEffectiveDate.MostRecentUsageEffectiveDate;
             }
 
             return mostRecentEffectiveDateDto;

@@ -3,16 +3,16 @@ import { ActivatedRoute, Router, RouterLink } from "@angular/router";
 import { Observable, tap } from "rxjs";
 import { routeParams } from "src/app/app.routes";
 import { AuthenticationService } from "src/app/shared/services/authentication.service";
-import { GeographyService } from "src/app/shared/generated/api/geography.service";
 import { WaterAccountUserService } from "src/app/shared/generated/api/water-account-user.service";
 import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
 import { GeographyDto, OnboardingWaterAccountDto, UserDto } from "src/app/shared/generated/model/models";
 import { ButtonComponent } from "../../../../shared/components/button/button.component";
 import { CustomRichTextComponent } from "../../../../shared/components/custom-rich-text/custom-rich-text.component";
-import { ParcelMinimapComponent } from "../../../../shared/components/parcel-minimap/parcel-minimap.component";
+import { ParcelMinimapComponent } from "../../../../shared/components/parcel/parcel-minimap/parcel-minimap.component";
 import { IconComponent } from "src/app/shared/components/icon/icon.component";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { NgIf, NgFor, AsyncPipe } from "@angular/common";
+import { PublicService } from "src/app/shared/generated/api/public.service";
 
 @Component({
     selector: "onboard-water-accounts",
@@ -36,7 +36,7 @@ export class OnboardWaterAccountsComponent implements OnInit {
         private authenticationService: AuthenticationService,
         private router: Router,
         private route: ActivatedRoute,
-        private geographyService: GeographyService,
+        private publicService: PublicService,
         private waterAccountUserService: WaterAccountUserService
     ) {}
 
@@ -47,7 +47,7 @@ export class OnboardWaterAccountsComponent implements OnInit {
             tap((user) => {
                 this.currentUserID = user.UserID;
 
-                this.geography$ = this.geographyService.publicGeographyNameGeographyNameGet(geographyName).pipe(
+                this.geography$ = this.publicService.publicGeographiesNameGeographyNameGet(geographyName).pipe(
                     tap((geography) => {
                         this.geographyID = geography.GeographyID;
 

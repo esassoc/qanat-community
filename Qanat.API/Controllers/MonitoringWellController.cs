@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Hangfire;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -12,6 +8,8 @@ using Qanat.API.Services.Authorization;
 using Qanat.EFModels.Entities;
 using Qanat.Models.DataTransferObjects;
 using Qanat.Models.Security;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Qanat.API.Controllers;
 
@@ -31,22 +29,6 @@ public class MonitoringWellController : SitkaController<MonitoringWellController
     {
         var monitoringWells = MonitoringWells.GetMonitoringWellsFromGeography(_dbContext, geographyID);
         return Ok(monitoringWells.Select(x => x.AsMonitoringWellMeasurementDataDto()));
-    }
-
-    [HttpGet("geographies/{geographyID}/monitoring-wells")]
-    [WithRoleFlag(FlagEnum.CanClaimWaterAccounts)] // todo: better permissions, need to add water account users to the geography users table as a normal user with basic read rights to geography entities
-    public ActionResult<List<MonitoringWellDataDto>> GetAllMonitoringWellsForGeographyForGrid([FromRoute] int geographyID)
-    {
-        var monitoringWells = MonitoringWells.GetMonitoringWellsFromGeographyForGrid(_dbContext, geographyID);
-        return Ok(monitoringWells.Select(x => x.AsMonitoringWellDataDto()));
-    }
-
-    [HttpGet("geographies/{geographyID}/monitoring-well/{siteCode}")]
-    [WithRoleFlag(FlagEnum.CanClaimWaterAccounts)] // todo: better permissions, need to add water account users to the geography users table as a normal user with basic read rights to geography entities
-    public ActionResult<List<MonitoringWellMeasurementDto>> GetMonitoringWellByGeographyAndSiteCode([FromRoute] int geographyID, string siteCode)
-    {
-        var monitoringWellMeasurements = MonitoringWells.GetMonitoringWell(_dbContext, geographyID, siteCode);
-        return Ok(monitoringWellMeasurements);
     }
 
     [HttpPost("monitoring-well-measurements")]

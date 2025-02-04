@@ -16,5 +16,6 @@ public class fParcelStagingChanges
     public bool HasOwnerNameChange { get; set; }
     public bool HasOwnerAddressChange { get; set; }
     public bool HasGeometryChange { get; set; }
+    public bool HasAcresChange { get; set; }
     public bool IsNew { get; set; }
 }

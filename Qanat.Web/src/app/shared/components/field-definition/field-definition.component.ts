@@ -15,6 +15,7 @@ import { CustomRichTextSimpleDto } from "../../generated/model/models";
 import { PopperDirective } from "../../directives/popper.directive";
 import { FormsModule } from "@angular/forms";
 import { NgIf } from "@angular/common";
+import { PublicService } from "../../generated/api/public.service";
 
 @Component({
     selector: "field-definition",
@@ -45,6 +46,7 @@ export class FieldDefinitionComponent implements OnInit, AfterViewInit, OnDestro
 
     constructor(
         private customRichTextService: CustomRichTextService,
+        private publicService: PublicService,
         private authenticationService: AuthenticationService,
         private cdr: ChangeDetectorRef,
         private alertService: AlertService
@@ -60,7 +62,7 @@ export class FieldDefinitionComponent implements OnInit, AfterViewInit, OnDestro
         this.authenticationService.getCurrentUser().subscribe((currentUser) => {
             this.currentUser = currentUser;
         });
-        this.customRichTextService.publicCustomRichTextCustomRichTextTypeIDGet(CustomRichTextTypeEnum[this.fieldDefinitionType]).subscribe((x) => this.loadFieldDefinition(x));
+        this.publicService.publicCustomRichTextsCustomRichTextTypeIDGet(CustomRichTextTypeEnum[this.fieldDefinitionType]).subscribe((x) => this.loadFieldDefinition(x));
     }
 
     ngOnDestroy() {

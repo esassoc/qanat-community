@@ -2,7 +2,6 @@ import { Component, OnInit } from "@angular/core";
 import { FormControl, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { Observable, debounceTime, map, startWith, tap } from "rxjs";
 import { FormFieldType } from "src/app/shared/components/forms/form-field/form-field.component";
-import { FrequentlyAskedQuestionService } from "src/app/shared/generated/api/frequently-asked-question.service";
 import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
 import { FrequentlyAskedQuestionSimpleDto } from "src/app/shared/generated/model/frequently-asked-question-simple-dto";
 import { LoadingDirective } from "../../shared/directives/loading.directive";
@@ -11,6 +10,7 @@ import { FormFieldComponent } from "../../shared/components/forms/form-field/for
 import { AlertDisplayComponent } from "../../shared/components/alert-display/alert-display.component";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { FrequentlyAskedQuestionDisplayComponent } from "src/app/shared/components/frequently-asked-question-display/frequently-asked-question-display.component";
+import { PublicService } from "src/app/shared/generated/api/public.service";
 
 @Component({
     selector: "frequently-asked-questions",
@@ -40,10 +40,10 @@ export class FrequentlyAskedQuestionsComponent implements OnInit {
     searchFormControl = new FormControl("");
     public searchTermDebounced: string = "";
 
-    constructor(private frequentlyAskedQuestionsService: FrequentlyAskedQuestionService) {}
+    constructor(private publicService: PublicService) {}
 
     ngOnInit(): void {
-        this.frequentlyAskedQuestions$ = this.frequentlyAskedQuestionsService.publicFaqGet().pipe(
+        this.frequentlyAskedQuestions$ = this.publicService.publicFaqGet().pipe(
             tap((faqs) => {
                 this.allFaqs = faqs;
                 this.faqsToDisplay$ = this.searchFormControl.valueChanges.pipe(

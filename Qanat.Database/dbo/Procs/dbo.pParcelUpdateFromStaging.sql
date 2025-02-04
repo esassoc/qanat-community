@@ -21,15 +21,21 @@ begin
            NewGeometry4326,
            NewOwnerName, 
            NewOwnerAddress,
+		   NewAcres,
            ParcelStatusID,
-		   case when NewGeometry is null then null else round(NewGeometry.STArea() / @squareFeetToAcresDivisor, 14) end as ParcelArea,
+		   case 
+				when NewGeometry is null or NewAcres is null then null 
+				when NewAcres is not null then NewAcres
+				else round(NewGeometry.STArea() / @squareFeetToAcresDivisor, 14) 
+		   end as ParcelArea,
            HasGeometryChange,
+		   HasAcresChange,
            IsNew
     into #parcelChanges
 	from dbo.fParcelStagingChanges(@geographyID)
 
 	insert into dbo.Parcel (GeographyID, ParcelNumber, ParcelArea, ParcelStatusID, OwnerName, OwnerAddress)
-    select GeographyID, ParcelNumber, ParcelArea, ParcelStatusID, NewOwnerName, NewOwnerAddress
+    select GeographyID, ParcelNumber, ParcelArea, ParcelStatusID,  LTRIM(RTRIM(NewOwnerName)),  LTRIM(RTRIM(NewOwnerAddress))
     from #parcelChanges
     where IsNew = 1
 
@@ -44,8 +50,8 @@ begin
     set 
         ParcelArea = pc.ParcelArea,
         ParcelStatusID = pc.ParcelStatusID,
-        OwnerName = pc.NewOwnerName,
-        OwnerAddress = pc.NewOwnerAddress
+        OwnerName = LTRIM(RTRIM(pc.NewOwnerName)),
+        OwnerAddress =  LTRIM(RTRIM(pc.NewOwnerAddress))
 
     from dbo.Parcel p
     join #parcelChanges pc on p.ParcelNumber = pc.ParcelNumber and p.GeographyID = pc.GeographyID
@@ -72,7 +78,6 @@ begin
     set 
         ParcelStatusID = pc.ParcelStatusID,
         WaterAccountID = null
-
     from dbo.Parcel p
     join #parcelChanges pc on p.ParcelNumber = pc.ParcelNumber and p.GeographyID = pc.GeographyID
     where p.GeographyID = @geographyID and pc.ParcelStatusID = 2
@@ -82,8 +87,8 @@ begin
     insert into dbo.ParcelHistory(GeographyID, ParcelID, EffectiveYear, UpdateDate, UpdateUserID, OwnerName, OwnerAddress, ParcelArea, ParcelStatusID, IsReviewed, WaterAccountID)
 	select @geographyID, p.ParcelID, @effectiveYear, GETUTCDATE(), @uploadUserID, p.OwnerName, p.OwnerAddress, p.ParcelArea, p.ParcelStatusID,
 		case when (
-		isnull(p.OwnerName, '') != isnull(poh.OwnerName, '')
-        or isnull(p.OwnerAddress, '') != isnull(poh.OwnerAddress, '')
+		LTRIM(RTRIM(isnull(p.OwnerName, ''))) != LTRIM(RTRIM(isnull(poh.OwnerName, '')))
+        or LTRIM(RTRIM(isnull(p.OwnerAddress, ''))) != LTRIM(RTRIM(isnull(poh.OwnerAddress, '')))
         or cast(isnull(p.ParcelArea, 0) as decimal(10,2)) != isnull(poh.ParcelArea, 0)
 		or isnull(p.ParcelStatusID, 0) != isnull(poh.ParcelStatusID, 0)
 		) then 0 else 1 end as IsReviewed,

@@ -9,13 +9,8 @@ using OSGeo.GDAL;
 using Qanat.EFModels.Entities;
 using System.Text.Json;
 using Qanat.API.Services.OpenET;
-using Qanat.Common.GeoSpatial;
 using Qanat.Models.DataTransferObjects;
 using System.Collections.Generic;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
-using NetTopologySuite.Geometries;
 
 namespace Qanat.Tests.IntegrationTests.Raster;
 
@@ -53,26 +48,29 @@ public class RasterTests
 
         var usageEntity = await _dbContext.UsageEntities.AsNoTracking()
             .Include(x => x.UsageEntityGeometry)
-            .Include(x => x.Geography)
+            .Include(x => x.Geography).ThenInclude(x => x.GeographyBoundary)
+            .Include(x => x.Geography).ThenInclude(x => x.ReportingPeriods)
             .FirstOrDefaultAsync(x => x.UsageEntityName == usageEntityName);
-
+        
         Assert.IsNotNull(usageEntity);
 
         var geography = usageEntity.Geography;
 
-        var usageEntityDto = new UsageEntityWithGeoJSONDto()
+        var usageEntityDto = new UsageEntitySimpleDto()
         {
+            UsageEntityID = usageEntity.UsageEntityID,
             UsageEntityName = usageEntity.UsageEntityName,
-            GeoJSON = usageEntity.UsageEntityGeometry.GeometryNative.Buffer(0).ToGeoJSON()
+            UsageEntityArea = usageEntity.UsageEntityArea
         };
 
-        var result = await _rasterProcessing.GetRasterValueForUsageEntity(geography.AsGeographyDto(), rasterDataset, usageEntityDto);
+        var bufferedGSABoundary = geography.GeographyBoundary.GSABoundary.Buffer(Geographies.GSABoundaryBuffer).Envelope;
+        var result = await _rasterProcessing.GetRasterValueForUsageEntity(geography.AsDto(), bufferedGSABoundary, rasterDataset, usageEntityDto);
         rasterDataset.Dispose();
 
         var oldResult = await _dbContext.WaterMeasurements.AsNoTracking()
             .FirstOrDefaultAsync(x => x.GeographyID == geography.GeographyID && x.WaterMeasurementTypeID == waterMeasurementTypeID && x.ReportedDate.Year == year && x.ReportedDate.Month == month && x.UsageEntityName == usageEntity.UsageEntityName);
 
-        result.OldValue = oldResult?.ReportedValue;
+        result.OldValue = (double?)oldResult?.ReportedValue;
 
         var prettyPrintedResultJSON = JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
         Console.WriteLine(prettyPrintedResultJSON);
@@ -95,7 +93,7 @@ public class RasterTests
 
         var usageEntities = await _dbContext.UsageEntities.AsNoTracking()
             .Include(x => x.UsageEntityGeometry)
-            .Include(x => x.Geography)
+            .Include(x => x.Geography).ThenInclude(x => x.DefaultReportingPeriod)
             .Include(x => x.Parcel)
             .Where(x => x.GeographyID == geographyID && x.UsageEntityGeometry != null && x.UsageEntityGeometry.GeometryNative.IsValid)
             .OrderBy(x => Guid.NewGuid())
@@ -108,20 +106,20 @@ public class RasterTests
         var geography = usageEntities.First().Geography;
 
         var rasterFileBytes = await File.ReadAllBytesAsync(rasterFilePath);
-        var usageEntityDtos = usageEntitiesToSample.Select(x => new UsageEntityWithGeoJSONDto()
+        var usageEntityDtos = usageEntitiesToSample.Select(x => new UsageEntitySimpleDto()
         {
+            UsageEntityID = x.UsageEntityID,
             UsageEntityName = x.UsageEntityName,
-            Area = x.UsageEntityArea,
-            GeoJSON = x.UsageEntityGeometry.GeometryNative.Buffer(0).ToGeoJSON()
+            UsageEntityArea = x.UsageEntityArea
         }).ToList();
 
-        var results = await _rasterProcessing.ProcessRasterBytesForUsageEntities(geography.AsGeographyDto(), usageEntityDtos, rasterFileBytes);
+        var results = await _rasterProcessing.ProcessRasterBytesForUsageEntities(geography.AsDto(), usageEntityDtos, rasterFileBytes);
 
         foreach (var rasterProcessingResult in results)
         {
             var oldResult = waterMeasurements.FirstOrDefault(x => x.GeographyID == geographyID && x.WaterMeasurementTypeID == waterMeasurementTypeID && x.ReportedDate.Year == year && x.ReportedDate.Month == month && x.UsageEntityName == rasterProcessingResult.UsageEntityName);
 
-            rasterProcessingResult.OldValue = oldResult?.ReportedValue;
+            rasterProcessingResult.OldValue = (double?)oldResult?.ReportedValue;
         }
 
         var averageExecutionTime = results.Average(x => x.ExecutionTime);
@@ -130,7 +128,7 @@ public class RasterTests
         var averageDifference = resultsWithOldValues.Average(x => x.Difference);
         var minDifference = resultsWithOldValues.Min(x => x.Difference);
         var maxDifference = resultsWithOldValues.Max(x => x.Difference);
-        var standardDeviation = resultsWithOldValues.Select(x => (double)x.Difference!.Value).StandardDeviation();
+        var standardDeviation = resultsWithOldValues.Select(x => x.Difference!.Value).StandardDeviation();
 
         Console.WriteLine($"Total Count: {results.Count}");
         Console.WriteLine($"\tAverage execution time: {averageExecutionTime}ms");
@@ -144,7 +142,7 @@ public class RasterTests
 
         var averageDifferencePercent = validDifferencePercents.Any()
             ? validDifferencePercents.Average()
-            : (decimal?) null;
+            : (double?) null;
 
         Console.WriteLine($"\tAverage Difference Percent: {Math.Round(averageDifferencePercent.GetValueOrDefault(0), 2, MidpointRounding.ToEven)}%");
         Console.WriteLine($"\tAverage Difference: {averageDifference}");
@@ -165,13 +163,23 @@ public class RasterTests
             var prettyPrintedResultsWithErrorsJSON = JsonSerializer.Serialize(resultsWithErrors, new JsonSerializerOptions { WriteIndented = true });
 
             Console.WriteLine(prettyPrintedResultsWithErrorsJSON);
-            Assert.Fail($"{resultsWithErrors.Count} results had errors, printed to console.");
+
+            List<string> skipErrorList =
+            [
+                "No valid geometry found for usage entity.",
+                "Usage entity is outside of the buffered GSA boundary."
+            ];
+
+            if (resultsWithErrors.Any(x => !skipErrorList.Contains(x.ErrorMessage)))
+            {
+                Assert.Fail($"{resultsWithErrors.Count} results had blocking errors, printed to console.");
+            }
         }
 
         var prettyPrintedResultJSON = JsonSerializer.Serialize(results, new JsonSerializerOptions { WriteIndented = true });
         Console.WriteLine(prettyPrintedResultJSON);
 
-        Assert.IsTrue(results.All(x => x.RasterValue.HasValue));
+        Assert.IsTrue(results.Where(x => string.IsNullOrEmpty( x.ErrorMessage)).All(x => x.RasterValue.HasValue));
         Assert.AreEqual(usageEntityDtos.Count, results.Count);
     }
 }

@@ -15,9 +15,14 @@ namespace Qanat.EFModels.Entities
             {
                 ReportingPeriodID = reportingPeriod.ReportingPeriodID,
                 GeographyID = reportingPeriod.GeographyID,
-                ReportingPeriodName = reportingPeriod.ReportingPeriodName,
-                StartMonth = reportingPeriod.StartMonth,
-                Interval = reportingPeriod.Interval
+                Name = reportingPeriod.Name,
+                StartDate = reportingPeriod.StartDate,
+                EndDate = reportingPeriod.EndDate,
+                ReadyForAccountHolders = reportingPeriod.ReadyForAccountHolders,
+                CreateDate = reportingPeriod.CreateDate,
+                CreateUserID = reportingPeriod.CreateUserID,
+                UpdateDate = reportingPeriod.UpdateDate,
+                UpdateUserID = reportingPeriod.UpdateUserID
             };
             return dto;
         }

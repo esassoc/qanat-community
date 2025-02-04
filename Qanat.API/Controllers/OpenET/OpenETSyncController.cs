@@ -49,13 +49,16 @@ public class OpenETSyncController : SitkaController<OpenETSyncController>
     {
         var geography = Geographies.GetByID(_dbContext, geographyID);
 
-        var syncInProgress = _dbContext.OpenETSyncHistories.AsNoTracking()
+        var latestSyncHistory = _dbContext.OpenETSyncHistories.AsNoTracking()
             .Include(x => x.OpenETSync)
-            .Any(x => x.OpenETSync.Year == openETRunDto.Year
-                   && x.OpenETSync.Month == openETRunDto.Month
-                   && x.OpenETSync.OpenETDataTypeID == openETRunDto.OpenETDataTypeID
-                   && (x.OpenETSyncResultTypeID == (int)OpenETSyncResultTypeEnum.Created || x.OpenETSyncResultTypeID == (int)OpenETSyncResultTypeEnum.InProgress));
+            .Where(x => x.OpenETSync.Year == openETRunDto.Year
+                     && x.OpenETSync.Month == openETRunDto.Month
+                     && x.OpenETSync.GeographyID == geographyID
+                     && x.OpenETSync.OpenETDataTypeID == openETRunDto.OpenETDataTypeID)
+            .OrderByDescending(x => x.CreateDate)
+            .FirstOrDefault();
 
+        var syncInProgress = latestSyncHistory is { OpenETSyncResultTypeID: (int)OpenETSyncResultTypeEnum.Created or (int)OpenETSyncResultTypeEnum.InProgress };
         if (syncInProgress)
         {
             return BadRequest("Sync already in progress.");
@@ -100,7 +103,7 @@ public class OpenETSyncController : SitkaController<OpenETSyncController>
 
         var reportedDate = openETSync.ReportedDate.AddMonths(1).AddDays(-1);
 
-        var geographyAsDto = geography.AsGeographyDto();
+        var geographyAsDto = geography.AsDto();
 
         //MK 9/19/2024 -- Assumes OpenET always returns Inches, somewhat of a smell.
         var backgroundJobID = _backgroundJobClient.Enqueue(() => _rasterProcessingService.ProcessRasterByFileCanonicalNameForAllUsageEntities(geographyAsDto, latestHistory.OpenETSyncHistoryID, waterMeasurementType.WaterMeasurementTypeID, UnitType.Inches.UnitTypeID, reportedDate, latestHistory.RasterFileResource.FileResourceCanonicalName, false, false));

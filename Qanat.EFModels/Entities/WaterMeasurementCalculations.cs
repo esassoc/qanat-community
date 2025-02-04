@@ -193,20 +193,15 @@ public static class WaterMeasurementCalculations
                 break;
 
             case WaterMeasurementCalculationTypeEnum.CalculateExtractedAgainstSupply:
-                //CalculateExtractedAgainstSupply assumes one dependency that is ET Evapo and one that is of calculation type ExtractedGroundwater.
-                var etEvapoDependency = waterMeasurementType.WaterMeasurementTypeDependencyWaterMeasurementTypes
-                    .FirstOrDefault(x => x.DependsOnWaterMeasurementType.WaterMeasurementCategoryType.ToEnum == WaterMeasurementCategoryTypeEnum.ET);
-
-                var etEvapoMeasurementType = etEvapoDependency?.DependsOnWaterMeasurementType;
+                //CalculateExtractedAgainstSupply assumes one dependency that is ExtractedGroundwater.
 
                 var extractedGroundwaterDependency = waterMeasurementType.WaterMeasurementTypeDependencyWaterMeasurementTypes
                     .FirstOrDefault(x => x.DependsOnWaterMeasurementType.WaterMeasurementCalculationTypeID == WaterMeasurementCalculationType.CalculateExtractedGroundwater.WaterMeasurementCalculationTypeID);
 
                 var extractedGroundwaterMeasurementType = extractedGroundwaterDependency?.DependsOnWaterMeasurementType;
-
-                if (etEvapoMeasurementType != null && extractedGroundwaterMeasurementType != null)
+                if (extractedGroundwaterMeasurementType != null)
                 {
-                    await CalculateExtractedAgainstSupply(dbContext, geographyID, waterMeasurementType, etEvapoMeasurementType, extractedGroundwaterMeasurementType, effectiveDate);
+                    await CalculateExtractedAgainstSupply(dbContext, geographyID, waterMeasurementType, extractedGroundwaterMeasurementType, effectiveDate);
                 }
                 else
                 {
@@ -225,16 +220,21 @@ public static class WaterMeasurementCalculations
 
                 var openETPrecipMeasurementType = openETPrecipDependency?.DependsOnWaterMeasurementType;
 
+
+                var consumedSurfaceWaterDependency = waterMeasurementType.WaterMeasurementTypeDependencyWaterMeasurementTypes
+                    .FirstOrDefault(x => x.DependsOnWaterMeasurementType.WaterMeasurementCalculationType?.ToEnum == WaterMeasurementCalculationTypeEnum.CalculateSurfaceWaterConsumption);
+
+                var consumedSurfaceWaterMeasurementType = consumedSurfaceWaterDependency?.DependsOnWaterMeasurementType;
+
                 if (openETEvapoMeasurementType != null && openETPrecipMeasurementType != null)
                 {
-                    await CalculateOpenETConsumptiveUse(dbContext, geographyID, waterMeasurementType, openETEvapoMeasurementType, openETPrecipMeasurementType, effectiveDate);
+                    await CalculateOpenETConsumptiveUse(dbContext, geographyID, waterMeasurementType, openETEvapoMeasurementType, openETPrecipMeasurementType, consumedSurfaceWaterMeasurementType, effectiveDate);
                 }
                 else
                 {
                     throw new ArgumentException("Missing dependency for CalculateOpenETConsumptiveUse.");
                 }
                 break;
-
             default:
                 throw new ArgumentException($"Calculation method not found for {waterMeasurementType.WaterMeasurementTypeName}");
         }
@@ -649,49 +649,30 @@ public static class WaterMeasurementCalculations
         await SaveWaterMeasurements(dbContext, geographyID, reportedDate, newWaterMeasurements, extractedGroundwaterMeasurementType.WaterMeasurementTypeID);
     }
 
-    private static async Task CalculateExtractedAgainstSupply(QanatDbContext dbContext, int geographyID, WaterMeasurementType extractedAgainstSupplyMeasurementType, WaterMeasurementType etEvapoMeasurementType, WaterMeasurementType extractedGroundwaterMeasurementType, DateTime reportedDate)
+    private static async Task CalculateExtractedAgainstSupply(QanatDbContext dbContext, int geographyID, WaterMeasurementType extractedAgainstSupplyMeasurementType, WaterMeasurementType extractedGroundwaterMeasurementType, DateTime reportedDate)
     {
         var extractedAgainstSupplyMeasurementTypeByDate = new Dictionary<DateTime, List<WaterMeasurement>>();
 
-        //MK 8/21/2024 -- Only geography using this right now is MIUGSA which is on a calendar reporting period. This could be made smarter in the future.
         var reportedYear = reportedDate.Year;
-        var fReportingPeriod = ReportingPeriods.GetByGeographyIDAndYear(dbContext, geographyID, reportedYear);
-        var reportingPeriodStart = fReportingPeriod.StartDate;
-        var reportingPeriodEnd = fReportingPeriod.EndDate;
+        var reportingPeriodDto = await ReportingPeriods.GetByGeographyIDAndYearAsync(dbContext, geographyID, reportedYear);
+        var reportingPeriodStart = reportingPeriodDto.StartDate;
+        var reportingPeriodEnd = reportingPeriodDto.EndDate;
 
-        var openETEvapoMeasurements = await dbContext.WaterMeasurements.AsNoTracking()
-            .Where(x => x.GeographyID == geographyID && x.WaterMeasurementTypeID == etEvapoMeasurementType.WaterMeasurementTypeID && x.ReportedDate >= reportingPeriodStart && x.ReportedDate <= reportingPeriodEnd)
-            .ToListAsync();
-            
         var extractedGroundwaterMeasurements = await dbContext.WaterMeasurements.AsNoTracking()
             .Where(x => x.GeographyID == geographyID && x.WaterMeasurementTypeID == extractedGroundwaterMeasurementType.WaterMeasurementTypeID && x.ReportedDate >= reportingPeriodStart && x.ReportedDate <= reportingPeriodEnd)
             .ToListAsync();
-
-        #region By Water Account
 
         var waterAccounts = await dbContext.fWaterAccountParcelByGeographyAndYear(geographyID, reportedYear).AsNoTracking()
             .ToListAsync();
 
         foreach (var waterAccount in waterAccounts.GroupBy(x => x.WaterAccountID))
         {
-            var activeParcelsNumbersInEffect = waterAccount.Select(x => x.ParcelNumber)
-                .ToList();
-
-            var waterAccountEvapoMeasurements = openETEvapoMeasurements.Where(x => activeParcelsNumbersInEffect.Contains(x.UsageEntityName)).ToList();
+            var activeParcelsNumbersInEffect = waterAccount.Select(x => x.ParcelNumber).ToList();
             var waterAccountGroundwaterMeasurements = extractedGroundwaterMeasurements.Where(x => activeParcelsNumbersInEffect.Contains(x.UsageEntityName)).ToList();
-            var hasETEvapoDataForYear = true;
+            var cumulativeValueInAcreFeet = waterAccountGroundwaterMeasurements.Sum(x => x.ReportedValueInAcreFeet.GetValueOrDefault(0));
 
-            var groupedByUsageEntity = waterAccountEvapoMeasurements.GroupBy(x => $"{x.UsageEntityName}-{x.UsageEntityArea}");
-            foreach (var grouping in groupedByUsageEntity)
-            {
-                if (grouping.Count() < 12)
-                {
-                    hasETEvapoDataForYear = false;
-                    break;
-                }
-            }
-
-            if (!hasETEvapoDataForYear)
+            //MK 12/20/2024 -- If a negative cumulative value, set the EAS to 0 for all months in the period. Updated business logic as of QAN-924.
+            if (cumulativeValueInAcreFeet <= 0)
             {
                 foreach (var extractedGroundwaterMeasurement in waterAccountGroundwaterMeasurements)
                 {
@@ -702,12 +683,12 @@ public static class WaterMeasurementCalculations
                         UnitTypeID = extractedGroundwaterMeasurement.UnitTypeID,
                         UsageEntityName = extractedGroundwaterMeasurement.UsageEntityName,
                         ReportedDate = extractedGroundwaterMeasurement.ReportedDate,
-                        ReportedValue = extractedGroundwaterMeasurement.ReportedValue,
-                        ReportedValueInAcreFeet = extractedGroundwaterMeasurement.ReportedValueInAcreFeet,
+                        ReportedValue = 0,
+                        ReportedValueInAcreFeet = 0,
                         UsageEntityArea = extractedGroundwaterMeasurement.UsageEntityArea,
                         LastUpdateDate = DateTime.UtcNow,
                         FromManualUpload = false,
-                        Comment = $"Missing ET data for a month for a usage entity. Set to {extractedGroundwaterMeasurementType.WaterMeasurementTypeName}."
+                        Comment = $"Set to 0 because cumulative value for the reporting period for the WATER ACCOUNT was less than or equal to 0: WaterAccount ({waterAccount.Key}) = {cumulativeValueInAcreFeet} acreft."
                     };
 
                     if (!extractedAgainstSupplyMeasurementTypeByDate.ContainsKey(extractedGroundwaterMeasurement.ReportedDate))
@@ -722,74 +703,35 @@ public static class WaterMeasurementCalculations
             }
             else
             {
-                var cumulativeValueInAcreFeet = waterAccountGroundwaterMeasurements.Sum(x => x.ReportedValueInAcreFeet.GetValueOrDefault(0));
-
-                //MK 8/21/2024 -- If we have a full year of ET data and a negative cumulative value, set the EAS to 0 for all months in the period.
-                if (cumulativeValueInAcreFeet < 0)
+                // If cumulative is positive, EAS = EG for all months in the period
+                foreach (var extractedGroundwaterMeasurement in waterAccountGroundwaterMeasurements)
                 {
-                    foreach (var extractedGroundwaterMeasurement in waterAccountGroundwaterMeasurements)
+                    var extractedAgainstSupplyMeasurement = new WaterMeasurement()
                     {
-                        var extractedAgainstSupplyMeasurement = new WaterMeasurement()
-                        {
-                            WaterMeasurementTypeID = extractedAgainstSupplyMeasurementType.WaterMeasurementTypeID,
-                            GeographyID = geographyID,
-                            UnitTypeID = extractedGroundwaterMeasurement.UnitTypeID,
-                            UsageEntityName = extractedGroundwaterMeasurement.UsageEntityName,
-                            ReportedDate = extractedGroundwaterMeasurement.ReportedDate,
-                            ReportedValue = 0,
-                            ReportedValueInAcreFeet = 0,
-                            UsageEntityArea = extractedGroundwaterMeasurement.UsageEntityArea,
-                            LastUpdateDate = DateTime.UtcNow,
-                            FromManualUpload = false,
-                            Comment = $"Set to 0 because cumulative value for the reporting period for the WATER ACCOUNT was less than or equal to 0: WaterAccount ({waterAccount.Key}) = {cumulativeValueInAcreFeet} acreft."
-                        };
+                        WaterMeasurementTypeID = extractedAgainstSupplyMeasurementType.WaterMeasurementTypeID,
+                        GeographyID = geographyID,
+                        UnitTypeID = extractedGroundwaterMeasurement.UnitTypeID,
+                        UsageEntityName = extractedGroundwaterMeasurement.UsageEntityName,
+                        ReportedDate = extractedGroundwaterMeasurement.ReportedDate,
+                        ReportedValue = extractedGroundwaterMeasurement.ReportedValue,
+                        ReportedValueInAcreFeet = extractedGroundwaterMeasurement.ReportedValueInAcreFeet,
+                        UsageEntityArea = extractedGroundwaterMeasurement.UsageEntityArea,
+                        LastUpdateDate = DateTime.UtcNow,
+                        FromManualUpload = false,
+                        Comment = $"Set to {extractedGroundwaterMeasurementType.WaterMeasurementTypeName} because cumulative value for the reporting period for the WATER ACCOUNT was greater than 0: WaterAccount ({waterAccount.Key}) = {cumulativeValueInAcreFeet} acreft."
+                    };
 
-
-                        if (!extractedAgainstSupplyMeasurementTypeByDate.ContainsKey(extractedGroundwaterMeasurement.ReportedDate))
-                        {
-                            extractedAgainstSupplyMeasurementTypeByDate.Add(extractedGroundwaterMeasurement.ReportedDate, [extractedAgainstSupplyMeasurement]);
-                        }
-                        else
-                        {
-                            extractedAgainstSupplyMeasurementTypeByDate[extractedGroundwaterMeasurement.ReportedDate].Add(extractedAgainstSupplyMeasurement);
-                        }
+                    if (!extractedAgainstSupplyMeasurementTypeByDate.ContainsKey(extractedGroundwaterMeasurement.ReportedDate))
+                    {
+                        extractedAgainstSupplyMeasurementTypeByDate.Add(extractedGroundwaterMeasurement.ReportedDate, [extractedAgainstSupplyMeasurement]);
                     }
-                }
-                else
-                {
-                    // If cumulative is positive, EAS = EG for all months in the period
-                    foreach (var extractedGroundwaterMeasurement in waterAccountGroundwaterMeasurements)
+                    else
                     {
-                        var extractedAgainstSupplyMeasurement = new WaterMeasurement()
-                        {
-                            WaterMeasurementTypeID = extractedAgainstSupplyMeasurementType.WaterMeasurementTypeID,
-                            GeographyID = geographyID,
-                            UnitTypeID = extractedGroundwaterMeasurement.UnitTypeID,
-                            UsageEntityName = extractedGroundwaterMeasurement.UsageEntityName,
-                            ReportedDate = extractedGroundwaterMeasurement.ReportedDate,
-                            ReportedValue = extractedGroundwaterMeasurement.ReportedValue,
-                            ReportedValueInAcreFeet = extractedGroundwaterMeasurement.ReportedValueInAcreFeet,
-                            UsageEntityArea = extractedGroundwaterMeasurement.UsageEntityArea,
-                            LastUpdateDate = DateTime.UtcNow,
-                            FromManualUpload = false,
-                            Comment = $"Set to {extractedGroundwaterMeasurementType.WaterMeasurementTypeName} because cumulative value for the reporting period for the WATER ACCOUNT was greater than 0: WaterAccount ({waterAccount.Key}) = {cumulativeValueInAcreFeet} acreft."
-                        };
-
-                        if (!extractedAgainstSupplyMeasurementTypeByDate.ContainsKey(extractedGroundwaterMeasurement.ReportedDate))
-                        {
-                            extractedAgainstSupplyMeasurementTypeByDate.Add(extractedGroundwaterMeasurement.ReportedDate, [extractedAgainstSupplyMeasurement]);
-                        }
-                        else
-                        {
-                            extractedAgainstSupplyMeasurementTypeByDate[extractedGroundwaterMeasurement.ReportedDate].Add(extractedAgainstSupplyMeasurement);
-                        }
+                        extractedAgainstSupplyMeasurementTypeByDate[extractedGroundwaterMeasurement.ReportedDate].Add(extractedAgainstSupplyMeasurement);
                     }
                 }
             }
         }
-
-        #endregion
-
 
         foreach (var reportedDateKey in extractedAgainstSupplyMeasurementTypeByDate.Keys)
         {
@@ -806,11 +748,12 @@ public static class WaterMeasurementCalculations
     /// <param name="openETConsumptiveUseWaterMeasurementType">The WaterMeasurementType representing the calculated Consumptive Use.</param>
     /// <param name="evapoWaterMeasurementType">The WaterMeasurementType representing the evapotranspiration values.</param>
     /// <param name="precipWaterMeasurementType">The WaterMeasurementType representing the precipitation values.</param>
+    /// <param name="consumedSurfaceWaterMeasurementType">The WaterMeasurementType representing the consumed surface water values.</param>
     /// <param name="reportedDate">The date of the recorded water measurements.</param>
     /// <returns>
     /// A task that represents the asynchronous operation. The task result contains no object, as the method saves the calculated Consumptive Use measurements directly to the database.
     /// </returns>
-    private static async Task CalculateOpenETConsumptiveUse(QanatDbContext dbContext, int geographyID, WaterMeasurementType openETConsumptiveUseWaterMeasurementType, WaterMeasurementType evapoWaterMeasurementType, WaterMeasurementType precipWaterMeasurementType, DateTime reportedDate)
+    private static async Task CalculateOpenETConsumptiveUse(QanatDbContext dbContext, int geographyID, WaterMeasurementType openETConsumptiveUseWaterMeasurementType, WaterMeasurementType evapoWaterMeasurementType, WaterMeasurementType precipWaterMeasurementType, WaterMeasurementType consumedSurfaceWaterMeasurementType, DateTime reportedDate)
     {
         var allWaterMeasurementsForGeographyAndDate = dbContext.WaterMeasurements.Include(x => x.WaterMeasurementType)
             .AsNoTracking()
@@ -823,6 +766,10 @@ public static class WaterMeasurementCalculations
 
         var precipitationWaterMeasurements = allWaterMeasurementsForGeographyAndDate
             .Where(x => x.WaterMeasurementType.WaterMeasurementTypeID == precipWaterMeasurementType.WaterMeasurementTypeID)
+            .ToList();
+
+        var consumedSurfaceWaterMeasurements = allWaterMeasurementsForGeographyAndDate
+            .Where(x => x.WaterMeasurementType.WaterMeasurementTypeID == consumedSurfaceWaterMeasurementType?.WaterMeasurementTypeID)
             .ToList();
 
         if (!evapotranspirationWaterMeasurements.Any() || !precipitationWaterMeasurements.Any())
@@ -838,15 +785,18 @@ public static class WaterMeasurementCalculations
         foreach (var evapotranspirationWaterMeasurement in evapotranspirationWaterMeasurements)
         {
             var precipitationWaterMeasurement = precipitationWaterMeasurements
-                .SingleOrDefault(x => x.UsageEntityName == evapotranspirationWaterMeasurement.UsageEntityName && x.UsageEntityArea == evapotranspirationWaterMeasurement.UsageEntityArea);
+                .SingleOrDefault(x => x.UsageEntityName == evapotranspirationWaterMeasurement.UsageEntityName);
 
             if (precipitationWaterMeasurement == null)
             {
                 continue;
             }
 
-            var reportedValue = evapotranspirationWaterMeasurement.ReportedValue - precipitationWaterMeasurement.ReportedValue;
-            var reportedValueInAcreFeet = (evapotranspirationWaterMeasurement.ReportedValueInAcreFeet ?? 0) - (precipitationWaterMeasurement.ReportedValueInAcreFeet ?? 0);
+            var consumedSurfaceWaterMeasurement = consumedSurfaceWaterMeasurements
+                .SingleOrDefault(x => x.UsageEntityName == evapotranspirationWaterMeasurement.UsageEntityName);
+
+            var reportedValue = evapotranspirationWaterMeasurement.ReportedValue - precipitationWaterMeasurement.ReportedValue - (consumedSurfaceWaterMeasurement?.ReportedValue ?? 0);
+            var reportedValueInAcreFeet = (evapotranspirationWaterMeasurement.ReportedValueInAcreFeet ?? 0) - (precipitationWaterMeasurement.ReportedValueInAcreFeet ?? 0) - (consumedSurfaceWaterMeasurement?.ReportedValueInAcreFeet ?? 0);
 
             var consumptiveUseRecord = new WaterMeasurement()
             {
@@ -861,6 +811,7 @@ public static class WaterMeasurementCalculations
                 Comment = $"{evapoWaterMeasurementType.WaterMeasurementTypeName} Value: {evapotranspirationWaterMeasurement.ReportedValueInAcreFeet} ac-ft, {precipWaterMeasurementType.WaterMeasurementTypeName} Value: {precipitationWaterMeasurement.ReportedValueInAcreFeet} ac-ft",
 
                 // months with heavy rain can lead to negative Consumptive Use calculations, so ensuring Reported Values cannot be < 0
+                // also months with lots of surface water delivery can lead to negative Consumed Groundwater 
                 ReportedValue = reportedValue > 0 ? reportedValue : 0,
                 ReportedValueInAcreFeet = reportedValueInAcreFeet > 0 ? reportedValueInAcreFeet : 0,
             };

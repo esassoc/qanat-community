@@ -21,10 +21,10 @@
   AUTHORITY[&quot;EPSG&quot;,&quot;4326&quot;]]</nativeCRS>
   <srs>EPSG:4326</srs>
   <nativeBoundingBox>
-    <minx>-120.62771775071468</minx>
-    <maxx>-120.60364565044627</maxx>
-    <miny>37.345848811783725</miny>
-    <maxy>37.36028551035513</maxy>
+    <minx>-122.26541002965607</minx>
+    <maxx>-119.12468208682697</maxx>
+    <miny>35.2698614840901</miny>
+    <maxy>38.92595906250557</maxy>
     <crs>EPSG:4326</crs>
   </nativeBoundingBox>
   <latLonBoundingBox>
@@ -53,6 +53,8 @@
     <id>DataStoreInfoImpl--5295db08:16ba03a820a:-7ff9</id>
   </store>
   <serviceConfiguration>false</serviceConfiguration>
+  <internationalTitle/>
+  <internationalAbstract/>
   <maxFeatures>0</maxFeatures>
   <numDecimals>0</numDecimals>
   <padWithZeros>false</padWithZeros>

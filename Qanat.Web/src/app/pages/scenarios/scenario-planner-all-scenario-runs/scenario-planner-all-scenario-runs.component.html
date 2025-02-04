@@ -7,7 +7,7 @@
                 <div class="latest-runs">
                     <h2 class="section-title primary">Latest Scenario Runs</h2>
                     <div *ngIf="latestModelRuns.length > 0; else noModelRuns" class="grid-12">
-                        <model-run-card *ngFor="let latestModelRun of latestModelRuns" [GETAction]="latestModelRun">
+                        <model-run-card *ngFor="let latestModelRun of latestModelRuns" [scenarioRun]="latestModelRun">
                             {{ latestModelRun.RunName }}
                         </model-run-card>
                     </div>

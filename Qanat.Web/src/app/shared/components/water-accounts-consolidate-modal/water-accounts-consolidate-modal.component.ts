@@ -4,11 +4,12 @@ import { ModalService } from "src/app/shared/services/modal/modal.service";
 import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
 import { NoteComponent } from "src/app/shared/components/note/note.component";
 import { IconComponent } from "../icon/icon.component";
+import { NgForOf, NgIf } from "@angular/common";
 
 @Component({
     selector: "water-accounts-consolidate-modal",
     standalone: true,
-    imports: [IconComponent, NoteComponent],
+    imports: [IconComponent, NoteComponent, NgForOf, NgIf],
     templateUrl: "./water-accounts-consolidate-modal.component.html",
     styleUrl: "./water-accounts-consolidate-modal.component.scss",
 })
