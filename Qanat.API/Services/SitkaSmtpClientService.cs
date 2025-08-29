@@ -1,17 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Mail;
-using System.Net.Mime;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Qanat.Common.Util;
 using SendGrid;
 using SendGrid.Helpers.Mail;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net.Mail;
+using System.Net.Mime;
+using System.Threading.Tasks;
+using Qanat.EFModels.Entities;
 
 namespace Qanat.API.Services
 {
@@ -23,6 +24,13 @@ namespace Qanat.API.Services
         private readonly ILogger<SitkaSmtpClientService> _logger;
         private readonly IWebHostEnvironment _webHostEnvironment;
 
+        private readonly string BasicTextWithLinkTemplateID = "d-79f96f6be61f4747a53f74d552b03530";
+        private readonly string InviteUserTemplateID = "d-ae51b588b644450990c6f50dabf98d5e";
+        private readonly string SupportTicketResponseTemplateID = "d-67d68b3a0b104beba7e349256d9b4b31";
+
+
+        // functions using SendGridMessage
+
         public SitkaSmtpClientService(ISendGridClient sendGridClient, IOptions<QanatConfiguration> qanatConfiguration, IWebHostEnvironment webHostEnvironment, ILogger<SitkaSmtpClientService> logger)
         {
             _sendGridClient = sendGridClient;
@@ -30,6 +38,118 @@ namespace Qanat.API.Services
             _logger = logger;
             _webHostEnvironment = webHostEnvironment;
         }
+
+        public async Task SendSupportTicketCreatedEmail(SupportTicket supportTicket, List<EmailAddress> geographyManagerEmails)
+        {
+            var sendGridMessage = new SendGridMessage();
+
+            if (geographyManagerEmails.Any())
+            {
+                sendGridMessage.AddTos(geographyManagerEmails);
+            }
+
+            var templateData = new SendGridBasicTextWithLinkTemplateData()
+            {
+                Subject = $"Help request #{supportTicket.SupportTicketID} has been submitted",
+                Header = $"Help request #{supportTicket.SupportTicketID} has been submitted",
+                Text = "A new help request has been submitted to the Groundwater Accounting Platform. View the request here: ",
+                LinkUrl = $"{_qanatConfiguration.WEB_URL}/support-tickets/{supportTicket.SupportTicketID}",
+                LinkText = $"Support Ticket #{supportTicket.SupportTicketID}"
+            };
+
+            sendGridMessage.SetTemplateId(BasicTextWithLinkTemplateID);
+            await SendWithDynamicTemplate(sendGridMessage, templateData);
+        }
+
+        public async Task SendBasicTextWithLinkEmail(SendGridMessage sendGridMessage, SendGridBaseTemplateData templateData)
+        {
+            sendGridMessage.SetTemplateId(BasicTextWithLinkTemplateID);
+            await SendWithDynamicTemplate(sendGridMessage, templateData);
+        }
+
+        public async Task SendInviteUserEmail(SendGridMessage sendGridMessage, SendGridBaseTemplateData templateData)
+        {
+            sendGridMessage.SetTemplateId(InviteUserTemplateID);
+            await SendWithDynamicTemplate(sendGridMessage, templateData);
+        }
+
+        public async Task SendSupportTicketResponseEmail(SendGridMessage sendGridMessage, SendGridBaseTemplateData templateData)
+        {
+            sendGridMessage.SetTemplateId(SupportTicketResponseTemplateID);
+            await SendWithDynamicTemplate(sendGridMessage, templateData);
+        }
+
+        private async Task SendWithDynamicTemplate(SendGridMessage sendGridMessage, SendGridBaseTemplateData templateData)
+        {
+            templateData.AppBaseUrl = _qanatConfiguration.WEB_URL;
+            sendGridMessage.SetTemplateData(templateData);
+
+            var messageWithAnyAlterations = AlterMessageIfInRedirectMode(sendGridMessage, templateData);
+
+            await SendDirectly(messageWithAnyAlterations);
+        }
+
+        public async Task SendDirectly(SendGridMessage sendGridMessage)
+        {
+            var defaultEmailFrom = GetDefaultEmailFrom();
+            sendGridMessage.From = new EmailAddress(defaultEmailFrom.Address, defaultEmailFrom.DisplayName);
+
+            if (_webHostEnvironment.IsDevelopment())
+            {
+                sendGridMessage.SetSandBoxMode(true);
+            }
+
+            var response = await _sendGridClient.SendEmailAsync(sendGridMessage);
+            _logger.LogInformation($"Email sent to SendGrid, Details:\r\n{sendGridMessage.PlainTextContent}");
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogError($"Error sending email sent to SendGrid, Details:\r\n{response.Body}");
+            }
+        }
+
+        private SendGridMessage AlterMessageIfInRedirectMode(SendGridMessage sendGridMessage, SendGridBaseTemplateData templateData)
+        {
+            var redirectEmail = _qanatConfiguration.SITKA_EMAIL_REDIRECT;
+            var isInRedirectMode = !string.IsNullOrWhiteSpace(redirectEmail);
+            if (!isInRedirectMode)
+            {
+                return sendGridMessage;
+            }
+
+            var toAddresses = new List<string>();
+            var ccAddresses = new List<string>();
+            var bccAddresses = new List<string>();
+
+            sendGridMessage.Personalizations.ForEach(p =>
+            {
+                if (p.Tos != null)
+                {
+                    toAddresses.AddRange(p.Tos.Select(x => x.Email).ToList());
+                }
+                if (p.Ccs != null) 
+                {
+                    ccAddresses.AddRange(p.Ccs.Select(x => x.Email).ToList());
+                }
+                if (p.Bccs != null)
+                {
+                    bccAddresses.AddRange(p.Bccs.Select(x => x.Email).ToList());
+                }
+            });
+
+            templateData.IsRedirect = true;
+            templateData.ActualTo = string.Join(", ", toAddresses);
+            templateData.ActualCc = string.Join(", ", ccAddresses);
+            templateData.ActualBcc = string.Join(", ", bccAddresses);
+
+            sendGridMessage.Personalizations = new List<Personalization>();
+            sendGridMessage.SetTemplateData(templateData);
+            sendGridMessage.AddTo(redirectEmail);
+
+            return sendGridMessage;
+        }
+
+
+        // functions using MailMessage (ideally to be replaced by SendGridMessage functions)
 
         /// <summary>
         /// Sends an email including mock mode and address redirection  <see cref="QanatConfiguration.SITKA_EMAIL_REDIRECT"/>, then calls onward to <see cref="SendDirectly"/>
@@ -156,8 +276,6 @@ namespace Qanat.API.Services
                         realMailMessage.AlternateViews[i] = newAlternateView;
                     }
                 }
-
-
             }
             addresses.Clear();
         }
@@ -215,3 +333,39 @@ You have received this email because you are assigned to receive support notific
         }
     }
 }
+
+public class SendGridBasicTextWithLinkTemplateData : SendGridBaseTemplateData
+{
+    public string Header { get; set; }
+    public string SubHeader { get; set; }
+    public string Text { get; set; }
+    public string LinkUrl { get; set; }
+    public string LinkText { get; set; }
+}
+
+public class SendGridInviteUserTemplateData : SendGridBaseTemplateData
+{
+    public string InvitingUserName { get; set; }
+    public string InvitingUserEmail { get; set; }
+    public int WaterAccountNumber { get; set; }
+    public string GeographyLongName { get; set; }
+}
+
+public class SendGridSupportTicketResponseTemplateData : SendGridBaseTemplateData
+{
+    public string RecipientFullName { get; set; }
+    public string QuestionTypeDisplayName { get; set; }
+    public string ResponseBody { get; set; }
+    public string GeographyLongName { get; set; }
+}
+
+public class SendGridBaseTemplateData
+{
+    public string Subject { get; set; }
+    public string AppBaseUrl { get; set; }
+    public bool IsRedirect { get; set; }
+    public string ActualTo { get; set; }
+    public string ActualCc { get; set; }
+    public string ActualBcc { get; set; }
+}
+

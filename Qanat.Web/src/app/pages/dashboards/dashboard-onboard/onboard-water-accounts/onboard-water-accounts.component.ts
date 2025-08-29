@@ -11,15 +11,14 @@ import { CustomRichTextComponent } from "../../../../shared/components/custom-ri
 import { ParcelMinimapComponent } from "../../../../shared/components/parcel/parcel-minimap/parcel-minimap.component";
 import { IconComponent } from "src/app/shared/components/icon/icon.component";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
-import { NgIf, NgFor, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { PublicService } from "src/app/shared/generated/api/public.service";
 
 @Component({
     selector: "onboard-water-accounts",
     templateUrl: "./onboard-water-accounts.component.html",
     styleUrls: ["./onboard-water-accounts.component.scss"],
-    standalone: true,
-    imports: [NgIf, PageHeaderComponent, NgFor, IconComponent, ParcelMinimapComponent, CustomRichTextComponent, ButtonComponent, RouterLink, AsyncPipe],
+    imports: [PageHeaderComponent, IconComponent, ParcelMinimapComponent, CustomRichTextComponent, ButtonComponent, RouterLink, AsyncPipe]
 })
 export class OnboardWaterAccountsComponent implements OnInit {
     public currentUser$: Observable<UserDto>;
@@ -47,11 +46,11 @@ export class OnboardWaterAccountsComponent implements OnInit {
             tap((user) => {
                 this.currentUserID = user.UserID;
 
-                this.geography$ = this.publicService.publicGeographiesNameGeographyNameGet(geographyName).pipe(
+                this.geography$ = this.publicService.getGeographyByNamePublic(geographyName).pipe(
                     tap((geography) => {
                         this.geographyID = geography.GeographyID;
 
-                        this.waterAccountUserService.geographiesGeographyIDWaterAccountGet(this.geographyID).subscribe((waterAccounts) => {
+                        this.waterAccountUserService.getUserAccountsForGeographyWaterAccountUser(this.geographyID).subscribe((waterAccounts) => {
                             this.waterAccounts = waterAccounts;
                             waterAccounts.forEach((x) => (this.waterAccountGeoJson[x.WaterAccountID] = this.getWaterAccountGeoJson(x)));
                         });
@@ -85,7 +84,7 @@ export class OnboardWaterAccountsComponent implements OnInit {
     }
 
     onSubmit() {
-        this.waterAccountUserService.geographiesGeographyIDWaterAccountsClaimPost(this.currentUserID, this.waterAccounts).subscribe(() => {
+        this.waterAccountUserService.updateWaterAccountUsersWaterAccountUser(this.currentUserID, this.waterAccounts).subscribe(() => {
             this.authenticationService.checkAndSetActiveAccount();
             this.authenticationService.updateActiveAccount(true);
             this.router.navigateByUrl("/water-dashboard");

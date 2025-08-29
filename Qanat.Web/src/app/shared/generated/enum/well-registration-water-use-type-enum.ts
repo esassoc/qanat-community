@@ -3,7 +3,7 @@
 //  Source Table: [dbo].[WellRegistrationWaterUseType]
 
 import { LookupTableEntry } from "src/app/shared/models/lookup-table-entry";
-import { SelectDropdownOption } from "src/app/shared/components/inputs/select-dropdown/select-dropdown.component"
+import { SelectDropdownOption } from "src/app/shared/components/forms/form-field/form-field.component"
 
 export enum WellRegistrationWaterUseTypeEnum {
   Agricultural = 1,
@@ -22,4 +22,4 @@ export const WellRegistrationWaterUseTypes: LookupTableEntry[]  = [
   { Name: "PrivateMunicipal", DisplayName: "Private Municipal", Value: 5 },
   { Name: "Other", DisplayName: "Other", Value: 6 }
 ];
-export const WellRegistrationWaterUseTypesAsSelectDropdownOptions = [{ Value: null, Label: "- Select -", Disabled: true }, ...WellRegistrationWaterUseTypes.map((x) => ({ Value: x.Value, Label: x.DisplayName } as SelectDropdownOption))];
+export const WellRegistrationWaterUseTypesAsSelectDropdownOptions = WellRegistrationWaterUseTypes.map((x) => ({ Value: x.Value, Label: x.DisplayName } as SelectDropdownOption));

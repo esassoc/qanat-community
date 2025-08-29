@@ -17,6 +17,10 @@ public partial class Well
 
     public int? ParcelID { get; set; }
 
+    public int? WellTypeID { get; set; }
+
+    public int WellStatusID { get; set; }
+
     [StringLength(100)]
     [Unicode(false)]
     public string WellName { get; set; }
@@ -37,24 +41,46 @@ public partial class Well
 
     public DateOnly? DateDrilled { get; set; }
 
-    public int? WellDepth { get; set; }
-
-    [Column(TypeName = "datetime")]
-    public DateTime? CreateDate { get; set; }
-
-    public int WellStatusID { get; set; }
+    public bool ParcelIsManualOverride { get; set; }
 
     [StringLength(500)]
     [Unicode(false)]
     public string Notes { get; set; }
 
+    public int? WellDepth { get; set; }
+
+    public int? CasingDiameter { get; set; }
+
+    public int? TopOfPerforations { get; set; }
+
+    public int? BottomOfPerforations { get; set; }
+
+    [StringLength(100)]
+    [Unicode(false)]
+    public string ElectricMeterNumber { get; set; }
+
+    [Unicode(false)]
+    public string SchemotoInstance { get; set; }
+
+    [Column(TypeName = "datetime")]
+    public DateTime? CreateDate { get; set; }
+
     [ForeignKey("GeographyID")]
     [InverseProperty("Wells")]
     public virtual Geography Geography { get; set; }
 
+    [InverseProperty("Well")]
+    public virtual ICollection<MeterReadingMonthlyInterpolation> MeterReadingMonthlyInterpolations { get; set; } = new List<MeterReadingMonthlyInterpolation>();
+
+    [InverseProperty("Well")]
+    public virtual ICollection<MeterReading> MeterReadings { get; set; } = new List<MeterReading>();
+
     [ForeignKey("ParcelID")]
     [InverseProperty("Wells")]
     public virtual Parcel Parcel { get; set; }
+
+    [InverseProperty("Well")]
+    public virtual ICollection<WellFileResource> WellFileResources { get; set; } = new List<WellFileResource>();
 
     [InverseProperty("Well")]
     public virtual ICollection<WellIrrigatedParcel> WellIrrigatedParcels { get; set; } = new List<WellIrrigatedParcel>();
@@ -64,4 +90,8 @@ public partial class Well
 
     [InverseProperty("Well")]
     public virtual ICollection<WellRegistration> WellRegistrations { get; set; } = new List<WellRegistration>();
+
+    [ForeignKey("WellTypeID")]
+    [InverseProperty("Wells")]
+    public virtual WellType WellType { get; set; }
 }

@@ -1,20 +1,30 @@
 CREATE TABLE [dbo].[ReportingPeriod]
 (
 	--Keys
-	[ReportingPeriodID]			INT				NOT NULL IDENTITY(1,1),
-	[GeographyID]				INT				NOT NULL,
+	[ReportingPeriodID]							INT				NOT NULL IDENTITY(1,1),
+	[GeographyID]								INT				NOT NULL,
 
 	--Data
-	[Name]						VARCHAR(255)	NOT NULL,	
-	[StartDate]					DATETIME		NOT NULL,
-	[EndDate]					DATETIME		NOT NULL,
-	[ReadyForAccountHolders]	BIT				NOT NULL DEFAULT(0),
+	[Name]										VARCHAR(255)	NOT NULL,	
+	[StartDate]									DATETIME		NOT NULL,
+	[EndDate]									DATETIME		NOT NULL,
+	[ReadyForAccountHolders]					BIT				NOT NULL DEFAULT(0),
+	[IsDefault]									BIT				NOT NULL DEFAULT(0),
+
+	--Self Reporting
+	[CoverCropSelfReportStartDate]				DATETIME		NULL,
+	[CoverCropSelfReportEndDate]				DATETIME		NULL,
+	[CoverCropSelfReportReadyForAccountHolders] BIT				NOT NULL DEFAULT(0),
+
+	[FallowSelfReportStartDate]					DATETIME		NULL,	
+	[FallowSelfReportEndDate]					DATETIME		NULL,
+	[FallowSelfReportReadyForAccountHolders]	BIT				NOT NULL DEFAULT(0),
 
 	--Basic Audit
-    [CreateDate]                DATETIME		NOT NULL,       
-    [CreateUserID]              INT				NOT NULL,   
-    [UpdateDate]                DATETIME		NULL,
-    [UpdateUserID]              INT				NULL,
+    [CreateDate]								DATETIME		NOT NULL,       
+    [CreateUserID]								INT				NOT NULL,   
+    [UpdateDate]								DATETIME		NULL,
+    [UpdateUserID]								INT				NULL,
 
 	CONSTRAINT [PK_ReportingPeriod_ReportingPeriodID]		PRIMARY KEY ([ReportingPeriodID]),
 

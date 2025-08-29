@@ -1,4 +1,3 @@
-import { CommonModule } from "@angular/common";
 import { AfterViewInit, Component, Input, OnChanges, OnDestroy } from "@angular/core";
 import * as L from "leaflet";
 import { MapLayerBase } from "../map-layer-base.component";
@@ -7,8 +6,6 @@ import { LeafletHelperService } from "src/app/shared/services/leaflet-helper.ser
 import { WellRegistrationLocationDto } from "src/app/shared/generated/model/well-registration-location-dto";
 @Component({
     selector: "well-registrations-layer",
-    standalone: true,
-    imports: [CommonModule, MapLayerBase],
     templateUrl: "./well-registrations-layer.component.html",
     styleUrls: ["./well-registrations-layer.component.scss"],
 })

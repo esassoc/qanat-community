@@ -4,14 +4,13 @@ import { FormFieldType } from "../forms/form-field/form-field.component";
 import { EntityCustomAttributesDto } from "../../generated/model/entity-custom-attributes-dto";
 import { RouterLink } from "@angular/router";
 import { ButtonLoadingDirective } from "../../directives/button-loading.directive";
-import { NgIf, NgFor, KeyValuePipe } from "@angular/common";
+import { KeyValuePipe } from "@angular/common";
 
 @Component({
     selector: "entity-custom-attributes-edit",
     templateUrl: "./entity-custom-attributes-edit.component.html",
     styleUrl: "./entity-custom-attributes-edit.component.scss",
-    standalone: true,
-    imports: [NgIf, FormsModule, ReactiveFormsModule, NgFor, ButtonLoadingDirective, RouterLink, KeyValuePipe],
+    imports: [FormsModule, ReactiveFormsModule, ButtonLoadingDirective, RouterLink, KeyValuePipe]
 })
 export class EntityCustomAttributesEditComponent implements OnInit {
     @Input() entityCustomAttributes: EntityCustomAttributesDto;

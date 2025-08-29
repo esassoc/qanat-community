@@ -1,0 +1,50 @@
+<div class="modal">
+    @if (well$ | async; as well) {
+        <div class="modal-header">
+            <custom-rich-text [customRichTextTypeID]="customRichTextID" [showLoading]="false" [showInfoIcon]="false"></custom-rich-text>
+        </div>
+        <div class="modal-body">
+            <div class="grid-12">
+                <div class="g-col-6">
+                    <form action="" class="form grid-12" [formGroup]="formGroup">
+                        <div class="field">
+                            <label class="field-label">Current Parcel</label>
+                            <div>
+                                <parcel-icon-with-number [parcelNumber]="well.ParcelNumber"></parcel-icon-with-number>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label class="field-label">New Parcel</label>
+                            <div>
+                                <parcel-typeahead [geographyID]="well.GeographyID" [selectedParcel]="selectedParcel" (change)="selectedParcelChanged($event)"></parcel-typeahead>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="g-col-6">
+                    <qanat-map mapID="UpdateParcelsMap" mapHeight="500px" (onMapLoad)="handleMapReady($event)" [showLayerControl]="false">
+                        @if (mapIsReady) {
+                            @if (selectedParcel) {
+                                <parcel-layer
+                                    [geographyID]="well.GeographyID"
+                                    [selectedParcelID]="selectedParcel.ParcelID"
+                                    [map]="map"
+                                    [layerControl]="layerControl"
+                                    [displayOnLoad]="true"
+                                    (parcelSelected)="onParcelSelectedFromMap($event)">
+                                </parcel-layer>
+                            }
+                            @if (wellLocation$ | async; as wellLocation) {
+                                <wells-layer [wells]="[wellLocation]" [displayOnLoad]="true" [map]="map" [layerControl]="layerControl"></wells-layer>
+                            }
+                        }
+                    </qanat-map>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" (click)="save()" [disabled]="well.ParcelID == selectedParcel?.ParcelID || !formGroup.valid || isLoadingSubmit">Update Parcel</button>
+            <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+        </div>
+    }
+</div>

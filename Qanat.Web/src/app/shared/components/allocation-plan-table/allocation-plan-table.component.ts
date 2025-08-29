@@ -1,14 +1,12 @@
 import { Component, Input, OnInit, ViewEncapsulation } from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { AllocationPlanManageDto } from "src/app/shared/generated/model/models";
+
+import { AllocationPlanManageDto, AllocationPlanPeriodUpsertDto } from "src/app/shared/generated/model/models";
 import { AllocationPlanTableHeaderComponent } from "../allocation-plan-table-header/allocation-plan-table-header.component";
 import { AllocationPlanPeriodComponent } from "../allocation-plan-period/allocation-plan-period.component";
-import { AllocationPlanTableRowComponent } from "../allocation-plan-table-row/allocation-plan-table-row.component";
 
 @Component({
     selector: "allocation-plan-table",
-    standalone: true,
-    imports: [CommonModule, AllocationPlanTableHeaderComponent, AllocationPlanPeriodComponent, AllocationPlanTableRowComponent],
+    imports: [AllocationPlanTableHeaderComponent, AllocationPlanPeriodComponent],
     templateUrl: "./allocation-plan-table.component.html",
     styleUrls: ["./allocation-plan-table.component.scss"],
     encapsulation: ViewEncapsulation.None,
@@ -43,5 +41,15 @@ export class AllocationPlanTableComponent implements OnInit {
         for (let i = startYear; i <= endYear; i++) {
             this.years = [...this.years, i];
         }
+    }
+
+    onChange(event: AllocationPlanPeriodUpsertDto): void {
+        var index = this.allocationPlan.AllocationPlanPeriods.findIndex((period) => period.AllocationPlanPeriodID === event.AllocationPlanPeriodID);
+        this.allocationPlan.AllocationPlanPeriods[index] = event;
+    }
+
+    onDelete(event: number): void {
+        var index = this.allocationPlan.AllocationPlanPeriods.findIndex((period) => period.AllocationPlanPeriodID === event);
+        this.allocationPlan.AllocationPlanPeriods.splice(index, 1);
     }
 }

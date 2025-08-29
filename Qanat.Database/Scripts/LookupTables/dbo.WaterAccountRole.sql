@@ -1,7 +1,7 @@
 ﻿MERGE INTO dbo.[WaterAccountRole] AS Target
 USING (VALUES
-(1, 'WaterAccountHolder', 'Account Holder', '', 10, '{"WaterAccountRights":15,"ParcelRights":15,"WaterTransactionRights":15,"WaterAccountUserRights":15,"AllocationPlanRights":1, "UsageEntityRights": 1}', '{}'),
-(2, 'WaterAccountViewer', 'Viewer', '', 20, '{"WaterAccountRights":1,"ParcelRights":1,"WaterTransactionRights":1,"WaterAccountUserRights":1,"AllocationPlanRights":1, "UsageEntityRights": 1}', '{}')
+(1, 'WaterAccountHolder', 'Account Holder', '', 10, '{"WaterAccountRights":15,"ParcelRights":15,"WaterTransactionRights":15,"WaterAccountUserRights":15,"AllocationPlanRights":1, "UsageLocationRights": 1, "MeterRights": 1, "WellMeterReadingRights": 1}', '{}'),
+(2, 'WaterAccountViewer', 'Viewer', '', 20, '{"WaterAccountRights":1,"ParcelRights":1,"WaterTransactionRights":1,"WaterAccountUserRights":1,"AllocationPlanRights":1, "UsageLocationRights": 1, "MeterRights": 1, "WellMeterReadingRights": 1}', '{}')
 )
 AS Source (WaterAccountRoleID, WaterAccountRoleName, WaterAccountRoleDisplayName, WaterAccountRoleDescription, SortOrder, Rights, Flags)
 ON Target.[WaterAccountRoleID] = Source.WaterAccountRoleID

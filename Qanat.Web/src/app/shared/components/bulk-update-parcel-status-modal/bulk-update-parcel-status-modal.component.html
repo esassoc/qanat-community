@@ -1,35 +1,25 @@
-<div class="modal-header">
-    <div>
-        <h3 class="section-title">Bulk Change Parcel Status</h3>
-        <p>Are you sure you want to change the status for {{ numberOfParcels }} Parcels?</p>
+<div class="modal">
+    <div class="modal-header">
+        <div>
+            <h3 class="section-title">Bulk Change Parcel Status</h3>
+            <p>Are you sure you want to change the status for {{ numberOfParcels }} Parcels?</p>
+        </div>
     </div>
 
-    <button type="button" class="close" (click)="close()">
-        <i class="fa fa-times-circle"></i>
-    </button>
-</div>
-
-<div class="modal-body">
-    <div class="copy copy-3 p-2">
-        <form action="" class="form" [formGroup]="formGroup">
-            <div class="field-label">
-                <field-definition fieldDefinitionType="ParcelStatus" [inline]="false"></field-definition>
-            </div>
-            <form-field [formControl]="formGroup.controls.ParcelStatusID" [type]="FormFieldType.Select" [formInputOptions]="statusOptions"></form-field>
-
-            <div *ngIf="modalContext.Years" class="mt-3">
-                <form-field
-                    [formControl]="formGroup.controls.EndYear"
-                    fieldLabel="End Year"
-                    placeholder="End Year"
-                    [type]="FormFieldType.Select"
-                    [formInputOptions]="yearOptions"></form-field>
-            </div>
-        </form>
+    <div class="modal-body">
+        <app-alert-display></app-alert-display>
+        <div class="copy copy-3 p-2">
+            <form action="" class="form" [formGroup]="formGroup">
+                <div class="field-label">
+                    <field-definition fieldDefinitionType="ParcelStatus" [inline]="false"></field-definition>
+                </div>
+                <form-field [formControl]="formGroup.controls.ParcelStatusID" [type]="FormFieldType.Select" [formInputOptions]="statusOptions"></form-field>
+            </form>
+        </div>
     </div>
-</div>
 
-<div class="modal-footer">
-    <button class="btn btn-primary" (click)="save()" [disabled]="!formGroup.valid">Update Parcels</button>
-    <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+    <div class="modal-footer">
+        <button class="btn btn-primary" (click)="save()" [disabled]="!formGroup.valid">Update Parcels</button>
+        <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+    </div>
 </div>

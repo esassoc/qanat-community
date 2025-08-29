@@ -13,8 +13,7 @@ import { ParcelByGeographyService } from "../../../generated/api/parcel-by-geogr
     selector: "parcel-typeahead",
     templateUrl: "./parcel-typeahead.component.html",
     styleUrls: ["./parcel-typeahead.component.scss"],
-    standalone: true,
-    imports: [NgSelectModule, FormsModule, AsyncPipe],
+    imports: [NgSelectModule, FormsModule, AsyncPipe]
 })
 export class ParcelTypeaheadComponent implements OnInit, OnChanges {
     @ViewChild(NgSelectComponent) ngSelectComponent: NgSelectComponent;
@@ -27,7 +26,10 @@ export class ParcelTypeaheadComponent implements OnInit, OnChanges {
     public parcelInputs$ = new Subject<string>();
     public searchLoading = false;
 
-    constructor(private parcelService: ParcelService, private parcelByGeographyService: ParcelByGeographyService) {}
+    constructor(
+        private parcelService: ParcelService,
+        private parcelByGeographyService: ParcelByGeographyService
+    ) {}
 
     ngOnChanges(changes: SimpleChanges): void {
         if (Object.keys(changes).includes("geographyID") || Object.keys(changes).includes("excludedParcelIDs")) {
@@ -48,13 +50,13 @@ export class ParcelTypeaheadComponent implements OnInit, OnChanges {
             switchMap((searchTerm) =>
                 this.geographyID
                     ? // search within geography
-                      this.parcelByGeographyService.geographiesGeographyIDParcelsSearchSearchStringGet(this.geographyID, searchTerm).pipe(
+                      this.parcelByGeographyService.searchParcelsByGeographyIDParcelByGeography(this.geographyID, searchTerm).pipe(
                           map((x) => x.filter((y) => !this.excludedParcelIDs.includes(y.ParcelID))),
                           catchError(() => of([])),
                           tap(() => (this.searchLoading = false))
                       )
                     : // search all geographies
-                      this.parcelService.parcelsSearchSearchStringGet(searchTerm).pipe(
+                      this.parcelService.searchByParcelNumberParcel(searchTerm).pipe(
                           map((x) => x.filter((y) => !this.excludedParcelIDs.includes(y.ParcelID))),
                           catchError(() => of([])),
                           tap(() => (this.searchLoading = false))

@@ -53,11 +53,6 @@ public static class Users
         return user?.AsUserDto();
     }
 
-    public static List<UserDto> GetByUserID(QanatDbContext dbContext, List<int> userIDs)
-    {
-        return GetUserImpl(dbContext).Where(x => userIDs.Contains(x.UserID)).Select(x => x.AsUserDto()).ToList();
-    }
-
     public static UserDto GetByUserGuid(QanatDbContext dbContext, Guid userGuid)
     {
         var user = GetUserImpl(dbContext).SingleOrDefault(x => x.UserGuid == userGuid);
@@ -68,8 +63,7 @@ public static class Users
     private static IQueryable<User> GetUserImpl(QanatDbContext dbContext)
     {
         return dbContext.Users
-            .Include(x => x.GeographyUsers)
-                .ThenInclude(x => x.Geography)
+            .Include(x => x.GeographyUsers).ThenInclude(x => x.Geography)
             .Include(x => x.WaterAccountUsers)
             .Include(x => x.ModelUsers)
             .AsNoTracking();
@@ -264,6 +258,8 @@ public static class Users
 
     public static List<UserGeographySummaryDto> ListUserGeographySummariesByUserID(QanatDbContext dbContext, int userID)
     {
+        var userDto = GetByUserID(dbContext, userID);
+
         var waterAccounts = dbContext.WaterAccounts
             .Include(x => x.Geography).ThenInclude(x => x.GeographyConfiguration)
             .Include(x => x.Parcels).ThenInclude(x => x.ParcelZones)
@@ -277,36 +273,80 @@ public static class Users
             .ThenInclude(x => x.Zones)
             .Select(x => new
             {
-                GeographyID = x.GeographyID,
+                x.GeographyID,
                 ZoneIDs = x.ZoneGroup.Zones.Select(y => y.ZoneID)
             })
             .ToDictionary(x => x.GeographyID);
+
+
+        var zonesDict = Zones.ListAsDisplayDto(dbContext).ToDictionary(y => y.ZoneID);
+
+        var hasManagerDashboardFlagName = Enum.GetName(typeof(FlagEnum), FlagEnum.HasManagerDashboard);
 
         return waterAccounts.GroupBy(x => x.GeographyID)
             .Select(x =>
             {
                 var parcels = x.SelectMany(y => y.Parcels).ToList();
-                var zonesDict = Zones.ListAsDisplayDto(dbContext).ToDictionary(y => y.ZoneID);
                 var geographyAllocationZoneIDs = geographyAllocationPlanZones.ContainsKey(x.Key)
                     ? geographyAllocationPlanZones[x.Key].ZoneIDs
                     : new List<int>();
+                var geography = x.First().Geography;
+
+                var isWaterManager = false;
+                if (!string.IsNullOrEmpty(hasManagerDashboardFlagName)
+                    && userDto.GeographyFlags.ContainsKey(geography.GeographyID) 
+                    && userDto.GeographyFlags[geography.GeographyID].ContainsKey(hasManagerDashboardFlagName))
+                {
+                    isWaterManager = userDto.GeographyFlags[geography.GeographyID][hasManagerDashboardFlagName];
+                }
+
+
                 return new UserGeographySummaryDto()
                 {
                     GeographyID = x.Key,
-                    GeographyName = x.First().Geography.GeographyName,
+                    GeographyName = geography.GeographyName,
                     GeographyDisplayName = x.First().Geography.GeographyDisplayName,
                     WaterAccounts = x.Select(waterAccount => new WaterAccountSummaryDto()
                     {
                         WaterAccountID = waterAccount.WaterAccountID,
                         WaterAccountNumber = waterAccount.WaterAccountNumber,
                         GeographyName = x.First().Geography.GeographyName,
-                        Zones = WaterAccounts.GetZonesForParcel(waterAccount, zonesDict, geographyAllocationZoneIDs),
+                        Zones = WaterAccounts.GetZonesForParcels(waterAccount, zonesDict, geographyAllocationZoneIDs, userDto),
                         NumOfParcels = waterAccount.Parcels.Count(),
                         Area = waterAccount.Parcels.Sum(x => x.ParcelArea)
                     }).OrderByDescending(y => y.Area).ToList(),
                     WellsCount = x.First().Geography.GeographyConfiguration.WellRegistryEnabled ?
                         parcels.SelectMany(y => y.Wells).Count() : null,
+                    AllowWaterMeasurementSelfReporting = geography.AllowWaterMeasurementSelfReporting,
+                    AllowFallowSelfReporting = geography.AllowFallowSelfReporting,
+                    AllowCoverCropSelfReporting = geography.AllowCoverCropSelfReporting,
+                    WellRegistryEnabled = geography.GeographyConfiguration?.WellRegistryEnabled ?? false,
+                    AllowLandownersToRequestAccountChanges = geography.AllowLandownersToRequestAccountChanges,
+                    IsGeographyWaterManager = isWaterManager
                 };
             }).ToList();
     }
+
+    public static async Task<string> GenerateApiKeyAsync(QanatDbContext dbContext, int userID)
+    {
+        var user = await dbContext.Users.FirstOrDefaultAsync(u => u.UserID == userID);
+        if (user == null)
+        {
+            throw new InvalidOperationException("User not found.");
+        }
+
+        var apiKey = Guid.NewGuid();
+        user.ApiKey = apiKey;
+        await dbContext.SaveChangesAsync();
+        return apiKey.ToString();
+    }
+
+    public static async Task<string> GetApiKeyByUserID(QanatDbContext dbContext, int userID)
+    {
+        var apiKey = (await dbContext.Users
+            .AsNoTracking().SingleOrDefaultAsync(x => x.UserID == userID))?.ApiKey;
+        return apiKey?.ToString();
+    }
+
+
 }

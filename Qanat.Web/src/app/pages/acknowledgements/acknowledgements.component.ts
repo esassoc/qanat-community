@@ -5,7 +5,6 @@ import { IconComponent } from "../../shared/components/icon/icon.component";
     selector: "acknowledgements",
     templateUrl: "./acknowledgements.component.html",
     styleUrl: "./acknowledgements.component.scss",
-    standalone: true,
-    imports: [IconComponent],
+    imports: [IconComponent]
 })
 export class AcknowledgementsComponent {}

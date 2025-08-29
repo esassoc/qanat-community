@@ -12,8 +12,7 @@ import { RichLinkComponent } from "src/app/shared/components/rich-link/rich-link
     selector: "grower-guide",
     templateUrl: "./grower-guide.component.html",
     styleUrls: ["./grower-guide.component.scss"],
-    standalone: true,
-    imports: [PageHeaderComponent, AlertDisplayComponent, IconComponent, RichLinkComponent, RouterLink, FaqDisplayComponent],
+    imports: [PageHeaderComponent, AlertDisplayComponent, IconComponent, RichLinkComponent, RouterLink, FaqDisplayComponent]
 })
 export class GrowerGuideComponent {
     public faqDisplayLocationTypeID: FaqDisplayLocationTypeEnum = FaqDisplayLocationTypeEnum.GrowersGuide;

@@ -10,11 +10,10 @@ import { RightsEnum } from "src/app/shared/models/enums/rights.enum";
 import { PermissionEnum } from "src/app/shared/generated/enum/permission-enum";
 import { AgGridHelper } from "src/app/shared/helpers/ag-grid-helper";
 import { RouterLink } from "@angular/router";
-import { AsyncPipe, NgIf } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { QanatGridComponent } from "src/app/shared/components/qanat-grid/qanat-grid.component";
 import { AlertDisplayComponent } from "src/app/shared/components/alert-display/alert-display.component";
-import { ButtonComponent } from "src/app/shared/components/button/button.component";
 import { CustomRichTextComponent } from "src/app/shared/components/custom-rich-text/custom-rich-text.component";
 import { ParcelSupplyByGeographyService } from "src/app/shared/generated/api/parcel-supply-by-geography.service";
 import { CurrentGeographyService } from "src/app/shared/services/current-geography.service";
@@ -24,8 +23,7 @@ import { GeographyMinimalDto, TransactionHistoryDto } from "src/app/shared/gener
     selector: "water-transactions",
     templateUrl: "./water-transactions.component.html",
     styleUrls: ["./water-transactions.component.scss"],
-    standalone: true,
-    imports: [PageHeaderComponent, AsyncPipe, AlertDisplayComponent, NgIf, ButtonComponent, RouterLink, CustomRichTextComponent, QanatGridComponent],
+    imports: [PageHeaderComponent, AsyncPipe, AlertDisplayComponent, RouterLink, CustomRichTextComponent, QanatGridComponent],
 })
 export class WaterTransactionsComponent implements OnInit {
     @ViewChild("transactionHistoryGrid") transactionHistoryGrid: AgGridAngular;
@@ -56,7 +54,7 @@ export class WaterTransactionsComponent implements OnInit {
         this.currentUser$ = this.authenticationService.getCurrentUser();
         this.transactionHistory$ = this.geography$.pipe(
             switchMap((geography) => {
-                return this.parcelSupplyByGeographyService.geographiesGeographyIDParcelSuppliesTransactionHistoryGet(geography.GeographyID);
+                return this.parcelSupplyByGeographyService.listTransactionHistoryParcelSupplyByGeography(geography.GeographyID);
             })
         );
 
@@ -90,8 +88,8 @@ export class WaterTransactionsComponent implements OnInit {
                 FieldDefinitionType: "SupplyType",
                 CustomDropdownFilterField: "WaterTypeName",
             }),
-            this.utilityFunctionsService.createDecimalColumnDef("Total Parcels Affected", "AffectedParcelsCount", { DecimalPlacesToDisplay: 0 }),
-            this.utilityFunctionsService.createDecimalColumnDef("Total Acres Affected", "AffectedAcresCount", { DecimalPlacesToDisplay: 0 }),
+            this.utilityFunctionsService.createDecimalColumnDef("Total Parcels Affected", "AffectedParcelsCount", { MaxDecimalPlacesToDisplay: 0 }),
+            this.utilityFunctionsService.createDecimalColumnDef("Total Acres Affected", "AffectedAcresCount", { MaxDecimalPlacesToDisplay: 0 }),
             this.utilityFunctionsService.createDecimalColumnDef("Transaction Depth (ac-ft/ac)", "TransactionDepth"),
             this.utilityFunctionsService.createDecimalColumnDef("Transaction Volume (ac-ft)", "TransactionVolume"),
             this.utilityFunctionsService.createBasicColumnDef("Spreadsheet Data Source", "UploadedFileName"),

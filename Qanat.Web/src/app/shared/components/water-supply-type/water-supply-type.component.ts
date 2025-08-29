@@ -7,8 +7,7 @@ import { WaterTypeFieldDefinitionComponent } from "../water-type-field-definitio
     selector: "water-supply-type",
     templateUrl: "./water-supply-type.component.html",
     styleUrls: ["./water-supply-type.component.scss"],
-    standalone: true,
-    imports: [WaterTypeFieldDefinitionComponent, DecimalPipe],
+    imports: [WaterTypeFieldDefinitionComponent, DecimalPipe]
 })
 export class WaterSupplyTypeComponent implements OnInit {
     @Input() waterType: WaterTypeSimpleDto;

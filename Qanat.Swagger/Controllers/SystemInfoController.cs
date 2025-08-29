@@ -1,34 +1,26 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using Qanat.EFModels.Entities;
 using Qanat.Models.DataTransferObjects;
-using Qanat.Swagger.Controllers;
+using Scalar.AspNetCore;
 using System;
 
-namespace Qanat.API.Controllers
+namespace Qanat.Swagger.Controllers;
+
+[ApiController]
+[ExcludeFromApiReference]
+public class SystemInfoController : ControllerBase
 {
-    [ApiController]
-    public class SystemInfoController : SitkaApiController<SystemInfoController>
+    [HttpGet("/", Name = "GetSystemInfo")]
+    [AllowAnonymous]
+    public IActionResult GetSystemInfo([FromServices] IWebHostEnvironment environment)
     {
-        public SystemInfoController(QanatDbContext dbContext, ILogger<SystemInfoController> logger)
-            : base(dbContext, logger)
+        var systemInfo = new SystemInfoDto
         {
-        }
+            Environment = environment.EnvironmentName,
+            CurrentTimeUTC = DateTime.UtcNow.ToString("o")
+        };
 
-        [HttpGet("/", Name = "GetSystemInfo")]  // MCS: the pattern seems to be to allow anonymous access to this endpoint
-        [AllowAnonymous]
-        public IActionResult GetSystemInfo([FromServices] IWebHostEnvironment environment)
-        {
-            SystemInfoDto systemInfo = new SystemInfoDto
-            {
-                Environment = environment.EnvironmentName,
-                CurrentTimeUTC = DateTime.UtcNow.ToString("o")
-            };
-
-            return Ok(systemInfo);
-        }
-
+        return Ok(systemInfo);
     }
 }

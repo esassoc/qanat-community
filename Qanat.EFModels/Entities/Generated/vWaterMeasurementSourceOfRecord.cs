@@ -15,26 +15,37 @@ public partial class vWaterMeasurementSourceOfRecord
 
     public int? WaterMeasurementTypeID { get; set; }
 
+    [Required]
+    [StringLength(50)]
+    [Unicode(false)]
+    public string WaterMeasurementTypeName { get; set; }
+
     public int? UnitTypeID { get; set; }
 
     public int ParcelID { get; set; }
 
+    public int UsageLocationID { get; set; }
+
     [Required]
     [StringLength(100)]
     [Unicode(false)]
-    public string UsageEntityName { get; set; }
+    public string UsageLocationName { get; set; }
+
+    public int ReportingPeriodID { get; set; }
 
     [Column(TypeName = "datetime")]
     public DateTime ReportedDate { get; set; }
 
     [Column(TypeName = "decimal(20, 4)")]
-    public decimal ReportedValue { get; set; }
+    public decimal? ReportedValueInNativeUnits { get; set; }
 
     [Column(TypeName = "decimal(20, 4)")]
-    public decimal? ReportedValueInAcreFeet { get; set; }
+    public decimal ReportedValueInAcreFeet { get; set; }
 
     [Column(TypeName = "decimal(20, 4)")]
-    public decimal? UsageEntityArea { get; set; }
+    public decimal ReportedValueInFeet { get; set; }
+
+    public double UsageLocationArea { get; set; }
 
     [Column(TypeName = "datetime")]
     public DateTime LastUpdateDate { get; set; }

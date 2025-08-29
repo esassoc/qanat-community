@@ -11,7 +11,7 @@ import { AlertService } from "src/app/shared/services/alert.service";
 import { AlertDisplayComponent } from "../../../shared/components/alert-display/alert-display.component";
 import { FormsModule } from "@angular/forms";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
-import { NgIf, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { CurrentGeographyService } from "src/app/shared/services/current-geography.service";
 import { GeographyMinimalDto } from "src/app/shared/generated/model/geography-minimal-dto";
 import { ActivatedRoute } from "@angular/router";
@@ -21,8 +21,7 @@ import { GeographyService } from "src/app/shared/generated/api/geography.service
     selector: "landing-page-configure",
     templateUrl: "./landing-page-configure.component.html",
     styleUrl: "./landing-page-configure.component.scss",
-    standalone: true,
-    imports: [NgIf, PageHeaderComponent, FormsModule, AlertDisplayComponent, AsyncPipe],
+    imports: [PageHeaderComponent, FormsModule, AlertDisplayComponent, AsyncPipe]
 })
 export class LandingPageConfigureComponent implements OnInit {
     public customRichTextTypeID = CustomRichTextTypeEnum.LandingPageConfigure;
@@ -44,7 +43,7 @@ export class LandingPageConfigureComponent implements OnInit {
         this.geography$ = this.route.params.pipe(
             switchMap((params) => {
                 const geographyName = params["geographyName"];
-                return this.geographyService.geographiesGeographyNameGeographyNameMinimalGet(geographyName);
+                return this.geographyService.getByNameAsMinimalDtoGeography(geographyName);
             }),
             tap((geography) => {
                 this.alertService.clearAlerts();
@@ -74,15 +73,15 @@ export class LandingPageConfigureComponent implements OnInit {
 
     public openDisableModal() {
         const options = {
-            title: "Confirm: Disable Landing Page",
-            message: "Are you sure you want to disable Landing Page?",
+            title: "Confirm: Disable Account Sign-up",
+            message: "Are you sure you want to disable Account Sign-up?",
             buttonClassYes: "btn-danger",
             buttonTextYes: "Confirm",
             buttonTextNo: "Cancel",
         } as ConfirmOptions;
         this.confirmService.confirm(options).then((confirmed) => {
             if (confirmed) {
-                this.geographyConfigurationService.geographiesGeographyIDConfigurationToggleLandingPagePut(this.geographyID, false).subscribe((response) => {
+                this.geographyConfigurationService.toggleLandingPageConfigurationGeographyConfiguration(this.geographyID, false).subscribe((response) => {
                     this.alertService.pushAlert(
                         new Alert(
                             "This feature is currently disabled. You can configure this feature, but changes will not take effect until the feature is enabled.",
@@ -90,7 +89,7 @@ export class LandingPageConfigureComponent implements OnInit {
                             false
                         )
                     );
-                    this.alertService.pushAlert(new Alert("Disabled Landing Page.", AlertContext.Success));
+                    this.alertService.pushAlert(new Alert("Disabled Account Sign-up.", AlertContext.Success));
                 });
             } else {
                 this.isEnabled = true;
@@ -100,17 +99,17 @@ export class LandingPageConfigureComponent implements OnInit {
 
     public openEnableModal() {
         const options = {
-            title: "Confirm: Enable Landing Page",
-            message: "Are you sure you want to enable Landing Page?",
+            title: "Confirm: Enable Account Sign-up",
+            message: "Are you sure you want to enable Account Sign-up?",
             buttonClassYes: "btn-danger",
             buttonTextYes: "Confirm",
             buttonTextNo: "Cancel",
         } as ConfirmOptions;
         this.confirmService.confirm(options).then((confirmed) => {
             if (confirmed) {
-                this.geographyConfigurationService.geographiesGeographyIDConfigurationToggleLandingPagePut(this.geographyID, true).subscribe((response) => {
+                this.geographyConfigurationService.toggleLandingPageConfigurationGeographyConfiguration(this.geographyID, true).subscribe((response) => {
                     this.alertService.clearAlerts();
-                    this.alertService.pushAlert(new Alert("Enabled Landing Page.", AlertContext.Success));
+                    this.alertService.pushAlert(new Alert("Enabled Account Sign-up.", AlertContext.Success));
                 });
             } else {
                 this.isEnabled = false;

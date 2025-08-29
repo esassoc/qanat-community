@@ -20,7 +20,7 @@ public class MonthlyUsageSummary
     public decimal? AverageCumulativeUsageAmount { get; set; }
     public decimal? CurrentUsageAmountDepth { get; set; }
     public decimal? AverageUsageAmountDepth { get; set; }
-    public decimal? UsageEntityArea { get; set; }
+    public decimal? UsageLocationArea { get; set; }
 
     public static List<WaterAccountParcelWaterMeasurementDto> ListByWaterAccountAndYear(QanatDbContext dbContext,
         int waterAccountID, int year, int userID)
@@ -42,9 +42,11 @@ public class MonthlyUsageSummary
         var parcelWaterMeasurementTypeGroups = geographyCumulativeWaterUsages.GroupBy(x => x.ParcelID).ToList();
         var geographySourceOfRecordWaterMeasurementTypeMonthlyUsageSummaryDto = new GeographySourceOfRecordWaterMeasurementTypeMonthlyUsageSummaryDto
         {
-            TotalUsageEntityArea = parcelWaterMeasurementTypeGroups.Sum(x => x.Average(y => y.UsageEntityArea)),
+            TotalParcelArea = parcelWaterMeasurementTypeGroups.Sum(x => x.Average(y => y.ParcelArea)),
+            TotalUsageLocationArea = parcelWaterMeasurementTypeGroups.Sum(x => x.Average(y => y.UsageLocationArea)),
             WaterMeasurementTotalValue = parcelWaterMeasurementTypeGroups.Sum(x => x.Sum(y => y.CurrentUsageAmount))
         };
+
         var monthlyUsageSummaryDtos = geographyCumulativeWaterUsages.GroupBy(x => x.EffectiveDate)
             .ToList()
             .Select(y => new MonthlyUsageSummaryDto
@@ -59,9 +61,20 @@ public class MonthlyUsageSummary
                 AverageUsageAmountDepth = y.Sum(x => x.AverageUsageAmountDepth),
             })
             .ToList();
-        geographySourceOfRecordWaterMeasurementTypeMonthlyUsageSummaryDto.WaterMeasurementMonthlyValues =
-            monthlyUsageSummaryDtos;
+
+        geographySourceOfRecordWaterMeasurementTypeMonthlyUsageSummaryDto.WaterMeasurementMonthlyValues = monthlyUsageSummaryDtos;
         return geographySourceOfRecordWaterMeasurementTypeMonthlyUsageSummaryDto;
+    }
+
+    public static List<WaterAccountParcelWaterMeasurementDto> ListByGeographyAndYearAsWaterMeasurementDtos(QanatDbContext dbContext, int geographyID, int year)
+    {
+        var geographyIDParam = new SqlParameter("geographyID", geographyID);
+        var yearParam = new SqlParameter("year", year);
+
+        var geographyCumulativeWaterUsages = dbContext.MonthlyUsageSummary.FromSqlRaw($"EXECUTE dbo.pGeographyMonthlyUsageSummary @geographyID, @year", geographyIDParam, yearParam).ToList();
+        var waterMeasurementDtos = ListAsDto(geographyCumulativeWaterUsages);
+
+        return waterMeasurementDtos;
     }
 
     private static List<WaterAccountParcelWaterMeasurementDto> ListAsDto(IEnumerable<MonthlyUsageSummary> monthlyUsageSummaries)
@@ -79,7 +92,7 @@ public class MonthlyUsageSummary
                 WaterMeasurementTypeName = parcelWaterMeasurementTypeDetails.WaterMeasurementTypeName,
                 WaterMeasurementCategoryTypeName = parcelWaterMeasurementTypeDetails.WaterMeasurementCategoryTypeName,
                 ParcelArea = parcelWaterMeasurementTypeDetails.ParcelArea,
-                UsageEntityArea = parcelWaterMeasurementTypeDetails.UsageEntityArea
+                UsageLocationArea = parcelWaterMeasurementTypeDetails.UsageLocationArea
             };
             var waterMeasurementMonthlyValues = parcelWaterMeasurementTypeGroup.Select(x => new MonthlyUsageSummaryDto
             {

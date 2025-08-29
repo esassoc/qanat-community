@@ -1,0 +1,24 @@
+<div class="modal">
+    <div class="modal-header">
+        <h2>Edit File Description</h2>
+    </div>
+    <div class="modal-body">
+        <form class="form grid-12 mb-3" [formGroup]="formGroup">
+            <div class="field g-col-12">
+                <label class="field-label">File</label>
+                <div class="pl-2">
+                    <b>
+                        {{ ref.data.wellRegistrationFileResourceToUpdate.FileResource.OriginalBaseFilename }}
+                    </b>
+                </div>
+            </div>
+            <div class="field g-col-12">
+                <form-field [formControl]="formGroup.controls.FileDescription" fieldLabel="Description" [type]="FormFieldType.Textarea"></form-field>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary" (click)="updateWellRegistrationFileResource()">Save</button>
+        <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
+    </div>
+</div>

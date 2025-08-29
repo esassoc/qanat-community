@@ -5,8 +5,7 @@ import { RouterOutlet } from "@angular/router";
     selector: "user-profile",
     templateUrl: "./user-profile.component.html",
     styleUrls: ["./user-profile.component.scss"],
-    standalone: true,
-    imports: [RouterOutlet],
+    imports: [RouterOutlet]
 })
 export class UserProfileComponent implements OnInit {
     constructor() {}

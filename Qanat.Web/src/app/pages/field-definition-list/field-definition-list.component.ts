@@ -18,8 +18,7 @@ import { QanatGridComponent } from "src/app/shared/components/qanat-grid/qanat-g
     selector: "qanat-field-definition-list",
     templateUrl: "./field-definition-list.component.html",
     styleUrls: ["./field-definition-list.component.scss"],
-    standalone: true,
-    imports: [PageHeaderComponent, AlertDisplayComponent, QanatGridComponent],
+    imports: [PageHeaderComponent, AlertDisplayComponent, QanatGridComponent]
 })
 export class FieldDefinitionListComponent implements OnInit {
     @ViewChild("fieldDefinitionsGrid") fieldDefinitionsGrid: AgGridAngular;
@@ -42,7 +41,7 @@ export class FieldDefinitionListComponent implements OnInit {
         this.authenticationService.getCurrentUser().subscribe((currentUser) => {
             this.currentUser = currentUser;
 
-            this.customRichTextService.fieldDefinitionsGet().subscribe((fieldDefinitions) => {
+            this.customRichTextService.listFieldDefinitionsCustomRichText().subscribe((fieldDefinitions) => {
                 this.fieldDefinitions = fieldDefinitions;
             });
 

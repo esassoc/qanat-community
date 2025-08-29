@@ -20,25 +20,25 @@ public static class FeeStructuresDtos
                 new FeeCategoryDto()
                 {
                     Name = "Category 0",
-                    Description = "Within Estimated Native Sustainable Yield",
+                    Description = "Native yield (no charge)",
                     ThresholdFloor = 0,
                     ThresholdCeiling = 0.5m,
                     AllocationMultiplier = 0.5m,
-                    TotalFeePerAcreFoot = null
+                    TotalFeePerAcreFoot = 0.00m
                 },
                 new FeeCategoryDto()
                 {
                     Name = "Category 1",
-                    Description = "Within Intended Long-Term Additional Sustainable Yield Once Sustainable Thresholds are Met",
+                    Description = "Sustainable use",
                     ThresholdFloor = 0.5m,
                     ThresholdCeiling = 1.1m,
                     AllocationMultiplier = .6m,
-                    TotalFeePerAcreFoot = 57.81m
+                    TotalFeePerAcreFoot = 52.27m
                 },
                 new FeeCategoryDto()
                 {
                     Name = "Category 2",
-                    Description = "Consumed GW Above Estimated Sustainable Yield",
+                    Description = "Use above sustainable yield, below reduction target",
                     ThresholdFloor = 1.1m,
                     ThresholdCeiling = 1.6m,
                     AllocationMultiplier = .5m,
@@ -47,7 +47,7 @@ public static class FeeStructuresDtos
                 new FeeCategoryDto()
                 {
                     Name = "Category 3",
-                    Description = "Above Use Reduction Target",
+                    Description = "Use above reduction target",
                     ThresholdFloor = 1.6m,
                     ThresholdCeiling = null,
                     AllocationMultiplier = null,

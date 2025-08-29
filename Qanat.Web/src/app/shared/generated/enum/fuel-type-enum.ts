@@ -3,7 +3,7 @@
 //  Source Table: [dbo].[FuelType]
 
 import { LookupTableEntry } from "src/app/shared/models/lookup-table-entry";
-import { SelectDropdownOption } from "src/app/shared/components/inputs/select-dropdown/select-dropdown.component"
+import { SelectDropdownOption } from "src/app/shared/components/forms/form-field/form-field.component"
 
 export enum FuelTypeEnum {
   Electric = 1,
@@ -18,4 +18,4 @@ export const FuelTypes: LookupTableEntry[]  = [
   { Name: "LP Gas", DisplayName: "LP Gas", Value: 3 },
   { Name: "Other", DisplayName: "Other", Value: 4 }
 ];
-export const FuelTypesAsSelectDropdownOptions = [{ Value: null, Label: "- Select -", Disabled: true }, ...FuelTypes.map((x) => ({ Value: x.Value, Label: x.DisplayName } as SelectDropdownOption))];
+export const FuelTypesAsSelectDropdownOptions = FuelTypes.map((x) => ({ Value: x.Value, Label: x.DisplayName } as SelectDropdownOption));

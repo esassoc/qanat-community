@@ -13,8 +13,6 @@ namespace Qanat.EFModels.Entities
         {
             public const int WaterAccountName = 255;
             public const int WaterAccountPIN = 7;
-            public const int ContactName = 255;
-            public const int ContactAddress = 500;
         }
     }
 }

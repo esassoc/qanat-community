@@ -29,5 +29,18 @@
     gap: $spacing-400;
     input {
         transform: scale(150%);
+        margin-left: $spacing-100;
     }
+}
+
+input[disabled] {
+    background-color: $gray-200 !important;
+}
+
+[disabled] {
+    background-color: $gray-200 !important;
+}
+
+::ng-deep .ng-select.ng-select-disabled > .ng-select-container {
+    background-color: $gray-200 !important;
 }

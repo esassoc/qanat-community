@@ -5,4 +5,11 @@
 	ExtenalUniqueID int not null,
 	Measurement decimal (10,2) not null,
 	MeasurementDate DateTime not null
-)
+);
+GO
+
+CREATE INDEX IX_MonitoringWellMeasurement_GeographyID on dbo.MonitoringWellMeasurement(GeographyID);
+GO
+
+CREATE INDEX IX_MonitoringWellMeasurement_MonitoringWellID on dbo.MonitoringWellMeasurement(MonitoringWellID);
+GO

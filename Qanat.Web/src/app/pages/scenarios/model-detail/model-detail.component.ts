@@ -9,7 +9,7 @@ import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-ric
 import { ModelEnum } from "src/app/shared/generated/enum/model-enum";
 import { ModelSimpleDto, ScenarioRunDto } from "src/app/shared/generated/model/models";
 import { environment } from "src/environments/environment";
-import { NgIf, NgFor, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { LoadingDirective } from "../../../shared/directives/loading.directive";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { ScenarioActionsHeroComponent } from "src/app/shared/components/scenario-planner/scenario-actions-hero/scenario-actions-hero.component";
@@ -21,8 +21,7 @@ import { ModelService } from "src/app/shared/generated/api/model.service";
     selector: "model-detail",
     templateUrl: "./model-detail.component.html",
     styleUrls: ["./model-detail.component.scss"],
-    standalone: true,
-    imports: [LoadingDirective, NgIf, PageHeaderComponent, ScenarioActionsHeroComponent, NgFor, ModelRunCardComponent, QanatGridComponent, AsyncPipe],
+    imports: [LoadingDirective, PageHeaderComponent, ScenarioActionsHeroComponent, ModelRunCardComponent, QanatGridComponent, AsyncPipe]
 })
 export class ModelDetailComponent implements OnInit {
     public model$: Observable<ModelSimpleDto>;
@@ -45,7 +44,7 @@ export class ModelDetailComponent implements OnInit {
         this.model$ = this.route.paramMap.pipe(
             switchMap((params) => {
                 const modelShortName = params.get(routeParams.modelShortName);
-                this.allModelRuns$ = this.modelService.modelsModelShortNameActionsGet(modelShortName).pipe(
+                this.allModelRuns$ = this.modelService.listActionsForModelModel(modelShortName).pipe(
                     tap((x) => {
                         this.latestModelRuns = x.slice(0, 3);
                         switch (x[0].Model.ModelID) {
@@ -61,7 +60,7 @@ export class ModelDetailComponent implements OnInit {
                     })
                 );
 
-                return this.modelService.modelsModelShortNameGet(modelShortName);
+                return this.modelService.getModelByIDModel(modelShortName);
             }),
             tap((x) => {
                 this.getDashboardUrl = environment.getDashboardUrl + "/Model/ModelDetails?modelID=" + x.GETModelID;

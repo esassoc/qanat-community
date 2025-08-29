@@ -1,23 +1,30 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Qanat.Common.Util;
 using Qanat.Models.DataTransferObjects;
 
 namespace Qanat.EFModels.Entities;
 
 public static class WaterMeasurementSelfReports
 {
-    #region Create and Validation
+    #region CreateAsync and Validation
 
     public static async Task<List<ErrorMessage>> ValidateCreateAsync(QanatDbContext dbContext, int geographyID, int waterAccountID, WaterMeasurementSelfReportCreateDto waterMeasurementSelfReportCreateDto)
     {
         var results = new List<ErrorMessage>();
 
         var existingSelfReport = await dbContext.WaterMeasurementSelfReports.AsNoTracking()
-            .SingleOrDefaultAsync(x => x.GeographyID == geographyID && x.WaterAccountID == waterAccountID && x.ReportingYear == waterMeasurementSelfReportCreateDto.ReportingYear && x.WaterMeasurementTypeID == waterMeasurementSelfReportCreateDto.WaterMeasurementTypeID);
+            .SingleOrDefaultAsync(x => x.GeographyID == geographyID && x.WaterAccountID == waterAccountID && x.ReportingPeriodID == waterMeasurementSelfReportCreateDto.ReportingPeriodID && x.WaterMeasurementTypeID == waterMeasurementSelfReportCreateDto.WaterMeasurementTypeID);
 
         if (existingSelfReport != null)
         {
             results.Add(new ErrorMessage() { Type = "Duplicate Self Report", Message = "A self report already exists for this Water Account, Reporting Period and Water Measurement Type." });
+        }
+
+        var reportingPeriod = await dbContext.ReportingPeriods.AsNoTracking()
+            .SingleOrDefaultAsync(x => x.GeographyID == geographyID && x.ReportingPeriodID == waterMeasurementSelfReportCreateDto.ReportingPeriodID);
+
+        if (reportingPeriod == null)
+        {
+            results.Add(new ErrorMessage() { Type = "Invalid Reporting Period", Message = $"The Reporting Period with ID of {waterMeasurementSelfReportCreateDto.ReportingPeriodID} does not exist." });
         }
 
         var waterMeasurementType = await dbContext.WaterMeasurementTypes.AsNoTracking()
@@ -48,10 +55,10 @@ public static class WaterMeasurementSelfReports
         {
             GeographyID = geographyID,
             WaterAccountID = waterAccountID,
-            ReportingYear = waterMeasurementSelfReportCreateDto.ReportingYear,
+            ReportingPeriodID = waterMeasurementSelfReportCreateDto.ReportingPeriodID,
             WaterMeasurementTypeID = waterMeasurementSelfReportCreateDto.WaterMeasurementTypeID,
 
-            WaterMeasurementSelfReportStatusID = WaterMeasurementSelfReportStatus.Draft.WaterMeasurementSelfReportStatusID,
+            WaterMeasurementSelfReportStatusID = SelfReportStatus.Draft.SelfReportStatusID,
 
             CreateDate = DateTime.UtcNow,
             CreateUserID = callingUser.UserID,
@@ -74,8 +81,10 @@ public static class WaterMeasurementSelfReports
     {
         var selfReportsAsSimpleDtos = await dbContext.WaterMeasurementSelfReports.AsNoTracking()
             .Include(x => x.WaterAccount)
+            .Include(x => x.ReportingPeriod)
             .Include(x => x.WaterMeasurementType)
             .Include(x => x.WaterMeasurementSelfReportLineItems)
+            .Include(x => x.WaterMeasurementSelfReportFileResources)
             .Include(x => x.CreateUser)
             .Include(x => x.UpdateUser)
             .Where(x => x.GeographyID == geographyID)
@@ -85,15 +94,17 @@ public static class WaterMeasurementSelfReports
         return selfReportsAsSimpleDtos;
     }
 
-    public static async Task<List<WaterMeasurementSelfReportSimpleDto>> ListAsSimpleDtoForWaterAccountAsync(QanatDbContext dbContext, int geographyID, int waterAccountID, int reportingYear)
+    public static async Task<List<WaterMeasurementSelfReportSimpleDto>> ListAsSimpleDtoForWaterAccountAsync(QanatDbContext dbContext, int geographyID, int waterAccountID, int reportingPeriodID)
     {
         var selfReportsAsSimpleDtos = await dbContext.WaterMeasurementSelfReports.AsNoTracking()
             .Include(x => x.WaterAccount)
+            .Include(x => x.ReportingPeriod)
             .Include(x => x.WaterMeasurementType)
             .Include(x => x.WaterMeasurementSelfReportLineItems)
+            .Include(x => x.WaterMeasurementSelfReportFileResources)
             .Include(x => x.CreateUser)
             .Include(x => x.UpdateUser)
-            .Where(x => x.GeographyID == geographyID && x.WaterAccountID == waterAccountID && x.ReportingYear == reportingYear)
+            .Where(x => x.GeographyID == geographyID && x.WaterAccountID == waterAccountID && x.ReportingPeriodID == reportingPeriodID)
             .Select(x => x.AsSimpleDtoWithExtras())
             .ToListAsync();
 
@@ -104,8 +115,10 @@ public static class WaterMeasurementSelfReports
     {
         var selfReportAsSimpleDto = await dbContext.WaterMeasurementSelfReports.AsNoTracking()
             .Include(x => x.WaterAccount)
+            .Include(x => x.ReportingPeriod)
             .Include(x => x.WaterMeasurementType)
             .Include(x => x.WaterMeasurementSelfReportLineItems)
+            .Include(x => x.WaterMeasurementSelfReportFileResources)
             .Include(x => x.CreateUser)
             .Include(x => x.UpdateUser)
             .Where(x => x.GeographyID == geographyID && x.WaterAccountID == waterAccountID && x.WaterMeasurementSelfReportID == waterMeasurementSelfReportID)
@@ -120,6 +133,7 @@ public static class WaterMeasurementSelfReports
         var selfReportAsDto = await dbContext.WaterMeasurementSelfReports.AsNoTracking()
             .Include(x => x.Geography)
             .Include(x => x.WaterAccount)
+            .Include(x => x.ReportingPeriod)
             .Include(x => x.WaterMeasurementType)
             .Include(x => x.WaterMeasurementSelfReportLineItems).ThenInclude(x => x.Parcel)
             .Include(x => x.WaterMeasurementSelfReportLineItems).ThenInclude(x => x.IrrigationMethod)
@@ -134,7 +148,7 @@ public static class WaterMeasurementSelfReports
 
     #endregion
 
-    #region Update and Validation
+    #region UpdateAsync and Validation
 
     public static async Task<List<ErrorMessage>> ValidateUpdateAsync(QanatDbContext dbContext, int geographyID, int waterAccountID, int waterMeasurementSelfReportID, WaterMeasurementSelfReportUpdateDto waterMeasurementSelfReportUpdateDto, UserDto callingUser)
     {
@@ -144,7 +158,7 @@ public static class WaterMeasurementSelfReports
             .Include(x => x.WaterMeasurementSelfReportLineItems)
             .SingleOrDefaultAsync(x => x.GeographyID == geographyID && x.WaterAccountID == waterAccountID && x.WaterMeasurementSelfReportID == waterMeasurementSelfReportID);
 
-        if (existingSelfReport.WaterMeasurementSelfReportStatusID != WaterMeasurementSelfReportStatus.Draft.WaterMeasurementSelfReportStatusID && existingSelfReport.WaterMeasurementSelfReportStatusID != WaterMeasurementSelfReportStatus.Returned.WaterMeasurementSelfReportStatusID)
+        if (existingSelfReport.WaterMeasurementSelfReportStatusID != SelfReportStatus.Draft.SelfReportStatusID && existingSelfReport.WaterMeasurementSelfReportStatusID != SelfReportStatus.Returned.SelfReportStatusID)
         {
             callingUser.Flags.TryGetValue(Flag.IsSystemAdmin.FlagName, out var isSystemAdmin);
 
@@ -162,7 +176,7 @@ public static class WaterMeasurementSelfReports
             }
         }
 
-        if (existingSelfReport.WaterMeasurementSelfReportStatusID == WaterMeasurementSelfReportStatus.Approved.WaterMeasurementSelfReportStatusID)
+        if (existingSelfReport.WaterMeasurementSelfReportStatusID == SelfReportStatus.Approved.SelfReportStatusID)
         {
             results.Add(new ErrorMessage { Type = "Approved", Message = "Approved Self Reports cannot be updated." });
         }
@@ -273,7 +287,7 @@ public static class WaterMeasurementSelfReports
             .Include(x => x.WaterMeasurementSelfReportLineItems).ThenInclude(waterMeasurementSelfReportLineItem => waterMeasurementSelfReportLineItem.Parcel)
             .SingleAsync(x => x.GeographyID == geographyID && x.WaterAccountID == waterAccountID && x.WaterMeasurementSelfReportID == waterMeasurementSelfReportID);
 
-        if (selfReport.WaterMeasurementSelfReportStatusID != WaterMeasurementSelfReportStatus.Draft.WaterMeasurementSelfReportStatusID && selfReport.WaterMeasurementSelfReportStatusID != WaterMeasurementSelfReportStatus.Returned.WaterMeasurementSelfReportStatusID)
+        if (selfReport.WaterMeasurementSelfReportStatusID != SelfReportStatus.Draft.SelfReportStatusID && selfReport.WaterMeasurementSelfReportStatusID != SelfReportStatus.Returned.SelfReportStatusID)
         {
             results.Add(new ErrorMessage() { Type = "Not In Draft or Returned", Message = "Only Draft or Returned Self Reports can be submitted." });
         }
@@ -301,7 +315,7 @@ public static class WaterMeasurementSelfReports
             .Include(x => x.WaterMeasurementSelfReportLineItems)
             .SingleAsync(x => x.GeographyID == geographyID && x.WaterAccountID == waterAccountID && x.WaterMeasurementSelfReportID == waterMeasurementSelfReportID);
 
-        selfReport.WaterMeasurementSelfReportStatusID = WaterMeasurementSelfReportStatus.Submitted.WaterMeasurementSelfReportStatusID;
+        selfReport.WaterMeasurementSelfReportStatusID = SelfReportStatus.Submitted.SelfReportStatusID;
         selfReport.SubmittedDate = DateTime.UtcNow;
         selfReport.UpdateUserID = callingUser.UserID;
         selfReport.UpdateDate = DateTime.UtcNow;
@@ -322,7 +336,7 @@ public static class WaterMeasurementSelfReports
             .Include(x => x.WaterMeasurementSelfReportLineItems)
             .SingleAsync(x => x.GeographyID == geographyID && x.WaterAccountID == waterAccountID && x.WaterMeasurementSelfReportID == waterMeasurementSelfReportID);
 
-        if (selfReport.WaterMeasurementSelfReportStatusID != WaterMeasurementSelfReportStatus.Submitted.WaterMeasurementSelfReportStatusID)
+        if (selfReport.WaterMeasurementSelfReportStatusID != SelfReportStatus.Submitted.SelfReportStatusID)
         {
             results.Add(new ErrorMessage() { Type = "Not Submitted", Message = "Only Submitted Self Reports can be approved." });
         }
@@ -335,9 +349,10 @@ public static class WaterMeasurementSelfReports
         var selfReport = await dbContext.WaterMeasurementSelfReports
             .Include(x => x.WaterMeasurementType)
             .Include(x => x.WaterMeasurementSelfReportLineItems).ThenInclude(x => x.IrrigationMethod)
+            .Include(x => x.ReportingPeriod)
             .SingleAsync(x => x.GeographyID == geographyID && x.WaterAccountID == waterAccountID && x.WaterMeasurementSelfReportID == waterMeasurementSelfReportID);
 
-        selfReport.WaterMeasurementSelfReportStatusID = WaterMeasurementSelfReportStatus.Approved.WaterMeasurementSelfReportStatusID;
+        selfReport.WaterMeasurementSelfReportStatusID = SelfReportStatus.Approved.SelfReportStatusID;
         selfReport.ApprovedDate = DateTime.UtcNow;
         selfReport.UpdateUserID = callingUser.UserID;
         selfReport.UpdateDate = DateTime.UtcNow;
@@ -349,6 +364,12 @@ public static class WaterMeasurementSelfReports
         var calculationsToRun = await WriteWaterMeasurementsForApprovedSelfReport(dbContext, geographyID, selfReport, callingUser);
         return calculationsToRun;
     }
+
+    public class ConsumedWaterCalculationDto
+    {
+        public int ConsumedWaterMeasurementTypeID { get; set; }
+    }
+
 
     private static async Task<ApproveSelfReportResult> WriteWaterMeasurementsForApprovedSelfReport(QanatDbContext dbContext, int geographyID, WaterMeasurementSelfReport selfReport, UserDto callingUser)
     {
@@ -368,18 +389,11 @@ public static class WaterMeasurementSelfReports
             { 12, "DecemberOverrideValueInAcreFeet" }
         };
 
-        WaterMeasurementType consumedWaterMeasurementType = null;
-        var parsedConsumedWaterMeasurementMetadata = selfReport.WaterMeasurementType.CalculationJSON.TryParseJObject(out var calculationJSON);
-        if (parsedConsumedWaterMeasurementMetadata)
-        {
-            var consumedWaterMeasurementTypeIDAsString = calculationJSON["ConsumedWaterMeasurementTypeID"]?.ToString();
-            var consumedWaterMeasurementTypeIDIsInt = int.TryParse(consumedWaterMeasurementTypeIDAsString, out var consumedWaterMeasurementTypeID);
-            consumedWaterMeasurementType = consumedWaterMeasurementTypeIDIsInt
-                ? await dbContext.WaterMeasurementTypes.AsNoTracking()
-                    .Include(x => x.WaterMeasurementTypeDependencyWaterMeasurementTypes)
-                    .SingleAsync(x => x.WaterMeasurementTypeID == consumedWaterMeasurementTypeID)
-                : null;
-        }
+        var calculationJSON = System.Text.Json.JsonSerializer.Deserialize<ConsumedWaterCalculationDto>(selfReport.WaterMeasurementType.CalculationJSON);
+        var consumedWaterMeasurementTypeID= calculationJSON.ConsumedWaterMeasurementTypeID;
+        var consumedWaterMeasurementType = await dbContext.WaterMeasurementTypes.AsNoTracking()
+            .Include(x => x.WaterMeasurementTypeDependencyWaterMeasurementTypes)
+            .SingleAsync(x => x.WaterMeasurementTypeID == consumedWaterMeasurementTypeID);
 
         var waterMeasurements = new List<WaterMeasurement>();
         var lineItemsToConsider = selfReport.WaterMeasurementSelfReportLineItems.Where(x => x.HasAnyOverrideValue);
@@ -392,13 +406,13 @@ public static class WaterMeasurementSelfReports
 
                 if (reportedValueInAcreFeet.HasValue)
                 {
-                    var deliveredWaterMeasurements = await WriteWaterMeasurementForLineItem(dbContext, geographyID, selfReport.ReportingYear, selfReport.WaterMeasurementTypeID, lineItem, month.Key, reportedValueInAcreFeet, callingUser, false);
+                    var deliveredWaterMeasurements = await WriteWaterMeasurementForLineItem(dbContext, geographyID, selfReport.ReportingPeriod.EndDate.Year, selfReport.WaterMeasurementTypeID, lineItem, month.Key, reportedValueInAcreFeet, callingUser, false);
                     waterMeasurements.AddRange(deliveredWaterMeasurements);
 
                     if (consumedWaterMeasurementType != null)
                     {
                         var reportedValueInAcreFeetAfterIrrigationEfficiencyApplied = reportedValueInAcreFeet.Value * (lineItem.IrrigationMethod.EfficiencyAsPercentage / 100.0000m);
-                        var consumedWaterMeasurements = await WriteWaterMeasurementForLineItem(dbContext, geographyID, selfReport.ReportingYear, consumedWaterMeasurementType.WaterMeasurementTypeID, lineItem, month.Key, reportedValueInAcreFeetAfterIrrigationEfficiencyApplied, callingUser, true);
+                        var consumedWaterMeasurements = await WriteWaterMeasurementForLineItem(dbContext, geographyID, selfReport.ReportingPeriod.EndDate.Year, consumedWaterMeasurementType.WaterMeasurementTypeID, lineItem, month.Key, reportedValueInAcreFeetAfterIrrigationEfficiencyApplied, callingUser, true);
                         waterMeasurements.AddRange(consumedWaterMeasurements);
                     }
                 }
@@ -434,27 +448,28 @@ public static class WaterMeasurementSelfReports
         var day = DateTime.DaysInMonth(date.Year, date.Month);
         var reportedDate = new DateTime(date.Year, date.Month, day);
 
-        var usageEntities = await UsageEntities.GetListByParcelID(dbContext, lineItem.ParcelID);
-        var totalArea = Math.Round(usageEntities.Sum(x => (decimal)x.Area), 4, MidpointRounding.ToEven);
+        var reportingPeriod = await ReportingPeriods.GetByGeographyIDAndYearAsync(dbContext, geographyID, reportingYear);
+        var usageLocations = await UsageLocations.ListByParcelAsync(dbContext, geographyID, lineItem.ParcelID, true);
+        usageLocations = usageLocations.Where(x => x.ReportingPeriod.ReportingPeriodID == reportingPeriod.ReportingPeriodID).ToList();
 
-        foreach (var usageEntity in usageEntities)
+        var totalArea = Math.Round(usageLocations.Sum(x => (decimal)x.Area), 4, MidpointRounding.ToEven);
+
+        foreach (var usageLocation in usageLocations)
         {
-            var usageEntityArea = Math.Round((decimal)usageEntity.Area, 4, MidpointRounding.ToEven);
+            var usageLocationArea = Math.Round((decimal)usageLocation.Area, 4, MidpointRounding.ToEven);
 
-            var proportionOfTotalArea = usageEntityArea / totalArea;
-            var reportedValueInAcreFeetProportional = reportedValueInAcreFeet * proportionOfTotalArea;
-            var reportedValueDepthProportional = UnitConversionHelper.ConvertAcreFeetToMillimeters(reportedValueInAcreFeetProportional.GetValueOrDefault(), usageEntityArea);
+            var proportionOfTotalArea = usageLocationArea / totalArea;
+            var volume = reportedValueInAcreFeet.GetValueOrDefault(0) * proportionOfTotalArea;
+            var depth = volume / proportionOfTotalArea;
             var waterMeasurementProportional = new WaterMeasurement()
             {
                 GeographyID = geographyID,
+                UsageLocationID = usageLocation.UsageLocationID,
                 WaterMeasurementTypeID = waterMeasurementTypeID,
-                UsageEntityName = usageEntity.UsageEntityName,
-                UsageEntityArea = usageEntityArea,
                 ReportedDate = reportedDate,
-                ReportedValueInAcreFeet = reportedValueInAcreFeetProportional,
-                ReportedValue = reportedValueDepthProportional,
+                ReportedValueInAcreFeet = volume,
+                ReportedValueInFeet = depth,
                 LastUpdateDate = DateTime.UtcNow,
-                UnitTypeID = UnitType.Millimeters.UnitTypeID, //MK 1/17/2025 -- Not sure how to avoid hardcoding this for now. Maybe a field on the self report itself? Maybe on the geography? Defaulting to MM for now as ETSGSA is the only self reporting atm. 
                 FromManualUpload = true,
                 Comment = includeIrrigationMethodInNote
                     ? $"Self Report approved for {reportingYear} by {callingUser.FullName}. Irrigation Method: {lineItem.IrrigationMethod.Name}, Efficiency: {lineItem.IrrigationMethod.EfficiencyAsPercentage}."
@@ -462,25 +477,6 @@ public static class WaterMeasurementSelfReports
             };
 
             waterMeasurements.Add(waterMeasurementProportional);
-
-            //var reportedValueInAcreFeetEqualPortion = reportedValueInAcreFeet / usageEntities.Count;
-            //var reportedValueDepthEqualPortion = UnitConversionHelper.ConvertAcreFeetToMillimeters(reportedValueInAcreFeetEqualPortion.GetValueOrDefault(), usageEntityArea);
-            //var waterMeasurementEqualPortion = new WaterMeasurement()
-            //{
-            //    GeographyID = geographyID,
-            //    WaterMeasurementTypeID = waterMeasurementTypeID,
-            //    UsageEntityName = usageEntity.UsageEntityName,
-            //    UsageEntityArea = usageEntityArea,
-            //    ReportedDate = reportedDate,
-            //    ReportedValueInAcreFeet = reportedValueInAcreFeetEqualPortion,
-            //    ReportedValue = reportedValueDepthEqualPortion,
-            //    LastUpdateDate = DateTime.UtcNow,
-            //    UnitTypeID = UnitType.Millimeters.UnitTypeID, //MK 1/17/2025 -- Not sure how to avoid hardcoding this for now. Maybe a field on the self report itself? Maybe on the geography? Defaulting to MM for now as ETSGSA is the only self reporting atm. 
-            //    FromManualUpload = true,
-            //    Comment = $"Self Report approved for {reportingYear} by {callingUser.FullName}."
-            //};
-
-            //waterMeasurements.Add(waterMeasurementEqualPortion);
         }
 
         return waterMeasurements;
@@ -494,7 +490,7 @@ public static class WaterMeasurementSelfReports
             .Include(x => x.WaterMeasurementSelfReportLineItems)
             .SingleAsync(x => x.GeographyID == geographyID && x.WaterAccountID == waterAccountID && x.WaterMeasurementSelfReportID == waterMeasurementSelfReportID);
 
-        if (selfReport.WaterMeasurementSelfReportStatusID != WaterMeasurementSelfReportStatus.Submitted.WaterMeasurementSelfReportStatusID)
+        if (selfReport.WaterMeasurementSelfReportStatusID != SelfReportStatus.Submitted.SelfReportStatusID)
         {
             results.Add(new ErrorMessage() { Type = "Not Submitted", Message = "Only Submitted Self Reports can be returned." });
         }
@@ -508,7 +504,7 @@ public static class WaterMeasurementSelfReports
             .Include(x => x.WaterMeasurementSelfReportLineItems)
             .SingleAsync(x => x.GeographyID == geographyID && x.WaterAccountID == waterAccountID && x.WaterMeasurementSelfReportID == waterMeasurementSelfReportID);
 
-        selfReport.WaterMeasurementSelfReportStatusID = WaterMeasurementSelfReportStatus.Returned.WaterMeasurementSelfReportStatusID;
+        selfReport.WaterMeasurementSelfReportStatusID = SelfReportStatus.Returned.SelfReportStatusID;
         selfReport.ReturnedDate = DateTime.UtcNow;
         selfReport.UpdateUserID = callingUser.UserID;
         selfReport.UpdateDate = DateTime.UtcNow;

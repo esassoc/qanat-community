@@ -11,7 +11,7 @@ import { AlertService } from "src/app/shared/services/alert.service";
 import { AlertDisplayComponent } from "../../../shared/components/alert-display/alert-display.component";
 import { FormsModule } from "@angular/forms";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
-import { NgIf, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { CurrentGeographyService } from "src/app/shared/services/current-geography.service";
 import { GeographyMinimalDto } from "src/app/shared/generated/model/models";
 import { ActivatedRoute } from "@angular/router";
@@ -22,8 +22,7 @@ import { routeParams } from "src/app/app.routes";
     selector: "well-registry-configure",
     templateUrl: "./well-registry-configure.component.html",
     styleUrls: ["./well-registry-configure.component.scss"],
-    standalone: true,
-    imports: [NgIf, PageHeaderComponent, FormsModule, AlertDisplayComponent, AsyncPipe],
+    imports: [PageHeaderComponent, FormsModule, AlertDisplayComponent, AsyncPipe]
 })
 export class WellRegistryConfigureComponent implements OnInit {
     public customRichTextTypeID = CustomRichTextTypeEnum.WellRegistryConfigurationPage;
@@ -45,7 +44,7 @@ export class WellRegistryConfigureComponent implements OnInit {
         this.geography$ = this.route.params.pipe(
             switchMap((params) => {
                 const geographyName = params[routeParams.geographyName];
-                return this.geographyService.geographiesGeographyNameGeographyNameMinimalGet(geographyName);
+                return this.geographyService.getByNameAsMinimalDtoGeography(geographyName);
             }),
             tap((geography) => {
                 this.alertService.clearAlerts();
@@ -83,7 +82,7 @@ export class WellRegistryConfigureComponent implements OnInit {
         } as ConfirmOptions;
         this.confirmService.confirm(options).then((confirmed) => {
             if (confirmed) {
-                this.geographyConfigurationService.geographiesGeographyIDConfigurationMeterConfigurationPut(this.geographyID, false).subscribe((response) => {
+                this.geographyConfigurationService.toggleMeterConfigurationGeographyConfiguration(this.geographyID, false).subscribe((response) => {
                     this.alertService.pushAlert(
                         new Alert(
                             "This feature is currently disabled. You can configure this feature, but changes will not take effect until the feature is enabled.",
@@ -109,7 +108,7 @@ export class WellRegistryConfigureComponent implements OnInit {
         } as ConfirmOptions;
         this.confirmService.confirm(options).then((confirmed) => {
             if (confirmed) {
-                this.geographyConfigurationService.geographiesGeographyIDConfigurationToggleWellRegistryPut(this.geographyID, true).subscribe((response) => {
+                this.geographyConfigurationService.toggleWellRegistryConfigurationGeographyConfiguration(this.geographyID, true).subscribe((response) => {
                     this.alertService.clearAlerts();
                     this.alertService.pushAlert(new Alert("Enabled Well Registry.", AlertContext.Success));
                 });

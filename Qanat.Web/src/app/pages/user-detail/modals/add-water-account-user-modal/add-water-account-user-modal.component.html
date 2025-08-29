@@ -2,23 +2,16 @@
     <div>
         <h3 class="section-title">Add Water Account</h3>
     </div>
-    <button type="button" class="close" (click)="close()">
-        <i class="fa fa-times-circle"></i>
-    </button>
 </div>
 
 <div class="modal-body" [loadingSpinner]="{ isLoading: isLoadingWaterAccounts }">
     <form action="" class="form" [formGroup]="formGroup">
-        <div class="mb-3">
-            <span class="field-label required">Water Account</span>
-            <ngx-select-dropdown
-                [multiple]="false"
-                [config]="waterAccountDropDownConfig"
-                [formControl]="waterAccountDropDownFormControl"
-                [options]="waterAccountDropDownOptions"
-                (change)="changedWaterAccount($event)"
-                *ngIf="waterAccountDropDownOptions$ | async as waterAccountDropDownOptions"></ngx-select-dropdown>
-        </div>
+        @if (waterAccountDropDownOptions$ | async; as waterAccountDropDownOptions) {
+            <div class="mb-3">
+                <span class="field-label required">Water Account</span>
+                <form-field [type]="FormFieldType.Select" [formControl]="formGroup.controls.WaterAccountID" [formInputOptions]="waterAccountDropDownOptions"></form-field>
+            </div>
+        }
 
         <div class="mb-3">
             <form-field

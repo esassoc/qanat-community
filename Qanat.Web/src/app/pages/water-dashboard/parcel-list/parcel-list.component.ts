@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from "@angular/core";
 import { BehaviorSubject, Observable, combineLatest, of } from "rxjs";
-import { filter, switchMap, tap } from "rxjs/operators";
+import { switchMap, tap } from "rxjs/operators";
 import { AuthenticationService } from "src/app/shared/services/authentication.service";
 import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
 import { AsyncPipe, CommonModule } from "@angular/common";
@@ -15,35 +15,33 @@ import { Map, layerControl } from "leaflet";
 import { PermissionEnum } from "src/app/shared/generated/enum/permission-enum";
 import { RightsEnum } from "src/app/shared/models/enums/rights.enum";
 import { UtilityFunctionsService } from "src/app/shared/services/utility-functions.service";
-import { QanatMapComponent, QanatMapInitEvent } from "src/app/shared/components/leaflet/qanat-map/qanat-map.component";
+import { QanatMapInitEvent } from "src/app/shared/components/leaflet/qanat-map/qanat-map.component";
 import { ZoneGroupService } from "src/app/shared/generated/api/zone-group.service";
 import { CustomAttributeService } from "src/app/shared/generated/api/custom-attribute.service";
 import { CustomAttributeTypeEnum } from "src/app/shared/generated/enum/custom-attribute-type-enum";
 import { ZoneGroupMinimalDto } from "src/app/shared/generated/model/zone-group-minimal-dto";
 import { CustomAttributeSimpleDto } from "src/app/shared/generated/model/custom-attribute-simple-dto";
-import { QanatGridHeaderComponent } from "src/app/shared/components/qanat-grid-header/qanat-grid-header.component";
-import { QanatGridComponent } from "src/app/shared/components/qanat-grid/qanat-grid.component";
 import { FormsModule } from "@angular/forms";
 import { GsaBoundariesComponent } from "src/app/shared/components/leaflet/layers/gsa-boundaries/gsa-boundaries.component";
 import { ParcelLayerComponent } from "src/app/shared/components/leaflet/layers/parcel-layer/parcel-layer.component";
-import { IconComponent } from "src/app/shared/components/icon/icon.component";
 import { GeographyService } from "src/app/shared/generated/api/geography.service";
 import { ExternalMapLayerService } from "src/app/shared/generated/api/external-map-layer.service";
-import { ExternalMapLayerDto } from "src/app/shared/generated/model/external-map-layer-dto";
 import { ZoneGroupLayerComponent } from "src/app/shared/components/leaflet/layers/zone-group-layer/zone-group-layer.component";
 import { GeographyExternalMapLayerComponent } from "src/app/shared/components/leaflet/layers/geography-external-map-layer/geography-external-map-layer.component";
 import { WaterDashboardNavComponent } from "src/app/shared/components/water-dashboard-nav/water-dashboard-nav.component";
 import { AlertDisplayComponent } from "src/app/shared/components/alert-display/alert-display.component";
 import { ParcelByGeographyService } from "src/app/shared/generated/api/parcel-by-geography.service";
-import { GeographyDto, GeographyMinimalDto } from "src/app/shared/generated/model/models";
+import { ExternalMapLayerSimpleDto, GeographyDto, GeographyMinimalDto, ReportingPeriodDto } from "src/app/shared/generated/model/models";
 import { CurrentGeographyService } from "src/app/shared/services/current-geography.service";
 import { GeographyHelper } from "src/app/shared/helpers/geography-helper";
+import { HybridMapGridComponent } from "src/app/shared/components/hybrid-map-grid/hybrid-map-grid.component";
+import { ReportingPeriodService } from "src/app/shared/generated/api/reporting-period.service";
+import { NgSelectModule } from "@ng-select/ng-select";
 
 @Component({
     selector: "parcel-list",
     templateUrl: "./parcel-list.component.html",
     styleUrls: ["./parcel-list.component.scss"],
-    standalone: true,
     imports: [
         PageHeaderComponent,
         LoadingDirective,
@@ -51,15 +49,13 @@ import { GeographyHelper } from "src/app/shared/helpers/geography-helper";
         FormsModule,
         AsyncPipe,
         WaterDashboardNavComponent,
-        QanatGridHeaderComponent,
-        QanatGridComponent,
-        QanatMapComponent,
+        HybridMapGridComponent,
         GsaBoundariesComponent,
         ParcelLayerComponent,
-        IconComponent,
         ZoneGroupLayerComponent,
         GeographyExternalMapLayerComponent,
         AlertDisplayComponent,
+        NgSelectModule,
     ],
 })
 export class ParcelListComponent implements OnInit, OnDestroy {
@@ -72,8 +68,12 @@ export class ParcelListComponent implements OnInit, OnDestroy {
     public currentUserGeographies$: Observable<GeographyMinimalDto[]>;
     public compareGeography = GeographyHelper.compareGeography;
 
+    public reportingPeriods$: Observable<ReportingPeriodDto[]>;
+    public currentReportingPeriodID$: BehaviorSubject<number> = new BehaviorSubject(null);
+    public currentReportingPeriodID: number;
+
     public zoneGroups$: Observable<ZoneGroupMinimalDto[]>;
-    public externalMapLayers$: Observable<ExternalMapLayerDto[]>;
+    public externalMapLayers$: Observable<ExternalMapLayerSimpleDto[]>;
     public customAttributes$: Observable<CustomAttributeSimpleDto[]>;
 
     public columnDefs$: Observable<ColDef<WaterAccountIndexGridDto>[]>;
@@ -98,11 +98,12 @@ export class ParcelListComponent implements OnInit, OnDestroy {
     public mapIsReady: boolean = false;
 
     public zoneGroups: ZoneGroupMinimalDto[];
-    public externalMapLayers: ExternalMapLayerDto[];
+    public externalMapLayers: ExternalMapLayerSimpleDto[];
     public customAttributes: CustomAttributeSimpleDto[];
 
     public richTextID: number = CustomRichTextTypeEnum.WaterDashboardParcels;
     public isLoading: boolean = true;
+    public layerLoading: boolean = true;
     public firstLoad: boolean = true;
 
     constructor(
@@ -113,6 +114,7 @@ export class ParcelListComponent implements OnInit, OnDestroy {
         private authenticationService: AuthenticationService,
         private utilityFunctionsService: UtilityFunctionsService,
         private geographyService: GeographyService,
+        private reportingPeriodService: ReportingPeriodService,
         private currentGeographyService: CurrentGeographyService,
         private cdr: ChangeDetectorRef
     ) {}
@@ -138,16 +140,31 @@ export class ParcelListComponent implements OnInit, OnDestroy {
 
         this.currentUserGeographies$ = combineLatest({ currentUser: this.currentUser$ }).pipe(
             switchMap(({ currentUser }) => {
-                return this.geographyService.geographiesCurrentUserGet();
+                return this.geographyService.listForCurrentUserGeography();
             }),
             tap((geographies) => {
                 this.currentUserHasNoGeographies = geographies.length == 0;
             })
         );
 
+        this.reportingPeriods$ = this.geography$.pipe(
+            switchMap((geography) => {
+                return this.reportingPeriodService.listByGeographyIDReportingPeriod(geography.GeographyID);
+            }),
+            tap((reportingPeriods) => {
+                let defaultReportingPeriod = reportingPeriods.find((x) => x.IsDefault);
+                if (!defaultReportingPeriod) {
+                    defaultReportingPeriod = reportingPeriods[0];
+                }
+
+                this.currentReportingPeriodID = defaultReportingPeriod?.ReportingPeriodID;
+                this.currentReportingPeriodID$.next(this.currentReportingPeriodID);
+            })
+        );
+
         this.zoneGroups$ = this.geography$.pipe(
             switchMap((geography) => {
-                return this.zoneGroupService.geographiesGeographyIDZoneGroupsGet(geography.GeographyID);
+                return this.zoneGroupService.listZoneGroup(geography.GeographyID);
             })
         );
 
@@ -160,26 +177,39 @@ export class ParcelListComponent implements OnInit, OnDestroy {
 
         this.externalMapLayers$ = this.geography$.pipe(
             switchMap((geography) => {
-                return this.externalMapLayerService.geographiesGeographyIDExternalMapLayersGet(geography.GeographyID);
+                return this.externalMapLayerService.getExternalMapLayer(geography.GeographyID);
             })
         );
 
         this.customAttributes$ = this.geography$.pipe(
             switchMap((geography) => {
-                return this.customAttributeService.geographiesGeographyIDCustomAttributesCustomAttributeTypeIDGet(geography.GeographyID, CustomAttributeTypeEnum.Parcel);
+                return this.customAttributeService.listCustomAttributesForGeographyCustomAttribute(geography.GeographyID, CustomAttributeTypeEnum.Parcel);
             })
         );
 
-        this.parcels$ = combineLatest({ currentUser: this.currentUser$, geography: this.geography$, _: this.refreshGeographyData$ }).pipe(
+        this.parcels$ = combineLatest({
+            currentUser: this.currentUser$,
+            geography: this.geography$,
+            reportingPeriodID: this.currentReportingPeriodID$,
+            _: this.refreshGeographyData$,
+        }).pipe(
             tap(() => {
                 this.isLoading = true;
+                this.layerLoading = true;
+                if (this.gridApi) {
+                    this.gridApi.setGridOption("loading", true);
+                }
             }),
-            switchMap(({ currentUser, geography, _ }) => {
-                return this.parcelByGeographyService.geographiesGeographyIDParcelsCurrentUserGet(geography.GeographyID);
+            switchMap(({ currentUser, geography, reportingPeriodID, _ }) => {
+                return this.parcelByGeographyService.listByGeographyIDByReportingPeriodForCurrentUserParcelByGeography(geography.GeographyID, reportingPeriodID);
             }),
             tap((parcels) => {
                 this.isLoading = false;
                 this.firstLoad = false;
+                this.mapIsReady = true;
+                if (this.gridApi) {
+                    this.gridApi.setGridOption("loading", false);
+                }
             })
         );
 
@@ -227,6 +257,10 @@ export class ParcelListComponent implements OnInit, OnDestroy {
         this.currentGeographyService.setCurrentGeography(selectedGeography);
     }
 
+    onReportingPeriodSelected($event: number) {
+        this.currentReportingPeriodID$.next($event);
+    }
+
     public handleMapReady(event: QanatMapInitEvent) {
         this.map = event.map;
         this.layerControl = event.layerControl;
@@ -246,21 +280,13 @@ export class ParcelListComponent implements OnInit, OnDestroy {
         this.gridRef = gridRef;
     }
 
-    public onGridSelectionChanged() {
-        const selectedNodes = this.gridApi.getSelectedNodes();
-        this.selectedParcelID = selectedNodes.length > 0 ? selectedNodes[0].data.ParcelID : null;
-    }
-
-    public onMapSelectionChanged(selectedParcelID: number) {
-        if (this.selectedParcelID == selectedParcelID) return;
+    public onSelectedParcelIDChanged(selectedParcelID: number) {
+        if (this.selectedParcelID == selectedParcelID) {
+            return;
+        }
 
         this.selectedParcelID = selectedParcelID;
-        this.gridApi.forEachNode((node, index) => {
-            if (node.data.ParcelID == selectedParcelID) {
-                node.setSelected(true, true);
-                this.gridApi.ensureIndexVisible(index, "top");
-            }
-        });
+        return this.selectedParcelID;
     }
 
     private createColumnDefs(user: UserDto, geography: GeographyDto, zoneGroups: ZoneGroupMinimalDto[]) {
@@ -287,25 +313,25 @@ export class ParcelListComponent implements OnInit, OnDestroy {
                 FieldDefinitionLabelOverride: "Water Account #",
             }),
             this.utilityFunctionsService.createBasicColumnDef("Water Account Name", "WaterAccountName"),
-            this.utilityFunctionsService.createMultiLinkColumnDef("Wells on Parcel", "WellsOnParcel", "WellID", "WellID", {
-                InRouterLink: "../wells",
-                MaxWidth: 300,
-            }),
-            this.utilityFunctionsService.createMultiLinkColumnDef("Irrigated By", "IrrigatedByWells", "WellID", "WellID", {
-                InRouterLink: "../wells",
-                MaxWidth: 300,
-            }),
-            { headerName: "Owner Name", field: "OwnerName" },
-            { headerName: "Owner Address", field: "OwnerAddress" },
             this.utilityFunctionsService.createBasicColumnDef("Parcel Status", "ParcelStatusDisplayName", {
                 FieldDefinitionType: "ParcelStatus",
                 CustomDropdownFilterField: "ParcelStatusDisplayName",
                 Hide: !userHasPermission,
             }),
+            this.utilityFunctionsService.createMultiLinkColumnDef("Wells on Parcel", "WellsOnParcel", "WellID", "WellID", {
+                InRouterLink: "/wells",
+                MaxWidth: 300,
+            }),
+            this.utilityFunctionsService.createMultiLinkColumnDef("Irrigated By", "IrrigatedByWells", "WellID", "WellID", {
+                InRouterLink: "/wells",
+                MaxWidth: 300,
+            }),
+            { headerName: "Owner Name", field: "OwnerName" },
+            { headerName: "Owner Address", field: "OwnerAddress" },
         ];
 
         zoneGroups.forEach((zoneGroup) => {
-            columnDefs.push(this.utilityFunctionsService.createZoneGroupColumnDef(zoneGroup, "ZoneIDs", !userHasPermission));
+            columnDefs.push(this.utilityFunctionsService.createZoneGroupColumnDef(zoneGroup, "ZoneIDs", false));
         });
 
         if (!this.customAttributes) {
@@ -315,5 +341,13 @@ export class ParcelListComponent implements OnInit, OnDestroy {
         columnDefs.push(...this.utilityFunctionsService.createCustomAttributeColumnDefs(this.customAttributes, !userHasPermission));
 
         return columnDefs;
+    }
+
+    public onLayerLoadStarted() {
+        this.layerLoading = true;
+    }
+
+    public onLayerLoadFinished() {
+        this.layerLoading = false;
     }
 }

@@ -1,5 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import { BehaviorSubject, combineLatest, forkJoin, map, Observable, switchMap, tap } from "rxjs";
+import { BehaviorSubject, combineLatest, Observable, of, switchMap, map, tap, concat, shareReplay } from "rxjs";
 import { MonthlyUsageSummaryDto } from "src/app/shared/generated/model/monthly-usage-summary-dto";
 import { WaterTypeSimpleDto } from "src/app/shared/generated/model/water-type-simple-dto";
 import { WaterTypeSupplyDto } from "src/app/shared/generated/model/water-type-supply-dto";
@@ -10,40 +10,36 @@ import { VegaMonthlyUsageChartComponent } from "../../../shared/components/vega/
 import { VegaCumulativeUsageChartComponent } from "../../../shared/components/vega/vega-cumulative-usage-chart/vega-cumulative-usage-chart.component";
 import { ReportingPeriodSelectComponent } from "../../../shared/components/reporting-period-select/reporting-period-select.component";
 import { AlertDisplayComponent } from "../../../shared/components/alert-display/alert-display.component";
-import { NgIf, NgClass, NgFor, DecimalPipe, DatePipe, AsyncPipe } from "@angular/common";
+import { NgClass, DecimalPipe, DatePipe, AsyncPipe } from "@angular/common";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { LoadingDirective } from "src/app/shared/directives/loading.directive";
 import { WaterTypeByGeographyService } from "src/app/shared/generated/api/water-type-by-geography.service";
 import { ParcelSupplyByGeographyService } from "src/app/shared/generated/api/parcel-supply-by-geography.service";
 import { GeographySourceOfRecordWaterMeasurementTypeMonthlyUsageSummaryDto } from "src/app/shared/generated/model/geography-source-of-record-water-measurement-type-monthly-usage-summary-dto";
 import { CurrentGeographyService } from "src/app/shared/services/current-geography.service";
-import { GeographyMinimalDto, MostRecentEffectiveDatesDto } from "src/app/shared/generated/model/models";
+import { GeographyMinimalDto, MostRecentEffectiveDatesDto, ReportingPeriodDto } from "src/app/shared/generated/model/models";
 
 @Component({
     selector: "statistics",
     templateUrl: "./statistics.component.html",
     styleUrls: ["./statistics.component.scss"],
-    standalone: true,
     imports: [
         PageHeaderComponent,
-        NgIf,
         AlertDisplayComponent,
         ReportingPeriodSelectComponent,
         NgClass,
         VegaCumulativeUsageChartComponent,
         VegaMonthlyUsageChartComponent,
         RouterLink,
-        NgFor,
         WaterTypeFieldDefinitionComponent,
         DecimalPipe,
         LoadingDirective,
         AsyncPipe,
         DatePipe,
-    ],
+    ]
 })
 export class StatisticsComponent implements OnInit {
     public geography$: Observable<GeographyMinimalDto>;
-
     private selectedYearSubject = new BehaviorSubject<number | null>(null);
     public selectedYear$ = this.selectedYearSubject.asObservable();
 
@@ -53,13 +49,11 @@ export class StatisticsComponent implements OnInit {
     public supplyData$: Observable<WaterTypeSupplyDto[]>;
 
     public viewModel$: Observable<StatisticsViewModel>;
-
-    public showCumulativeWaterUsageChart: boolean = true;
-    public showAcresFeet: boolean = false;
-    public acresFeetUnits: string = "ac-ft";
-    public acresFeetAcreUnits: string = "ac-ft/ac";
-
-    public isLoading: boolean = true;
+    public showCumulativeWaterUsageChart = true;
+    public showAcresFeet = false;
+    public acresFeetUnits = "ac-ft";
+    public acresFeetAcreUnits = "ac-ft/ac";
+    public isLoading = true;
 
     constructor(
         private parcelSupplyByGeographyService: ParcelSupplyByGeographyService,
@@ -69,74 +63,72 @@ export class StatisticsComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        this.geography$ = this.currentGeographyService.getCurrentGeography().pipe(
-            tap((geography) => {
-                this.selectedYearSubject.next(geography.DefaultDisplayYear);
-            })
-        );
+        this.geography$ = this.currentGeographyService.getCurrentGeography();
 
-        this.waterTypes$ = this.geography$.pipe(
-            switchMap((geography) => {
-                return this.waterTypeByGeographyService.geographiesGeographyIDWaterTypesActiveGet(geography.GeographyID);
-            })
-        );
-
-        this.mostRecentEffectiveDates$ = combineLatest([this.geography$, this.selectedYear$]).pipe(
+        this.waterTypes$ = this.geography$.pipe(switchMap((geography) => this.waterTypeByGeographyService.getActiveWaterTypesWaterTypeByGeography(geography.GeographyID)));
+        this.viewModel$ = combineLatest([this.geography$, this.selectedYear$]).pipe(
             switchMap(([geography, selectedYear]) => {
-                return this.parcelSupplyByGeographyService.geographiesGeographyIDParcelSuppliesRecentEffectiveDatesYearYearGet(geography.GeographyID, selectedYear);
-            })
-        );
+                const loading$ = of(null); // clears view immediately
 
-        this.usageData$ = combineLatest([this.geography$, this.selectedYear$]).pipe(
-            switchMap(([geography, selectedYear]) => {
-                return this.parcelSupplyByGeographyService.geographiesGeographyIDParcelSuppliesMonthlyUsageSummaryYearYearGet(geography.GeographyID, selectedYear);
-            })
-        );
+                if (!geography || !selectedYear) {
+                    return loading$; // show loading if either is missing
+                }
 
-        this.supplyData$ = combineLatest([this.geography$, this.selectedYear$]).pipe(
-            switchMap(([geography, selectedYear]) => {
-                return this.parcelSupplyByGeographyService.geographiesGeographyIDParcelSuppliesYearYearGet(geography.GeographyID, selectedYear);
-            })
-        );
+                const data$ = combineLatest([
+                    this.parcelSupplyByGeographyService.getMostRecentSupplyAndUsageDateParcelSupplyByGeography(geography.GeographyID, selectedYear).pipe(shareReplay(1)),
+                    this.parcelSupplyByGeographyService
+                        .getMonthlyUsageSummaryForGeographyAndReportingPeriodParcelSupplyByGeography(geography.GeographyID, selectedYear)
+                        .pipe(shareReplay(1)),
+                    this.parcelSupplyByGeographyService.getSupplyOfWaterTypesParcelSupplyByGeography(geography.GeographyID, selectedYear).pipe(shareReplay(1)),
+                ]).pipe(
+                    map(([mostRecentDates, usageData, supplyData]) => {
+                        const totalSupply = this.sumPipe.transform(supplyData, "TotalSupply") || 0;
+                        const usageToDate = usageData.WaterMeasurementTotalValue || 0;
+                        const totalAcreage = usageData.TotalParcelArea || 0;
 
-        this.viewModel$ = combineLatest([this.mostRecentEffectiveDates$, this.usageData$, this.supplyData$]).pipe(
-            map(([mostRecentDates, usageData, supplyData]) => {
-                const totalSupply = this.sumPipe.transform(supplyData, "TotalSupply") || 0;
-                const usageToDate = usageData.WaterMeasurementTotalValue || 0;
-                const totalAcreage = usageData.TotalUsageEntityArea || 0;
+                        const monthlyUsageSummaries = usageData.WaterMeasurementMonthlyValues.map((monthlyUsageSummary) => ({
+                            ...monthlyUsageSummary,
+                            CurrentCumulativeUsageAmountDepth: monthlyUsageSummary.CurrentCumulativeUsageAmount / totalAcreage,
+                            AverageCumulativeUsageAmountDepth: monthlyUsageSummary.AverageCumulativeUsageAmount / totalAcreage,
+                            TotalSupply: totalSupply,
+                            TotalSupplyDepth: this.convertToAcresFeetAcre(totalSupply, totalAcreage),
+                        }));
 
-                const monthlyUsageSummaries = usageData.WaterMeasurementMonthlyValues.map((monthlyUsageSummary) => ({
-                    ...monthlyUsageSummary,
-                    CurrentCumulativeUsageAmountDepth: monthlyUsageSummary.CurrentCumulativeUsageAmount / totalAcreage,
-                    AverageCumulativeUsageAmountDepth: monthlyUsageSummary.AverageCumulativeUsageAmount / totalAcreage,
-                    TotalSupply: totalSupply,
-                    TotalSupplyDepth: this.convertToAcresFeetAcre(totalSupply, totalAcreage),
-                }));
+                        const currentAvailable = totalSupply - usageToDate;
+                        const barStyling = `width: ${(usageToDate / totalSupply) * 100}%`;
 
-                const currentAvailable = totalSupply - usageToDate;
-                const barStyling = `width: ${(usageToDate / totalSupply) * 100}%`;
+                        const mostRecentSupplyDate = this.getDateFromString(mostRecentDates.MostRecentSupplyEffectiveDate);
+                        const mostRecentUsageDate = this.getDateFromString(mostRecentDates.MostRecentUsageEffectiveDate);
+                        const mostRecentEffectiveDate = mostRecentSupplyDate > mostRecentUsageDate ? mostRecentSupplyDate : mostRecentUsageDate;
 
-                const mostRecentSupplyDate = this.getDateFromString(mostRecentDates.MostRecentSupplyEffectiveDate);
-                const mostRecentUsageDate = this.getDateFromString(mostRecentDates.MostRecentUsageEffectiveDate);
-                const mostRecentEffectiveDate = mostRecentSupplyDate > mostRecentUsageDate ? mostRecentSupplyDate : mostRecentUsageDate;
+                        return {
+                            mostRecentSupplyDate,
+                            mostRecentUsageDate,
+                            mostRecentEffectiveDate,
+                            usageToDate,
+                            totalSupply,
+                            currentAvailable,
+                            barStyling,
+                            monthlyUsageSummaries,
+                            supplyData,
+                            totalAcreage,
+                        } as StatisticsViewModel;
+                    })
+                );
 
-                return {
-                    mostRecentSupplyDate,
-                    mostRecentUsageDate,
-                    mostRecentEffectiveDate,
-                    usageToDate,
-                    totalSupply,
-                    currentAvailable,
-                    barStyling,
-                    monthlyUsageSummaries,
-                    supplyData,
-                    totalAcreage,
-                } as StatisticsViewModel;
+                // emit null first to trigger @else block before actual data comes in
+                return concat(loading$, data$);
             }),
-            tap(() => {
-                this.isLoading = false;
+            tap((vm) => {
+                this.isLoading = vm === null;
             })
         );
+    }
+
+    onSelectedReportingPeriodChange(selectedReportingPeriod: ReportingPeriodDto) {
+        const endDate = new Date(selectedReportingPeriod.EndDate);
+        const selectedYear = endDate.getUTCFullYear();
+        this.selectedYearSubject.next(selectedYear);
     }
 
     getPercentageOfWaterUsed(viewModel: StatisticsViewModel) {
@@ -146,44 +138,34 @@ export class StatisticsComponent implements OnInit {
     }
 
     getWaterTypeUsage(viewModel: StatisticsViewModel, waterType: WaterTypeSimpleDto): number {
-        const waterUse = viewModel.supplyData.filter((x) => x.WaterTypeID == waterType.WaterTypeID);
-        if (waterUse.length == 1) {
-            return waterUse[0].TotalSupply;
-        }
-
-        return 0;
+        const waterUse = viewModel.supplyData.filter((x) => x.WaterTypeID === waterType.WaterTypeID);
+        return waterUse.length === 1 ? waterUse[0].TotalSupply : 0;
     }
 
     setWaterSupplyBar(viewModel: StatisticsViewModel, waterTypeTotalUse: number) {
         return "width: " + (waterTypeTotalUse / viewModel.totalSupply) * 100 + "%";
     }
 
-    updateDashboardForSelectedYear(selectedYear: number) {
-        this.selectedYearSubject.next(selectedYear);
-    }
-
     getDateFromString(dateString: string) {
-        if (dateString != null) return dateString.substring(0, 10);
+        return dateString?.substring(0, 10);
     }
 
-    //TODO: Make this reactive
     convertToAcresFeetAcre(num: number, acreage: number) {
-        if (!acreage || acreage == 0) {
+        if (!acreage || acreage === 0) {
             return null;
         }
-
         return num / acreage;
     }
 
-    changeUnits(temp) {
-        this.showAcresFeet = temp;
+    changeUnits(useAcreFeet: boolean) {
+        this.showAcresFeet = useAcreFeet;
     }
 
     getShowAcresFeet() {
         return this.showAcresFeet;
     }
 
-    public updateShowCumulativeWaterUsageChart(value: boolean) {
+    updateShowCumulativeWaterUsageChart(value: boolean) {
         this.showCumulativeWaterUsageChart = value;
     }
 }

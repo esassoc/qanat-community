@@ -9,6 +9,13 @@ h2 {
     align-items: center;
     gap: 0.5rem;
 }
+
+.apn {
+    font-size: $type-size-300;
+    font-weight: bold;
+    display: block;
+}
+
 .large {
     .apn {
         font-size: $type-size-400;

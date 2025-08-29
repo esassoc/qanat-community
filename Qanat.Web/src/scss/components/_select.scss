@@ -124,3 +124,122 @@
         }
     }
 }
+
+//MK 5/6/2025: These !importants are insavory but necessary to override the default styles of ng-select in all cases. The ng-deep version of this before was not working for the User Edit Model Access dialog.
+.ng-select.ng-select-multiple.custom .ng-value {
+    background: $blue-50 !important;
+    border: 1px solid $blue-200 !important;
+    color: $blue-700 !important;
+    border-radius: $spacing-100 !important;
+}
+
+.ng-select.ng-select-multiple.custom .ng-value-label {
+    padding: $spacing-200 !important;
+    padding-top: 10px !important;
+    padding-left: 0 !important;
+    font-weight: 600 !important;
+}
+
+.ng-select.ng-select-multiple.custom .ng-value-icon {
+    padding: $spacing-200 !important;
+    padding-top: 10px !important;
+    border-right: unset !important;
+
+    &:hover {
+        background: $blue-100 !important;
+    }
+}
+
+.ng-select.ng-select-multiple .ng-select-container .ng-value-container .ng-placeholder {
+    top: 1rem !important;
+}
+
+.custom.ng-dropdown-panel .ng-dropdown-panel-items .ng-option {
+    height: 3rem;
+    line-height: 2.25rem;
+}
+
+.custom.ng-dropdown-panel .ng-dropdown-panel-items .ng-option {
+    &.ng-option-selected,
+    &:hover {
+        background: $blue-50;
+        color: $blue-700;
+    }
+}
+
+.ng-select.custom {
+    .ng-select-container {
+        height: 3rem;
+        border-color: $gray-200;
+    }
+
+    .ng-dropdown-panel .ng-dropdown-panel-items .ng-option {
+        height: 3rem;
+        line-height: 2.25rem;
+    }
+
+    .ng-dropdown-panel .ng-dropdown-panel-items .ng-option {
+        &.ng-option-selected,
+        &:hover {
+            background: $blue-50;
+            color: $blue-700;
+        }
+    }
+
+    .ng-clear-wrapper {
+        padding-inline: $spacing-200;
+        display: inline-block;
+        width: unset;
+        .ng-clear {
+            font-size: 24px;
+            top: 3px;
+            position: relative;
+        }
+    }
+
+    .ng-arrow-wrapper {
+        padding-inline: $spacing-300;
+        display: inline-block;
+        width: unset;
+
+        .ng-arrow {
+            top: 2px;
+            position: relative;
+            border-width: 7px 6px 2.5px;
+        }
+    }
+
+    &.small {
+        .ng-select-container {
+            height: 1rem;
+        }
+
+        .ng-value {
+            top: 1px;
+        }
+    }
+
+    &.small.ng-touched.ng-select-searchable {
+        .ng-value {
+            top: 6px;
+        }
+    }
+
+    &.small.ng-select-opened.ng-select-searchable {
+        .ng-value {
+            top: 6px;
+        }
+    }
+}
+
+//MK 5/6/2025: Multiple selects can grow and if they have a height set, not all options are visible. This is a workaround to set the height to unset so that the select can grow and show all options.
+.ng-select.ng-select-multiple.custom {
+    .ng-select-container {
+        height: unset;
+    }
+}
+
+.ng-select.custom.ng-select-opened > .ng-select-container .ng-arrow {
+    border-width: 0 6px 7px;
+    top: 0;
+}

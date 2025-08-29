@@ -1,7 +1,10 @@
-﻿using Qanat.Models.DataTransferObjects;
+﻿using System.Text.Json;
+using Qanat.Models.DataTransferObjects;
 using Microsoft.EntityFrameworkCore;
 using Qanat.Common.GeoSpatial;
 using Qanat.Common.Util;
+using Schemoto.Helpers;
+using Schemoto.InstanceNamespace;
 
 namespace Qanat.EFModels.Entities;
 
@@ -13,9 +16,19 @@ public class Wells
             .Include(x => x.Parcel).ThenInclude(x => x.ParcelGeometry)
             .Include(x => x.WellIrrigatedParcels).ThenInclude(x => x.Parcel)
             .Include(x => x.Geography)
+            .Include(x => x.WellMeters).ThenInclude(x => x.Meter)
             .AsNoTracking()
             .Where(x => x.GeographyID == geographyID)
             .Select(x => x.AsMinimalDto())
+            .ToList();
+    }
+
+    public static List<WellDisplayDto> ListByGeographyIDAsDisplayDto(QanatDbContext dbContext, int geographyID)
+    {
+        return dbContext.Wells
+            .AsNoTracking()
+            .Where(x => x.GeographyID == geographyID)
+            .Select(x => x.AsDisplayDto())
             .ToList();
     }
 
@@ -41,6 +54,7 @@ public class Wells
         return dbContext.Wells.AsNoTracking()
             .Include(x => x.Parcel)
             .Include(x => x.WellIrrigatedParcels).ThenInclude(x => x.Parcel)
+            .Include(x => x.WellMeters).ThenInclude(x => x.Meter)
             .Where(x => x.GeographyID == geographyID && x.ParcelID.HasValue && parcelIDs.Contains(x.ParcelID.Value))
             .Select(x => x.AsMinimalDto())
             .ToList();
@@ -55,12 +69,10 @@ public class Wells
             .SingleOrDefault(x => x.WellID == wellID);
     }
 
-    public static Well GetByIDWithTracking(QanatDbContext dbContext, int wellID)
+    public static WellDisplayDto GetByIDAsDisplayDto(QanatDbContext dbContext, int wellID)
     {
-        return dbContext.Wells
-            .Include(x => x.Geography)
-            .Include(x => x.Parcel).ThenInclude(x => x.ParcelGeometry)
-            .SingleOrDefault(x => x.WellID == wellID);
+        return dbContext.Wells.AsNoTracking()
+            .SingleOrDefault(x => x.WellID == wellID).AsDisplayDto();
     }
 
     public static BoundingBoxDto GetBoundingBoxByWellIDs(QanatDbContext dbContext, List<int> wellIDs)
@@ -74,10 +86,15 @@ public class Wells
 
     public static Well CreateFromWellRegistration(QanatDbContext dbContext, WellRegistration wellRegistration)
     {
+        var wellRegistrationMetadatum = dbContext.WellRegistrationMetadata
+            .AsNoTracking()
+            .SingleOrDefault(x => x.WellRegistrationID == wellRegistration.WellRegistrationID);
+
         var well = new Well()
         {
             GeographyID = wellRegistration.GeographyID,
             ParcelID = wellRegistration.ParcelID,
+            ParcelIsManualOverride = false,
             WellName = wellRegistration.WellName,
             LocationPoint = wellRegistration.LocationPoint,
             LocationPoint4326 = wellRegistration.LocationPoint4326,
@@ -85,8 +102,13 @@ public class Wells
             CountyWellPermitNumber = wellRegistration.CountyWellPermitNumber,
             DateDrilled = wellRegistration.DateDrilled,
             WellDepth = wellRegistration.WellDepth,
+            CasingDiameter = wellRegistrationMetadatum?.CasingDiameter,
+            TopOfPerforations = wellRegistrationMetadatum?.TopOfPerforations,
+            BottomOfPerforations = wellRegistrationMetadatum?.BottomOfPerforations,
+            ElectricMeterNumber = wellRegistrationMetadatum?.ElectricMeterNumber,
             CreateDate = DateTime.UtcNow
         };
+
         dbContext.Wells.Add(well);
         dbContext.SaveChanges();
         dbContext.Entry(well).Reload();
@@ -117,9 +139,51 @@ public class Wells
         well.StateWCRNumber = requestDto.StateWCRNumber;
         well.CountyWellPermitNumber = requestDto.CountyWellPermitNumber;
         well.DateDrilled = requestDto.DateDrilled;
-        well.WellDepth = requestDto.WellDepth;
         well.WellStatusID = requestDto.WellStatusID;
         well.Notes = requestDto.Notes;
+        well.WellDepth = requestDto.WellDepth;
+        well.CasingDiameter = requestDto.CasingDiameter;
+        well.TopOfPerforations = requestDto.TopOfPerforations;
+        well.BottomOfPerforations = requestDto.BottomOfPerforations;
+        well.ElectricMeterNumber = requestDto.ElectricMeterNumber;
+
+        dbContext.SaveChanges();
+    }
+
+    public static List<ErrorMessage> ValidateWellParcelOverride(QanatDbContext dbContext, WellParcelDto wellParcelDto)
+    {
+        var errors = new List<ErrorMessage>();
+
+        var well = dbContext.Wells.SingleOrDefault(x => x.WellID == wellParcelDto.WellID);
+        var parcel = dbContext.Parcels.SingleOrDefault(x => x.ParcelID == wellParcelDto.ParcelID);
+
+        if (well == null)
+        {
+            errors.Add(new ErrorMessage() { Type = "Well", Message = $"Well with ID {wellParcelDto.WellID} does not exist." });
+        }
+        if (parcel == null)
+        {
+            errors.Add(new ErrorMessage() { Type = "Parcel", Message = $"Parcel with ID {wellParcelDto.ParcelID} does not exist." });
+        }
+        if (errors.Any())
+        {
+            return errors;
+        }
+
+        if (well.GeographyID != parcel.GeographyID)
+        {
+            errors.Add(new ErrorMessage() { Type = "Geography", Message = $"Well and parcel must belong to the same geography." });
+        }
+
+        return errors;
+    }
+
+    public static void OverrideWellParcel(QanatDbContext dbContext, WellParcelDto wellParcelDto)
+    {
+        var well = dbContext.Wells.Single(x => x.WellID == wellParcelDto.WellID);
+
+        well.ParcelID = wellParcelDto.ParcelID;
+        well.ParcelIsManualOverride = true;
 
         dbContext.SaveChanges();
     }
@@ -180,5 +244,22 @@ public class Wells
             (x, y) => x.ParcelID == y.ParcelID && x.WellID == y.WellID);
         
         dbContext.SaveChanges();
+    }
+
+    public static async Task<WellInstanceDto> GetInstanceAsync(QanatDbContext dbContext, int wellID)
+    {
+        var well = await dbContext.Wells.AsNoTracking()
+            .SingleAsync(x => x.WellID == wellID);
+
+        var wellInstanceDto = new WellInstanceDto()
+        {
+            WellID = well.WellID,
+            WellName = well.WellName,
+            SchemotoInstance = !string.IsNullOrEmpty(well.SchemotoInstance)
+                ? JsonSerializer.Deserialize<Instance>(well.SchemotoInstance)
+                : null,
+        };
+
+        return wellInstanceDto;
     }
 }

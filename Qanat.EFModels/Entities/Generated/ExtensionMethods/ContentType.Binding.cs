@@ -17,9 +17,7 @@ namespace Qanat.EFModels.Entities
         public static readonly ContentTypeFieldDefinition FieldDefinition = ContentTypeFieldDefinition.Instance;
 
         public static readonly List<ContentType> All;
-        public static readonly List<ContentTypeSimpleDto> AllAsSimpleDto;
         public static readonly ReadOnlyDictionary<int, ContentType> AllLookupDictionary;
-        public static readonly ReadOnlyDictionary<int, ContentTypeSimpleDto> AllAsSimpleDtoLookupDictionary;
 
         /// <summary>
         /// Static type constructor to coordinate static initialization order
@@ -27,9 +25,7 @@ namespace Qanat.EFModels.Entities
         static ContentType()
         {
             All = new List<ContentType> { PageInstructions, FormInstructions, FieldDefinition };
-            AllAsSimpleDto = new List<ContentTypeSimpleDto> { PageInstructions.AsSimpleDto(), FormInstructions.AsSimpleDto(), FieldDefinition.AsSimpleDto() };
             AllLookupDictionary = new ReadOnlyDictionary<int, ContentType>(All.ToDictionary(x => x.ContentTypeID));
-            AllAsSimpleDtoLookupDictionary = new ReadOnlyDictionary<int, ContentTypeSimpleDto>(AllAsSimpleDto.ToDictionary(x => x.ContentTypeID));
         }
 
         /// <summary>

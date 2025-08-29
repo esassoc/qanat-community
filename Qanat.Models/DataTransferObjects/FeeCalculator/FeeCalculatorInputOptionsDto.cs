@@ -10,7 +10,7 @@ public class FeeCalculatorInputOptionsDto
     public List<int> FilterGridToWaterMeasurementTypeIDs => [ET_WaterMeasurementTypeID, Precip_WaterMeasurementTypeID];
 
     public List<WaterAccountMinimalDto> WaterAccounts { get; set; }
-    public List<FeeCalculatorYearDto> Years { get; set; }
+    public List<ReportingPeriodDto> ReportingPeriods { get; set; }
     public List<FeeStructureDto> FeeStructures { get; set; }
     public List<MLRPIncentiveDto> MLRPIncentives { get; set; }
 

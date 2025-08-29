@@ -8,7 +8,7 @@ import { ParcelService } from "src/app/shared/generated/api/parcel.service";
 import { AuthenticationService } from "src/app/shared/services/authentication.service";
 import { GeographyLogoComponent } from "../../../shared/components/geography-logo/geography-logo.component";
 import { IconComponent } from "../../../shared/components/icon/icon.component";
-import { NgIf, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { LoadingDirective } from "src/app/shared/directives/loading.directive";
 import { FormsModule } from "@angular/forms";
 import { SearchParcelsComponent } from "../../../shared/components/search-parcels/search-parcels.component";
@@ -22,10 +22,8 @@ import { GeographyAllocationPlanConfigurationDto } from "src/app/shared/generate
 
 @Component({
     selector: "parcel-detail-layout",
-    standalone: true,
     imports: [
         SearchParcelsComponent,
-        NgIf,
         RouterLink,
         GeographyLogoComponent,
         IconComponent,
@@ -36,9 +34,8 @@ import { GeographyAllocationPlanConfigurationDto } from "src/app/shared/generate
         AsyncPipe,
         DropdownToggleDirective,
     ],
-
     templateUrl: "./parcel-detail-layout.component.html",
-    styleUrl: "./parcel-detail-layout.component.scss",
+    styleUrl: "./parcel-detail-layout.component.scss"
 })
 export class ParcelDetailLayoutComponent implements OnInit {
     @ViewChild("parcelSupplyGrid") parcelSupplyGrid: AgGridAngular;
@@ -56,7 +53,7 @@ export class ParcelDetailLayoutComponent implements OnInit {
     ngOnInit(): void {
         this.currentParcel$ = this.route.params.pipe(
             switchMap((params) => {
-                return this.parcelService.parcelsParcelIDGet(params[routeParams.parcelID]);
+                return this.parcelService.getByIDParcel(params[routeParams.parcelID]);
             })
         );
 
@@ -65,7 +62,7 @@ export class ParcelDetailLayoutComponent implements OnInit {
                 return combineLatest({
                     parcel: of(parcel),
                     currentUser: this.authenticationService.getCurrentUser(),
-                    geographyConfig: this.allocationPlanService.geographiesGeographyIDAllocationPlanConfigurationGet(parcel.GeographyID),
+                    geographyConfig: this.allocationPlanService.getAllocationPlanConfigurationByGeographyIDAllocationPlan(parcel.GeographyID),
                 });
             }),
             map((value) => {
@@ -104,7 +101,7 @@ export class ParcelDetailLayoutComponent implements OnInit {
                             title: "Allocation Plan",
                             routerLink: ["/parcels", parcelID, "detail"],
                             fragment: "allocation-plan",
-                            isDisabled: !geographyAllocationConfig.IsVisibleToLandowners,
+                            isDisabled: !geographyAllocationConfig?.IsVisibleToLandowners,
                         },
                         {
                             title: "Supply Activity",
@@ -133,12 +130,6 @@ export class ParcelDetailLayoutComponent implements OnInit {
                     icon: "Wells",
                     routerLink: ["/water-dashboard/wells"],
                 },
-                // {
-                //     title: "Support & Contact",
-                //     icon: "Question",
-                //     routerLink: ["/request-support"],
-                //     queryParams: { GeographyID: parcel.GeographyID.toString() },
-                // },
             ],
         } as DashboardMenu;
 

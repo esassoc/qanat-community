@@ -16,9 +16,7 @@ namespace Qanat.EFModels.Entities
         public static readonly MonitoringWellSourceTypeYoloWRID YoloWRID = MonitoringWellSourceTypeYoloWRID.Instance;
 
         public static readonly List<MonitoringWellSourceType> All;
-        public static readonly List<MonitoringWellSourceTypeSimpleDto> AllAsSimpleDto;
         public static readonly ReadOnlyDictionary<int, MonitoringWellSourceType> AllLookupDictionary;
-        public static readonly ReadOnlyDictionary<int, MonitoringWellSourceTypeSimpleDto> AllAsSimpleDtoLookupDictionary;
 
         /// <summary>
         /// Static type constructor to coordinate static initialization order
@@ -26,9 +24,7 @@ namespace Qanat.EFModels.Entities
         static MonitoringWellSourceType()
         {
             All = new List<MonitoringWellSourceType> { CNRA, YoloWRID };
-            AllAsSimpleDto = new List<MonitoringWellSourceTypeSimpleDto> { CNRA.AsSimpleDto(), YoloWRID.AsSimpleDto() };
             AllLookupDictionary = new ReadOnlyDictionary<int, MonitoringWellSourceType>(All.ToDictionary(x => x.MonitoringWellSourceTypeID));
-            AllAsSimpleDtoLookupDictionary = new ReadOnlyDictionary<int, MonitoringWellSourceTypeSimpleDto>(AllAsSimpleDto.ToDictionary(x => x.MonitoringWellSourceTypeID));
         }
 
         /// <summary>

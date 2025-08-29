@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Qanat.Models.DataTransferObjects;
+﻿namespace Qanat.Models.DataTransferObjects;
 
 public class ZoneGroupMonthlyUsageDto
 {

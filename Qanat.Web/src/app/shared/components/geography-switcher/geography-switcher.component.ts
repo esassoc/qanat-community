@@ -2,7 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { Observable, of, switchMap } from "rxjs";
 import { GeographyDto, GeographyMinimalDto } from "../../generated/model/models";
 import { DropdownToggleDirective } from "../../directives/dropdown-toggle.directive";
-import { NgIf, NgFor, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { IconComponent } from "../icon/icon.component";
 import { GeographyService } from "../../generated/api/geography.service";
 import { CurrentGeographyService } from "../../services/current-geography.service";
@@ -13,8 +13,7 @@ import { routeParams } from "src/app/app.routes";
     selector: "geography-switcher",
     templateUrl: "./geography-switcher.component.html",
     styleUrls: ["./geography-switcher.component.scss"],
-    standalone: true,
-    imports: [NgIf, DropdownToggleDirective, IconComponent, NgFor, AsyncPipe],
+    imports: [DropdownToggleDirective, IconComponent, AsyncPipe]
 })
 export class GeographySwitcherComponent implements OnInit {
     public currentUserAvailableGeographies$: Observable<GeographyMinimalDto[]>;
@@ -28,7 +27,7 @@ export class GeographySwitcherComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        this.currentUserAvailableGeographies$ = this.geographyService.geographiesCurrentUserGet();
+        this.currentUserAvailableGeographies$ = this.geographyService.listForCurrentUserGeography();
         this.geography$ = this.currentGeographyService.getCurrentGeography();
     }
 

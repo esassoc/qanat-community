@@ -5,18 +5,16 @@ import { environment } from "src/environments/environment";
 import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
 import { Observable } from "rxjs";
-import { CustomRichTextComponent } from "../../../shared/components/custom-rich-text/custom-rich-text.component";
 import { AlertDisplayComponent } from "../../../shared/components/alert-display/alert-display.component";
 import { HomepageUserPortalComponent } from "../homepage-user-portal/homepage-user-portal.component";
-import { NgIf, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { IconComponent } from "../../../shared/components/icon/icon.component";
 
 @Component({
     selector: "app-home-index",
     templateUrl: "./home-index.component.html",
     styleUrls: ["./home-index.component.scss"],
-    standalone: true,
-    imports: [NgIf, HomepageUserPortalComponent, AlertDisplayComponent, CustomRichTextComponent, AsyncPipe, RouterLink, IconComponent],
+    imports: [HomepageUserPortalComponent, AlertDisplayComponent, AsyncPipe, RouterLink, IconComponent],
 })
 export class HomeIndexComponent implements OnInit, OnDestroy {
     public currentUser$: Observable<UserDto>;

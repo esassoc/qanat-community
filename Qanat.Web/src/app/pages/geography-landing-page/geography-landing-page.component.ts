@@ -1,13 +1,12 @@
 import { Component } from "@angular/core";
 import { Observable, of, switchMap, tap } from "rxjs";
 import { AuthenticationService } from "src/app/shared/services/authentication.service";
-import { UserService } from "src/app/shared/generated/api/user.service";
 import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
 import { GeographyLandingPageDto } from "src/app/shared/generated/model/geography-landing-page-dto";
-import { GeographyDto, UserDto } from "src/app/shared/generated/model/models";
+import { GeographyDto, GeographyPublicDto, UserDto } from "src/app/shared/generated/model/models";
 import { ActivatedRoute, RouterLink } from "@angular/router";
 import { CustomRichTextComponent } from "../../shared/components/custom-rich-text/custom-rich-text.component";
-import { NgIf, NgClass, AsyncPipe } from "@angular/common";
+import { NgClass, AsyncPipe } from "@angular/common";
 import { GeographyLandingPageHeaderComponent } from "src/app/shared/components/geography-landing-page-header/geography-landing-page-header.component";
 import { GeographyPromoCardComponent } from "src/app/shared/components/geography-promo-card/geography-promo-card.component";
 import { IconComponent } from "src/app/shared/components/icon/icon.component";
@@ -15,14 +14,13 @@ import { GeographyWidePromoCardComponent } from "src/app/shared/components/geogr
 import { RichLinkComponent } from "src/app/shared/components/rich-link/rich-link.component";
 import { PublicService } from "src/app/shared/generated/api/public.service";
 import { routeParams } from "src/app/app.routes";
+import { GeographyService } from "src/app/shared/generated/api/geography.service";
 
 @Component({
     selector: "geography-landing-page",
     templateUrl: "./geography-landing-page.component.html",
     styleUrls: ["./geography-landing-page.component.scss"],
-    standalone: true,
     imports: [
-        NgIf,
         GeographyLandingPageHeaderComponent,
         CustomRichTextComponent,
         GeographyPromoCardComponent,
@@ -36,24 +34,29 @@ import { routeParams } from "src/app/app.routes";
 })
 export class GeographyLandingPageComponent {
     public CustomRichTextTypeEnum = CustomRichTextTypeEnum;
-    geography$: Observable<GeographyDto>;
+    geography$: Observable<GeographyPublicDto>;
     public landingPageDto$: Observable<GeographyLandingPageDto>;
     currentUser: UserDto = null;
     public hasUserCompletedSetUp: boolean;
     public geography: GeographyDto;
 
-    constructor(private authenticationService: AuthenticationService, private userService: UserService, private publicService: PublicService, private route: ActivatedRoute) {}
+    constructor(
+        private authenticationService: AuthenticationService,
+        private geographyService: GeographyService,
+        private publicService: PublicService,
+        private route: ActivatedRoute
+    ) {}
 
     ngOnInit(): void {
         const geographyName = this.route.snapshot.paramMap.get(routeParams.geographyName);
-        this.geography$ = this.publicService.publicGeographiesNameGeographyNameGet(geographyName).pipe(tap((geography) => (this.geography = geography)));
+        this.geography$ = this.publicService.getGeographyByNamePublic(geographyName).pipe(tap((geography) => (this.geography = geography)));
         this.landingPageDto$ = of(this.authenticationService.isAuthenticated()).pipe(
             switchMap((authenticated) => {
                 if (authenticated) {
                     return this.authenticationService.currentUserSetObservable.pipe(
                         switchMap((user) => {
                             this.currentUser = user;
-                            return this.userService.geographiesGeographyIDLandingPageGet(this.geography.GeographyID);
+                            return this.geographyService.getNumberOfWellsAndParcelsRegisteredToUserGeography(this.geography.GeographyID);
                         }),
                         tap((x) => {
                             this.hasUserCompletedSetUp = this.geography.WellRegistryEnabled

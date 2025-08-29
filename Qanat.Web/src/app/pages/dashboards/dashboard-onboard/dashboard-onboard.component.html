@@ -2,10 +2,12 @@
     <aside class="sidebar">
         <div class="sidebar-header">
             <h5 class="sidebar-title">
-                <a routerLink="/claim-water-accounts" *ngIf="geography$ | async as geography">
-                    <geography-logo [geographyID]="geography.GeographyID"></geography-logo>
-                    <span class="sidebar-title__label">{{ geography.GeographyDisplayName }}</span>
-                </a>
+                @if (geography$ | async; as geography) {
+                    <a routerLink="/claim-water-accounts">
+                        <geography-logo [geographyID]="geography.GeographyID"></geography-logo>
+                        <span class="sidebar-title__label">{{ geography.GeographyDisplayName }}</span>
+                    </a>
+                }
             </h5>
         </div>
 

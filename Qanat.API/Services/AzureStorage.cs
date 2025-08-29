@@ -74,7 +74,7 @@ public class AzureStorage : IAzureStorage
                 // Add data to variables in order to return a BlobDto
                 var contentType = content.Value.Details.ContentType;
 
-                // Create new BlobDto with blob data from variables
+                // CreateAsync new BlobDto with blob data from variables
                 return new BlobDto { Content = data, Name = blobFilename, ContentType = contentType };
             }
         }
@@ -94,7 +94,7 @@ public class AzureStorage : IAzureStorage
         // Get a reference to a container named in appsettings.json
         var container = new BlobContainerClient(_storageConnectionString, containerName);
 
-        // Create a new list object for 
+        // CreateAsync a new list object for 
         var files = new List<BlobDto>();
 
         await foreach (var file in container.GetBlobsAsync())
@@ -118,7 +118,7 @@ public class AzureStorage : IAzureStorage
 
     public async Task<BlobResponseDto> UploadAsync(string containerName, string blobFilename, Stream data)
     {
-        // Create new upload response object that we can return to the requesting method
+        // CreateAsync new upload response object that we can return to the requesting method
         BlobResponseDto response = new();
 
         // Get a reference to a container named in appsettings.json and then create it
@@ -169,12 +169,12 @@ public class AzureStorage : IAzureStorage
     {
         // Get a reference to a container named in appsettings.json and then create it
         var container = new BlobContainerClient(_storageConnectionString, containerName);
-        // Create new upload response object that we can return to the requesting method
+        // CreateAsync new upload response object that we can return to the requesting method
         BlobResponseDto response = new();
 
         try
         {
-            // Create a BlobClient representing the source blob to copy.
+            // CreateAsync a BlobClient representing the source blob to copy.
             var sourceBlob = container.GetBlobClient(originalBlobName);
 
             // Ensure that the source blob exists.
@@ -193,7 +193,7 @@ public class AzureStorage : IAzureStorage
                 // Start the copy operation.
                 await destBlob.StartCopyFromUriAsync(sourceBlob.Uri);
 
-                // Update the source blob's properties.
+                // UpdateAsync the source blob's properties.
                 BlobProperties sourceProperties = await sourceBlob.GetPropertiesAsync();
 
                 if (sourceProperties.LeaseState == LeaseState.Leased)

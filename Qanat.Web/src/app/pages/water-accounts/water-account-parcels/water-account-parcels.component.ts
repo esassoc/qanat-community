@@ -4,33 +4,29 @@ import { routeParams } from "src/app/app.routes";
 import { Observable, forkJoin } from "rxjs";
 import { WaterAccountService } from "src/app/shared/generated/api/water-account.service";
 import { WaterAccountDto } from "src/app/shared/generated/model/water-account-dto";
-import { AllocationPlanMinimalDto, ExternalMapLayerDto, ParcelDetailDto, ZoneGroupMinimalDto } from "src/app/shared/generated/model/models";
+import { AllocationPlanMinimalDto, ExternalMapLayerSimpleDto, ParcelDetailDto, ZoneGroupMinimalDto } from "src/app/shared/generated/model/models";
 import { map, switchMap, tap } from "rxjs/operators";
 import { ColDef, GridApi, GridReadyEvent, SelectionChangedEvent } from "ag-grid-community";
 import { UtilityFunctionsService } from "src/app/shared/services/utility-functions.service";
 import { ZoneGroupService } from "src/app/shared/generated/api/zone-group.service";
-import { NgIf, AsyncPipe, NgFor } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { QanatGridComponent } from "src/app/shared/components/qanat-grid/qanat-grid.component";
-import { WaterAccountParcelService } from "src/app/shared/generated/api/water-account-parcel.service";
 import { ModelNameTagComponent } from "src/app/shared/components/name-tag/name-tag.component";
 import { QanatMapComponent, QanatMapInitEvent } from "src/app/shared/components/leaflet/qanat-map/qanat-map.component";
 import { ParcelLayerComponent } from "src/app/shared/components/leaflet/layers/parcel-layer/parcel-layer.component";
 import { LoadingDirective } from "src/app/shared/directives/loading.directive";
 import { Map, layerControl } from "leaflet";
 import { ExternalMapLayerService } from "src/app/shared/generated/api/external-map-layer.service";
-import { GsaBoundariesComponent } from "src/app/shared/components/leaflet/layers/gsa-boundaries/gsa-boundaries.component";
 import { ZoneGroupLayerComponent } from "src/app/shared/components/leaflet/layers/zone-group-layer/zone-group-layer.component";
 import { GeographyExternalMapLayerComponent } from "src/app/shared/components/leaflet/layers/geography-external-map-layer/geography-external-map-layer.component";
-import { MapLayerBase } from "../../../shared/components/leaflet/layers/map-layer-base.component";
+import { WaterAccountParcelByWaterAccountService } from "src/app/shared/generated/api/water-account-parcel-by-water-account.service";
 
 @Component({
     selector: "water-account-parcels",
     templateUrl: "./water-account-parcels.component.html",
     styleUrls: ["./water-account-parcels.component.scss"],
-    standalone: true,
     imports: [
-        NgIf,
         PageHeaderComponent,
         ModelNameTagComponent,
         RouterLink,
@@ -39,11 +35,8 @@ import { MapLayerBase } from "../../../shared/components/leaflet/layers/map-laye
         QanatMapComponent,
         ParcelLayerComponent,
         LoadingDirective,
-        GsaBoundariesComponent,
         ZoneGroupLayerComponent,
         GeographyExternalMapLayerComponent,
-        MapLayerBase,
-        NgFor,
     ],
 })
 export class WaterAccountParcelsComponent implements OnInit, OnDestroy {
@@ -57,7 +50,7 @@ export class WaterAccountParcelsComponent implements OnInit, OnDestroy {
     public waterAccount$: Observable<WaterAccountDto>;
     public allocationPlans$: Observable<AllocationPlanMinimalDto[]>;
     public zoneGroups: ZoneGroupMinimalDto[];
-    public externalMapLayers: ExternalMapLayerDto[];
+    public externalMapLayers: ExternalMapLayerSimpleDto[];
 
     public columnDefs: ColDef<any>[];
     public isLoading = true;
@@ -79,7 +72,7 @@ export class WaterAccountParcelsComponent implements OnInit, OnDestroy {
 
     constructor(
         private waterAccountService: WaterAccountService,
-        private waterAccountParcelService: WaterAccountParcelService,
+        private waterAccountParcelByWaterAccountService: WaterAccountParcelByWaterAccountService,
         private route: ActivatedRoute,
         private utilityFunctionsService: UtilityFunctionsService,
         private zoneGroupService: ZoneGroupService,
@@ -90,7 +83,7 @@ export class WaterAccountParcelsComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         this.waterAccount$ = this.route.paramMap.pipe(
             map((paramMap) => parseInt(paramMap.get(routeParams.waterAccountID))),
-            switchMap((waterAccountID) => this.waterAccountService.waterAccountsWaterAccountIDGet(waterAccountID)),
+            switchMap((waterAccountID) => this.waterAccountService.getByIDWaterAccount(waterAccountID)),
             tap((waterAccount) => {
                 this.geographyID = waterAccount.Geography.GeographyID;
 
@@ -98,9 +91,9 @@ export class WaterAccountParcelsComponent implements OnInit, OnDestroy {
                     map((paramMap) => parseInt(paramMap.get(routeParams.waterAccountID))),
                     switchMap((waterAccountID) =>
                         forkJoin({
-                            parcels: this.waterAccountParcelService.waterAccountsWaterAccountIDParcelsGet(waterAccountID),
-                            zoneGroups: this.zoneGroupService.geographiesGeographyIDZoneGroupsGet(this.geographyID),
-                            externalMapLayers: this.externalMapLayerService.geographiesGeographyIDExternalMapLayersGet(this.geographyID),
+                            parcels: this.waterAccountParcelByWaterAccountService.getWaterAccountParcelsWaterAccountParcelByWaterAccount(waterAccountID),
+                            zoneGroups: this.zoneGroupService.listZoneGroup(this.geographyID),
+                            externalMapLayers: this.externalMapLayerService.getExternalMapLayer(this.geographyID),
                         })
                     ),
                     tap(({ parcels, zoneGroups, externalMapLayers }) => {
@@ -115,7 +108,7 @@ export class WaterAccountParcelsComponent implements OnInit, OnDestroy {
                     map((x) => x.parcels)
                 );
 
-                this.allocationPlans$ = this.waterAccountService.waterAccountsWaterAccountIDAllocationPlansGet(waterAccount.WaterAccountID);
+                this.allocationPlans$ = this.waterAccountService.getAccountAllocationPlansByAccountIDWaterAccount(waterAccount.WaterAccountID);
             })
         );
     }

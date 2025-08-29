@@ -1,4 +1,3 @@
-import { CommonModule } from "@angular/common";
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, Output } from "@angular/core";
 import * as L from "leaflet";
 import { Map } from "leaflet";
@@ -7,8 +6,6 @@ import { WfsService } from "src/app/shared/services/wfs.service";
 import { ReplaySubject, Subscription, debounceTime } from "rxjs";
 @Component({
     selector: "highlighted-parcels-layer",
-    standalone: true,
-    imports: [CommonModule, MapLayerBase],
     templateUrl: "./highlighted-parcels-layer.component.html",
     styleUrls: ["./highlighted-parcels-layer.component.scss"],
 })
@@ -28,7 +25,22 @@ export class HighlightedParcelsLayerComponent extends MapLayerBase implements On
     get highlightedParcelIDs(): number[] {
         return this._highlightedParcelIDs;
     }
-    public geoJsonStyle = { color: "#ffff00" };
+    private defaultStyle = {
+        color: "#3388ff",
+        weight: 2,
+        opacity: 0.65,
+        fillOpacity: 0.1,
+        zIndex: 9999,
+    };
+
+    private highlightStyle = {
+        color: "#fcfc12",
+        weight: 2,
+        opacity: 0.65,
+        fillOpacity: 0.1,
+        zIndex: 9999,
+    };
+
     public layer;
     private updateSubscriptionDebounoced = Subscription.EMPTY;
 
@@ -66,10 +78,15 @@ export class HighlightedParcelsLayerComponent extends MapLayerBase implements On
 
         let cql_filter = `GeographyID = ${this.geographyID}`;
         cql_filter += this.highlightedParcelIDs.length > 0 ? ` and ParcelID in(${this.highlightedParcelIDs.join(",")})` : " and ParcelID is null";
+        cql_filter += ` and IsCurrent = 1`;
 
         this.wfsService.getGeoserverWFSLayer(null, "Qanat:AllParcels", cql_filter).subscribe((response) => {
             if (response.length > 0) {
-                const geoJson = L.geoJSON(response, { style: this.geoJsonStyle }).on("click", (e) => this.clickedOnHighlightedParcel(e));
+                const geoJson = L.geoJSON(response, { style: this.highlightStyle })
+                    .on("click", (e) => this.clickedOnHighlightedParcel(e))
+                    .bindPopup((layer) => {
+                        return `Parcel (<b>${layer.feature.properties.ParcelNumber}</b>)`;
+                    });
                 geoJson.addTo(this.layer);
                 const bounds = this.layer.getBounds();
                 this.map.fitBounds(bounds);

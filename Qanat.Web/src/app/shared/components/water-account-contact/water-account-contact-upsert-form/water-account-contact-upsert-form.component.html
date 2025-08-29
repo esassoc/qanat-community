@@ -1,0 +1,33 @@
+<form action="" class="form grid-8" [formGroup]="formGroup">
+    <form-field class="g-col-8" [formControl]="formGroup.controls.ContactName" fieldLabel="Contact Name" placeholder="Contact Name" [type]="FormFieldType.Text"></form-field>
+    <form-field
+        class="g-col-4"
+        [formControl]="formGroup.controls.ContactPhoneNumber"
+        fieldLabel="Phone Number"
+        mask="(000) 000-0000"
+        placeholder="e.g. (123) 456-7890"
+        [type]="FormFieldType.Text"></form-field>
+    <form-field class="g-col-4" [formControl]="formGroup.controls.ContactEmail" fieldLabel="Email" placeholder="e.g. user@example.com" [type]="FormFieldType.Text"></form-field>
+    @if (showCommunicationPreferenceDropdown) {
+        <form-field
+            class="g-col-4"
+            [formControl]="formGroup.controls.PrefersPhysicalCommunication"
+            fieldLabel="Communication Preference"
+            [formInputOptions]="communicationPreferenceDropdownOptions"
+            [type]="FormFieldType.Select"></form-field>
+    }
+
+    <form-field [formControl]="formGroup.controls.Address" fieldLabel="Address" placeholder="Address" [type]="FormFieldType.Text"></form-field>
+    <form-field [formControl]="formGroup.controls.SecondaryAddress" fieldLabel="Secondary Address" placeholder="Secondary Address" [type]="FormFieldType.Text"></form-field>
+    <form-field [formControl]="formGroup.controls.City" fieldLabel="City" placeholder="City" [type]="FormFieldType.Text" class="g-col-3"></form-field>
+    @if (stateDropdownOptions$ | async; as stateDropdownOptions) {
+        <form-field
+            [formControl]="formGroup.controls.State"
+            fieldLabel="State"
+            placeholder="State"
+            [type]="FormFieldType.Select"
+            [formInputOptions]="stateDropdownOptions"
+            class="g-col-2"></form-field>
+    }
+    <form-field [formControl]="formGroup.controls.ZipCode" fieldLabel="Zip Code" placeholder="Zip Code" [type]="FormFieldType.Text" class="g-col-3"></form-field>
+</form>

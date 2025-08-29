@@ -1,5 +1,5 @@
-import { AsyncPipe, DOCUMENT, NgIf } from "@angular/common";
-import { ChangeDetectorRef, Component, Inject, OnInit, QueryList, ViewChildren } from "@angular/core";
+import { AsyncPipe } from "@angular/common";
+import { ChangeDetectorRef, Component, Inject, OnInit, QueryList, ViewChildren, DOCUMENT } from "@angular/core";
 import { UntypedFormGroup, UntypedFormControl, Validators, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { Router, ActivatedRoute, RouterLink } from "@angular/router";
 import { Observable, switchMap, tap } from "rxjs";
@@ -13,7 +13,6 @@ import { PageHeaderComponent } from "src/app/shared/components/page-header/page-
 import { AlertDisplayComponent } from "src/app/shared/components/alert-display/alert-display.component";
 import { ButtonComponent } from "src/app/shared/components/button/button.component";
 import { CustomRichTextComponent } from "src/app/shared/components/custom-rich-text/custom-rich-text.component";
-import { IconComponent } from "src/app/shared/components/icon/icon.component";
 import { CurrentGeographyService } from "src/app/shared/services/current-geography.service";
 import { GeographyMinimalDto } from "src/app/shared/generated/model/models";
 import { GeographyService } from "src/app/shared/generated/api/geography.service";
@@ -22,8 +21,7 @@ import { GeographyService } from "src/app/shared/generated/api/geography.service
     selector: "reference-wells-upload",
     templateUrl: "./reference-wells-upload.component.html",
     styleUrls: ["./reference-wells-upload.component.scss"],
-    standalone: true,
-    imports: [AsyncPipe, PageHeaderComponent, AlertDisplayComponent, FormsModule, ReactiveFormsModule, NgIf, ButtonComponent, CustomRichTextComponent, IconComponent, RouterLink],
+    imports: [AsyncPipe, PageHeaderComponent, AlertDisplayComponent, FormsModule, ReactiveFormsModule, ButtonComponent, CustomRichTextComponent, RouterLink],
 })
 export class ReferenceWellsUploadComponent implements OnInit {
     @ViewChildren("fileInput") public fileInput: QueryList<any>;
@@ -61,7 +59,7 @@ export class ReferenceWellsUploadComponent implements OnInit {
         this.geography$ = this.route.params.pipe(
             switchMap((params) => {
                 const geographyName = params.geographyName;
-                return this.geographyService.geographiesGeographyNameGeographyNameMinimalGet(geographyName);
+                return this.geographyService.getByNameAsMinimalDtoGeography(geographyName);
             }),
             tap((geography) => {
                 this.currentGeographyService.setCurrentGeography(geography);
@@ -114,7 +112,7 @@ export class ReferenceWellsUploadComponent implements OnInit {
         }
 
         this.isLoadingSubmit = true;
-        this.wellService.geographiesGeographyIDUploadReferenceWellsPost(geography.GeographyID, this.gdbInputFile).subscribe(
+        this.wellService.uploadGDBAndParseFeatureClassesForReferenceWellsWell(geography.GeographyID, this.gdbInputFile).subscribe(
             (response) => {
                 this.isLoadingSubmit = false;
                 this.router.navigate(["../"], { relativeTo: this.route });

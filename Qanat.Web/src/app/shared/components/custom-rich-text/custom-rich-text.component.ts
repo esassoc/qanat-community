@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ViewChild, AfterViewChecked, ChangeDetectorRef, OnDestroy } from "@angular/core";
+import { Component, OnInit, Input, ViewChild, AfterViewChecked, ChangeDetectorRef, OnDestroy, OnChanges, SimpleChanges, ElementRef } from "@angular/core";
 import { AuthenticationService } from "src/app/shared/services/authentication.service";
 import { AlertService } from "../../services/alert.service";
 import { Alert } from "../../models/alert";
@@ -15,7 +15,7 @@ import { UserDto } from "../../generated/model/models";
 import { CustomRichTextService } from "../../generated/api/custom-rich-text.service";
 import { GeographyEnum } from "../../models/enums/geography.enum";
 import { FormsModule } from "@angular/forms";
-import { NgIf } from "@angular/common";
+
 import { LoadingDirective } from "../../directives/loading.directive";
 import { IconComponent } from "../icon/icon.component";
 import { PublicService } from "../../generated/api/public.service";
@@ -24,11 +24,12 @@ import { PublicService } from "../../generated/api/public.service";
     selector: "custom-rich-text",
     templateUrl: "./custom-rich-text.component.html",
     styleUrls: ["./custom-rich-text.component.scss"],
-    standalone: true,
-    imports: [LoadingDirective, NgIf, IconComponent, FormsModule, EditorComponent],
+    imports: [LoadingDirective, IconComponent, FormsModule, EditorComponent],
     providers: [{ provide: TINYMCE_SCRIPT_SRC, useValue: "tinymce/tinymce.min.js" }],
 })
-export class CustomRichTextComponent implements OnInit, AfterViewChecked, OnDestroy {
+export class CustomRichTextComponent implements OnInit, AfterViewChecked, OnDestroy, OnChanges {
+    @ViewChild("displayContent") private displayContent?: ElementRef<HTMLElement>;
+
     @Input() geographyID: number = null;
     public GeographyEnum = GeographyEnum;
     @Input() customRichTextTypeID: number;
@@ -70,9 +71,18 @@ export class CustomRichTextComponent implements OnInit, AfterViewChecked, OnDest
             this.currentUser = currentUser;
         });
 
-        this.publicService.publicCustomRichTextsCustomRichTextTypeIDGet(this.customRichTextTypeID, this.geographyID).subscribe((x) => {
+        this.publicService.getCustomRichTextPublic(this.customRichTextTypeID, this.geographyID).subscribe((x) => {
             this.loadCustomRichText(x);
         });
+    }
+
+    ngOnChanges(changes: SimpleChanges) {
+        if (changes.geographyID && changes.geographyID.currentValue) {
+            this.isLoading = true;
+            this.publicService.getCustomRichTextPublic(this.customRichTextTypeID, changes.geographyID.currentValue).subscribe((x) => {
+                this.loadCustomRichText(x);
+            });
+        }
     }
 
     ngOnDestroy(): void {
@@ -91,8 +101,23 @@ export class CustomRichTextComponent implements OnInit, AfterViewChecked, OnDest
             this.showTitle = true;
         }
 
+        this.runCodeHighlighting();
         this.isLoading = false;
         this.cdr.detectChanges();
+    }
+
+    private runCodeHighlighting() {
+        if (this.isEditing) {
+            return;
+        }
+        const prism = (window as any).Prism;
+        const host = this.displayContent?.nativeElement;
+        if (!prism || !host) {
+            return;
+        }
+
+        // Defer so [innerHTML] has committed
+        setTimeout(() => prism.highlightAllUnder(host), 0);
     }
 
     public showEditButton(): boolean {
@@ -111,7 +136,7 @@ export class CustomRichTextComponent implements OnInit, AfterViewChecked, OnDest
         this.isEditing = false;
         this.isLoading = true;
         const updateDto = new CustomRichTextSimpleDto({ CustomRichTextTitle: this.editedTitle, CustomRichTextContent: this.editedContent, GeographyID: this.geographyID });
-        this.customRichTextService.customRichTextCustomRichTextTypeIDPut(this.customRichTextTypeID, updateDto).subscribe(
+        this.customRichTextService.updateCustomRichTextCustomRichText(this.customRichTextTypeID, updateDto).subscribe(
             (x) => {
                 this.loadCustomRichText(x);
             },

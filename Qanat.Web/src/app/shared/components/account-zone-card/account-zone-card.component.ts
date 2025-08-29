@@ -3,7 +3,7 @@ import { GeographyDto, WaterAccountDto, ZoneGroupMinimalDto, ZoneMinimalDto } fr
 import { QanatMapComponent, QanatMapInitEvent } from "src/app/shared/components/leaflet/qanat-map/qanat-map.component";
 import { Control, Map } from "leaflet";
 import { RouterLink } from "@angular/router";
-import { AsyncPipe, NgIf } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { ZoneGroupLayerComponent } from "../leaflet/layers/zone-group-layer/zone-group-layer.component";
 import { Observable } from "rxjs";
 import { GeographyService } from "../../generated/api/geography.service";
@@ -12,8 +12,7 @@ import { GeographyService } from "../../generated/api/geography.service";
     selector: "account-zone-card",
     templateUrl: "./account-zone-card.component.html",
     styleUrls: ["./account-zone-card.component.scss"],
-    standalone: true,
-    imports: [AsyncPipe, NgIf, RouterLink, QanatMapComponent, ZoneGroupLayerComponent],
+    imports: [AsyncPipe, RouterLink, QanatMapComponent, ZoneGroupLayerComponent]
 })
 export class AccountZoneCardComponent implements OnInit, OnChanges {
     @Input() waterAccount: WaterAccountDto;
@@ -32,7 +31,7 @@ export class AccountZoneCardComponent implements OnInit, OnChanges {
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes && changes.waterAccount && changes.waterAccount.currentValue) {
-            this.geography$ = this.geographyService.geographiesGeographyIDGet(changes.waterAccount.currentValue.Geography.GeographyID);
+            this.geography$ = this.geographyService.getGeographyByIDGeography(changes.waterAccount.currentValue.Geography.GeographyID);
         }
     }
 

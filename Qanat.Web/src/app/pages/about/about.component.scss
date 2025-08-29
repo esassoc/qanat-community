@@ -39,8 +39,10 @@
     }
 
     &__photo {
+        padding-bottom: 1rem;
         @include desktop-small {
             grid-column: 2 / span 6;
+            padding-bottom: 0;
         }
     }
 
@@ -290,5 +292,22 @@
 
     .divider-header {
         padding-bottom: $spacing-600;
+    }
+}
+
+.video-walkthrough {
+    text-align: center;
+    padding-bottom: $spacing-700;
+}
+
+.video-thumbnail {
+    width: 100%;
+
+    a {
+        display: block;
+    }
+
+    img {
+        border-radius: $spacing-100;
     }
 }

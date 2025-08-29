@@ -5,8 +5,7 @@ import { NgClass } from "@angular/common";
     selector: "fresca-button",
     templateUrl: "./button.component.html",
     styleUrls: ["./button.component.scss"],
-    standalone: true,
-    imports: [NgClass],
+    imports: [NgClass]
 })
 export class ButtonComponent implements OnInit {
     @Input() type: string = "button";

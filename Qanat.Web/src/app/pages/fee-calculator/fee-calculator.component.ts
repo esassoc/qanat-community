@@ -1,4 +1,4 @@
-import { AsyncPipe, CurrencyPipe, DecimalPipe, JsonPipe, KeyValuePipe, NgClass, NgFor, NgIf } from "@angular/common";
+import { AsyncPipe, CurrencyPipe, DecimalPipe, JsonPipe, KeyValuePipe, NgClass } from "@angular/common";
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from "@angular/core";
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
@@ -29,10 +29,7 @@ import { ExpandCollapseDirective } from "src/app/shared/directives/expand-collap
 
 @Component({
     selector: "fee-calculator",
-    standalone: true,
     imports: [
-        NgIf,
-        NgFor,
         PageHeaderComponent,
         FormsModule,
         FormFieldComponent,
@@ -52,7 +49,7 @@ import { ExpandCollapseDirective } from "src/app/shared/directives/expand-collap
     ],
     templateUrl: "./fee-calculator.component.html",
     styleUrl: "./fee-calculator.component.scss",
-    changeDetection: ChangeDetectionStrategy.OnPush,
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FeeCalculatorComponent implements OnInit {
     public isLoadingInputs: boolean = true;
@@ -64,7 +61,7 @@ export class FeeCalculatorComponent implements OnInit {
 
     public inputFormGroup = new FormGroup<FeeCalculatorInputDtoForm>({
         WaterAccountID: FeeCalculatorInputDtoFormControls.WaterAccountID(),
-        ReportingYear: FeeCalculatorInputDtoFormControls.ReportingYear(),
+        ReportingPeriodID: FeeCalculatorInputDtoFormControls.ReportingPeriodID(),
         FeeStructureID: FeeCalculatorInputDtoFormControls.FeeStructureID(),
         SurfaceWaterDelivered: FeeCalculatorInputDtoFormControls.SurfaceWaterDelivered(),
         SurfaceWaterIrrigationEfficiency: FeeCalculatorInputDtoFormControls.SurfaceWaterIrrigationEfficiency(),
@@ -77,7 +74,8 @@ export class FeeCalculatorComponent implements OnInit {
     public mlrpIncentiveAcreControls: { [key: string]: FormControl } = {};
 
     public waterAccountOptions: FormInputOption[];
-    public yearOptions: FormInputOption[];
+    public reportingPeriodOptions: FormInputOption[];
+    public selectedReportingPeriodName: string;
     public feeStructureOptions: FormInputOption[];
     public selectedFeeStructure: FeeStructureDto;
 
@@ -104,7 +102,7 @@ export class FeeCalculatorComponent implements OnInit {
     ngOnInit() {
         this.route.params.subscribe((params) => {
             if (params && params.geographyName) {
-                this.inputs$ = this.feeCalculatorService.feeCalculatorGeographyNameInputsGet(params.geographyName).pipe(
+                this.inputs$ = this.feeCalculatorService.getFeeCalculatorInputsFeeCalculator(params.geographyName).pipe(
                     tap((inputs) => {
                         setTimeout(() => {
                             this.setUpControls(inputs);
@@ -146,19 +144,23 @@ export class FeeCalculatorComponent implements OnInit {
 
         this.inputFormGroup.get("WaterAccountID").setValue(inputs.InitialInputs.WaterAccountID);
         this.inputFormGroup.get("WaterAccountID").valueChanges.subscribe((waterAccountID: number) => {
-            this.updateSelectedWaterAccountID(waterAccountID);
+            if (waterAccountID) {
+                this.updateSelectedWaterAccountID(waterAccountID);
+            }
         });
 
-        this.yearOptions = inputs.Years.map((year) => {
+        this.reportingPeriodOptions = inputs.ReportingPeriods.map((year) => {
             return {
-                Value: year.Year,
+                Value: year.ReportingPeriodID,
                 Label: year.Name,
             } as FormInputOption;
         });
 
-        this.inputFormGroup.get("ReportingYear").setValue(inputs.InitialInputs.ReportingYear);
-        this.inputFormGroup.get("ReportingYear").valueChanges.subscribe((value) => {
-            this.updateSelectedReportingYear(value);
+        this.inputFormGroup.get("ReportingPeriodID").setValue(inputs.InitialInputs.ReportingPeriodID);
+        this.inputFormGroup.get("ReportingPeriodID").valueChanges.subscribe((value) => {
+            if (value) {
+                this.updateSelectedReportingPeriodID(value);
+            }
         });
 
         this.feeStructureOptions = inputs.FeeStructures.map((fs) => {
@@ -170,16 +172,21 @@ export class FeeCalculatorComponent implements OnInit {
 
         this.cdr.markForCheck();
         this.inputFormGroup.get("FeeStructureID").setValue(inputs.InitialInputs.FeeStructureID);
+
+        this.selectedFeeStructure = inputs.FeeStructures.find((x) => x.FeeStructureID === inputs.InitialInputs.FeeStructureID);
+
         this.inputFormGroup.get("FeeStructureID").valueChanges.subscribe((value) => {
-            this.inputsTS.InitialInputs.FeeStructureID = value;
+            if (value) {
+                this.inputsTS.InitialInputs.FeeStructureID = value;
 
-            let feeStructure = this.inputsTS.FeeStructures.find((x) => x.FeeStructureID === value);
-            if (feeStructure) {
-                this.selectedFeeStructure = feeStructure;
+                let feeStructure = this.inputsTS.FeeStructures.find((x) => x.FeeStructureID === value);
+                if (feeStructure) {
+                    this.selectedFeeStructure = feeStructure;
+                }
+
+                this.calculate();
+                this.cdr.markForCheck();
             }
-
-            this.calculate();
-            this.cdr.markForCheck();
         });
 
         if (this.inputsTS.InitialInputs.SurfaceWaterDelivered) {
@@ -244,9 +251,6 @@ export class FeeCalculatorComponent implements OnInit {
         });
 
         this.calculate(true);
-
-        //this.updateMLRPControls();
-        //this.updateWaterMeasurements();
     }
 
     private updateMLRPControls() {
@@ -255,8 +259,7 @@ export class FeeCalculatorComponent implements OnInit {
             let control = this.inputFormGroup.get(`${mlrp.Name}`);
             let mlrpIncentiveControl: FormControl<number>;
 
-            let acresLimit = parseFloat(this.decimalPipe.transform(this.output.BaselineScenario.Acres, "1.2-2"));
-
+            let acresLimit = parseFloat(this.decimalPipe.transform(this.output.BaselineScenario.Acres, "1.2-2")?.replace(/,/g, "") || "0"); //MK 5/20/2025: parseFloat doesn't handle commas, so we need to remove them first.
             if (control instanceof FormControl) {
                 mlrpIncentiveControl = control as FormControl<number>;
                 mlrpIncentiveControl.setValue(0);
@@ -298,15 +301,20 @@ export class FeeCalculatorComponent implements OnInit {
         this.cdr.markForCheck();
     }
 
-    private updateSelectedReportingYear(reportingYear: number) {
-        this.inputsTS.InitialInputs.ReportingYear = reportingYear;
+    private updateSelectedReportingPeriodID(reportingPeriodID: number) {
+        this.inputsTS.InitialInputs.ReportingPeriodID = reportingPeriodID;
         this.calculate();
         this.updateWaterMeasurements();
+
+        let selectedOption = this.reportingPeriodOptions.find((x) => x.Value === reportingPeriodID);
+        if (selectedOption) {
+            this.selectedReportingPeriodName = selectedOption.Label;
+        }
     }
 
     private updateWaterMeasurements() {
         this.waterAccountService
-            .waterAccountsWaterAccountIDParcelSuppliesYearsYearMonthlyUsageSummaryGet(this.inputsTS.InitialInputs.WaterAccountID, this.inputsTS.InitialInputs.ReportingYear)
+            .getMonthlyUsageSummaryForWaterAccountAndReportingPeriodWaterAccount(this.inputsTS.InitialInputs.WaterAccountID, this.inputsTS.InitialInputs.ReportingPeriodID)
             .subscribe((result) => {
                 this.waterMeasurements = result;
                 this.cdr.markForCheck();
@@ -316,14 +324,14 @@ export class FeeCalculatorComponent implements OnInit {
     private calculate(updateForm: boolean = false) {
         let inputs = new FeeCalculatorInputDto({
             WaterAccountID: this.inputsTS.InitialInputs.WaterAccountID,
-            ReportingYear: this.inputsTS.InitialInputs.ReportingYear,
+            ReportingPeriodID: this.inputsTS.InitialInputs.ReportingPeriodID,
             FeeStructureID: this.inputsTS.InitialInputs.FeeStructureID,
             SurfaceWaterDelivered: this.inputFormGroup.get("SurfaceWaterDelivered").value,
             SurfaceWaterIrrigationEfficiency: this.inputFormGroup.get("SurfaceWaterIrrigationEfficiency").value,
             MLRPIncentives: [...this.inputsTS.MLRPIncentives],
         });
 
-        this.feeCalculatorService.feeCalculatorGeographyNameCalculatePost(this.route.snapshot.params.geographyName, inputs).subscribe((result) => {
+        this.feeCalculatorService.calculateFeeFeeCalculator(this.route.snapshot.params.geographyName, inputs).subscribe((result) => {
             this.output = result;
             this.mergeFeeStructureReportData();
             this.isLoadingOutput = false;

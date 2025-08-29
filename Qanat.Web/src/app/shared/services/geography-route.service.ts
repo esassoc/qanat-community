@@ -17,12 +17,16 @@ export class GeographyRouteService implements OnDestroy {
     private geographiesSub: Subscription = Subscription.EMPTY;
     private routerSub: Subscription = Subscription.EMPTY;
 
-    constructor(private route: ActivatedRoute, private publicService: PublicService, private router: Router) {
+    constructor(
+        private route: ActivatedRoute,
+        private publicService: PublicService,
+        private router: Router
+    ) {
         this.fetchGeographies();
     }
 
     fetchGeographies(): void {
-        this.geographiesSub = this.publicService.publicGeographiesGet().subscribe((geographies) => {
+        this.geographiesSub = this.publicService.geographiesListPublic().subscribe((geographies) => {
             this.geographies = geographies;
             this.routerSub = this.router.events
                 .pipe(

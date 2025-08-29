@@ -18,9 +18,7 @@ namespace Qanat.EFModels.Entities
         public static readonly OpenETRasterCalculationResultTypeFailed Failed = OpenETRasterCalculationResultTypeFailed.Instance;
 
         public static readonly List<OpenETRasterCalculationResultType> All;
-        public static readonly List<OpenETRasterCalculationResultTypeSimpleDto> AllAsSimpleDto;
         public static readonly ReadOnlyDictionary<int, OpenETRasterCalculationResultType> AllLookupDictionary;
-        public static readonly ReadOnlyDictionary<int, OpenETRasterCalculationResultTypeSimpleDto> AllAsSimpleDtoLookupDictionary;
 
         /// <summary>
         /// Static type constructor to coordinate static initialization order
@@ -28,9 +26,7 @@ namespace Qanat.EFModels.Entities
         static OpenETRasterCalculationResultType()
         {
             All = new List<OpenETRasterCalculationResultType> { NotStarted, InProgress, Succeeded, Failed };
-            AllAsSimpleDto = new List<OpenETRasterCalculationResultTypeSimpleDto> { NotStarted.AsSimpleDto(), InProgress.AsSimpleDto(), Succeeded.AsSimpleDto(), Failed.AsSimpleDto() };
             AllLookupDictionary = new ReadOnlyDictionary<int, OpenETRasterCalculationResultType>(All.ToDictionary(x => x.OpenETRasterCalculationResultTypeID));
-            AllAsSimpleDtoLookupDictionary = new ReadOnlyDictionary<int, OpenETRasterCalculationResultTypeSimpleDto>(AllAsSimpleDto.ToDictionary(x => x.OpenETRasterCalculationResultTypeID));
         }
 
         /// <summary>

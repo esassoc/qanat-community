@@ -1,0 +1,23 @@
+@use "/src/scss/abstracts" as *;
+
+.page-wrapper {
+    padding: $spacing-600;
+
+    ::ng-deep {
+        .page-header {
+            .name-tag {
+                top: -5px;
+                position: relative;
+            }
+        }
+    }
+    .page-body.meter-reading-page-body {
+        gap: 0;
+    }
+}
+
+.geography-selector {
+    .field {
+        width: $spacing-950;
+    }
+}

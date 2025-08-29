@@ -1,36 +1,30 @@
-import { Component, ComponentRef } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { DomSanitizer } from "@angular/platform-browser";
 import { ConfirmOptions } from "src/app/shared/services/confirm/confirm-options";
-import { IModal, ModalService } from "../../services/modal/modal.service";
-import { ModalComponent } from "../modal/modal.component";
-import { NgIf } from "@angular/common";
-import { ConfirmState } from "../../services/confirm/confirm-state";
-import { IconComponent } from "../icon/icon.component";
+
+import { DialogRef } from "@ngneat/dialog";
+import { TrustHtmlPipe } from "../../pipes/trust-html.pipe";
 
 @Component({
     selector: "confirm-modal",
     templateUrl: "./confirm-modal.component.html",
     styleUrls: ["./confirm-modal.component.scss"],
     standalone: true,
-    imports: [NgIf, IconComponent],
+    imports: [TrustHtmlPipe],
 })
-export class ConfirmModalComponent implements IModal {
-    modalComponentRef: ComponentRef<ModalComponent>;
+export class ConfirmModalComponent {
+    public ref: DialogRef<ConfirmOptions, boolean> = inject(DialogRef);
     modalContext: ConfirmOptions;
 
-    constructor(
-        private state: ConfirmState,
-        public sanitizer: DomSanitizer,
-        private modalService: ModalService
-    ) {
-        this.modalContext = state.options;
+    constructor(public sanitizer: DomSanitizer) {
+        this.modalContext = this.ref.data;
     }
 
     close() {
-        this.modalService.close(this.modalComponentRef, false);
+        this.ref.close(false);
     }
 
     save() {
-        this.modalService.close(this.modalComponentRef, true);
+        this.ref.close(true);
     }
 }

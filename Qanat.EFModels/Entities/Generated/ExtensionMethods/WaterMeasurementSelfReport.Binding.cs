@@ -7,7 +7,7 @@ namespace Qanat.EFModels.Entities
     public partial class WaterMeasurementSelfReport
     {
         public int PrimaryKey => WaterMeasurementSelfReportID;
-        public WaterMeasurementSelfReportStatus WaterMeasurementSelfReportStatus => WaterMeasurementSelfReportStatus.AllLookupDictionary[WaterMeasurementSelfReportStatusID];
+        public SelfReportStatus WaterMeasurementSelfReportStatus => SelfReportStatus.AllLookupDictionary[WaterMeasurementSelfReportStatusID];
 
         public static class FieldLengths
         {

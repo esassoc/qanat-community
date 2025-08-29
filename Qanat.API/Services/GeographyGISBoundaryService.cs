@@ -2,17 +2,14 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NetTopologySuite.Geometries;
-using NetTopologySuite.IO;
-using Newtonsoft.Json;
 using Qanat.API.Models;
 using Qanat.API.Services.OpenET;
 using Qanat.EFModels.Entities;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Threading.Tasks;
 namespace Qanat.API.Services;
 
@@ -77,17 +74,9 @@ public class GeographyGISBoundaryService
         var queryString = QueryHelpers.AddQueryString("arcgis/rest/services/Boundaries/i03_Groundwater_Sustainability_Agencies/MapServer/0/query?where=", query);
         try
         {
+            // todo: should be using FeatureCollection instead of GSAGeoJson
             var response = await _httpClient.GetAsync(queryString);
-            var responseText = await response.Content.ReadAsStreamAsync();
-
-            using var streamReader = new StreamReader(responseText);
-            using var jsonReader = new JsonTextReader(streamReader);
-
-            var scale = Math.Pow(10, 14);
-            var geometryFactory = new GeometryFactory(new PrecisionModel(scale), 4326);
-            var reader = new GeoJsonReader(geometryFactory, new JsonSerializerSettings());
-            var featureCollection = reader.Read<GSAGeoJson>(jsonReader);
-
+            var featureCollection = await response.Content.ReadFromJsonAsync<GSAGeoJson>();
             return featureCollection;
         }
         catch (Exception e)

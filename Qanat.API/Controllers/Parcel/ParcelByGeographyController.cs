@@ -22,31 +22,15 @@ namespace Qanat.API.Controllers;
 [ApiController]
 [RightsChecker]
 [Route("geographies/{geographyID}/parcels")]
-public class ParcelByGeographyController : SitkaController<ParcelByGeographyController>
+public class ParcelByGeographyController(QanatDbContext dbContext, ILogger<ParcelByGeographyController> logger, IOptions<QanatConfiguration> qanatConfiguration, FileService fileService, GDALAPIService gdalApiService, HierarchyContext hierarchyContext, [FromServices] UserDto callingUser)
+    : SitkaController<ParcelByGeographyController>(dbContext, logger, qanatConfiguration)
 {
-    private readonly FileService _fileService;
-    private readonly GDALAPIService _gdalApiService;
-    private readonly HierarchyContext _hierarchyContext;
-    private readonly UserDto _callingUser;
-
-    public ParcelByGeographyController(QanatDbContext dbContext, ILogger<ParcelByGeographyController> logger, IOptions<QanatConfiguration> qanatConfiguration, FileService fileService, GDALAPIService gdalApiService, HierarchyContext hierarchyContext, [FromServices] UserDto callingUser)
-        : base(dbContext, logger, qanatConfiguration)
-    {
-        _fileService = fileService;
-        _gdalApiService = gdalApiService;
-        _hierarchyContext = hierarchyContext;
-        _callingUser = callingUser;
-    }
-
     [HttpGet]
     [EntityNotFound(typeof(Geography), "geographyID")]
     [WithGeographyRolePermission(PermissionEnum.ParcelRights, RightsEnum.Read)]
-    public ActionResult<List<ParcelIndexGridDto>> List([FromRoute] int geographyID)
+    public ActionResult<List<ParcelIndexGridDto>> ListByGeographyID([FromRoute] int geographyID)
     {
-        var parcelIndexGridDtos = _dbContext.vParcelDetaileds.AsNoTracking()
-            .Where(x => x.GeographyID == geographyID)
-            .Select(x => x.AsIndexGridDto()).ToList();
-
+        var parcelIndexGridDtos = Parcels.ListByGeographyIDAsIndexGridDtos(_dbContext, geographyID);
         return Ok(parcelIndexGridDtos);
     }
 
@@ -57,12 +41,42 @@ public class ParcelByGeographyController : SitkaController<ParcelByGeographyCont
     {
         var user = UserContext.GetUserFromHttpContext(_dbContext, HttpContext);
 
-        var hasPermission = new WithGeographyRolePermission(PermissionEnum.ParcelRights, RightsEnum.Read).HasPermission(user, _hierarchyContext);
+        var hasPermission = new WithGeographyRolePermission(PermissionEnum.ParcelRights, RightsEnum.Read).HasPermission(user, hierarchyContext);
         var parcelIndexGridDtos = hasPermission
             ? Parcels.ListByGeographyIDAsIndexGridDtos(_dbContext, geographyID)
             : Parcels.ListByGeographyIDAndUserIDAsIndexGridDtos(_dbContext, geographyID, user.UserID);
 
         return Ok(parcelIndexGridDtos);
+    }
+
+    [HttpGet("current-user/by-reporting-period/{reportingPeriodID}")]
+    [EntityNotFound(typeof(Geography), "geographyID")]
+    [EntityNotFound(typeof(ReportingPeriod), "reportingPeriodID")]
+    [AuthenticatedWithUser]
+    public ActionResult<List<ParcelIndexGridDto>> ListByGeographyIDByReportingPeriodForCurrentUser([FromRoute] int geographyID, [FromRoute] int reportingPeriodID)
+    {
+        var user = UserContext.GetUserFromHttpContext(_dbContext, HttpContext);
+
+        var hasPermission = new WithGeographyRolePermission(PermissionEnum.ParcelRights, RightsEnum.Read).HasPermission(user, hierarchyContext);
+        var parcelIndexGridDtos = hasPermission
+            ? Parcels.ListByGeographyIDAndReportingPeriodAsIndexGridDtos(_dbContext, geographyID, reportingPeriodID)
+            : Parcels.ListByGeographyIDAndReportingPeriodIDAndUserIDAsIndexGridDtos(_dbContext, geographyID, reportingPeriodID, user.UserID);
+
+        return Ok(parcelIndexGridDtos);
+    }
+
+    [HttpGet("current-user/by-reporting-period/{reportingPeriodID}/display-links")]
+    [EntityNotFound(typeof(Geography), "geographyID")]
+    [EntityNotFound(typeof(ReportingPeriod), "reportingPeriodID")]
+    [AuthenticatedWithUser]
+    public ActionResult<List<ParcelLinkDisplayDto>> ListByGeographyIDByReportingPeriodForCurrentUserAsDisplayLink([FromRoute] int geographyID, [FromRoute] int reportingPeriodID)
+    {
+        var hasPermission = new WithGeographyRolePermission(PermissionEnum.ParcelRights, RightsEnum.Read).HasPermission(callingUser, hierarchyContext);
+        var parcelLinkDisplayDtos = hasPermission
+            ? Parcels.ListByGeographyIDAndReportingPeriodAsLinkDisplayDtos(_dbContext, geographyID, reportingPeriodID)
+            : Parcels.ListByGeographyIDAndReportingPeriodIDAndUserIDAsLinkDisplayDtos(_dbContext, geographyID, reportingPeriodID, callingUser.UserID);
+
+        return Ok(parcelLinkDisplayDtos);
     }
 
     [HttpPost("water-account/start-year")]
@@ -91,24 +105,12 @@ public class ParcelByGeographyController : SitkaController<ParcelByGeographyCont
         return Ok(parcelsWithGeoJSON);
     }
 
-    [HttpPost("latest-effective-year")]
-    [EntityNotFound(typeof(Geography), "geographyID")]
-    [WithGeographyRolePermission(PermissionEnum.ParcelRights, RightsEnum.Read)]
-    public ActionResult<int> GetLatestEffectiveYearForParcels([FromRoute] int geographyID, [FromBody] List<int> parcelIDs)
-    {
-        var latestEffectiveYear = _dbContext.WaterAccountParcels
-            .Where(x => x.GeographyID == geographyID && parcelIDs.Contains(x.ParcelID)).ToList()
-            .MaxBy(x => x.EffectiveYear)?.EffectiveYear;
-
-        return Ok(latestEffectiveYear);
-    }
-
     [HttpGet("water-supply/{year}")]
     [EntityNotFound(typeof(Geography), "geographyID")]
     [WithGeographyRolePermission(PermissionEnum.ParcelRights, RightsEnum.Read)]
     public async Task<ActionResult<IEnumerable<ParcelWaterSupplyDto>>> ListParcelsWithWaterSupplyByYearAndGeography([FromRoute] int geographyID, [FromRoute] int year)
     {
-        var reportingPeriod = await ReportingPeriods.GetByGeographyIDAndYearAsync(_dbContext, geographyID, year, _callingUser);
+        var reportingPeriod = await ReportingPeriods.GetByGeographyIDAndYearAsync(_dbContext, geographyID, year, callingUser);
         if (reportingPeriod == null)
         {
             var geography = await Geographies.GetByIDAsMinimalDtoAsync(_dbContext, geographyID);
@@ -169,7 +171,7 @@ public class ParcelByGeographyController : SitkaController<ParcelByGeographyCont
         try
         {
             var ogrInfoRequestDto = new OgrInfoRequestDto { BlobContainer = FileService.FileContainerName, CanonicalName = uploadedGdbDto.CanonicalName };
-            var featureClassInfos = await _gdalApiService.OgrInfoGdbToFeatureClassInfo(ogrInfoRequestDto);
+            var featureClassInfos = await gdalApiService.OgrInfoGdbToFeatureClassInfo(ogrInfoRequestDto);
             var uploadParcelLayerInfoDto = new UploadParcelLayerInfoDto()
             {
                 UploadedGdbID = uploadedGdbDto.UploadedGdbID,
@@ -209,7 +211,7 @@ public class ParcelByGeographyController : SitkaController<ParcelByGeographyCont
             return BadRequest("You have not uploaded a file for review. Please upload one.");
         }
 
-        var errors = UploadedGdbs.ValidateEffectiveYear(_dbContext, parcelLayerUpdateDto.EffectiveYear, geographyID);
+        var errors = await UploadedGdbs.ValidateEffectiveYearAsync(_dbContext, parcelLayerUpdateDto.EffectiveYear, geographyID);
         errors.ForEach(vm => { ModelState.AddModelError(vm.Type, vm.Message); });
         if (!ModelState.IsValid)
         {
@@ -244,7 +246,7 @@ public class ParcelByGeographyController : SitkaController<ParcelByGeographyCont
             }
         };
 
-        var geoJson = await _gdalApiService.Ogr2OgrGdbToGeoJson(apiRequest);
+        var geoJson = await gdalApiService.Ogr2OgrGdbToGeoJson(apiRequest);
         var parcelStagings = await GeoJsonSerializer.DeserializeFromFeatureCollection<ParcelStaging>(geoJson, GeoJsonSerializer.CreateGeoJSONSerializerOptions(14, 4), uploadedGdbDto.SRID);
 
         var results = ValidateParcelGdb(uploadedGdbDto, parcelStagings);
@@ -288,7 +290,7 @@ public class ParcelByGeographyController : SitkaController<ParcelByGeographyCont
         uploadedGdb.EffectiveYear = parcelLayerUpdateDto.EffectiveYear;
         await _dbContext.SaveChangesAsync();
 
-        var geographyCoordinateSystemWkt = await _gdalApiService.GdalSrsInfoGetWktForCoordinateSystem(geography.CoordinateSystem);
+        var geographyCoordinateSystemWkt = await gdalApiService.GdalSrsInfoGetWktForCoordinateSystem(geography.CoordinateSystem);
 
         foreach (var parcelStaging in parcelStagings)
         {
@@ -363,11 +365,11 @@ public class ParcelByGeographyController : SitkaController<ParcelByGeographyCont
         var uploadedGdb = await UploadedGdbs.CreateNew(_dbContext, user.UserID, geographyID);
         await using (var stream = uploadedGdbRequestDto.File.OpenReadStream())
         {
-            await _fileService.SaveFileStreamToAzureBlobStorage(uploadedGdb.CanonicalName, stream);
+            await fileService.SaveFileStreamToAzureBlobStorage(uploadedGdb.CanonicalName, stream);
         }
 
         var ogrInfoRequestDto = new OgrInfoRequestDto { BlobContainer = FileService.FileContainerName, CanonicalName = uploadedGdb.CanonicalName };
-        var srid = await _gdalApiService.OgrInfoGdbGetSRID(ogrInfoRequestDto);
+        var srid = await gdalApiService.OgrInfoGdbGetSRID(ogrInfoRequestDto);
 
         uploadedGdb.SRID = srid;
         await _dbContext.SaveChangesAsync();
@@ -437,59 +439,28 @@ public class ParcelByGeographyController : SitkaController<ParcelByGeographyCont
         return Ok();
     }
 
-    [HttpGet("uploaded-gdb/latest")]
+    [HttpGet("uploaded-gdb/latest-upload-date")]
     [EntityNotFound(typeof(Geography), "geographyID")]
     [WithGeographyRolePermission(PermissionEnum.ParcelRights, RightsEnum.Read)]
-    public ActionResult<UploadedGdbSimpleDto> GetLatestFinalizedGDBUploadForGeography([FromRoute] int geographyID)
+    public ActionResult<UploadedGdbSimpleDto> GetLatestUploadedFinalizedGDBUploadForGeography([FromRoute] int geographyID)
     {
         var gdbUploadSimpleDto = _dbContext.UploadedGdbs.AsNoTracking()
             .Where(x => x.GeographyID == geographyID && x.Finalized).ToList()
             .MaxBy(x => x.UploadDate)?.AsSimpleDto();
 
         return (gdbUploadSimpleDto);
-
     }
 
-    [HttpPost("account")]
+    [HttpGet("uploaded-gdb/latest-effective-year")]
     [EntityNotFound(typeof(Geography), "geographyID")]
-    [WithGeographyRolePermission(PermissionEnum.ParcelRights, RightsEnum.Update)]
-    public async Task<IActionResult> ChangeOwnershipOfParcel([FromBody] ParcelOwnershipUpdateDto parcelOwnershipUpdateDto, [FromRoute] int geographyID)
+    [WithGeographyRolePermission(PermissionEnum.ParcelRights, RightsEnum.Read)]
+    public ActionResult<UploadedGdbSimpleDto> GetLatestEffectiveYearFinalizedGDBUploadForGeography([FromRoute] int geographyID)
     {
-        if (parcelOwnershipUpdateDto.ToBeInactivated)
-        {
-            var parcel = _dbContext.Parcels.Single(x => x.ParcelID == parcelOwnershipUpdateDto.ParcelID);
-            parcel.ParcelStatusID = (int)ParcelStatusEnum.Inactive;
+        var gdbUploadSimpleDto = _dbContext.UploadedGdbs.AsNoTracking()
+            .Where(x => x.GeographyID == geographyID && x.Finalized && x.EffectiveYear.HasValue).ToList()
+            .MaxBy(x => x.EffectiveYear)?.AsSimpleDto();
 
-            var parcelHistory = ParcelHistories.CreateNew(parcel, _callingUser.UserID, parcelOwnershipUpdateDto.EffectiveYear);
-            await _dbContext.ParcelHistories.AddAsync(parcelHistory);
-
-            await _dbContext.SaveChangesAsync();
-
-            await ParcelHistories.MarkAsReviewedByParcelIDs(_dbContext, [parcel.ParcelID]);
-
-            return Ok();
-        }
-
-        var accountParcel = _dbContext.WaterAccountParcels.SingleOrDefault(x => x.GeographyID == geographyID
-                                                                           && x.WaterAccountID == parcelOwnershipUpdateDto.WaterAccountID
-                                                                           && x.ParcelID == parcelOwnershipUpdateDto.ParcelID
-                                                                           && x.EffectiveYear == parcelOwnershipUpdateDto.EffectiveYear);
-        if (accountParcel != null)
-        {
-            return BadRequest("There is already a matching entry.");
-        }
-
-        await _dbContext.WaterAccountParcels.AddAsync(new WaterAccountParcel()
-        {
-            GeographyID = geographyID,
-            WaterAccountID = parcelOwnershipUpdateDto.WaterAccountID,
-            ParcelID = parcelOwnershipUpdateDto.ParcelID,
-            EffectiveYear = parcelOwnershipUpdateDto.EffectiveYear,
-        });
-
-        await _dbContext.SaveChangesAsync();
-
-        return Ok();
+        return (gdbUploadSimpleDto);
     }
 
     [HttpGet("{parcelID}/allocation-plans")]
@@ -500,7 +471,7 @@ public class ParcelByGeographyController : SitkaController<ParcelByGeographyCont
         var geographyAllocationPlan = GeographyAllocationPlanConfigurations.GetByGeographyID(_dbContext, geographyID);
         if (geographyAllocationPlan == null)
         {
-            return NotFound();
+            return Ok(new List<AllocationPlanManageDto>());
         }
 
         var parcelZoneIDs = _dbContext.ParcelZones
@@ -508,18 +479,14 @@ public class ParcelByGeographyController : SitkaController<ParcelByGeographyCont
             .Where(x => x.ParcelID == parcelID && x.Zone.ZoneGroupID == geographyAllocationPlan.ZoneGroupID)
             .Select(x => x.ZoneID).ToList();
 
-        var allocationPlans =
-            AllocationPlans.ListByGeographyIDAndZoneIDsAsSimpleDto(_dbContext, geographyID, parcelZoneIDs);
-
-        var allocationPlanManageDtos =
-            AllocationPlans.GetAllocationPlanManageDtos(_dbContext, allocationPlans.Select(x => x.AllocationPlanID));
-
+        var allocationPlans = AllocationPlans.ListByGeographyIDAndZoneIDsAsSimpleDto(_dbContext, geographyID, parcelZoneIDs);
+        var allocationPlanManageDtos = AllocationPlans.GetAllocationPlanManageDtos(_dbContext, allocationPlans.Select(x => x.AllocationPlanID));
         return Ok(allocationPlanManageDtos);
     }
 
     [HttpPost("bulk-update-parcel-status/")]
     [WithGeographyRolePermission(PermissionEnum.ParcelRights, RightsEnum.Update)]
-    public ActionResult BulkUpdateParcelStatus([FromRoute] int geographyID, [FromBody] ParcelBulkUpdateParcelStatusDto parcelBulkUpdateParcelStatusDto)
+    public async Task<ActionResult> BulkUpdateParcelStatus([FromRoute] int geographyID, [FromBody] ParcelBulkUpdateParcelStatusDto parcelBulkUpdateParcelStatusDto)
     {
         var validParcelStatuses = new List<int>
         {
@@ -527,15 +494,17 @@ public class ParcelByGeographyController : SitkaController<ParcelByGeographyCont
             (int)ParcelStatusEnum.Inactive,
             (int)ParcelStatusEnum.Unassigned
         };
+
         if (validParcelStatuses.Contains(parcelBulkUpdateParcelStatusDto.ParcelStatusID))
         {
             var user = UserContext.GetUserFromHttpContext(_dbContext, HttpContext);
-            Parcels.UpdateParcelStatus(_dbContext, parcelBulkUpdateParcelStatusDto, user.UserID);
+            await Parcels.UpdateParcelStatus(_dbContext, geographyID, parcelBulkUpdateParcelStatusDto, user.UserID);
         }
         else
         {
             return BadRequest("Invalid Parcel Status for bulk update.");
         }
+
         return Ok();
     }
 }

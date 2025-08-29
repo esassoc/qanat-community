@@ -1,7 +1,4 @@
-﻿using System;
-using System.Security.Cryptography.X509Certificates;
-
-namespace Qanat.EFModels.Entities;
+﻿namespace Qanat.EFModels.Entities;
 
 public partial class OpenETSync
 {

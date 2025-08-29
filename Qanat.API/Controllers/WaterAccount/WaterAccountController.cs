@@ -17,84 +17,89 @@ namespace Qanat.API.Controllers;
 [ApiController]
 [RightsChecker]
 [Route("water-accounts")]
-public class WaterAccountController : SitkaController<WaterAccountController>
+public class WaterAccountController(QanatDbContext dbContext, ILogger<WaterAccountController> logger, IOptions<QanatConfiguration> qanatConfiguration, [FromServices] UserDto callingUser)
+    : SitkaController<WaterAccountController>(dbContext, logger, qanatConfiguration)
 {
-    private readonly UserDto _callingUser;
-    public WaterAccountController(QanatDbContext dbContext, ILogger<WaterAccountController> logger, IOptions<QanatConfiguration> qanatConfiguration, [FromServices] UserDto callingUser) : base(dbContext, logger, qanatConfiguration)
+    [HttpGet("{waterAccountID}/minimal")]
+    [EntityNotFound(typeof(WaterAccount), "waterAccountID")]
+    [WithWaterAccountRolePermission(PermissionEnum.WaterAccountRights, RightsEnum.Read)]
+    public ActionResult<WaterAccountMinimalDto> GetWaterAccountByIDMinimal([FromRoute] int waterAccountID)
     {
-        _callingUser = callingUser;
+        var waterAccountMinimalDto = WaterAccounts.GetByIDAsMinimalDto(_dbContext, waterAccountID);
+        return Ok(waterAccountMinimalDto);
     }
-
-    [HttpGet]
-    [WithRolePermission(PermissionEnum.WaterAccountRights, RightsEnum.Read)]
-    public ActionResult<List<WaterAccountMinimalDto>> GetAllWaterAccounts()
-    {
-        var waterAccountMinimalDtos = WaterAccounts.ListAsMinimalDtos(_dbContext);
-        return Ok(waterAccountMinimalDtos);
-    }
-    
 
     [HttpGet("{waterAccountID}")]
     [EntityNotFound(typeof(WaterAccount), "waterAccountID")]
     [WithWaterAccountRolePermission(PermissionEnum.WaterAccountRights, RightsEnum.Read)]
-    public ActionResult<WaterAccountDto> GetAccountByID([FromRoute] int waterAccountID)
+    public ActionResult<WaterAccountDto> GetByID([FromRoute] int waterAccountID)
     {
         var waterAccountDto = WaterAccounts.GetByIDAsDto(_dbContext, waterAccountID);
+        return Ok(waterAccountDto);
+    }
+
+    [HttpGet("{waterAccountID}/reporting-periods/{reportingPeriodID}")]
+    [EntityNotFound(typeof(WaterAccount), "waterAccountID")]
+    [EntityNotFound(typeof(ReportingPeriod), "reportingPeriodID")]
+    [WithWaterAccountRolePermission(PermissionEnum.WaterAccountRights, RightsEnum.Read)]
+    public ActionResult<WaterAccountDto> GetByIDAndReportingPeriodID([FromRoute] int waterAccountID, [FromRoute] int reportingPeriodID)
+    {
+        var waterAccountDto = WaterAccounts.GetByIDAsDto(_dbContext, waterAccountID, reportingPeriodID);
         return Ok(waterAccountDto);
     }
 
     [HttpPut("{waterAccountID}")]
     [EntityNotFound(typeof(WaterAccount), "waterAccountID")]
     [WithRoleFlag(FlagEnum.CanClaimWaterAccounts)]
-    public ActionResult<WaterAccountDto> UpdateWaterAccount([FromRoute] int waterAccountID, [FromBody] WaterAccountUpdateDto waterAccountUpdateDto)
+    public ActionResult<WaterAccountDto> Update([FromRoute] int waterAccountID, [FromBody] WaterAccountUpdateDto waterAccountUpdateDto)
     {
-        var waterAccountDto = WaterAccounts.UpdateAccountEntity(_dbContext, waterAccountID, waterAccountUpdateDto);
+        var waterAccountDto = WaterAccounts.UpdateWaterAccount(_dbContext, waterAccountID, waterAccountUpdateDto);
+        return Ok(waterAccountDto);
+    }
+
+    [HttpGet("{waterAccountID}/water-account-contact")]
+    [EntityNotFound(typeof(WaterAccount), "waterAccountID")]
+    [WithWaterAccountRolePermission(PermissionEnum.WaterAccountRights, RightsEnum.Read)]
+    public async Task<ActionResult<WaterAccountContactDto>> GetWaterAccountContactByWaterAccountID([FromRoute] int waterAccountID)
+    {
+        var waterAccountContactDto = await WaterAccountContacts.GetByWaterAccountIDAsDto(_dbContext, waterAccountID);
+        return Ok(waterAccountContactDto);
+    }
+
+    [HttpPut("{waterAccountID}/water-account-contact")]
+    [EntityNotFound(typeof(WaterAccount), "waterAccountID")]
+    [WithGeographyRolePermission(PermissionEnum.WaterAccountRights, RightsEnum.Update)]
+    public ActionResult<WaterAccountDto> UpdateWaterAccountContact([FromRoute] int waterAccountID, [FromBody] WaterAccountWaterAccountContactUpdateDto waterAccountWaterAccountUpdateDto)
+    {
+        if (waterAccountWaterAccountUpdateDto.WaterAccountContactID.HasValue)
+        {
+            var errors = WaterAccounts.ValidateUpdateWaterAccountContact(_dbContext, waterAccountID, waterAccountWaterAccountUpdateDto.WaterAccountContactID.Value);
+            errors.ForEach(vm => { ModelState.AddModelError(vm.Type, vm.Message); });
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+        }
+
+        var waterAccountDto = WaterAccounts.UpdateWaterAccountContact(_dbContext, waterAccountID, waterAccountWaterAccountUpdateDto.WaterAccountContactID);
         return Ok(waterAccountDto);
     }
 
     [HttpDelete("{waterAccountID}")]
     [WithGeographyRolePermission(PermissionEnum.WaterAccountRights, RightsEnum.Delete)]
-    public async Task<ActionResult> DeleteWaterAccount([FromRoute] int waterAccountID)
+    public async Task<ActionResult> Delete([FromRoute] int waterAccountID)
     {
-        await WaterAccounts.DeleteWaterAccount(_dbContext, waterAccountID);
+        await WaterAccounts.DeleteWaterAccount(_dbContext, waterAccountID, callingUser);
         return Ok();
-    }
-
-    [HttpGet("{waterAccountID}/geojson")]
-    [EntityNotFound(typeof(WaterAccount), "waterAccountID")]
-    [WithWaterAccountRolePermission(PermissionEnum.WaterAccountRights, RightsEnum.Read)]
-    public ActionResult<WaterAccountGeoJSONDto> GetWaterAccountGeoJson([FromRoute] int waterAccountID)
-    {
-        var waterAccountGeoJSONDto = WaterAccounts.GetByIDAsWaterAccountGeoJSONDto(_dbContext, waterAccountID);
-        return Ok(waterAccountGeoJSONDto);
-    }
-
-    [HttpPut("{waterAccountID}/edit-users")]
-    [EntityNotFound(typeof(WaterAccount), "waterAccountID")]
-    [WithGeographyRolePermission(PermissionEnum.WaterAccountRights, RightsEnum.Update)]
-    public async Task<ActionResult<WaterAccountMinimalDto>> EditUsers([FromRoute] int waterAccountID, [FromBody] List<WaterAccountUserMinimalDto> waterAccountEditUsersDto)
-    {
-        if (!Users.ValidateAllExist(_dbContext, waterAccountEditUsersDto))
-        {
-            return NotFound("One or more of the User IDs was invalid.");
-        }
-
-        var updatedAccount = WaterAccounts.SetAssociatedUsers(_dbContext, waterAccountID, waterAccountEditUsersDto, out var addedUserIDs);
-        if (addedUserIDs.Count > 0)
-        {
-            GeographyUsers.AddGeographyNormalUsersIfAbsent(_dbContext, addedUserIDs, updatedAccount.GeographyID);
-        }
-
-        return Ok(updatedAccount);
     }
 
     [HttpPut("{waterAccountID}/merge/{secondaryWaterAccountID}")]
     [EntityNotFound(typeof(WaterAccount), "waterAccountID")]
     [EntityNotFound(typeof(WaterAccount), "secondaryWaterAccountID")]
     [WithGeographyRolePermission(PermissionEnum.WaterAccountRights, RightsEnum.Update)]
-    public async Task<ActionResult<WaterAccountMinimalDto>> MergeWaterAccounts([FromRoute] int waterAccountID, [FromRoute] int secondaryWaterAccountID, [FromBody] MergeWaterAccountsDto mergeDto)
+    public async Task<ActionResult<WaterAccountMinimalDto>> Merge([FromRoute] int waterAccountID, [FromRoute] int secondaryWaterAccountID, [FromBody] MergeWaterAccountsDto mergeDto)
     {
-        var errors = WaterAccounts.ValidateMergeWaterAccounts(_dbContext, waterAccountID, secondaryWaterAccountID, mergeDto);
+        var errors = await WaterAccounts.ValidateMergeWaterAccounts(_dbContext, waterAccountID, secondaryWaterAccountID, mergeDto, callingUser);
         errors.ForEach(vm => { ModelState.AddModelError(vm.Type, vm.Message); });
 
         if (!ModelState.IsValid)
@@ -102,18 +107,17 @@ public class WaterAccountController : SitkaController<WaterAccountController>
             return BadRequest(ModelState);
         }
 
-        var primaryAccount = await WaterAccounts.MergeWaterAccounts(_dbContext, waterAccountID, secondaryWaterAccountID, mergeDto, _callingUser);
+        var primaryAccount = await WaterAccounts.MergeWaterAccounts(_dbContext, waterAccountID, secondaryWaterAccountID, mergeDto, callingUser);
         return Ok(primaryAccount);
     }
 
     [HttpGet("{waterAccountID}/water-budget-stats/years/{year}")]
     [EntityNotFound(typeof(WaterAccount), "waterAccountID")]
-    [EntityNotFound(typeof(ReportingPeriod), "reportingPeriodID")]
     [WithWaterAccountRolePermission(PermissionEnum.WaterAccountRights, RightsEnum.Read)]
     public async Task<ActionResult<WaterAccountBudgetStatDto>> GetWaterMeasurementStatsForWaterBudget([FromRoute] int waterAccountID, [FromRoute] int year)
     {
         var waterAccount = WaterAccounts.GetByIDAsMinimalDto(_dbContext, waterAccountID);
-        var budgetStats = await WaterMeasurements.GetWaterMeasurementStatsForWaterBudget(_dbContext, waterAccount.Geography.GeographyID, waterAccountID, year, _callingUser);
+        var budgetStats = await WaterMeasurements.GetWaterMeasurementStatsForWaterBudget(_dbContext, waterAccount.Geography.GeographyID, waterAccountID, year, callingUser);
         return Ok(budgetStats);
     }
 
@@ -146,32 +150,14 @@ public class WaterAccountController : SitkaController<WaterAccountController>
         return Ok(mostRecentEffectiveDates);
     }
 
-    [HttpPatch("{waterAccountID}/update-parcels")]
-    [EntityNotFound(typeof(WaterAccount), "waterAccountID")]
-    [WithGeographyRolePermission(PermissionEnum.WaterAccountRights, RightsEnum.Update)]
-    public async Task<ActionResult<WaterAccountMinimalDto>> UpdateWaterAccountParcels([FromRoute] int waterAccountID, [FromBody] UpdateWaterAccountParcelsDto dto)
-    {
-        var errors = WaterAccounts.ValidateUpdateWaterAccountParcels(_dbContext, waterAccountID, dto);
-        errors.ForEach(vm => { ModelState.AddModelError(vm.Type, vm.Message); });
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-
-        var user = UserContext.GetUserFromHttpContext(_dbContext, HttpContext);
-        var waterAccountMinimalDto = await WaterAccounts.UpdateWaterAccountParcels(_dbContext, waterAccountID, dto.EffectiveYear, dto.ParcelIDs, user.UserID);
-
-        return Ok(waterAccountMinimalDto);
-    }
-
     [HttpGet("{waterAccountID}/allocation-plans")]
     [EntityNotFound(typeof(WaterAccount), "waterAccountID")]
     [WithWaterAccountRolePermission(PermissionEnum.AllocationPlanRights, RightsEnum.Read)]
     public ActionResult<List<AllocationPlanMinimalDto>> GetAccountAllocationPlansByAccountID([FromRoute] int waterAccountID)
     {
-        var account = WaterAccounts.GetByID(_dbContext, waterAccountID);
+        var waterAccountDisplayDto = WaterAccounts.GetByIDAsDisplayDto(_dbContext, waterAccountID);
 
-        var geographyAllocationPlan = GeographyAllocationPlanConfigurations.GetByGeographyID(_dbContext, account.GeographyID);
+        var geographyAllocationPlan = GeographyAllocationPlanConfigurations.GetByGeographyID(_dbContext, waterAccountDisplayDto.GeographyID);
         if (geographyAllocationPlan == null)
         {
             return Ok(new List<AllocationPlanMinimalDto>());
@@ -185,7 +171,7 @@ public class WaterAccountController : SitkaController<WaterAccountController>
             .Select(x => x.ZoneID).ToList();
 
         var allocationPlans =
-            AllocationPlans.ListByGeographyIDAndZoneIDsAsSimpleDto(_dbContext, account.GeographyID, parcelZoneIDs);
+            AllocationPlans.ListByGeographyIDAndZoneIDsAsSimpleDto(_dbContext, waterAccountDisplayDto.GeographyID, parcelZoneIDs);
 
         return allocationPlans;
     }

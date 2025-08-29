@@ -16,9 +16,7 @@ namespace Qanat.EFModels.Entities
         public static readonly OpenETDataTypePrecipitation Precipitation = OpenETDataTypePrecipitation.Instance;
 
         public static readonly List<OpenETDataType> All;
-        public static readonly List<OpenETDataTypeSimpleDto> AllAsSimpleDto;
         public static readonly ReadOnlyDictionary<int, OpenETDataType> AllLookupDictionary;
-        public static readonly ReadOnlyDictionary<int, OpenETDataTypeSimpleDto> AllAsSimpleDtoLookupDictionary;
 
         /// <summary>
         /// Static type constructor to coordinate static initialization order
@@ -26,9 +24,7 @@ namespace Qanat.EFModels.Entities
         static OpenETDataType()
         {
             All = new List<OpenETDataType> { Evapotranspiration, Precipitation };
-            AllAsSimpleDto = new List<OpenETDataTypeSimpleDto> { Evapotranspiration.AsSimpleDto(), Precipitation.AsSimpleDto() };
             AllLookupDictionary = new ReadOnlyDictionary<int, OpenETDataType>(All.ToDictionary(x => x.OpenETDataTypeID));
-            AllAsSimpleDtoLookupDictionary = new ReadOnlyDictionary<int, OpenETDataTypeSimpleDto>(AllAsSimpleDto.ToDictionary(x => x.OpenETDataTypeID));
         }
 
         /// <summary>

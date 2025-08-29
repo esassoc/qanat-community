@@ -8,5 +8,5 @@ public class WaterMeasurementSelfReportCreateDto
     public int WaterMeasurementTypeID { get; set; }
 
     [Required]
-    public int ReportingYear { get; set; }
+    public int ReportingPeriodID { get; set; }
 }

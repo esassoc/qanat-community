@@ -33,7 +33,7 @@ public class ModelController(QanatDbContext dbContext, ILogger<ModelController> 
     [WithScenarioPlannerRolePermission(PermissionEnum.ModelRights, RightsEnum.Read)]
     public async Task<ActionResult<ModelSimpleDto>> GetModelByID([FromRoute] string modelShortName)
     {
-        var model = Model.AllAsSimpleDto.SingleOrDefault(x => x.ModelShortName == modelShortName);
+        var model = Model.All.SingleOrDefault(x => x.ModelShortName == modelShortName);
 
         //MK 1/23/2025:Authorization checks should happen before not founds, as bad actors can get info from not founds. Probably doesn't matter much in this context but it's still good to be aware.
         if (model != null)
@@ -50,7 +50,7 @@ public class ModelController(QanatDbContext dbContext, ILogger<ModelController> 
             return result;
         }
             
-        return Ok(model);
+        return Ok(model.AsSimpleDto());
     }
 
     [HttpGet("{modelID}/image")]
@@ -106,37 +106,10 @@ public class ModelController(QanatDbContext dbContext, ILogger<ModelController> 
         return Ok(modelBoundaryDto);
     }
 
-    [HttpGet("{modelShortName}/scenarios")]
+    [HttpGet("{modelShortName}/scenario-runs")]
     [WithRoleFlag(FlagEnum.IsSystemAdmin)]
     [WithScenarioPlannerRolePermission(PermissionEnum.ModelRights, RightsEnum.Read)]
-    public async Task<ActionResult<List<ScenarioSimpleDto>>> ListScenariosForModel([FromRoute] string modelShortName)
-    {
-        var model = Model.All.SingleOrDefault(x => x.ModelShortName == modelShortName);
-
-        //MK 1/23/2025: Authorization checks should happen before not founds, as bad actors can get info from not founds. Probably doesn't matter much in this context but it's still good to be aware.
-        if (model != null)
-        {
-            var userHasAccess = await ModelUsers.CheckIfUserHasModelAccessAsync(_dbContext, model.ModelID, callingUser);
-            if (!userHasAccess)
-            {
-                return Forbid();
-            }
-        }
-
-        if (CheckAndLogIfNotFound(model, "Model", modelShortName, out var result))
-        {
-            return result;
-        }
-
-        var scenarioIDs = _dbContext.ModelScenarios.AsNoTracking().Where(x => x.ModelID == model.ModelID).Select(x => x.ScenarioID);
-        var scenarioDtos = Scenario.AllAsSimpleDto.Where(x => scenarioIDs.Contains(x.ScenarioID)).ToList();
-        return Ok(scenarioDtos);
-    }
-
-    [HttpGet("{modelShortName}/actions")]
-    [WithRoleFlag(FlagEnum.IsSystemAdmin)]
-    [WithScenarioPlannerRolePermission(PermissionEnum.ModelRights, RightsEnum.Read)]
-    public async Task<ActionResult<List<GETActionDto>>> ListActionsForModel([FromRoute] string modelShortName)
+    public async Task<ActionResult<List<ScenarioRunDto>>> ListActionsForModel([FromRoute] string modelShortName)
     {
         var model = Model.All.SingleOrDefault(x => x.ModelShortName == modelShortName);
 
@@ -162,7 +135,7 @@ public class ModelController(QanatDbContext dbContext, ILogger<ModelController> 
             return Ok(byModelIDAndUserID);
         }
 
-        var getActions = ScenarioRuns.ListByModelID(_dbContext, model!.ModelID);
-        return Ok(getActions);
+        var scenarioRuns = ScenarioRuns.ListByModelID(_dbContext, model!.ModelID);
+        return Ok(scenarioRuns);
     }
 }

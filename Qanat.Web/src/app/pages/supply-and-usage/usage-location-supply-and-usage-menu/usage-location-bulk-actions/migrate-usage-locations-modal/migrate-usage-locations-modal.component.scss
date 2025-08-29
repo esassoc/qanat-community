@@ -1,0 +1,16 @@
+@use "/src/scss/abstracts" as *;
+
+.modal-body {
+    overflow-y: auto;
+    max-height: 50vh;
+
+    .form.grid-12 {
+        gap: 0.5rem 1.5rem;
+    }
+}
+
+note {
+    font-size: 14px;
+    line-height: 1.25em;
+    margin-bottom: $spacing-300;
+}

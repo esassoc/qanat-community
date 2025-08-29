@@ -13,7 +13,7 @@ import TinyMCEHelpers from "src/app/shared/helpers/tiny-mce-helpers";
 import { CustomRichTextSimpleDto } from "src/app/shared/generated/model/models";
 import { FormsModule } from "@angular/forms";
 import { AlertDisplayComponent } from "../../shared/components/alert-display/alert-display.component";
-import { NgIf } from "@angular/common";
+
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { PublicService } from "src/app/shared/generated/api/public.service";
 
@@ -21,9 +21,8 @@ import { PublicService } from "src/app/shared/generated/api/public.service";
     selector: "qanat-field-definition-edit",
     templateUrl: "./field-definition-edit.component.html",
     styleUrls: ["./field-definition-edit.component.scss"],
-    standalone: true,
-    imports: [NgIf, PageHeaderComponent, AlertDisplayComponent, EditorComponent, FormsModule, RouterLink],
-    providers: [{ provide: TINYMCE_SCRIPT_SRC, useValue: "tinymce/tinymce.min.js" }],
+    imports: [PageHeaderComponent, AlertDisplayComponent, EditorComponent, FormsModule, RouterLink],
+    providers: [{ provide: TINYMCE_SCRIPT_SRC, useValue: "tinymce/tinymce.min.js" }]
 })
 export class FieldDefinitionEditComponent implements OnInit, AfterViewInit, OnDestroy {
     @Input() geographyID: number = null;
@@ -57,7 +56,7 @@ export class FieldDefinitionEditComponent implements OnInit, AfterViewInit, OnDe
             this.currentUser = currentUser;
             const id = parseInt(this.route.snapshot.paramMap.get(routeParams.fieldDefinitionID));
             if (id) {
-                this.publicService.publicCustomRichTextsCustomRichTextTypeIDGet(id).subscribe((fieldDefinition) => {
+                this.publicService.getCustomRichTextPublic(id).subscribe((fieldDefinition) => {
                     this.fieldDefinition = fieldDefinition;
                     this.originalFieldDefinitionValue = fieldDefinition.CustomRichTextContent;
                 });
@@ -81,7 +80,7 @@ export class FieldDefinitionEditComponent implements OnInit, AfterViewInit, OnDe
             CustomRichTextContent: this.fieldDefinition.CustomRichTextContent,
             GeographyID: this.fieldDefinition.Geography?.GeographyID,
         });
-        this.customRichTextService.customRichTextCustomRichTextTypeIDPut(this.fieldDefinition.CustomRichTextType.CustomRichTextTypeID, updateDto).subscribe({
+        this.customRichTextService.updateCustomRichTextCustomRichText(this.fieldDefinition.CustomRichTextType.CustomRichTextTypeID, updateDto).subscribe({
             next: (response) => {
                 this.isLoadingSubmit = false;
                 this.fieldDefinition = response;

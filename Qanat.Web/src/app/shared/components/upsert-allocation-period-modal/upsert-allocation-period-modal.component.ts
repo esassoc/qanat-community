@@ -1,10 +1,8 @@
-import { Component, ComponentRef, OnInit } from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { IModal, ModalEvent, ModalService } from "src/app/shared/services/modal/modal.service";
-import { ModalComponent } from "src/app/shared/components/modal/modal.component";
+import { Component, inject, OnInit } from "@angular/core";
+
 import { AlertService } from "src/app/shared/services/alert.service";
 import { FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
-import { SelectDropdownOption } from "src/app/shared/components/inputs/select-dropdown/select-dropdown.component";
+import { SelectDropdownOption } from "src/app/shared/components/forms/form-field/form-field.component";
 import { AllocationPlanManageDto } from "src/app/shared/generated/model/allocation-plan-manage-dto";
 import { inOutAnimation } from "src/app/shared/animations/in-out.animation";
 import { AllocationPlanService } from "src/app/shared/generated/api/allocation-plan.service";
@@ -20,18 +18,18 @@ import { Observable } from "rxjs";
 import { tap } from "rxjs/operators";
 import { FormFieldComponent, FormFieldType } from "src/app/shared/components/forms/form-field/form-field.component";
 import { AlertDisplayComponent } from "src/app/shared/components/alert-display/alert-display.component";
+import { AsyncPipe } from "@angular/common";
+import { DialogRef } from "@ngneat/dialog";
 
 @Component({
     selector: "upsert-allocation-period-modal",
-    standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, AlertDisplayComponent, FormFieldComponent],
+    imports: [ReactiveFormsModule, AlertDisplayComponent, FormFieldComponent, AsyncPipe],
     templateUrl: "./upsert-allocation-period-modal.component.html",
     styleUrls: ["./upsert-allocation-period-modal.component.scss"],
     animations: [inOutAnimation],
 })
-export class UpsertAllocationPeriodModalComponent implements OnInit, IModal {
-    modalComponentRef: ComponentRef<ModalComponent>;
-    modalContext: AllocationPeriodContext;
+export class UpsertAllocationPeriodModalComponent implements OnInit {
+    public ref: DialogRef<AllocationPeriodContext, any> = inject(DialogRef);
     public FormFieldType = FormFieldType;
 
     public formGroup: FormGroup<AllocationPlanPeriodUpsertDtoForm> = new FormGroup<AllocationPlanPeriodUpsertDtoForm>({
@@ -57,19 +55,18 @@ export class UpsertAllocationPeriodModalComponent implements OnInit, IModal {
     });
 
     public yearOptions: SelectDropdownOption[] = [
-        { Value: null, Label: "Select a Year", Disabled: true },
-        { Value: 1, Label: "1", Disabled: false },
-        { Value: 2, Label: "2", Disabled: false },
-        { Value: 3, Label: "3", Disabled: false },
-        { Value: 4, Label: "4", Disabled: false },
-        { Value: 5, Label: "5", Disabled: false },
+        { Value: null, Label: "Select a Year", disabled: true },
+        { Value: 1, Label: "1", disabled: false },
+        { Value: 2, Label: "2", disabled: false },
+        { Value: 3, Label: "3", disabled: false },
+        { Value: 4, Label: "4", disabled: false },
+        { Value: 5, Label: "5", disabled: false },
     ];
 
     public carryOverValue$: Observable<any>;
     public borrowForwardValue$: Observable<any>;
 
     constructor(
-        private modalService: ModalService,
         private allocationPlanService: AllocationPlanService,
         private alertService: AlertService
     ) {}
@@ -101,26 +98,26 @@ export class UpsertAllocationPeriodModalComponent implements OnInit, IModal {
         for (
             let i = 0;
             i <=
-            this.modalContext.AllocationPlanManageDto.GeographyAllocationPlanConfiguration.EndYear -
-                this.modalContext.AllocationPlanManageDto.GeographyAllocationPlanConfiguration.StartYear;
+            this.ref.data.AllocationPlanManageDto.GeographyAllocationPlanConfiguration.EndYear -
+                this.ref.data.AllocationPlanManageDto.GeographyAllocationPlanConfiguration.StartYear;
             i++
         ) {
-            years.push(this.modalContext.AllocationPlanManageDto.GeographyAllocationPlanConfiguration.StartYear + i);
+            years.push(this.ref.data.AllocationPlanManageDto.GeographyAllocationPlanConfiguration.StartYear + i);
         }
 
         this.yearOptions = [
-            { Value: null, Label: "Select a Year", Disabled: true },
+            { Value: null, Label: "Select a Year", disabled: true },
             ...years.map((year) => {
-                return { Value: year, Label: year.toString(), Disabled: false } as SelectDropdownOption;
+                return { Value: year, Label: year.toString(), disabled: false } as SelectDropdownOption;
             }),
         ];
     }
 
     ngAfterViewInit(): void {
-        if (this.modalContext.Update === true) {
-            this.formGroup.patchValue(this.modalContext.AllocationPlanPeriodSimpleDto, { emitEvent: true });
+        if (this.ref.data.Update === true) {
+            this.formGroup.patchValue(this.ref.data.AllocationPlanPeriodSimpleDto, { emitEvent: true });
         } else {
-            this.formGroup.controls.AllocationPlanID.patchValue(this.modalContext.AllocationPlanManageDto.AllocationPlanID);
+            this.formGroup.controls.AllocationPlanID.patchValue(this.ref.data.AllocationPlanManageDto.AllocationPlanID);
         }
         this.formGroup.controls.EnableCarryOver.updateValueAndValidity({ emitEvent: true });
         this.formGroup.controls.EnableBorrowForward.updateValueAndValidity({ emitEvent: true });
@@ -130,28 +127,28 @@ export class UpsertAllocationPeriodModalComponent implements OnInit, IModal {
         const submitDto = new AllocationPlanPeriodUpsertDto(this.formGroup.value);
 
         const endPoint =
-            this.modalContext.Update === true
-                ? this.allocationPlanService.geographiesGeographyIDAllocationPlansAllocationPlanIDAllocationPlanPeriodIDPut(
-                      this.modalContext.AllocationPlanManageDto.GeographyAllocationPlanConfiguration.GeographyID,
-                      this.modalContext.AllocationPlanManageDto.AllocationPlanID,
-                      this.modalContext.AllocationPlanPeriodSimpleDto.AllocationPlanPeriodID,
+            this.ref.data.Update === true
+                ? this.allocationPlanService.updateAllocationPlanPeriodAllocationPlan(
+                      this.ref.data.AllocationPlanManageDto.GeographyAllocationPlanConfiguration.GeographyID,
+                      this.ref.data.AllocationPlanManageDto.AllocationPlanID,
+                      this.ref.data.AllocationPlanPeriodSimpleDto.AllocationPlanPeriodID,
                       submitDto
                   )
-                : this.allocationPlanService.geographiesGeographyIDAllocationPlansAllocationPlanIDPost(
-                      this.modalContext.AllocationPlanManageDto.GeographyAllocationPlanConfiguration.GeographyID,
-                      this.modalContext.AllocationPlanManageDto.AllocationPlanID,
+                : this.allocationPlanService.createAllocationPlanPeriodAllocationPlan(
+                      this.ref.data.AllocationPlanManageDto.GeographyAllocationPlanConfiguration.GeographyID,
+                      this.ref.data.AllocationPlanManageDto.AllocationPlanID,
                       submitDto
                   );
 
         endPoint.subscribe((response) => {
             this.alertService.clearAlerts();
-            this.alertService.pushAlert(new Alert(`Successfully ${this.modalContext.Update === true ? "updated" : "created"} Allocation Plan Period.`, AlertContext.Success));
-            this.modalService.close(this.modalComponentRef, response, new UpsertAllocationPeriodEvent(response));
+            this.alertService.pushAlert(new Alert(`Successfully ${this.ref.data.Update === true ? "updated" : "created"} Allocation Plan Period.`, AlertContext.Success));
+            this.ref.close(submitDto);
         });
     }
 
     close(): void {
-        this.modalService.close(this.modalComponentRef);
+        this.ref.close(null);
     }
 }
 
@@ -159,10 +156,4 @@ export interface AllocationPeriodContext {
     AllocationPlanManageDto: AllocationPlanManageDto | null;
     AllocationPlanPeriodSimpleDto: AllocationPlanPeriodSimpleDto | null;
     Update: boolean | null;
-}
-
-export class UpsertAllocationPeriodEvent extends ModalEvent {
-    constructor(value: any) {
-        super(value);
-    }
 }

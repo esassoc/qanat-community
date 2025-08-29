@@ -1,17 +1,15 @@
-import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, Output, SimpleChange, SimpleChanges, ViewChild, ViewContainerRef } from "@angular/core";
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild } from "@angular/core";
 import { WaterAccountDto } from "src/app/shared/generated/model/water-account-dto";
-import { ModalService, ModalSizeEnum, ModalThemeEnum } from "src/app/shared/services/modal/modal.service";
 import { DeleteWaterAccountComponent } from "../modals/delete-water-account/delete-water-account.component";
 import { MergeWaterAccountsComponent } from "../modals/merge-water-accounts/merge-water-accounts.component";
 import { UpdateParcelsComponent } from "../modals/update-parcels/update-parcels.component";
-import { UpdateWaterAccountInfoComponent, WaterAccountContext } from "../modals/update-water-account-info/update-water-account-info.component";
+import { UpdateWaterAccountInfoComponent } from "../modals/update-water-account-info/update-water-account-info.component";
 import { Observable, tap } from "rxjs";
 import { WaterAccountService } from "src/app/shared/generated/api/water-account.service";
-import { ParcelMapComponent } from "../../parcel/parcel-map/parcel-map.component";
 import { ParcelIconWithNumberComponent } from "../../parcel/parcel-icon-with-number/parcel-icon-with-number.component";
 import { RouterLink } from "@angular/router";
 import { IconComponent } from "src/app/shared/components/icon/icon.component";
-import { NgIf, NgFor, AsyncPipe, DecimalPipe } from "@angular/common";
+import { AsyncPipe, DecimalPipe } from "@angular/common";
 import { QanatMapComponent, QanatMapInitEvent } from "../../leaflet/qanat-map/qanat-map.component";
 import { Map, layerControl } from "leaflet";
 import { GsaBoundariesComponent } from "../../leaflet/layers/gsa-boundaries/gsa-boundaries.component";
@@ -23,19 +21,16 @@ import { WellMinimalDto } from "src/app/shared/generated/model/well-minimal-dto"
 import { ZoneGroupMinimalDto } from "src/app/shared/generated/model/zone-group-minimal-dto";
 import { ZoneGroupService } from "src/app/shared/generated/api/zone-group.service";
 import { WellService } from "src/app/shared/generated/api/well.service";
+import { DialogService } from "@ngneat/dialog";
 
 @Component({
     selector: "water-account-card",
     templateUrl: "./water-account-card.component.html",
     styleUrls: ["./water-account-card.component.scss"],
-    standalone: true,
     imports: [
-        NgIf,
         IconComponent,
         RouterLink,
-        NgFor,
         ParcelIconWithNumberComponent,
-        ParcelMapComponent,
         AsyncPipe,
         DecimalPipe,
         QanatMapComponent,
@@ -51,8 +46,10 @@ export class WaterAccountCardComponent implements OnChanges {
 
     @Input() waterAccountID: number;
     @Input() displayActions: boolean = true;
+    @Input() reportingPeriodID: number;
 
     @Output() waterAccountIDChange = new EventEmitter<WaterAccountDto>();
+    @Output() reportingPeriodIDChange = new EventEmitter<number>();
 
     public waterAccount: WaterAccountDto;
     public waterAccount$: Observable<WaterAccountDto>;
@@ -67,24 +64,29 @@ export class WaterAccountCardComponent implements OnChanges {
     public mapIsReady: boolean = false;
 
     constructor(
-        private modalService: ModalService,
-        private viewContainerRef: ViewContainerRef,
         private waterAccountService: WaterAccountService,
         private cdr: ChangeDetectorRef,
         private wellService: WellService,
-        private zoneGroupService: ZoneGroupService
+        private zoneGroupService: ZoneGroupService,
+        private dialogService: DialogService
     ) {}
 
     ngOnChanges(changes: SimpleChanges): void {
-        if (changes.waterAccountID.currentValue && changes.waterAccountID.currentValue !== changes.waterAccountID.previousValue) {
+        var waterAccountIDChanged = changes.waterAccountID && changes.waterAccountID.currentValue !== changes.waterAccountID.previousValue;
+        var reportingPeriodIDChanged = changes.reportingPeriodID && changes.reportingPeriodID.currentValue !== changes.reportingPeriodID.previousValue;
+        if (waterAccountIDChanged || reportingPeriodIDChanged) {
             this.mapIsReady = false;
 
-            this.waterAccount$ = this.waterAccountService.waterAccountsWaterAccountIDGet(this.waterAccountID).pipe(
+            this.waterAccount$ = this.reportingPeriodID
+                ? this.waterAccountService.getByIDAndReportingPeriodIDWaterAccount(this.waterAccountID, this.reportingPeriodID)
+                : this.waterAccountService.getByIDWaterAccount(this.waterAccountID);
+
+            this.waterAccount$ = this.waterAccount$.pipe(
                 tap((waterAccount) => {
                     this.waterAccount = waterAccount;
 
-                    this.wells$ = this.wellService.waterAccountsWaterAccountIDWellsGet(waterAccount.WaterAccountID);
-                    this.zoneGroups$ = this.zoneGroupService.geographiesGeographyIDZoneGroupsGet(this.waterAccount.Geography.GeographyID);
+                    this.wells$ = this.wellService.listWellsByWaterAccountIDWell(waterAccount.WaterAccountID);
+                    this.zoneGroups$ = this.zoneGroupService.listZoneGroup(this.waterAccount.Geography.GeographyID);
 
                     this.updateSelectedParcels();
                 })
@@ -104,59 +106,71 @@ export class WaterAccountCardComponent implements OnChanges {
     }
 
     openUpdateInfoModal(): void {
-        this.modalService
-            .open(UpdateWaterAccountInfoComponent, this.viewContainerRef, { ModalSize: ModalSizeEnum.Medium, ModalTheme: ModalThemeEnum.Light }, {
+        const dialogRef = this.dialogService.open(UpdateWaterAccountInfoComponent, {
+            data: {
                 WaterAccountID: this.waterAccount.WaterAccountID,
                 GeographyID: this.waterAccount.Geography.GeographyID,
-            } as WaterAccountContext)
-            .instance.result.then((result) => {
-                if (result) {
-                    this.waterAccountID = result;
-                    this.waterAccountIDChange.emit(result);
-                }
-            });
+            },
+            size: "sm",
+        });
+
+        dialogRef.afterClosed$.subscribe((result) => {
+            if (result) {
+                this.waterAccountID = result.WaterAccountID;
+                this.waterAccountIDChange.emit(result);
+            }
+        });
     }
 
     openMergeModal(): void {
-        this.modalService
-            .open(MergeWaterAccountsComponent, this.viewContainerRef, { ModalSize: ModalSizeEnum.Large, ModalTheme: ModalThemeEnum.Light }, {
+        const dialogRef = this.dialogService.open(MergeWaterAccountsComponent, {
+            data: {
                 WaterAccountID: this.waterAccount.WaterAccountID,
                 GeographyID: this.waterAccount.Geography.GeographyID,
-            } as WaterAccountContext)
-            .instance.result.then((result) => {
-                if (result) {
-                    this.waterAccountID = { ...result };
-                    this.waterAccountIDChange.emit(result);
-                    this.updateSelectedParcels();
-                }
-            });
+            },
+            size: "lg",
+        });
+
+        dialogRef.afterClosed$.subscribe((result) => {
+            if (result) {
+                this.waterAccountID = result.WaterAccountID;
+                this.waterAccountIDChange.emit(result);
+                this.updateSelectedParcels();
+            }
+        });
     }
 
     openUpdateParcelsModal(): void {
-        this.modalService
-            .open(UpdateParcelsComponent, this.viewContainerRef, { ModalSize: ModalSizeEnum.ExtraLarge, ModalTheme: ModalThemeEnum.Light }, {
+        const dialogRef = this.dialogService.open(UpdateParcelsComponent, {
+            data: {
                 WaterAccountID: this.waterAccount.WaterAccountID,
                 GeographyID: this.waterAccount.Geography.GeographyID,
-            } as WaterAccountContext)
-            .instance.result.then((result) => {
-                if (result) {
-                    this.waterAccountID = { ...result };
-                    this.updateSelectedParcels();
-                    this.waterAccountIDChange.emit(result);
-                }
-            });
+            },
+            size: "lg",
+        });
+
+        dialogRef.afterClosed$.subscribe((result) => {
+            if (result.success) {
+                this.waterAccountID = result.result[0].WaterAccountID;
+                this.updateSelectedParcels();
+                this.waterAccountIDChange.emit(result.result[0]);
+            }
+        });
     }
 
     openDeleteModal(): void {
-        this.modalService
-            .open(DeleteWaterAccountComponent, this.viewContainerRef, { ModalSize: ModalSizeEnum.Medium, ModalTheme: ModalThemeEnum.Light }, {
+        const dialogRef = this.dialogService.open(DeleteWaterAccountComponent, {
+            data: {
                 WaterAccountID: this.waterAccount.WaterAccountID,
                 GeographyID: this.waterAccount.Geography.GeographyID,
-            } as WaterAccountContext)
-            .instance.result.then((result) => {
-                if (result) {
-                    this.waterAccountIDChange.emit(null);
-                }
-            });
+            },
+            size: "sm",
+        });
+
+        dialogRef.afterClosed$.subscribe((result) => {
+            if (result) {
+                this.waterAccountIDChange.emit(null);
+            }
+        });
     }
 }

@@ -1,8 +1,8 @@
 import { Injectable, ViewContainerRef } from "@angular/core";
-import { ModalService, ModalSizeEnum, ModalThemeEnum } from "src/app/shared/services/modal/modal.service";
 import { ConfirmOptions } from "./confirm-options";
-import { ConfirmState } from "./confirm-state";
 import { ConfirmModalComponent } from "../../components/confirm-modal/confirm-modal.component";
+import { DialogService } from "@ngneat/dialog";
+import { firstValueFrom } from "rxjs";
 
 /**
  * A confirmation service, allowing to open a confirmation modal from anywhere and get back a promise.
@@ -11,10 +11,7 @@ import { ConfirmModalComponent } from "../../components/confirm-modal/confirm-mo
     providedIn: "root",
 })
 export class ConfirmService {
-    constructor(
-        private modalService: ModalService,
-        private state: ConfirmState
-    ) {}
+    constructor(private dialogService: DialogService) {}
     /**
      * Opens a confirmation modal
      * @param options the options for the modal (title and message)
@@ -22,7 +19,23 @@ export class ConfirmService {
      * or closes the modal
      */
     confirm(options: ConfirmOptions, viewContainerRef: ViewContainerRef = null): Promise<boolean> {
-        this.state.modal = this.modalService.open(ConfirmModalComponent, viewContainerRef, { ModalSize: ModalSizeEnum.Medium, ModalTheme: ModalThemeEnum.Light }, options);
-        return this.state.modal.instance.result;
+        const dialogRef = this.dialogService.open(ConfirmModalComponent, {
+            data: {
+                title: options.title,
+                message: options.message,
+                icon: options.icon,
+                buttonTextYes: options.buttonTextYes,
+                buttonTextNo: options.buttonTextNo,
+                buttonClassYes: options.buttonClassYes,
+            },
+            size: "sm",
+        });
+
+        return firstValueFrom(dialogRef.afterClosed$).then((result) => {
+            if (result) {
+                return true;
+            }
+            return false;
+        });
     }
 }

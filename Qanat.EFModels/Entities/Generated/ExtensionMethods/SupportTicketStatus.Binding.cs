@@ -13,23 +13,20 @@ namespace Qanat.EFModels.Entities
     public abstract partial class SupportTicketStatus : IHavePrimaryKey
     {
         public static readonly SupportTicketStatusUnassigned Unassigned = SupportTicketStatusUnassigned.Instance;
-        public static readonly SupportTicketStatusAssigned Assigned = SupportTicketStatusAssigned.Instance;
+        public static readonly SupportTicketStatusActive Active = SupportTicketStatusActive.Instance;
         public static readonly SupportTicketStatusClosed Closed = SupportTicketStatusClosed.Instance;
+        public static readonly SupportTicketStatusOnHold OnHold = SupportTicketStatusOnHold.Instance;
 
         public static readonly List<SupportTicketStatus> All;
-        public static readonly List<SupportTicketStatusSimpleDto> AllAsSimpleDto;
         public static readonly ReadOnlyDictionary<int, SupportTicketStatus> AllLookupDictionary;
-        public static readonly ReadOnlyDictionary<int, SupportTicketStatusSimpleDto> AllAsSimpleDtoLookupDictionary;
 
         /// <summary>
         /// Static type constructor to coordinate static initialization order
         /// </summary>
         static SupportTicketStatus()
         {
-            All = new List<SupportTicketStatus> { Unassigned, Assigned, Closed };
-            AllAsSimpleDto = new List<SupportTicketStatusSimpleDto> { Unassigned.AsSimpleDto(), Assigned.AsSimpleDto(), Closed.AsSimpleDto() };
+            All = new List<SupportTicketStatus> { Unassigned, Active, Closed, OnHold };
             AllLookupDictionary = new ReadOnlyDictionary<int, SupportTicketStatus>(All.ToDictionary(x => x.SupportTicketStatusID));
-            AllAsSimpleDtoLookupDictionary = new ReadOnlyDictionary<int, SupportTicketStatusSimpleDto>(AllAsSimpleDto.ToDictionary(x => x.SupportTicketStatusID));
         }
 
         /// <summary>
@@ -98,10 +95,12 @@ namespace Qanat.EFModels.Entities
         {
             switch (enumValue)
             {
-                case SupportTicketStatusEnum.Assigned:
-                    return Assigned;
+                case SupportTicketStatusEnum.Active:
+                    return Active;
                 case SupportTicketStatusEnum.Closed:
                     return Closed;
+                case SupportTicketStatusEnum.OnHold:
+                    return OnHold;
                 case SupportTicketStatusEnum.Unassigned:
                     return Unassigned;
                 default:
@@ -113,8 +112,9 @@ namespace Qanat.EFModels.Entities
     public enum SupportTicketStatusEnum
     {
         Unassigned = 1,
-        Assigned = 2,
-        Closed = 3
+        Active = 2,
+        Closed = 3,
+        OnHold = 4
     }
 
     public partial class SupportTicketStatusUnassigned : SupportTicketStatus
@@ -123,15 +123,21 @@ namespace Qanat.EFModels.Entities
         public static readonly SupportTicketStatusUnassigned Instance = new SupportTicketStatusUnassigned(1, @"Unassigned", @"Unassigned");
     }
 
-    public partial class SupportTicketStatusAssigned : SupportTicketStatus
+    public partial class SupportTicketStatusActive : SupportTicketStatus
     {
-        private SupportTicketStatusAssigned(int supportTicketStatusID, string supportTicketStatusName, string supportTicketStatusDisplayName) : base(supportTicketStatusID, supportTicketStatusName, supportTicketStatusDisplayName) {}
-        public static readonly SupportTicketStatusAssigned Instance = new SupportTicketStatusAssigned(2, @"Assigned", @"Assigned");
+        private SupportTicketStatusActive(int supportTicketStatusID, string supportTicketStatusName, string supportTicketStatusDisplayName) : base(supportTicketStatusID, supportTicketStatusName, supportTicketStatusDisplayName) {}
+        public static readonly SupportTicketStatusActive Instance = new SupportTicketStatusActive(2, @"Active", @"Active");
     }
 
     public partial class SupportTicketStatusClosed : SupportTicketStatus
     {
         private SupportTicketStatusClosed(int supportTicketStatusID, string supportTicketStatusName, string supportTicketStatusDisplayName) : base(supportTicketStatusID, supportTicketStatusName, supportTicketStatusDisplayName) {}
         public static readonly SupportTicketStatusClosed Instance = new SupportTicketStatusClosed(3, @"Closed", @"Closed");
+    }
+
+    public partial class SupportTicketStatusOnHold : SupportTicketStatus
+    {
+        private SupportTicketStatusOnHold(int supportTicketStatusID, string supportTicketStatusName, string supportTicketStatusDisplayName) : base(supportTicketStatusID, supportTicketStatusName, supportTicketStatusDisplayName) {}
+        public static readonly SupportTicketStatusOnHold Instance = new SupportTicketStatusOnHold(4, @"OnHold", @"On Hold");
     }
 }

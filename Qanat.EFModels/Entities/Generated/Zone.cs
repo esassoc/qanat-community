@@ -26,7 +26,7 @@ public partial class Zone
     [Unicode(false)]
     public string ZoneSlug { get; set; }
 
-    [StringLength(200)]
+    [StringLength(500)]
     [Unicode(false)]
     public string ZoneDescription { get; set; }
 

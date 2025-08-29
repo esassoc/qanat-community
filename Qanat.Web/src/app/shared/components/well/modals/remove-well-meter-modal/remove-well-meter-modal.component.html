@@ -1,0 +1,27 @@
+<div class="modal">
+    <div class="modal-header">
+        <h3>Remove Meter from Well</h3>
+    </div>
+
+    <div class="modal-body">
+        <app-alert-display></app-alert-display>
+
+        <form action="" class="form" [formGroup]="formGroup">
+            <div class="mb-3">
+                <form-field [formControl]="formGroup.controls.EndDate" fieldLabel="End Date" [type]="FormFieldType.Date" required></form-field>
+            </div>
+        </form>
+        <div class="copy copy-3 note-color pt-4 pb-2">
+            <note>
+                Are you sure you want to remove {{ ref.data.DeviceName }} meter from well
+                <strong>{{ ref.data.WellName }}</strong>
+                ?
+            </note>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-danger" (click)="save()" [disabled]="!formGroup.valid || isLoadingSubmit">Remove Meter from Well</button>
+            <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+        </div>
+    </div>
+</div>

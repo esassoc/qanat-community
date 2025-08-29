@@ -19,14 +19,13 @@ import { PageHeaderComponent } from "src/app/shared/components/page-header/page-
 import { AlertDisplayComponent } from "src/app/shared/components/alert-display/alert-display.component";
 import { CurrentGeographyService } from "src/app/shared/services/current-geography.service";
 import { GeographyMinimalDto } from "src/app/shared/generated/model/models";
-import { AsyncPipe, CommonModule } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 
 @Component({
     selector: "openet-sync-integration",
     templateUrl: "./openet-sync-integration.component.html",
     styleUrls: ["./openet-sync-integration.component.scss"],
-    standalone: true,
-    imports: [PageHeaderComponent, AlertDisplayComponent, QanatGridComponent, CommonModule, AsyncPipe],
+    imports: [PageHeaderComponent, AlertDisplayComponent, QanatGridComponent, AsyncPipe],
 })
 export class OpenetSyncIntegrationComponent implements OnInit {
     @ViewChild("openETGrid") openETGrid: AgGridAngular;
@@ -63,7 +62,7 @@ export class OpenetSyncIntegrationComponent implements OnInit {
                 this.initializeGrid(geography.GeographyID);
             }),
             switchMap(({ geography }) => {
-                return this.openETSyncService.geographiesGeographyIDOpenEtSyncsGet(geography.GeographyID);
+                return this.openETSyncService.listOpenETSyncsOpenETSync(geography.GeographyID);
             }),
             tap((openETSyncs) => {
                 this.pushSyncAlert(openETSyncs);
@@ -142,9 +141,43 @@ export class OpenetSyncIntegrationComponent implements OnInit {
 
     public createActionsColumnValueGetter(geographyID: number): ValueGetterFunc {
         return (params: any) => {
+            var deleteAction = {
+                ActionName: "Delete",
+                ActionHandler: () => {
+                    this.confirmService
+                        .confirm({
+                            title: "Delete",
+                            message: `Are you sure you would like to delete ${this.utilityFunctionsService.getMonthName(params.data.Month)} ${params.data.Year}? This will also delete any associated raster calculations.`,
+                            buttonTextYes: "Delete",
+                            buttonClassYes: "btn-primary",
+                            buttonTextNo: "Cancel",
+                        })
+                        .then((confirmed) => {
+                            if (confirmed) {
+                                this.isLoadingSubmit = true;
+                                this.openETSyncService.deleteHistoriesAndFileResourcesOpenETSync(geographyID, params.data.OpenETSyncID).subscribe(
+                                    () => {
+                                        this.isLoadingSubmit = false;
+                                        this.alertService.pushAlert(new Alert(`Successfully deleted!`, AlertContext.Success, true));
+                                        this.refetchSyncTrigger.next();
+                                    },
+                                    (error) => {
+                                        this.isLoadingSubmit = false;
+                                    }
+                                );
+                            }
+                        });
+                },
+            };
+
             if (params.data.FinalizeDate != null) {
-                return null;
+                if (params.data.LastSyncStatus != null) {
+                    return [deleteAction];
+                }
+
+                return [];
             }
+
             const isSyncSuccesfull =
                 params?.data?.LastSyncStatus?.OpenETSyncResultTypeDisplayName == "Succeeded" || params?.data?.LastSyncStatus?.OpenETSyncResultTypeDisplayName == "No New Data";
 
@@ -170,7 +203,7 @@ export class OpenetSyncIntegrationComponent implements OnInit {
                                     openETRunDto.Month = params.data.Month;
                                     openETRunDto.OpenETDataTypeID = params.data.OpenETDataType.OpenETDataTypeID;
 
-                                    this.openETSyncService.geographiesGeographyIDOpenEtSyncsPost(geographyID, openETRunDto).subscribe(
+                                    this.openETSyncService.queueOpenETSyncOpenETSync(geographyID, openETRunDto).subscribe(
                                         () => {
                                             this.isLoadingSubmit = false;
                                             this.alertService.pushAlert(
@@ -183,10 +216,10 @@ export class OpenetSyncIntegrationComponent implements OnInit {
                                                 )
                                             );
 
-                                            (this.openETGrid as any)?.gridApi?.showLoadingOverlay();
+                                            (this.openETGrid as any)?.gridApi?.setGridOption("loading", true);
 
                                             this.refetchSyncTrigger.next();
-                                            (this.openETGrid as any)?.hideOverlay();
+                                            (this.openETGrid as any)?.gridApi?.setGridOption("loading", false);
                                             this.cdr.detectChanges();
                                         },
                                         (error) => {
@@ -204,7 +237,7 @@ export class OpenetSyncIntegrationComponent implements OnInit {
                     actions.push({
                         ActionName: "Download Raster",
                         ActionHandler: () => {
-                            this.fileResourceService.fileResourcesFileResourceGuidAsStringGet(params.data.FileResourceGUID).subscribe((response) => {
+                            this.fileResourceService.downloadFileResourceFileResource(params.data.FileResourceGUID).subscribe((response) => {
                                 saveAs(response, `${params.data.FileResourceOriginalName}.${params.data.FileResourceOriginalFileExtension}`);
                             });
                         },
@@ -226,7 +259,7 @@ export class OpenetSyncIntegrationComponent implements OnInit {
                                 .then((confirmed) => {
                                     if (confirmed) {
                                         this.isLoadingSubmit = true;
-                                        this.openETSyncService.geographiesGeographyIDOpenEtSyncsOpenETSyncIDCalculatePut(geographyID, params.data.OpenETSyncID).subscribe(
+                                        this.openETSyncService.calculateRasterForOpenETSyncOpenETSync(geographyID, params.data.OpenETSyncID, { UsageLocationIDs: null }).subscribe(
                                             () => {
                                                 this.isLoadingSubmit = false;
                                                 this.alertService.pushAlert(
@@ -264,7 +297,7 @@ export class OpenetSyncIntegrationComponent implements OnInit {
                                     .then((confirmed) => {
                                         if (confirmed) {
                                             this.isLoadingSubmit = true;
-                                            this.openETSyncService.geographiesGeographyIDOpenEtSyncsOpenETSyncIDFinalizePut(geographyID, params.data.OpenETSyncID).subscribe(
+                                            this.openETSyncService.finalizeOpenETSyncOpenETSync(geographyID, params.data.OpenETSyncID).subscribe(
                                                 () => {
                                                     this.isLoadingSubmit = false;
                                                     this.alertService.pushAlert(new Alert(`Successfully finalized!`, AlertContext.Success, true));
@@ -281,6 +314,10 @@ export class OpenetSyncIntegrationComponent implements OnInit {
                         });
                     }
                 }
+            }
+
+            if (params.data.LastRasterCalculationStatus) {
+                actions.push(deleteAction);
             }
 
             return actions;

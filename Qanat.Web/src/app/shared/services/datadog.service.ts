@@ -20,7 +20,7 @@ export class DatadogService {
     init() {
         this.currentUser$ = this.authenticationService.getCurrentUser();
 
-        forkJoin([this.systemInfoService.getSystemInfo(), this.currentUser$]).subscribe(([systemInfo, currentUser]) => {
+        forkJoin([this.systemInfoService.getSystemInfoSystemInfo(), this.currentUser$]).subscribe(([systemInfo, currentUser]) => {
             const env = environment.production ? "prod" : environment.staging ? "qa" : "dev";
             datadogLogs.init({
                 clientToken: environment.datadogClientToken,

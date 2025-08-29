@@ -4,10 +4,9 @@ import { AllocationPlanPeriodSimpleDto } from "src/app/shared/generated/model/mo
 
 @Component({
     selector: "period-body",
-    standalone: true,
     imports: [CommonModule],
     templateUrl: "./period-body.component.html",
-    styleUrls: ["./period-body.component.scss"],
+    styleUrls: ["./period-body.component.scss"]
 })
 export class PeriodBodyComponent implements OnInit {
     @Input() allocationPlanPeriod: AllocationPlanPeriodSimpleDto;

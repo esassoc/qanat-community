@@ -3,25 +3,24 @@ import { ActivatedRoute, Router, RouterLink, RouterLinkActive, RouterOutlet } fr
 import { Observable } from "rxjs";
 import { switchMap, tap } from "rxjs/operators";
 import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
-import { GeographyDto, GeographyPublicDto, GeographyMinimalDto } from "src/app/shared/generated/model/models";
+import { GeographyMinimalDto, GeographyAllocationPlanConfigurationDto } from "src/app/shared/generated/model/models";
 import { ConfigureCardComponent } from "../../../shared/components/configure-card/configure-card.component";
 import { AlertDisplayComponent } from "../../../shared/components/alert-display/alert-display.component";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { GeographySwitcherComponent } from "../../../shared/components/geography-switcher/geography-switcher.component";
 import { GeographyLogoComponent } from "../../../shared/components/geography-logo/geography-logo.component";
-import { NgIf, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { IconComponent } from "src/app/shared/components/icon/icon.component";
 import { CurrentGeographyService } from "src/app/shared/services/current-geography.service";
 import { GeographyService } from "src/app/shared/generated/api/geography.service";
 import { routeParams } from "src/app/app.routes";
+import { AllocationPlanService } from "src/app/shared/generated/api/allocation-plan.service";
 
 @Component({
     selector: "configure-layout-menu",
     templateUrl: "./configure-layout-menu.component.html",
     styleUrls: ["./configure-layout-menu.component.scss"],
-    standalone: true,
     imports: [
-        NgIf,
         RouterLink,
         GeographyLogoComponent,
         IconComponent,
@@ -36,8 +35,10 @@ import { routeParams } from "src/app/app.routes";
 })
 export class DashboardConfigureComponent implements OnInit {
     public geography$: Observable<GeographyMinimalDto>;
+    public allocationPlan$: Observable<GeographyAllocationPlanConfigurationDto>;
 
     public reportingPeriodRichTextTypeID = CustomRichTextTypeEnum.ReportingPeriodConfiguration;
+    public statementTemplateRichTextTypeID = CustomRichTextTypeEnum.StatementTemplateConfiguration;
     public waterSupplyRichTextTypeID = CustomRichTextTypeEnum.WaterSupplyConfiguration;
     public waterLevelsRichTextTypeID = CustomRichTextTypeEnum.WaterLevelsConfiguration;
     public tradingRichTextTypeID = CustomRichTextTypeEnum.TradingConfiguration;
@@ -46,8 +47,10 @@ export class DashboardConfigureComponent implements OnInit {
     public permissionsRichTextTypeID = CustomRichTextTypeEnum.PermissionsConfiguration;
     public geospatialDataRichTextTypeID = CustomRichTextTypeEnum.GeospatialDataConfiguration;
     public zoneGroupRichTextTypeID = CustomRichTextTypeEnum.ZoneGroupConfiguration;
+    public usageLocationTypeRichTextTypeID = CustomRichTextTypeEnum.UsageLocationTypeConfiguration;
     public landingPageRichTextTypeID = CustomRichTextTypeEnum.ConfigureLandingPage;
     public meterRichTextTypeID = CustomRichTextTypeEnum.MeterConfiguration;
+    public selfReportingRichTextTypeID = CustomRichTextTypeEnum.SelfReportingConfiguration;
     public allocationPlanRichTextTypeID = CustomRichTextTypeEnum.AllocationPlanConfigureCard;
     public setupRichTextTypeID = CustomRichTextTypeEnum.ConfigureGeographySetup;
     public customAttributesRichTextTypeID = CustomRichTextTypeEnum.ConfigureCustomAttributes;
@@ -63,6 +66,7 @@ export class DashboardConfigureComponent implements OnInit {
     constructor(
         private currentGeographyService: CurrentGeographyService,
         private geographyService: GeographyService,
+        private allocationPlanService: AllocationPlanService,
         private route: ActivatedRoute,
         private router: Router
     ) {}
@@ -80,7 +84,7 @@ export class DashboardConfigureComponent implements OnInit {
             this.geography$ = this.route.params.pipe(
                 switchMap((params) => {
                     const geographyName = params[routeParams.geographyName];
-                    return this.geographyService.geographiesGeographyNameGeographyNameMinimalGet(geographyName).pipe(
+                    return this.geographyService.getByNameAsMinimalDtoGeography(geographyName).pipe(
                         tap((geography) => {
                             this.currentGeographyService.setCurrentGeography(geography);
                         })
@@ -88,6 +92,12 @@ export class DashboardConfigureComponent implements OnInit {
                 })
             );
         }
+
+        this.allocationPlan$ = this.geography$.pipe(
+            switchMap((geography) => {
+                return this.allocationPlanService.getAllocationPlanConfigurationByGeographyIDAllocationPlan(geography.GeographyID);
+            })
+        );
     }
 
     redirectToGeography(geographyName: string) {

@@ -33,16 +33,13 @@ public class OpenETConnectionTest
         var firstStatusResult = await GetAccountStatus();
         Assert.IsNotNull(firstStatusResult);
         Assert.IsNotNull(firstStatusResult.MonthlyRequests);
-        Assert.IsNotNull(firstStatusResult.MonthlyExportEECUSeconds);
 
         var secondStatusResult = await GetAccountStatus();
         Assert.IsNotNull(secondStatusResult);
         Assert.IsNotNull(secondStatusResult.MonthlyRequests);
-        Assert.IsNotNull(secondStatusResult.MonthlyExportEECUSeconds);
 
         Assert.AreEqual(firstStatusResult.MonthlyRequests, secondStatusResult.MonthlyRequests);
-        Assert.AreEqual(firstStatusResult.MonthlyExportEECUSeconds, secondStatusResult.MonthlyExportEECUSeconds);
-
+        
         //Pretty print json 
         var secondStatusResultAsJson = JsonSerializer.Serialize(secondStatusResult, new JsonSerializerOptions { WriteIndented = true });
         Console.WriteLine(secondStatusResultAsJson);
@@ -68,8 +65,8 @@ public class OpenETAccountStatusDto
     [JsonPropertyName("Monthly Requests")]
     public string MonthlyRequests { get; set; }
 
-    [JsonPropertyName("Monthly Export EECU Seconds")]
-    public string MonthlyExportEECUSeconds { get; set; }
+    //[JsonPropertyName("Monthly Export EECU Seconds")]
+    //public string MonthlyExportEECUSeconds { get; set; }
 
     [JsonPropertyName("Max Area Acres")]
     public int MaxAreaAcres { get; set; }

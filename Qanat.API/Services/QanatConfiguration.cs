@@ -7,6 +7,8 @@ public class QanatConfiguration
     public string DB_CONNECTION_STRING { get; set; }
     public string SITKA_EMAIL_REDIRECT { get; set; }
     public string PlatformLongName { get; set; }
+    public string WEB_URL { get; set; }
+    public string SitkaCaptureServiceUrl { get; set; }
     public string SupportEmail { get; set; }
     public string SendGridApiKey { get; set; }
     public AzureADB2CConfiguration AzureAdB2C { get; set; }
@@ -14,6 +16,7 @@ public class QanatConfiguration
     public GoogleCloudConfiguration GoogleCloud { get; set; }
     public string CNRAFeatureServerBaseUrl { get; set; }
     public string AdminClientFlowClientID { get; set; }
+    public string NormalClientFlowClientID { get; set; }
     public string InactiveClientFlowClientID { get; set; }
     public string AzureBlobStorageConnectionString { get; set; }
     public int GETRunCustomerID { get; set; }
@@ -28,6 +31,8 @@ public class QanatConfiguration
     public string RecaptchaSecretKey { get; set; }
     public string RecaptchaVerifyUrl { get; set; }
     public double RecaptchaScoreThreshold { get; set; }
+    public string MapboxApiBaseUrl { get; set; }
+    public string MapboxApiToken { get; set; }
 }
 
 public class OpenETConfiguration

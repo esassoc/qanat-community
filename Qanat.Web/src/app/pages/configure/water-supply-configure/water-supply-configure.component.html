@@ -25,14 +25,16 @@
                 </div>
             </div>
 
-            <ng-container *ngIf="waterTypes$ | async">
+            @if (waterTypes$ | async) {
                 <water-types-configure [waterTypes]="waterTypes" [currentUser]="currentUser" [geographyID]="geographyID"></water-types-configure>
-            </ng-container>
+            }
         </div>
 
         <div class="card-footer flex-end">
             <button type="submit" class="btn btn-primary" [disabled]="isLoadingSubmit" (click)="saveWaterTypes()">
-                <span *ngIf="isLoadingSubmit" class="fa fa-spinner loading-spinner"></span>
+                @if (isLoadingSubmit) {
+                    <span class="fa fa-spinner loading-spinner"></span>
+                }
                 Save
             </button>
             <a class="btn btn-primary-outline" routerLink="/configure/">Cancel</a>

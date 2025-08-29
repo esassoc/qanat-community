@@ -17,9 +17,7 @@ namespace Qanat.EFModels.Entities
         public static readonly MeterStatusRetired Retired = MeterStatusRetired.Instance;
 
         public static readonly List<MeterStatus> All;
-        public static readonly List<MeterStatusSimpleDto> AllAsSimpleDto;
         public static readonly ReadOnlyDictionary<int, MeterStatus> AllLookupDictionary;
-        public static readonly ReadOnlyDictionary<int, MeterStatusSimpleDto> AllAsSimpleDtoLookupDictionary;
 
         /// <summary>
         /// Static type constructor to coordinate static initialization order
@@ -27,9 +25,7 @@ namespace Qanat.EFModels.Entities
         static MeterStatus()
         {
             All = new List<MeterStatus> { Active, Broken, Retired };
-            AllAsSimpleDto = new List<MeterStatusSimpleDto> { Active.AsSimpleDto(), Broken.AsSimpleDto(), Retired.AsSimpleDto() };
             AllLookupDictionary = new ReadOnlyDictionary<int, MeterStatus>(All.ToDictionary(x => x.MeterStatusID));
-            AllAsSimpleDtoLookupDictionary = new ReadOnlyDictionary<int, MeterStatusSimpleDto>(AllAsSimpleDto.ToDictionary(x => x.MeterStatusID));
         }
 
         /// <summary>

@@ -1,14 +1,13 @@
 import { Component, Input, OnInit } from "@angular/core";
 import { AgGridAngular } from "ag-grid-angular";
 import { Observable, combineLatest, map, startWith } from "rxjs";
-import { NgIf, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 
 @Component({
     selector: "pagination-controls",
     templateUrl: "./pagination-controls.component.html",
     styleUrl: "./pagination-controls.component.scss",
-    standalone: true,
-    imports: [NgIf, AsyncPipe],
+    imports: [AsyncPipe]
 })
 export class PaginationControlsComponent implements OnInit {
     @Input() grid: AgGridAngular;

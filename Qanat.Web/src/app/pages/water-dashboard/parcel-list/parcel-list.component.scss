@@ -10,15 +10,15 @@
     }
 }
 
-.geography-selector {
-    width: $spacing-2500;
-    text-align: right;
+.navigation-selector-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 
-    .field select {
-        height: $spacing-600;
-        width: $spacing-1000;
-        font-size: $type-size-200;
-        padding: $spacing-100;
+.navigation-selector {
+    .field {
+        width: $spacing-950;
     }
 }
 

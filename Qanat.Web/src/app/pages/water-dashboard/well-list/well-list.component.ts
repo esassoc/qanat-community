@@ -3,10 +3,9 @@ import { BehaviorSubject, combineLatest, map, of, switchMap, tap } from "rxjs";
 import { Observable } from "rxjs/internal/Observable";
 import { AuthenticationService } from "src/app/shared/services/authentication.service";
 import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
-import { NgIf, AsyncPipe, CommonModule } from "@angular/common";
+import { AsyncPipe, CommonModule } from "@angular/common";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
-import { QanatGridComponent } from "src/app/shared/components/qanat-grid/qanat-grid.component";
-import { QanatMapComponent, QanatMapInitEvent } from "src/app/shared/components/leaflet/qanat-map/qanat-map.component";
+import { QanatMapInitEvent } from "src/app/shared/components/leaflet/qanat-map/qanat-map.component";
 import { UserDto } from "src/app/shared/generated/model/user-dto";
 import { ColDef, GridApi, GridReadyEvent } from "ag-grid-community";
 import { AgGridAngular } from "ag-grid-angular";
@@ -17,17 +16,14 @@ import { RightsEnum } from "src/app/shared/models/enums/rights.enum";
 import { WellMinimalDto } from "src/app/shared/generated/model/well-minimal-dto";
 import { WellService } from "src/app/shared/generated/api/well.service";
 import { FormsModule } from "@angular/forms";
-import { QanatGridHeaderComponent } from "src/app/shared/components/qanat-grid-header/qanat-grid-header.component";
 import { OpenedWellPopupEvent, WellsLayerComponent } from "src/app/shared/components/leaflet/layers/wells-layer/wells-layer.component";
 import { RouterLink } from "@angular/router";
-import { IconComponent } from "src/app/shared/components/icon/icon.component";
 import { GeographyService } from "src/app/shared/generated/api/geography.service";
 import { LoadingDirective } from "src/app/shared/directives/loading.directive";
 import { ParcelService } from "src/app/shared/generated/api/parcel.service";
 import { ZoneGroupService } from "src/app/shared/generated/api/zone-group.service";
 import { ExternalMapLayerService } from "src/app/shared/generated/api/external-map-layer.service";
 import { ZoneGroupMinimalDto } from "src/app/shared/generated/model/zone-group-minimal-dto";
-import { ExternalMapLayerDto } from "src/app/shared/generated/model/external-map-layer-dto";
 import { ParcelLayerComponent } from "src/app/shared/components/leaflet/layers/parcel-layer/parcel-layer.component";
 import { ZoneGroupLayerComponent } from "src/app/shared/components/leaflet/layers/zone-group-layer/zone-group-layer.component";
 import { GeographyExternalMapLayerComponent } from "src/app/shared/components/leaflet/layers/geography-external-map-layer/geography-external-map-layer.component";
@@ -35,26 +31,22 @@ import { GsaBoundariesComponent } from "src/app/shared/components/leaflet/layers
 import { WaterDashboardNavComponent } from "src/app/shared/components/water-dashboard-nav/water-dashboard-nav.component";
 import { AlertDisplayComponent } from "src/app/shared/components/alert-display/alert-display.component";
 import { ParcelByGeographyService } from "src/app/shared/generated/api/parcel-by-geography.service";
-import { GeographyMinimalDto } from "src/app/shared/generated/model/models";
+import { ExternalMapLayerSimpleDto, GeographyMinimalDto } from "src/app/shared/generated/model/models";
 import { GeographyHelper } from "src/app/shared/helpers/geography-helper";
 import { CurrentGeographyService } from "src/app/shared/services/current-geography.service";
+import { NgSelectModule } from "@ng-select/ng-select";
+import { HybridMapGridComponent } from "src/app/shared/components/hybrid-map-grid/hybrid-map-grid.component";
 
 @Component({
     selector: "well-list",
     templateUrl: "./well-list.component.html",
     styleUrls: ["./well-list.component.scss"],
-    standalone: true,
     imports: [
         PageHeaderComponent,
         LoadingDirective,
-        NgIf,
         RouterLink,
-        IconComponent,
         AsyncPipe,
         WaterDashboardNavComponent,
-        QanatGridComponent,
-        QanatGridHeaderComponent,
-        QanatMapComponent,
         WellsLayerComponent,
         CommonModule,
         FormsModule,
@@ -63,6 +55,8 @@ import { CurrentGeographyService } from "src/app/shared/services/current-geograp
         GeographyExternalMapLayerComponent,
         GsaBoundariesComponent,
         AlertDisplayComponent,
+        NgSelectModule,
+        HybridMapGridComponent,
     ],
 })
 export class WellListComponent implements OnInit, OnDestroy {
@@ -81,7 +75,7 @@ export class WellListComponent implements OnInit, OnDestroy {
 
     public parcelIDs$: Observable<number[]>;
     public zoneGroups$: Observable<ZoneGroupMinimalDto[]>;
-    public externalMapLayers$: Observable<ExternalMapLayerDto[]>;
+    public externalMapLayers$: Observable<ExternalMapLayerSimpleDto[]>;
 
     public currentUserHasManagerPermissionsForSelectedGeography: boolean = false;
     public currentUserHasOverallPermission: boolean = false;
@@ -102,6 +96,7 @@ export class WellListComponent implements OnInit, OnDestroy {
 
     public richTextID: number = CustomRichTextTypeEnum.WaterDashboardWells;
     public isLoading: boolean = true;
+    public layerLoading: boolean = false;
     public firstLoad: boolean = true;
 
     constructor(
@@ -143,40 +138,48 @@ export class WellListComponent implements OnInit, OnDestroy {
             })
         );
 
-        this.currentUserGeographies$ = this.geographyService.geographiesCurrentUserGet().pipe(
+        this.currentUserGeographies$ = this.geographyService.listForCurrentUserGeography().pipe(
             tap((geographies) => {
                 this.currentUserHasNoGeographies = geographies.length == 0;
             })
         );
 
-        this.parcelIDs$ = this.geography$.pipe(
-            switchMap((geography) => {
-                return this.parcelByGeographyService.geographiesGeographyIDParcelsCurrentUserGet(geography.GeographyID);
-            }),
-            map((parcels) => parcels.map((x) => x.ParcelID))
-        );
-
         this.zoneGroups$ = this.geography$.pipe(
             switchMap((geography) => {
-                return this.zoneGroupService.geographiesGeographyIDZoneGroupsGet(geography.GeographyID);
+                return this.zoneGroupService.listZoneGroup(geography.GeographyID);
             })
         );
 
         this.externalMapLayers$ = this.geography$.pipe(
             switchMap((geography) => {
-                return this.externalMapLayerService.geographiesGeographyIDExternalMapLayersGet(geography.GeographyID);
+                return this.externalMapLayerService.getExternalMapLayer(geography.GeographyID);
             })
         );
 
         this.wells$ = combineLatest({ currentUser: this.currentUser$, geography: this.geography$, _: this.gridRefReady$ }).pipe(
-            tap(() => (this.isLoading = true)),
+            tap(() => {
+                this.isLoading = true;
+                if (this.gridApi) {
+                    this.gridApi.setGridOption("loading", true);
+                }
+            }),
             switchMap(({ currentUser, geography }) => {
-                return this.wellService.geographiesGeographyIDWellsCurrentUserGet(geography.GeographyID);
+                return this.wellService.listWellsByGeographyIDAndCurrentUserWell(geography.GeographyID);
             }),
             tap(() => {
                 this.isLoading = false;
                 this.firstLoad = false;
+                if (this.gridApi) {
+                    this.gridApi.setGridOption("loading", false);
+                }
             })
+        );
+
+        this.parcelIDs$ = this.geography$.pipe(
+            switchMap((geography) => {
+                return this.parcelByGeographyService.listByGeographyIDForCurrentUserParcelByGeography(geography.GeographyID);
+            }),
+            map((parcels) => parcels.map((x) => x.ParcelID))
         );
     }
 
@@ -273,11 +276,20 @@ export class WellListComponent implements OnInit, OnDestroy {
                 FieldDefinitionType: "WellStatus",
                 CustomDropdownFilterField: "WellStatusDisplayName",
             }),
+            this.utilityFunctionsService.createBasicColumnDef("Meter", "MeterSerialNumber"),
             this.utilityFunctionsService.createLatLonColumnDef("Latitude", "Latitude"),
             this.utilityFunctionsService.createLatLonColumnDef("Longitude", "Longitude"),
             this.utilityFunctionsService.createBasicColumnDef("Notes", "Notes"),
         ];
 
         return columnDefs;
+    }
+
+    public onLayerLoadStarted() {
+        this.layerLoading = true;
+    }
+
+    public onLayerLoadFinished() {
+        this.layerLoading = false;
     }
 }

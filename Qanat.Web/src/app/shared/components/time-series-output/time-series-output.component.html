@@ -2,37 +2,50 @@
 
 <div class="stats grid-12 mb-4">
     <scenario-output-stat
-        class="g-col-4"
+        class="g-col-3"
         [statTitle]="'Average change in water level'"
         [value]="averageChangeInWaterLevel"
         [units]="'feet'"
         [description]="'As of the end of the model run (' + (getScenarioRunResult.ModelRunEndDate | date) + ')'"></scenario-output-stat>
 
     <scenario-output-stat
-        class="g-col-4"
+        class="g-col-3"
         [statTitle]="'Total Change in Aquifer Storage'"
         [value]="totalChangeInAquiferStorage"
         [units]="'ac-ft'"
         [description]="'Change in the aquifer(s) volume of water.'"></scenario-output-stat>
 
-    <ng-container [ngSwitch]="scenarioRun.Scenario.ScenarioID">
-        <scenario-output-stat
-            *ngSwitchCase="ScenarioEnum.AddaWell"
-            class="g-col-4"
-            [statTitle]="'Total change in pumping'"
-            [value]="totalChangeInPumping"
-            [units]="'ac-ft'"
-            [description]="'As of the end of the model run (' + (getScenarioRunResult.ModelRunEndDate | date) + ')'"></scenario-output-stat>
+    <scenario-output-stat
+        class="g-col-3"
+        [statTitle]="'Total Change in Interconnected Surface Water Discharge'"
+        [value]="totalChangeInGainFromStreams"
+        [units]="'ac-ft'"
+        [description]="'Gain from streams.'"></scenario-output-stat>
 
-        <scenario-output-stat
-            *ngSwitchCase="ScenarioEnum.Recharge"
-            class="g-col-4"
-            [statTitle]="'Total change in recharge'"
-            [value]="totalChangeInRecharge"
-            [units]="'ac-ft'"
-            [description]="'As of the end of the model run (' + (getScenarioRunResult.ModelRunEndDate | date) + ')'"></scenario-output-stat>
-    </ng-container>
+    @switch (scenarioRun.Scenario.ScenarioID) {
+        @case (ScenarioEnum.AddaWell) {
+            <scenario-output-stat
+                class="g-col-3"
+                [statTitle]="'Total change in pumping'"
+                [value]="totalChangeInPumping"
+                [units]="'ac-ft'"
+                [description]="'As of the end of the model run (' + (getScenarioRunResult.ModelRunEndDate | date) + ')'"></scenario-output-stat>
+        }
+        @case (ScenarioEnum.Recharge) {
+            <scenario-output-stat
+                class="g-col-3"
+                [statTitle]="'Total change in recharge'"
+                [value]="totalChangeInRecharge"
+                [units]="'ac-ft'"
+                [description]="'As of the end of the model run (' + (getScenarioRunResult.ModelRunEndDate | date) + ')'"></scenario-output-stat>
+        }
+    }
 </div>
 
 <h2 class="mb-3">Water Levels</h2>
 <time-series-output-chart [scenarioRunResult]="getScenarioRunResult" [scenarioRun]="scenarioRun" [(selectedLabel)]="selectedMarker"></time-series-output-chart>
+<!-- <h2 class="mt-3 mb-3">Gain from Streams</h2>
+<time-series-output-gain-from-streams-chart
+  [scenarioRunResult]="getScenarioRunResult"
+  [scenarioRun]="scenarioRun"
+[(selectedLabel)]="selectedMarker"></time-series-output-gain-from-streams-chart> -->

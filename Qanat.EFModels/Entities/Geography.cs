@@ -1,5 +1,4 @@
-﻿using NetTopologySuite.Operation.Buffer;
-using Qanat.Common.GeoSpatial;
+﻿using Qanat.Common.GeoSpatial;
 
 namespace Qanat.EFModels.Entities;
 

@@ -1,7 +1,9 @@
 <div class="full-width-page">
     <page-header icon="Wells" [templateRight]="templateRight" [templateAbove]="templateAbove" [customRichTextTypeID]="richTextID">
         <ng-template #templateRight>
-            <a *ngIf="geography$ | async" class="btn btn-primary btn-rounded" routerLink="upload"> Upload Reference Wells </a>
+            @if (geography$ | async) {
+                <a class="btn btn-primary btn-rounded" routerLink="upload"> Upload Reference Wells </a>
+            }
         </ng-template>
         <ng-template #templateAbove>
             <div class="back">
@@ -13,13 +15,9 @@
     <div class="page-body grid-12">
         <app-alert-display></app-alert-display>
         <div class="table-responsive">
-            <qanat-grid
-                *ngIf="referenceWells$ | async as referenceWells"
-                [rowData]="referenceWells"
-                [columnDefs]="columnDefs"
-                (gridReady)="onGridReady($event)"
-                rowSelection="single"
-                downloadFileName="reference-wells"></qanat-grid>
+            @if (referenceWells$ | async; as referenceWells) {
+                <qanat-grid [rowData]="referenceWells" [columnDefs]="columnDefs" (gridReady)="onGridReady($event)" downloadFileName="reference-wells"></qanat-grid>
+            }
         </div>
     </div>
 </div>

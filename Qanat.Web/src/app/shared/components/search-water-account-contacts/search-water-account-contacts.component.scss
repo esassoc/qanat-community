@@ -1,0 +1,148 @@
+@use "/src/scss/abstracts" as *;
+
+:host {
+    display: block;
+}
+.search-container {
+    position: relative;
+    input {
+        padding-left: 3rem;
+        padding-right: 3rem;
+        font-family: inherit;
+
+        &:disabled {
+            background: #e5e5e5;
+            cursor: not-allowed;
+        }
+
+        border-radius: 0;
+
+        &::placeholder {
+            font-size: 0.8rem;
+        }
+    }
+    .search-prepend,
+    .search-append {
+        position: absolute;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .search-prepend {
+        left: 0;
+        width: 50px;
+        pointer-events: none;
+    }
+    .search-append {
+        top: 0;
+        right: 0;
+        button.clear {
+            margin-right: 15px;
+            background: none;
+            border: none;
+            color: #444444;
+            &:hover {
+                color: #000;
+            }
+        }
+    }
+}
+
+.search-results {
+    position: absolute;
+    z-index: 9999;
+    box-shadow: 0px 4px 12px 0px #00000040;
+    background: #fff;
+
+    border: 1px solid $gray-200;
+
+    .refine-search {
+        width: 360px;
+    }
+
+    ul {
+        max-height: 3z60px;
+        max-width: 560px;
+        overflow-y: auto;
+        z-index: 10;
+
+        li {
+            &:first-child button {
+                border-radius: 8px 8px 0 0;
+            }
+
+            &:last-child button {
+                border-radius: 0 0 8px 8px;
+            }
+
+            button {
+                padding: $spacing-400 $spacing-400;
+                background: none;
+                border: none;
+                text-align: left;
+                width: 100%;
+                font-family: inherit;
+
+                &:hover,
+                &:focus {
+                    background: rgba($primary, 0.1);
+                }
+            }
+
+            & + li {
+                border-top: 1px solid #e5e5e5;
+            }
+
+            &.highlighted-search-result {
+                background: rgba($primary, 0.05);
+            }
+
+            icon ::ng-deep svg {
+                color: $primary;
+                height: 18px;
+                width: 18px;
+            }
+        }
+    }
+
+    .button-head {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+
+        svg {
+            path {
+                fill: $primary;
+            }
+        }
+    }
+
+    .wa-name {
+        font-size: $type-size-300;
+        color: $primary;
+        padding-left: 0.25rem;
+    }
+
+    .wa-id {
+        font-size: $type-size-100;
+        color: $gray-default;
+        overflow: hidden;
+        max-width: 10rem;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .wa-parcels,
+    .wa-acres {
+        font-size: $type-size-200;
+    }
+
+    .wa-acres {
+        padding-left: 0.125rem;
+    }
+
+    .wa-meta {
+        font-size: $type-size-150;
+    }
+}

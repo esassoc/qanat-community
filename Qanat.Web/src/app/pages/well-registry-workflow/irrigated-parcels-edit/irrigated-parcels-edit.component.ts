@@ -14,7 +14,7 @@ import { IDeactivateComponent } from "src/app/guards/unsaved-changes-guard";
 import { WellRegistrationService } from "src/app/shared/generated/api/well-registration.service";
 import { ButtonComponent } from "../../../shared/components/button/button.component";
 import { WellIrrigatedParcelsEditMapComponent } from "../../../shared/components/maps/well-irrigated-parcels-edit-map/well-irrigated-parcels-edit-map.component";
-import { NgIf, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { AlertDisplayComponent } from "../../../shared/components/alert-display/alert-display.component";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { WorkflowHelpComponent } from "src/app/shared/components/workflow-help/workflow-help.component";
@@ -24,8 +24,7 @@ import { WorkflowBodyComponent } from "src/app/shared/components/workflow-body/w
     selector: "irrigated-parcels-edit",
     templateUrl: "./irrigated-parcels-edit.component.html",
     styleUrls: ["./irrigated-parcels-edit.component.scss"],
-    standalone: true,
-    imports: [PageHeaderComponent, WorkflowHelpComponent, WorkflowBodyComponent, AlertDisplayComponent, NgIf, WellIrrigatedParcelsEditMapComponent, ButtonComponent, AsyncPipe],
+    imports: [PageHeaderComponent, WorkflowHelpComponent, WorkflowBodyComponent, AlertDisplayComponent, WellIrrigatedParcelsEditMapComponent, ButtonComponent, AsyncPipe]
 })
 export class IrrigatedParcelsEditComponent implements OnInit, IDeactivateComponent {
     public customRichTextTypeID = CustomRichTextTypeEnum.WellRegistryIrrigatedParcels;
@@ -56,7 +55,7 @@ export class IrrigatedParcelsEditComponent implements OnInit, IDeactivateCompone
         this.wellRegistrationIrrigatedParcels$ = this.route.paramMap.pipe(
             switchMap((paramMap) => {
                 this.wellID = parseInt(paramMap.get(routeParams.wellRegistrationID));
-                return this.wellRegistrationService.wellRegistrationsWellRegistrationIDIrrigatedParcelsGet(this.wellID);
+                return this.wellRegistrationService.getWellRegistrationIrrigatedParcelsWellRegistration(this.wellID);
             }),
             tap((wellIrrigatedParcelsDto) => {
                 this.geographyID = wellIrrigatedParcelsDto.GeographyID;
@@ -70,7 +69,7 @@ export class IrrigatedParcelsEditComponent implements OnInit, IDeactivateCompone
         this.isLoadingSubmit = true;
 
         const requestDto = new WellRegistrationIrrigatedParcelsRequestDto({ IrrigatedParcelIDs: this.irrigatedParcelIDs });
-        this.wellRegistrationService.wellRegistrationsWellRegistrationIDIrrigatedParcelsPut(this.wellID, requestDto).subscribe({
+        this.wellRegistrationService.updateWellIrrigatedParcelsWellRegistration(this.wellID, requestDto).subscribe({
             next: () => {
                 this.isLoadingSubmit = false;
                 this.wellRegistryProgressService.updateProgress(this.wellID);

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Qanat.Models.Security
 {
@@ -81,5 +82,30 @@ namespace Qanat.Models.Security
         Update = 0b00010, // 2
         Create = 0b00100, // 4
         Delete = 0b01000  // 8
+    }
+
+    public class RightsConverter : JsonConverter<Rights>
+    {
+        public override Rights Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            if (reader.TokenType == JsonTokenType.Number)
+            {
+                return reader.GetInt32();
+            }
+            else
+            {
+                return new Rights();
+            }
+        }
+
+        public override void Write(Utf8JsonWriter writer, Rights value, JsonSerializerOptions options)
+        {
+            if (value == null)
+            {
+                writer.WriteNullValue();
+                return;
+            }
+            writer.WriteNumberValue(value);
+        }
     }
 }

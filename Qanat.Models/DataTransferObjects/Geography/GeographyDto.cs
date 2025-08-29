@@ -16,6 +16,8 @@ public class GeographyDto
     public string Color { get; set; }
     public string ContactEmail { get; set; }
     public string ContactPhoneNumber { get; set; }
+    public string ContactAddressLine1 { get; set; }
+    public string ContactAddressLine2 { get; set; }
     public string LandownerDashboardSupplyLabel { get; set; }
     public string LandownerDashboardUsageLabel { get; set; }
 
@@ -23,10 +25,7 @@ public class GeographyDto
     public BoundingBoxDto BoundingBox { get; set; }
     public int CoordinateSystem { get; set; }
     public int AreaToAcresConversionFactor { get; set; }
-
-    // Reporting Period/Temporal Data
-    public ReportingPeriodSimpleDto DefaultReportingPeriod { get; set; }
-
+        
     // OpenET Configuration
     public bool IsOpenETActive { get; set; }
 
@@ -48,8 +47,8 @@ public class GeographyDto
     public bool WellRegistryEnabled { get; set; }
     public bool LandingPageEnabled { get; set; }
     public bool MeterDataEnabled { get; set; }
-    public bool DisplayUsageGeometriesAsField { get; set; }
     public bool AllowLandownersToRequestAccountChanges { get; set; }
     public bool AllowWaterMeasurementSelfReporting { get; set; }
+    public bool AllowFallowSelfReporting { get; set; }
     public bool FeeCalculatorEnabled { get; set; }
 }

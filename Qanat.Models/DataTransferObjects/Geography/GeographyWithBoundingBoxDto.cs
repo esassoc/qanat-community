@@ -6,4 +6,7 @@ public class GeographyWithBoundingBoxDto
     public string GeographyName { get; set; }
     public string GeographyDisplayName { get; set; }
     public BoundingBoxDto BoundingBox { get; set; }
+
+    public bool AllocationPlansVisibleToLandowners { get; set; }
+    public bool AllocationPlansVisibleToPublic { get; set; }
 }

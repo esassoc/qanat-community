@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Qanat.Models.DataTransferObjects;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace Qanat.EFModels.Entities;
 
@@ -30,20 +26,5 @@ public static class GeographyConfigurations
             .SingleAsync(x => x.GeographyConfigurationID == geographyID);
         geographyConfiguration.MetersEnabled = enabled;
         await dbContext.SaveChangesAsync();
-    }
-
-    public static async Task<List<GeographyConfigurationDto>> GetGeographyConfigurations(QanatDbContext dbContext)
-    {
-        var geographyConfigurations = await dbContext.Geographies.AsNoTracking()
-            .Include(x => x.GeographyConfiguration)
-            .Select(x => new GeographyConfigurationDto()
-            {
-                GeographyID = x.GeographyID,
-                GeographySlug = x.GeographyName.ToLower(),
-                WellRegistryEnabled = x.GeographyConfiguration.WellRegistryEnabled,
-                LandingPageEnabled = x.GeographyConfiguration.LandingPageEnabled,
-            }).ToListAsync();
-
-        return geographyConfigurations;
     }
 }

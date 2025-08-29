@@ -12,8 +12,7 @@ import { RichLinkComponent } from "src/app/shared/components/rich-link/rich-link
     selector: "manager-guide",
     templateUrl: "./manager-guide.component.html",
     styleUrls: ["./manager-guide.component.scss"],
-    standalone: true,
-    imports: [PageHeaderComponent, AlertDisplayComponent, IconComponent, RichLinkComponent, RouterLink, FaqDisplayComponent],
+    imports: [PageHeaderComponent, AlertDisplayComponent, IconComponent, RichLinkComponent, RouterLink, FaqDisplayComponent]
 })
 export class ManagerGuideComponent {
     public faqDisplayLocationTypeID: FaqDisplayLocationTypeEnum = FaqDisplayLocationTypeEnum.WaterManagerGuide;

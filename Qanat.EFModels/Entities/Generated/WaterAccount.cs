@@ -9,6 +9,8 @@ namespace Qanat.EFModels.Entities;
 [Table("WaterAccount")]
 [Index("WaterAccountNumber", Name = "AK_Account_AccountNumber", IsUnique = true)]
 [Index("WaterAccountID", "GeographyID", Name = "AK_WaterAccount_WaterAccountID_GeographyID", IsUnique = true)]
+[Index("GeographyID", Name = "IX_WaterAccount_GeographyID")]
+[Index("WaterAccountContactID", Name = "IX_WaterAccount_WaterAccountContactID")]
 public partial class WaterAccount
 {
     [Key]
@@ -35,35 +37,36 @@ public partial class WaterAccount
     [Column(TypeName = "datetime")]
     public DateTime CreateDate { get; set; }
 
-    [StringLength(255)]
-    [Unicode(false)]
-    public string ContactName { get; set; }
-
-    [StringLength(500)]
-    [Unicode(false)]
-    public string ContactAddress { get; set; }
+    public int? WaterAccountContactID { get; set; }
 
     [ForeignKey("GeographyID")]
     [InverseProperty("WaterAccounts")]
     public virtual Geography Geography { get; set; }
 
     [InverseProperty("WaterAccount")]
-    public virtual ICollection<ParcelHistory> ParcelHistories { get; set; } = new List<ParcelHistory>();
+    public virtual ICollection<Parcel> Parcels { get; set; } = new List<Parcel>();
 
     [InverseProperty("WaterAccount")]
-    public virtual ICollection<Parcel> Parcels { get; set; } = new List<Parcel>();
+    public virtual ICollection<StatementBatchWaterAccount> StatementBatchWaterAccounts { get; set; } = new List<StatementBatchWaterAccount>();
 
     [InverseProperty("WaterAccount")]
     public virtual ICollection<SupportTicket> SupportTickets { get; set; } = new List<SupportTicket>();
 
+    [ForeignKey("WaterAccountContactID")]
+    [InverseProperty("WaterAccounts")]
+    public virtual WaterAccountContact WaterAccountContact { get; set; }
+
+    [InverseProperty("WaterAccount")]
+    public virtual ICollection<WaterAccountCoverCropStatus> WaterAccountCoverCropStatuses { get; set; } = new List<WaterAccountCoverCropStatus>();
+
     [InverseProperty("WaterAccount")]
     public virtual WaterAccountCustomAttribute WaterAccountCustomAttribute { get; set; }
 
-    [InverseProperty("WaterAccountNavigation")]
-    public virtual ICollection<WaterAccountParcel> WaterAccountParcelWaterAccountNavigations { get; set; } = new List<WaterAccountParcel>();
+    [InverseProperty("WaterAccount")]
+    public virtual ICollection<WaterAccountFallowStatus> WaterAccountFallowStatuses { get; set; } = new List<WaterAccountFallowStatus>();
 
     [InverseProperty("WaterAccount")]
-    public virtual ICollection<WaterAccountParcel> WaterAccountParcelWaterAccounts { get; set; } = new List<WaterAccountParcel>();
+    public virtual ICollection<WaterAccountParcel> WaterAccountParcels { get; set; } = new List<WaterAccountParcel>();
 
     [InverseProperty("WaterAccountNavigation")]
     public virtual ICollection<WaterAccountReconciliation> WaterAccountReconciliationWaterAccountNavigations { get; set; } = new List<WaterAccountReconciliation>();

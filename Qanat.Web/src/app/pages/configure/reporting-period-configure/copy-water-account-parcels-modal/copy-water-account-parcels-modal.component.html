@@ -1,0 +1,25 @@
+<div class="modal">
+    <div class="modal-header">
+        <h3 class="section-title">Copy Parcel Water Account Assignments</h3>
+    </div>
+    <div class="modal-body grid-12">
+        <app-alert-display></app-alert-display>
+
+        <form class="form grid-12" [formGroup]="formGroup">
+            <form-field
+                class="g-col-12"
+                [formControl]="formGroup.controls.FromReportingPeriodID"
+                fieldLabel="Copy From Reporting Period"
+                [required]="true"
+                [type]="FormFieldType.Select"
+                [formInputOptions]="reportingPeriodSelectOptions"></form-field>
+        </form>
+
+        <note noteType="warning">Copying to {{ ref.data.ToReportingPeriod.Name }}. This action will wipe existing Parcel Water Account assignments.</note>
+    </div>
+
+    <div class="modal-footer">
+        <button class="btn btn-primary" (click)="save()" [disabled]="formGroup.invalid">Save</button>
+        <button class="btn btn-primary-outline" (click)="cancel()">Cancel</button>
+    </div>
+</div>

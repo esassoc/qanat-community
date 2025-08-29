@@ -11,10 +11,10 @@ namespace Qanat.EFModels.Entities
 
         public static class FieldLengths
         {
-            public const int SerialNumber = 25;
+            public const int SerialNumber = 255;
             public const int DeviceName = 255;
-            public const int Make = 100;
-            public const int ModelNumber = 25;
+            public const int Make = 255;
+            public const int ModelNumber = 255;
         }
     }
 }

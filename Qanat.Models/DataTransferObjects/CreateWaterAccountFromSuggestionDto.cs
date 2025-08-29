@@ -7,7 +7,7 @@ public class CreateWaterAccountFromSuggestionDto
     [Required]
     public List<int> ParcelIDList { get; set; }
     [Required]
-    public int EffectiveYear { get; set; }
+    public int ReportingPeriodID { get; set; }
     [Required]
     public string WaterAccountName { get; set; }
 

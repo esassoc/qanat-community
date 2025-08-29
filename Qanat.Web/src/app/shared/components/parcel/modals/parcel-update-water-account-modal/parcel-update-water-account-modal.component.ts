@@ -1,82 +1,99 @@
-import { Component, ComponentRef } from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { IModal, ModalService } from "src/app/shared/services/modal/modal.service";
-import { ModalComponent } from "src/app/shared/components/modal/modal.component";
+import { Component, ComponentRef, inject } from "@angular/core";
 import { ParcelContext } from "src/app/shared/components/water-account/modals/add-parcel-to-water-account/add-parcel-to-water-account.component";
-import { FormGroup, FormControl, Validators, FormsModule, ReactiveFormsModule } from "@angular/forms";
-import { Observable, map, tap } from "rxjs";
+import { FormGroup, FormControl, FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { Observable, shareReplay, switchMap, tap } from "rxjs";
 import { ParcelService } from "src/app/shared/generated/api/parcel.service";
 import { ParcelMinimalDto } from "src/app/shared/generated/model/parcel-minimal-dto";
-import { WaterAccountDto } from "src/app/shared/generated/model/water-account-dto";
-import { Alert } from "src/app/shared/models/alert";
-import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
 import { AlertService } from "src/app/shared/services/alert.service";
-import { SelectDropdownOption } from "src/app/shared/components/inputs/select-dropdown/select-dropdown.component";
 import { ReportingPeriodService } from "src/app/shared/generated/api/reporting-period.service";
 import { FormFieldComponent, FormFieldType } from "src/app/shared/components/forms/form-field/form-field.component";
-import { SearchWaterAccountsComponent } from "src/app/shared/components/search-water-accounts/search-water-accounts.component";
-import { NoteComponent } from "src/app/shared/components/note/note.component";
-import { IconComponent } from "../../../icon/icon.component";
+import { ReportingPeriodDto } from "src/app/shared/generated/model/reporting-period-dto";
+import { WaterAccountParcelByParcelService } from "src/app/shared/generated/api/water-account-parcel-by-parcel.service";
+import { UpdateWaterAccountParcelsByParcelDto, WaterAccountMinimalAndReportingPeriodSimpleDto, WaterAccountReportingPeriodDto } from "src/app/shared/generated/model/models";
+import { Alert } from "src/app/shared/models/alert";
+import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
+import { AsyncPipe } from "@angular/common";
+import { DialogRef } from "@ngneat/dialog";
 
 @Component({
     selector: "parcel-update-water-account-modal",
-    standalone: true,
-    imports: [CommonModule, IconComponent, FormsModule, ReactiveFormsModule, SearchWaterAccountsComponent, FormFieldComponent, NoteComponent],
+    imports: [FormsModule, ReactiveFormsModule, FormFieldComponent, AsyncPipe],
     templateUrl: "./parcel-update-water-account-modal.component.html",
     styleUrls: ["./parcel-update-water-account-modal.component.scss"],
 })
-export class ParcelUpdateWaterAccountModalComponent implements IModal {
-    modalComponentRef: ComponentRef<ModalComponent>;
+export class ParcelUpdateWaterAccountModalComponent {
+    public ref: DialogRef<ParcelContext, boolean> = inject(DialogRef);
     public FormFieldType = FormFieldType;
 
-    public modalContext: ParcelContext;
-
     public parcel$: Observable<ParcelMinimalDto>;
-    public isLoadingSubmit: boolean = false;
-    public effectiveYearOptions$: Observable<SelectDropdownOption[]>;
+    public reportingPeriods$: Observable<ReportingPeriodDto[]>;
+    public waterAccountParcels$: Observable<WaterAccountMinimalAndReportingPeriodSimpleDto[]>;
 
-    public formGroup: FormGroup<UpdateParcelWaterAccountForm> = new FormGroup<UpdateParcelWaterAccountForm>({
-        WaterAccount: new FormControl<WaterAccountDto>(null, [Validators.required]),
-        EffectiveYear: new FormControl<number>(null, [Validators.required]),
-    });
+    public isLoadingSubmit: boolean = false;
+
+    public formGroup: FormGroup = new FormGroup({});
+
+    public waterAccountFormControls: { [reportingPeriodID: string]: FormControl<number> };
 
     constructor(
-        private modalService: ModalService,
         private alertService: AlertService,
         private parcelService: ParcelService,
+        private waterAccountParcelByParcelService: WaterAccountParcelByParcelService,
         private reportingPeriodService: ReportingPeriodService
     ) {}
 
     ngOnInit(): void {
-        this.parcel$ = this.parcelService.parcelsParcelIDGet(this.modalContext.ParcelID).pipe(
-            tap((x) => {
-                this.effectiveYearOptions$ = this.reportingPeriodService.geographiesGeographyIDReportingPeriodsGet(x.GeographyID).pipe(
-                    map((years) => {
-                        let options = years.map((x) => {
-                            let year = new Date(x.StartDate).getFullYear();
-                            return { Value: year, Label: year.toString() } as SelectDropdownOption;
-                        });
-                        options = [{ Value: null, Label: "- Select -", Disabled: true }, ...options]; // insert an empty option at the front
-                        return options;
-                    })
+        this.parcel$ = this.parcelService.getByIDParcel(this.ref.data.ParcelID);
+
+        this.reportingPeriods$ = this.reportingPeriodService.listByGeographyIDReportingPeriod(this.ref.data.GeographyID).pipe(
+            tap((reportingPeriods) => {
+                // Initialize Form Controls for each Reporting Period
+                this.waterAccountFormControls = reportingPeriods.reduce(
+                    (acc, reportingPeriod) => {
+                        acc[reportingPeriod.ReportingPeriodID] = new FormControl<number>(null, []);
+                        this.formGroup.addControl(reportingPeriod.ReportingPeriodID.toString(), acc[reportingPeriod.ReportingPeriodID]);
+                        return acc;
+                    },
+                    {} as { [reportingPeriodID: number]: FormControl<number> }
                 );
+            }),
+            shareReplay(1) // Prevents multiple API calls and form resets
+        );
+
+        this.waterAccountParcels$ = this.reportingPeriods$.pipe(
+            switchMap(() => this.waterAccountParcelByParcelService.getWaterAccountParcelsForParcelWaterAccountParcelByParcel(this.ref.data.ParcelID)),
+            tap((waterAccountParcels) => {
+                waterAccountParcels.forEach((waterAccountParcel) => {
+                    const reportingPeriodID = waterAccountParcel.ReportingPeriod.ReportingPeriodID;
+                    if (this.formGroup.controls[reportingPeriodID.toString()]) {
+                        this.formGroup.controls[reportingPeriodID.toString()].setValue(waterAccountParcel.WaterAccount.WaterAccountID);
+                    }
+                });
             })
         );
     }
 
     close() {
-        this.modalService.close(this.modalComponentRef, false);
+        this.ref.close(false);
     }
 
     save() {
         this.isLoadingSubmit = true;
+        let values = this.formGroup.value;
+        let reportingPeriodWaterAccounts: WaterAccountReportingPeriodDto[] = Object.keys(values).map((reportingPeriodID) => ({
+            ReportingPeriodID: parseInt(reportingPeriodID),
+            WaterAccountID: values[reportingPeriodID],
+        }));
 
-        const waterAccountID = this.formGroup.controls.WaterAccount.value.WaterAccountID;
-        this.parcelService.parcelsParcelIDUpdateWaterAccountWaterAccountIDPost(this.modalContext.ParcelID, waterAccountID, this.formGroup.controls.EffectiveYear.value).subscribe(
+        let updateWaterAccountParcelsByParcelDto: UpdateWaterAccountParcelsByParcelDto = {
+            ReportingPeriodWaterAccounts: reportingPeriodWaterAccounts,
+        };
+
+        this.waterAccountParcelByParcelService.updateWaterAccountParcelsForParcelWaterAccountParcelByParcel(this.ref.data.ParcelID, updateWaterAccountParcelsByParcelDto).subscribe(
             () => {
                 this.alertService.clearAlerts();
-                this.alertService.pushAlert(new Alert("Successfully added parcel to water account", AlertContext.Success));
-                this.modalService.close(this.modalComponentRef, true);
+                this.alertService.pushAlert(new Alert("Successfully updated water accounts for parcel", AlertContext.Success));
+                this.ref.close(true);
             },
             (error: any) => {
                 this.isLoadingSubmit = false;
@@ -86,9 +103,4 @@ export class ParcelUpdateWaterAccountModalComponent implements IModal {
             }
         );
     }
-}
-
-export class UpdateParcelWaterAccountForm {
-    WaterAccount: FormControl<WaterAccountDto>;
-    EffectiveYear: FormControl<number>;
 }

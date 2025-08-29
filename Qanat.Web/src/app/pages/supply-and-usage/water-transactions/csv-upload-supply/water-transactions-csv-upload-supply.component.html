@@ -5,7 +5,7 @@
         </div>
     </ng-template>
 </page-header>
-<ng-container *ngIf="geography$ | async as geography">
+@if (geography$ | async; as geography) {
     <div class="page-body">
         <app-alert-display></app-alert-display>
         <form class="form mb-3 grid-9">
@@ -15,18 +15,16 @@
                     <label for="file-upload" class="custom-file-upload">
                         <input type="file" class="form-control" name="file-upload" [id]="fileUploadElementID" (change)="onFileUploadChange($event)" required />
                         {{ fileUpload?.name ?? "No file chosen..." }}
-
                         <fresca-button iconClass="fas fa-folder-open" (click)="onClickFileUpload()"> Browse </fresca-button>
                     </label>
                 </div>
                 <em>Accepted extensions: CSV</em>
                 <i class="fas fa-file-open"></i>
             </div>
-
             <div class="field g-col-6">
                 <label class="d-block required field-label">Supply Type</label>
                 <ng-select
-                    class="form-control"
+                    class="form-control custom"
                     name="waterType"
                     [(ngModel)]="waterTypeID"
                     [items]="waterTypes$ | async"
@@ -34,7 +32,6 @@
                     bindValue="WaterTypeID"></ng-select>
                 <field-definition fieldDefinitionType="SupplyType"></field-definition>
             </div>
-
             <div class="field g-col-6">
                 <label class="required field-label">Effective Date</label>
                 <input type="date" class="form-control" name="effectiveDate" required [(ngModel)]="effectiveDate" />
@@ -42,11 +39,12 @@
             </div>
         </form>
     </div>
-
     <div class="page-footer">
         <fresca-button class="ml-auto" (click)="onSubmit(geography)" [disabled]="isLoadingSubmit">
-            <span *ngIf="isLoadingSubmit" class="fa fa-spinner loading-spinner"></span>
+            @if (isLoadingSubmit) {
+                <span class="fa fa-spinner loading-spinner"></span>
+            }
             Save
         </fresca-button>
     </div>
-</ng-container>
+}

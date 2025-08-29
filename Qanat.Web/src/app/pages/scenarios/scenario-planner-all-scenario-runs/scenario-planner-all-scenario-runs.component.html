@@ -3,26 +3,29 @@
         <page-header [customRichTextTypeID]="customRichTextTypeID" pageTitle="Scenario Runs"></page-header>
 
         <div class="page-body">
-            <ng-container *ngIf="allModelRuns$ | async as allModelRuns">
+            @if (allModelRuns$ | async; as allModelRuns) {
                 <div class="latest-runs">
                     <h2 class="section-title primary">Latest Scenario Runs</h2>
-                    <div *ngIf="latestModelRuns.length > 0; else noModelRuns" class="grid-12">
-                        <model-run-card *ngFor="let latestModelRun of latestModelRuns" [scenarioRun]="latestModelRun">
-                            {{ latestModelRun.RunName }}
-                        </model-run-card>
-                    </div>
+                    @if (latestModelRuns.length > 0) {
+                        <div class="grid-12">
+                            @for (latestModelRun of latestModelRuns; track latestModelRun) {
+                                <model-run-card [scenarioRun]="latestModelRun">
+                                    {{ latestModelRun.RunName }}
+                                </model-run-card>
+                            }
+                        </div>
+                    } @else {
+                        <div class="no-runs copy copy-2">
+                            <p>
+                                <em> There are no Scenario runs. Use the buttons above to create a Scenario run. </em>
+                            </p>
+                        </div>
+                    }
                 </div>
-                <ng-template #noModelRuns>
-                    <div class="no-runs copy copy-2">
-                        <p>
-                            <em> There are no Scenario runs. Use the buttons above to create a Scenario run. </em>
-                        </p>
-                    </div>
-                </ng-template>
                 <div class="all-runs">
                     <qanat-grid [rowData]="allModelRuns" [columnDefs]="columnDefs" downloadFileName="scenario-runs" [sizeColumnsToFitGrid]="true"></qanat-grid>
                 </div>
-            </ng-container>
+            }
         </div>
     </ng-container>
 </div>

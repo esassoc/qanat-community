@@ -20,9 +20,7 @@ namespace Qanat.EFModels.Entities
         public static readonly OpenETSyncResultTypeCreated Created = OpenETSyncResultTypeCreated.Instance;
 
         public static readonly List<OpenETSyncResultType> All;
-        public static readonly List<OpenETSyncResultTypeSimpleDto> AllAsSimpleDto;
         public static readonly ReadOnlyDictionary<int, OpenETSyncResultType> AllLookupDictionary;
-        public static readonly ReadOnlyDictionary<int, OpenETSyncResultTypeSimpleDto> AllAsSimpleDtoLookupDictionary;
 
         /// <summary>
         /// Static type constructor to coordinate static initialization order
@@ -30,9 +28,7 @@ namespace Qanat.EFModels.Entities
         static OpenETSyncResultType()
         {
             All = new List<OpenETSyncResultType> { InProgress, Succeeded, Failed, NoNewData, DataNotAvailable, Created };
-            AllAsSimpleDto = new List<OpenETSyncResultTypeSimpleDto> { InProgress.AsSimpleDto(), Succeeded.AsSimpleDto(), Failed.AsSimpleDto(), NoNewData.AsSimpleDto(), DataNotAvailable.AsSimpleDto(), Created.AsSimpleDto() };
             AllLookupDictionary = new ReadOnlyDictionary<int, OpenETSyncResultType>(All.ToDictionary(x => x.OpenETSyncResultTypeID));
-            AllAsSimpleDtoLookupDictionary = new ReadOnlyDictionary<int, OpenETSyncResultTypeSimpleDto>(AllAsSimpleDto.ToDictionary(x => x.OpenETSyncResultTypeID));
         }
 
         /// <summary>

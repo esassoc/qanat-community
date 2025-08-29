@@ -19,6 +19,11 @@ export function withGeographyFlagGuard(flagEnum: FlagEnum): CanActivateFn {
         return authenticationService.getCurrentUser().pipe(
             map((currentUser) => {
                 const geographyID = GeographyEnum[geographySlug];
+
+                if (AuthorizationHelper.hasFlag(FlagEnum.IsSystemAdmin, currentUser)) {
+                    return true; //MK 2/5/2025: System Admins can access everything. Wanted to OR these in app.routes but they are AND'd. This is a workaround because System Admins won't have geography flags.
+                }
+
                 if (AuthorizationHelper.hasGeographyFlag(geographyID, flagEnum, currentUser)) {
                     return true;
                 }

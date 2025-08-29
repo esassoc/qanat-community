@@ -7,14 +7,12 @@ import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
 import { UserDto } from "../../generated/model/user-dto";
 import { WaterTypeFieldDefinitionComponent } from "../water-type-field-definition/water-type-field-definition.component";
 import { FormsModule } from "@angular/forms";
-import { CommonModule, NgFor } from "@angular/common";
 
 @Component({
     selector: "water-types-configure",
     templateUrl: "./water-types-configure.component.html",
     styleUrls: ["./water-types-configure.component.scss"],
-    standalone: true,
-    imports: [CdkDropList, NgFor, CdkDrag, FormsModule, WaterTypeFieldDefinitionComponent, CdkDragHandle, CommonModule],
+    imports: [CdkDropList, CdkDrag, FormsModule, WaterTypeFieldDefinitionComponent, CdkDragHandle]
 })
 export class WaterTypesConfigureComponent implements OnChanges {
     @Input() geographyID: number;

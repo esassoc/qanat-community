@@ -3,7 +3,9 @@
 <main class="site">
     <div class="site-wrapper">
         <!--This is to avoid reload during acquireTokenSilent() because of hidden iframe -->
-        <router-outlet *ngIf="!isIframe"></router-outlet>
+        @if (!isIframe) {
+            <router-outlet></router-outlet>
+        }
     </div>
 </main>
 

@@ -13,7 +13,7 @@ import { CustomRichTextComponent } from "../../../shared/components/custom-rich-
 import { LargeGeographyCardComponent } from "../../../shared/components/large-geography-card/large-geography-card.component";
 import { AlertDisplayComponent } from "../../../shared/components/alert-display/alert-display.component";
 import { LoadingDirective } from "../../../shared/directives/loading.directive";
-import { NgIf, NgFor, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { RichLinkComponent } from "src/app/shared/components/rich-link/rich-link.component";
 import { PageLoadingComponent } from "src/app/shared/components/page-loading/page-loading.component";
 
@@ -21,14 +21,11 @@ import { PageLoadingComponent } from "src/app/shared/components/page-loading/pag
     selector: "homepage-user-portal",
     templateUrl: "./homepage-user-portal.component.html",
     styleUrls: ["./homepage-user-portal.component.scss"],
-    standalone: true,
     imports: [
-        NgIf,
         RichLinkComponent,
         RouterLink,
         LoadingDirective,
         AlertDisplayComponent,
-        NgFor,
         LargeGeographyCardComponent,
         CustomRichTextComponent,
         DropdownToggleDirective,
@@ -57,7 +54,7 @@ export class HomepageUserPortalComponent implements OnInit {
     ngOnInit(): void {
         this.currentUser$ = this.authenticationService.getCurrentUser().pipe(tap(() => (this.noWaterAccountsText = this.getNoWaterAccountsText())));
 
-        this.geographySummaries$ = this.userService.userGeographySummaryGet().pipe(
+        this.geographySummaries$ = this.userService.getGeographySummaryUser().pipe(
             tap((x) => {
                 this.isLoading = false;
             })

@@ -18,7 +18,7 @@ export function withWaterAccountRolePermissionGuard(permissionEnum: PermissionEn
 
         const waterAccountID = route.paramMap.get(routeParams.waterAccountID);
 
-        return forkJoin([authenticationService.getCurrentUser(), waterAccountService.waterAccountsWaterAccountIDGet(parseInt(waterAccountID))]).pipe(
+        return forkJoin([authenticationService.getCurrentUser(), waterAccountService.getByIDWaterAccount(parseInt(waterAccountID))]).pipe(
             map(([currentUser, waterAccount]) => {
                 if (AuthorizationHelper.hasWaterAccountRolePermission(waterAccount.Geography.GeographyID, waterAccount.WaterAccountID, permissionEnum, rightsEnum, currentUser)) {
                     return true;

@@ -1,15 +1,14 @@
 import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
-import { CommonModule } from "@angular/common";
+
 import { default as vegaEmbed, VisualizationSpec, vega } from "vega-embed";
 import { LeafletHelperService } from "src/app/shared/services/leaflet-helper.service";
 import { ScenarioRunDto, ScenarioRunResult } from "../../generated/model/models";
 
 @Component({
     selector: "time-series-output-chart",
-    standalone: true,
-    imports: [CommonModule],
+    imports: [],
     templateUrl: "./time-series-output-chart.component.html",
-    styleUrls: ["./time-series-output-chart.component.scss"],
+    styleUrls: ["./time-series-output-chart.component.scss"]
 })
 export class TimeSeriesOutputChartComponent implements OnInit {
     @Input() scenarioRunResult: ScenarioRunResult;

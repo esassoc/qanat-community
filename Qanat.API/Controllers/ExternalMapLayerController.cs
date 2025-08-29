@@ -15,12 +15,13 @@ namespace Qanat.API.Controllers;
 
 [ApiController]
 [RightsChecker]
-public class ExternalMapLayerController : SitkaController<ExternalMapLayerController>
+[Route("geographies/{geographyID}/external-map-layers")]
+public class ExternalMapLayerController(
+    QanatDbContext dbContext,
+    ILogger<ExternalMapLayerController> logger,
+    IOptions<QanatConfiguration> qanatConfiguration)
+    : SitkaController<ExternalMapLayerController>(dbContext, logger, qanatConfiguration)
 {
-    public ExternalMapLayerController(QanatDbContext dbContext, ILogger<ExternalMapLayerController> logger, IOptions<QanatConfiguration> qanatConfiguration) : base(dbContext, logger, qanatConfiguration)
-    {
-    }
-
     private static IQueryable<ExternalMapLayer> GetImpl(QanatDbContext dbContext)
     {
         return dbContext.ExternalMapLayers.AsNoTracking()
@@ -70,33 +71,35 @@ public class ExternalMapLayerController : SitkaController<ExternalMapLayerContro
         return results;
     }
 
-    [HttpGet("geographies/{geographyID}/external-map-layers")]
+    [HttpGet]
     [EntityNotFound(typeof(Geography), "geographyID")]
     [WithGeographyRolePermission(PermissionEnum.ExternalMapLayerRights, RightsEnum.Read)]
-    public ActionResult<List<ExternalMapLayerDto>> Get([FromRoute] int geographyID)
+    public ActionResult<List<ExternalMapLayerSimpleDto>> Get([FromRoute] int geographyID)
     {
         return Ok(GetImpl(_dbContext).Where(x => x.GeographyID == geographyID)
-            .Select(x => x.AsExternalMapLayerDto()).ToList());
+            .Select(x => x.AsSimpleDto()).ToList());
     }
 
-    [HttpGet("geographies/{geographyID}/external-map-layers/active")]
+    [HttpGet("active")]
     [EntityNotFound(typeof(Geography), "geographyID")]
     [WithGeographyRolePermission(PermissionEnum.ExternalMapLayerRights, RightsEnum.Read)]
-    public ActionResult<List<ExternalMapLayerDto>> GetActiveExternalMapLayers([FromRoute] int geographyID)
+    public ActionResult<List<ExternalMapLayerSimpleDto>> GetActiveExternalMapLayers([FromRoute] int geographyID)
     {
         return Ok(GetImpl(_dbContext).Where(x => x.GeographyID == geographyID && x.IsActive == true)
-            .Select(x => x.AsExternalMapLayerDto()).ToList());
+            .Select(x => x.AsSimpleDto()).ToList());
     }
 
-    [HttpGet("geographies/{geographyID}/external-map-layer/{externalMapLayerID}")]
+    [HttpGet("{externalMapLayerID}")]
     [EntityNotFound(typeof(Geography), "geographyID")]
+    [EntityNotFound(typeof(ExternalMapLayer), "externalMapLayerID")]
     [WithGeographyRolePermission(PermissionEnum.ExternalMapLayerRights, RightsEnum.Read)]
-    public ActionResult<ExternalMapLayerSimpleDto> GetExternalMapLayerByID([FromRoute] int geographyID, int externalMapLayerID)
+    public ActionResult<ExternalMapLayerSimpleDto> GetExternalMapLayerByID([FromRoute] int geographyID, [FromRoute] int externalMapLayerID)
     {
-        return Ok(_dbContext.ExternalMapLayers.Single(x => x.GeographyID == geographyID && x.ExternalMapLayerID == externalMapLayerID).AsSimpleDto());
+        var externalMapLayerSimpleDto = _dbContext.ExternalMapLayers.Single(x => x.GeographyID == geographyID && x.ExternalMapLayerID == externalMapLayerID).AsSimpleDto();
+        return Ok(externalMapLayerSimpleDto);
     }
 
-    [HttpPost("geographies/{geographyID}/external-map-layers")]
+    [HttpPost]
     [EntityNotFound(typeof(Geography), "geographyID")]
     [WithGeographyRolePermission(PermissionEnum.ExternalMapLayerRights, RightsEnum.Create)]
     public ActionResult Add([FromRoute] int geographyID, [FromBody] ExternalMapLayerSimpleDto externalMapLayerDto)
@@ -131,7 +134,7 @@ public class ExternalMapLayerController : SitkaController<ExternalMapLayerContro
         return Ok();
     }
 
-    [HttpPut("geographies/{geographyID}/external-map-layers")]
+    [HttpPut]
     [EntityNotFound(typeof(Geography), "geographyID")]
     [WithGeographyRolePermission(PermissionEnum.ExternalMapLayerRights, RightsEnum.Update)]
     public ActionResult Update([FromRoute] int geographyID, [FromBody] ExternalMapLayerSimpleDto externalMapLayerDto)

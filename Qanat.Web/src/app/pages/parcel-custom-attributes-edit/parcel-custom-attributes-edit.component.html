@@ -3,9 +3,7 @@
 <div class="page-body">
     <app-alert-display></app-alert-display>
 
-    <entity-custom-attributes-edit
-        *ngIf="parcelCustomAttributes$ | async as parcelCustomAttributes"
-        [entityCustomAttributes]="parcelCustomAttributes"
-        [isLoadingSubmit]="isLoadingSubmit"
-        (save)="save($event)"></entity-custom-attributes-edit>
+    @if (parcelCustomAttributes$ | async; as parcelCustomAttributes) {
+        <entity-custom-attributes-edit [entityCustomAttributes]="parcelCustomAttributes" [isLoadingSubmit]="isLoadingSubmit" (save)="save($event)"></entity-custom-attributes-edit>
+    }
 </div>

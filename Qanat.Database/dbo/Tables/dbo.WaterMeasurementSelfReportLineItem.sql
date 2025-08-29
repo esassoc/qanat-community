@@ -32,5 +32,5 @@ CREATE TABLE [dbo].[WaterMeasurementSelfReportLineItem]
     CONSTRAINT [FK_WaterMeasurementSelfReportLineItem_User_CreateUserID]                                        FOREIGN KEY ([CreateUserID])                    REFERENCES dbo.[User]([UserID]),
     CONSTRAINT [FK_WaterMeasurementSelfReportLineItem_User_UpdateUserID]                                        FOREIGN KEY ([UpdateUserID])                    REFERENCES dbo.[User]([UserID]),
     
-    CONSTRAINT [AK_WaterMeasurementSelfReportLineItem_WaterMeasurementSelfReportID_UsageEntityID]               UNIQUE ([WaterMeasurementSelfReportID], [ParcelID])
+    CONSTRAINT [AK_WaterMeasurementSelfReportLineItem_WaterMeasurementSelfReportID_Parcel]                      UNIQUE ([WaterMeasurementSelfReportID], [ParcelID])
 )

@@ -14,7 +14,7 @@ import { WellRegistrationService } from "src/app/shared/generated/api/well-regis
 import { ConfirmWellRegistrationLocationDto } from "src/app/shared/generated/model/confirm-well-registration-location-dto";
 import { ButtonComponent } from "../../../shared/components/button/button.component";
 import { WellLocationEditMapComponent } from "../../../shared/components/maps/well-location-edit-map/well-location-edit-map.component";
-import { NgIf, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { AlertDisplayComponent } from "../../../shared/components/alert-display/alert-display.component";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { WorkflowHelpComponent } from "src/app/shared/components/workflow-help/workflow-help.component";
@@ -24,8 +24,7 @@ import { WorkflowBodyComponent } from "src/app/shared/components/workflow-body/w
     selector: "confirm-well-location",
     templateUrl: "./confirm-well-location.component.html",
     styleUrls: ["./confirm-well-location.component.scss"],
-    standalone: true,
-    imports: [PageHeaderComponent, WorkflowHelpComponent, WorkflowBodyComponent, AlertDisplayComponent, NgIf, WellLocationEditMapComponent, ButtonComponent, AsyncPipe],
+    imports: [PageHeaderComponent, WorkflowHelpComponent, WorkflowBodyComponent, AlertDisplayComponent, WellLocationEditMapComponent, ButtonComponent, AsyncPipe]
 })
 export class ConfirmWellLocationComponent implements OnInit, OnDestroy {
     public customRichTextTypeID = CustomRichTextTypeEnum.WellRegistryConfirmWellLocation;
@@ -49,7 +48,7 @@ export class ConfirmWellLocationComponent implements OnInit, OnDestroy {
         this.confirmWellLocation$ = this.route.paramMap.pipe(
             switchMap((paramMap) => {
                 const wellRegistrationID = parseInt(paramMap.get(routeParams.wellRegistrationID));
-                return this.wellRegistrationService.wellRegistrationsWellRegistrationIDLocationConfirmGet(wellRegistrationID);
+                return this.wellRegistrationService.getConfirmLocationWellRegistration(wellRegistrationID);
             }),
             tap((wellLocation) => {
                 this.model = { ...wellLocation };
@@ -70,7 +69,7 @@ export class ConfirmWellLocationComponent implements OnInit, OnDestroy {
     public saveAndContinue() {
         this.isLoadingSubmit = true;
 
-        this.wellRegistrationService.wellRegistrationsWellRegistrationIDLocationConfirmPut(this.model.WellRegistrationID, this.model).subscribe({
+        this.wellRegistrationService.confirmLocationWellRegistration(this.model.WellRegistrationID, this.model).subscribe({
             next: () => {
                 this.router.navigate([`../irrigated-parcels`], { relativeTo: this.route }).then(() => {
                     this.isLoadingSubmit = false;

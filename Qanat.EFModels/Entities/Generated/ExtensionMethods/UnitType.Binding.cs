@@ -14,21 +14,19 @@ namespace Qanat.EFModels.Entities
     {
         public static readonly UnitTypeInches Inches = UnitTypeInches.Instance;
         public static readonly UnitTypeMillimeters Millimeters = UnitTypeMillimeters.Instance;
+        public static readonly UnitTypeAcreFeet AcreFeet = UnitTypeAcreFeet.Instance;
+        public static readonly UnitTypeAcreFeetPerAcre AcreFeetPerAcre = UnitTypeAcreFeetPerAcre.Instance;
 
         public static readonly List<UnitType> All;
-        public static readonly List<UnitTypeSimpleDto> AllAsSimpleDto;
         public static readonly ReadOnlyDictionary<int, UnitType> AllLookupDictionary;
-        public static readonly ReadOnlyDictionary<int, UnitTypeSimpleDto> AllAsSimpleDtoLookupDictionary;
 
         /// <summary>
         /// Static type constructor to coordinate static initialization order
         /// </summary>
         static UnitType()
         {
-            All = new List<UnitType> { Inches, Millimeters };
-            AllAsSimpleDto = new List<UnitTypeSimpleDto> { Inches.AsSimpleDto(), Millimeters.AsSimpleDto() };
+            All = new List<UnitType> { Inches, Millimeters, AcreFeet, AcreFeetPerAcre };
             AllLookupDictionary = new ReadOnlyDictionary<int, UnitType>(All.ToDictionary(x => x.UnitTypeID));
-            AllAsSimpleDtoLookupDictionary = new ReadOnlyDictionary<int, UnitTypeSimpleDto>(AllAsSimpleDto.ToDictionary(x => x.UnitTypeID));
         }
 
         /// <summary>
@@ -99,6 +97,10 @@ namespace Qanat.EFModels.Entities
         {
             switch (enumValue)
             {
+                case UnitTypeEnum.AcreFeet:
+                    return AcreFeet;
+                case UnitTypeEnum.AcreFeetPerAcre:
+                    return AcreFeetPerAcre;
                 case UnitTypeEnum.Inches:
                     return Inches;
                 case UnitTypeEnum.Millimeters:
@@ -112,7 +114,9 @@ namespace Qanat.EFModels.Entities
     public enum UnitTypeEnum
     {
         Inches = 1,
-        Millimeters = 2
+        Millimeters = 2,
+        AcreFeet = 3,
+        AcreFeetPerAcre = 4
     }
 
     public partial class UnitTypeInches : UnitType
@@ -125,5 +129,17 @@ namespace Qanat.EFModels.Entities
     {
         private UnitTypeMillimeters(int unitTypeID, string unitTypeName, string unitTypeDisplayName, string unitTypeAbbreviation) : base(unitTypeID, unitTypeName, unitTypeDisplayName, unitTypeAbbreviation) {}
         public static readonly UnitTypeMillimeters Instance = new UnitTypeMillimeters(2, @"Millimeters", @"millimeters", @"mm");
+    }
+
+    public partial class UnitTypeAcreFeet : UnitType
+    {
+        private UnitTypeAcreFeet(int unitTypeID, string unitTypeName, string unitTypeDisplayName, string unitTypeAbbreviation) : base(unitTypeID, unitTypeName, unitTypeDisplayName, unitTypeAbbreviation) {}
+        public static readonly UnitTypeAcreFeet Instance = new UnitTypeAcreFeet(3, @"AcreFeet", @"acre-feet", @"ac-ft");
+    }
+
+    public partial class UnitTypeAcreFeetPerAcre : UnitType
+    {
+        private UnitTypeAcreFeetPerAcre(int unitTypeID, string unitTypeName, string unitTypeDisplayName, string unitTypeAbbreviation) : base(unitTypeID, unitTypeName, unitTypeDisplayName, unitTypeAbbreviation) {}
+        public static readonly UnitTypeAcreFeetPerAcre Instance = new UnitTypeAcreFeetPerAcre(4, @"AcreFeetPerAcre", @"acre-feet/acre", @"ac-ft/ac");
     }
 }

@@ -1,175 +1,164 @@
 <div class="list-view">
     <page-header pageTitle="Geography Statistics" icon="LineChart" [templateRight]="templateRight">
         <ng-template #templateRight>
-            <em *ngIf="mostRecentEffectiveDates$ | async as mostRecentEffectiveDates">
-                Data last updated through {{ mostRecentEffectiveDates.MostRecentEffectiveDate | date: "M/d/yyyy" : "+0000" }}
-            </em>
+            @if (mostRecentEffectiveDates$ | async; as mostRecentEffectiveDates) {
+                <em> Data last updated through {{ mostRecentEffectiveDates.MostRecentEffectiveDate | date: "M/d/yyyy" : "+0000" }} </em>
+            }
         </ng-template>
     </page-header>
 
-    <div class="page-body statistics grid-12" [loadingSpinner]="{ isLoading: this.isLoading }">
+    <div class="page-body statistics grid-12">
         <app-alert-display></app-alert-display>
 
-        <div class="g-col-12" *ngIf="geography$ | async as geography">
-            <ng-container *ngIf="selectedYear$ | async as selectedYear">
+        @if (geography$ | async; as geography) {
+            <div class="g-col-12">
                 <div class="statistics__filters mb-2">
-                    <reporting-period-select
-                        [geographyID]="geography.GeographyID"
-                        [defaultDisplayYear]="selectedYear"
-                        (selectionChanged)="updateDashboardForSelectedYear($event)"></reporting-period-select>
-
+                    <reporting-period-select [geographyID]="geography.GeographyID" (selectionChanged)="onSelectedReportingPeriodChange($event)"></reporting-period-select>
                     <div class="statistics__filter units">
                         <h5 class="statistics__filter-label">Units</h5>
-
                         <div class="button-group">
                             <a class="button-group__item" [ngClass]="{ active: getShowAcresFeet() == false }" (click)="changeUnits(false)"> ac-ft/ac </a>
                             <a class="button-group__item" [ngClass]="{ active: getShowAcresFeet() == true }" (click)="changeUnits(true)"> ac-ft </a>
                         </div>
                     </div>
                 </div>
-                <ng-container *ngIf="viewModel$ | async as viewModel">
-                    <div class="group group-4">
-                        <div class="statistics__module">
-                            <div class="statistics__module-header">
-                                <h3 class="statistics__title-small">Total Supply</h3>
-                            </div>
-
-                            <div class="stat">
-                                <h4 class="stat__value">
-                                    {{ (getShowAcresFeet() ? viewModel.totalSupply : convertToAcresFeetAcre(viewModel.totalSupply, viewModel.totalAcreage)) | number: "1.2-2" }}
-                                </h4>
-                                <p class="stat__meta">
-                                    {{ getShowAcresFeet() ? acresFeetUnits : acresFeetAcreUnits }}
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="statistics__module">
-                            <div class="statistics__module-header">
-                                <h3 class="statistics__title-small">Total Usage</h3>
-                            </div>
-
-                            <div class="stat">
-                                <h4 class="stat__value">
-                                    {{ (getShowAcresFeet() ? viewModel.usageToDate : convertToAcresFeetAcre(viewModel.usageToDate, viewModel.totalAcreage)) | number: "1.2-2" }}
-                                </h4>
-                                <p class="stat__meta">
-                                    {{ getShowAcresFeet() ? acresFeetUnits : acresFeetAcreUnits }}
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="statistics__module">
-                            <div class="statistics__module-header">
-                                <h3 class="statistics__title-small">Balance</h3>
-                            </div>
-
-                            <div class="stat">
-                                <h4 class="stat__value">
-                                    {{
-                                        (getShowAcresFeet() ? viewModel.currentAvailable : convertToAcresFeetAcre(viewModel.currentAvailable, viewModel.totalAcreage))
-                                            | number: "1.2-2"
-                                    }}
-                                </h4>
-                                <p class="stat__meta">
-                                    {{ getShowAcresFeet() ? acresFeetUnits : acresFeetAcreUnits }}
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="statistics__module">
-                            <div class="statistics__module-header">
-                                <h3 class="statistics__title-small">Acres Managed</h3>
-                            </div>
-
-                            <div class="stat">
-                                <h4 class="stat__value">{{ viewModel.totalAcreage | number: "1.2-2" }}</h4>
-                                <p class="stat__meta">{{ acresFeetUnits }}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="statistics__module chart">
-                        <div class="statistics__module-header underline">
-                            <h3 class="statistics__title-large">Water Usage Chart</h3>
-                        </div>
-
-                        <div class="button-group chart__button-group">
-                            <a class="button-group__item active" [class.active]="showCumulativeWaterUsageChart == true" (click)="updateShowCumulativeWaterUsageChart(true)">
-                                Cumulative
-                            </a>
-                            <a class="button-group__item" [class.active]="showCumulativeWaterUsageChart == false" (click)="updateShowCumulativeWaterUsageChart(false)"> Monthly </a>
-                        </div>
-
-                        <div class="cumulative" *ngIf="showCumulativeWaterUsageChart">
-                            <vega-cumulative-usage-chart
-                                [monthlyUsageSummaries]="viewModel.monthlyUsageSummaries"
-                                [year]="selectedYear"
-                                [showAcreFeet]="showAcresFeet"></vega-cumulative-usage-chart>
-                        </div>
-
-                        <div class="monthly" *ngIf="!showCumulativeWaterUsageChart">
-                            <vega-monthly-usage-chart
-                                [monthlyUsageSummaries]="viewModel.monthlyUsageSummaries"
-                                [year]="selectedYear"
-                                [showAcreFeet]="showAcresFeet"></vega-monthly-usage-chart>
-                        </div>
-
-                        <div class="mt-2" style="text-align: right">
-                            <a class="btn btn-primary-outline" [routerLink]="['/geographies', geography.GeographyName.toLowerCase()]"> About Water Budgets </a>
-                        </div>
-                    </div>
-
-                    <div class="statistics__module">
-                        <div class="statistics__module-header">
-                            <h3 class="statistics__title-small">Annual Usage Meter</h3>
-                        </div>
-
-                        <div class="statistics__usage-meter">
-                            <div class="meter">
-                                <div class="usage" [style]="viewModel.barStyling"></div>
-                            </div>
-
-                            <div class="stat">
-                                <h4 class="stat__value">{{ getPercentageOfWaterUsed(viewModel) }}%</h4>
-                                <p class="stat__meta">of Supply Used</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="statistics__module">
-                        <div class="statistics__module-header underline">
-                            <h3 class="statistics__title-large">Supply</h3>
-                        </div>
-
-                        <div class="statistics__water-supply">
-                            <ng-container *ngIf="waterTypes$ | async as waterTypes">
-                                <div class="statistics__water-supply-type" *ngFor="let waterType of waterTypes">
-                                    <div class="label">
-                                        <water-type-field-definition [waterType]="waterType"></water-type-field-definition>
-                                    </div>
-
-                                    <div class="amount">
-                                        {{
-                                            (getShowAcresFeet()
-                                                ? getWaterTypeUsage(viewModel, waterType)
-                                                : convertToAcresFeetAcre(getWaterTypeUsage(viewModel, waterType), viewModel.totalAcreage)
-                                            ) | number: "1.2-2"
-                                        }}
-                                        <span class="unit">
-                                            {{ getShowAcresFeet() ? acresFeetUnits : acresFeetAcreUnits }}
-                                        </span>
-                                    </div>
-
-                                    <div class="meter">
-                                        <div class="supply" [style]="setWaterSupplyBar(viewModel, getWaterTypeUsage(viewModel, waterType))"></div>
-                                    </div>
+                @if (selectedYear$ | async; as selectedYear) {
+                    @if (viewModel$ | async; as viewModel) {
+                        <div class="group group-4">
+                            <div class="statistics__module">
+                                <div class="statistics__module-header">
+                                    <h3 class="statistics__title-small">Total Supply</h3>
                                 </div>
-                            </ng-container>
+                                <div class="stat">
+                                    <h4 class="stat__value">
+                                        {{ (getShowAcresFeet() ? viewModel.totalSupply : convertToAcresFeetAcre(viewModel.totalSupply, viewModel.totalAcreage)) | number: "1.2-2" }}
+                                    </h4>
+                                    <p class="stat__meta">
+                                        {{ getShowAcresFeet() ? acresFeetUnits : acresFeetAcreUnits }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="statistics__module">
+                                <div class="statistics__module-header">
+                                    <h3 class="statistics__title-small">Total Usage</h3>
+                                </div>
+                                <div class="stat">
+                                    <h4 class="stat__value">
+                                        {{ (getShowAcresFeet() ? viewModel.usageToDate : convertToAcresFeetAcre(viewModel.usageToDate, viewModel.totalAcreage)) | number: "1.2-2" }}
+                                    </h4>
+                                    <p class="stat__meta">
+                                        {{ getShowAcresFeet() ? acresFeetUnits : acresFeetAcreUnits }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="statistics__module">
+                                <div class="statistics__module-header">
+                                    <h3 class="statistics__title-small">Balance</h3>
+                                </div>
+                                <div class="stat">
+                                    <h4 class="stat__value">
+                                        {{
+                                            (getShowAcresFeet() ? viewModel.currentAvailable : convertToAcresFeetAcre(viewModel.currentAvailable, viewModel.totalAcreage))
+                                                | number: "1.2-2"
+                                        }}
+                                    </h4>
+                                    <p class="stat__meta">
+                                        {{ getShowAcresFeet() ? acresFeetUnits : acresFeetAcreUnits }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="statistics__module">
+                                <div class="statistics__module-header">
+                                    <h3 class="statistics__title-small">Acres Managed</h3>
+                                </div>
+                                <div class="stat">
+                                    <h4 class="stat__value">{{ viewModel.totalAcreage | number: "1.2-2" }}</h4>
+                                    <p class="stat__meta">{{ acresFeetUnits }}</p>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </ng-container>
-            </ng-container>
-        </div>
+                        <div class="statistics__module chart">
+                            <div class="statistics__module-header underline">
+                                <h3 class="statistics__title-large">Water Usage Chart</h3>
+                            </div>
+                            <div class="button-group chart__button-group">
+                                <a class="button-group__item active" [class.active]="showCumulativeWaterUsageChart == true" (click)="updateShowCumulativeWaterUsageChart(true)">
+                                    Cumulative
+                                </a>
+                                <a class="button-group__item" [class.active]="showCumulativeWaterUsageChart == false" (click)="updateShowCumulativeWaterUsageChart(false)">
+                                    Monthly
+                                </a>
+                            </div>
+                            @if (showCumulativeWaterUsageChart) {
+                                <div class="cumulative">
+                                    <vega-cumulative-usage-chart
+                                        [monthlyUsageSummaries]="viewModel.monthlyUsageSummaries"
+                                        [year]="selectedYear"
+                                        [showAcreFeet]="showAcresFeet"
+                                        [waterTypesSupply]="viewModel.supplyData"></vega-cumulative-usage-chart>
+                                </div>
+                            }
+                            @if (!showCumulativeWaterUsageChart) {
+                                <div class="monthly">
+                                    <vega-monthly-usage-chart
+                                        [monthlyUsageSummaries]="viewModel.monthlyUsageSummaries"
+                                        [year]="selectedYear"
+                                        [showAcreFeet]="showAcresFeet"></vega-monthly-usage-chart>
+                                </div>
+                            }
+                            <div class="mt-2" style="text-align: right">
+                                <a class="btn btn-primary-outline" [routerLink]="['/geographies', geography.GeographyName.toLowerCase()]"> About Water Budgets </a>
+                            </div>
+                        </div>
+                        <div class="statistics__module">
+                            <div class="statistics__module-header">
+                                <h3 class="statistics__title-small">Annual Usage Meter</h3>
+                            </div>
+                            <div class="statistics__usage-meter">
+                                <div class="meter">
+                                    <div class="usage" [style]="viewModel.barStyling"></div>
+                                </div>
+                                <div class="stat">
+                                    <h4 class="stat__value">{{ getPercentageOfWaterUsed(viewModel) }}%</h4>
+                                    <p class="stat__meta">of Supply Used</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="statistics__module">
+                            <div class="statistics__module-header underline">
+                                <h3 class="statistics__title-large">Supply</h3>
+                            </div>
+                            <div class="statistics__water-supply">
+                                @if (waterTypes$ | async; as waterTypes) {
+                                    @for (waterType of waterTypes; track waterType) {
+                                        <div class="statistics__water-supply-type">
+                                            <div class="label">
+                                                <water-type-field-definition [waterType]="waterType"></water-type-field-definition>
+                                            </div>
+                                            <div class="amount">
+                                                {{
+                                                    (getShowAcresFeet()
+                                                        ? getWaterTypeUsage(viewModel, waterType)
+                                                        : convertToAcresFeetAcre(getWaterTypeUsage(viewModel, waterType), viewModel.totalAcreage)
+                                                    ) | number: "1.2-2"
+                                                }}
+                                                <span class="unit">
+                                                    {{ getShowAcresFeet() ? acresFeetUnits : acresFeetAcreUnits }}
+                                                </span>
+                                            </div>
+                                            <div class="meter">
+                                                <div class="supply" [style]="setWaterSupplyBar(viewModel, getWaterTypeUsage(viewModel, waterType))"></div>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    } @else {
+                        <div class="g-col-12" [loadingSpinner]="{ isLoading: true, loadingHeight: 500 }"></div>
+                    }
+                }
+            </div>
+        }
     </div>
 </div>

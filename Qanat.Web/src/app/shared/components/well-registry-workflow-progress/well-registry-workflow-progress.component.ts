@@ -5,10 +5,9 @@ import { Observable, map } from "rxjs";
 
 @Component({
     selector: "well-registry-workflow-progress",
-    standalone: true,
     imports: [CommonModule],
     templateUrl: "./well-registry-workflow-progress.component.html",
-    styleUrls: ["./well-registry-workflow-progress.component.scss"],
+    styleUrls: ["./well-registry-workflow-progress.component.scss"]
 })
 export class WellRegistryWorkflowProgressComponent {
     public progressPercent$: Observable<number>;

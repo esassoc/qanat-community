@@ -1,8 +1,6 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Irony.Parsing;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -19,31 +17,22 @@ namespace Qanat.API.Controllers;
 [ApiController]
 [RightsChecker]
 [Route("geographies/{geographyID}/water-accounts")]
-public class WaterAccountByGeographyController : SitkaController<WaterAccountByGeographyController>
+public class WaterAccountByGeographyController(QanatDbContext dbContext, ILogger<WaterAccountByGeographyController> logger, IOptions<QanatConfiguration> qanatConfiguration, HierarchyContext hierarchyContext, [FromServices] UserDto callingUser)
+    : SitkaController<WaterAccountByGeographyController>(dbContext, logger, qanatConfiguration)
 {
-    private readonly HierarchyContext _hierarchyContext;
-    private readonly UserDto _callingUser;
-
-    public WaterAccountByGeographyController(QanatDbContext dbContext, ILogger<WaterAccountByGeographyController> logger,
-        IOptions<QanatConfiguration> qanatConfiguration, HierarchyContext hierarchyContext, [FromServices] UserDto callingUser) : base(dbContext, logger, qanatConfiguration)
-    {
-        _hierarchyContext = hierarchyContext;
-        _callingUser = callingUser;
-    }
-
     [HttpPost]
     [EntityNotFound(typeof(Geography), "geographyID")]
     [WithGeographyRolePermission(PermissionEnum.WaterAccountRights, RightsEnum.Create)]
-    public async Task<ActionResult<WaterAccountDto>> CreateWaterAccount([FromRoute] int geographyID, [FromBody] WaterAccountCreateDto waterAccountDto)
+    public async Task<ActionResult<WaterAccountSimpleDto>> CreateWaterAccount([FromRoute] int geographyID, [FromBody] WaterAccountUpsertDto waterAccountUpsertDto)
     {
-        var errors = WaterAccounts.ValidateWaterAccountName(_dbContext, geographyID, waterAccountDto.WaterAccountName);
+        var errors = WaterAccounts.ValidateWaterAccountName(_dbContext, geographyID, waterAccountUpsertDto.WaterAccountName);
         errors.ForEach(vm => { ModelState.AddModelError(vm.Type, vm.Message); });
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
 
-        var waterAccount = await WaterAccounts.CreateWaterAccount(_dbContext, geographyID, waterAccountDto);
+        var waterAccount = await WaterAccounts.CreateWaterAccount(_dbContext, geographyID, waterAccountUpsertDto);
         var waterAccountSimpleDto = waterAccount.AsSimpleDto();
         return Ok(waterAccountSimpleDto);
     }
@@ -51,15 +40,22 @@ public class WaterAccountByGeographyController : SitkaController<WaterAccountByG
     [HttpGet("current-user")]
     [EntityNotFound(typeof(Geography), "geographyID")]
     [WithGeographyRoleFlag(FlagEnum.CanClaimWaterAccounts)]
-    public ActionResult<List<WaterAccountIndexGridDto>> List([FromRoute] int geographyID)
+    public async Task<ActionResult<List<WaterAccountIndexGridDto>>> ListByCurrentUser([FromRoute] int geographyID)
     {
-        var user = UserContext.GetUserFromHttpContext(_dbContext, HttpContext);
-
-        var hasPermission = new WithGeographyRolePermission(PermissionEnum.WaterAccountRights, RightsEnum.Read).HasPermission(user, _hierarchyContext);
+        var hasPermission = new WithGeographyRolePermission(PermissionEnum.WaterAccountRights, RightsEnum.Read).HasPermission(callingUser, hierarchyContext);
         var waterAccountIndexGridDtos = hasPermission
-            ? WaterAccounts.ListByGeographyIDAsIndexGridDtos(_dbContext, geographyID)
-            : WaterAccounts.ListByGeographyIDAndUserIDAsIndexGridDtos(_dbContext, geographyID, user.UserID);
+            ? await WaterAccounts.ListByGeographyIDAsIndexGridDtos(_dbContext, geographyID)
+            : await WaterAccounts.ListByGeographyIDAndUserIDAsIndexGridDtos(_dbContext, geographyID, callingUser.UserID);
 
+        return Ok(waterAccountIndexGridDtos);
+    }
+
+    [HttpGet("years/{year}")]
+    [EntityNotFound(typeof(Geography), "geographyID")]
+    [WithGeographyRolePermission(PermissionEnum.WaterAccountRights, RightsEnum.Read)]
+    public async Task<ActionResult<List<WaterAccountIndexGridDto>>> ListByGeographyIDAndYear([FromRoute] int geographyID, [FromRoute] int year)
+    {
+        var waterAccountIndexGridDtos = await WaterAccounts.ListByGeographyIDAndYearAsIndexGridDtos(_dbContext, geographyID, year);
         return Ok(waterAccountIndexGridDtos);
     }
 
@@ -68,14 +64,14 @@ public class WaterAccountByGeographyController : SitkaController<WaterAccountByG
     [WithGeographyRolePermission(PermissionEnum.WaterAccountRights, RightsEnum.Read)]
     public async Task<ActionResult<List<WaterAccountBudgetReportDto>>> GetWaterAccountsBudget([FromRoute] int geographyID, [FromRoute] int year)
     {
-        var reportingPeriodDto = await ReportingPeriods.GetByGeographyIDAndYearAsync(_dbContext, geographyID, year, _callingUser);
+        var reportingPeriodDto = await ReportingPeriods.GetByGeographyIDAndYearAsync(_dbContext, geographyID, year, callingUser);
         if (reportingPeriodDto == null)
         {
             var geography = await Geographies.GetByIDAsMinimalDtoAsync(_dbContext, geographyID);
             return BadRequest($"No reporting period found for the year {year} for {geography.GeographyDisplayName}.");
         }
 
-        var waterAccountBudgetReport = WaterAccountBudgetReportByGeographyAndYear.ListByGeographyAndEffectiveDate(_dbContext, geographyID, reportingPeriodDto.StartDate, reportingPeriodDto.EndDate);
+        var waterAccountBudgetReport = WaterAccountBudgetReportByGeographyAndReportingPeriod.ListByGeographyAndReportingPeriod(_dbContext, geographyID, reportingPeriodDto);
         return Ok(waterAccountBudgetReport);
     }
 
@@ -86,8 +82,7 @@ public class WaterAccountByGeographyController : SitkaController<WaterAccountByG
     public async Task<ActionResult<WaterAccountMinimalDto>> CreateWaterAccountFromSuggestion([FromRoute] int geographyID, [FromBody] CreateWaterAccountFromSuggestionDto dto)
     {
         // might want to validate if parcelIDs posted in the same geography
-        var user = UserContext.GetUserFromHttpContext(_dbContext, HttpContext);
-        var waterAccountMinimalDto = await WaterAccounts.CreateWaterAccountFromSuggestion(_dbContext, geographyID, dto, user.UserID);
+        var waterAccountMinimalDto = await WaterAccounts.CreateWaterAccountFromSuggestion(_dbContext, geographyID, dto, callingUser);
         return Ok(waterAccountMinimalDto);
     }
 
@@ -100,8 +95,9 @@ public class WaterAccountByGeographyController : SitkaController<WaterAccountByG
         // might want to validate if parcelIDs posted in the same geography
         foreach (var dto in dtos)
         {
-            await WaterAccounts.CreateWaterAccountFromSuggestion(_dbContext, geographyID, dto, 77);
+            await WaterAccounts.CreateWaterAccountFromSuggestion(_dbContext, geographyID, dto, callingUser);
         }
+
         return Ok();
     }
 
@@ -111,28 +107,20 @@ public class WaterAccountByGeographyController : SitkaController<WaterAccountByG
     [WithGeographyRolePermission(PermissionEnum.WaterAccountRights, RightsEnum.Create)]
     public async Task<IActionResult> RejectWaterAccountSuggestions([FromRoute] int geographyID, [FromBody] List<int> parcelIDs)
     {
-        var year = DateTime.UtcNow.Year; // do we need this to be passed in?
-
         // might want to validate if parcelIDs posted in the same geography
         var parcels = _dbContext.Parcels.Where(x => parcelIDs.Contains(x.ParcelID)).ToList();
         foreach (var parcel in parcels)
         {
             parcel.WaterAccountID = null;
             parcel.ParcelStatusID = (int)ParcelStatusEnum.Excluded;
-            var parcelHistory = ParcelHistories.CreateNew(parcel, _callingUser.UserID, year);
+            var parcelHistory = ParcelHistories.CreateNew(parcel, callingUser.UserID);
             await _dbContext.ParcelHistories.AddAsync(parcelHistory);
-        }
-
-        var waterAccountParcels = _dbContext.WaterAccountParcels.Where(x => parcelIDs.Contains(x.ParcelID) && x.EndYear != null).ToList();
-        foreach (var waterAccountParcel in waterAccountParcels)
-        {
-            waterAccountParcel.EndYear = DateTime.UtcNow.Year;
         }
 
         await _dbContext.SaveChangesAsync();
 
         var parcelIDsToReview = parcels.Select(x => x.ParcelID).ToList();
-        await ParcelHistories.MarkAsReviewedByParcelIDs(_dbContext, parcelIDsToReview);
+        await ParcelHistories.MarkAsReviewedByParcelIDsAsync(_dbContext, parcelIDsToReview);
 
         return Ok();
     }
@@ -153,8 +141,7 @@ public class WaterAccountByGeographyController : SitkaController<WaterAccountByG
         var userDtos = _dbContext.WaterAccountUsers.AsNoTracking()
             .Include(x => x.User)
             .Include(x => x.WaterAccount)
-            .Where(x => x.WaterAccount.GeographyID == geographyID &&
-                        x.WaterAccountRoleID == WaterAccountRole.WaterAccountHolder.WaterAccountRoleID)
+            .Where(x => x.WaterAccount.GeographyID == geographyID && x.WaterAccountRoleID == WaterAccountRole.WaterAccountHolder.WaterAccountRoleID)
             .AsEnumerable().DistinctBy(x => x.UserID)
             .Select(x => x.User.AsUserDto()).AsEnumerable()
             .OrderBy(x => x.LastName).ToList();
@@ -168,7 +155,7 @@ public class WaterAccountByGeographyController : SitkaController<WaterAccountByG
     [WithWaterAccountRolePermission(PermissionEnum.WaterAccountRights, RightsEnum.Read)]
     public async Task<ActionResult<List<ParcelMinimalDto>>> ListParcelsByWaterAccountID([FromRoute] int geographyID, [FromRoute] int waterAccountID, [FromRoute] int year)
     {
-        var reportingPeriodDto = await ReportingPeriods.GetByGeographyIDAndYearAsync(_dbContext, geographyID, year, _callingUser);
+        var reportingPeriodDto = await ReportingPeriods.GetByGeographyIDAndYearAsync(_dbContext, geographyID, year, callingUser);
         if (reportingPeriodDto == null)
         {
             var geography = await Geographies.GetByIDAsMinimalDtoAsync(_dbContext, geographyID);

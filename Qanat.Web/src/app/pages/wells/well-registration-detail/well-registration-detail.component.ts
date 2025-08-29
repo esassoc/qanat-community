@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component } from "@angular/core";
 import { ActivatedRoute, RouterLink } from "@angular/router";
 import saveAs from "file-saver";
 import * as L from "leaflet";
-import { Observable, Subscription, forkJoin, map, switchMap, tap } from "rxjs";
+import { Observable, Subscription, switchMap, tap } from "rxjs";
 import { routeParams } from "src/app/app.routes";
 import { FileResourceService } from "src/app/shared/generated/api/file-resource.service";
 import { WellRegistrationService } from "src/app/shared/generated/api/well-registration.service";
@@ -15,23 +15,19 @@ import { QanatMapComponent, QanatMapInitEvent } from "src/app/shared/components/
 import { LoadingDirective } from "../../../shared/directives/loading.directive";
 import { AlertDisplayComponent } from "../../../shared/components/alert-display/alert-display.component";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
-import { NgIf, NgFor, AsyncPipe, DecimalPipe, DatePipe } from "@angular/common";
+import { AsyncPipe, DecimalPipe, DatePipe } from "@angular/common";
 import { HighlightedParcelsLayerComponent } from "src/app/shared/components/leaflet/layers/highlighted-parcels-layer/highlighted-parcels-layer.component";
 import { WellRegistrationsLayerComponent } from "src/app/shared/components/leaflet/layers/well-registrations-layer/well-registrations-layer.component";
-import { IconComponent } from "src/app/shared/components/icon/icon.component";
-import { SelectDropdownOption } from "src/app/shared/components/inputs/select-dropdown/select-dropdown.component";
+import { SelectDropdownOption } from "src/app/shared/components/forms/form-field/form-field.component";
 
 @Component({
     selector: "well-registration-detail",
     templateUrl: "./well-registration-detail.component.html",
     styleUrls: ["./well-registration-detail.component.scss"],
-    standalone: true,
     imports: [
-        NgIf,
         PageHeaderComponent,
         RouterLink,
         AlertDisplayComponent,
-        NgFor,
         QanatMapComponent,
         HighlightedParcelsLayerComponent,
         WellRegistrationsLayerComponent,
@@ -39,8 +35,7 @@ import { SelectDropdownOption } from "src/app/shared/components/inputs/select-dr
         AsyncPipe,
         DecimalPipe,
         DatePipe,
-        IconComponent,
-    ],
+    ]
 })
 export class WellRegistrationDetailComponent {
     public FuelTypeEnum = FuelTypeEnum;
@@ -67,7 +62,7 @@ export class WellRegistrationDetailComponent {
         this.wellRegistration$ = this.route.paramMap.pipe(
             switchMap((paramMap) => {
                 const wellID = parseInt(paramMap.get(routeParams.wellRegistrationID));
-                return this.wellRegistrationService.wellRegistrationsWellRegistrationIDGet(wellID);
+                return this.wellRegistrationService.getWellRegistrationDetailsByIDWellRegistration(wellID);
             }),
             tap((wellRegistration) => {
                 this.irrigatedParcelNumbers = wellRegistration.IrrigatedParcels.map((x) => x.ParcelNumber);
@@ -75,16 +70,13 @@ export class WellRegistrationDetailComponent {
                 this.showUpdateButton = ![WellRegistrationStatusEnum.Submitted, WellRegistrationStatusEnum.Approved].includes(
                     wellRegistration.WellRegistrationStatus.WellRegistrationStatusID
                 );
-
                 const wellRegistrationLocationDto = new WellRegistrationLocationDto();
                 wellRegistrationLocationDto.WellRegistrationID = wellRegistration.WellRegistrationID;
                 wellRegistrationLocationDto.Longitude = wellRegistration.Longitude;
                 wellRegistrationLocationDto.Latitude = wellRegistration.Latitude;
-                wellRegistrationLocationDto.ParcelID = wellRegistration.Parcel.ParcelID;
-                wellRegistrationLocationDto.ParcelNumber = wellRegistration.Parcel.ParcelNumber;
-
+                wellRegistrationLocationDto.ParcelID = wellRegistration.Parcel?.ParcelID;
+                wellRegistrationLocationDto.ParcelNumber = wellRegistration.Parcel?.ParcelNumber;
                 this.wellRegistrationAsArray = [wellRegistrationLocationDto];
-
                 this.wellRegistrationFuelType =
                     wellRegistration.WellRegistrationMetadatum?.FuelTypeID != null
                         ? this.FuelTypesSelectDropdownOptions.find((x) => x.Value == wellRegistration.WellRegistrationMetadatum.FuelTypeID)
@@ -98,7 +90,7 @@ export class WellRegistrationDetailComponent {
     }
 
     public openFileResourceLink(fileResource: FileResourceSimpleDto) {
-        this.fileResourceRequestSubscription = this.fileResourceService.fileResourcesFileResourceGuidAsStringGet(fileResource.FileResourceGUID).subscribe((response) => {
+        this.fileResourceRequestSubscription = this.fileResourceService.downloadFileResourceFileResource(fileResource.FileResourceGUID).subscribe((response) => {
             saveAs(response, `${fileResource.OriginalBaseFilename}.${fileResource.OriginalFileExtension}`);
         });
     }

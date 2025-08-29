@@ -1,46 +1,134 @@
 @use "/src/scss/abstracts" as *;
 
-.form-top {
+form-field::ng-deep .field-label,
+label {
+    font-size: 12px;
+}
+
+.note-content {
+    display: flex;
+    justify-content: flex-start;
+    gap: $spacing-200;
+    font-size: 14px;
+    line-height: 22px;
+
+    icon {
+        &.info::ng-deep svg path {
+            color: $blue-700;
+        }
+        &.warning::ng-deep svg path {
+            color: $yellow-darker;
+        }
+    }
+}
+
+.form-step {
     display: grid;
-    grid-template-columns: 1fr auto 1fr; /* Columns take equal space, middle column minimum */
-    gap: 1em;
+    align-items: flex-start;
+    gap: $spacing-400;
+
+    @include desktop-medium {
+        grid-template-columns: 1fr 5fr;
+    }
+
+    &-label {
+        display: flex;
+        gap: $spacing-200;
+        font-size: $type-size-200;
+        font-weight: 800;
+        align-items: flex-start;
+        line-height: 28px;
+        margin: 0;
+    }
+
+    &-number {
+        height: 24px;
+        width: 24px;
+        color: $white;
+        background-color: $blue-700;
+        border-radius: 12px;
+        text-align: center;
+        vertical-align: middle;
+        margin: 0;
+        transform: translateY(-2px);
+    }
+
+    &-content {
+        display: grid;
+        gap: $spacing-400;
+        margin-left: $spacing-600;
+
+        @include desktop-medium {
+            margin: 0;
+        }
+    }
+
+    &-divider {
+        border-bottom: 1px solid $gray-200;
+        margin-top: $spacing-400;
+        margin-bottom: $spacing-500;
+    }
+}
+
+.select-water-accounts {
+    grid-template-columns: 1fr auto 1fr;
+
     .water-account {
-        flex-grow: 5;
+        min-width: 0; // prevents grid columns from growing to fit wide content
     }
-}
 
-ol {
-    max-height: 200px;
-    overflow: auto;
+    .swap-accounts {
+        height: 3rem;
+        margin-top: 1.5rem;
+    }
 
-    li {
-        width: 100%;
-        padding: 1rem 0;
+    .parcel-preview {
+        background-color: $gray-50;
+        border: 1px solid $gray-200;
+        border-radius: $spacing-200;
+        padding: $spacing-400;
+        margin-top: $spacing-300;
 
-        span.parcel-index {
-            display: inline-block;
-            width: 1.5em;
+        &-header {
+            display: flex;
+            gap: $spacing-200;
+            align-items: center;
             font-weight: 600;
+            border-bottom: 1px solid $gray-200;
+            padding-bottom: $spacing-200;
+
+            icon::ng-deep svg path {
+                color: $blue-700;
+            }
         }
-        & + li {
-            border-top: 1px solid #0000001a;
+
+        &-list {
+            gap: $spacing-300;
+            padding-top: $spacing-400;
+            font-size: 14px;
+
+            .added {
+                color: $green-dark;
+            }
+
+            .removed {
+                color: $red-500;
+                text-decoration: line-through;
+            }
         }
     }
 }
 
-.button-group__item {
-    padding: 0.75rem 1rem 0.75em;
+.merge-type-button-area {
+    display: flex;
+    justify-content: flex-start;
+    gap: $spacing-200;
+}
 
-    &:nth-child(2) {
-        color: $red-default;
-        background: $white;
-        border-color: $red-default;
+.merge-type-note {
+    display: block;
+}
 
-        &:hover,
-        &.active {
-            background: $red-default;
-            color: $white;
-            border-color: $red-default;
-        }
-    }
+.reporting-period-selector {
+    width: 230px;
 }

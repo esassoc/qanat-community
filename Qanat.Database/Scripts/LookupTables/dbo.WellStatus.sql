@@ -1,7 +1,8 @@
 ﻿MERGE INTO dbo.WellStatus AS Target
 USING (VALUES
 (1, 'Operational', 'Operational'),
-(2, 'NonOperational', 'Non-Operational')
+(2, 'NonOperational', 'Non-Operational'),
+(3, 'Duplicate', 'Duplicate')
 )
 AS Source (WellStatusID, WellStatusName, WellStatusDisplayName)
 ON Target.WellStatusID = Source.WellStatusID

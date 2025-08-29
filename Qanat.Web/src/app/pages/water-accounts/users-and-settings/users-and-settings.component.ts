@@ -1,9 +1,9 @@
 import { Component, OnInit, ViewContainerRef } from "@angular/core";
 import { ActivatedRoute, RouterLink } from "@angular/router";
-import { BehaviorSubject, Observable, Subject, forkJoin, map, switchMap, tap } from "rxjs";
+import { BehaviorSubject, Observable, switchMap, tap } from "rxjs";
 import { routeParams } from "src/app/app.routes";
 import { AuthenticationService } from "src/app/shared/services/authentication.service";
-import { UpdateWaterAccountInfoComponent, WaterAccountContext } from "src/app/shared/components/water-account/modals/update-water-account-info/update-water-account-info.component";
+import { UpdateWaterAccountInfoComponent } from "src/app/shared/components/water-account/modals/update-water-account-info/update-water-account-info.component";
 import { WaterAccountUserService } from "src/app/shared/generated/api/water-account-user.service";
 import { WaterAccountService } from "src/app/shared/generated/api/water-account.service";
 import { RoleEnum } from "src/app/shared/generated/enum/role-enum";
@@ -13,7 +13,6 @@ import { UserDto } from "src/app/shared/generated/model/user-dto";
 import { WaterAccountDto } from "src/app/shared/generated/model/water-account-dto";
 import { WaterAccountMinimalDto } from "src/app/shared/generated/model/water-account-minimal-dto";
 import { WaterAccountUserMinimalDto } from "src/app/shared/generated/model/water-account-user-minimal-dto";
-import { ModalService, ModalSizeEnum, ModalThemeEnum } from "src/app/shared/services/modal/modal.service";
 import { InviteUserToWaterAccountModalComponent } from "./modals/invite-user-to-water-account-modal/invite-user-to-water-account-modal.component";
 import { ConfirmService } from "src/app/shared/services/confirm/confirm.service";
 import { AlertService } from "src/app/shared/services/alert.service";
@@ -21,7 +20,7 @@ import { Alert } from "src/app/shared/models/alert";
 import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
 import { IconComponent } from "src/app/shared/components/icon/icon.component";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
-import { NgIf, NgFor, NgClass, AsyncPipe, DatePipe } from "@angular/common";
+import { NgClass, AsyncPipe, DatePipe } from "@angular/common";
 import { KeyValuePairListComponent } from "src/app/shared/components/key-value-pair-list/key-value-pair-list.component";
 import { KeyValuePairComponent } from "src/app/shared/components/key-value-pair/key-value-pair.component";
 import { UpdateWaterAccountUserRoleModalComponent } from "src/app/shared/components/update-water-account-user-role-modal/update-water-account-user-role-modal.component";
@@ -31,26 +30,28 @@ import { LoadingDirective } from "src/app/shared/directives/loading.directive";
 import { PermissionEnum } from "src/app/shared/generated/enum/permission-enum";
 import { AuthorizationHelper } from "src/app/shared/helpers/authorization-helper";
 import { RightsEnum } from "src/app/shared/models/enums/rights.enum";
+import { WaterAccountContactUpdateComponent } from "src/app/shared/components/water-account-contact/modals/water-account-contact-update/water-account-contact-update.component";
+import { PhonePipe } from "src/app/shared/pipes/phone.pipe";
+import { DialogService } from "@ngneat/dialog";
+import { WaterAccountUpdateAssociatedContactComponent } from "src/app/shared/components/water-account/modals/water-account-update-associated-contact/water-account-update-associated-contact.component";
 
 @Component({
     selector: "users-and-settings",
     templateUrl: "./users-and-settings.component.html",
     styleUrl: "./users-and-settings.component.scss",
-    standalone: true,
     imports: [
         AlertDisplayComponent,
-        NgIf,
         PageHeaderComponent,
         ModelNameTagComponent,
         RouterLink,
         KeyValuePairListComponent,
         KeyValuePairComponent,
         IconComponent,
-        NgFor,
         NgClass,
         AsyncPipe,
         DatePipe,
         LoadingDirective,
+        PhonePipe,
     ],
 })
 export class UsersAndSettingsComponent implements OnInit {
@@ -60,6 +61,7 @@ export class UsersAndSettingsComponent implements OnInit {
     public waterAccountUsers$: Observable<WaterAccountUserMinimalDto[]>;
     public refreshWaterAccountUsers$: BehaviorSubject<number> = new BehaviorSubject(null);
 
+    public currentUser$: Observable<UserDto>;
     public currentUser: UserDto;
     public isCurrentUserAnAccountHolder: boolean = false;
     public isCurrentUserGeographyManager: boolean = false;
@@ -74,21 +76,18 @@ export class UsersAndSettingsComponent implements OnInit {
         private waterAccountUserService: WaterAccountUserService,
         private route: ActivatedRoute,
         private authenticationService: AuthenticationService,
-        private modalService: ModalService,
         private confirmService: ConfirmService,
         private alertService: AlertService,
-        private viewContainerRef: ViewContainerRef
+        private dialogService: DialogService
     ) {}
 
     ngOnInit(): void {
-        this.authenticationService.getCurrentUser().subscribe((currentUser) => {
-            this.currentUser = currentUser;
-        });
+        this.currentUser$ = this.authenticationService.getCurrentUser().pipe(tap((currentUser) => (this.currentUser = currentUser)));
 
         this.waterAccount$ = this.route.paramMap.pipe(
             switchMap((paramMap) => {
                 const waterAccountID = parseInt(paramMap.get(routeParams.waterAccountID));
-                return this.waterAccountService.waterAccountsWaterAccountIDGet(waterAccountID);
+                return this.waterAccountService.getByIDWaterAccount(waterAccountID);
             }),
             tap((waterAccount: WaterAccountDto) => {
                 this.waterAccount = waterAccount;
@@ -99,7 +98,7 @@ export class UsersAndSettingsComponent implements OnInit {
                     RightsEnum.Delete,
                     this.currentUser
                 );
-                this.allocationPlans$ = this.waterAccountService.waterAccountsWaterAccountIDAllocationPlansGet(waterAccount.WaterAccountID);
+                this.allocationPlans$ = this.waterAccountService.getAccountAllocationPlansByAccountIDWaterAccount(waterAccount.WaterAccountID);
                 this.refreshWaterAccountUsers$.next(waterAccount.WaterAccountID);
             })
         );
@@ -107,74 +106,93 @@ export class UsersAndSettingsComponent implements OnInit {
         this.waterAccountUsers$ = this.refreshWaterAccountUsers$.pipe(
             switchMap((waterAccountID) => {
                 if (!waterAccountID) return [];
-                return this.waterAccountUserService.waterAccountsWaterAccountIDUsersGet(waterAccountID);
+                return this.waterAccountUserService.getAllUsersForWaterAccountWaterAccountUser(waterAccountID);
             }),
             tap((waterAccountUsers) => {
                 const currentWaterAccountUser = waterAccountUsers.find((x) => x.UserID == this.currentUser.UserID);
                 if (currentWaterAccountUser) {
-                    this.isCurrentUserAnAccountHolder = currentWaterAccountUser.WaterAccountRoleID == WaterAccountRoleEnum.WaterAccountHolder;
+                    this.isCurrentUserAnAccountHolder = AuthorizationHelper.hasWaterAccountRolePermission(
+                        this.waterAccount.Geography.GeographyID,
+                        this.waterAccount.WaterAccountID,
+                        PermissionEnum.WaterAccountRights,
+                        RightsEnum.Update,
+                        this.currentUser
+                    );
                 }
             })
         );
     }
 
     public updateInfoModal(waterAccountID: number) {
-        this.modalService
-            .open(UpdateWaterAccountInfoComponent, this.viewContainerRef, { ModalSize: ModalSizeEnum.Large, ModalTheme: ModalThemeEnum.Light }, {
+        const dialogRef = this.dialogService.open(UpdateWaterAccountInfoComponent, {
+            data: {
                 WaterAccountID: waterAccountID,
                 GeographyID: this.waterAccount.Geography.GeographyID,
-            } as WaterAccountContext)
-            .instance.result.then((result) => {
-                if (result) {
-                    this.waterAccount = result;
-                }
-            });
+            },
+            size: "sm",
+        });
+
+        dialogRef.afterClosed$.subscribe((result) => {
+            if (result) {
+                this.waterAccount = result;
+            }
+        });
+    }
+
+    public updateAssociatedContactModal(waterAccount: WaterAccountDto) {
+        const dialogRef = this.dialogService.open(WaterAccountUpdateAssociatedContactComponent, {
+            data: {
+                WaterAccountID: waterAccount.WaterAccountID,
+                GeographyID: waterAccount.Geography.GeographyID,
+                WaterAccountContactID: waterAccount.WaterAccountContact?.WaterAccountContactID,
+                WaterAccountContactName: waterAccount.WaterAccountContact?.ContactName,
+            },
+            size: "lg",
+        });
+        dialogRef.afterClosed$.subscribe((result) => {
+            if (!result) {
+                return;
+            } else if (result.WaterAccountContact) {
+                this.waterAccount.WaterAccountContact = result.WaterAccountContact;
+            } else {
+                this.waterAccount.WaterAccountContact = result;
+            }
+        });
     }
 
     public inviteUserToWaterAccountModal(waterAccount: WaterAccountMinimalDto) {
         this.alertService.clearAlerts();
-        this.modalService
-            .open(
-                InviteUserToWaterAccountModalComponent,
-                this.viewContainerRef,
-                {
-                    ModalSize: ModalSizeEnum.Medium,
-                    ModalTheme: ModalThemeEnum.Light,
-                },
-                {
-                    CurrentUserID: this.currentUser.UserID,
-                    WaterAccountID: waterAccount.WaterAccountID,
-                } as InviteToWaterAccountContext
-            )
-            .instance.result.then((result) => {
-                if (result) {
-                    this.refreshWaterAccountUsers$.next(waterAccount.WaterAccountID);
-                }
-            });
+        const dialogRef = this.dialogService.open(InviteUserToWaterAccountModalComponent, {
+            data: {
+                CurrentUserID: this.currentUser.UserID,
+                WaterAccountID: waterAccount.WaterAccountID,
+            },
+            size: "sm",
+        });
+
+        dialogRef.afterClosed$.subscribe((result) => {
+            if (result) {
+                this.refreshWaterAccountUsers$.next(waterAccount.WaterAccountID);
+            }
+        });
     }
 
     public updateUserWaterAccountRoleModal(userWaterAccount: WaterAccountUserMinimalDto) {
         const userDisplayName = userWaterAccount.User.RoleID == RoleEnum.PendingLogin ? userWaterAccount.User.Email : userWaterAccount.User.FullName;
+        const dialogRef = this.dialogService.open(UpdateWaterAccountUserRoleModalComponent, {
+            data: {
+                WaterAccountUser: userWaterAccount,
+            },
+            size: "sm",
+        });
 
-        this.modalService
-            .open(
-                UpdateWaterAccountUserRoleModalComponent,
-                this.viewContainerRef,
-                {
-                    ModalSize: ModalSizeEnum.Medium,
-                    ModalTheme: ModalThemeEnum.Light,
-                },
-                {
-                    WaterAccountUser: userWaterAccount,
-                }
-            )
-            .instance.result.then((result) => {
-                if (result) {
-                    this.refreshWaterAccountUsers$.next(this.waterAccount.WaterAccountID);
-                    this.alertService.clearAlerts();
-                    this.alertService.pushAlert(new Alert(`Role updated for ${userDisplayName}.`, AlertContext.Success));
-                }
-            });
+        dialogRef.afterClosed$.subscribe((result) => {
+            if (result) {
+                this.refreshWaterAccountUsers$.next(this.waterAccount.WaterAccountID);
+                this.alertService.clearAlerts();
+                this.alertService.pushAlert(new Alert(`Role updated for ${userDisplayName}.`, AlertContext.Success));
+            }
+        });
     }
 
     public resendUserInviteConfirmation(userWaterAccount: WaterAccountUserMinimalDto) {
@@ -191,7 +209,7 @@ export class UsersAndSettingsComponent implements OnInit {
             .then((confirmed) => {
                 if (confirmed) {
                     this.waterAccountUserService
-                        .waterAccountsWaterAccountIDInvitingUserInvitingUserIDResendPost(this.waterAccount.WaterAccountID, this.currentUser.UserID, userWaterAccount)
+                        .resendInvitationToPendingUserWaterAccountUser(this.waterAccount.WaterAccountID, this.currentUser.UserID, userWaterAccount)
                         .subscribe(() => {
                             this.alertService.clearAlerts();
                             this.alertService.pushAlert(new Alert(`Invitation resent to ${userWaterAccount.UserEmail}.`, AlertContext.Success));
@@ -217,15 +235,13 @@ export class UsersAndSettingsComponent implements OnInit {
             })
             .then((confirmed) => {
                 if (confirmed) {
-                    this.waterAccountUserService
-                        .waterAccountsWaterAccountIDUserWaterAccountUserIDDelete(this.waterAccount.WaterAccountID, userWaterAccount.WaterAccountUserID)
-                        .subscribe(() => {
-                            this.refreshWaterAccountUsers$.next(this.waterAccount.WaterAccountID);
-                            this.alertService.clearAlerts();
-                            this.alertService.pushAlert(
-                                new Alert(`${userDisplayName} removed from Water Account #${userWaterAccount.WaterAccount.WaterAccountNumber}.`, AlertContext.Success)
-                            );
-                        });
+                    this.waterAccountUserService.removeUserFromWaterAccountWaterAccountUser(this.waterAccount.WaterAccountID, userWaterAccount.WaterAccountUserID).subscribe(() => {
+                        this.refreshWaterAccountUsers$.next(this.waterAccount.WaterAccountID);
+                        this.alertService.clearAlerts();
+                        this.alertService.pushAlert(
+                            new Alert(`${userDisplayName} removed from Water Account #${userWaterAccount.WaterAccount.WaterAccountNumber}.`, AlertContext.Success)
+                        );
+                    });
                     this.isLoadingSubmit = false;
                 } else {
                     this.isLoadingSubmit = false;

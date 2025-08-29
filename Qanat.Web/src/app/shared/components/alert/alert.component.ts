@@ -2,14 +2,12 @@ import { Component, Input, OnInit } from "@angular/core";
 import { Alert } from "../../models/alert";
 import { AlertContext } from "../../models/enums/alert-context.enum";
 import { AlertService } from "../../services/alert.service";
-import { NgIf } from "@angular/common";
 
 @Component({
     selector: "alert",
     templateUrl: "./alert.component.html",
     styleUrls: ["./alert.component.scss"],
-    standalone: true,
-    imports: [NgIf],
+    imports: []
 })
 export class AlertComponent implements OnInit {
     @Input() alert: Alert;

@@ -44,6 +44,13 @@ public class EntityNotFoundMiddleware
                     {
                         // Return a 404 response if the entity doesn't exist
                         context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                        var responseContent = new
+                        {
+                            StatusCode = context.Response.StatusCode,
+                            Message = "Not found."
+                        };
+                        await context.Response.WriteAsJsonAsync(responseContent);
+
                         return;
                     }
                 }
@@ -53,5 +60,4 @@ public class EntityNotFoundMiddleware
         // Call the next middleware in the pipeline
         await _next(context);
     }
-
 }

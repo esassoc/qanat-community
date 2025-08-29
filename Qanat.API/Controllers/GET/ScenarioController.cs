@@ -22,7 +22,7 @@ public class ScenarioController(QanatDbContext dbContext, ILogger<ScenarioContro
     [WithScenarioPlannerRolePermission(PermissionEnum.ScenarioRights, RightsEnum.Read)]
     public ActionResult<List<ScenarioSimpleDto>> ListScenarios()
     {
-        var scenarios = Scenario.AllAsSimpleDto;
+        var scenarios = Scenario.All.Select(x => x.AsSimpleDto());
         return Ok(scenarios);
     }
 
@@ -31,13 +31,13 @@ public class ScenarioController(QanatDbContext dbContext, ILogger<ScenarioContro
     [WithScenarioPlannerRolePermission(PermissionEnum.ScenarioRights, RightsEnum.Read)]
     public ActionResult<ScenarioSimpleDto> GetScenarioByID([FromRoute] string scenarioShortName)
     {
-        var scenario = Scenario.AllAsSimpleDto.SingleOrDefault(x => x.ScenarioShortName == scenarioShortName);
+        var scenario = Scenario.All.SingleOrDefault(x => x.ScenarioShortName == scenarioShortName);
         if (CheckAndLogIfNotFound(scenario, "Scenario", scenarioShortName, out var result))
         {
             return result;
         }
 
-        return Ok(scenario);
+        return Ok(scenario.AsSimpleDto());
     }
 
     [HttpGet("{scenarioID}/image")]

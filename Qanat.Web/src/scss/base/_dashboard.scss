@@ -222,12 +222,10 @@
                     path {
                         stroke: $white;
                     }
+                }
 
-                    &.fill-none {
-                        path {
-                            fill: none;
-                        }
-                    }
+                .no-fill path {
+                    stroke: $white;
                 }
             }
         }
@@ -309,12 +307,10 @@
                     path {
                         stroke: $white;
                     }
+                }
 
-                    &.fill-none {
-                        path {
-                            fill: none;
-                        }
-                    }
+                .no-fill path {
+                    stroke: $white;
                 }
             }
 
@@ -341,11 +337,11 @@
                     path {
                         stroke: $white;
                     }
+                }
 
-                    &.fill-none {
-                        path {
-                            fill: none;
-                        }
+                .no-fill {
+                    path {
+                        stroke: $white;
                     }
                 }
             }

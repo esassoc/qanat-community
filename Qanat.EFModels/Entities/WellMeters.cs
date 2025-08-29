@@ -15,6 +15,12 @@ public class WellMeters
             errorMessages.Add(new ErrorMessage() { Type = "Well", Message = "The selected well is already assigned a meter."});
         }
 
+        var existingWellMeterForMeter = dbContext.WellMeters.AsNoTracking().SingleOrDefault(x => x.MeterID == requestDto.MeterID && !x.EndDate.HasValue);
+        if (existingWellMeterForMeter != null)
+        {
+            errorMessages.Add(new ErrorMessage() { Type = "Meter", Message = "The selected meter is already assigned to a well." });
+        }
+
         return errorMessages;
     }
 
@@ -37,7 +43,7 @@ public class WellMeters
 
         if (wellMeter == null)
         {
-            errorMessages.Add(new ErrorMessage() { Type="Well Meter", Message = $"The selected meter was not found assigned to the selected well."});
+            errorMessages.Add(new ErrorMessage() { Type= "Well Meter", Message = "The selected meter was not found assigned to the selected well."});
         }
         else if (wellMeter.StartDate >= requestDto.EndDate)
         {

@@ -7,12 +7,11 @@ RETURN
     from
     (
         select was.WaterAccountID, wap.ParcelID, 
-	        rank() over (partition by wap.WaterAccountID, wap.ParcelID order by wap.EffectiveYear desc) as Ranking 
+	        rank() over (partition by wap.WaterAccountID, wap.ParcelID order by rp.EndDate desc) as Ranking 
         from dbo.WaterAccountParcel wap
+        join dbo.ReportingPeriod rp on rp.ReportingPeriodID = wap.ReportingPeriodID
         join dbo.fWaterAccountUser(@userID) was on wap.WaterAccountID = was.WaterAccountID
-        where wap.EffectiveYear <= @year
---        join dbo.fReportingPeriod(@year) rp on was.GeographyID = rp.GeographyID
---        where wap.EffectiveYear <= rp.EndDate
+        where YEAR(rp.EndDate) <= @year
     ) a
     where a.Ranking = 1
 )

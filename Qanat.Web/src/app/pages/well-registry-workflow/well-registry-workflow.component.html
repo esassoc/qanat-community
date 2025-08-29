@@ -2,7 +2,9 @@
     <aside class="sidebar">
         <div class="sidebar-header">
             <h5 class="sidebar-title">
-                <geography-logo *ngIf="geography$ | async as geography" [geographyID]="geography.GeographyID"></geography-logo>
+                @if (geography$ | async; as geography) {
+                    <geography-logo [geographyID]="geography.GeographyID"></geography-logo>
+                }
                 <div>Register a Well</div>
             </h5>
         </div>

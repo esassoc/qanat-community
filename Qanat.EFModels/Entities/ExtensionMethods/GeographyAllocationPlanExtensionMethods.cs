@@ -1,9 +1,8 @@
-using System.Linq;
 using Qanat.Models.DataTransferObjects;
 
 namespace Qanat.EFModels.Entities;
 
-public static partial class GeographyAllocationPlanExtensionMethods
+public static class GeographyAllocationPlanExtensionMethods
 {
     public static GeographyAllocationPlanConfigurationDto AsConfigurationDto(
         this GeographyAllocationPlanConfiguration geographyAllocationPlanConfiguration)

@@ -36,9 +36,9 @@ public class RasterTests
     {
     }
 
-    [DataTestMethod]
-    [DataRow(1, 2023, 5, "2023-05-ET.tif", "259-080-006")]
-    public async Task CanGetRasterDataForUsageEntity(int waterMeasurementTypeID, int year, int month, string rasterFileName, string usageEntityName)
+    [TestMethod]
+    [DataRow(1, 1, 2023, 5, "2023-05-ET.tif")]
+    public async Task CanGetRasterDataForUsageLocation(int geographyID, int waterMeasurementTypeID, int year, int month, string rasterFileName)
     {
         var rasterFilePath = $"../../../IntegrationTests/Raster/RasterFiles/{rasterFileName}";
         Assert.IsTrue(File.Exists(rasterFilePath));
@@ -46,31 +46,29 @@ public class RasterTests
         var rasterDataset = Gdal.Open(rasterFilePath, Access.GA_ReadOnly);
         Assert.IsNotNull(rasterDataset);
 
-        var usageEntity = await _dbContext.UsageEntities.AsNoTracking()
-            .Include(x => x.UsageEntityGeometry)
+        var usageLocation = await _dbContext.UsageLocations.AsNoTracking()
+            .Include(x => x.UsageLocationGeometry)
             .Include(x => x.Geography).ThenInclude(x => x.GeographyBoundary)
             .Include(x => x.Geography).ThenInclude(x => x.ReportingPeriods)
-            .FirstOrDefaultAsync(x => x.UsageEntityName == usageEntityName);
-        
-        Assert.IsNotNull(usageEntity);
+            .FirstOrDefaultAsync(x => x.GeographyID == geographyID);
 
-        var geography = usageEntity.Geography;
+        var geography = usageLocation.Geography;
 
-        var usageEntityDto = new UsageEntitySimpleDto()
+        var usageLocationDto = new UsageLocationSimpleDto()
         {
-            UsageEntityID = usageEntity.UsageEntityID,
-            UsageEntityName = usageEntity.UsageEntityName,
-            UsageEntityArea = usageEntity.UsageEntityArea
+            UsageLocationID = usageLocation.UsageLocationID,
+            Name = usageLocation.Name,
+            Area = usageLocation.Area
         };
 
         var bufferedGSABoundary = geography.GeographyBoundary.GSABoundary.Buffer(Geographies.GSABoundaryBuffer).Envelope;
-        var result = await _rasterProcessing.GetRasterValueForUsageEntity(geography.AsDto(), bufferedGSABoundary, rasterDataset, usageEntityDto);
+        var result = await _rasterProcessing.GetRasterValueForUsageLocation(geography.AsDto(), bufferedGSABoundary, rasterDataset, usageLocationDto);
         rasterDataset.Dispose();
 
         var oldResult = await _dbContext.WaterMeasurements.AsNoTracking()
-            .FirstOrDefaultAsync(x => x.GeographyID == geography.GeographyID && x.WaterMeasurementTypeID == waterMeasurementTypeID && x.ReportedDate.Year == year && x.ReportedDate.Month == month && x.UsageEntityName == usageEntity.UsageEntityName);
+            .FirstOrDefaultAsync(x => x.GeographyID == geography.GeographyID && x.WaterMeasurementTypeID == waterMeasurementTypeID && x.ReportedDate.Year == year && x.ReportedDate.Month == month && x.UsageLocationID == usageLocation.UsageLocationID);
 
-        result.OldValue = (double?)oldResult?.ReportedValue;
+        result.OldValue = (double?)oldResult?.ReportedValueInNativeUnits;
 
         var prettyPrintedResultJSON = JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
         Console.WriteLine(prettyPrintedResultJSON);
@@ -79,10 +77,10 @@ public class RasterTests
         Assert.IsTrue(result.RasterValue.HasValue);
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow(1, 1, 2023, 5, "2023-05-ET.tif", 100)]
     [DataRow(7, 21, 2024, 6, "2024_Jun_EaTurGSA_ETa_mm_30m.tif", 100)] //MK 9/18/2024 -- Using the 30m as its smaller and I didn't want to commit the 10mb+ 10m raster... Need to iterate on this and potentially use AzureBlobStorage instead so we don't pollute the repo and upset Ray ;)
-    public async Task CanGetRasterDataForRandomSampleOfGeographyUsageEntities(int geographyID, int waterMeasurementTypeID, int year, int month, string rasterFileName, int? take)
+    public async Task CanGetRasterDataForRandomSampleOfGeographyUsageLocations(int geographyID, int waterMeasurementTypeID, int year, int month, string rasterFileName, int? take)
     {
         var rasterFilePath = $"../../../IntegrationTests/Raster/RasterFiles/{rasterFileName}";
         Assert.IsTrue(File.Exists(rasterFilePath));
@@ -91,35 +89,35 @@ public class RasterTests
             .Where(x => x.GeographyID == geographyID && x.WaterMeasurementTypeID == waterMeasurementTypeID && x.ReportedDate.Year == year && x.ReportedDate.Month == month)
             .ToListAsync();
 
-        var usageEntities = await _dbContext.UsageEntities.AsNoTracking()
-            .Include(x => x.UsageEntityGeometry)
-            .Include(x => x.Geography).ThenInclude(x => x.DefaultReportingPeriod)
+        var usageLocations = await _dbContext.UsageLocations.AsNoTracking()
+            .Include(x => x.Geography)
+            .Include(x => x.UsageLocationGeometry)
             .Include(x => x.Parcel)
-            .Where(x => x.GeographyID == geographyID && x.UsageEntityGeometry != null && x.UsageEntityGeometry.GeometryNative.IsValid)
+            .Where(x => x.GeographyID == geographyID && x.UsageLocationGeometry != null && x.UsageLocationGeometry.GeometryNative.IsValid)
             .OrderBy(x => Guid.NewGuid())
             .ToListAsync();
 
-        var usageEntitiesToSample = take.HasValue
-            ? usageEntities.Take(take.Value)
-            : usageEntities;
+        var usageLocationsToSample = take.HasValue
+            ? usageLocations.Take(take.Value)
+            : usageLocations;
 
-        var geography = usageEntities.First().Geography;
+        var geography = usageLocations.First().Geography;
 
         var rasterFileBytes = await File.ReadAllBytesAsync(rasterFilePath);
-        var usageEntityDtos = usageEntitiesToSample.Select(x => new UsageEntitySimpleDto()
+        var usageLocationDtos = usageLocationsToSample.Select(x => new UsageLocationSimpleDto()
         {
-            UsageEntityID = x.UsageEntityID,
-            UsageEntityName = x.UsageEntityName,
-            UsageEntityArea = x.UsageEntityArea
+            UsageLocationID = x.UsageLocationID,
+            Name = x.Name,
+            Area = x.Area
         }).ToList();
 
-        var results = await _rasterProcessing.ProcessRasterBytesForUsageEntities(geography.AsDto(), usageEntityDtos, rasterFileBytes);
+        var results = await _rasterProcessing.ProcessRasterBytesForUsageLocations(geography.AsDto(), usageLocationDtos, rasterFileBytes);
 
         foreach (var rasterProcessingResult in results)
         {
-            var oldResult = waterMeasurements.FirstOrDefault(x => x.GeographyID == geographyID && x.WaterMeasurementTypeID == waterMeasurementTypeID && x.ReportedDate.Year == year && x.ReportedDate.Month == month && x.UsageEntityName == rasterProcessingResult.UsageEntityName);
+            var oldResult = waterMeasurements.FirstOrDefault(x => x.GeographyID == geographyID && x.WaterMeasurementTypeID == waterMeasurementTypeID && x.ReportedDate.Year == year && x.ReportedDate.Month == month && x.UsageLocationID == rasterProcessingResult.UsageLocationID);
 
-            rasterProcessingResult.OldValue = (double?)oldResult?.ReportedValue;
+            rasterProcessingResult.OldValue = (double?)oldResult?.ReportedValueInNativeUnits;
         }
 
         var averageExecutionTime = results.Average(x => x.ExecutionTime);
@@ -135,14 +133,13 @@ public class RasterTests
         Console.WriteLine();
         Console.WriteLine($"Count w/ Previous Values: {resultsWithOldValues.Count}");
 
-
         var validDifferencePercents = resultsWithOldValues
             .Where(x => x.DifferencePercent.HasValue)
             .Select(x => x.DifferencePercent.GetValueOrDefault(0)).ToList();
 
         var averageDifferencePercent = validDifferencePercents.Any()
             ? validDifferencePercents.Average()
-            : (double?) null;
+            : (double?)null;
 
         Console.WriteLine($"\tAverage Difference Percent: {Math.Round(averageDifferencePercent.GetValueOrDefault(0), 2, MidpointRounding.ToEven)}%");
         Console.WriteLine($"\tAverage Difference: {averageDifference}");
@@ -166,8 +163,8 @@ public class RasterTests
 
             List<string> skipErrorList =
             [
-                "No valid geometry found for usage entity.",
-                "Usage entity is outside of the buffered GSA boundary."
+                RasterProcessingService.UsageLocationNoValidGeometryErrorMessage,
+                RasterProcessingService.UsageLocationOutsideGSABoundaryErrorMessage
             ];
 
             if (resultsWithErrors.Any(x => !skipErrorList.Contains(x.ErrorMessage)))
@@ -179,8 +176,8 @@ public class RasterTests
         var prettyPrintedResultJSON = JsonSerializer.Serialize(results, new JsonSerializerOptions { WriteIndented = true });
         Console.WriteLine(prettyPrintedResultJSON);
 
-        Assert.IsTrue(results.Where(x => string.IsNullOrEmpty( x.ErrorMessage)).All(x => x.RasterValue.HasValue));
-        Assert.AreEqual(usageEntityDtos.Count, results.Count);
+        Assert.IsTrue(results.Where(x => string.IsNullOrEmpty(x.ErrorMessage)).All(x => x.RasterValue.HasValue));
+        Assert.AreEqual(usageLocationDtos.Count, results.Count);
     }
 }
 

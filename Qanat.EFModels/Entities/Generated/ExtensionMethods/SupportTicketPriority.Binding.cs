@@ -18,9 +18,7 @@ namespace Qanat.EFModels.Entities
         public static readonly SupportTicketPriorityNotPrioritized NotPrioritized = SupportTicketPriorityNotPrioritized.Instance;
 
         public static readonly List<SupportTicketPriority> All;
-        public static readonly List<SupportTicketPrioritySimpleDto> AllAsSimpleDto;
         public static readonly ReadOnlyDictionary<int, SupportTicketPriority> AllLookupDictionary;
-        public static readonly ReadOnlyDictionary<int, SupportTicketPrioritySimpleDto> AllAsSimpleDtoLookupDictionary;
 
         /// <summary>
         /// Static type constructor to coordinate static initialization order
@@ -28,9 +26,7 @@ namespace Qanat.EFModels.Entities
         static SupportTicketPriority()
         {
             All = new List<SupportTicketPriority> { High, Medium, Low, NotPrioritized };
-            AllAsSimpleDto = new List<SupportTicketPrioritySimpleDto> { High.AsSimpleDto(), Medium.AsSimpleDto(), Low.AsSimpleDto(), NotPrioritized.AsSimpleDto() };
             AllLookupDictionary = new ReadOnlyDictionary<int, SupportTicketPriority>(All.ToDictionary(x => x.SupportTicketPriorityID));
-            AllAsSimpleDtoLookupDictionary = new ReadOnlyDictionary<int, SupportTicketPrioritySimpleDto>(AllAsSimpleDto.ToDictionary(x => x.SupportTicketPriorityID));
         }
 
         /// <summary>

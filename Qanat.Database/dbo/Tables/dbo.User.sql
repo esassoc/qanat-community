@@ -19,6 +19,7 @@
     [ScenarioPlannerRoleID]      INT              NOT NULL DEFAULT(1),
     GETRunCustomerID             INT              NULL,
     GETRunUserID                 INT              NULL,
+    ApiKey                       UNIQUEIDENTIFIER NULL,
 
     CONSTRAINT [PK_User_UserID]                                     PRIMARY KEY CLUSTERED ([UserID] ASC),
     

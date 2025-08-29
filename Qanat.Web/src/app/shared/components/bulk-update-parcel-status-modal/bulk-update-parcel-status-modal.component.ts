@@ -1,9 +1,7 @@
-import { Component, ComponentRef, OnInit } from "@angular/core";
-import { CommonModule } from "@angular/common";
+import { Component, ComponentRef, inject, OnInit } from "@angular/core";
+
 import { FormGroup, ReactiveFormsModule } from "@angular/forms";
-import { SelectDropdownOption } from "src/app/shared/components/inputs/select-dropdown/select-dropdown.component";
-import { ModalComponent } from "src/app/shared/components/modal/modal.component";
-import { ModalService } from "src/app/shared/services/modal/modal.service";
+import { SelectDropdownOption } from "src/app/shared/components/forms/form-field/form-field.component";
 import { ParcelStatusEnum } from "src/app/shared/generated/enum/parcel-status-enum";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { Alert } from "src/app/shared/models/alert";
@@ -16,62 +14,60 @@ import { FormFieldComponent, FormFieldType } from "src/app/shared/components/for
 import { FieldDefinitionComponent } from "src/app/shared/components/field-definition/field-definition.component";
 import { AlertContext } from "../../models/enums/alert-context.enum";
 import { ParcelByGeographyService } from "../../generated/api/parcel-by-geography.service";
+import { AlertDisplayComponent } from "../alert-display/alert-display.component";
+import { DialogRef } from "@ngneat/dialog";
 
 @Component({
     selector: "bulk-update-parcel-status-modal",
-    standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, FormFieldComponent, FieldDefinitionComponent],
+    imports: [ReactiveFormsModule, FormFieldComponent, FieldDefinitionComponent, AlertDisplayComponent],
     templateUrl: "./bulk-update-parcel-status-modal.component.html",
     styleUrls: ["./bulk-update-parcel-status-modal.component.scss"],
 })
 export class BulkUpdateParcelStatusModalComponent implements OnInit {
-    modalComponentRef: ComponentRef<ModalComponent>;
-    modalContext: ParcelUpdateContext;
+    public ref: DialogRef<ParcelUpdateContext, boolean> = inject(DialogRef);
     public FormFieldType = FormFieldType;
     public numberOfParcels: number;
 
     public formGroup: FormGroup<ParcelBulkUpdateParcelStatusDtoForm> = new FormGroup<ParcelBulkUpdateParcelStatusDtoForm>({
         ParcelStatusID: ParcelBulkUpdateParcelStatusDtoFormControls.ParcelStatusID(),
         ParcelIDs: ParcelBulkUpdateParcelStatusDtoFormControls.ParcelIDs(),
-        EndYear: ParcelBulkUpdateParcelStatusDtoFormControls.EndYear(),
     });
 
     public statusOptions: SelectDropdownOption[] = [
-        { Value: null, Label: "Select Parcel Status", Disabled: true },
-        { Value: ParcelStatusEnum.Excluded, Label: "Excluded", Disabled: false },
-        { Value: ParcelStatusEnum.Inactive, Label: "Inactive", Disabled: false },
-        { Value: ParcelStatusEnum.Unassigned, Label: "Unassigned", Disabled: false },
+        { Value: ParcelStatusEnum.Excluded, Label: "Excluded", disabled: false },
+        { Value: ParcelStatusEnum.Inactive, Label: "Inactive", disabled: false },
+        { Value: ParcelStatusEnum.Unassigned, Label: "Unassigned", disabled: false },
     ];
 
-    public yearOptions: SelectDropdownOption[] = [{ Value: null, Label: "Select End Year:", Disabled: true }];
+    public yearOptions: SelectDropdownOption[] = [{ Value: null, Label: "Select End Year:", disabled: true }];
 
-    constructor(private modalService: ModalService, private parcelByGeographyService: ParcelByGeographyService, private alertService: AlertService) {}
+    constructor(
+        private parcelByGeographyService: ParcelByGeographyService,
+        private alertService: AlertService
+    ) {}
 
     ngOnInit(): void {
-        this.numberOfParcels = this.modalContext.ParcelIDs.length;
-        if (this.modalContext.Years) {
-            this.modalContext.Years.forEach((year) => {
-                this.yearOptions.push({ Value: year, Label: year.toString(), Disabled: false });
+        this.numberOfParcels = this.ref.data.ParcelIDs.length;
+        if (this.ref.data.Years) {
+            this.ref.data.Years.forEach((year) => {
+                this.yearOptions.push({ Value: year, Label: year.toString(), disabled: false });
             });
         }
     }
 
     save(): void {
         const submitDto = new ParcelBulkUpdateParcelStatusDto(this.formGroup.value);
-        submitDto.ParcelIDs = this.modalContext.ParcelIDs;
-        if (!this.modalContext.Years && !submitDto.EndYear) {
-            submitDto.EndYear = new Date().getFullYear(); // default to current year if no year picker
-        }
+        submitDto.ParcelIDs = this.ref.data.ParcelIDs;
 
-        this.parcelByGeographyService.geographiesGeographyIDParcelsBulkUpdateParcelStatusPost(this.modalContext.GeographyID, submitDto).subscribe(() => {
+        this.parcelByGeographyService.bulkUpdateParcelStatusParcelByGeography(this.ref.data.GeographyID, submitDto).subscribe(() => {
             this.alertService.clearAlerts();
             this.alertService.pushAlert(new Alert("Parcels successfully updated!", AlertContext.Success));
-            this.modalService.close(this.modalComponentRef, true);
+            this.ref.close(true);
         });
     }
 
     close(): void {
-        this.modalService.close(this.modalComponentRef, false);
+        this.ref.close(false);
     }
 }
 

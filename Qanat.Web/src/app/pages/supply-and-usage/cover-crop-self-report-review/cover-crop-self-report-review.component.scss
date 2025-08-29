@@ -1,0 +1,38 @@
+@use "/src/scss/abstracts/" as *;
+
+.section-header {
+    gap: $spacing-300;
+    align-items: center;
+
+    .section-title {
+        padding-bottom: 0;
+        font-size: 24px;
+    }
+}
+
+.review-stats {
+    display: flex;
+    border-radius: $spacing-400;
+    border: 1px solid $gray-light;
+    align-content: center;
+    align-items: center;
+    overflow: hidden;
+    flex-wrap: nowrap;
+
+    div {
+        padding: 0.6rem 1.2rem 0.3rem;
+        line-height: 0.875em;
+        font-size: $type-size-100;
+        font-weight: bold;
+        text-transform: uppercase;
+        border-color: transparent;
+        background-color: $gray-lighter;
+        color: $gray-default;
+
+        &:first-child {
+            border-right: 1px solid $gray-light;
+            background-color: $orange-default;
+            color: $white;
+        }
+    }
+}

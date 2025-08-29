@@ -1,0 +1,16 @@
+<div class="modal">
+    <div class="modal-header">
+        <h2>{{ ref.data.Header }}</h2>
+    </div>
+
+    <div class="modal-body grid-12">
+        <form class="form" [formGroup]="formGroup">
+            <form-field [formControl]="formGroup.controls.HtmlContent" [type]="FormFieldType.RTE"></form-field>
+        </form>
+    </div>
+
+    <div class="modal-footer">
+        <button class="btn btn-primary" (click)="save()" [disabled]="formGroup.invalid">Save</button>
+        <button class="btn btn-primary-outline" (click)="cancel()">Cancel</button>
+    </div>
+</div>

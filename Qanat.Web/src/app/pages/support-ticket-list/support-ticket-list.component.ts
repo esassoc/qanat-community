@@ -1,174 +1,300 @@
 import { Component, OnInit } from "@angular/core";
 import { SupportTicketService } from "../../shared/generated/api/support-ticket.service";
-import { Observable } from "rxjs";
+import { Observable, tap } from "rxjs";
 import { UtilityFunctionsService } from "../../shared/services/utility-functions.service";
 import { ColDef, GridApi, GridReadyEvent } from "ag-grid-community";
 import { PageHeaderComponent } from "../../shared/components/page-header/page-header.component";
 import { QanatGridComponent } from "../../shared/components/qanat-grid/qanat-grid.component";
-import { AsyncPipe, NgIf } from "@angular/common";
-import { ModalService, ModalSizeEnum, ModalThemeEnum } from "../../shared/services/modal/modal.service";
-import { CreateSupportModalComponent } from "../../shared/components/create-support-modal/create-support-modal.component";
-import { ConfirmService } from "../../shared/services/confirm/confirm.service";
-import { Alert } from "../../shared/models/alert";
-import { AlertContext } from "../../shared/models/enums/alert-context.enum";
-import { ConfirmOptions } from "../../shared/services/confirm/confirm-options";
-import { AlertService } from "../../shared/services/alert.service";
-import { UpdateSupportTicketModalComponent } from "../../shared/components/update-support-ticket-modal/update-support-ticket-modal.component";
+import { AsyncPipe } from "@angular/common";
+import { CreateSupportModalComponent } from "../../shared/components/support-ticket/modals/create-support-modal/create-support-modal.component";
 import { SupportTicketStatusEnum } from "../../shared/generated/enum/support-ticket-status-enum";
 import { SupportTicketGridDto } from "../../shared/generated/model/support-ticket-grid-dto";
 import { AlertDisplayComponent } from "../../shared/components/alert-display/alert-display.component";
 import { IconComponent } from "src/app/shared/components/icon/icon.component";
+import { SupportTicketUpdateModalComponent } from "src/app/shared/components/support-ticket/modals/support-ticket-update-modal/support-ticket-update-modal.component";
+import { LoadingDirective } from "src/app/shared/directives/loading.directive";
+import { DialogService } from "@ngneat/dialog";
+import { SupportTicketUpdateContext, SupportTicketUpdateStatusContext } from "../support-ticket-admin-pages/support-ticket-detail/support-ticket-detail.component";
+import { SupportTicketUpdateStatusModalComponent } from "src/app/shared/components/support-ticket/modals/support-ticket-update-status-modal/support-ticket-update-status-modal.component";
 
 @Component({
     selector: "support-ticket-list",
-    standalone: true,
-    imports: [PageHeaderComponent, QanatGridComponent, AsyncPipe, NgIf, AlertDisplayComponent, IconComponent],
+    imports: [PageHeaderComponent, QanatGridComponent, AsyncPipe, AlertDisplayComponent, IconComponent, LoadingDirective],
     templateUrl: "./support-ticket-list.component.html",
     styleUrl: "./support-ticket-list.component.scss",
 })
 export class SupportTicketListComponent implements OnInit {
+    public activeTab: "Inbox" | "Active" | "On Hold" | "Closed" = "Inbox";
+    public activeTabIcon = {
+        "Inbox": "Inbox",
+        "Active": "CircleCheckmark",
+        "On Hold": "Info",
+        "Closed": "CircleX",
+    };
+
     public supportTicketDtos$: Observable<SupportTicketGridDto[]>;
+    public rowData: SupportTicketGridDto[];
     public columnDefs: ColDef[];
+
+    public inboxSupportTickets: SupportTicketGridDto[];
+    public activeSupportTickets: SupportTicketGridDto[];
+    public onHoldSupportTickets: SupportTicketGridDto[];
+    public closedSupportTickets: SupportTicketGridDto[];
+
+    public inboxColumnDefs: ColDef[] = [];
+    public activeColumnDefs: ColDef[] = [];
+    public onHoldColumnDefs: ColDef[] = [];
+    public closedColumnDefs: ColDef[] = [];
+
     public gridApi: GridApi;
+    public isLoading = true;
 
     constructor(
         private supportTicketService: SupportTicketService,
         private utilityFunctionsService: UtilityFunctionsService,
-        private modalService: ModalService,
-        private confirmService: ConfirmService,
-        private alertService: AlertService
+        private dialogService: DialogService
     ) {}
 
     ngOnInit(): void {
         this.loadSupportTickets();
-        this.initializeGrid();
+        this.createColumnDefs();
     }
 
-    loadSupportTickets() {
-        this.supportTicketDtos$ = this.supportTicketService.supportTicketsGet();
+    public changeActiveTab(tab: "Inbox" | "Active" | "On Hold" | "Closed") {
+        this.activeTab = tab;
+
+        switch (tab) {
+            case "Inbox":
+                this.rowData = this.inboxSupportTickets;
+                this.columnDefs = this.inboxColumnDefs;
+                break;
+            case "Active":
+                this.rowData = this.activeSupportTickets;
+                this.columnDefs = this.activeColumnDefs;
+                break;
+            case "On Hold":
+                this.rowData = this.onHoldSupportTickets;
+                this.columnDefs = this.onHoldColumnDefs;
+                break;
+            case "Closed":
+                this.rowData = this.closedSupportTickets;
+                this.columnDefs = this.closedColumnDefs;
+                break;
+        }
     }
 
-    private initializeGrid(): void {
-        this.columnDefs = [
+    private loadSupportTickets() {
+        this.supportTicketDtos$ = this.supportTicketService.listAllSupportTicketsSupportTicket().pipe(
+            tap((supportTickets) => {
+                this.inboxSupportTickets = supportTickets
+                    .filter((x) => x.SupportTicketStatus.SupportTicketStatusID == SupportTicketStatusEnum.Unassigned)
+                    .sort((a, b) => this.utilityFunctionsService.dateSortComparator(a.DateCreated, b.DateCreated));
+
+                this.activeSupportTickets = supportTickets
+                    .filter((x) => x.SupportTicketStatus.SupportTicketStatusID == SupportTicketStatusEnum.Active)
+                    .sort((a, b) => -1 * this.utilityFunctionsService.dateSortComparator(a.DateUpdated, b.DateUpdated));
+
+                this.onHoldSupportTickets = supportTickets
+                    .filter((x) => x.SupportTicketStatus.SupportTicketStatusID == SupportTicketStatusEnum.OnHold)
+                    .sort((a, b) => -1 * this.utilityFunctionsService.dateSortComparator(a.DateUpdated, b.DateUpdated));
+
+                this.closedSupportTickets = supportTickets
+                    .filter((x) => x.SupportTicketStatus.SupportTicketStatusID == SupportTicketStatusEnum.Closed)
+                    .sort((a, b) => -1 * this.utilityFunctionsService.dateSortComparator(a.DateClosed, b.DateClosed));
+
+                this.changeActiveTab("Inbox");
+                this.isLoading = false;
+            })
+        );
+    }
+
+    private createColumnDefs(): void {
+        const baseColumnDefs: ColDef[] = [
             this.utilityFunctionsService.createActionsColumnDef((params: any) => {
                 var actions = [];
                 actions.push({ ActionName: "View Ticket", ActionIcon: "fas fa-map", ActionLink: `${params.data.SupportTicketID}` });
                 if (params.data.SupportTicketStatus.SupportTicketStatusID != SupportTicketStatusEnum.Closed) {
-                    actions.push({ ActionName: "Update", ActionIcon: "fas fa-map", ActionHandler: () => this.openUpdateModal(params.data) });
-                    actions.push({ ActionName: "Close", ActionIcon: "fas fa-info-circle", ActionHandler: () => this.openDeleteModal(params.data.SupportTicketID) });
-                } else {
-                    actions.push({ ActionName: "Reopen", ActionIcon: "fas fa-info-circle", ActionHandler: () => this.openReopenModal(params.data.SupportTicketID) });
+                    actions.push({ ActionName: "Update Details", ActionIcon: "fas fa-edit", ActionHandler: () => this.openUpdateDetailsModal(params.data) });
                 }
+                actions.push({ ActionName: "Update Status", ActionIcon: "fas fa-edit", ActionHandler: () => this.openUpdateStatusModal(params.data) });
 
                 return actions.length == 0 ? null : actions;
             }),
-            this.utilityFunctionsService.createLinkColumnDef("Ticket ID", "SupportTicketID", "SupportTicketID"),
-            this.utilityFunctionsService.createBasicColumnDef("Geography", "GeographyName"),
-            this.utilityFunctionsService.createBasicColumnDef("Assigned To", "AssignedUserFullName"),
-            this.utilityFunctionsService.createBasicColumnDef("Status", "SupportTicketStatus.SupportTicketStatusDisplayName", {
-                CustomDropdownFilterField: "SupportTicketStatus.SupportTicketStatusDisplayName",
-            }),
-            this.utilityFunctionsService.createBasicColumnDef("Priority", "SupportTicketPriority.SupportTicketPriorityDisplayName", {
-                CustomDropdownFilterField: "SupportTicketPriority.SupportTicketPriorityDisplayName",
-            }),
-            this.utilityFunctionsService.createBasicColumnDef("Question Type", "SupportTicketQuestionType.SupportTicketQuestionTypeDisplayName", {
-                CustomDropdownFilterField: "SupportTicketQuestionType.SupportTicketQuestionTypeDisplayName",
-            }),
-            this.utilityFunctionsService.createBasicColumnDef("Water Account", "WaterAccountNumber", {
-                FieldDefinitionType: "WaterAccount",
-            }),
+            { headerName: "Ticket ID", field: "SupportTicketID", cellRenderer: (params) => `<a href="/support-tickets/${params.value}" target="_blank">${params.value}</a>` },
+            this.utilityFunctionsService.createBasicColumnDef("Geography", "GeographyName", { CustomDropdownFilterField: "GeographyName" }),
             this.utilityFunctionsService.createBasicColumnDef("Contact Name", "ContactFirstName", {
                 ValueFormatter: (params) => {
                     return params.data.ContactFirstName + " " + params.data.ContactLastName;
                 },
             }),
-            this.utilityFunctionsService.createBasicColumnDef("Contact Email", "ContactEmail"),
-            this.utilityFunctionsService.createPhoneNumberColumnDef("Contact Phone Number", "ContactPhoneNumber"),
+            this.utilityFunctionsService.createBasicColumnDef("Priority", "SupportTicketPriority.SupportTicketPriorityDisplayName", {
+                CustomDropdownFilterField: "SupportTicketPriority.SupportTicketPriorityDisplayName",
+            }),
             this.utilityFunctionsService.createDateColumnDef("Date Updated", "DateUpdated", "M/d/yyyy"),
-            this.utilityFunctionsService.createBasicColumnDef("Created By", "CreateUserFullName"),
             this.utilityFunctionsService.createDateColumnDef("Date Created", "DateCreated", "M/d/yyyy"),
+            this.utilityFunctionsService.createBasicColumnDef("Question Type", "SupportTicketQuestionType.SupportTicketQuestionTypeDisplayName", {
+                CustomDropdownFilterField: "SupportTicketQuestionType.SupportTicketQuestionTypeDisplayName",
+            }),
         ];
+
+        // inbox column defs
+        this.inboxColumnDefs = baseColumnDefs.slice();
+        this.inboxColumnDefs.splice(7, 0, this.utilityFunctionsService.createDaysPassedColumnDef("Days Open", "DateCreated"));
+        this.inboxColumnDefs.splice(
+            9,
+            0,
+            ...[
+                this.utilityFunctionsService.createLinkColumnDef("Water Account", "WaterAccountNumber", "WaterAccountID", {
+                    FieldDefinitionType: "WaterAccount",
+                    InRouterLink: "/water-accounts/",
+                }),
+                this.utilityFunctionsService.createBasicColumnDef("Contact Email", "ContactEmail"),
+                this.utilityFunctionsService.createPhoneNumberColumnDef("Contact Phone Number", "ContactPhoneNumber"),
+                this.utilityFunctionsService.createBasicColumnDef("Created By", "CreateUserFullName", { CustomDropdownFilterField: "CreateUserFullName" }),
+            ]
+        );
+
+        // active column defs
+        this.activeColumnDefs = baseColumnDefs.slice();
+        this.activeColumnDefs.splice(
+            4,
+            0,
+            this.utilityFunctionsService.createBasicColumnDef("Assigned To", "AssignedUserFullName", { CustomDropdownFilterField: "AssignedUserFullName" })
+        );
+        this.activeColumnDefs.splice(
+            6,
+            0,
+            ...[
+                this.utilityFunctionsService.createDaysPassedColumnDef("Days Open", "DateCreated"),
+                { headerName: "Most Recent Note", field: "MostRecentNoteMessage", width: 200, maxWidth: 200, suppressSizeToFit: true, suppressAutoSize: true },
+            ]
+        );
+        this.activeColumnDefs.splice(
+            11,
+            0,
+            ...[
+                this.utilityFunctionsService.createLinkColumnDef("Water Account", "WaterAccountNumber", "WaterAccountID", {
+                    FieldDefinitionType: "WaterAccount",
+                    InRouterLink: "/water-accounts/",
+                }),
+                this.utilityFunctionsService.createBasicColumnDef("Contact Email", "ContactEmail"),
+                this.utilityFunctionsService.createPhoneNumberColumnDef("Contact Phone Number", "ContactPhoneNumber"),
+            ]
+        );
+
+        // on hold column defs
+        this.onHoldColumnDefs = baseColumnDefs.slice();
+        this.onHoldColumnDefs.splice(
+            4,
+            0,
+            ...[this.utilityFunctionsService.createBasicColumnDef("Assigned To", "AssignedUserFullName", { CustomDropdownFilterField: "AssignedUserFullName" })]
+        );
+        this.onHoldColumnDefs.splice(
+            8,
+            0,
+            ...[
+                this.utilityFunctionsService.createDaysPassedColumnDef("Days Open", "DateCreated"),
+                { headerName: "Most Recent Note", field: "MostRecentNoteMessage", width: 200, maxWidth: 200, suppressSizeToFit: true, suppressAutoSize: true },
+                this.utilityFunctionsService.createLinkColumnDef("Water Account", "WaterAccountNumber", "WaterAccountID", {
+                    FieldDefinitionType: "WaterAccount",
+                    InRouterLink: "/water-accounts/",
+                }),
+                this.utilityFunctionsService.createBasicColumnDef("Contact Email", "ContactEmail"),
+                this.utilityFunctionsService.createPhoneNumberColumnDef("Contact Phone Number", "ContactPhoneNumber"),
+            ]
+        );
+
+        // closed column defs
+        this.closedColumnDefs = baseColumnDefs.slice();
+        this.closedColumnDefs.splice(
+            4,
+            0,
+            this.utilityFunctionsService.createBasicColumnDef("Assigned To", "AssignedUserFullName", { CustomDropdownFilterField: "AssignedUserFullName" })
+        );
+        this.closedColumnDefs.splice(6, 0, this.utilityFunctionsService.createDateColumnDef("Date Closed", "DateClosed", "M/d/yyyy"));
+        this.closedColumnDefs.splice(9, 0, {
+            headerName: "Most Recent Note",
+            field: "MostRecentNoteMessage",
+            width: 200,
+            maxWidth: 200,
+            suppressSizeToFit: true,
+            suppressAutoSize: true,
+        });
+        this.closedColumnDefs.splice(
+            11,
+            0,
+            ...[
+                this.utilityFunctionsService.createLinkColumnDef("Water Account", "WaterAccountNumber", "WaterAccountID", {
+                    FieldDefinitionType: "WaterAccount",
+                    InRouterLink: "/water-accounts/",
+                }),
+                this.utilityFunctionsService.createBasicColumnDef("Contact Email", "ContactEmail"),
+                this.utilityFunctionsService.createPhoneNumberColumnDef("Contact Phone Number", "ContactPhoneNumber"),
+            ]
+        );
     }
 
     public onGridReady(event: GridReadyEvent) {
         this.gridApi = event.api;
     }
+
     public openCreateNewModal() {
-        this.modalService
-            .open(CreateSupportModalComponent, null, { CloseOnClickOut: false, TopLayer: false, ModalSize: ModalSizeEnum.Large, ModalTheme: ModalThemeEnum.Light })
-            .instance.result.then((result) => {
-                if (result) {
-                    this.loadSupportTickets();
-                }
-            });
+        const dialogRef = this.dialogService.open(CreateSupportModalComponent, {
+            data: {
+                GeographyID: null,
+                WaterAccountID: null,
+            },
+            size: "lg",
+        });
+
+        dialogRef.afterClosed$.subscribe((result) => {
+            if (result) {
+                this.loadSupportTickets();
+            }
+        });
     }
 
-    public openUpdateModal(supportTicket: SupportTicketGridDto) {
-        this.modalService
-            .open(UpdateSupportTicketModalComponent, null, { CloseOnClickOut: false, TopLayer: false, ModalSize: ModalSizeEnum.Large, ModalTheme: ModalThemeEnum.Light }, {
+    public openUpdateStatusModal(supportTicket: SupportTicketGridDto) {
+        const dialogRef = this.dialogService.open(SupportTicketUpdateStatusModalComponent, {
+            data: {
+                SupportTicketID: supportTicket.SupportTicketID,
+                GeographyID: supportTicket.GeographyID,
+                SupportTicketStatusID: supportTicket.SupportTicketStatus.SupportTicketStatusID,
+                SupportTicketPriorityID: supportTicket.SupportTicketPriority.SupportTicketPriorityID,
+                AssignedUserID: supportTicket.AssignedUserID,
+            } as SupportTicketUpdateStatusContext,
+            size: "lg",
+        });
+
+        dialogRef.afterClosed$.subscribe((result) => {
+            if (result) {
+                this.loadSupportTickets();
+            }
+        });
+    }
+
+    private openUpdateDetailsModal(supportTicket: SupportTicketGridDto) {
+        const dialogRef = this.dialogService.open(SupportTicketUpdateModalComponent, {
+            data: {
                 SupportTicketID: supportTicket.SupportTicketID,
                 WaterAccountID: supportTicket.WaterAccountID,
                 Description: supportTicket.Description,
                 SupportTicketPriorityID: supportTicket.SupportTicketPriority.SupportTicketPriorityID,
+                SupportTicketQuestionTypeID: supportTicket.SupportTicketQuestionType.SupportTicketQuestionTypeID,
                 GeographyID: supportTicket.GeographyID,
                 ContactFirstName: supportTicket.ContactFirstName,
                 ContactLastName: supportTicket.ContactLastName,
                 ContactEmail: supportTicket.ContactEmail,
                 ContactPhoneNumber: supportTicket.ContactPhoneNumber,
                 AssignedUserID: supportTicket.AssignedUserID,
-            } as SupportTicketContext)
-            .instance.result.then((result) => {
-                if (result) {
-                    this.loadSupportTickets();
-                }
-            });
-    }
+            } as SupportTicketUpdateContext,
+            size: "lg",
+        });
 
-    public openDeleteModal(supportTicketID) {
-        const options = {
-            title: "Confirm: Close Support Ticket",
-            message: "Are you sure you want to close this support ticket?",
-            buttonClassYes: "btn-danger",
-            buttonTextYes: "Confirm",
-            buttonTextNo: "Cancel",
-        } as ConfirmOptions;
-        this.confirmService.confirm(options).then((confirmed) => {
-            if (confirmed) {
-                this.supportTicketService.supportTicketsSupportTicketIDClosePut(supportTicketID).subscribe((response) => {
-                    this.alertService.pushAlert(new Alert("Sucessfully closed support ticket.", AlertContext.Success));
-                    this.loadSupportTickets();
-                });
+        dialogRef.afterClosed$.subscribe((result) => {
+            if (result) {
+                this.loadSupportTickets();
             }
         });
     }
-    public openReopenModal(supportTicketID) {
-        const options = {
-            title: "Confirm: Reopen Support Ticket",
-            message: "Are you sure you want to reopen this support ticket?",
-            buttonClassYes: "btn-danger",
-            buttonTextYes: "Confirm",
-            buttonTextNo: "Cancel",
-        } as ConfirmOptions;
-        this.confirmService.confirm(options).then((confirmed) => {
-            if (confirmed) {
-                this.supportTicketService.supportTicketsSupportTicketIDReopenPut(supportTicketID).subscribe((response) => {
-                    this.alertService.pushAlert(new Alert("Sucessfully reopened support ticket.", AlertContext.Success));
-                    this.loadSupportTickets();
-                });
-            }
-        });
-    }
-}
-
-export class SupportTicketContext {
-    SupportTicketID: number;
-    WaterAccountID: number;
-    Description: string;
-    SupportTicketPriorityID: number;
-    GeographyID: number;
-    ContactFirstName: string;
-    ContactLastName: string;
-    ContactEmail: string;
-    ContactPhoneNumber: string;
-    AssignedUserID: number;
 }

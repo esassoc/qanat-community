@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Qanat.EFModels.Entities;
 
 [Table("WaterMeasurementSelfReport")]
-[Index("GeographyID", "WaterAccountID", "WaterMeasurementTypeID", "ReportingYear", Name = "AK_WaterMeasurementSelfReport_GeographyID_WaterAccountID_WaterMeasurementTypeID_ReportingYear", IsUnique = true)]
+[Index("GeographyID", "WaterAccountID", "WaterMeasurementTypeID", "ReportingPeriodID", Name = "AK_WaterMeasurementSelfReport_GeographyID_WaterAccountID_WaterMeasurementTypeID_ReportingPeriodID", IsUnique = true)]
 public partial class WaterMeasurementSelfReport
 {
     [Key]
@@ -19,7 +19,7 @@ public partial class WaterMeasurementSelfReport
 
     public int WaterMeasurementTypeID { get; set; }
 
-    public int ReportingYear { get; set; }
+    public int ReportingPeriodID { get; set; }
 
     public int WaterMeasurementSelfReportStatusID { get; set; }
 
@@ -50,6 +50,10 @@ public partial class WaterMeasurementSelfReport
     [InverseProperty("WaterMeasurementSelfReports")]
     public virtual Geography Geography { get; set; }
 
+    [ForeignKey("ReportingPeriodID")]
+    [InverseProperty("WaterMeasurementSelfReports")]
+    public virtual ReportingPeriod ReportingPeriod { get; set; }
+
     [ForeignKey("UpdateUserID")]
     [InverseProperty("WaterMeasurementSelfReportUpdateUsers")]
     public virtual User UpdateUser { get; set; }
@@ -57,6 +61,9 @@ public partial class WaterMeasurementSelfReport
     [ForeignKey("WaterAccountID")]
     [InverseProperty("WaterMeasurementSelfReports")]
     public virtual WaterAccount WaterAccount { get; set; }
+
+    [InverseProperty("WaterMeasurementSelfReport")]
+    public virtual ICollection<WaterMeasurementSelfReportFileResource> WaterMeasurementSelfReportFileResources { get; set; } = new List<WaterMeasurementSelfReportFileResource>();
 
     [InverseProperty("WaterMeasurementSelfReport")]
     public virtual ICollection<WaterMeasurementSelfReportLineItem> WaterMeasurementSelfReportLineItems { get; set; } = new List<WaterMeasurementSelfReportLineItem>();

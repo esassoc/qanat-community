@@ -1,19 +1,18 @@
 <div class="modal-header">
     <div>
-        <h3 class="section-title">
-            <icon icon="Users"></icon>
-            Update Role for {{ userDisplayName }}
-        </h3>
+        <h3 class="section-title">Update Role for {{ userDisplayName }}</h3>
     </div>
-    <button type="button" class="close" (click)="close()">
-        <i class="fa fa-times-circle"></i>
-    </button>
 </div>
 
 <div class="modal-body">
     <form action="" class="form" [formGroup]="formGroup">
         <div class="mb-3">
-            <form-field [formControl]="formGroup.controls.WaterAccountRole" fieldLabel="Role" [formInputOptions]="WaterAccountRolesSelectDropdownOptions" [type]="FormFieldType.Select"></form-field>
+            <form-field
+                [formControl]="formGroup.controls.WaterAccountRoleID"
+                fieldLabel="Name"
+                fieldValue="Value"
+                [formInputOptions]="WaterAccountRolesSelectDropdownOptions"
+                [type]="FormFieldType.Select"></form-field>
         </div>
     </form>
 </div>

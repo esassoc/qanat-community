@@ -1,0 +1,29 @@
+<div class="full-width-page">
+    @if (geography$ | async; as geography) {
+        <div class="list-view">
+            <page-header icon="Meter" [templateRight]="templateRight" [templateAbove]="templateAbove" [customRichTextTypeID]="richTextTypeID">
+                <ng-template #templateRight>
+                    <button class="btn btn-primary btn-rounded" (click)="addMeterModal(geography)">+ Add Meter</button>
+                </ng-template>
+                <ng-template #templateAbove>
+                    <div class="back">
+                        <a routerLink="/water-dashboard/wells" class="back__link">Back to All Wells</a>
+                    </div>
+                </ng-template>
+            </page-header>
+            <div class="page-body grid-12">
+                <app-alert-display></app-alert-display>
+                <div class="table-responsive">
+                    @if (meters$ | async; as meters) {
+                        <qanat-grid
+                            [rowData]="meters"
+                            [columnDefs]="columnDefs"
+                            (gridReady)="onGridReady($event)"
+                            downloadFileName="meters"
+                            [sizeColumnsToFitGrid]="true"></qanat-grid>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>

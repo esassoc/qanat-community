@@ -18,9 +18,7 @@ namespace Qanat.EFModels.Entities
         public static readonly FuelTypeOther Other = FuelTypeOther.Instance;
 
         public static readonly List<FuelType> All;
-        public static readonly List<FuelTypeSimpleDto> AllAsSimpleDto;
         public static readonly ReadOnlyDictionary<int, FuelType> AllLookupDictionary;
-        public static readonly ReadOnlyDictionary<int, FuelTypeSimpleDto> AllAsSimpleDtoLookupDictionary;
 
         /// <summary>
         /// Static type constructor to coordinate static initialization order
@@ -28,9 +26,7 @@ namespace Qanat.EFModels.Entities
         static FuelType()
         {
             All = new List<FuelType> { Electric, Diesel, LPGas, Other };
-            AllAsSimpleDto = new List<FuelTypeSimpleDto> { Electric.AsSimpleDto(), Diesel.AsSimpleDto(), LPGas.AsSimpleDto(), Other.AsSimpleDto() };
             AllLookupDictionary = new ReadOnlyDictionary<int, FuelType>(All.ToDictionary(x => x.FuelTypeID));
-            AllAsSimpleDtoLookupDictionary = new ReadOnlyDictionary<int, FuelTypeSimpleDto>(AllAsSimpleDto.ToDictionary(x => x.FuelTypeID));
         }
 
         /// <summary>

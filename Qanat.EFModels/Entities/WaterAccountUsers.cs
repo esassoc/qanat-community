@@ -1,58 +1,42 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Qanat.Common.Util;
 using Qanat.Models.DataTransferObjects;
-using System.Net.Mail;
 
 namespace Qanat.EFModels.Entities;
 
 public static class WaterAccountUsers
 {
-    public static List<WaterAccountUserMinimalDto> GetWaterAccountUsersForUserID(QanatDbContext dbContext, int userID)
+    public static List<WaterAccountUserMinimalDto> GetWaterAccountUsersForUserID(QanatDbContext dbContext, int userID, UserDto callingUser)
     {
-        var geographyAccountUsers = dbContext.WaterAccountUsers
+        /*MK 2/13/25: If the user is checking their own water accounts, they should see all of them.
+                      If they are checking someone else's water accounts, they should only see the water accounts where the calling user is a manager unless they are an admin. */
+
+        var filterToGeographyIDs = Geographies.ListAsSimpleDto(dbContext).Select(x => x.GeographyID);
+        if (userID != callingUser.UserID)
+        {
+            var callingUserIsAdmin = callingUser.Flags[Flag.IsSystemAdmin.FlagName];
+            if (!callingUserIsAdmin)
+            {
+                var geographyIDsWhereCurrentUserIsManager = callingUser.GeographyFlags.Where(x => x.Value[Flag.HasManagerDashboard.FlagName]).Select(x => x.Key);
+                filterToGeographyIDs = filterToGeographyIDs.Where(x => geographyIDsWhereCurrentUserIsManager.Contains(x)).ToList();
+            }
+        }
+
+        var waterAccountUsers = dbContext.WaterAccountUsers
             .Include(x => x.User)
             .Include(x => x.WaterAccount).ThenInclude(x => x.Geography)
-            .Where(x => x.UserID == userID);
+            .Where(x => x.UserID == userID && filterToGeographyIDs.Contains(x.WaterAccount.GeographyID));
 
-        return geographyAccountUsers.Select(x => x.AsWaterAccountUserMinimalDto()).ToList();
+        return waterAccountUsers.Select(x => x.AsWaterAccountUserMinimalDto()).ToList();
     }
 
-    public static WaterAccountUserMinimalDto GetWaterAccountUserForUserIDAndWaterAccountID(QanatDbContext dbContext, int callingUserUserID, int waterAccountID)
+    public static WaterAccountUserMinimalDto GetWaterAccountUserForUserIDAndWaterAccountID(QanatDbContext dbContext, int userID, int waterAccountID)
     {
         var waterAccountUser = dbContext.WaterAccountUsers
             .Include(x => x.User)
             .Include(x => x.WaterAccount).ThenInclude(x => x.Geography)
-            .SingleOrDefault(x => x.UserID == callingUserUserID && x.WaterAccountID == waterAccountID);
+            .SingleOrDefault(x => x.UserID == userID && x.WaterAccountID == waterAccountID);
 
         return waterAccountUser?.AsWaterAccountUserMinimalDto();
-    }
-
-    public static List<WaterAccountUserMinimalDto> UpdateUserWaterAccounts(QanatDbContext dbContext, int userID, List<WaterAccountUserMinimalDto> geographyAccountUserMinimalDtos)
-    {
-        var newAccountUsers = geographyAccountUserMinimalDtos.Select(dto => new WaterAccountUser()
-        {
-            WaterAccountID = dto.WaterAccount.WaterAccountID,
-            UserID = dto.UserID,
-            ClaimDate = DateTime.UtcNow,
-            WaterAccountRoleID = dto.WaterAccountRole.WaterAccountRoleID
-        }).ToList();
-
-        var existingWaterAccountUsers = dbContext.WaterAccountUsers.Where(x => x.UserID == userID).ToList();
-
-        var allInDatabase = dbContext.WaterAccountUsers;
-        existingWaterAccountUsers.Merge(newAccountUsers, allInDatabase, (x, y) => x.WaterAccountID == y.WaterAccountID && x.UserID == y.UserID,
-            (existing, updated) =>
-            {
-                existing.WaterAccountRoleID = updated.WaterAccountRoleID;
-            });
-        dbContext.SaveChanges();
-
-        foreach (var geographyAccountUserMinimalDto in geographyAccountUserMinimalDtos)
-        {
-            GeographyUsers.AddGeographyNormalUserIfAbsent(dbContext, userID, geographyAccountUserMinimalDto.WaterAccount.GeographyID);
-        }
-
-        return GetWaterAccountUsersForUserID(dbContext, userID);
     }
 
     public static List<ErrorMessage> ValidateClaimWaterAccounts(QanatDbContext dbContext, int userID, List<OnboardingWaterAccountDto> onboardingWaterAccountDtos)
@@ -154,9 +138,8 @@ public static class WaterAccountUsers
         return results;
     }
 
-    public static MailMessage AddUserToWaterAccount(QanatDbContext dbContext, int geographyAccountID, AddUserByEmailDto addUserByEmailDto, User user, User invitingUser)
+    public static void AddUserToWaterAccount(QanatDbContext dbContext, int geographyAccountID, AddUserByEmailDto addUserByEmailDto, User user)
     {
-        var geographyAccount = dbContext.WaterAccounts.Single(x => x.WaterAccountID == geographyAccountID);
         dbContext.WaterAccountUsers.Add(new WaterAccountUser()
         {
             WaterAccountID = geographyAccountID,
@@ -165,22 +148,50 @@ public static class WaterAccountUsers
             ClaimDate = DateTime.UtcNow
         });
         dbContext.SaveChanges();
+    }
 
-        var mailMessage = new MailMessage
+    public static async Task<List<ErrorMessage>> ValidateAddUserAsync(QanatDbContext dbContext, int waterAccountID, WaterAccountUserMinimalDto user)
+    {
+        var errorMessages = new List<ErrorMessage>();
+
+        var existingWaterAccountUser = await dbContext.WaterAccountUsers.FirstOrDefaultAsync(x => x.WaterAccountID == waterAccountID && x.UserID == user.UserID);
+        if (existingWaterAccountUser != null)
         {
-            Subject = $"You’ve been added to a new Water Account in the Ground Water Accounting Platform",
-            Body = $"Hello {user.FullName},<br /><br />" +
-                   $"{invitingUser.FullName} has added you to their {geographyAccount.WaterAccountName} Water Account in the Groundwater Accounting Platform.<br /><br />" +
-                   $"You can now view this Water Account from your dashboard on the platform:<br />" +
-                   $"https://groundwateraccounting.org/water-dashboard<br /><br />" +
-                   $"If you think you have been added to this Water Account in error, please contact {invitingUser.FullName} at {invitingUser.Email}.<br /><br />" +
-                   $"Thank you,<br />" +
-                   $"The Groundwater Accounting Platform Team",
-            IsBodyHtml = true
+            errorMessages.Add(new ErrorMessage()
+            {
+                Type = "User",
+                Message = "User already is associated to the Water Account."
+            });
+        }
+
+        var waterAccountRole = WaterAccountRole.All.FirstOrDefault(x => x.WaterAccountRoleID == user.WaterAccountRoleID);
+        if (waterAccountRole == null)
+        {
+            errorMessages.Add(new ErrorMessage()
+            {
+                Type = "Water Account Role",
+                Message = $"Could not find a Water Account Role with the ID {user.WaterAccountRoleID}."
+            });
+        }
+
+        return errorMessages;
+    }
+
+    public static async Task<WaterAccountUserMinimalDto> AddUserAsync(QanatDbContext dbContext, int waterAccountID, WaterAccountUserMinimalDto user)
+    {
+        var newWaterAccountUser = new WaterAccountUser()
+        {
+            WaterAccountID = waterAccountID,
+            WaterAccountRoleID = user.WaterAccountRoleID,
+            UserID = user.UserID,
+            ClaimDate = DateTime.UtcNow
         };
 
-        mailMessage.To.Add(new MailAddress(addUserByEmailDto.Email));
-        return mailMessage;
+        await dbContext.WaterAccountUsers.AddAsync(newWaterAccountUser);
+        await dbContext.SaveChangesAsync();
+
+        var addedWaterAccountUser = GetWaterAccountUserForUserIDAndWaterAccountID(dbContext, user.UserID, waterAccountID);
+        return addedWaterAccountUser;
     }
 
     public static void RemoveUserFromWaterAccount(QanatDbContext dbContext, int waterAccountUserID)

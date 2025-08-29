@@ -20,7 +20,7 @@ import { ScenarioMapMarkerLayerComponent } from "../../../shared/components/scen
 import { ScenarioMapComponent } from "../../../shared/components/maps/scenario-map/scenario-map.component";
 import { FormsModule } from "@angular/forms";
 import { ModelNameTagComponent } from "../../../shared/components/name-tag/name-tag.component";
-import { NgIf, NgFor, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { MonitoringWellsLayerComponent } from "src/app/shared/components/leaflet/layers/monitoring-wells-layer/monitoring-wells-layer.component";
 import { ModelService } from "src/app/shared/generated/api/model.service";
@@ -30,20 +30,17 @@ import { ScenarioRunService } from "src/app/shared/generated/api/scenario-run.se
     selector: "scenario-run-recharge",
     templateUrl: "./scenario-run-recharge.component.html",
     styleUrls: ["./scenario-run-recharge.component.scss"],
-    standalone: true,
     imports: [
-        NgIf,
         PageHeaderComponent,
         ModelNameTagComponent,
         FormsModule,
         ScenarioMapComponent,
         ScenarioMapMarkerLayerComponent,
         MonitoringWellsLayerComponent,
-        NgFor,
         ScenarioMapMarkerInputCardComponent,
         ButtonLoadingDirective,
         AsyncPipe,
-    ],
+    ]
 })
 export class ScenarioRunRechargeComponent implements OnInit, OnDestroy {
     public scenarioID = ScenarioEnum.Recharge;
@@ -85,7 +82,7 @@ export class ScenarioRunRechargeComponent implements OnInit, OnDestroy {
         if (modelShortName) {
             this.modelShortName = modelShortName;
 
-            this.getModel$ = this.modelService.modelsModelShortNameGet(modelShortName).pipe(
+            this.getModel$ = this.modelService.getModelByIDModel(modelShortName).pipe(
                 tap((model) => {
                     this.model.ModelID = model.ModelID;
                 })
@@ -197,7 +194,7 @@ export class ScenarioRunRechargeComponent implements OnInit, OnDestroy {
         this.isLoadingSubmit = true;
         this.alertService.clearAlerts();
 
-        this.scenarioRunService.scenarioRunsRechargePost(this.model).subscribe(
+        this.scenarioRunService.startRechargeScenarioRunScenarioRun(this.model).subscribe(
             () => {
                 this.isLoadingSubmit = false;
                 this.initModel();

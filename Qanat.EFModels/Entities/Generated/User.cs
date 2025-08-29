@@ -67,11 +67,10 @@ public partial class User
 
     public int? GETRunUserID { get; set; }
 
+    public Guid? ApiKey { get; set; }
+
     [InverseProperty("CreateUser")]
     public virtual ICollection<FileResource> FileResources { get; set; } = new List<FileResource>();
-
-    [InverseProperty("User")]
-    public virtual ICollection<GETAction> GETActions { get; set; } = new List<GETAction>();
 
     [InverseProperty("User")]
     public virtual ICollection<GeographyUser> GeographyUsers { get; set; } = new List<GeographyUser>();
@@ -86,6 +85,9 @@ public partial class User
     public virtual ICollection<ParcelSupply> ParcelSupplies { get; set; } = new List<ParcelSupply>();
 
     [InverseProperty("CreateUser")]
+    public virtual ICollection<ParcelWaterAccountHistory> ParcelWaterAccountHistories { get; set; } = new List<ParcelWaterAccountHistory>();
+
+    [InverseProperty("CreateUser")]
     public virtual ICollection<ReportingPeriod> ReportingPeriodCreateUsers { get; set; } = new List<ReportingPeriod>();
 
     [InverseProperty("UpdateUser")]
@@ -93,6 +95,12 @@ public partial class User
 
     [InverseProperty("User")]
     public virtual ICollection<ScenarioRun> ScenarioRuns { get; set; } = new List<ScenarioRun>();
+
+    [InverseProperty("UpdateUser")]
+    public virtual ICollection<StatementBatch> StatementBatches { get; set; } = new List<StatementBatch>();
+
+    [InverseProperty("UpdateUser")]
+    public virtual ICollection<StatementTemplate> StatementTemplates { get; set; } = new List<StatementTemplate>();
 
     [InverseProperty("AssignedUser")]
     public virtual ICollection<SupportTicket> SupportTicketAssignedUsers { get; set; } = new List<SupportTicket>();
@@ -108,6 +116,54 @@ public partial class User
 
     [InverseProperty("User")]
     public virtual ICollection<UploadedWellGdb> UploadedWellGdbs { get; set; } = new List<UploadedWellGdb>();
+
+    [InverseProperty("CreateUser")]
+    public virtual ICollection<UsageLocation> UsageLocationCreateUsers { get; set; } = new List<UsageLocation>();
+
+    [InverseProperty("CreateUser")]
+    public virtual ICollection<UsageLocationHistory> UsageLocationHistories { get; set; } = new List<UsageLocationHistory>();
+
+    [InverseProperty("CreateUser")]
+    public virtual ICollection<UsageLocationParcelHistory> UsageLocationParcelHistories { get; set; } = new List<UsageLocationParcelHistory>();
+
+    [InverseProperty("CreateUser")]
+    public virtual ICollection<UsageLocationType> UsageLocationTypeCreateUsers { get; set; } = new List<UsageLocationType>();
+
+    [InverseProperty("UpdateUser")]
+    public virtual ICollection<UsageLocationType> UsageLocationTypeUpdateUsers { get; set; } = new List<UsageLocationType>();
+
+    [InverseProperty("UpdateUser")]
+    public virtual ICollection<UsageLocation> UsageLocationUpdateUsers { get; set; } = new List<UsageLocation>();
+
+    [InverseProperty("ApprovedByUser")]
+    public virtual ICollection<WaterAccountCoverCropStatus> WaterAccountCoverCropStatusApprovedByUsers { get; set; } = new List<WaterAccountCoverCropStatus>();
+
+    [InverseProperty("CreateUser")]
+    public virtual ICollection<WaterAccountCoverCropStatus> WaterAccountCoverCropStatusCreateUsers { get; set; } = new List<WaterAccountCoverCropStatus>();
+
+    [InverseProperty("ReturnedByUser")]
+    public virtual ICollection<WaterAccountCoverCropStatus> WaterAccountCoverCropStatusReturnedByUsers { get; set; } = new List<WaterAccountCoverCropStatus>();
+
+    [InverseProperty("SubmittedByUser")]
+    public virtual ICollection<WaterAccountCoverCropStatus> WaterAccountCoverCropStatusSubmittedByUsers { get; set; } = new List<WaterAccountCoverCropStatus>();
+
+    [InverseProperty("UpdateUser")]
+    public virtual ICollection<WaterAccountCoverCropStatus> WaterAccountCoverCropStatusUpdateUsers { get; set; } = new List<WaterAccountCoverCropStatus>();
+
+    [InverseProperty("ApprovedByUser")]
+    public virtual ICollection<WaterAccountFallowStatus> WaterAccountFallowStatusApprovedByUsers { get; set; } = new List<WaterAccountFallowStatus>();
+
+    [InverseProperty("CreateUser")]
+    public virtual ICollection<WaterAccountFallowStatus> WaterAccountFallowStatusCreateUsers { get; set; } = new List<WaterAccountFallowStatus>();
+
+    [InverseProperty("ReturnedByUser")]
+    public virtual ICollection<WaterAccountFallowStatus> WaterAccountFallowStatusReturnedByUsers { get; set; } = new List<WaterAccountFallowStatus>();
+
+    [InverseProperty("SubmittedByUser")]
+    public virtual ICollection<WaterAccountFallowStatus> WaterAccountFallowStatusSubmittedByUsers { get; set; } = new List<WaterAccountFallowStatus>();
+
+    [InverseProperty("UpdateUser")]
+    public virtual ICollection<WaterAccountFallowStatus> WaterAccountFallowStatusUpdateUsers { get; set; } = new List<WaterAccountFallowStatus>();
 
     [InverseProperty("User")]
     public virtual ICollection<WaterAccountUserStaging> WaterAccountUserStagings { get; set; } = new List<WaterAccountUserStaging>();
@@ -129,4 +185,10 @@ public partial class User
 
     [InverseProperty("CreateUser")]
     public virtual ICollection<WellRegistration> WellRegistrations { get; set; } = new List<WellRegistration>();
+
+    [InverseProperty("CreateUser")]
+    public virtual ICollection<WellType> WellTypeCreateUsers { get; set; } = new List<WellType>();
+
+    [InverseProperty("UpdateUser")]
+    public virtual ICollection<WellType> WellTypeUpdateUsers { get; set; } = new List<WellType>();
 }

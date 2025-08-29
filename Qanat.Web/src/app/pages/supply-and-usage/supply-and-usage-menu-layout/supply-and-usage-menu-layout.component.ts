@@ -1,14 +1,12 @@
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute, IsActiveMatchOptions, Router, RouterLink, RouterOutlet } from "@angular/router";
 import { Observable, of } from "rxjs";
-import { GeographyDto } from "src/app/shared/generated/model/geography-dto";
-import { filter, share, switchMap, tap } from "rxjs/operators";
-import { OpenETConfigurationService } from "src/app/shared/generated/api/open-et-configuration.service";
+import { switchMap, tap } from "rxjs/operators";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { GeographySwitcherComponent } from "../../../shared/components/geography-switcher/geography-switcher.component";
 import { IconComponent } from "src/app/shared/components/icon/icon.component";
 import { GeographyLogoComponent } from "../../../shared/components/geography-logo/geography-logo.component";
-import { NgIf, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { DashboardMenu, DashboardMenuComponent } from "src/app/shared/components/dashboard-menu/dashboard-menu.component";
 import { CurrentGeographyService } from "src/app/shared/services/current-geography.service";
 import { routeParams } from "src/app/app.routes";
@@ -19,11 +17,9 @@ import { GeographyMinimalDto } from "src/app/shared/generated/model/geography-mi
     selector: "qanat-supply-and-usage-menu-layout",
     templateUrl: "./supply-and-usage-menu-layout.component.html",
     styleUrls: ["./supply-and-usage-menu-layout.component.scss"],
-    standalone: true,
-    imports: [NgIf, RouterLink, GeographyLogoComponent, IconComponent, GeographySwitcherComponent, RouterOutlet, PageHeaderComponent, AsyncPipe, DashboardMenuComponent],
+    imports: [RouterLink, GeographyLogoComponent, IconComponent, GeographySwitcherComponent, RouterOutlet, PageHeaderComponent, AsyncPipe, DashboardMenuComponent]
 })
 export class SupplyAndUsageMenuLayoutComponent implements OnInit {
-    public isOpenETActive$: Observable<boolean>;
     public supplyAndUsageMenu: DashboardMenu;
 
     public geography$: Observable<GeographyMinimalDto>;
@@ -45,7 +41,7 @@ export class SupplyAndUsageMenuLayoutComponent implements OnInit {
             switchMap((params) => {
                 const geographyName = params[routeParams.geographyName];
                 if (geographyName) {
-                    return this.geographyService.geographiesGeographyNameGeographyNameMinimalGet(geographyName).pipe(
+                    return this.geographyService.getByNameAsMinimalDtoGeography(geographyName).pipe(
                         tap((geography) => {
                             this.currentGeographyService.setCurrentGeography(geography);
                             this.buildMenu(geography);
@@ -99,13 +95,18 @@ export class SupplyAndUsageMenuLayoutComponent implements OnInit {
                     routerLink: ["/supply-and-usage", geographySlug, "statistics"],
                 },
                 {
+                    title: "Usage Locations",
+                    icon: "Map",
+                    routerLink: ["/supply-and-usage", geographySlug, "usage-locations"],
+                },
+                {
                     title: "Water Measurements",
                     icon: "Measurements",
                     routerLink: ["/supply-and-usage", geographySlug, "water-measurements"],
                 },
                 {
                     title: "Water Supply",
-                    icon: "Transactions",
+                    icon: "WaterDropFilled",
                     routerLink: ["/supply-and-usage", geographySlug, "water-supply"],
                 },
                 {
@@ -124,6 +125,11 @@ export class SupplyAndUsageMenuLayoutComponent implements OnInit {
                     title: "Zones",
                     icon: "Zones",
                     routerLink: ["/supply-and-usage", geographySlug, "zones"],
+                },
+                {
+                    title: "Statements",
+                    icon: "Statement",
+                    routerLink: ["/supply-and-usage", geographySlug, "statements"],
                 },
             ],
         } as DashboardMenu;

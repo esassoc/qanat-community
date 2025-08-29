@@ -20,9 +20,7 @@ namespace Qanat.EFModels.Entities
         public static readonly FlagCanReviewWells CanReviewWells = FlagCanReviewWells.Instance;
 
         public static readonly List<Flag> All;
-        public static readonly List<FlagSimpleDto> AllAsSimpleDto;
         public static readonly ReadOnlyDictionary<int, Flag> AllLookupDictionary;
-        public static readonly ReadOnlyDictionary<int, FlagSimpleDto> AllAsSimpleDtoLookupDictionary;
 
         /// <summary>
         /// Static type constructor to coordinate static initialization order
@@ -30,9 +28,7 @@ namespace Qanat.EFModels.Entities
         static Flag()
         {
             All = new List<Flag> { CanImpersonateUsers, HasManagerDashboard, IsSystemAdmin, CanClaimWaterAccounts, CanRegisterWells, CanReviewWells };
-            AllAsSimpleDto = new List<FlagSimpleDto> { CanImpersonateUsers.AsSimpleDto(), HasManagerDashboard.AsSimpleDto(), IsSystemAdmin.AsSimpleDto(), CanClaimWaterAccounts.AsSimpleDto(), CanRegisterWells.AsSimpleDto(), CanReviewWells.AsSimpleDto() };
             AllLookupDictionary = new ReadOnlyDictionary<int, Flag>(All.ToDictionary(x => x.FlagID));
-            AllAsSimpleDtoLookupDictionary = new ReadOnlyDictionary<int, FlagSimpleDto>(AllAsSimpleDto.ToDictionary(x => x.FlagID));
         }
 
         /// <summary>

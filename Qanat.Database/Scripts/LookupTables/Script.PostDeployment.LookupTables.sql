@@ -24,9 +24,7 @@ GO
 GO
 :r ".\dbo.GeographyRole.sql"
 GO
-:r ".\dbo.GETActionOutputFileType.sql"
-GO
-:r ".\dbo.GETActionStatus.sql"
+:r ".\dbo.MeterReadingUnitType.sql"
 GO
 :r ".\dbo.MeterStatus.sql"
 GO
@@ -54,7 +52,11 @@ GO
 GO
 :r ".\dbo.ScenarioRunStatus.sql"
 GO
+:r ".\dbo.SelfReportStatus.sql"
+GO
 :r ".\dbo.State.sql"
+GO
+:r ".\dbo.StatementTemplateType.sql"
 GO
 :r ".\dbo.SupportTicketPriority.sql"
 GO
@@ -69,8 +71,6 @@ GO
 :r ".\dbo.WaterMeasurementCalculationType.sql"
 GO
 :r ".\dbo.WaterMeasurementCategoryType.sql"
-GO
-:r ".\dbo.WaterMeasurementSelfReportStatus.sql"
 GO
 :r ".\dbo.WellRegistrationContactType.sql"
 GO

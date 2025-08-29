@@ -38,13 +38,15 @@ Ensure the following software is installed:
    - `.env` (from the `docker-compose` directory)
    - `appsecrets.json` (from the `Qanat.API` directory)
    - `secrets` (from the `Build` directory)
-   - Create a file named geoserver-environment.properties with the following contents:
-     ```
-     datastore-host = host.docker.internal
-     datastore-password = password#1
-     datastore-user = DockerWebUser
-     datastore-database = QanatDB
-     ```
+   - Create a folder on your machine at the following address:
+      `C:\sitka\Qanat\GeoServer`
+      - Create a file named geoserver-environment.properties in the above folder with the following contents:
+      ```
+      datastore-host = host.docker.internal
+      datastore-password = password#1
+      datastore-user = DockerWebUser
+      datastore-database = QanatDB
+      ```
 
 4. **Update environment configuration:**  
    Copy `[repo root dir]\docker-compose\.env.template` to `[repo root dir]\docker-compose\.env` and update the values.

@@ -1,11 +1,11 @@
-﻿using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using NetTopologySuite.Features;
+﻿using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Geometries.Prepared;
 using NetTopologySuite.IO.Converters;
 using Qanat.Common.JsonConverters;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using JsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
@@ -103,9 +103,12 @@ public static class GeoJsonSerializer
             PropertyNameCaseInsensitive = false,
             PropertyNamingPolicy = null
         };
+
         jsonSerializerOptions.Converters.Add(new DateTimeConverter());
+        jsonSerializerOptions.Converters.Add(new EmptyStringToNullNullableConverterFactory());
         jsonSerializerOptions.Converters.Add(new DoubleConverter(numberOfSignificantDigits));
         jsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+
         return jsonSerializerOptions;
     }
 
@@ -170,7 +173,13 @@ public static class GeoJsonSerializer
 
     public static T DeserializeFromFeature<T>(IFeature feature, JsonSerializerOptions geoJSONSerializerOptions, int srid) where T : IHasGeometry
     {
-        feature.Attributes.TryDeserializeJsonObject<T>(geoJSONSerializerOptions, out var deserialized);
+        if (feature.Attributes is not IPartiallyDeserializedAttributesTable pat || !pat.TryDeserializeJsonObject<T>(geoJSONSerializerOptions, out var deserialized) || deserialized == null)
+        {
+            var keys = string.Join(", ", feature.Attributes.GetNames() ?? []); 
+            throw new JsonException($"Failed to deserialize {typeof(T).Name} from feature attributes. Keys: [{keys}]");
+        }
+
+        //feature.Attributes.TryDeserializeJsonObject<T>(geoJSONSerializerOptions, out var deserialized);
         deserialized.Geometry = feature.Geometry;
         deserialized.Geometry.SRID = srid;
         return deserialized;

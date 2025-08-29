@@ -1,0 +1,86 @@
+<div class="modal">
+    <div class="modal-header">
+        <h3 class="section-title">Create a Support Ticket</h3>
+    </div>
+
+    <div class="modal-body grid-12">
+        <form action="" class="form support-ticket-create-form grid-12" [formGroup]="formGroup">
+            <form-field
+                class="g-col-6"
+                [formControl]="formGroup.controls.ContactFirstName"
+                fieldLabel="Contact First Name"
+                placeholder="First Name"
+                [required]="true"
+                [type]="FormFieldType.Text"></form-field>
+            <form-field
+                class="g-col-6"
+                [formControl]="formGroup.controls.ContactLastName"
+                fieldLabel="Contact Last Name"
+                placeholder="Last Name"
+                [type]="FormFieldType.Text"></form-field>
+            <form-field class="g-col-6" [formControl]="formGroup.controls.ContactEmail" fieldLabel="Contact Email" placeholder="Email" [type]="FormFieldType.Text"></form-field>
+            <form-field
+                class="g-col-6"
+                [formControl]="formGroup.controls.ContactPhoneNumber"
+                fieldLabel="Contact Phone Number"
+                mask="(000) 000-0000"
+                placeholder="e.g. (123) 456-7890"></form-field>
+            @if (geographyOptions$ | async; as geographyOptions) {
+                <div class="grid-12">
+                    <form-field
+                        class="g-col-6"
+                        [formInputOptions]="geographyOptions"
+                        [formControl]="formGroup.controls.GeographyID"
+                        fieldLabel="Geography"
+                        [required]="true"
+                        [type]="FormFieldType.Select"></form-field>
+                    <form-field
+                        class="g-col-6"
+                        [geographyID]="formGroup.controls.GeographyID.value"
+                        [formControl]="formGroup.controls.WaterAccountID"
+                        fieldLabel="Water Account"
+                        [type]="FormFieldType.WaterAccountSearch">
+                    </form-field>
+                </div>
+
+                @if (users$ | async) {
+                    <form-field
+                        class="g-col-6"
+                        [formInputOptions]="userOptions[formGroup.controls.GeographyID.value]"
+                        [formControl]="formGroup.controls.AssignedUserID"
+                        fieldLabel="Assigned User"
+                        [type]="FormFieldType.Select"></form-field>
+                }
+            }
+
+            <form-field
+                class="g-col-6"
+                [formInputOptions]="SupportTicketPrioritiesSelectDropdownOptions"
+                [formControl]="formGroup.controls.SupportTicketPriorityID"
+                fieldLabel="Priority"
+                [required]="true"
+                [type]="FormFieldType.Select"></form-field>
+            <form-field
+                class="m-2"
+                [formInputOptions]="SupportTicketQuestionTypesSelectDropdownOptions"
+                [formControl]="formGroup.controls.SupportTicketQuestionTypeID"
+                fieldLabel="Question Type"
+                [required]="true"
+                [type]="FormFieldType.Select"></form-field>
+            <form-field
+                class="m-2"
+                [formControl]="formGroup.controls.Description"
+                fieldLabel="Description"
+                placeholder="Description"
+                [required]="true"
+                [type]="FormFieldType.RTE"></form-field>
+        </form>
+    </div>
+
+    <div class="modal-footer sticky-footer">
+        <div class="sticky-footer-content">
+            <button class="btn btn-primary" (click)="save()" [disabled]="formGroup.invalid">Create</button>
+            <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+        </div>
+    </div>
+</div>

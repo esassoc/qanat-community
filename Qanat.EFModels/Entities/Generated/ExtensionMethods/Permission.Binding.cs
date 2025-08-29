@@ -31,25 +31,24 @@ namespace Qanat.EFModels.Entities
         public static readonly PermissionAllocationPlanRights AllocationPlanRights = PermissionAllocationPlanRights.Instance;
         public static readonly PermissionFrequentlyAskedQuestionRights FrequentlyAskedQuestionRights = PermissionFrequentlyAskedQuestionRights.Instance;
         public static readonly PermissionCustomAttributeRights CustomAttributeRights = PermissionCustomAttributeRights.Instance;
-        public static readonly PermissionUsageEntityRights UsageEntityRights = PermissionUsageEntityRights.Instance;
+        public static readonly PermissionUsageLocationRights UsageLocationRights = PermissionUsageLocationRights.Instance;
         public static readonly PermissionModelRights ModelRights = PermissionModelRights.Instance;
         public static readonly PermissionScenarioRights ScenarioRights = PermissionScenarioRights.Instance;
         public static readonly PermissionScenarioRunRights ScenarioRunRights = PermissionScenarioRunRights.Instance;
+        public static readonly PermissionMeterRights MeterRights = PermissionMeterRights.Instance;
+        public static readonly PermissionWellMeterReadingRights WellMeterReadingRights = PermissionWellMeterReadingRights.Instance;
+        public static readonly PermissionStatementTemplateRights StatementTemplateRights = PermissionStatementTemplateRights.Instance;
 
         public static readonly List<Permission> All;
-        public static readonly List<PermissionSimpleDto> AllAsSimpleDto;
         public static readonly ReadOnlyDictionary<int, Permission> AllLookupDictionary;
-        public static readonly ReadOnlyDictionary<int, PermissionSimpleDto> AllAsSimpleDtoLookupDictionary;
 
         /// <summary>
         /// Static type constructor to coordinate static initialization order
         /// </summary>
         static Permission()
         {
-            All = new List<Permission> { CustomRichTextRights, FieldDefinitionRights, FileResourceRights, UserRights, WaterAccountRights, ParcelRights, TagRights, WellRights, WaterTransactionRights, ReportingPeriodRights, WaterTypeRights, GeographyRights, ExternalMapLayerRights, WaterAccountUserRights, ZoneGroupRights, MonitoringWellRights, AllocationPlanRights, FrequentlyAskedQuestionRights, CustomAttributeRights, UsageEntityRights, ModelRights, ScenarioRights, ScenarioRunRights };
-            AllAsSimpleDto = new List<PermissionSimpleDto> { CustomRichTextRights.AsSimpleDto(), FieldDefinitionRights.AsSimpleDto(), FileResourceRights.AsSimpleDto(), UserRights.AsSimpleDto(), WaterAccountRights.AsSimpleDto(), ParcelRights.AsSimpleDto(), TagRights.AsSimpleDto(), WellRights.AsSimpleDto(), WaterTransactionRights.AsSimpleDto(), ReportingPeriodRights.AsSimpleDto(), WaterTypeRights.AsSimpleDto(), GeographyRights.AsSimpleDto(), ExternalMapLayerRights.AsSimpleDto(), WaterAccountUserRights.AsSimpleDto(), ZoneGroupRights.AsSimpleDto(), MonitoringWellRights.AsSimpleDto(), AllocationPlanRights.AsSimpleDto(), FrequentlyAskedQuestionRights.AsSimpleDto(), CustomAttributeRights.AsSimpleDto(), UsageEntityRights.AsSimpleDto(), ModelRights.AsSimpleDto(), ScenarioRights.AsSimpleDto(), ScenarioRunRights.AsSimpleDto() };
+            All = new List<Permission> { CustomRichTextRights, FieldDefinitionRights, FileResourceRights, UserRights, WaterAccountRights, ParcelRights, TagRights, WellRights, WaterTransactionRights, ReportingPeriodRights, WaterTypeRights, GeographyRights, ExternalMapLayerRights, WaterAccountUserRights, ZoneGroupRights, MonitoringWellRights, AllocationPlanRights, FrequentlyAskedQuestionRights, CustomAttributeRights, UsageLocationRights, ModelRights, ScenarioRights, ScenarioRunRights, MeterRights, WellMeterReadingRights, StatementTemplateRights };
             AllLookupDictionary = new ReadOnlyDictionary<int, Permission>(All.ToDictionary(x => x.PermissionID));
-            AllAsSimpleDtoLookupDictionary = new ReadOnlyDictionary<int, PermissionSimpleDto>(AllAsSimpleDto.ToDictionary(x => x.PermissionID));
         }
 
         /// <summary>
@@ -134,6 +133,8 @@ namespace Qanat.EFModels.Entities
                     return FrequentlyAskedQuestionRights;
                 case PermissionEnum.GeographyRights:
                     return GeographyRights;
+                case PermissionEnum.MeterRights:
+                    return MeterRights;
                 case PermissionEnum.ModelRights:
                     return ModelRights;
                 case PermissionEnum.MonitoringWellRights:
@@ -146,10 +147,12 @@ namespace Qanat.EFModels.Entities
                     return ScenarioRights;
                 case PermissionEnum.ScenarioRunRights:
                     return ScenarioRunRights;
+                case PermissionEnum.StatementTemplateRights:
+                    return StatementTemplateRights;
                 case PermissionEnum.TagRights:
                     return TagRights;
-                case PermissionEnum.UsageEntityRights:
-                    return UsageEntityRights;
+                case PermissionEnum.UsageLocationRights:
+                    return UsageLocationRights;
                 case PermissionEnum.UserRights:
                     return UserRights;
                 case PermissionEnum.WaterAccountRights:
@@ -160,6 +163,8 @@ namespace Qanat.EFModels.Entities
                     return WaterTransactionRights;
                 case PermissionEnum.WaterTypeRights:
                     return WaterTypeRights;
+                case PermissionEnum.WellMeterReadingRights:
+                    return WellMeterReadingRights;
                 case PermissionEnum.WellRights:
                     return WellRights;
                 case PermissionEnum.ZoneGroupRights:
@@ -191,10 +196,13 @@ namespace Qanat.EFModels.Entities
         AllocationPlanRights = 19,
         FrequentlyAskedQuestionRights = 20,
         CustomAttributeRights = 21,
-        UsageEntityRights = 22,
+        UsageLocationRights = 22,
         ModelRights = 23,
         ScenarioRights = 24,
-        ScenarioRunRights = 25
+        ScenarioRunRights = 25,
+        MeterRights = 26,
+        WellMeterReadingRights = 27,
+        StatementTemplateRights = 28
     }
 
     public partial class PermissionCustomRichTextRights : Permission
@@ -311,10 +319,10 @@ namespace Qanat.EFModels.Entities
         public static readonly PermissionCustomAttributeRights Instance = new PermissionCustomAttributeRights(21, @"CustomAttributeRights", @"CustomAttributeRights");
     }
 
-    public partial class PermissionUsageEntityRights : Permission
+    public partial class PermissionUsageLocationRights : Permission
     {
-        private PermissionUsageEntityRights(int permissionID, string permissionName, string permissionDisplayName) : base(permissionID, permissionName, permissionDisplayName) {}
-        public static readonly PermissionUsageEntityRights Instance = new PermissionUsageEntityRights(22, @"UsageEntityRights", @"UsageEntityRights");
+        private PermissionUsageLocationRights(int permissionID, string permissionName, string permissionDisplayName) : base(permissionID, permissionName, permissionDisplayName) {}
+        public static readonly PermissionUsageLocationRights Instance = new PermissionUsageLocationRights(22, @"UsageLocationRights", @"UsageLocationRights");
     }
 
     public partial class PermissionModelRights : Permission
@@ -333,5 +341,23 @@ namespace Qanat.EFModels.Entities
     {
         private PermissionScenarioRunRights(int permissionID, string permissionName, string permissionDisplayName) : base(permissionID, permissionName, permissionDisplayName) {}
         public static readonly PermissionScenarioRunRights Instance = new PermissionScenarioRunRights(25, @"ScenarioRunRights", @"ScenarioRunRights");
+    }
+
+    public partial class PermissionMeterRights : Permission
+    {
+        private PermissionMeterRights(int permissionID, string permissionName, string permissionDisplayName) : base(permissionID, permissionName, permissionDisplayName) {}
+        public static readonly PermissionMeterRights Instance = new PermissionMeterRights(26, @"MeterRights", @"MeterRights");
+    }
+
+    public partial class PermissionWellMeterReadingRights : Permission
+    {
+        private PermissionWellMeterReadingRights(int permissionID, string permissionName, string permissionDisplayName) : base(permissionID, permissionName, permissionDisplayName) {}
+        public static readonly PermissionWellMeterReadingRights Instance = new PermissionWellMeterReadingRights(27, @"WellMeterReadingRights", @"WellMeterReadingRights");
+    }
+
+    public partial class PermissionStatementTemplateRights : Permission
+    {
+        private PermissionStatementTemplateRights(int permissionID, string permissionName, string permissionDisplayName) : base(permissionID, permissionName, permissionDisplayName) {}
+        public static readonly PermissionStatementTemplateRights Instance = new PermissionStatementTemplateRights(28, @"StatementTemplateRights", @"StatementTemplateRights");
     }
 }

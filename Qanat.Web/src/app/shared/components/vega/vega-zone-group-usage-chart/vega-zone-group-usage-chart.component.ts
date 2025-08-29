@@ -11,7 +11,6 @@ import { NgClass } from "@angular/common";
     selector: "vega-zone-group-usage-chart",
     templateUrl: "./vega-zone-group-usage-chart.component.html",
     styleUrls: ["./vega-zone-group-usage-chart.component.scss"],
-    standalone: true,
     imports: [NgClass, LoadingDirective, CustomRichTextComponent],
 })
 export class VegaZoneGroupUsageChartComponent implements OnInit {
@@ -43,7 +42,7 @@ export class VegaZoneGroupUsageChartComponent implements OnInit {
     }
 
     private getChartData() {
-        this.zoneGroupService.geographiesGeographyIDZoneGroupZoneGroupSlugWaterUsageGet(this.geographyID, this.zoneGroupSlug).subscribe((zoneGroupUsages) => {
+        this.zoneGroupService.listWaterUsageByZoneGroupSlugZoneGroup(this.geographyID, this.zoneGroupSlug).subscribe((zoneGroupUsages) => {
             this.chartData = zoneGroupUsages;
 
             const dateObjects = zoneGroupUsages.map((x) => new Date(x.EffectiveDate));

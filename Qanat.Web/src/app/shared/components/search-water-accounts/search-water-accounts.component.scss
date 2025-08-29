@@ -1,8 +1,63 @@
 @use "/src/scss/abstracts" as *;
 
+::ng-deep .ng-select.custom.water-account-search {
+    .ng-dropdown-panel .ng-dropdown-header {
+        padding: 0;
+        font-size: $type-size-200;
+        color: $gray-1000;
+    }
+
+    &.force-open .ng-arrow-wrapper {
+        display: none;
+    }
+
+    .ng-dropdown-panel .ng-dropdown-panel-items .ng-option {
+        height: unset;
+        line-height: unset;
+
+        &:hover,
+        &-selected {
+            color: $gray-1000;
+            .wa-name {
+                color: $gray-500;
+            }
+        }
+    }
+
+    .wa-id {
+        font-size: $type-size-300;
+        color: $gray-1000;
+        padding-left: 0.25rem;
+    }
+
+    .wa-name {
+        font-size: $type-size-100;
+        color: $gray-500;
+        overflow: hidden;
+        max-width: 10rem;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        padding-left: 0.25rem;
+    }
+
+    .wa-parcels,
+    .wa-acres {
+        font-size: $type-size-200;
+    }
+
+    .wa-acres {
+        padding-left: 0.125rem;
+    }
+
+    .wa-meta {
+        font-size: $type-size-150;
+    }
+}
+
 :host {
     display: block;
 }
+
 .search-container {
     position: relative;
     input {
@@ -72,42 +127,35 @@
         width: 360px;
     }
 
-    ul {
-        max-height: 560px;
-        max-width: 360px;
-        overflow-y: auto;
-        z-index: 10;
+    .search-item {
+        &:first-child button {
+            border-radius: 8px 8px 0 0;
+        }
 
-        li {
-            &:first-child button {
-                border-radius: 8px 8px 0 0;
+        &:last-child button {
+            border-radius: 0 0 8px 8px;
+        }
+
+        button {
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            text-align: left;
+            width: 100%;
+            font-family: inherit;
+
+            &:hover,
+            &:focus {
+                background: rgba($primary, 0.1);
             }
+        }
 
-            &:last-child button {
-                border-radius: 0 0 8px 8px;
-            }
+        & + .search-item {
+            border-top: 1px solid #e5e5e5;
+        }
 
-            button {
-                padding: 1rem 1.5rem;
-                background: none;
-                border: none;
-                text-align: left;
-                width: 100%;
-                font-family: inherit;
-
-                &:hover,
-                &:focus {
-                    background: rgba($primary, 0.1);
-                }
-            }
-
-            & + li {
-                border-top: 1px solid #e5e5e5;
-            }
-
-            &.highlighted-search-result {
-                background: rgba($primary, 0.05);
-            }
+        &.highlighted-search-result {
+            background: rgba($primary, 0.05);
         }
     }
 

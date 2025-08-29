@@ -9,12 +9,8 @@
 
     <div class="page-body">
         <app-alert-display></app-alert-display>
-        <qanat-grid
-            *ngIf="wellsToReview$ | async as wells"
-            [rowData]="wells"
-            [columnDefs]="colDefs"
-            downloadFileName="submitted-wells"
-            [colIDsToExclude]="['0']"
-            [sizeColumnsToFitGrid]="true"></qanat-grid>
+        @if (wellsToReview$ | async; as wells) {
+            <qanat-grid [rowData]="wells" [columnDefs]="colDefs" downloadFileName="submitted-wells" [colIDsToExclude]="['0']" [sizeColumnsToFitGrid]="true"></qanat-grid>
+        }
     </div>
 </div>

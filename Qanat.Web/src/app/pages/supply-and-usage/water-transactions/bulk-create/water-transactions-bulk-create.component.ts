@@ -9,11 +9,11 @@ import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-ric
 import { ColDef, SelectionChangedEvent } from "ag-grid-community";
 import { UtilityFunctionsService } from "src/app/shared/services/utility-functions.service";
 import { ParcelSupplyUpsertDto } from "src/app/shared/generated/model/parcel-supply-upsert-dto";
-import { ParcelWaterSupplyDto, UserDto, GeographyMinimalDto, WaterTypeSimpleDto, ZoneGroupMinimalDto } from "src/app/shared/generated/model/models";
+import { ParcelWaterSupplyDto, UserDto, GeographyMinimalDto, WaterTypeSimpleDto, ZoneGroupMinimalDto, ReportingPeriodDto } from "src/app/shared/generated/model/models";
 import { ZoneGroupService } from "src/app/shared/generated/api/zone-group.service";
 import { NgSelectModule } from "@ng-select/ng-select";
 import { FormsModule } from "@angular/forms";
-import { AsyncPipe, NgIf } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { QanatGridComponent } from "src/app/shared/components/qanat-grid/qanat-grid.component";
 import { AlertDisplayComponent } from "src/app/shared/components/alert-display/alert-display.component";
@@ -29,7 +29,6 @@ import { CurrentGeographyService } from "src/app/shared/services/current-geograp
     selector: "water-transactions-bulk-create",
     templateUrl: "./water-transactions-bulk-create.component.html",
     styleUrls: ["./water-transactions-bulk-create.component.scss"],
-    standalone: true,
     imports: [
         AsyncPipe,
         PageHeaderComponent,
@@ -37,7 +36,6 @@ import { CurrentGeographyService } from "src/app/shared/services/current-geograp
         AlertDisplayComponent,
         ReportingPeriodSelectComponent,
         QanatGridComponent,
-        NgIf,
         FormsModule,
         NgSelectModule,
         FieldDefinitionComponent,
@@ -75,21 +73,20 @@ export class WaterTransactionsBulkCreateComponent implements OnInit {
 
     ngOnInit(): void {
         this.geography$ = this.currentGeographyService.getCurrentGeography().pipe(
-            tap((geography) => {
-                this.selectedYearSubject.next(geography.DefaultDisplayYear);
+            tap(() => {
                 this.model = new ParcelSupplyUpsertDto();
             })
         );
 
         this.waterTypes$ = this.geography$.pipe(
             switchMap((geography) => {
-                return this.waterTypeByGeographyService.geographiesGeographyIDWaterTypesActiveGet(geography.GeographyID);
+                return this.waterTypeByGeographyService.getActiveWaterTypesWaterTypeByGeography(geography.GeographyID);
             })
         );
 
         this.zoneGroups$ = this.geography$.pipe(
             switchMap((geography) => {
-                return this.zoneGroupService.geographiesGeographyIDZoneGroupsGet(geography.GeographyID);
+                return this.zoneGroupService.listZoneGroup(geography.GeographyID);
             })
         );
 
@@ -102,7 +99,7 @@ export class WaterTransactionsBulkCreateComponent implements OnInit {
 
         this.parcelSupply$ = combineLatest({ geography: this.geography$, selectedYear: this.selectedYear$ }).pipe(
             switchMap(({ geography, selectedYear }) => {
-                return this.parcelByGeographyService.geographiesGeographyIDParcelsWaterSupplyYearGet(geography.GeographyID, selectedYear);
+                return this.parcelByGeographyService.listParcelsWithWaterSupplyByYearAndGeographyParcelByGeography(geography.GeographyID, selectedYear);
             })
         );
     }
@@ -114,7 +111,6 @@ export class WaterTransactionsBulkCreateComponent implements OnInit {
 
     private createColumnDefs(waterTypes: WaterTypeSimpleDto[], zoneGroups: ZoneGroupMinimalDto[]): ColDef<ParcelWaterSupplyDto>[] {
         const columnDefs = [
-            this.utilityFunctionsService.createCheckboxSelectionColumnDef(),
             this.utilityFunctionsService.createLinkColumnDef("APN", "ParcelNumber", "ParcelID", {
                 ValueGetter: (params) => {
                     return { LinkValue: `${params.data.ParcelID}`, LinkDisplay: params.data.ParcelNumber };
@@ -146,7 +142,7 @@ export class WaterTransactionsBulkCreateComponent implements OnInit {
         this.isLoadingSubmit = true;
         this.alertService.clearAlerts();
 
-        this.parcelSupplyByGeographyService.geographiesGeographyIDParcelSuppliesBulkPost(geography.GeographyID, this.model).subscribe(
+        this.parcelSupplyByGeographyService.bulkNewParcelSupplyByGeography(geography.GeographyID, this.model).subscribe(
             (response) => {
                 this.isLoadingSubmit = false;
 
@@ -160,7 +156,9 @@ export class WaterTransactionsBulkCreateComponent implements OnInit {
         );
     }
 
-    public changeSelectedYear(selectedYear: number) {
+    public onSelectedReportingPeriodChange(selectedReportingPeriod: ReportingPeriodDto) {
+        let endDate = new Date(selectedReportingPeriod.EndDate);
+        let selectedYear = endDate.getUTCFullYear();
         this.selectedYearSubject.next(selectedYear);
     }
 }

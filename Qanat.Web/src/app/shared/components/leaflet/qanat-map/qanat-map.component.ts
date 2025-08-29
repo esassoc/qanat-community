@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, EventEmitter, Input, OnDestroy, Output } from "@angular/core";
-import { CommonModule } from "@angular/common";
+
 import { Control, LeafletEvent, Map, MapOptions } from "leaflet";
 import * as L from "leaflet";
 import { LeafletHelperService } from "src/app/shared/services/leaflet-helper.service";
@@ -8,8 +8,6 @@ import { environment } from "src/environments/environment";
 
 @Component({
     selector: "qanat-map",
-    standalone: true,
-    imports: [CommonModule, QanatMapComponent],
     template: `
         <div [id]="mapID" [style.height]="mapHeight">
             <ng-content></ng-content>
@@ -18,14 +16,15 @@ import { environment } from "src/environments/environment";
     styles: [],
 })
 export class QanatMapComponent implements AfterViewInit, OnDestroy {
-    public mapID: string = crypto.randomUUID();
-    public map: Map;
-    public tileLayers: { [key: string]: any } = LeafletHelperService.GetDefaultTileLayers();
-    public layerControl: Control.Layers;
     @Input() boundingBox: BoundingBoxDto;
     @Input() mapHeight: string = "500px";
     @Input() showLayerControl: boolean = true;
     @Output() onMapLoad: EventEmitter<QanatMapInitEvent> = new EventEmitter();
+
+    public mapID: string = crypto.randomUUID();
+    public map: Map;
+    public tileLayers: { [key: string]: any } = LeafletHelperService.GetDefaultTileLayers();
+    public layerControl: Control.Layers;
 
     constructor() {}
 
@@ -79,6 +78,7 @@ export class QanatMapInitEvent {
     public map: Map;
     public layerControl: any;
     public mapID: string;
+
     constructor(map: Map, layerControl: any, mapID?: string) {
         this.map = map;
         this.layerControl = layerControl;

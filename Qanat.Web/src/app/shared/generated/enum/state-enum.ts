@@ -3,7 +3,7 @@
 //  Source Table: [dbo].[State]
 
 import { LookupTableEntry } from "src/app/shared/models/lookup-table-entry";
-import { SelectDropdownOption } from "src/app/shared/components/inputs/select-dropdown/select-dropdown.component"
+import { SelectDropdownOption } from "src/app/shared/components/forms/form-field/form-field.component"
 
 export enum StateEnum {
   Alabama = 1,
@@ -110,4 +110,4 @@ export const States: LookupTableEntry[]  = [
   { Name: "Wisconsin", DisplayName: "Wisconsin", Value: 49 },
   { Name: "Wyoming", DisplayName: "Wyoming", Value: 50 }
 ];
-export const StatesAsSelectDropdownOptions = [{ Value: null, Label: "- Select -", Disabled: true }, ...States.map((x) => ({ Value: x.Value, Label: x.DisplayName } as SelectDropdownOption))];
+export const StatesAsSelectDropdownOptions = States.map((x) => ({ Value: x.Value, Label: x.DisplayName } as SelectDropdownOption));

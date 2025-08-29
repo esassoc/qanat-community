@@ -1,0 +1,50 @@
+<div class="modal">
+    <div class="modal-header">
+        <h2>Recalculate OpenET Sync Raster Data</h2>
+    </div>
+
+    <div class="modal-body">
+        <form action="" class="form grid-12" [formGroup]="formGroup">
+            <div class="field g-col-12">
+                <form-field
+                    class="m-2"
+                    [multiple]="false"
+                    [formControl]="formGroup.controls?.OpenETDataTypeID"
+                    fieldLabel="Open ET Data Type"
+                    [formInputOptions]="OpenETDataTypeSelectOptions"
+                    [type]="FormFieldType.Select">
+                </form-field>
+            </div>
+            <div class="field g-col-12">
+                <reporting-period-select
+                    [geographyID]="ref.data.GeographyID"
+                    [initialReportingPeriodID]="ref.data.ReportingPeriodID"
+                    (selectionChanged)="onReportingPeriodSelected($event)"></reporting-period-select>
+            </div>
+
+            <div class="field g-col-12">
+                <form-field
+                    class="m-2"
+                    [multiple]="false"
+                    [formControl]="formGroup.controls?.Month"
+                    fieldLabel="Months"
+                    [formInputOptions]="monthOptions$ | async"
+                    [type]="FormFieldType.Select">
+                </form-field>
+            </div>
+
+            @if (!ref.data.ParcelID) {
+                <note noteType="info" class="g-col-12">
+                    Updating {{ ref.data.ParcelID ? selectedUsageLocations?.length : ref.data.UsageLocationIDs?.length }} usage location{{
+                        ref.data.ParcelID ? (selectedUsageLocations?.length === 1 ? "" : "s") : ref.data.UsageLocationIDs?.length === 1 ? "" : "s"
+                    }}.
+                </note>
+            }
+        </form>
+    </div>
+
+    <div class="modal-footer">
+        <button class="btn btn-primary" (click)="save()" [class.disabled]="!formGroup.valid">Recalculate</button>
+        <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+    </div>
+</div>

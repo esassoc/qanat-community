@@ -1,0 +1,148 @@
+<div class="page-wrapper">
+    <page-header [templateAbove]="templateAbove" [templateRight]="templateRight" pageTitle="Cover Crop Self-Report" icon="Clipboard">
+        <ng-template #templateAbove>
+            <div class="back">
+                <a [routerLink]="['/cover-crop-self-reports']" class="back__link">Back to your Cover Crop Self Reports</a>
+            </div>
+        </ng-template>
+        <ng-template #templateRight>
+            @if (coverCropSelfReport$ | async; as coverCropSelfReport) {
+                <div class="extra-info">
+                    <div class="field mr-4">
+                        <div class="field-label">Water Account</div>
+                        <div>
+                            #{{ coverCropSelfReport.WaterAccount.WaterAccountNumber }}
+                            @if (
+                                coverCropSelfReport.WaterAccount.WaterAccountName?.length > 0 &&
+                                coverCropSelfReport.WaterAccount.WaterAccountName != "" + coverCropSelfReport.WaterAccount.WaterAccountNumber
+                            ) {
+                                <span class="water-account-name">
+                                    {{ coverCropSelfReport.WaterAccount.WaterAccountName }}
+                                </span>
+                            }
+                        </div>
+                    </div>
+                    <div class="field mr-4">
+                        <div class="field-label">Reporting Period</div>
+                        <div>
+                            {{ coverCropSelfReport.ReportingPeriod.Name }}
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">Status</div>
+                        <div>
+                            {{ coverCropSelfReport.SelfReportStatus.SelfReportStatusDisplayName }}
+                        </div>
+                    </div>
+                </div>
+            }
+        </ng-template>
+    </page-header>
+
+    <div class="page-content grid-12">
+        @if (coverCropSelfReport$ | async; as coverCropSelfReport) {
+            <div class="rich-text-container g-col-12">
+                <icon class="info-icon" icon="Info"></icon>
+                <custom-rich-text [customRichTextTypeID]="richTextTypeID" [geographyID]="coverCropSelfReport.Geography.GeographyID" style="width: 100%"></custom-rich-text>
+            </div>
+
+            <app-alert-display></app-alert-display>
+
+            <div class="form-container g-col-4 card">
+                @if (selectedUsageLocation) {
+                    <div class="card-header">
+                        <h2>Cover Crop Self Report for {{ selectedUsageLocation?.Name }}</h2>
+                    </div>
+                    <div class="card-body">
+                        <form class="form grid-12" [formGroup]="formGroup">
+                            <div class="g-col-12">
+                                @if (selectedUsageLocation.UsageLocationType.CanBeSelectedInCoverCropForm) {
+                                    @if (usageLocationTypeSelectOptions$ | async; as usageLocationTypeSelectOptions) {
+                                        <form-field
+                                            [formControl]="formGroup.controls.UsageLocationTypeID"
+                                            fieldLabel="Usage Location Type"
+                                            [type]="FormFieldType.Select"
+                                            [formInputOptions]="usageLocationTypeSelectOptions"
+                                            placeholder="Select Usage Location Type"></form-field>
+                                    }
+                                } @else {
+                                    <label class="field-label">Usage Location Type</label>
+                                    <div class="field-value">
+                                        {{ selectedUsageLocation.UsageLocationType?.Name }}
+                                    </div>
+                                }
+                            </div>
+
+                            @if (selectedUsageLocation.UsageLocationType.CanBeSelectedInCoverCropForm) {
+                                <div class="g-col-12">
+                                    <form-field
+                                        [formControl]="formGroup.controls.CoverCropNote"
+                                        fieldLabel="Cover Crop Note"
+                                        [type]="FormFieldType.Textarea"
+                                        placeholder="Enter Cover Crop Note"></form-field>
+                                </div>
+                            }
+                        </form>
+                    </div>
+                    <div class="card-footer grid-12">
+                        <div class="g-col-3"></div>
+                        <div class="g-col-3"></div>
+                        <div class="g-col-6">
+                            <button class="btn btn-primary" [buttonLoading]="isLoadingSubmit" (click)="save()" [disabled]="!formGroup.valid || isLoadingSubmit">Save</button>
+                        </div>
+                    </div>
+                } @else {
+                    <div>Please select a Usage Location on the map or the grid to continue.</div>
+                }
+            </div>
+
+            <div class="map-container g-col-8">
+                <qanat-map (onMapLoad)="handleMapReady($event)" mapHeight="400px" [loadingSpinner]="{ isLoading: layerLoading, opacity: 0.33 }">
+                    @if (mapIsReady) {
+                        <usage-location-layer
+                            [map]="map"
+                            [layerControl]="layerControl"
+                            [usageLocationIDs]="usageLocationIDs"
+                            [displayOnLoad]="true"
+                            [geographyID]="coverCropSelfReport.Geography.GeographyID"
+                            (usageLocationSelected)="onMapSelected($event)"
+                            [selectedUsageLocationID]="selectedUsageLocation?.UsageLocationID"
+                            [displayCoverCropped]="true"
+                            (layerStartedLoading)="onLayerLoadStarted()"
+                            (layerFinishedLoading)="onLayerLoadFinished()"></usage-location-layer>
+                    }
+                </qanat-map>
+            </div>
+            <div class="grid-container g-col-12">
+                <qanat-grid
+                    height="400px"
+                    [rowData]="coverCropSelfReport.UsageLocations"
+                    [columnDefs]="usageLocationColDefs$ | async"
+                    defaultRowSelection="singleRow"
+                    (gridReady)="onGridReady($event)"
+                    (selectionChanged)="onGridSelection()">
+                    <div customGridActionsRight>
+                        @if (enableSubmit) {
+                            <button
+                                class="btn btn-success"
+                                style="width: 100%"
+                                [buttonLoading]="isLoadingSubmit"
+                                (click)="submit(coverCropSelfReport)"
+                                [disabled]="!enableSubmit || isLoadingSubmit">
+                                Submit
+                            </button>
+                        }
+                    </div>
+                </qanat-grid>
+            </div>
+            @if (currentUser$ | async; as currentUser) {
+                @if (currentUserIsWaterManagerOrAdmin && coverCropSelfReport.SelfReportStatus.SelfReportStatusID === SelfReportStatusEnum.Submitted) {
+                    <div class="admin-banner flex-end">
+                        <button class="btn btn-primary mr-3" (click)="approve(coverCropSelfReport)" [buttonLoading]="isLoadingSubmit" [disabled]="isLoadingSubmit">Approve</button>
+                        <button class="btn btn-danger mr-3" (click)="return(coverCropSelfReport)" [buttonLoading]="isLoadingSubmit" [disabled]="isLoadingSubmit">Return</button>
+                    </div>
+                }
+            }
+        }
+    </div>
+</div>

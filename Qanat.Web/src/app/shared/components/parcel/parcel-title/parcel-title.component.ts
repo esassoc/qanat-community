@@ -4,10 +4,9 @@ import { IconComponent } from "src/app/shared/components/icon/icon.component";
 
 @Component({
     selector: "parcel-title",
-    standalone: true,
     imports: [CommonModule, IconComponent],
     templateUrl: "./parcel-title.component.html",
-    styleUrls: ["./parcel-title.component.scss"],
+    styleUrls: ["./parcel-title.component.scss"]
 })
 export class ParcelTitleComponent implements OnInit {
     @Input() parcelNumber: string;

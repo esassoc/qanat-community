@@ -1,15 +1,14 @@
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute, IsActiveMatchOptions, Router, RouterLink, RouterOutlet } from "@angular/router";
 import { combineLatest, Observable, of } from "rxjs";
-import { map, switchMap } from "rxjs/operators";
+import { map, shareReplay, switchMap } from "rxjs/operators";
 import { routeParams } from "src/app/app.routes";
 import { AuthenticationService } from "src/app/shared/services/authentication.service";
 import { GeographyService } from "src/app/shared/generated/api/geography.service";
 import { WaterAccountService } from "src/app/shared/generated/api/water-account.service";
 import { GeographyDto } from "src/app/shared/generated/model/geography-dto";
-import { UserDto, WaterAccountDto, WaterAccountSearchResultDto } from "src/app/shared/generated/model/models";
-import { SelectDropDownModule } from "ngx-select-dropdown";
-import { NgIf, AsyncPipe } from "@angular/common";
+import { UserDto, WaterAccountMinimalDto } from "src/app/shared/generated/model/models";
+import { AsyncPipe } from "@angular/common";
 import { IconComponent } from "src/app/shared/components/icon/icon.component";
 import { DashboardMenu, DashboardMenuComponent } from "src/app/shared/components/dashboard-menu/dashboard-menu.component";
 import { GeographyLogoComponent } from "src/app/shared/components/geography-logo/geography-logo.component";
@@ -24,23 +23,20 @@ import { PermissionEnum } from "src/app/shared/generated/enum/permission-enum";
     selector: "water-account-detail-layout",
     templateUrl: "./water-account-detail-layout.component.html",
     styleUrls: ["./water-account-detail-layout.component.scss"],
-    standalone: true,
     imports: [
-        NgIf,
         RouterLink,
         GeographyLogoComponent,
         IconComponent,
-        SelectDropDownModule,
         DashboardMenuComponent,
         RouterOutlet,
         LoadingDirective,
         AsyncPipe,
         SearchWaterAccountsComponent,
         DropdownToggleDirective,
-    ],
+    ]
 })
 export class WaterAccountDetailLayoutComponent implements OnInit {
-    public currentWaterAccount$: Observable<WaterAccountDto>;
+    public currentWaterAccount$: Observable<WaterAccountMinimalDto>;
     public pageMenu$: Observable<DashboardMenu>;
 
     constructor(
@@ -54,8 +50,9 @@ export class WaterAccountDetailLayoutComponent implements OnInit {
     ngOnInit(): void {
         this.currentWaterAccount$ = this.route.params.pipe(
             switchMap((params) => {
-                return this.waterAccountsService.waterAccountsWaterAccountIDGet(params[routeParams.waterAccountID]);
-            })
+                return this.waterAccountsService.getWaterAccountByIDMinimalWaterAccount(params[routeParams.waterAccountID]);
+            }),
+            shareReplay()
         );
 
         this.pageMenu$ = this.currentWaterAccount$.pipe(
@@ -63,7 +60,7 @@ export class WaterAccountDetailLayoutComponent implements OnInit {
                 return combineLatest({
                     parcel: of(waterAccount),
                     currentUser: this.authenticationService.getCurrentUser(),
-                    geography: this.geographyService.geographiesGeographyIDGet(waterAccount.Geography.GeographyID),
+                    geography: this.geographyService.getGeographyByIDGeography(waterAccount.Geography.GeographyID),
                 });
             }),
             map((value) => {
@@ -71,12 +68,13 @@ export class WaterAccountDetailLayoutComponent implements OnInit {
             })
         );
     }
-    changedWaterAccount(waterAccount: WaterAccountSearchResultDto, currentWaterAccount: WaterAccountDto): void {
-        if (waterAccount && waterAccount.WaterAccountID !== undefined && waterAccount.WaterAccountID !== currentWaterAccount.WaterAccountID) {
+
+    changedWaterAccount(waterAccountID: number, currentWaterAccount: WaterAccountMinimalDto): void {
+        if (waterAccountID !== currentWaterAccount?.WaterAccountID) {
             // Preserve the current route structure dynamically
             const currentRoute = this.router.url.split("?")[0]; // Extract the current route path without query params
             const updatedRoute = currentRoute.split("/").map(
-                (segment, index) => (index === 2 ? waterAccount.WaterAccountID.toString() : segment) // Replace only the water account ID segment
+                (segment, index) => (index === 2 ? waterAccountID.toString() : segment) // Replace only the water account ID segment
             );
 
             this.router.navigate(updatedRoute, {
@@ -86,7 +84,7 @@ export class WaterAccountDetailLayoutComponent implements OnInit {
         }
     }
 
-    buildMenu(waterAccount: WaterAccountDto, geography: GeographyDto, currentUser: UserDto): DashboardMenu {
+    buildMenu(waterAccount: WaterAccountMinimalDto, geography: GeographyDto, currentUser: UserDto): DashboardMenu {
         const waterAccountID = waterAccount.WaterAccountID;
         const isSystemAdministratorOrGeographyManager = AuthorizationHelper.isSystemAdministratorOrGeographyManager(currentUser, geography.GeographyID);
         const menu = {
@@ -157,13 +155,12 @@ export class WaterAccountDetailLayoutComponent implements OnInit {
                     icon: "Wells",
                     routerLink: ["/water-dashboard/wells"],
                 },
-
-                // {
-                //     title: "Support & Contact",
-                //     icon: "Question",
-                //     routerLink: ["/request-support"],
-                //     queryParams: { GeographyName: this.currentWaterAccount.Geography.GeographyName },
-                // },
+                {
+                    title: "Support & Contact",
+                    icon: "Question",
+                    routerLink: ["/request-support"],
+                    queryParams: { GeographyName: geography.GeographyName },
+                },
             ],
         } as DashboardMenu;
 

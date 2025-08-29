@@ -14,24 +14,21 @@ namespace Qanat.API.Controllers
 {
     [ApiController]
     [RightsChecker]
-    public class SystemInfoController : SitkaController<SystemInfoController>
+    public class SystemInfoController(QanatDbContext dbContext, ILogger<SystemInfoController> logger, IOptions<QanatConfiguration> qanatConfiguration)
+        : SitkaController<SystemInfoController>(dbContext, logger, qanatConfiguration)
     {
-        public SystemInfoController(QanatDbContext dbContext, ILogger<SystemInfoController> logger, IOptions<QanatConfiguration> qanatConfiguration)
-            : base(dbContext, logger, qanatConfiguration)
-        {
-        }
-
         [HttpGet("/", Name = "GetSystemInfo")]
         [AllowAnonymous]
         [LogIgnore]
         public ActionResult<SystemInfoDto> GetSystemInfo([FromServices] IWebHostEnvironment environment)
         {
-            SystemInfoDto systemInfo = new SystemInfoDto
+            var systemInfo = new SystemInfoDto
             {
                 Environment = environment.EnvironmentName,
                 CurrentTimeUTC = DateTime.UtcNow.ToString("o"),
                 PodName = _qanatConfiguration.HostName
             };
+
             return Ok(systemInfo);
         }
     }

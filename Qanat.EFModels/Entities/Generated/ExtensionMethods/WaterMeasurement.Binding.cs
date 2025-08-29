@@ -11,7 +11,6 @@ namespace Qanat.EFModels.Entities
 
         public static class FieldLengths
         {
-            public const int UsageEntityName = 100;
             public const int Comment = 500;
         }
     }

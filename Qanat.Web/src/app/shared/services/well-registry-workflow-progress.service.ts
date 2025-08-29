@@ -26,7 +26,7 @@ export class WellRegistryWorkflowProgressService {
 
     getProgress(wellID: number) {
         if (wellID) {
-            this.progressSubscription = this.wellRegistrationService.wellRegistrationsWellRegistrationIDProgressGet(wellID).subscribe((response) => {
+            this.progressSubscription = this.wellRegistrationService.getWellRegistrationProgressWellRegistration(wellID).subscribe((response) => {
                 this.progressSubject.next(response);
             });
         } else {

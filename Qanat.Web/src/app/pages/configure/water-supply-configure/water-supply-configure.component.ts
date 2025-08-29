@@ -9,7 +9,7 @@ import { map, Observable, switchMap, tap } from "rxjs";
 import { AuthenticationService } from "src/app/shared/services/authentication.service";
 import { UserDto } from "src/app/shared/generated/model/user-dto";
 import { ActivatedRoute, RouterLink } from "@angular/router";
-import { AsyncPipe, NgIf } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { WaterTypesConfigureComponent } from "../../../shared/components/water-types-configure/water-types-configure.component";
 import { AlertDisplayComponent } from "../../../shared/components/alert-display/alert-display.component";
 import { ModelNameTagComponent } from "../../../shared/components/name-tag/name-tag.component";
@@ -25,8 +25,7 @@ import { LoadingDirective } from "src/app/shared/directives/loading.directive";
     selector: "water-supply-configure",
     templateUrl: "./water-supply-configure.component.html",
     styleUrls: ["./water-supply-configure.component.scss"],
-    standalone: true,
-    imports: [AsyncPipe, LoadingDirective, PageHeaderComponent, ModelNameTagComponent, AlertDisplayComponent, WaterTypesConfigureComponent, NgIf, RouterLink],
+    imports: [AsyncPipe, LoadingDirective, PageHeaderComponent, ModelNameTagComponent, AlertDisplayComponent, WaterTypesConfigureComponent, RouterLink]
 })
 export class WaterSupplyConfigureComponent implements OnInit {
     public currentUser: UserDto;
@@ -67,14 +66,14 @@ export class WaterSupplyConfigureComponent implements OnInit {
             }),
             switchMap((params) => {
                 const geographyName = params[routeParams.geographyName];
-                return this.geographyService.geographiesGeographyNameGeographyNameMinimalGet(geographyName);
+                return this.geographyService.getByNameAsMinimalDtoGeography(geographyName);
             }),
             tap((geography) => {
                 this.currentGeographyService.setCurrentGeography(geography);
                 this.geographyID = geography.GeographyID;
             }),
             switchMap((geography) => {
-                return this.waterTypeByGeographyService.geographiesGeographyIDWaterTypesGet(geography.GeographyID);
+                return this.waterTypeByGeographyService.getWaterTypesWaterTypeByGeography(geography.GeographyID);
             }),
             map((waterTypes) => {
                 return waterTypes.map((wt) => new CustomWaterTypeDto(wt.WaterTypeID, wt.WaterTypeName, wt.IsActive, wt.WaterTypeColor, wt.WaterTypeDefinition));
@@ -105,7 +104,7 @@ export class WaterSupplyConfigureComponent implements OnInit {
                 })
         );
 
-        this.waterTypeByGeographyService.geographiesGeographyIDWaterTypesPut(this.geographyID, waterTypeSimpleDtos).subscribe((waterTypes) => {
+        this.waterTypeByGeographyService.updateWaterTypesWaterTypeByGeography(this.geographyID, waterTypeSimpleDtos).subscribe((waterTypes) => {
             this.updateWaterTypes(waterTypes);
             this.alertService.pushAlert(new Alert(`Successfully saved!`, AlertContext.Success, true));
         });

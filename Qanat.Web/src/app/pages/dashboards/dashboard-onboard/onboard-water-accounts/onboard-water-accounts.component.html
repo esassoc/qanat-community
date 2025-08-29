@@ -1,102 +1,108 @@
-<div class="full-height-wrapper" *ngIf="currentUser$ | async as currentUser">
-    <page-header pageTitle="Review Water Accounts"></page-header>
-    <div class="page-body grid-12" *ngIf="geography$ | async as geography">
-        <div class="g-col-8 water-account-list">
-            <div class="water-account-list-item" *ngFor="let waterAccount of waterAccounts; let i = index">
-                <div class="water-account-list-item__header module-header flex-between">
-                    <h2 class="section-title">
-                        <icon icon="WaterAccounts"></icon>
-                        #{{ waterAccount.WaterAccountNumber }}
-
-                        <span
-                            class="water-account-name"
-                            title="{{ waterAccount.WaterAccountName }}"
-                            *ngIf="waterAccount.WaterAccountName?.length > 0 && waterAccount.WaterAccountName != '' + waterAccount.WaterAccountNumber">
-                            {{ waterAccount.WaterAccountName }}
-                        </span>
-                    </h2>
-
-                    <div class="status-icon">
-                        <span *ngIf="waterAccount.IsClaimed">
-                            <i class="fa fa-check-circle fa-lg"></i>
-                        </span>
-                        <span *ngIf="waterAccount.IsClaimed === false">
-                            <i class="fa fa-times-circle fa-lg"></i>
-                        </span>
-                    </div>
-                </div>
-
-                <div class="water-account-list-item__body grid-12">
-                    <div class="g-col-7 water-account-list-item__info">
-                        <div class="water-account-list-item__parcels | copy copy-3">
-                            <strong>
-                                <icon icon="Parcels"></icon>
-                                Parcels ({{ waterAccount.ParcelNumbers.length }})
-                            </strong>
-                            <ul>
-                                <li *ngFor="let parcelNumber of waterAccount.ParcelNumbers">
-                                    {{ parcelNumber }}
-                                </li>
-                            </ul>
-                        </div>
-
-                        <div class="claim-account-bar flex-between">
-                            <div class="copy copy-2">
-                                <p class="claim-account-text">Should this water account be associated with your user profile?</p>
+@if (currentUser$ | async; as currentUser) {
+    <div class="full-height-wrapper">
+        <page-header pageTitle="Review Water Accounts"></page-header>
+        @if (geography$ | async; as geography) {
+            <div class="page-body grid-12">
+                <div class="g-col-8 water-account-list">
+                    @for (waterAccount of waterAccounts; track waterAccount; let i = $index) {
+                        <div class="water-account-list-item">
+                            <div class="water-account-list-item__header module-header flex-between">
+                                <h2 class="section-title">
+                                    <icon icon="WaterAccounts"></icon>
+                                    #{{ waterAccount.WaterAccountNumber }}
+                                    @if (waterAccount.WaterAccountName?.length > 0 && waterAccount.WaterAccountName != "" + waterAccount.WaterAccountNumber) {
+                                        <span class="water-account-name" title="{{ waterAccount.WaterAccountName }}">
+                                            {{ waterAccount.WaterAccountName }}
+                                        </span>
+                                    }
+                                </h2>
+                                <div class="status-icon">
+                                    @if (waterAccount.IsClaimed) {
+                                        <span>
+                                            <i class="fa fa-check-circle fa-lg"></i>
+                                        </span>
+                                    }
+                                    @if (waterAccount.IsClaimed === false) {
+                                        <span>
+                                            <i class="fa fa-times-circle fa-lg"></i>
+                                        </span>
+                                    }
+                                </div>
                             </div>
-
-                            <div class="btn-group">
-                                <button
-                                    class="btn btn-sm"
-                                    [class.btn-success-outline]="!waterAccount.IsClaimed"
-                                    [class.btn-success]="waterAccount.IsClaimed"
-                                    (click)="claimAccount(waterAccount)">
-                                    <i class="fa fa-thumbs-up"></i>
-                                    <span>YES</span>
-                                </button>
-
-                                <button
-                                    class="btn btn-sm"
-                                    [class.btn-danger-outline]="waterAccount.IsClaimed === true || waterAccount.IsClaimed === null"
-                                    [class.btn-danger]="waterAccount.IsClaimed === false"
-                                    (click)="rejectAccount(waterAccount)">
-                                    <i class="fa fa-thumbs-down"></i>
-                                    <span>NO</span>
-                                </button>
+                            <div class="water-account-list-item__body grid-12">
+                                <div class="g-col-7 water-account-list-item__info">
+                                    <div class="water-account-list-item__parcels | copy copy-3">
+                                        <strong>
+                                            <icon icon="Parcels"></icon>
+                                            Parcels ({{ waterAccount.ParcelNumbers.length }})
+                                        </strong>
+                                        <ul>
+                                            @for (parcelNumber of waterAccount.ParcelNumbers; track parcelNumber) {
+                                                <li>
+                                                    {{ parcelNumber }}
+                                                </li>
+                                            }
+                                        </ul>
+                                    </div>
+                                    <div class="claim-account-bar flex-between">
+                                        <div class="copy copy-2">
+                                            <p class="claim-account-text">Should this water account be associated with your user profile?</p>
+                                        </div>
+                                        <div class="btn-group">
+                                            <button
+                                                class="btn btn-sm"
+                                                [class.btn-success-outline]="!waterAccount.IsClaimed"
+                                                [class.btn-success]="waterAccount.IsClaimed"
+                                                (click)="claimAccount(waterAccount)">
+                                                <i class="fa fa-thumbs-up"></i>
+                                                <span>YES</span>
+                                            </button>
+                                            <button
+                                                class="btn btn-sm"
+                                                [class.btn-danger-outline]="waterAccount.IsClaimed === true || waterAccount.IsClaimed === null"
+                                                [class.btn-danger]="waterAccount.IsClaimed === false"
+                                                (click)="rejectAccount(waterAccount)">
+                                                <i class="fa fa-thumbs-down"></i>
+                                                <span>NO</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="g-col-5 water-account-list-item__map">
+                                    <parcel-minimap [geoJson]="waterAccountGeoJson[waterAccount.WaterAccountID]" height="245px" width="100%"></parcel-minimap>
+                                </div>
+                            </div>
+                            <div class="water-account-list-item__footer list-item-footer">
+                                <div class="meta">
+                                    <icon icon="Geography"></icon>
+                                    {{ geography.GeographyName }}
+                                </div>
+                                <div class="meta">
+                                    <i class="fa fa-key"></i>
+                                    {{ waterAccount.WaterAccountPIN }}
+                                </div>
+                                <div class="meta">Water Account {{ i + 1 }} of {{ waterAccounts.length }}</div>
                             </div>
                         </div>
-                    </div>
-                    <div class="g-col-5 water-account-list-item__map">
-                        <parcel-minimap [geoJson]="waterAccountGeoJson[waterAccount.WaterAccountID]" height="245px" width="100%"></parcel-minimap>
-                    </div>
+                    }
+                    @if (waterAccounts?.length === 0) {
+                        <div>You do not currently have any water accounts to review.</div>
+                    }
                 </div>
-
-                <div class="water-account-list-item__footer list-item-footer">
-                    <div class="meta">
-                        <icon icon="Geography"></icon>
-                        {{ geography.GeographyName }}
+                <div class="sidebar-help g-col-4">
+                    <div class="copy copy-3">
+                        <custom-rich-text [customRichTextTypeID]="customRichTextID" [geographyID]="geography.GeographyID"></custom-rich-text>
                     </div>
-                    <div class="meta">
-                        <i class="fa fa-key"></i>
-                        {{ waterAccount.WaterAccountPIN }}
-                    </div>
-                    <div class="meta">Water Account {{ i + 1 }} of {{ waterAccounts.length }}</div>
                 </div>
             </div>
-            <div *ngIf="waterAccounts?.length === 0">You do not currently have any water accounts to review.</div>
-        </div>
-
-        <div class="sidebar-help g-col-4">
-            <div class="copy copy-3">
-                <custom-rich-text [customRichTextTypeID]="customRichTextID" [geographyID]="geography.GeographyID"></custom-rich-text>
-            </div>
+        }
+        <div class="page-footer">
+            @if (!formIsValid()) {
+                <div class="alert alert-warning">
+                    <div class="alert-content">You are required to answer "Yes" or "No" to the all of the above Water Accounts before saving and continuing.</div>
+                </div>
+            }
+            <fresca-button class="ml-auto" [routerLink]="['./']" [disabled]="!isAuthenticated() || !formIsValid()" (onClick)="onSubmit()"> Save and Continue </fresca-button>
         </div>
     </div>
-
-    <div class="page-footer">
-        <div class="alert alert-warning" *ngIf="!formIsValid()">
-            <div class="alert-content">You are required to answer "Yes" or "No" to the all of the above Water Accounts before saving and continuing.</div>
-        </div>
-        <fresca-button class="ml-auto" [routerLink]="['./']" [disabled]="!isAuthenticated() || !formIsValid()" (onClick)="onSubmit()"> Save and Continue </fresca-button>
-    </div>
-</div>
+}

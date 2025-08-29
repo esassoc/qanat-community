@@ -8,19 +8,17 @@ import { FrequentlyAskedQuestionSimpleDto } from "src/app/shared/generated/model
 import { UserDto } from "src/app/shared/generated/model/user-dto";
 import { RightsEnum } from "src/app/shared/models/enums/rights.enum";
 import { FaqDisplayEditModalComponent } from "../faq-display-edit-modal/faq-display-edit-modal.component";
-import { ModalService, ModalSizeEnum, ModalThemeEnum } from "src/app/shared/services/modal/modal.service";
-import { FAQContext } from "../edit-faq-modal/edit-faq-modal.component";
 import { IconComponent } from "src/app/shared/components/icon/icon.component";
 import { FrequentlyAskedQuestionDisplayComponent } from "src/app/shared/components/frequently-asked-question-display/frequently-asked-question-display.component";
-import { AsyncPipe, NgFor } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { PublicService } from "src/app/shared/generated/api/public.service";
+import { DialogService } from "@ngneat/dialog";
 
 @Component({
     selector: "faq-display",
-    standalone: true,
     templateUrl: "./faq-display.component.html",
     styleUrl: "./faq-display.component.scss",
-    imports: [WithRolePermissionDirective, IconComponent, FrequentlyAskedQuestionDisplayComponent, WithRolePermissionDirective, AsyncPipe, NgFor],
+    imports: [WithRolePermissionDirective, IconComponent, FrequentlyAskedQuestionDisplayComponent, WithRolePermissionDirective, AsyncPipe],
 })
 export class FaqDisplayComponent implements OnInit {
     faqs$: Observable<FrequentlyAskedQuestionSimpleDto[]>;
@@ -28,7 +26,11 @@ export class FaqDisplayComponent implements OnInit {
     rolePermissionCheck$: Observable<RolePermissionCheck>;
     @Input() faqDisplayLocationTypeID: FaqDisplayLocationTypeEnum;
 
-    constructor(private authenticationService: AuthenticationService, private publicService: PublicService, private modalService: ModalService) {}
+    constructor(
+        private authenticationService: AuthenticationService,
+        private publicService: PublicService,
+        private dialogService: DialogService
+    ) {}
 
     ngOnInit(): void {
         this.rolePermissionCheck$ = this.authenticationService.getCurrentUser().pipe(
@@ -44,19 +46,22 @@ export class FaqDisplayComponent implements OnInit {
     }
 
     loadFAQs() {
-        this.faqs$ = this.publicService.publicFaqLocationFaqDisplayQuestionLocationTypeIDGet(this.faqDisplayLocationTypeID);
+        this.faqs$ = this.publicService.listFrequentlyAskedQuestionsByLocationTypeIDPublic(this.faqDisplayLocationTypeID);
     }
 
     public openEditModal() {
-        this.modalService
-            .open(FaqDisplayEditModalComponent, null, { CloseOnClickOut: false, TopLayer: false, ModalSize: ModalSizeEnum.Large, ModalTheme: ModalThemeEnum.Light }, {
+        const dialogRef = this.dialogService.open(FaqDisplayEditModalComponent, {
+            data: {
                 FrequentlyAskedQuestionID: null,
                 FaqDisplayLocationTypeID: this.faqDisplayLocationTypeID,
-            } as FAQContext)
-            .instance.result.then((result) => {
-                if (result) {
-                    this.loadFAQs();
-                }
-            });
+            },
+            size: "lg",
+        });
+
+        dialogRef.afterClosed$.subscribe((result) => {
+            if (result) {
+                this.loadFAQs();
+            }
+        });
     }
 }

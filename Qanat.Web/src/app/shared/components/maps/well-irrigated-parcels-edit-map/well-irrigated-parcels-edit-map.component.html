@@ -1,12 +1,21 @@
 <div class="map-wrapper pb-5">
     <qanat-map (onMapLoad)="handleMapReady($event)" mapHeight="500px">
-        <ng-container *ngIf="mapIsReady">
-            <geography-parcels-layer [displayOnLoad]="true" [geographyID]="geographyID" [map]="map" parcelStyle="parcel_labeled"
+        @if (mapIsReady) {
+            <geography-parcels-layer
+                [displayOnLoad]="true"
+                [geographyID]="geographyID"
+                [map]="map"
+                parcelStyle="parcel_labeled"
                 [layerControl]="layerControl"></geography-parcels-layer>
-            <highlighted-parcels-layer [displayOnLoad]="true" [map]="map" [geographyID]="geographyID" [highlightedParcelIDs]="irrigatedParcelIDs"
-                (onHighlightedParcelClick)="clickedOnHighlightedParcel($event)" (onNonHighlightedParcelClick)="clickedOnNonHighlightedParcel($event)"
+            <highlighted-parcels-layer
+                [displayOnLoad]="true"
+                [map]="map"
+                [geographyID]="geographyID"
+                [highlightedParcelIDs]="irrigatedParcelIDs"
+                (onHighlightedParcelClick)="clickedOnHighlightedParcel($event)"
+                (onNonHighlightedParcelClick)="clickedOnNonHighlightedParcel($event)"
                 [layerControl]="layerControl"></highlighted-parcels-layer>
-        </ng-container>
+        }
     </qanat-map>
 </div>
 
@@ -19,44 +28,69 @@
         <div class="field-label">All Parcels</div>
 
         <div class="parcel-list">
-            <ng-select class="search" [(ngModel)]="parcelSearchModel" [typeahead]="parcelInputs$" [minTermLength]="2" [loading]="searchLoading"
-                (add)="onSelected($event)" [multiple]="true" placeholder="Search APNs" typeToSearchText="Begin typing to search">
-                <ng-option *ngFor="let parcel of parcels$ | async" [value]="parcel" [disabled]="isIrrigatedParcel[parcel.ParcelID]">
-                    {{ parcel.ParcelNumber }}
-                    <span *ngIf="isIrrigatedParcel[parcel.ParcelID]">(Already Added)</span>
-                </ng-option>
+            <ng-select
+                class="search"
+                [(ngModel)]="parcelSearchModel"
+                [typeahead]="parcelInputs$"
+                [minTermLength]="2"
+                [loading]="searchLoading"
+                (add)="onSelected($event)"
+                [multiple]="true"
+                placeholder="Search APNs"
+                typeToSearchText="Begin typing to search">
+                @for (parcel of parcels$ | async; track parcel) {
+                    <ng-option [value]="parcel" [disabled]="isIrrigatedParcel[parcel.ParcelID]">
+                        {{ parcel.ParcelNumber }}
+                        @if (isIrrigatedParcel[parcel.ParcelID]) {
+                            <span>(Already Added)</span>
+                        }
+                    </ng-option>
+                }
             </ng-select>
 
-            <div class="list-item flex-between p-2" *ngFor="let parcel of selectedParcels; let i = index"
-                [class.recently-active]="isIrrigatedParcel[parcel.ParcelID] == false" (click)="highlightParcel(parcel.ParcelID)">
-                <div>
-                    {{ parcel.ParcelNumber }}
-                    <span *ngIf="isIrrigatedParcel[parcel.ParcelID] == false" class="small"> Recently Deleted </span>
+            @for (parcel of selectedParcels; track parcel; let i = $index) {
+                <div class="list-item flex-between p-2" [class.recently-active]="isIrrigatedParcel[parcel.ParcelID] == false" (click)="highlightParcel(parcel.ParcelID)">
+                    <div>
+                        {{ parcel.ParcelNumber }}
+                        @if (isIrrigatedParcel[parcel.ParcelID] == false) {
+                            <span class="small"> Recently Deleted </span>
+                        }
+                    </div>
+                    <div class="action-icon" (click)="addIrrigatedParcel(parcel, i)">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
                 </div>
-                <div class="action-icon" (click)="addIrrigatedParcel(parcel, i)">
-                    <i class="fas fa-plus-circle"></i>
-                </div>
-            </div>
+            }
         </div>
     </div>
 
     <div class="g-col-6 selected">
         <div class="field-label">Irrigated Parcels</div>
 
-        <div class="parcel-list" *ngIf="irrigatedParcels">
-            <div *ngIf="irrigatedParcels?.length === 0" class="no-parcels copy copy-4">
-                <p><em>This user hasn't claimed any parcels yet</em></p>
+        @if (irrigatedParcels) {
+            <div class="parcel-list">
+                @if (irrigatedParcels?.length === 0) {
+                    <div class="no-parcels copy copy-4">
+                        <p><em>This user hasn't claimed any parcels yet</em></p>
+                    </div>
+                }
+                @for (parcel of irrigatedParcels; track parcel; let i = $index) {
+                    <div
+                        class="list-item flex-between p-2"
+                        [ngClass]="{ 'recently-active': i < recentlyAddedCount, 'no-border': i == 0 }"
+                        (click)="highlightParcel(parcel.ParcelID)">
+                        <div>
+                            {{ parcel.ParcelNumber }}
+                            @if (i < recentlyAddedCount) {
+                                <span class="small">Recently Added</span>
+                            }
+                        </div>
+                        <div class="action-icon" (click)="removeIrrigatedParcel(parcel, i)">
+                            <i class="fas fa-minus-circle"></i>
+                        </div>
+                    </div>
+                }
             </div>
-            <div class="list-item flex-between p-2" *ngFor="let parcel of irrigatedParcels; let i = index"
-                [ngClass]="{ 'recently-active': i < recentlyAddedCount, 'no-border': i == 0 }" (click)="highlightParcel(parcel.ParcelID)">
-                <div>
-                    {{ parcel.ParcelNumber }}
-                    <span *ngIf="i < recentlyAddedCount" class="small">Recently Added</span>
-                </div>
-                <div class="action-icon" (click)="removeIrrigatedParcel(parcel, i)">
-                    <i class="fas fa-minus-circle"></i>
-                </div>
-            </div>
-        </div>
+        }
     </div>
 </div>

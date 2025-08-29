@@ -1,5 +1,5 @@
 import { Component } from "@angular/core";
-import { CommonModule } from "@angular/common";
+
 import { Observable, switchMap, tap } from "rxjs";
 import { WellRegistryWorkflowProgressService } from "src/app/shared/services/well-registry-workflow-progress.service";
 import { Router } from "@angular/router";
@@ -16,13 +16,13 @@ import { GeographyDto } from "src/app/shared/generated/model/geography-dto";
 import { WellRegistrationService } from "src/app/shared/generated/api/well-registration.service";
 import { WithGeographyFlagDirective } from "src/app/shared/directives/with-geography-flag.directive";
 import { IconComponent } from "../icon/icon.component";
+import { AsyncPipe } from "@angular/common";
 
 @Component({
     selector: "well-registry-review-banner",
-    standalone: true,
-    imports: [CommonModule, IconComponent, WithGeographyFlagDirective],
+    imports: [IconComponent, WithGeographyFlagDirective, AsyncPipe],
     templateUrl: "./well-registry-review-banner.component.html",
-    styleUrls: ["./well-registry-review-banner.component.scss"],
+    styleUrls: ["./well-registry-review-banner.component.scss"]
 })
 export class WellRegistryReviewBannerComponent {
     public FlagEnum = FlagEnum;
@@ -58,11 +58,11 @@ export class WellRegistryReviewBannerComponent {
 
     approve(wellID: number): void {
         this.isLoadingSubmit = true;
-        this.wellRegistrationService.wellRegistrationsWellRegistrationIDApprovePost(wellID).subscribe({
+        this.wellRegistrationService.approveWellRegistrationWellRegistration(wellID).subscribe({
             next: () => {
                 this.isLoadingSubmit = false;
                 this.wellRegistryProgressService.updateProgress(wellID);
-                this.router.navigate(["/manage", this.geography.GeographyName.toLowerCase(), "wells", "review-submitted-wells"]).then(() => {
+                this.router.navigate(["/wells", this.geography.GeographyName.toLowerCase(), "review-submitted-wells"]).then(() => {
                     this.alertService.pushAlert(new Alert("Successfully approved Well Registration", AlertContext.Success));
                 });
             },
@@ -72,11 +72,11 @@ export class WellRegistryReviewBannerComponent {
 
     return(wellID: number): void {
         this.isLoadingSubmit = true;
-        this.wellRegistrationService.wellRegistrationsWellRegistrationIDReturnPost(wellID).subscribe({
+        this.wellRegistrationService.returnWellRegistrationWellRegistration(wellID).subscribe({
             next: () => {
                 this.isLoadingSubmit = false;
                 this.wellRegistryProgressService.updateProgress(wellID);
-                this.router.navigate(["/manage", this.geography.GeographyName.toLowerCase(), "wells", "review-submitted-wells"]).then(() => {
+                this.router.navigate(["/wells", this.geography.GeographyName.toLowerCase(), "review-submitted-wells"]).then(() => {
                     this.alertService.pushAlert(new Alert("Successfully returned Well Registration", AlertContext.Success));
                 });
             },

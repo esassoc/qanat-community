@@ -1,12 +1,14 @@
 <div [id]="mapID" class="well-map" [style.height]="mapHeight"></div>
 
-<div *ngIf="wellMarker" class="model-information">
-    <div>
-        <strong>Latitude:</strong>
-        {{ wellMarker.Latitude | number: "0.5-5" }}
+@if (wellMarker) {
+    <div class="model-information">
+        <div>
+            <strong>Latitude:</strong>
+            {{ wellMarker.Latitude | number: "0.5-5" }}
+        </div>
+        <div>
+            <strong>Longitude:</strong>
+            {{ wellMarker.Longitude | number: "0.5-5" }}
+        </div>
     </div>
-    <div>
-        <strong>Longitude:</strong>
-        {{ wellMarker.Longitude | number: "0.5-5" }}
-    </div>
-</div>
+}

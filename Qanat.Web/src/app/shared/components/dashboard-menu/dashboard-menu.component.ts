@@ -7,11 +7,10 @@ import { IconComponent, IconInterface } from "../icon/icon.component";
 
 @Component({
     selector: "dashboard-menu",
-    standalone: true,
     imports: [CommonModule, IconComponent, RouterLink, RouterLinkActive, WithGeographyFlagDirective],
     templateUrl: "./dashboard-menu.component.html",
     styleUrls: ["./dashboard-menu.component.scss"],
-    animations: [slideAnimation],
+    animations: [slideAnimation]
 })
 export class DashboardMenuComponent {
     @Input() dashboardMenu: DashboardMenu;
@@ -32,7 +31,7 @@ export class DashboardMenuComponent {
 export interface IDashboardMenuItem {
     routerLink?: string | string[];
     title: string;
-    icon?: typeof IconInterface; // Specify the type of IconInterface
+    icon?: IconInterface; // Specify the type of IconInterface
     isDropdown?: boolean;
 }
 
@@ -44,7 +43,7 @@ export class DashboardMenuItem implements IDashboardMenuItem {
     routerLink?: string | string[];
     fragment?: string;
     title: string;
-    icon?: typeof IconInterface;
+    icon?: IconInterface;
     isDropdown?: boolean;
     preventCollapse?: boolean;
     menuItems?: DashboardMenuItem[];

@@ -1,0 +1,60 @@
+@use "/src/scss/abstracts" as *;
+
+.nav-container {
+    border-top: 1px solid $gray-200;
+    border-left: 1px solid $gray-200;
+    border-right: 1px solid $gray-200;
+    border-radius: $spacing-200;
+
+    .dashboard-navbar {
+        display: flex;
+        align-items: flex-start;
+        background-color: $gray-50;
+        border-bottom: 1px solid $gray-200;
+        border-radius: $spacing-200 $spacing-200 0 0;
+        height: 98%;
+        max-height: 60px;
+        height: 58px;
+
+        .tab {
+            padding: $spacing-400 $spacing-500;
+            height: 100%;
+            border-left: 1px solid $gray-200;
+            cursor: pointer;
+            color: $blue-default;
+
+            &:first-of-type {
+                border: none;
+            }
+
+            &:last-of-type {
+                border-right: 1px solid $gray-200;
+            }
+
+            &.active {
+                background-color: $white;
+                height: 103%;
+                border-top-left-radius: $spacing-200;
+            }
+
+            icon {
+                margin-right: $spacing-200;
+            }
+        }
+    }
+}
+
+::ng-deep .enabled-circle {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: $gray-300;
+    display: inline-block;
+    margin-right: $spacing-100;
+    position: relative;
+    top: 5px;
+}
+
+::ng-deep .enabled-circle.enabled {
+    background-color: $orange-default;
+}

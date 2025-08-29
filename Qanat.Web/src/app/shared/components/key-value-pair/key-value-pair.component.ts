@@ -1,13 +1,12 @@
 import { Component, ContentChild, ElementRef, HostBinding, Input } from "@angular/core";
-import { CommonModule } from "@angular/common";
+
 import { CopyToClipboardDirective } from "src/app/shared/directives/copy-to-clipboard.directive";
 
 @Component({
     selector: "key-value-pair",
-    standalone: true,
-    imports: [CommonModule, CopyToClipboardDirective],
+    imports: [CopyToClipboardDirective],
     templateUrl: "./key-value-pair.component.html",
-    styleUrls: ["./key-value-pair.component.scss"],
+    styleUrls: ["./key-value-pair.component.scss"]
 })
 export class KeyValuePairComponent {
     @Input() key: string;

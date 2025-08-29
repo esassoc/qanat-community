@@ -1,13 +1,11 @@
 import { Component } from "@angular/core";
 import { ICellRendererParams } from "ag-grid-community";
-import { NgFor } from "@angular/common";
 
 @Component({
     selector: "tag-renderer",
     templateUrl: "./tag-renderer.component.html",
     styleUrl: "./tag-renderer.component.scss",
-    standalone: true,
-    imports: [NgFor],
+    imports: []
 })
 export class TagRendererComponent {
     public params: ICellRendererParams;

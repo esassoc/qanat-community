@@ -12,15 +12,13 @@ namespace Qanat.API.Controllers
 {
     [ApiController]
     [RightsChecker]
-
-    public class CustomRichTextController : SitkaController<CustomRichTextController>
+    public class CustomRichTextController(
+        QanatDbContext dbContext,
+        ILogger<CustomRichTextController> logger,
+        IOptions<QanatConfiguration> qanatConfiguration)
+        : SitkaController<CustomRichTextController>(dbContext, logger, qanatConfiguration)
     {
-        public CustomRichTextController(QanatDbContext dbContext, ILogger<CustomRichTextController> logger, IOptions<QanatConfiguration> qanatConfiguration)
-            : base(dbContext, logger, qanatConfiguration)
-        {
-        }
-
-        [HttpGet("fieldDefinitions")]
+        [HttpGet("field-definitions")]
         [WithRolePermission(PermissionEnum.FieldDefinitionRights, RightsEnum.Read)]
         public ActionResult<List<CustomRichTextDto>> ListFieldDefinitions()
         {
@@ -28,7 +26,7 @@ namespace Qanat.API.Controllers
             return Ok(customRichTextDtos);
         }
 
-        [HttpPut("customRichText/{customRichTextTypeID}")]
+        [HttpPut("custom-rich-texts/{customRichTextTypeID}")]
         [WithRolePermission(PermissionEnum.CustomRichTextRights, RightsEnum.Update)]
         public ActionResult<CustomRichTextDto> UpdateCustomRichText([FromRoute] int customRichTextTypeID, [FromBody] CustomRichTextSimpleDto customRichTextUpdateDto)
         {

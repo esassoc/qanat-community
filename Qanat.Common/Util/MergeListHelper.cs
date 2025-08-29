@@ -1,6 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Qanat.Common.Util
 {
@@ -24,9 +22,9 @@ namespace Qanat.Common.Util
             existingList.MergeDelete(updatedList, matchCriteria, allInDatabase);
         }
 
-        public static void MergeNew<T>(this ICollection<T> existingList, IEnumerable<T> updatedList,
-            DbSet<T> allInDatabase, Match<T> matchCriteria) where T : class
+        public static List<T> MergeNew<T>(this ICollection<T> existingList, IEnumerable<T> updatedList, DbSet<T> allInDatabase, Match<T> matchCriteria) where T : class
         {
+            var newRecords = new List<T>();
             // Inserting new records
             foreach (var currentRecordFromForm in updatedList)
             {
@@ -35,20 +33,27 @@ namespace Qanat.Common.Util
                 {
                     existingList.Add(currentRecordFromForm);
                     allInDatabase.Add(currentRecordFromForm);
+                    newRecords.Add(currentRecordFromForm);
                 }
             }
+
+            return newRecords;
         }
 
-        public static void MergeUpdate<T>(this ICollection<T> existingList, IEnumerable<T> updatedList, Match<T> matchCriteria, UpdateFunction<T> updateFunction) where T : class
+        public static List<T> MergeUpdate<T>(this ICollection<T> existingList, IEnumerable<T> updatedList, Match<T> matchCriteria, UpdateFunction<T> updateFunction) where T : class
         {
+            var updatedRecords = new List<T>();
             foreach (var currentRecordFromForm in updatedList)
             {
                 var existingRecord = existingList.MatchRecord(currentRecordFromForm, matchCriteria);
                 if (!Equals(existingRecord, default(T)))
                 {
                     updateFunction(existingRecord, currentRecordFromForm);
+                    updatedRecords.Add(existingRecord);
                 }
             }
+
+            return updatedRecords;
         }
 
         public static void MergeDelete<T>(this ICollection<T> existingList, IEnumerable<T> updatedList, Match<T> matchCriteria, DbSet<T> allInDatabase) where T : class

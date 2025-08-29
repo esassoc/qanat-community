@@ -17,9 +17,7 @@ namespace Qanat.EFModels.Entities
         public static readonly FaqDisplayLocationTypeRequestSupport RequestSupport = FaqDisplayLocationTypeRequestSupport.Instance;
 
         public static readonly List<FaqDisplayLocationType> All;
-        public static readonly List<FaqDisplayLocationTypeSimpleDto> AllAsSimpleDto;
         public static readonly ReadOnlyDictionary<int, FaqDisplayLocationType> AllLookupDictionary;
-        public static readonly ReadOnlyDictionary<int, FaqDisplayLocationTypeSimpleDto> AllAsSimpleDtoLookupDictionary;
 
         /// <summary>
         /// Static type constructor to coordinate static initialization order
@@ -27,9 +25,7 @@ namespace Qanat.EFModels.Entities
         static FaqDisplayLocationType()
         {
             All = new List<FaqDisplayLocationType> { GrowersGuide, WaterManagerGuide, RequestSupport };
-            AllAsSimpleDto = new List<FaqDisplayLocationTypeSimpleDto> { GrowersGuide.AsSimpleDto(), WaterManagerGuide.AsSimpleDto(), RequestSupport.AsSimpleDto() };
             AllLookupDictionary = new ReadOnlyDictionary<int, FaqDisplayLocationType>(All.ToDictionary(x => x.FaqDisplayLocationTypeID));
-            AllAsSimpleDtoLookupDictionary = new ReadOnlyDictionary<int, FaqDisplayLocationTypeSimpleDto>(AllAsSimpleDto.ToDictionary(x => x.FaqDisplayLocationTypeID));
         }
 
         /// <summary>

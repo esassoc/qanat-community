@@ -5,7 +5,7 @@ import { AppComponent } from "./app/app.component";
 import { WaterAccountPopupComponent } from "./app/shared/components/maps/water-account-popup/water-account-popup.component";
 import { ParcelPopupComponent } from "./app/shared/components/maps/parcel-popup/parcel-popup.component";
 import { WellPopupComponent } from "./app/shared/components/maps/well-popup/well-popup.component";
-import { UsageEntityPopupComponent } from "./app/shared/components/maps/usage-entity-popup/usage-entity-popup.component";
+import { UsageLocationPopupComponent } from "./app/shared/components/maps/usage-location-popup/usage-location-popup.component";
 
 (async () => {
     const app = createApplication(appConfig);
@@ -26,8 +26,8 @@ import { UsageEntityPopupComponent } from "./app/shared/components/maps/usage-en
     });
     customElements.define("well-popup-custom-element", ngWellElement);
 
-    const ngUsageEntityElement = createCustomElement(UsageEntityPopupComponent, {
+    const ngUsageLocationElement = createCustomElement(UsageLocationPopupComponent, {
         injector: (await app).injector,
     });
-    customElements.define("usage-entity-popup-custom-element", ngUsageEntityElement);
+    customElements.define("usage-location-popup-custom-element", ngUsageLocationElement);
 })();

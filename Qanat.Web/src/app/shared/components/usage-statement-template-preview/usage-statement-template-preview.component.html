@@ -1,0 +1,356 @@
+<div class="grid-8 template-preview">
+    <!-- page 1 -->
+    <div class="page-wrapper g-col-4">
+        <div class="template-preview-page page-1">
+            <div class="grid-row solid-border">
+                <!-- header & table-->
+                <ng-container *ngTemplateOutlet="sectionTitleAndSubtitle"> </ng-container>
+                <ng-container *ngTemplateOutlet="table"></ng-container>
+
+                <!-- panels -->
+                <div class="info-panels">
+                    <div class="editable-area">
+                        <div class="edit-button">
+                            <button type="button" class="btn btn-sm btn-orange" (click)="onEditButtonClicked(customFieldName1)">Edit</button>
+                        </div>
+                        <ng-container *ngTemplateOutlet="shadedPanelWithParagraph"></ng-container>
+                    </div>
+                    <div class="panel panel-dashed">
+                        <icon icon="Logo"></icon>
+                        <ng-container *ngTemplateOutlet="shortParagraph"></ng-container>
+                    </div>
+                </div>
+            </div>
+
+            <!-- usage info paragraphs -->
+            <div class="grid-row dashed-border">
+                <ng-container *ngTemplateOutlet="sectionTitle"></ng-container>
+                <div class="editable-area">
+                    <div class="edit-button">
+                        <button type="button" class="btn btn-sm btn-orange" (click)="onEditButtonClicked(customFieldName2)">Edit</button>
+                    </div>
+                    <ng-container *ngTemplateOutlet="paragraph"></ng-container>
+                    <ng-container *ngTemplateOutlet="paragraph"></ng-container>
+                    <ng-container *ngTemplateOutlet="paragraph"></ng-container>
+                    <ng-container *ngTemplateOutlet="paragraph"></ng-container>
+                    <ng-container *ngTemplateOutlet="paragraph"></ng-container>
+                </div>
+            </div>
+
+            <!-- mailing area -->
+            <div class="grid-row dashed-border mailing-area">
+                <div>
+                    <div class="geography-address">
+                        <geography-logo [geographyID]="geographyID"></geography-logo>
+                        <ng-container *ngTemplateOutlet="address"></ng-container>
+                    </div>
+                    <div class="mailing-address">
+                        <ng-container *ngTemplateOutlet="address"></ng-container>
+                    </div>
+                </div>
+                <div class="mailing-info">
+                    <ng-container *ngTemplateOutlet="shortParagraph"></ng-container>
+                    <ng-container *ngTemplateOutlet="shortParagraph"></ng-container>
+                </div>
+            </div>
+        </div>
+        <div class="page-count">Page 1</div>
+    </div>
+
+    <!-- page 2 -->
+    <div class="page-wrapper g-col-4">
+        <div class="template-preview-page page-2">
+            <!-- left column -->
+            <div class="left-column">
+                <div class="account-info">
+                    <div>
+                        <geography-logo [geographyID]="geographyID"></geography-logo>
+                        <ng-container *ngTemplateOutlet="shortParagraph"></ng-container>
+                    </div>
+                    <div>
+                        <svg width="85" height="12" viewBox="0 0 85 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="45" height="4" fill="#BDBDBD" />
+                            <rect y="8" width="85" height="4" fill="#BDBDBD" />
+                        </svg>
+                    </div>
+                    <div>
+                        <svg width="68" height="16" viewBox="0 0 68 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="68" height="1" fill="#BDBDBD" />
+                            <rect y="5" width="68" height="1" fill="#BDBDBD" />
+                            <rect y="10" width="68" height="1" fill="#BDBDBD" />
+                            <rect y="15" width="48" height="1" fill="#BDBDBD" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="dashed-border pt-1">
+                    <icon icon="Logo"></icon>
+                    <ng-container *ngTemplateOutlet="shortParagraph"></ng-container>
+                </div>
+            </div>
+            <!-- right column -->
+            <div class="right-column">
+                <!-- map area -->
+                <div class="grid-row solid-border">
+                    <ng-container *ngTemplateOutlet="sectionTitle"></ng-container>
+                    <div class="map-area">
+                        <div class="map"></div>
+                        <ng-container *ngTemplateOutlet="mapInfo"></ng-container>
+                    </div>
+                </div>
+
+                <!-- table & info panel -->
+                <div class="grid-row dashed-border">
+                    <ng-container *ngTemplateOutlet="sectionTitleAndSubtitle"></ng-container>
+                    <ng-container *ngTemplateOutlet="table"></ng-container>
+                    <div class="editable-area">
+                        <div class="edit-button">
+                            <button type="button" class="btn btn-sm btn-orange" (click)="onEditButtonClicked(customFieldName3)">Edit</button>
+                        </div>
+                        <ng-container *ngTemplateOutlet="shadedPanelWithParagraph"></ng-container>
+                    </div>
+                </div>
+
+                <!-- graph -->
+                <div class="grid-row dashed-border">
+                    <ng-container *ngTemplateOutlet="sectionTitle"></ng-container>
+                    <ng-container *ngTemplateOutlet="graph"></ng-container>
+                </div>
+
+                <!-- questions panel -->
+                <div class="grid-row dashed-border">
+                    <ng-container *ngTemplateOutlet="sectionTitleAndSubtitle"></ng-container>
+                    <div class="editable-area">
+                        <div class="edit-button">
+                            <button type="button" class="btn btn-sm btn-orange" (click)="onEditButtonClicked(customFieldName4)">Edit</button>
+                        </div>
+                        <ng-container *ngTemplateOutlet="shadedPanelWithParagraph"></ng-container>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="page-count">Page 2</div>
+    </div>
+</div>
+
+<!-- reusable template elements -->
+<ng-template #sectionTitle>
+    <div class="template-section-title">
+        <svg width="145px" height="auto" viewBox="0 0 155 2" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="155" height="2" fill="#7C7C7C" />
+        </svg>
+    </div>
+</ng-template>
+
+<ng-template #sectionTitleAndSubtitle>
+    <div class="template-section-title-and-subtitle">
+        <svg width="145px" height="auto" viewBox="0 0 155 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="155" height="2" fill="#7C7C7C" />
+            <rect y="7" width="115" height="1" fill="#BDBDBD" />
+            <rect y="13" width="95" height="1" fill="#BDBDBD" />
+        </svg>
+    </div>
+</ng-template>
+
+<ng-template #paragraph>
+    <div>
+        <svg width="100%" height="auto" viewBox="0 0 465 35" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="465" height="1" fill="#BDBDBD" />
+            <rect y="5" width="465" height="1" fill="#BDBDBD" />
+            <rect y="10" width="465" height="1" fill="#BDBDBD" />
+            <rect y="15" width="465" height="1" fill="#BDBDBD" />
+            <rect y="20" width="465" height="1" fill="#BDBDBD" />
+            <rect y="25" width="465" height="1" fill="#BDBDBD" />
+            <rect y="30" width="48" height="1" fill="#BDBDBD" />
+        </svg>
+    </div>
+</ng-template>
+
+<ng-template #shortParagraph>
+    <div>
+        <svg width="100%" height="auto" viewBox="0 0 144 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="144" height="1" fill="#BDBDBD" />
+            <rect y="5" width="144" height="1" fill="#BDBDBD" />
+            <rect y="10" width="48" height="1" fill="#BDBDBD" />
+        </svg>
+    </div>
+</ng-template>
+
+<ng-template #shadedPanelWithParagraph>
+    <div class="panel panel-shaded">
+        <svg width="100%" height="auto" viewBox="0 0 265 41" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="265" height="1" fill="#BDBDBD" />
+            <rect y="5" width="265" height="1" fill="#BDBDBD" />
+            <rect y="10" width="265" height="1" fill="#BDBDBD" />
+            <rect y="15" width="265" height="1" fill="#BDBDBD" />
+            <rect y="20" width="265" height="1" fill="#BDBDBD" />
+            <rect y="25" width="265" height="1" fill="#BDBDBD" />
+            <rect y="30" width="265" height="1" fill="#BDBDBD" />
+            <rect y="35" width="265" height="1" fill="#BDBDBD" />
+            <rect y="40" width="48" height="1" fill="#BDBDBD" />
+        </svg>
+    </div>
+</ng-template>
+
+<ng-template #address>
+    <svg width="100%" height="auto" viewBox="0 0 165 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="95" height="2" fill="#BDBDBD" />
+        <rect y="4" width="75" height="2" fill="#BDBDBD" />
+        <rect y="8" width="75" height="2" fill="#BDBDBD" />
+    </svg>
+</ng-template>
+
+<ng-template #table>
+    <div>
+        <svg width="100%" height="auto" viewBox="0 0 465 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="0.5" y="0.5" width="92" height="15" stroke="#DCDCDC" />
+            <rect x="22" y="7" width="49" height="2" fill="#BDBDBD" />
+            <mask id="path-3-inside-1_401_8851" fill="white">
+                <path d="M93 0H186V16H93V0Z" />
+            </mask>
+            <path d="M186 0H187V-1H186V0ZM186 16V17H187V16H186ZM93 1H186V-1H93V1ZM185 0V16H187V0H185ZM186 15H93V17H186V15Z" fill="#DCDCDC" mask="url(#path-3-inside-1_401_8851)" />
+            <rect x="115" y="7" width="49" height="2" fill="#BDBDBD" />
+            <mask id="path-6-inside-2_401_8851" fill="white">
+                <path d="M186 0H279V16H186V0Z" />
+            </mask>
+            <path
+                d="M279 0H280V-1H279V0ZM279 16V17H280V16H279ZM186 1H279V-1H186V1ZM278 0V16H280V0H278ZM279 15H186V17H279V15Z"
+                fill="#DCDCDC"
+                mask="url(#path-6-inside-2_401_8851)" />
+            <rect x="208" y="7" width="49" height="2" fill="#BDBDBD" />
+            <mask id="path-9-inside-3_401_8851" fill="white">
+                <path d="M279 0H372V16H279V0Z" />
+            </mask>
+            <path
+                d="M372 0H373V-1H372V0ZM372 16V17H373V16H372ZM279 1H372V-1H279V1ZM371 0V16H373V0H371ZM372 15H279V17H372V15Z"
+                fill="#DCDCDC"
+                mask="url(#path-9-inside-3_401_8851)" />
+            <rect x="301" y="7" width="49" height="2" fill="#BDBDBD" />
+            <mask id="path-12-inside-4_401_8851" fill="white">
+                <path d="M372 0H465V16H372V0Z" />
+            </mask>
+            <path
+                d="M465 0H466V-1H465V0ZM465 16V17H466V16H465ZM372 1H465V-1H372V1ZM464 0V16H466V0H464ZM465 15H372V17H465V15Z"
+                fill="#DCDCDC"
+                mask="url(#path-12-inside-4_401_8851)" />
+            <rect x="394" y="3.5" width="49" height="1" fill="#BDBDBD" />
+            <mask id="path-15-inside-5_401_8851" fill="white">
+                <path d="M372 8H465V16H372V8Z" />
+            </mask>
+            <path d="M372 9H465V7H372V9Z" fill="#DCDCDC" mask="url(#path-15-inside-5_401_8851)" />
+            <mask id="path-17-inside-6_401_8851" fill="white">
+                <path d="M372 8H418.5V16H372V8Z" />
+            </mask>
+            <path d="M417.5 8V16H419.5V8H417.5Z" fill="#DCDCDC" mask="url(#path-17-inside-6_401_8851)" />
+            <rect x="385.75" y="11.5" width="19" height="1" fill="#BDBDBD" />
+            <rect x="432.25" y="11.5" width="19" height="1" fill="#BDBDBD" />
+            <rect x="22" y="23" width="49" height="2" fill="#DCDCDC" />
+            <rect x="115" y="23" width="49" height="2" fill="#DCDCDC" />
+            <rect x="208" y="23" width="49" height="2" fill="#DCDCDC" />
+            <rect x="301" y="23" width="49" height="2" fill="#DCDCDC" />
+            <rect x="385.75" y="23.5" width="19" height="1" fill="#BDBDBD" />
+            <rect x="432.25" y="23.5" width="19" height="1" fill="#BDBDBD" />
+        </svg>
+    </div>
+</ng-template>
+
+<ng-template #mapInfo>
+    <svg width="100%" height="auto" viewBox="0 0 148 155" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <mask id="path-1-inside-1_402_9437" fill="white">
+            <path d="M0 0H148V6H0V0Z" />
+        </mask>
+        <path
+            d="M0 6.5H0.5V5.5H0V6.5ZM1.5 6.5H2.5V5.5H1.5V6.5ZM3.5 6.5H4.5V5.5H3.5V6.5ZM5.5 6.5H6.5V5.5H5.5V6.5ZM7.5 6.5H8.5V5.5H7.5V6.5ZM9.5 6.5H10.5V5.5H9.5V6.5ZM11.5 6.5H12.5V5.5H11.5V6.5ZM13.5 6.5H14.5V5.5H13.5V6.5ZM15.5 6.5H16.5V5.5H15.5V6.5ZM17.5 6.5H18.5V5.5H17.5V6.5ZM19.5 6.5H20.5V5.5H19.5V6.5ZM21.5 6.5H22.5V5.5H21.5V6.5ZM23.5 6.5H24.5V5.5H23.5V6.5ZM25.5 6.5H26.5V5.5H25.5V6.5ZM27.5 6.5H28.5V5.5H27.5V6.5ZM29.5 6.5H30.5V5.5H29.5V6.5ZM31.5 6.5H32.5V5.5H31.5V6.5ZM33.5 6.5H34.5V5.5H33.5V6.5ZM35.5 6.5H36.5V5.5H35.5V6.5ZM37.5 6.5H38.5V5.5H37.5V6.5ZM39.5 6.5H40.5V5.5H39.5V6.5ZM41.5 6.5H42.5V5.5H41.5V6.5ZM43.5 6.5H44.5V5.5H43.5V6.5ZM45.5 6.5H46.5V5.5H45.5V6.5ZM47.5 6.5H48.5V5.5H47.5V6.5ZM49.5 6.5H50.5V5.5H49.5V6.5ZM51.5 6.5H52.5V5.5H51.5V6.5ZM53.5 6.5H54.5V5.5H53.5V6.5ZM55.5 6.5H56.5V5.5H55.5V6.5ZM57.5 6.5H58.5V5.5H57.5V6.5ZM59.5 6.5H60.5V5.5H59.5V6.5ZM61.5 6.5H62.5V5.5H61.5V6.5ZM63.5 6.5H64.5V5.5H63.5V6.5ZM65.5 6.5H66.5V5.5H65.5V6.5ZM67.5 6.5H68.5V5.5H67.5V6.5ZM69.5 6.5H70.5V5.5H69.5V6.5ZM71.5 6.5H72.5V5.5H71.5V6.5ZM73.5 6.5H74.5V5.5H73.5V6.5ZM75.5 6.5H76.5V5.5H75.5V6.5ZM77.5 6.5H78.5V5.5H77.5V6.5ZM79.5 6.5H80.5V5.5H79.5V6.5ZM81.5 6.5H82.5V5.5H81.5V6.5ZM83.5 6.5H84.5V5.5H83.5V6.5ZM85.5 6.5H86.5V5.5H85.5V6.5ZM87.5 6.5H88.5V5.5H87.5V6.5ZM89.5 6.5H90.5V5.5H89.5V6.5ZM91.5 6.5H92.5V5.5H91.5V6.5ZM93.5 6.5H94.5V5.5H93.5V6.5ZM95.5 6.5H96.5V5.5H95.5V6.5ZM97.5 6.5H98.5V5.5H97.5V6.5ZM99.5 6.5H100.5V5.5H99.5V6.5ZM101.5 6.5H102.5V5.5H101.5V6.5ZM103.5 6.5H104.5V5.5H103.5V6.5ZM105.5 6.5H106.5V5.5H105.5V6.5ZM107.5 6.5H108.5V5.5H107.5V6.5ZM109.5 6.5H110.5V5.5H109.5V6.5ZM111.5 6.5H112.5V5.5H111.5V6.5ZM113.5 6.5H114.5V5.5H113.5V6.5ZM115.5 6.5H116.5V5.5H115.5V6.5ZM117.5 6.5H118.5V5.5H117.5V6.5ZM119.5 6.5H120.5V5.5H119.5V6.5ZM121.5 6.5H122.5V5.5H121.5V6.5ZM123.5 6.5H124.5V5.5H123.5V6.5ZM125.5 6.5H126.5V5.5H125.5V6.5ZM127.5 6.5H128.5V5.5H127.5V6.5ZM129.5 6.5H130.5V5.5H129.5V6.5ZM131.5 6.5H132.5V5.5H131.5V6.5ZM133.5 6.5H134.5V5.5H133.5V6.5ZM135.5 6.5H136.5V5.5H135.5V6.5ZM137.5 6.5H138.5V5.5H137.5V6.5ZM139.5 6.5H140.5V5.5H139.5V6.5ZM141.5 6.5H142.5V5.5H141.5V6.5ZM143.5 6.5H144.5V5.5H143.5V6.5ZM145.5 6.5H146.5V5.5H145.5V6.5ZM147.5 6.5H148V5.5H147.5V6.5ZM0 7H0.5V5H0V7ZM1.5 7H2.5V5H1.5V7ZM3.5 7H4.5V5H3.5V7ZM5.5 7H6.5V5H5.5V7ZM7.5 7H8.5V5H7.5V7ZM9.5 7H10.5V5H9.5V7ZM11.5 7H12.5V5H11.5V7ZM13.5 7H14.5V5H13.5V7ZM15.5 7H16.5V5H15.5V7ZM17.5 7H18.5V5H17.5V7ZM19.5 7H20.5V5H19.5V7ZM21.5 7H22.5V5H21.5V7ZM23.5 7H24.5V5H23.5V7ZM25.5 7H26.5V5H25.5V7ZM27.5 7H28.5V5H27.5V7ZM29.5 7H30.5V5H29.5V7ZM31.5 7H32.5V5H31.5V7ZM33.5 7H34.5V5H33.5V7ZM35.5 7H36.5V5H35.5V7ZM37.5 7H38.5V5H37.5V7ZM39.5 7H40.5V5H39.5V7ZM41.5 7H42.5V5H41.5V7ZM43.5 7H44.5V5H43.5V7ZM45.5 7H46.5V5H45.5V7ZM47.5 7H48.5V5H47.5V7ZM49.5 7H50.5V5H49.5V7ZM51.5 7H52.5V5H51.5V7ZM53.5 7H54.5V5H53.5V7ZM55.5 7H56.5V5H55.5V7ZM57.5 7H58.5V5H57.5V7ZM59.5 7H60.5V5H59.5V7ZM61.5 7H62.5V5H61.5V7ZM63.5 7H64.5V5H63.5V7ZM65.5 7H66.5V5H65.5V7ZM67.5 7H68.5V5H67.5V7ZM69.5 7H70.5V5H69.5V7ZM71.5 7H72.5V5H71.5V7ZM73.5 7H74.5V5H73.5V7ZM75.5 7H76.5V5H75.5V7ZM77.5 7H78.5V5H77.5V7ZM79.5 7H80.5V5H79.5V7ZM81.5 7H82.5V5H81.5V7ZM83.5 7H84.5V5H83.5V7ZM85.5 7H86.5V5H85.5V7ZM87.5 7H88.5V5H87.5V7ZM89.5 7H90.5V5H89.5V7ZM91.5 7H92.5V5H91.5V7ZM93.5 7H94.5V5H93.5V7ZM95.5 7H96.5V5H95.5V7ZM97.5 7H98.5V5H97.5V7ZM99.5 7H100.5V5H99.5V7ZM101.5 7H102.5V5H101.5V7ZM103.5 7H104.5V5H103.5V7ZM105.5 7H106.5V5H105.5V7ZM107.5 7H108.5V5H107.5V7ZM109.5 7H110.5V5H109.5V7ZM111.5 7H112.5V5H111.5V7ZM113.5 7H114.5V5H113.5V7ZM115.5 7H116.5V5H115.5V7ZM117.5 7H118.5V5H117.5V7ZM119.5 7H120.5V5H119.5V7ZM121.5 7H122.5V5H121.5V7ZM123.5 7H124.5V5H123.5V7ZM125.5 7H126.5V5H125.5V7ZM127.5 7H128.5V5H127.5V7ZM129.5 7H130.5V5H129.5V7ZM131.5 7H132.5V5H131.5V7ZM133.5 7H134.5V5H133.5V7ZM135.5 7H136.5V5H135.5V7ZM137.5 7H138.5V5H137.5V7ZM139.5 7H140.5V5H139.5V7ZM141.5 7H142.5V5H141.5V7ZM143.5 7H144.5V5H143.5V7ZM145.5 7H146.5V5H145.5V7ZM147.5 7H148V5H147.5V7Z"
+            fill="#BDBDBD"
+            mask="url(#path-1-inside-1_402_9437)" />
+        <rect width="38" height="2" fill="#BDBDBD" />
+        <rect y="10" width="68" height="1" fill="#BDBDBD" />
+        <mask id="path-5-inside-2_402_9437" fill="white">
+            <path d="M0 27H70V33H0V27Z" />
+        </mask>
+        <path
+            d="M0 33.5H0.5V32.5H0V33.5ZM1.5 33.5H2.5V32.5H1.5V33.5ZM3.5 33.5H4.5V32.5H3.5V33.5ZM5.5 33.5H6.5V32.5H5.5V33.5ZM7.5 33.5H8.5V32.5H7.5V33.5ZM9.5 33.5H10.5V32.5H9.5V33.5ZM11.5 33.5H12.5V32.5H11.5V33.5ZM13.5 33.5H14.5V32.5H13.5V33.5ZM15.5 33.5H16.5V32.5H15.5V33.5ZM17.5 33.5H18.5V32.5H17.5V33.5ZM19.5 33.5H20.5V32.5H19.5V33.5ZM21.5 33.5H22.5V32.5H21.5V33.5ZM23.5 33.5H24.5V32.5H23.5V33.5ZM25.5 33.5H26.5V32.5H25.5V33.5ZM27.5 33.5H28.5V32.5H27.5V33.5ZM29.5 33.5H30.5V32.5H29.5V33.5ZM31.5 33.5H32.5V32.5H31.5V33.5ZM33.5 33.5H34.5V32.5H33.5V33.5ZM35.5 33.5H36.5V32.5H35.5V33.5ZM37.5 33.5H38.5V32.5H37.5V33.5ZM39.5 33.5H40.5V32.5H39.5V33.5ZM41.5 33.5H42.5V32.5H41.5V33.5ZM43.5 33.5H44.5V32.5H43.5V33.5ZM45.5 33.5H46.5V32.5H45.5V33.5ZM47.5 33.5H48.5V32.5H47.5V33.5ZM49.5 33.5H50.5V32.5H49.5V33.5ZM51.5 33.5H52.5V32.5H51.5V33.5ZM53.5 33.5H54.5V32.5H53.5V33.5ZM55.5 33.5H56.5V32.5H55.5V33.5ZM57.5 33.5H58.5V32.5H57.5V33.5ZM59.5 33.5H60.5V32.5H59.5V33.5ZM61.5 33.5H62.5V32.5H61.5V33.5ZM63.5 33.5H64.5V32.5H63.5V33.5ZM65.5 33.5H66.5V32.5H65.5V33.5ZM67.5 33.5H68.5V32.5H67.5V33.5ZM69.5 33.5H70V32.5H69.5V33.5ZM0 34H0.5V32H0V34ZM1.5 34H2.5V32H1.5V34ZM3.5 34H4.5V32H3.5V34ZM5.5 34H6.5V32H5.5V34ZM7.5 34H8.5V32H7.5V34ZM9.5 34H10.5V32H9.5V34ZM11.5 34H12.5V32H11.5V34ZM13.5 34H14.5V32H13.5V34ZM15.5 34H16.5V32H15.5V34ZM17.5 34H18.5V32H17.5V34ZM19.5 34H20.5V32H19.5V34ZM21.5 34H22.5V32H21.5V34ZM23.5 34H24.5V32H23.5V34ZM25.5 34H26.5V32H25.5V34ZM27.5 34H28.5V32H27.5V34ZM29.5 34H30.5V32H29.5V34ZM31.5 34H32.5V32H31.5V34ZM33.5 34H34.5V32H33.5V34ZM35.5 34H36.5V32H35.5V34ZM37.5 34H38.5V32H37.5V34ZM39.5 34H40.5V32H39.5V34ZM41.5 34H42.5V32H41.5V34ZM43.5 34H44.5V32H43.5V34ZM45.5 34H46.5V32H45.5V34ZM47.5 34H48.5V32H47.5V34ZM49.5 34H50.5V32H49.5V34ZM51.5 34H52.5V32H51.5V34ZM53.5 34H54.5V32H53.5V34ZM55.5 34H56.5V32H55.5V34ZM57.5 34H58.5V32H57.5V34ZM59.5 34H60.5V32H59.5V34ZM61.5 34H62.5V32H61.5V34ZM63.5 34H64.5V32H63.5V34ZM65.5 34H66.5V32H65.5V34ZM67.5 34H68.5V32H67.5V34ZM69.5 34H70V32H69.5V34Z"
+            fill="#BDBDBD"
+            mask="url(#path-5-inside-2_402_9437)" />
+        <rect y="27" width="40" height="2" fill="#BDBDBD" />
+        <rect y="37" width="28" height="1" fill="#BDBDBD" />
+        <mask id="path-9-inside-3_402_9437" fill="white">
+            <path d="M78 27H148V33H78V27Z" />
+        </mask>
+        <path
+            d="M78 33.5H78.5V32.5H78V33.5ZM79.5 33.5H80.5V32.5H79.5V33.5ZM81.5 33.5H82.5V32.5H81.5V33.5ZM83.5 33.5H84.5V32.5H83.5V33.5ZM85.5 33.5H86.5V32.5H85.5V33.5ZM87.5 33.5H88.5V32.5H87.5V33.5ZM89.5 33.5H90.5V32.5H89.5V33.5ZM91.5 33.5H92.5V32.5H91.5V33.5ZM93.5 33.5H94.5V32.5H93.5V33.5ZM95.5 33.5H96.5V32.5H95.5V33.5ZM97.5 33.5H98.5V32.5H97.5V33.5ZM99.5 33.5H100.5V32.5H99.5V33.5ZM101.5 33.5H102.5V32.5H101.5V33.5ZM103.5 33.5H104.5V32.5H103.5V33.5ZM105.5 33.5H106.5V32.5H105.5V33.5ZM107.5 33.5H108.5V32.5H107.5V33.5ZM109.5 33.5H110.5V32.5H109.5V33.5ZM111.5 33.5H112.5V32.5H111.5V33.5ZM113.5 33.5H114.5V32.5H113.5V33.5ZM115.5 33.5H116.5V32.5H115.5V33.5ZM117.5 33.5H118.5V32.5H117.5V33.5ZM119.5 33.5H120.5V32.5H119.5V33.5ZM121.5 33.5H122.5V32.5H121.5V33.5ZM123.5 33.5H124.5V32.5H123.5V33.5ZM125.5 33.5H126.5V32.5H125.5V33.5ZM127.5 33.5H128.5V32.5H127.5V33.5ZM129.5 33.5H130.5V32.5H129.5V33.5ZM131.5 33.5H132.5V32.5H131.5V33.5ZM133.5 33.5H134.5V32.5H133.5V33.5ZM135.5 33.5H136.5V32.5H135.5V33.5ZM137.5 33.5H138.5V32.5H137.5V33.5ZM139.5 33.5H140.5V32.5H139.5V33.5ZM141.5 33.5H142.5V32.5H141.5V33.5ZM143.5 33.5H144.5V32.5H143.5V33.5ZM145.5 33.5H146.5V32.5H145.5V33.5ZM147.5 33.5H148V32.5H147.5V33.5ZM78 34H78.5V32H78V34ZM79.5 34H80.5V32H79.5V34ZM81.5 34H82.5V32H81.5V34ZM83.5 34H84.5V32H83.5V34ZM85.5 34H86.5V32H85.5V34ZM87.5 34H88.5V32H87.5V34ZM89.5 34H90.5V32H89.5V34ZM91.5 34H92.5V32H91.5V34ZM93.5 34H94.5V32H93.5V34ZM95.5 34H96.5V32H95.5V34ZM97.5 34H98.5V32H97.5V34ZM99.5 34H100.5V32H99.5V34ZM101.5 34H102.5V32H101.5V34ZM103.5 34H104.5V32H103.5V34ZM105.5 34H106.5V32H105.5V34ZM107.5 34H108.5V32H107.5V34ZM109.5 34H110.5V32H109.5V34ZM111.5 34H112.5V32H111.5V34ZM113.5 34H114.5V32H113.5V34ZM115.5 34H116.5V32H115.5V34ZM117.5 34H118.5V32H117.5V34ZM119.5 34H120.5V32H119.5V34ZM121.5 34H122.5V32H121.5V34ZM123.5 34H124.5V32H123.5V34ZM125.5 34H126.5V32H125.5V34ZM127.5 34H128.5V32H127.5V34ZM129.5 34H130.5V32H129.5V34ZM131.5 34H132.5V32H131.5V34ZM133.5 34H134.5V32H133.5V34ZM135.5 34H136.5V32H135.5V34ZM137.5 34H138.5V32H137.5V34ZM139.5 34H140.5V32H139.5V34ZM141.5 34H142.5V32H141.5V34ZM143.5 34H144.5V32H143.5V34ZM145.5 34H146.5V32H145.5V34ZM147.5 34H148V32H147.5V34Z"
+            fill="#BDBDBD"
+            mask="url(#path-9-inside-3_402_9437)" />
+        <rect x="78" y="27" width="40" height="2" fill="#BDBDBD" />
+        <rect x="78" y="37" width="28" height="1" fill="#BDBDBD" />
+        <mask id="path-13-inside-4_402_9437" fill="white">
+            <path d="M0 54H148V60H0V54Z" />
+        </mask>
+        <path
+            d="M0 60.5H0.5V59.5H0V60.5ZM1.5 60.5H2.5V59.5H1.5V60.5ZM3.5 60.5H4.5V59.5H3.5V60.5ZM5.5 60.5H6.5V59.5H5.5V60.5ZM7.5 60.5H8.5V59.5H7.5V60.5ZM9.5 60.5H10.5V59.5H9.5V60.5ZM11.5 60.5H12.5V59.5H11.5V60.5ZM13.5 60.5H14.5V59.5H13.5V60.5ZM15.5 60.5H16.5V59.5H15.5V60.5ZM17.5 60.5H18.5V59.5H17.5V60.5ZM19.5 60.5H20.5V59.5H19.5V60.5ZM21.5 60.5H22.5V59.5H21.5V60.5ZM23.5 60.5H24.5V59.5H23.5V60.5ZM25.5 60.5H26.5V59.5H25.5V60.5ZM27.5 60.5H28.5V59.5H27.5V60.5ZM29.5 60.5H30.5V59.5H29.5V60.5ZM31.5 60.5H32.5V59.5H31.5V60.5ZM33.5 60.5H34.5V59.5H33.5V60.5ZM35.5 60.5H36.5V59.5H35.5V60.5ZM37.5 60.5H38.5V59.5H37.5V60.5ZM39.5 60.5H40.5V59.5H39.5V60.5ZM41.5 60.5H42.5V59.5H41.5V60.5ZM43.5 60.5H44.5V59.5H43.5V60.5ZM45.5 60.5H46.5V59.5H45.5V60.5ZM47.5 60.5H48.5V59.5H47.5V60.5ZM49.5 60.5H50.5V59.5H49.5V60.5ZM51.5 60.5H52.5V59.5H51.5V60.5ZM53.5 60.5H54.5V59.5H53.5V60.5ZM55.5 60.5H56.5V59.5H55.5V60.5ZM57.5 60.5H58.5V59.5H57.5V60.5ZM59.5 60.5H60.5V59.5H59.5V60.5ZM61.5 60.5H62.5V59.5H61.5V60.5ZM63.5 60.5H64.5V59.5H63.5V60.5ZM65.5 60.5H66.5V59.5H65.5V60.5ZM67.5 60.5H68.5V59.5H67.5V60.5ZM69.5 60.5H70.5V59.5H69.5V60.5ZM71.5 60.5H72.5V59.5H71.5V60.5ZM73.5 60.5H74.5V59.5H73.5V60.5ZM75.5 60.5H76.5V59.5H75.5V60.5ZM77.5 60.5H78.5V59.5H77.5V60.5ZM79.5 60.5H80.5V59.5H79.5V60.5ZM81.5 60.5H82.5V59.5H81.5V60.5ZM83.5 60.5H84.5V59.5H83.5V60.5ZM85.5 60.5H86.5V59.5H85.5V60.5ZM87.5 60.5H88.5V59.5H87.5V60.5ZM89.5 60.5H90.5V59.5H89.5V60.5ZM91.5 60.5H92.5V59.5H91.5V60.5ZM93.5 60.5H94.5V59.5H93.5V60.5ZM95.5 60.5H96.5V59.5H95.5V60.5ZM97.5 60.5H98.5V59.5H97.5V60.5ZM99.5 60.5H100.5V59.5H99.5V60.5ZM101.5 60.5H102.5V59.5H101.5V60.5ZM103.5 60.5H104.5V59.5H103.5V60.5ZM105.5 60.5H106.5V59.5H105.5V60.5ZM107.5 60.5H108.5V59.5H107.5V60.5ZM109.5 60.5H110.5V59.5H109.5V60.5ZM111.5 60.5H112.5V59.5H111.5V60.5ZM113.5 60.5H114.5V59.5H113.5V60.5ZM115.5 60.5H116.5V59.5H115.5V60.5ZM117.5 60.5H118.5V59.5H117.5V60.5ZM119.5 60.5H120.5V59.5H119.5V60.5ZM121.5 60.5H122.5V59.5H121.5V60.5ZM123.5 60.5H124.5V59.5H123.5V60.5ZM125.5 60.5H126.5V59.5H125.5V60.5ZM127.5 60.5H128.5V59.5H127.5V60.5ZM129.5 60.5H130.5V59.5H129.5V60.5ZM131.5 60.5H132.5V59.5H131.5V60.5ZM133.5 60.5H134.5V59.5H133.5V60.5ZM135.5 60.5H136.5V59.5H135.5V60.5ZM137.5 60.5H138.5V59.5H137.5V60.5ZM139.5 60.5H140.5V59.5H139.5V60.5ZM141.5 60.5H142.5V59.5H141.5V60.5ZM143.5 60.5H144.5V59.5H143.5V60.5ZM145.5 60.5H146.5V59.5H145.5V60.5ZM147.5 60.5H148V59.5H147.5V60.5ZM0 61H0.5V59H0V61ZM1.5 61H2.5V59H1.5V61ZM3.5 61H4.5V59H3.5V61ZM5.5 61H6.5V59H5.5V61ZM7.5 61H8.5V59H7.5V61ZM9.5 61H10.5V59H9.5V61ZM11.5 61H12.5V59H11.5V61ZM13.5 61H14.5V59H13.5V61ZM15.5 61H16.5V59H15.5V61ZM17.5 61H18.5V59H17.5V61ZM19.5 61H20.5V59H19.5V61ZM21.5 61H22.5V59H21.5V61ZM23.5 61H24.5V59H23.5V61ZM25.5 61H26.5V59H25.5V61ZM27.5 61H28.5V59H27.5V61ZM29.5 61H30.5V59H29.5V61ZM31.5 61H32.5V59H31.5V61ZM33.5 61H34.5V59H33.5V61ZM35.5 61H36.5V59H35.5V61ZM37.5 61H38.5V59H37.5V61ZM39.5 61H40.5V59H39.5V61ZM41.5 61H42.5V59H41.5V61ZM43.5 61H44.5V59H43.5V61ZM45.5 61H46.5V59H45.5V61ZM47.5 61H48.5V59H47.5V61ZM49.5 61H50.5V59H49.5V61ZM51.5 61H52.5V59H51.5V61ZM53.5 61H54.5V59H53.5V61ZM55.5 61H56.5V59H55.5V61ZM57.5 61H58.5V59H57.5V61ZM59.5 61H60.5V59H59.5V61ZM61.5 61H62.5V59H61.5V61ZM63.5 61H64.5V59H63.5V61ZM65.5 61H66.5V59H65.5V61ZM67.5 61H68.5V59H67.5V61ZM69.5 61H70.5V59H69.5V61ZM71.5 61H72.5V59H71.5V61ZM73.5 61H74.5V59H73.5V61ZM75.5 61H76.5V59H75.5V61ZM77.5 61H78.5V59H77.5V61ZM79.5 61H80.5V59H79.5V61ZM81.5 61H82.5V59H81.5V61ZM83.5 61H84.5V59H83.5V61ZM85.5 61H86.5V59H85.5V61ZM87.5 61H88.5V59H87.5V61ZM89.5 61H90.5V59H89.5V61ZM91.5 61H92.5V59H91.5V61ZM93.5 61H94.5V59H93.5V61ZM95.5 61H96.5V59H95.5V61ZM97.5 61H98.5V59H97.5V61ZM99.5 61H100.5V59H99.5V61ZM101.5 61H102.5V59H101.5V61ZM103.5 61H104.5V59H103.5V61ZM105.5 61H106.5V59H105.5V61ZM107.5 61H108.5V59H107.5V61ZM109.5 61H110.5V59H109.5V61ZM111.5 61H112.5V59H111.5V61ZM113.5 61H114.5V59H113.5V61ZM115.5 61H116.5V59H115.5V61ZM117.5 61H118.5V59H117.5V61ZM119.5 61H120.5V59H119.5V61ZM121.5 61H122.5V59H121.5V61ZM123.5 61H124.5V59H123.5V61ZM125.5 61H126.5V59H125.5V61ZM127.5 61H128.5V59H127.5V61ZM129.5 61H130.5V59H129.5V61ZM131.5 61H132.5V59H131.5V61ZM133.5 61H134.5V59H133.5V61ZM135.5 61H136.5V59H135.5V61ZM137.5 61H138.5V59H137.5V61ZM139.5 61H140.5V59H139.5V61ZM141.5 61H142.5V59H141.5V61ZM143.5 61H144.5V59H143.5V61ZM145.5 61H146.5V59H145.5V61ZM147.5 61H148V59H147.5V61Z"
+            fill="#BDBDBD"
+            mask="url(#path-13-inside-4_402_9437)" />
+        <rect y="54" width="38" height="2" fill="#BDBDBD" />
+        <rect y="64" width="68" height="1" fill="#BDBDBD" />
+        <rect x="76" y="64" width="68" height="1" fill="#BDBDBD" />
+        <rect y="69" width="68" height="1" fill="#BDBDBD" />
+        <rect x="76" y="69" width="68" height="1" fill="#BDBDBD" />
+        <rect y="74" width="68" height="1" fill="#BDBDBD" />
+        <rect x="76" y="74" width="68" height="1" fill="#BDBDBD" />
+        <rect y="79" width="68" height="1" fill="#BDBDBD" />
+        <rect x="76" y="79" width="68" height="1" fill="#BDBDBD" />
+        <rect y="84" width="68" height="1" fill="#BDBDBD" />
+        <rect x="76" y="84" width="68" height="1" fill="#BDBDBD" />
+        <rect y="89" width="68" height="1" fill="#BDBDBD" />
+    </svg>
+</ng-template>
+
+<ng-template #graph>
+    <div>
+        <svg width="100%" height="auto" viewBox="0 0 354 133" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g clip-path="url(#clip0_402_9568)">
+                <path d="M354 0H0V164.231H354V0Z" fill="white" />
+                <path d="M0.233398 0H351.904V132.462H0.233398V0Z" stroke="#DDDDDD" stroke-miterlimit="10" />
+                <path d="M17.5134 132.462V134.89" stroke="#DDDDDD" stroke-miterlimit="10" />
+                <path d="M46.0017 132.462V134.89" stroke="#DDDDDD" stroke-miterlimit="10" />
+                <path d="M74.9565 132.462V134.89" stroke="#DDDDDD" stroke-miterlimit="10" />
+                <path d="M103.912 132.462V134.89" stroke="#DDDDDD" stroke-miterlimit="10" />
+                <path d="M132.4 132.462V134.89" stroke="#DDDDDD" stroke-miterlimit="10" />
+                <path d="M161.355 132.462V134.89" stroke="#DDDDDD" stroke-miterlimit="10" />
+                <path d="M190.31 132.462V134.89" stroke="#DDDDDD" stroke-miterlimit="10" />
+                <path d="M219.265 132.462V134.89" stroke="#DDDDDD" stroke-miterlimit="10" />
+                <path d="M247.753 132.462V134.89" stroke="#DDDDDD" stroke-miterlimit="10" />
+                <path d="M276.709 132.462V134.89" stroke="#DDDDDD" stroke-miterlimit="10" />
+                <path d="M305.664 132.462V134.89" stroke="#DDDDDD" stroke-miterlimit="10" />
+                <path d="M334.152 132.462V134.89" stroke="#DDDDDD" stroke-miterlimit="10" />
+                <path d="M0.233398 132.462H351.898" stroke="#DDDDDD" stroke-miterlimit="10" />
+                <path d="M0.233398 119.235H351.898" stroke="#DDDDDD" stroke-miterlimit="10" />
+                <path d="M0.233398 106.009H351.898" stroke="#DDDDDD" stroke-miterlimit="10" />
+                <path d="M0.233398 92.7831H351.898" stroke="#DDDDDD" stroke-miterlimit="10" />
+                <path d="M0.233398 79.557H351.898" stroke="#DDDDDD" stroke-miterlimit="10" />
+                <path d="M0.233398 66.3309H351.898" stroke="#DDDDDD" stroke-miterlimit="10" />
+                <path d="M0.233398 53.1048H351.898" stroke="#DDDDDD" stroke-miterlimit="10" />
+                <path d="M0.233398 39.8787H351.898" stroke="#DDDDDD" stroke-miterlimit="10" />
+                <path d="M0.233398 26.6526H351.898" stroke="#DDDDDD" stroke-miterlimit="10" />
+                <path d="M0.233398 13.4265H351.898" stroke="#DDDDDD" stroke-miterlimit="10" />
+                <path d="M0.233398 0.200317H351.898" stroke="#DDDDDD" stroke-miterlimit="10" />
+                <path d="M5.76514 124.935H17.2951V132.296H5.76514V124.935Z" fill="#71C9E9" />
+                <path d="M34.5901 115.884H46.1201V132.296H34.5901V115.884Z" fill="#71C9E9" />
+                <path d="M63.415 115.424H74.945V132.296H63.415V115.424Z" fill="#71C9E9" />
+                <path d="M92.2405 74.2094H103.77V132.296H92.2405V74.2094Z" fill="#71C9E9" />
+                <path d="M121.065 69.0714H132.595V132.296H121.065V69.0714Z" fill="#71C9E9" />
+                <path d="M149.89 46.7213H161.42V132.296H149.89V46.7213Z" fill="#71C9E9" />
+                <path d="M179.797 1.90387H190.613V132.296H179.797V1.90387Z" fill="#71C9E9" />
+                <path d="M207.54 21.2234H219.07V132.296H207.54V21.2234Z" fill="#71C9E9" />
+                <path d="M236.365 73.937H247.895V132.296H236.365V73.937Z" fill="#71C9E9" />
+                <path d="M265.191 98.3054H276.721V132.296H265.191V98.3054Z" fill="#71C9E9" />
+                <path d="M294.015 114.63H305.545V132.296H294.015V114.63Z" fill="#71C9E9" />
+                <path d="M322.84 126.342H334.37V132.296H322.84V126.342Z" fill="#71C9E9" />
+            </g>
+            <defs>
+                <clipPath id="clip0_402_9568">
+                    <rect width="354" height="133" fill="white" />
+                </clipPath>
+            </defs>
+        </svg>
+    </div>
+</ng-template>

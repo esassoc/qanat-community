@@ -2,38 +2,42 @@
 
 <div class="page-body">
     <app-alert-display></app-alert-display>
-    <ng-container *ngIf="canCreateTransaction$ | async as canCreateTransactions">
-        <div class="transaction-options grid-12" *ngIf="canCreateTransactions">
-            <div class="g-col-6 single">
-                <h2 class="section-title">Create Single Transaction</h2>
-                <div class="copy copy-3 pt-1 pb-2">
-                    <p>Use Single Transaction to perform a water deposit or withdrawal transaction for an individual parcel.</p>
+    @if (canCreateTransaction$ | async; as canCreateTransactions) {
+        @if (canCreateTransactions) {
+            <div class="transaction-options grid-12">
+                <div class="g-col-6 single border-right no-border-top">
+                    <div class="grid-12">
+                        <h2 class="section-title g-col-9">Create Single Transaction</h2>
+                        <a class="btn btn-primary g-col-3" [routerLink]="['new']">Create</a>
+                    </div>
+                    <div class="copy copy-3 pt-1 pb-2">
+                        <p>Use Single Transaction to perform a water deposit or withdrawal transaction for an individual parcel.</p>
+                    </div>
                 </div>
-                <fresca-button [routerLink]="['new']" cssClass="btn btn-primary" iconClass=""> Create Single Transaction </fresca-button>
-            </div>
-
-            <div class="g-col-6 bulk">
-                <h2 class="section-title">Create Bulk Transaction</h2>
-                <div class="copy copy-3 pt-1 pb-2">
-                    <p>Set Water Supply for multiple parcels at once by filtering and selecting a data grid.</p>
+                <div class="g-col-6 bulk no-border-top">
+                    <div class="grid-12">
+                        <h2 class="section-title g-col-9">Create Bulk Transaction</h2>
+                        <a class="btn btn-primary g-col-3" [routerLink]="['bulk-new']">Create</a>
+                    </div>
+                    <div class="copy copy-3 pt-1 pb-2">
+                        <p>Set Water Supply for multiple parcels at once by filtering and selecting a data grid.</p>
+                    </div>
                 </div>
-
-                <fresca-button [routerLink]="['bulk-new']" cssClass="btn btn-primary" iconClass=""> Create Bulk Transaction </fresca-button>
-            </div>
-
-            <div class="g-col-6 supply-csv">
-                <h2 class="section-title">Upload Supply Transactions (CSV)</h2>
-                <div class="copy copy-3 pt-1 pb-2">
-                    <p>Create water supply transactions for multiple parcels by uploading a comma-separated spreadsheet containing water supply per Parcel.</p>
+                <div class="g-col-6 supply-csv border-right no-border-bottom">
+                    <div class="grid-12">
+                        <h2 class="section-title g-col-9">Upload Supply Transactions (CSV)</h2>
+                        <a class="btn btn-primary g-col-3" [routerLink]="['csv-upload/supply']">Upload</a>
+                    </div>
+                    <div class="copy copy-3 pt-1 pb-2">
+                        <p>Create water supply transactions for multiple parcels by uploading a comma-separated spreadsheet containing water supply per Parcel.</p>
+                    </div>
                 </div>
-
-                <fresca-button [routerLink]="['csv-upload/supply']" cssClass="btn btn-primary" iconClass=""> Upload Supply Transactions (CSV) </fresca-button>
             </div>
-        </div>
-    </ng-container>
+        }
+    }
 
     <div class="transaction-history">
-        <div class="section-header pt-5 pb-3">
+        <div class="section-header pt-1 pb-1">
             <h2 class="module-title underline">Transaction History</h2>
 
             <div class="copy copy-2">

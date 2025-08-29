@@ -4,15 +4,14 @@ import TinyMCEHelpers from "../../helpers/tiny-mce-helpers";
 import { WaterTypeSimpleDto } from "../../generated/model/water-type-simple-dto";
 import { PopperDirective } from "../../directives/popper.directive";
 import { FormsModule } from "@angular/forms";
-import { NgIf } from "@angular/common";
+import { JsonPipe } from "@angular/common";
 
 @Component({
     selector: "water-type-field-definition",
     templateUrl: "./water-type-field-definition.component.html",
     styleUrls: ["./water-type-field-definition.component.scss"],
-    standalone: true,
-    imports: [NgIf, EditorComponent, FormsModule, PopperDirective],
-    providers: [{ provide: TINYMCE_SCRIPT_SRC, useValue: "tinymce/tinymce.min.js" }],
+    imports: [EditorComponent, FormsModule, PopperDirective],
+    providers: [{ provide: TINYMCE_SCRIPT_SRC, useValue: "tinymce/tinymce.min.js" }]
 })
 export class WaterTypeFieldDefinitionComponent implements AfterViewInit {
     @Input() waterType: WaterTypeSimpleDto;

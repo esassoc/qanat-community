@@ -1,19 +1,18 @@
-import { ChangeDetectorRef, Component, ComponentRef, OnInit, TemplateRef, ViewContainerRef } from "@angular/core";
+import { ChangeDetectorRef, Component, ComponentRef, OnInit } from "@angular/core";
 import { FormControl, Validators, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { Observable, switchMap, tap } from "rxjs";
 import { AuthenticationService } from "src/app/shared/services/authentication.service";
 import { ConfirmOptions } from "src/app/shared/services/confirm/confirm-options";
 import { ConfirmService } from "src/app/shared/services/confirm/confirm.service";
 import { FormFieldType, FormInputOption } from "src/app/shared/components/forms/form-field/form-field.component";
-import { ModalComponent } from "src/app/shared/components/modal/modal.component";
+
 import { WaterMeasurementService } from "src/app/shared/generated/api/water-measurement.service";
 import { ZoneGroupService } from "src/app/shared/generated/api/zone-group.service";
 import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
-import { GeographyForAdminEditorsDto, UnitTypeSimpleDto, UserDto, WaterMeasurementTypeSimpleDto, ZoneGroupMinimalDto } from "src/app/shared/generated/model/models";
+import { GeographyForAdminEditorsDto, UserDto, WaterMeasurementTypeSimpleDto, ZoneGroupMinimalDto } from "src/app/shared/generated/model/models";
 import { Alert } from "src/app/shared/models/alert";
 import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
 import { AlertService } from "src/app/shared/services/alert.service";
-import { ModalService } from "src/app/shared/services/modal/modal.service";
 import { Control, Map } from "leaflet";
 import { QanatMapComponent, QanatMapInitEvent } from "src/app/shared/components/leaflet/qanat-map/qanat-map.component";
 import { NoSelectedItemBoxComponent } from "src/app/shared/components/no-selected-item-box/no-selected-item-box.component";
@@ -21,12 +20,11 @@ import { FieldDefinitionComponent } from "../../../shared/components/field-defin
 import { NgSelectModule } from "@ng-select/ng-select";
 import { ButtonComponent } from "../../../shared/components/button/button.component";
 import { FormFieldComponent } from "../../../shared/components/forms/form-field/form-field.component";
-import { NgIf, NgFor, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { AlertDisplayComponent } from "../../../shared/components/alert-display/alert-display.component";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { ManageZoneGroupCardComponent } from "src/app/shared/components/manage-zone-group-card/manage-zone-group-card.component";
 import { ZoneGroupLayerComponent } from "src/app/shared/components/leaflet/layers/zone-group-layer/zone-group-layer.component";
-import { IconComponent } from "src/app/shared/components/icon/icon.component";
 import { ActivatedRoute, RouterLink } from "@angular/router";
 import { routeParams } from "src/app/app.routes";
 import { GeographyService } from "src/app/shared/generated/api/geography.service";
@@ -35,11 +33,9 @@ import { GeographyService } from "src/app/shared/generated/api/geography.service
     selector: "zone-group-data-uploader",
     templateUrl: "./zone-group-data-uploader.component.html",
     styleUrls: ["./zone-group-data-uploader.component.scss"],
-    standalone: true,
     imports: [
         PageHeaderComponent,
         AlertDisplayComponent,
-        NgIf,
         FormFieldComponent,
         FormsModule,
         ReactiveFormsModule,
@@ -48,17 +44,13 @@ import { GeographyService } from "src/app/shared/generated/api/geography.service
         QanatMapComponent,
         ZoneGroupLayerComponent,
         NgSelectModule,
-        NgFor,
         FieldDefinitionComponent,
         AsyncPipe,
         NoSelectedItemBoxComponent,
-        IconComponent,
         RouterLink,
     ],
 })
 export class ZoneGroupDataUploaderComponent implements OnInit {
-    private openModalComponent: ComponentRef<ModalComponent>;
-
     geographyZoneGroups$: Observable<ZoneGroupMinimalDto[]>;
     public FormFieldType = FormFieldType;
     public zoneGroupSelectOptions: FormInputOption[];
@@ -72,7 +64,6 @@ export class ZoneGroupDataUploaderComponent implements OnInit {
     public zoneGroupSlug: string;
 
     public waterMeasurementTypes: WaterMeasurementTypeSimpleDto[];
-    public unitTypes: UnitTypeSimpleDto[];
 
     public fileUpload: File;
     public fileUploadHeaders: string[];
@@ -97,19 +88,17 @@ export class ZoneGroupDataUploaderComponent implements OnInit {
         private geographyService: GeographyService,
         private zoneGroupService: ZoneGroupService,
         private waterMeasurementService: WaterMeasurementService,
-        private modalService: ModalService,
-        private viewContainerRef: ViewContainerRef,
         private route: ActivatedRoute
     ) {}
 
     ngOnInit(): void {
         const geographyName = this.route.snapshot.paramMap.get(routeParams.geographyName);
-        this.geographyZoneGroups$ = this.geographyService.geographiesGeographyNameGeographyNameForAdminEditorGet(geographyName).pipe(
+        this.geographyZoneGroups$ = this.geographyService.getByGeographyNameForAdminEditorGeography(geographyName).pipe(
             tap((geography) => {
                 this.geography = geography;
             }),
             switchMap((geography) => {
-                return this.zoneGroupService.geographiesGeographyIDZoneGroupsGet(geography.GeographyID);
+                return this.zoneGroupService.listZoneGroup(geography.GeographyID);
             }),
             tap((zoneGroups) => {
                 this.zoneGroupSelectOptions = zoneGroups.map((zoneGroup) => {
@@ -155,7 +144,7 @@ export class ZoneGroupDataUploaderComponent implements OnInit {
         this.isLoadingSubmit = true;
         this.alertService.clearAlerts();
 
-        this.waterMeasurementService.geographiesGeographyIDWaterMeasurementsCsvHeadersPost(this.geography.GeographyID, this.fileUpload).subscribe({
+        this.waterMeasurementService.listCSVHeadersWaterMeasurement(this.geography.GeographyID, this.fileUpload).subscribe({
             next: (fileUploadHeaders) => {
                 this.isLoadingSubmit = false;
                 this.fileUploadHeaders = fileUploadHeaders;
@@ -199,13 +188,7 @@ export class ZoneGroupDataUploaderComponent implements OnInit {
         this.confirmService.confirm(confirmOptions).then((confirmed) => {
             if (confirmed) {
                 this.zoneGroupService
-                    .geographiesGeographyIDZoneGroupZoneGroupIDCsvPost(
-                        this.geography.GeographyID,
-                        selectedZoneGroup.ZoneGroupID,
-                        this.fileUpload,
-                        this.apnColumnName,
-                        this.zoneColumnName
-                    )
+                    .uploadZoneGroupDataZoneGroup(this.geography.GeographyID, selectedZoneGroup.ZoneGroupID, this.fileUpload, this.apnColumnName, this.zoneColumnName)
                     .subscribe({
                         next: (response) => {
                             this.isLoadingSubmit = false;
@@ -216,7 +199,6 @@ export class ZoneGroupDataUploaderComponent implements OnInit {
                         },
                         error: (error) => {
                             this.isLoadingSubmit = false;
-                            this.close();
                             this.cdr.detectChanges();
 
                             if (error.error?.UploadedFile) {
@@ -244,27 +226,9 @@ export class ZoneGroupDataUploaderComponent implements OnInit {
         return successMessage;
     }
 
-    open(template: TemplateRef<any>): void {
-        this.openModalComponent = this.modalService.open(template, this.viewContainerRef);
-    }
-
-    close(): void {
-        if (!this.openModalComponent) return;
-        this.modalService.close(this.openModalComponent);
-    }
-
     closeColumns(): void {
         this.fileUploadHeaders = null;
         this.displayFileInputPanel = true;
-    }
-
-    openClearZoneGroup(template: TemplateRef<any>): void {
-        this.openModalComponent = this.modalService.open(template, this.viewContainerRef);
-    }
-
-    closeClearZoneGroup(): void {
-        if (!this.openModalComponent) return;
-        this.modalService.close(this.openModalComponent);
     }
 
     public map: Map;

@@ -1,0 +1,103 @@
+<div class="modal">
+    @if (well$ | async; as well) {
+        <div class="modal-header">
+            <h3>
+                @if (!ref.data.UpdatingTechnicalInfo) {
+                    Update Well Info
+                } @else {
+                    Update Technical Info
+                }
+            </h3>
+        </div>
+        <div class="modal-body">
+            <div class="copy copy-2 mb-4">
+                <custom-rich-text [customRichTextTypeID]="customRichTextTypeID"></custom-rich-text>
+            </div>
+            <app-alert-display></app-alert-display>
+            <form action="" class="form grid-12" [formGroup]="formGroup">
+                @if (!ref.data.UpdatingTechnicalInfo) {
+                    <form-field
+                        class="g-col-6"
+                        [formControl]="formGroup.controls.StateWCRNumber"
+                        name="stateWCRNo"
+                        fieldLabel="State WCR Number"
+                        [type]="FormFieldType.Text"
+                        fieldDefinitionName="StateWCRNo"></form-field>
+                    <form-field
+                        class="g-col-6"
+                        [formControl]="formGroup.controls.CountyWellPermitNumber"
+                        name="countyWellPermitNo"
+                        fieldLabel="County Permit Number"
+                        [type]="FormFieldType.Text"
+                        fieldDefinitionName="CountyWellPermitNo"></form-field>
+                    <form-field
+                        class="g-col-6"
+                        [formControl]="formGroup.controls.DateDrilled"
+                        name="dateDrilled"
+                        fieldLabel="Date Drilled"
+                        [type]="FormFieldType.Date"
+                        fieldDefinitionName="DateDrilled"></form-field>
+                    <form-field
+                        class="g-col-6"
+                        [formControl]="formGroup.controls.WellStatusID"
+                        name="wellStatus"
+                        fieldLabel="Well Status"
+                        [type]="FormFieldType.Select"
+                        [formInputOptions]="WellStatusOptions"
+                        fieldDefinitionName="WellStatus"
+                        required></form-field>
+                    <form-field class="g-col-6" [formControl]="formGroup.controls.Notes" name="Notes" fieldLabel="Notes" [type]="FormFieldType.Textarea"></form-field>
+                } @else {
+                    <form-field
+                        class="g-col-6"
+                        [formControl]="formGroup.controls.WellDepth"
+                        name="wellDepth"
+                        fieldLabel="Well Depth"
+                        [type]="FormFieldType.Number"
+                        fieldDefinitionName="WellDepth"></form-field>
+
+                    <form-field
+                        class="g-col-6"
+                        [formControl]="formGroup.controls.CasingDiameter"
+                        name="casingDiameter"
+                        fieldLabel="Casing Diameter"
+                        [type]="FormFieldType.Number"></form-field>
+
+                    <form-field
+                        class="g-col-6"
+                        [formControl]="formGroup.controls.TopOfPerforations"
+                        name="topOfPerforations"
+                        fieldLabel="Top of Perforations"
+                        [type]="FormFieldType.Number"
+                        fieldDefinitionName="WellRegistryFieldTopOfPerforations"></form-field>
+
+                    <form-field
+                        class="g-col-6"
+                        [formControl]="formGroup.controls.BottomOfPerforations"
+                        name="bottomOfPerforations"
+                        fieldLabel="Bottom of Perforations"
+                        [type]="FormFieldType.Number"
+                        fieldDefinitionName="WellRegistryFieldBottomOfPerforations"></form-field>
+
+                    <form-field
+                        class="g-col-6"
+                        [formControl]="formGroup.controls.ElectricMeterNumber"
+                        name="electricMeterNumber"
+                        fieldLabel="Electric Meter Number"
+                        [type]="FormFieldType.Text"></form-field>
+                }
+            </form>
+            <note class="pt-3">
+                <p>
+                    Are you sure you want to update the info for well
+                    <strong>{{ well.WellName }}</strong>
+                    ?
+                </p>
+            </note>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" (click)="save()" [disabled]="!formGroup.valid || isLoadingSubmit">Update Well</button>
+            <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+        </div>
+    }
+</div>

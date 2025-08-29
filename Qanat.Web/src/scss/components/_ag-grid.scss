@@ -1,25 +1,20 @@
-@use "node_modules/ag-grid-community/styles" as ag;
+// @use "ag-grid-community/styles" as ag;
 @use "/src/scss/abstracts" as *;
 
-@include ag.grid-styles(
-    (
-        theme: balham,
-        grid-size: 0.25rem,
-        cell-horizontal-padding: 0.625rem,
-        balham-active-color: $primary,
-        header-height: 3rem,
-        header-background-color: $primary,
-        header-foreground-color: $white,
-        header-column-separator-color: darken($primary, 5%),
-        header-cell-hover-background-color: lighten($primary, 3%),
-        header-cell-moving-background-color: lighten($primary, 3%),
-        row-height: 2.75rem,
-        row-hover-color: rgba($primary, 0.05),
-        font-size: 0.75rem,
-    )
-);
+ag-grid-angular {
+    --ag-spacing: 0.5rem;
+    --ag-cell-horizontal-padding: 0.625rem;
+    --ag-accent-color: #0d5b73;
+    --ag-header-height: 3rem;
+    --ag-header-background-color: #0d5b73;
+    --ag-header-text-color: #ffffff;
+    --ag-header-column-border: 1px solid #004e66;
+    --ag-header-cell-hover-background-color: #15637b;
+    --ag-header-cell-moving-background-color: #15637b;
+    --ag-row-height: 2.75rem;
+    --ag-row-hover-color: rgba(#0d5b73, 0.05);
+    --ag-font-size: 0.75rem;
 
-.ag-theme-balham {
     .ag-body-viewport.ag-selectable .ag-cell-wrapper {
         overflow: hidden;
         text-overflow: ellipsis;
@@ -94,24 +89,22 @@
         padding: 0.25rem;
     }
 
-    .ag-icon-filter::before {
-        content: "";
+    .ag-icon-filter:before {
+        font-size: 0.7rem;
+        color: $white;
     }
 
-    .ag-filter-active .ag-icon-filter:before {
-        font-family: "FontAwesome";
-        content: "*";
-        color: $orange-default;
-        position: relative;
-        left: -10px;
-    }
+    .ag-filter-active .ag-icon-filter {
+        clip-path: none;
 
-    .ag-icon-filter:after {
-        font-family: "FontAwesome";
-        font-size: 0.75rem;
-        content: "\f0b0" !important;
-        display: block;
-        color: #fff;
+        &:after {
+            content: "*";
+            color: $orange-default;
+            position: relative;
+            left: -10px;
+            top: -14px;
+            font-size: 0.85rem;
+        }
     }
 
     .ag-icon-asc:before,
@@ -122,22 +115,6 @@
 
     .ag-filter {
         background-color: $white;
-
-        &-body {
-            .ag-wrapper {
-                input {
-                    margin-top: 8px;
-                    padding: 4px;
-                    min-height: 2rem;
-                    border-radius: 4px;
-                    font-size: $type-size-150;
-
-                    &:focus {
-                        border: 1px solid rgba($primary, 0.2);
-                    }
-                }
-            }
-        }
 
         &-condition {
             padding: 0.5rem 0;
@@ -201,4 +178,8 @@
 .custom-grid-actions {
     display: inline-flex;
     column-gap: $spacing-200;
+}
+
+.red-row {
+    background-color: $red-default !important;
 }

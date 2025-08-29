@@ -1,7 +1,7 @@
 import { AfterViewInit, ChangeDetectorRef, Component, OnInit } from "@angular/core";
 import { FormGroup, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
-import { combineLatest, map, Observable, of, switchMap, tap } from "rxjs";
+import { combineLatest, Observable, of, switchMap, tap } from "rxjs";
 import { routeParams } from "src/app/app.routes";
 import { ConfirmService } from "src/app/shared/services/confirm/confirm.service";
 import { FormFieldType, FormInputOption } from "src/app/shared/components/forms/form-field/form-field.component";
@@ -17,7 +17,7 @@ import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { ButtonLoadingDirective } from "../../../shared/directives/button-loading.directive";
 import { FormFieldComponent } from "../../../shared/components/forms/form-field/form-field.component";
-import { NgIf, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { AlertDisplayComponent } from "../../../shared/components/alert-display/alert-display.component";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { UserDto } from "src/app/shared/generated/model/user-dto";
@@ -28,33 +28,18 @@ import { WaterMeasurementTypeService } from "src/app/shared/generated/api/water-
 import { WaterMeasurementTypeSimpleDto } from "src/app/shared/generated/model/water-measurement-type-simple-dto";
 import { CurrentGeographyService } from "src/app/shared/services/current-geography.service";
 import { LoadingDirective } from "src/app/shared/directives/loading.directive";
-import { SelectDropdownOption } from "src/app/shared/components/inputs/select-dropdown/select-dropdown.component";
-import { ReportingPeriodService } from "src/app/shared/generated/api/reporting-period.service";
 
 @Component({
     selector: "geography-setup",
     templateUrl: "./geography-setup.component.html",
     styleUrl: "./geography-setup.component.scss",
-    standalone: true,
-    imports: [
-        PageHeaderComponent,
-        LoadingDirective,
-        AlertDisplayComponent,
-        NgIf,
-        FormsModule,
-        FormFieldComponent,
-        ReactiveFormsModule,
-        ButtonLoadingDirective,
-        RouterLink,
-        AsyncPipe,
-    ],
+    imports: [PageHeaderComponent, LoadingDirective, AlertDisplayComponent, FormsModule, FormFieldComponent, ReactiveFormsModule, ButtonLoadingDirective, RouterLink, AsyncPipe],
 })
 export class GeographySetupComponent implements OnInit, AfterViewInit {
     public currentUser$: Observable<UserDto>;
     public geography$: Observable<GeographyForAdminEditorsDto>;
     public isLoading: boolean = false;
 
-    public reportingPeriodDropdownOptions$: Observable<SelectDropdownOption[]>;
     public waterMeasurementTypes$: Observable<WaterMeasurementTypeSimpleDto[]>;
 
     public FormFieldType = FormFieldType;
@@ -65,16 +50,15 @@ export class GeographySetupComponent implements OnInit, AfterViewInit {
     public formGroup: FormGroup<GeographyForAdminEditorsDtoForm> = new FormGroup<GeographyForAdminEditorsDtoForm>({
         GeographyID: GeographyForAdminEditorsDtoFormControls.GeographyID(),
         GeographyDisplayName: GeographyForAdminEditorsDtoFormControls.GeographyDisplayName(),
-        DefaultReportingPeriodID: GeographyForAdminEditorsDtoFormControls.DefaultReportingPeriodID(),
         APNRegexPattern: GeographyForAdminEditorsDtoFormControls.APNRegexPattern(),
         APNRegexDisplay: GeographyForAdminEditorsDtoFormControls.APNRegexDisplay(),
         LandownerDashboardSupplyLabel: GeographyForAdminEditorsDtoFormControls.LandownerDashboardSupplyLabel(),
         LandownerDashboardUsageLabel: GeographyForAdminEditorsDtoFormControls.LandownerDashboardUsageLabel(),
         ContactEmail: GeographyForAdminEditorsDtoFormControls.ContactEmail(),
         ContactPhoneNumber: GeographyForAdminEditorsDtoFormControls.ContactPhoneNumber(),
-        DisplayUsageGeometriesAsField: GeographyForAdminEditorsDtoFormControls.DisplayUsageGeometriesAsField(),
+        ContactAddressLine1: GeographyForAdminEditorsDtoFormControls.ContactAddressLine1(),
+        ContactAddressLine2: GeographyForAdminEditorsDtoFormControls.ContactAddressLine2(),
         AllowLandownersToRequestAccountChanges: GeographyForAdminEditorsDtoFormControls.AllowLandownersToRequestAccountChanges(),
-        AllowWaterMeasurementSelfReporting: GeographyForAdminEditorsDtoFormControls.AllowWaterMeasurementSelfReporting(),
         ShowSupplyOnWaterBudgetComponent: GeographyForAdminEditorsDtoFormControls.ShowSupplyOnWaterBudgetComponent(),
         WaterBudgetSlotAHeader: GeographyForAdminEditorsDtoFormControls.WaterBudgetSlotAHeader(),
         WaterBudgetSlotAWaterMeasurementTypeID: GeographyForAdminEditorsDtoFormControls.WaterBudgetSlotAWaterMeasurementTypeID(),
@@ -95,7 +79,6 @@ export class GeographySetupComponent implements OnInit, AfterViewInit {
         private authenticationService: AuthenticationService,
         private geographyService: GeographyService,
         private currentGeographyService: CurrentGeographyService,
-        private reportingPeriodService: ReportingPeriodService,
         private waterMeasurementTypeService: WaterMeasurementTypeService,
         private route: ActivatedRoute,
         private router: Router,
@@ -128,8 +111,8 @@ export class GeographySetupComponent implements OnInit, AfterViewInit {
                 const geographyName = params[routeParams.geographyName];
 
                 //MK 1/9/2025 -- This is a bit of a hack to get the minimal and admin geography data in one call, the data is almost duplicated but its not quite there.
-                const geographyMinimal = this.geographyService.geographiesGeographyNameGeographyNameMinimalGet(geographyName);
-                const geographyForAdminEdit = this.geographyService.geographiesGeographyNameGeographyNameForAdminEditorGet(geographyName);
+                const geographyMinimal = this.geographyService.getByNameAsMinimalDtoGeography(geographyName);
+                const geographyForAdminEdit = this.geographyService.getByGeographyNameForAdminEditorGeography(geographyName);
                 return combineLatest({ geographyMinimal: geographyMinimal, geographyForAdminEdit: geographyForAdminEdit });
             }),
             tap((combo) => {
@@ -142,7 +125,7 @@ export class GeographySetupComponent implements OnInit, AfterViewInit {
                 this.formGroup.patchValue(geography);
                 this.modelOnLoad = JSON.stringify(this.formGroup.getRawValue());
                 this.apnRegexPatternOnLoad = geography.APNRegexPattern;
-                this.waterMeasurementTypes$ = this.waterMeasurementTypeService.geographiesGeographyIDWaterMeasurementTypesGet(geography.GeographyID).pipe(
+                this.waterMeasurementTypes$ = this.waterMeasurementTypeService.getWaterMeasurementTypesWaterMeasurementType(geography.GeographyID).pipe(
                     tap((waterMeasurementTypes) => {
                         this.waterMeasurementTypeOptions = waterMeasurementTypes.map(
                             (type) =>
@@ -156,20 +139,6 @@ export class GeographySetupComponent implements OnInit, AfterViewInit {
 
                 this.showSupplyOnWaterBudgetComponentFormOptions = !geography.ShowSupplyOnWaterBudgetComponent;
                 this.isLoading = false;
-            })
-        );
-
-        this.reportingPeriodDropdownOptions$ = this.geography$.pipe(
-            switchMap((geography) => {
-                return this.reportingPeriodService.geographiesGeographyIDReportingPeriodsGet(geography.GeographyID).pipe(
-                    map((reportingPeriods) => {
-                        let options: SelectDropdownOption[] = reportingPeriods.map((x) => {
-                            return { Value: x.ReportingPeriodID, Label: x.Name } as SelectDropdownOption;
-                        });
-                        options = [{ Value: null, Label: "- Select -", Disabled: true }, ...options]; // insert an empty option at the front
-                        return options;
-                    })
-                );
             })
         );
 
@@ -211,7 +180,7 @@ export class GeographySetupComponent implements OnInit, AfterViewInit {
 
     private saveGeographyChanges() {
         this.isLoadingSubmit = true;
-        this.geographyService.geographiesGeographyIDPut(this.formGroup.controls.GeographyID.value, this.formGroup.getRawValue()).subscribe({
+        this.geographyService.updateGeographyGeography(this.formGroup.controls.GeographyID.value, this.formGroup.getRawValue()).subscribe({
             next: () => {
                 this.modelOnLoad = null;
                 this.formGroup.reset();

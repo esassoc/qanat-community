@@ -1,5 +1,5 @@
 import { Component, Input } from "@angular/core";
-import { CommonModule } from "@angular/common";
+
 import { ZoneGroupMinimalDto } from "src/app/shared/generated/model/zone-group-minimal-dto";
 import saveAs from "file-saver";
 import { ZoneGroupService } from "src/app/shared/generated/api/zone-group.service";
@@ -13,10 +13,9 @@ import { PageHeaderComponent } from "../page-header/page-header.component";
 
 @Component({
     selector: "manage-zone-group-card",
-    standalone: true,
-    imports: [CommonModule, PageHeaderComponent, IconComponent],
+    imports: [PageHeaderComponent, IconComponent],
     templateUrl: "./manage-zone-group-card.component.html",
-    styleUrls: ["./manage-zone-group-card.component.scss"],
+    styleUrls: ["./manage-zone-group-card.component.scss"]
 })
 export class ManageZoneGroupCardComponent {
     public isLoadingSubmit: boolean = false;
@@ -30,7 +29,7 @@ export class ManageZoneGroupCardComponent {
 
     downloadZoneGroupDataAsCsv() {
         this.isLoadingSubmit = true;
-        this.zoneGroupService.geographiesGeographyIDZoneGroupsZoneGroupSlugGet(this.zoneGroup.GeographyID, this.zoneGroup.ZoneGroupSlug).subscribe((response) => {
+        this.zoneGroupService.listZoneGroupDataZoneGroup(this.zoneGroup.GeographyID, this.zoneGroup.ZoneGroupSlug).subscribe((response) => {
             saveAs(response, `ZoneGroupDataFor${this.zoneGroup.ZoneGroupName}`);
             this.isLoadingSubmit = false;
         });
@@ -50,7 +49,7 @@ export class ManageZoneGroupCardComponent {
 
         this.confirmService.confirm(confirmOptions).then((confirmed) => {
             if (confirmed) {
-                this.zoneGroupService.geographiesGeographyIDZoneGroupZoneGroupIDClearDelete(this.zoneGroup.GeographyID, this.zoneGroup.ZoneGroupID).subscribe((response) => {
+                this.zoneGroupService.clearAllZoneGroupDataZoneGroup(this.zoneGroup.GeographyID, this.zoneGroup.ZoneGroupID).subscribe((response) => {
                     this.isLoadingSubmit = false;
                     this.alertService.pushAlert(new Alert("Successfully cleared Zone Group Data.", AlertContext.Success));
                 });

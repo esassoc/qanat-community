@@ -11,15 +11,17 @@
                 </div>
 
                 <div class="welcome-card-body">
-                    <div *ngIf="currentUser$ | async as currentUser">
-                        <div class="copy copy-3">
-                            <p>
-                                Hi, {{ currentUser.FullName }}! (
-                                <a (click)="logout()" class="sign-out-link">Sign Out</a>
-                                )
-                            </p>
+                    @if (currentUser$ | async; as currentUser) {
+                        <div>
+                            <div class="copy copy-3">
+                                <p>
+                                    Hi, {{ currentUser.FullName }}! (
+                                    <a (click)="logout()" class="sign-out-link">Sign Out</a>
+                                    )
+                                </p>
+                            </div>
                         </div>
-                    </div>
+                    }
                 </div>
             </div>
         </section>
@@ -30,13 +32,18 @@
         <section class="accounts-and-data">
             <h2 class="section-title">Your Water Accounts & Data</h2>
 
-            <div class="geography-cards grid-12" *ngIf="geographySummaries$ | async as geographySummaries">
-                <large-geography-card *ngFor="let geographySummary of geographySummaries" [userGeographySummary]="geographySummary"></large-geography-card>
-
-                <div *ngIf="geographySummaries.length == 0">
-                    {{ noWaterAccountsText }}
+            @if (geographySummaries$ | async; as geographySummaries) {
+                <div class="geography-cards grid-12">
+                    @for (geographySummary of geographySummaries; track geographySummary) {
+                        <large-geography-card [userGeographySummary]="geographySummary"></large-geography-card>
+                    }
+                    @if (geographySummaries.length == 0) {
+                        <div>
+                            {{ noWaterAccountsText }}
+                        </div>
+                    }
                 </div>
-            </div>
+            }
         </section>
 
         <section class="claim-water-accounts">

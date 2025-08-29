@@ -14,13 +14,9 @@ namespace Qanat.API.Controllers;
 [ApiController]
 [RightsChecker]
 [Route("geographies/{geographyID}/water-measurement-self-reports")]
-public class WaterMeasurementReviewSelfReportController : SitkaController<WaterMeasurementReviewSelfReportController>
+public class WaterMeasurementReviewSelfReportController(QanatDbContext dbContext, ILogger<WaterMeasurementReviewSelfReportController> logger, IOptions<QanatConfiguration> qanatConfiguration)
+    : SitkaController<WaterMeasurementReviewSelfReportController>(dbContext, logger, qanatConfiguration)
 {
-
-    public WaterMeasurementReviewSelfReportController(QanatDbContext dbContext, ILogger<WaterMeasurementReviewSelfReportController> logger, IOptions<QanatConfiguration> qanatConfiguration) : base(dbContext, logger, qanatConfiguration)
-    {
-    } 
-
     [HttpGet]
     [EntityNotFound(typeof(Geography), "geographyID")]
     [WithRoleFlag(FlagEnum.IsSystemAdmin)]

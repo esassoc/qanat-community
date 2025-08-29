@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Qanat.Models.DataTransferObjects.Watershed
+﻿namespace Qanat.Models.DataTransferObjects.Watershed
 {
     public class WatershedIDListDto
     {

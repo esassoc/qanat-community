@@ -9,6 +9,10 @@ a {
     color: $primary;
 }
 
+a.no-underline {
+    text-decoration: none !important;
+}
+
 button {
     font-family: $overpass;
 }

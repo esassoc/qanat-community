@@ -9,3 +9,31 @@
         gap: $spacing-600;
     }
 }
+
+.water-account-parcel-table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+.water-account-parcel-table thead {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+.water-account-parcel-table tbody {
+    display: block;
+    max-height: 20rem;
+    overflow-y: auto;
+}
+
+.water-account-parcel-table tbody tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+.name-tag-nudge {
+    position: relative;
+    top: -5px;
+}

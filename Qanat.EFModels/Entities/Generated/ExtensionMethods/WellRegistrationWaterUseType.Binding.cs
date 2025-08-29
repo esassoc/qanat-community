@@ -20,9 +20,7 @@ namespace Qanat.EFModels.Entities
         public static readonly WellRegistrationWaterUseTypeOther Other = WellRegistrationWaterUseTypeOther.Instance;
 
         public static readonly List<WellRegistrationWaterUseType> All;
-        public static readonly List<WellRegistrationWaterUseTypeSimpleDto> AllAsSimpleDto;
         public static readonly ReadOnlyDictionary<int, WellRegistrationWaterUseType> AllLookupDictionary;
-        public static readonly ReadOnlyDictionary<int, WellRegistrationWaterUseTypeSimpleDto> AllAsSimpleDtoLookupDictionary;
 
         /// <summary>
         /// Static type constructor to coordinate static initialization order
@@ -30,9 +28,7 @@ namespace Qanat.EFModels.Entities
         static WellRegistrationWaterUseType()
         {
             All = new List<WellRegistrationWaterUseType> { Agricultural, StockWatering, Domestic, PublicMunicipal, PrivateMunicipal, Other };
-            AllAsSimpleDto = new List<WellRegistrationWaterUseTypeSimpleDto> { Agricultural.AsSimpleDto(), StockWatering.AsSimpleDto(), Domestic.AsSimpleDto(), PublicMunicipal.AsSimpleDto(), PrivateMunicipal.AsSimpleDto(), Other.AsSimpleDto() };
             AllLookupDictionary = new ReadOnlyDictionary<int, WellRegistrationWaterUseType>(All.ToDictionary(x => x.WellRegistrationWaterUseTypeID));
-            AllAsSimpleDtoLookupDictionary = new ReadOnlyDictionary<int, WellRegistrationWaterUseTypeSimpleDto>(AllAsSimpleDto.ToDictionary(x => x.WellRegistrationWaterUseTypeID));
         }
 
         /// <summary>

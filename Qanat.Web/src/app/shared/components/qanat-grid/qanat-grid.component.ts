@@ -8,14 +8,21 @@ import {
     GetRowIdFunc,
     GridApi,
     GridColumnsChangedEvent,
+    GridOptions,
     GridReadyEvent,
     RowDataUpdatedEvent,
+    RowSelectionMode,
+    RowSelectionOptions,
     SelectionChangedEvent,
+    SelectionColumnDef,
+    Theme,
+    themeBalham,
+    iconOverrides,
+    ModuleRegistry,
+    AllCommunityModule,
 } from "ag-grid-community";
 import { AgGridHelper } from "src/app/shared/helpers/ag-grid-helper";
 import { TooltipComponent } from "src/app/shared/components/ag-grid/tooltip/tooltip.component";
-import { IconComponent } from "../icon/icon.component";
-import { ClearGridFiltersButtonComponent } from "src/app/shared/components/clear-grid-filters-button/clear-grid-filters-button.component";
 import { FormsModule } from "@angular/forms";
 import { CsvDownloadButtonComponent } from "src/app/shared/components/csv-download-button/csv-download-button.component";
 import { PaginationControlsComponent } from "src/app/shared/components/ag-grid/pagination-controls/pagination-controls.component";
@@ -23,18 +30,7 @@ import { QanatGridHeaderComponent } from "../qanat-grid-header/qanat-grid-header
 
 @Component({
     selector: "qanat-grid",
-    standalone: true,
-    imports: [
-        CommonModule,
-        AgGridModule,
-        TooltipComponent,
-        IconComponent,
-        FormsModule,
-        ClearGridFiltersButtonComponent,
-        CsvDownloadButtonComponent,
-        PaginationControlsComponent,
-        QanatGridHeaderComponent,
-    ],
+    imports: [CommonModule, AgGridModule, FormsModule, CsvDownloadButtonComponent, PaginationControlsComponent, QanatGridHeaderComponent],
     templateUrl: "./qanat-grid.component.html",
     styleUrls: ["./qanat-grid.component.scss"],
 })
@@ -46,6 +42,7 @@ export class QanatGridComponent implements OnInit, OnChanges {
     @Output() filterChanged: EventEmitter<FilterChangedEvent<any>> = new EventEmitter<FilterChangedEvent<any>>();
     @Output() gridReady: EventEmitter<GridReadyEvent> = new EventEmitter<GridReadyEvent>();
     @Output() gridRefReady: EventEmitter<AgGridAngular> = new EventEmitter<AgGridAngular>();
+    @Output() firstDataLoaded: EventEmitter<FirstDataRenderedEvent> = new EventEmitter<FirstDataRenderedEvent>();
 
     @Input() rowData: any[];
     @Input() columnDefs: any[];
@@ -56,12 +53,15 @@ export class QanatGridComponent implements OnInit, OnChanges {
         tooltipComponent: TooltipComponent,
         tooltipValueGetter: (params) => params.value,
     };
-    @Input() rowSelection: "single" | "multiple";
-    @Input() suppressRowClickSelection: boolean = false;
-    @Input() rowMultiSelectWithClick: boolean = false;
+
     @Input() pagination: boolean = false;
     @Input() paginationPageSize: number = 100;
     @Input() getRowId: GetRowIdFunc;
+    @Input() gridOptions: GridOptions;
+
+    @Input() rowSelection: RowSelectionOptions;
+    // setting default will override passed rowSelectionOptions
+    @Input() defaultRowSelection: RowSelectionMode;
 
     // our stuff
     @Input() width: string = "100%";
@@ -73,7 +73,9 @@ export class QanatGridComponent implements OnInit, OnChanges {
     @Input() hideGlobalFilter: boolean = false;
     @Input() disableGlobalFilter: boolean = false;
     @Input() sizeColumnsToFitGrid: boolean = false;
+    @Input() suppressColumnSizing: boolean = false;
     @Input() overrideDefaultGridHeader: boolean = false;
+    @Input() unsetHeaderGridActionWidth: boolean = false;
 
     private gridApi: GridApi;
     public gridLoaded: boolean = false;
@@ -82,14 +84,43 @@ export class QanatGridComponent implements OnInit, OnChanges {
     public selectedRowsCount: number = 0;
     public allRowsSelected: boolean = false;
     public multiSelectEnabled: boolean;
+    public selectionColumnDef: SelectionColumnDef = { pinned: true };
     public anyFilterPresent: boolean = false;
     public filteredRowsCount: number;
-
     public autoSizeStrategy: { type: "fitCellContents" | "fitGridWidth" };
 
+    private fontAwesomeIcons = iconOverrides({
+        type: "font",
+        family: "FontAwesome",
+        icons: {
+            filter: "\u{f0b0}",
+            filterActive: "\u{f0b0}",
+        },
+    });
+
+    public gridTheme: Theme = themeBalham.withPart(this.fontAwesomeIcons);
+
     ngOnInit(): void {
-        this.autoSizeStrategy = { type: this.sizeColumnsToFitGrid ? "fitGridWidth" : "fitCellContents" };
-        this.multiSelectEnabled = this.rowSelection == "multiple";
+        ModuleRegistry.registerModules([AllCommunityModule]);
+
+        this.autoSizeStrategy = this.suppressColumnSizing ? null : { type: this.sizeColumnsToFitGrid ? "fitGridWidth" : "fitCellContents" };
+
+        if (this.defaultRowSelection == "singleRow") {
+            this.rowSelection = AgGridHelper.defaultSingleRowSelectionOptions;
+        } else if (this.defaultRowSelection == "multiRow") {
+            this.rowSelection = AgGridHelper.defaultMultiRowSelectionOptions;
+        }
+
+        this.multiSelectEnabled = this.rowSelection?.mode == "multiRow";
+        if (this.multiSelectEnabled) {
+            this.selectionColumnDef = {
+                pinned: true,
+                sortable: true,
+                resizable: true,
+                width: 70,
+                sort: "desc",
+            };
+        }
 
         if (this.hideTooltips) {
             this.defaultColDef.tooltipValueGetter = null;
@@ -98,30 +129,45 @@ export class QanatGridComponent implements OnInit, OnChanges {
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes.rowData) {
+            this.gridApi?.setGridOption("loading", true);
             this.gridApi?.updateGridOptions({ rowData: this.rowData });
-            this.gridApi?.hideOverlay();
+            this.gridApi?.setGridOption("loading", false);
         }
 
         if (changes.columnDefs) {
+            this.gridApi?.setGridOption("loading", true);
             this.gridApi?.updateGridOptions({ columnDefs: this.columnDefs });
-            this.gridApi?.hideOverlay();
+            this.gridApi?.setGridOption("loading", false);
         }
     }
 
     public onGridReady(event: GridReadyEvent) {
         this.gridReady.emit(event);
+
         this.gridApi = event.api;
     }
 
     public onFirstDataRendered(event: FirstDataRenderedEvent) {
-        event.api.sizeColumnsToFit();
-        this.gridLoaded = true;
-
+        this.firstDataLoaded.emit(event);
         this.gridRefReady.emit(this.gridref);
+        this.resizeGridColumns();
+        this.gridLoaded = true;
     }
 
     public onGridColumnsChanged(event: GridColumnsChangedEvent) {
-        event.api.sizeColumnsToFit();
+        this.resizeGridColumns();
+    }
+
+    public resizeGridColumns() {
+        if (this.suppressColumnSizing) return;
+
+        if (this.autoSizeStrategy.type == "fitCellContents") {
+            this.gridApi?.autoSizeAllColumns();
+        } else if (this.autoSizeStrategy.type == "fitGridWidth") {
+            // This will size columns to fit the grid width, but it may not be perfect
+            // as it doesn't account for the number of columns and their widths.
+            this.gridApi?.sizeColumnsToFit();
+        }
     }
 
     public onSelectionChanged(event: SelectionChangedEvent) {
@@ -147,14 +193,25 @@ export class QanatGridComponent implements OnInit, OnChanges {
 
     public onRowDataUpdated(event: RowDataUpdatedEvent) {
         event.api.autoSizeAllColumns();
+        if (event.api.isRowDataEmpty()) {
+            event.api.showNoRowsOverlay();
+            if (!this.gridLoaded) {
+                this.gridRefReady.emit(this.gridref);
+                this.gridLoaded = true;
+            }
+        } else {
+            event.api.hideOverlay();
+        }
     }
 
     onSelectAll() {
-        this.gridApi.selectAllFiltered();
+        // todo: ensure only selecting filtered
+        this.gridApi.selectAll();
     }
 
     onDeselectAll() {
-        this.gridApi.deselectAllFiltered();
+        // todo: ensure only deselecting filtered
+        this.gridApi.deselectAll();
     }
 
     public onFiltersCleared() {

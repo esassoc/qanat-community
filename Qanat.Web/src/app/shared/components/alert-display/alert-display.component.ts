@@ -3,14 +3,13 @@ import { AlertService } from "../../services/alert.service";
 import { Alert } from "../../models/alert";
 import { Subscription } from "rxjs";
 import { AlertComponent } from "../alert/alert.component";
-import { NgIf, NgFor } from "@angular/common";
+import { SlicePipe } from "@angular/common";
 
 @Component({
     selector: "app-alert-display",
     templateUrl: "./alert-display.component.html",
     styleUrls: ["./alert-display.component.css"],
-    standalone: true,
-    imports: [NgIf, NgFor, AlertComponent],
+    imports: [AlertComponent, SlicePipe]
 })
 export class AlertDisplayComponent implements OnInit, OnDestroy {
     @Input() clearAlertsOnDestroy: boolean = true;

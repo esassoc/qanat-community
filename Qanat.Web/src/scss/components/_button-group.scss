@@ -15,8 +15,8 @@
         font-weight: bold;
         transition: all 200ms ease;
         border-radius: 0.25rem;
-        border: 1;
-        border-color: $primary;
+        border: 1px solid $primary;
+        // border-color: $primary;
 
         &:hover {
             cursor: pointer;

@@ -1,210 +1,279 @@
-<ng-container *ngIf="currentUser$ | async; else isLoadingTemplate">
-    <ng-container *ngIf="waterAccount$ | async as waterAccount; else isLoadingTemplate">
-        <page-header *ngIf="waterAccount" [pageTitle]="'#' + waterAccount.WaterAccountNumber" [templateTitleAppend]="templateTitleAppend"
-            [templateRight]="templateRight" icon="WaterAccounts" preTitle="Water Measurement Self-Reports">
-            <ng-template #templateTitleAppend>
-                <span class="water-account-name"
-                    *ngIf="waterAccount.WaterAccountName?.length > 0 && waterAccount.WaterAccountName != ''+ waterAccount.WaterAccountNumber"
-                    title="{{ waterAccount.WaterAccountName }}">
-                    {{ waterAccount.WaterAccountName }}
-                </span>
-
-                <name-tag *ngIf="allocationPlans?.length > 0" [name]="allocationPlans[0].ZoneName" [color]="allocationPlans[0].ZoneColor"
-                    [routerLink]="['/geographies', waterAccount.Geography.GeographyName.toLowerCase(), 'allocation-plans', allocationPlans[0].WaterTypeSlug, allocationPlans[0].ZoneSlug]"
-                    class="zone-tag" title="Allocation Plan Zone"></name-tag>
-            </ng-template>
-            <ng-template #templateRight></ng-template>
-        </page-header>
-
+@if (currentUser$ | async) {
+    @if (waterAccount$ | async; as waterAccount) {
+        @if (waterAccount) {
+            <page-header
+                [pageTitle]="'#' + waterAccount.WaterAccountNumber"
+                [templateTitleAppend]="templateTitleAppend"
+                [templateRight]="templateRight"
+                icon="WaterAccounts"
+                preTitle="Water Measurement Self-Reports">
+                <ng-template #templateTitleAppend>
+                    @if (waterAccount.WaterAccountName?.length > 0 && waterAccount.WaterAccountName != "" + waterAccount.WaterAccountNumber) {
+                        <span class="water-account-name" title="{{ waterAccount.WaterAccountName }}">
+                            {{ waterAccount.WaterAccountName }}
+                        </span>
+                    }
+                    @if (allocationPlans?.length > 0) {
+                        <name-tag
+                            [name]="allocationPlans[0].ZoneName"
+                            [color]="allocationPlans[0].ZoneColor"
+                            [routerLink]="[
+                                '/geographies',
+                                waterAccount.Geography.GeographyName.toLowerCase(),
+                                'allocation-plans',
+                                allocationPlans[0].WaterTypeSlug,
+                                allocationPlans[0].ZoneSlug,
+                            ]"
+                            class="zone-tag"
+                            title="Allocation Plan Zone"></name-tag>
+                    }
+                </ng-template>
+                <ng-template #templateRight></ng-template>
+            </page-header>
+        }
         <div class="page-body statistics grid-12">
             <div class="statistics__filters">
-                <reporting-period-select [geographyID]="geographyID" [defaultDisplayYear]="selectedYear" (selectionChanged)="updateReportingPeriod($event)">
-                </reporting-period-select>
+                <reporting-period-select [geographyID]="geographyID" (selectionChanged)="updateReportingPeriod($event)"> </reporting-period-select>
             </div>
-
-            <div class="self-reports-table-container" *ngIf="selfReports$ | async as selfReports; else isLoadingTemplate">
-                <div class="self-reports-table-header grid-12">
-                    <div class="g-col-6">Water Source</div>
-                    <div class="g-col-3">Status</div>
-                    <div class="g-col-3">Actions</div>
-                </div>
-
-                <div class="self-reports-table" *ngIf="!pageIsLoading; else isLoadingTemplate">
-                    <div class="self-reports-table-item grid-12" *ngFor="let selfReportByWaterMeasurementType of selfReports">
-                        <div class="g-col-6">
-                            {{ selfReportByWaterMeasurementType.WaterMeasurementType.WaterMeasurementTypeName }}
-                        </div>
-                        <div class="g-col-3">
-                            <ng-container *ngIf="!selfReportByWaterMeasurementType.SelfReport">
-                                Not Reported
-                            </ng-container>
-                            <ng-container *ngIf="selfReportByWaterMeasurementType.SelfReport">
-                                {{ selfReportByWaterMeasurementType.SelfReport.WaterMeasurementSelfReportStatusDisplayName }}
-                            </ng-container>
-                        </div>
-                        <div class="actions-container g-col-3">
-                            <ng-container *ngIf="!selfReportByWaterMeasurementType.SelfReport 
-                                && currentUserCanCreateSelfReport">
-                                <button class="btn btn-primary" [buttonLoading]="selfReportByWaterMeasurementType.PostRequestInProgress"
-                                    (click)="startSelfReport(selfReportByWaterMeasurementType)">Start</button>
-                            </ng-container>
-
-                            <ng-container *ngIf="selfReportByWaterMeasurementType.SelfReport 
-                            && currentUserCanCreateSelfReport 
-                            && !selfReportByWaterMeasurementType.PostRequestInProgress 
-                            && selfReportByWaterMeasurementType.SelfReport.WaterMeasurementSelfReportStatusDisplayName == 'Draft'">
-                                <a class="btn btn-primary"
-                                    [routerLink]="['/water-accounts', waterAccount.WaterAccountID, 'water-measurement-self-reports', selfReportByWaterMeasurementType.SelfReport.WaterMeasurementSelfReportID]">Edit</a>
-                            </ng-container>
-
-                            <ng-container *ngIf="selfReportByWaterMeasurementType.SelfReport 
-                            && currentUserCanCreateSelfReport 
-                            && !selfReportByWaterMeasurementType.PostRequestInProgress 
-                            && selfReportByWaterMeasurementType.SelfReport.WaterMeasurementSelfReportStatusDisplayName != 'Draft'">
-                                <a class="btn btn-primary"
-                                    [routerLink]="['/water-accounts', waterAccount.WaterAccountID, 'water-measurement-self-reports', selfReportByWaterMeasurementType.SelfReport.WaterMeasurementSelfReportID]">View</a>
-                            </ng-container>
-
-                            <div class="toggle" [expandCollapse]="lineItemTable" *ngIf="selfReportByWaterMeasurementType.SelfReport"
-                                (click)="getReportLineItems(selfReportByWaterMeasurementType)">
-                                <i class="fas fa-angle-up"></i>
-                            </div>
-                        </div>
-                        <div class="line-item-table-container" #lineItemTable>
-                            <div style="min-height: 10rem;"> <!--min height so loading tempalte doesn't look weird-->
-                                <ng-container *ngIf="selfReportByWaterMeasurementType.SelfReportLineItems; else isLoadingTemplate">
-                                    <table class="table">
-                                        <colgroup>
-                                            <col style="width: 6%;" /> <!-- APN -->
-                                            <col style="width: 4%;" /> <!-- Area -->
-                                            <col style="width: 8%;" /> <!-- Irrigation Method -->
-                                            <col style="width: 4%;" /> <!-- Total -->
-                                            <col style="width: 6%;" /> <!-- Nov -->
-                                            <col style="width: 6%;" /> <!-- Dec -->
-                                            <col style="width: 6%;" /> <!-- Jan -->
-                                            <col style="width: 6%;" /> <!-- Feb -->
-                                            <col style="width: 6%;" /> <!-- Mar -->
-                                            <col style="width: 6%;" /> <!-- Apr -->
-                                            <col style="width: 6%;" /> <!-- May -->
-                                            <col style="width: 6%;" /> <!-- Jun -->
-                                            <col style="width: 6%;" /> <!-- Jul -->
-                                            <col style="width: 6%;" /> <!-- Aug -->
-                                            <col style="width: 6%;" /> <!-- Sep -->
-                                            <col style="width: 6%;" /> <!-- Oct -->
-                                        </colgroup>
-                                        <thead>
-                                            <tr>
-                                                <th>APN</th>
-                                                <th>Area (ac)</th>
-                                                <th>Irrigation Method</th>
-                                                <th>Total</th>
-                                                <th>Nov (ac-ft)</th>
-                                                <th>Dec (ac-ft)</th>
-                                                <th>Jan (ac-ft)</th>
-                                                <th>Feb (ac-ft)</th>
-                                                <th>Mar (ac-ft)</th>
-                                                <th>Apr (ac-ft)</th>
-                                                <th>May (ac-ft)</th>
-                                                <th>Jun (ac-ft)</th>
-                                                <th>Jul &nbsp;(ac-ft)</th> <!-- &nbsp; for spacing -->
-                                                <th>Aug (ac-ft)</th>
-                                                <th>Sep (ac-ft)</th>
-                                                <th>Oct (ac-ft)</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr *ngFor="let lineItem of selfReportByWaterMeasurementType.SelfReportLineItems">
-                                                <td>{{ lineItem.ParcelNumber }}</td>
-                                                <td class="right-aligned">{{ lineItem.ParcelArea | number : '1.2-2' }}</td>
-                                                <td>{{ lineItem.IrrigationMethodName }}</td>
-                                                <td class="right-aligned">{{ lineItem.LineItemTotal | number : '1.0-2' }}</td>
-                                                <td class="right-aligned">{{ lineItem.NovemberOverrideValueInAcreFeet | number : '1.0-2' }}</td>
-                                                <td class="right-aligned">{{ lineItem.DecemberOverrideValueInAcreFeet | number : '1.0-2' }}</td>
-                                                <td class="right-aligned">{{ lineItem.JanuaryOverrideValueInAcreFeet | number : '1.0-2' }}</td>
-                                                <td class="right-aligned">{{ lineItem.FebruaryOverrideValueInAcreFeet | number : '1.0-2' }}</td>
-                                                <td class="right-aligned">{{ lineItem.MarchOverrideValueInAcreFeet | number : '1.0-2' }}</td>
-                                                <td class="right-aligned">{{ lineItem.AprilOverrideValueInAcreFeet | number : '1.0-2' }}</td>
-                                                <td class="right-aligned">{{ lineItem.MayOverrideValueInAcreFeet | number : '1.0-2' }}</td>
-                                                <td class="right-aligned">{{ lineItem.JuneOverrideValueInAcreFeet | number : '1.0-2' }}</td>
-                                                <td class="right-aligned">{{ lineItem.JulyOverrideValueInAcreFeet | number : '1.0-2' }}</td>
-                                                <td class="right-aligned">{{ lineItem.AugustOverrideValueInAcreFeet | number : '1.0-2' }}</td>
-                                                <td class="right-aligned">{{ lineItem.SeptemberOverrideValueInAcreFeet | number : '1.0-2' }}</td>
-                                                <td class="right-aligned">{{ lineItem.OctoberOverrideValueInAcreFeet | number : '1.0-2' }}</td>
-                                            </tr>
-
-                                        </tbody>
-                                        <tfoot>
-                                            <tr>
-                                                <td>Account Total</td>
-                                                <td class="right-aligned">
-                                                    {{ selfReportByWaterMeasurementType.SelfReportLineItems | sum: 'ParcelArea' | number: '1.2-2' }}
-                                                </td>
-                                                <td><!--Blank for spacing--></td>
-                                                <td class="right-aligned">
-                                                    {{ selfReportByWaterMeasurementType.SelfReportLineItems | sum: 'LineItemTotal' | number: '1.0-2' }}
-                                                </td>
-
-                                                <td class="right-aligned">
-                                                    {{ selfReportByWaterMeasurementType.SelfReportLineItems | sum: 'NovemberOverrideValueInAcreFeet' | number:
-                                                    '1.0-2' }}
-                                                </td>
-                                                <td class="right-aligned">
-                                                    {{ selfReportByWaterMeasurementType.SelfReportLineItems | sum: 'DecemberOverrideValueInAcreFeet' | number:
-                                                    '1.0-2' }}
-                                                </td>
-                                                <td class="right-aligned">
-                                                    {{ selfReportByWaterMeasurementType.SelfReportLineItems | sum: 'JanuaryOverrideValueInAcreFeet' | number:
-                                                    '1.0-2' }}
-                                                </td>
-                                                <td class="right-aligned">
-                                                    {{ selfReportByWaterMeasurementType.SelfReportLineItems | sum: 'FebruaryOverrideValueInAcreFeet' | number:
-                                                    '1.0-2' }}
-                                                </td>
-                                                <td class="right-aligned">
-                                                    {{ selfReportByWaterMeasurementType.SelfReportLineItems | sum: 'MarchOverrideValueInAcreFeet' | number:
-                                                    '1.0-2' }}
-                                                </td>
-                                                <td class="right-aligned">
-                                                    {{ selfReportByWaterMeasurementType.SelfReportLineItems | sum: 'AprilOverrideValueInAcreFeet' | number:
-                                                    '1.0-2' }}
-                                                </td>
-                                                <td class="right-aligned">
-                                                    {{ selfReportByWaterMeasurementType.SelfReportLineItems | sum: 'MayOverrideValueInAcreFeet' | number:
-                                                    '1.0-2' }}
-                                                </td>
-                                                <td class="right-aligned">
-                                                    {{ selfReportByWaterMeasurementType.SelfReportLineItems | sum: 'JuneOverrideValueInAcreFeet' | number:
-                                                    '1.0-2' }}
-                                                </td>
-                                                <td class="right-aligned">
-                                                    {{ selfReportByWaterMeasurementType.SelfReportLineItems | sum: 'JulyOverrideValueInAcreFeet' | number:
-                                                    '1.0-2' }}
-                                                </td>
-                                                <td class="right-aligned">
-                                                    {{ selfReportByWaterMeasurementType.SelfReportLineItems | sum: 'AugustOverrideValueInAcreFeet' | number:
-                                                    '1.0-2' }}
-                                                </td>
-                                                <td class="right-aligned">
-                                                    {{ selfReportByWaterMeasurementType.SelfReportLineItems | sum: 'SeptemberOverrideValueInAcreFeet' | number:
-                                                    '1.0-2' }}
-                                                </td>
-                                                <td class="right-aligned">
-                                                    {{ selfReportByWaterMeasurementType.SelfReportLineItems | sum: 'OctoberOverrideValueInAcreFeet' | number:
-                                                    '1.0-2' }}
-                                                </td>
-                                            </tr>
-                                        </tfoot>
-                                    </table>
-                                </ng-container>
-                            </div>
-                        </div>
+            @if (selfReports$ | async; as selfReports) {
+                <div class="self-reports-table-container">
+                    <div class="self-reports-table-header grid-12">
+                        <div class="g-col-6">Water Source</div>
+                        <div class="g-col-2">Status</div>
+                        <div class="g-col-2">Total (ac-ft)</div>
+                        <div class="g-col-2">Actions</div>
                     </div>
+                    @if (!pageIsLoading) {
+                        <div class="self-reports-table">
+                            @for (selfReportByWaterMeasurementType of selfReports; track selfReportByWaterMeasurementType) {
+                                <div class="self-reports-table-item grid-12">
+                                    <div class="g-col-6">
+                                        {{ selfReportByWaterMeasurementType.WaterMeasurementType.WaterMeasurementTypeName }}
+                                    </div>
+                                    <div class="g-col-2">
+                                        @if (!selfReportByWaterMeasurementType.SelfReport) {
+                                            Not Reported
+                                        }
+                                        @if (selfReportByWaterMeasurementType.SelfReport) {
+                                            {{ selfReportByWaterMeasurementType.SelfReport.WaterMeasurementSelfReportStatusDisplayName }}
+                                        }
+                                    </div>
+                                    <div class="g-col-2">
+                                        @if (selfReportByWaterMeasurementType.SelfReport) {
+                                            <span>
+                                                {{ selfReportByWaterMeasurementType?.SelfReport?.TotalVolume ?? 0 | number: "1.0-2" }}
+                                            </span>
+                                        }
+                                        @if (!selfReportByWaterMeasurementType.SelfReport) {
+                                            <span> - </span>
+                                        }
+                                    </div>
+                                    <div class="actions-container g-col-2">
+                                        @if (!selfReportByWaterMeasurementType.SelfReport && currentUserCanCreateSelfReport) {
+                                            <button
+                                                class="btn btn-primary"
+                                                [buttonLoading]="selfReportByWaterMeasurementType.PostRequestInProgress"
+                                                (click)="startSelfReport(selfReportByWaterMeasurementType)">
+                                                Start
+                                            </button>
+                                        }
+                                        @if (
+                                            selfReportByWaterMeasurementType.SelfReport &&
+                                            currentUserCanCreateSelfReport &&
+                                            !selfReportByWaterMeasurementType.PostRequestInProgress &&
+                                            selfReportByWaterMeasurementType.SelfReport.WaterMeasurementSelfReportStatusDisplayName == "Draft"
+                                        ) {
+                                            <a
+                                                class="btn btn-primary"
+                                                [routerLink]="[
+                                                    '/water-accounts',
+                                                    waterAccount.WaterAccountID,
+                                                    'water-measurement-self-reports',
+                                                    selfReportByWaterMeasurementType.SelfReport.WaterMeasurementSelfReportID,
+                                                ]"
+                                                >Edit</a
+                                            >
+                                        }
+                                        @if (
+                                            selfReportByWaterMeasurementType.SelfReport &&
+                                            currentUserCanCreateSelfReport &&
+                                            !selfReportByWaterMeasurementType.PostRequestInProgress &&
+                                            selfReportByWaterMeasurementType.SelfReport.WaterMeasurementSelfReportStatusDisplayName != "Draft"
+                                        ) {
+                                            <a
+                                                class="btn btn-primary"
+                                                [routerLink]="[
+                                                    '/water-accounts',
+                                                    waterAccount.WaterAccountID,
+                                                    'water-measurement-self-reports',
+                                                    selfReportByWaterMeasurementType.SelfReport.WaterMeasurementSelfReportID,
+                                                ]"
+                                                >View</a
+                                            >
+                                        }
+                                        @if (selfReportByWaterMeasurementType.SelfReport) {
+                                            <div class="toggle" [expandCollapse]="lineItemTable" (click)="getReportLineItems(selfReportByWaterMeasurementType)">
+                                                <i class="fas fa-angle-up"></i>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="line-item-table-container" #lineItemTable>
+                                        <div style="min-height: 10rem">
+                                            <!--min height so loading tempalte doesn't look weird-->
+                                            @if (selfReportByWaterMeasurementType.SelfReportLineItems) {
+                                                <table class="table">
+                                                    <colgroup>
+                                                        <col style="width: 6%" />
+                                                        <!-- APN -->
+                                                        <col style="width: 4%" />
+                                                        <!-- Area -->
+                                                        <col style="width: 8%" />
+                                                        <!-- Irrigation Method -->
+                                                        <col style="width: 4%" />
+                                                        <!-- Total -->
+                                                        <col style="width: 6%" />
+                                                        <!-- Nov -->
+                                                        <col style="width: 6%" />
+                                                        <!-- Dec -->
+                                                        <col style="width: 6%" />
+                                                        <!-- Jan -->
+                                                        <col style="width: 6%" />
+                                                        <!-- Feb -->
+                                                        <col style="width: 6%" />
+                                                        <!-- Mar -->
+                                                        <col style="width: 6%" />
+                                                        <!-- Apr -->
+                                                        <col style="width: 6%" />
+                                                        <!-- May -->
+                                                        <col style="width: 6%" />
+                                                        <!-- Jun -->
+                                                        <col style="width: 6%" />
+                                                        <!-- Jul -->
+                                                        <col style="width: 6%" />
+                                                        <!-- Aug -->
+                                                        <col style="width: 6%" />
+                                                        <!-- Sep -->
+                                                        <col style="width: 6%" />
+                                                        <!-- Oct -->
+                                                    </colgroup>
+                                                    <thead>
+                                                        <tr>
+                                                            <th>APN</th>
+                                                            <th>Area (ac)</th>
+                                                            <th>Irrigation Method</th>
+                                                            <th>Total (ac-ft)</th>
+                                                            <th>Nov</th>
+                                                            <th>Dec</th>
+                                                            <th>Jan</th>
+                                                            <th>Feb</th>
+                                                            <th>Mar</th>
+                                                            <th>Apr</th>
+                                                            <th>May</th>
+                                                            <th>June</th>
+                                                            <th>Jul</th>
+                                                            <th>Aug</th>
+                                                            <th>Sep</th>
+                                                            <th>Oct</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @for (lineItem of selfReportByWaterMeasurementType.SelfReportLineItems; track lineItem) {
+                                                            <tr>
+                                                                <td>{{ lineItem.ParcelNumber }}</td>
+                                                                <td class="right-aligned">{{ lineItem.ParcelArea | number: "1.2-2" }}</td>
+                                                                <td>{{ lineItem.IrrigationMethodName }}</td>
+                                                                <td class="right-aligned">{{ lineItem.LineItemTotal | number: "1.0-2" }}</td>
+                                                                <td class="right-aligned">{{ lineItem.NovemberOverrideValueInAcreFeet | number: "1.0-2" }}</td>
+                                                                <td class="right-aligned">{{ lineItem.DecemberOverrideValueInAcreFeet | number: "1.0-2" }}</td>
+                                                                <td class="right-aligned">{{ lineItem.JanuaryOverrideValueInAcreFeet | number: "1.0-2" }}</td>
+                                                                <td class="right-aligned">{{ lineItem.FebruaryOverrideValueInAcreFeet | number: "1.0-2" }}</td>
+                                                                <td class="right-aligned">{{ lineItem.MarchOverrideValueInAcreFeet | number: "1.0-2" }}</td>
+                                                                <td class="right-aligned">{{ lineItem.AprilOverrideValueInAcreFeet | number: "1.0-2" }}</td>
+                                                                <td class="right-aligned">{{ lineItem.MayOverrideValueInAcreFeet | number: "1.0-2" }}</td>
+                                                                <td class="right-aligned">{{ lineItem.JuneOverrideValueInAcreFeet | number: "1.0-2" }}</td>
+                                                                <td class="right-aligned">{{ lineItem.JulyOverrideValueInAcreFeet | number: "1.0-2" }}</td>
+                                                                <td class="right-aligned">{{ lineItem.AugustOverrideValueInAcreFeet | number: "1.0-2" }}</td>
+                                                                <td class="right-aligned">{{ lineItem.SeptemberOverrideValueInAcreFeet | number: "1.0-2" }}</td>
+                                                                <td class="right-aligned">{{ lineItem.OctoberOverrideValueInAcreFeet | number: "1.0-2" }}</td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                    <tfoot>
+                                                        <tr>
+                                                            <td>Account Total</td>
+                                                            <td class="right-aligned">
+                                                                {{ selfReportByWaterMeasurementType.SelfReportLineItems | sum: "ParcelArea" | number: "1.2-2" }}
+                                                            </td>
+                                                            <td><!--Blank for spacing--></td>
+                                                            <td class="right-aligned">
+                                                                {{ selfReportByWaterMeasurementType.SelfReportLineItems | sum: "LineItemTotal" | number: "1.0-2" }}
+                                                            </td>
+                                                            <td class="right-aligned">
+                                                                {{
+                                                                    selfReportByWaterMeasurementType.SelfReportLineItems | sum: "NovemberOverrideValueInAcreFeet" | number: "1.0-2"
+                                                                }}
+                                                            </td>
+                                                            <td class="right-aligned">
+                                                                {{
+                                                                    selfReportByWaterMeasurementType.SelfReportLineItems | sum: "DecemberOverrideValueInAcreFeet" | number: "1.0-2"
+                                                                }}
+                                                            </td>
+                                                            <td class="right-aligned">
+                                                                {{ selfReportByWaterMeasurementType.SelfReportLineItems | sum: "JanuaryOverrideValueInAcreFeet" | number: "1.0-2" }}
+                                                            </td>
+                                                            <td class="right-aligned">
+                                                                {{
+                                                                    selfReportByWaterMeasurementType.SelfReportLineItems | sum: "FebruaryOverrideValueInAcreFeet" | number: "1.0-2"
+                                                                }}
+                                                            </td>
+                                                            <td class="right-aligned">
+                                                                {{ selfReportByWaterMeasurementType.SelfReportLineItems | sum: "MarchOverrideValueInAcreFeet" | number: "1.0-2" }}
+                                                            </td>
+                                                            <td class="right-aligned">
+                                                                {{ selfReportByWaterMeasurementType.SelfReportLineItems | sum: "AprilOverrideValueInAcreFeet" | number: "1.0-2" }}
+                                                            </td>
+                                                            <td class="right-aligned">
+                                                                {{ selfReportByWaterMeasurementType.SelfReportLineItems | sum: "MayOverrideValueInAcreFeet" | number: "1.0-2" }}
+                                                            </td>
+                                                            <td class="right-aligned">
+                                                                {{ selfReportByWaterMeasurementType.SelfReportLineItems | sum: "JuneOverrideValueInAcreFeet" | number: "1.0-2" }}
+                                                            </td>
+                                                            <td class="right-aligned">
+                                                                {{ selfReportByWaterMeasurementType.SelfReportLineItems | sum: "JulyOverrideValueInAcreFeet" | number: "1.0-2" }}
+                                                            </td>
+                                                            <td class="right-aligned">
+                                                                {{ selfReportByWaterMeasurementType.SelfReportLineItems | sum: "AugustOverrideValueInAcreFeet" | number: "1.0-2" }}
+                                                            </td>
+                                                            <td class="right-aligned">
+                                                                {{
+                                                                    selfReportByWaterMeasurementType.SelfReportLineItems | sum: "SeptemberOverrideValueInAcreFeet" | number: "1.0-2"
+                                                                }}
+                                                            </td>
+                                                            <td class="right-aligned">
+                                                                {{ selfReportByWaterMeasurementType.SelfReportLineItems | sum: "OctoberOverrideValueInAcreFeet" | number: "1.0-2" }}
+                                                            </td>
+                                                        </tr>
+                                                    </tfoot>
+                                                </table>
+                                            } @else {
+                                                <div [loadingSpinner]="{ isLoading: true }" style="margin-top: 10rem"></div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    } @else {
+                        <div [loadingSpinner]="{ isLoading: true }" style="margin-top: 10rem"></div>
+                    }
                 </div>
-            </div>
+            } @else {
+                <div [loadingSpinner]="{ isLoading: true }" style="margin-top: 10rem"></div>
+            }
         </div>
-    </ng-container>
-</ng-container>
-
-<ng-template #isLoadingTemplate>
+    } @else {
+        <div [loadingSpinner]="{ isLoading: true }" style="margin-top: 10rem"></div>
+    }
+} @else {
     <div [loadingSpinner]="{ isLoading: true }" style="margin-top: 10rem"></div>
-</ng-template>
+}

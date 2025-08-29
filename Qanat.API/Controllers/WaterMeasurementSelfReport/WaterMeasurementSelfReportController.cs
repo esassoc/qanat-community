@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Hangfire;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Qanat.API.Services;
@@ -19,18 +17,11 @@ namespace Qanat.API.Controllers;
 [ApiController]
 [RightsChecker]
 [Route("geographies/{geographyID}/water-accounts/{waterAccountID}/water-measurement-self-reports")]
-public class WaterMeasurementSelfReportController : SitkaController<WaterMeasurementSelfReportController>
+public class WaterMeasurementSelfReportController(QanatDbContext dbContext, ILogger<WaterMeasurementSelfReportController> logger, IOptions<QanatConfiguration> qanatConfiguration, UserDto callingUser)
+    : SitkaController<WaterMeasurementSelfReportController>(dbContext, logger, qanatConfiguration)
 {
-    private readonly UserDto _callingUser;
-    private readonly IBackgroundJobClient _backgroundJobClient;
 
-    public WaterMeasurementSelfReportController(QanatDbContext dbContext, ILogger<WaterMeasurementSelfReportController> logger, IOptions<QanatConfiguration> qanatConfiguration, UserDto callingUser, IBackgroundJobClient backgroundJobClient) : base(dbContext, logger, qanatConfiguration)
-    {
-        _callingUser = callingUser;
-        _backgroundJobClient = backgroundJobClient;
-    }
-
-    #region Create, Read, Update
+    #region CreateAsync, Read, UpdateAsync
 
     [HttpPost]
     [EntityNotFound(typeof(Geography), "geographyID")]
@@ -47,19 +38,20 @@ public class WaterMeasurementSelfReportController : SitkaController<WaterMeasure
             return BadRequest(ModelState);
         }
 
-        var newSelfReportAsSimpleDto = await WaterMeasurementSelfReports.CreateAsync(_dbContext, geographyID, waterAccountID, waterMeasurementSelfReportCreateDto, _callingUser);
+        var newSelfReportAsSimpleDto = await WaterMeasurementSelfReports.CreateAsync(_dbContext, geographyID, waterAccountID, waterMeasurementSelfReportCreateDto, callingUser);
         return Ok(newSelfReportAsSimpleDto);
     }
 
-    [HttpGet("reporting-periods/{year}")]
+    [HttpGet("reporting-periods/{reportingPeriodID}")]
     [EntityNotFound(typeof(Geography), "geographyID")]
     [EntityNotFound(typeof(WaterAccount), "waterAccountID")]
+    [EntityNotFound(typeof(ReportingPeriod), "reportingPeriodID")]
     [WithRoleFlag(FlagEnum.IsSystemAdmin)] //Admin
     [WithGeographyRoleFlag(FlagEnum.HasManagerDashboard)] //Geography Manager
     [WithWaterAccountRolePermission(PermissionEnum.WaterAccountRights, RightsEnum.Read)] //Water Account Viewer/Holder
-    public async Task<ActionResult<List<WaterMeasurementSelfReportSimpleDto>>> ReadListByYear([FromRoute] int geographyID, [FromRoute] int waterAccountID, [FromRoute] int year)
+    public async Task<ActionResult<List<WaterMeasurementSelfReportSimpleDto>>> ReadListByYear([FromRoute] int geographyID, [FromRoute] int waterAccountID, [FromRoute] int reportingPeriodID)
     {
-        var selfReportSimpleDtos = await WaterMeasurementSelfReports.ListAsSimpleDtoForWaterAccountAsync(_dbContext, geographyID, waterAccountID, year);
+        var selfReportSimpleDtos = await WaterMeasurementSelfReports.ListAsSimpleDtoForWaterAccountAsync(_dbContext, geographyID, waterAccountID, reportingPeriodID);
         return Ok(selfReportSimpleDtos);
     }
 
@@ -85,14 +77,14 @@ public class WaterMeasurementSelfReportController : SitkaController<WaterMeasure
     [WithWaterAccountRolePermission(PermissionEnum.WaterAccountRights, RightsEnum.Update)] //Water Account Holder
     public async Task<ActionResult<WaterMeasurementSelfReportDto>> Update([FromRoute] int geographyID, [FromRoute] int waterAccountID, [FromRoute] int waterMeasurementSelfReportID, [FromBody] WaterMeasurementSelfReportUpdateDto waterMeasurementSelfReportUpdateDto)
     {
-        var validationErrors = await WaterMeasurementSelfReports.ValidateUpdateAsync(_dbContext, geographyID, waterAccountID, waterMeasurementSelfReportID, waterMeasurementSelfReportUpdateDto, _callingUser);
+        var validationErrors = await WaterMeasurementSelfReports.ValidateUpdateAsync(_dbContext, geographyID, waterAccountID, waterMeasurementSelfReportID, waterMeasurementSelfReportUpdateDto, callingUser);
         if (validationErrors.Any() || !ModelState.IsValid)
         {
             validationErrors.ForEach(ve => ModelState.AddModelError(ve.Type, ve.Message));
             return BadRequest(ModelState);
         }
 
-        var updatedSelfReportAsDto = await WaterMeasurementSelfReports.UpdateAsync(_dbContext, geographyID, waterAccountID, waterMeasurementSelfReportID, waterMeasurementSelfReportUpdateDto, _callingUser);
+        var updatedSelfReportAsDto = await WaterMeasurementSelfReports.UpdateAsync(_dbContext, geographyID, waterAccountID, waterMeasurementSelfReportID, waterMeasurementSelfReportUpdateDto, callingUser);
         return Ok(updatedSelfReportAsDto);
     }
 
@@ -116,7 +108,7 @@ public class WaterMeasurementSelfReportController : SitkaController<WaterMeasure
             return BadRequest(ModelState);
         }
 
-        var updatedSelfReportAsDto = await WaterMeasurementSelfReports.SubmitAsync(_dbContext, geographyID, waterAccountID, waterMeasurementSelfReportID, _callingUser);
+        var updatedSelfReportAsDto = await WaterMeasurementSelfReports.SubmitAsync(_dbContext, geographyID, waterAccountID, waterMeasurementSelfReportID, callingUser);
         return Ok(updatedSelfReportAsDto);
     }
 
@@ -138,13 +130,13 @@ public class WaterMeasurementSelfReportController : SitkaController<WaterMeasure
         ApproveSelfReportResult calculationsToRun = null;
         try
         { 
-            calculationsToRun = await WaterMeasurementSelfReports.ApproveAsync(_dbContext, geographyID, waterAccountID, waterMeasurementSelfReportID, _callingUser);
+            calculationsToRun = await WaterMeasurementSelfReports.ApproveAsync(_dbContext, geographyID, waterAccountID, waterMeasurementSelfReportID, callingUser);
         }
         catch (Exception ex)
         {
             //MK 1/17/2025 -- If we had an error approving, we should set the status back to submitted. Probably could improve the unit of work pattern to handle this better w/o a try/catch and reset.
             //Right now it will overwrite the previous submitter/submit date which is not ideal, but without we could get in a state where the users are stuck in approved and we haven't calculated the dependant water measurements.
-            await WaterMeasurementSelfReports.SubmitAsync(_dbContext, geographyID, waterAccountID, waterMeasurementSelfReportID, _callingUser);
+            await WaterMeasurementSelfReports.SubmitAsync(_dbContext, geographyID, waterAccountID, waterMeasurementSelfReportID, callingUser);
             return BadRequest(ex.Message);
         }
 
@@ -152,7 +144,7 @@ public class WaterMeasurementSelfReportController : SitkaController<WaterMeasure
         {
             foreach (var reportedDate in calculationsToRun.ReportedDates)
             {
-                await WaterMeasurementCalculations.RunMeasurementTypeForGeography(_dbContext, geographyID, waterMeasurementTypeID, reportedDate);
+                await WaterMeasurementCalculations.RunMeasurementTypeForGeographyAsync(_dbContext, geographyID, waterMeasurementTypeID, reportedDate);
             }
         }
 
@@ -175,7 +167,7 @@ public class WaterMeasurementSelfReportController : SitkaController<WaterMeasure
             return BadRequest(ModelState);
         }
 
-        var updatedSelfReportAsDto = await WaterMeasurementSelfReports.ReturnAsync(_dbContext, geographyID, waterAccountID, waterMeasurementSelfReportID, _callingUser);
+        var updatedSelfReportAsDto = await WaterMeasurementSelfReports.ReturnAsync(_dbContext, geographyID, waterAccountID, waterMeasurementSelfReportID, callingUser);
         return Ok(updatedSelfReportAsDto);
     }
 

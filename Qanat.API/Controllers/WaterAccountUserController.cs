@@ -5,29 +5,43 @@ using Microsoft.Extensions.Options;
 using Qanat.API.Services;
 using Qanat.API.Services.Attributes;
 using Qanat.API.Services.Authorization;
+using Qanat.Common.GeoSpatial;
 using Qanat.EFModels.Entities;
 using Qanat.Models.DataTransferObjects;
 using Qanat.Models.Security;
+using SendGrid.Helpers.Mail;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mail;
-using Qanat.Common.GeoSpatial;
+using System.Threading.Tasks;
 
 namespace Qanat.API.Controllers;
 
 [ApiController]
 [RightsChecker]
-public class WaterAccountUserController : SitkaController<WaterAccountUserController>
+public class WaterAccountUserController(QanatDbContext dbContext, ILogger<WaterAccountUserController> logger, IOptions<QanatConfiguration> qanatConfiguration, SitkaSmtpClientService sitkaSmtpClientService, UserDto callingUser)
+    : SitkaController<WaterAccountUserController>(dbContext, logger, qanatConfiguration)
 {
-    protected readonly SitkaSmtpClientService _sitkaSmtpClientService;
-
-    public WaterAccountUserController(QanatDbContext dbContext, 
-        ILogger<WaterAccountUserController> logger, 
-        IOptions<QanatConfiguration> qanatConfiguration,
-        SitkaSmtpClientService sitkaSmtpClientService) : base(dbContext, logger, qanatConfiguration)
+    [HttpPost("water-accounts/{waterAccountID}/add-user")]
+    [EntityNotFound(typeof(WaterAccount), "waterAccountID")]
+    [WithGeographyRolePermission(PermissionEnum.WaterAccountRights, RightsEnum.Update)]
+    public async Task<ActionResult<WaterAccountMinimalDto>> AddUser([FromRoute] int waterAccountID, [FromBody] WaterAccountUserMinimalDto user)
     {
-        _sitkaSmtpClientService = sitkaSmtpClientService;
+        var validationErrors = await WaterAccountUsers.ValidateAddUserAsync(_dbContext, waterAccountID, user);
+        validationErrors.ForEach(x => ModelState.AddModelError(x.Type, x.Message));
+
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var addedUser = await WaterAccountUsers.AddUserAsync(_dbContext, waterAccountID, user);
+
+        var waterAccount = WaterAccounts.GetByIDAsMinimalDto(_dbContext, waterAccountID);
+        GeographyUsers.AddGeographyNormalUsersIfAbsent(_dbContext, [user.UserID], waterAccount.GeographyID);
+
+        return Ok(addedUser);
     }
 
     [HttpGet("geographies/{geographyID}/waterAccountPINs")]
@@ -56,19 +70,12 @@ public class WaterAccountUserController : SitkaController<WaterAccountUserContro
     }
 
     [HttpGet("/user/{userID}/water-accounts")]
+    [EntityNotFound(typeof(User), "userID")]
     [WithRolePermission(PermissionEnum.UserRights, RightsEnum.Read)]
     public ActionResult<List<WaterAccountUserMinimalDto>> GetUserWaterAccounts([FromRoute] int userID)
     {
-        var dtos = WaterAccountUsers.GetWaterAccountUsersForUserID(_dbContext, userID);
+        var dtos = WaterAccountUsers.GetWaterAccountUsersForUserID(_dbContext, userID, callingUser);
         return dtos;
-    }
-
-    [HttpPut("/user/{userID}/water-accounts")]
-    [WithRolePermission(PermissionEnum.UserRights, RightsEnum.Update)]
-    public ActionResult<List<WaterAccountUserMinimalDto>> UpdateUserWaterAccounts([FromRoute] int userID, [FromBody] List<WaterAccountUserMinimalDto> waterAccountUserSimpleDtos)
-    {
-        var waterAccountUsers = WaterAccountUsers.UpdateUserWaterAccounts(_dbContext, userID, waterAccountUserSimpleDtos);
-        return waterAccountUsers;
     }
 
     [HttpGet("geographies/{geographyID}/water-account")]
@@ -139,16 +146,16 @@ public class WaterAccountUserController : SitkaController<WaterAccountUserContro
         {
             return BadRequest(ModelState);
         }
-        
+
         WaterAccountUsers.ClaimWaterAccounts(_dbContext, user.UserID, onboardingWaterAccountDtos);
-        
+
         return Ok();
     }
 
     [HttpPost("water-accounts/{waterAccountID}/inviting-user/{invitingUserID}")]
     [EntityNotFound(typeof(WaterAccount), "waterAccountID")]
     [WithWaterAccountRolePermission(PermissionEnum.WaterAccountUserRights, RightsEnum.Create)]
-    public ActionResult<WaterAccountUserMinimalDto> AddUserOnWaterAccountByEmail([FromRoute] int waterAccountID, int invitingUserID, [FromBody] AddUserByEmailDto addUserByEmailDto)
+    public async Task<ActionResult<WaterAccountUserMinimalDto>> AddUserOnWaterAccountByEmail([FromRoute] int waterAccountID, int invitingUserID, [FromBody] AddUserByEmailDto addUserByEmailDto)
     {
         var errors = WaterAccountUsers.ValidateAddUserData(_dbContext, addUserByEmailDto);
         var emailErrors = WaterAccountUsers.ValidateEmail(addUserByEmailDto.Email);
@@ -158,28 +165,28 @@ public class WaterAccountUserController : SitkaController<WaterAccountUserContro
         {
             return BadRequest(ModelState);
         }
+
         var user = _dbContext.Users.SingleOrDefault(x => x.Email == addUserByEmailDto.Email.Replace(" ", string.Empty));
         var invitingUser = _dbContext.Users.Single(x => x.UserID == invitingUserID);
-        var waterAccount = _dbContext.WaterAccounts.Single(x => x.WaterAccountID == waterAccountID);
+        var waterAccount = _dbContext.WaterAccounts.Include(x => x.Geography).Single(x => x.WaterAccountID == waterAccountID);
         if (user != null && user.Role != Role.PendingLogin)
         {
-            var waterAccountUser =
-                _dbContext.WaterAccountUsers.SingleOrDefault(x =>
-                    x.WaterAccountID == waterAccountID && x.UserID == user.UserID);
-
+            var waterAccountUser = _dbContext.WaterAccountUsers.SingleOrDefault(x => x.WaterAccountID == waterAccountID && x.UserID == user.UserID);
             if (waterAccountUser == null)
             {
-                var mailMessageActiveUser = WaterAccountUsers.AddUserToWaterAccount(_dbContext, waterAccountID, addUserByEmailDto,
-                    user, invitingUser);
-                _sitkaSmtpClientService.Send(mailMessageActiveUser);
+                GeographyUsers.AddGeographyNormalUserIfAbsent(_dbContext, user.UserID, waterAccount.GeographyID);
+                await _dbContext.SaveChangesAsync();
 
-                return _dbContext.WaterAccountUsers.Include(x=>x.WaterAccount).Single(x =>
-                   x.WaterAccountID == waterAccountID && x.UserID == user.UserID).AsWaterAccountUserMinimalDto();
+                WaterAccountUsers.AddUserToWaterAccount(_dbContext, waterAccountID, addUserByEmailDto, user);
+
+                return _dbContext.WaterAccountUsers.AsNoTracking()
+                    .Include(x => x.User)
+                    .Include(x => x.WaterAccount)
+                    .Single(x => x.WaterAccountID == waterAccountID && x.UserID == user.UserID)
+                    .AsWaterAccountUserMinimalDto();
             }
-            else
-            {
-                return BadRequest("User is already added on this water account.");
-            }
+
+            return BadRequest("User is already added on this water account.");
         }
 
         if (user == null)
@@ -195,10 +202,10 @@ public class WaterAccountUserController : SitkaController<WaterAccountUserContro
                 ReceiveSupportEmails = false,
             };
             _dbContext.Users.Add(pendingUser);
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
             user = pendingUser;
         }
-        
+
         var pendingWaterAccountUser = new WaterAccountUser()
         {
             WaterAccountID = waterAccountID,
@@ -209,23 +216,10 @@ public class WaterAccountUserController : SitkaController<WaterAccountUserContro
         _dbContext.WaterAccountUsers.Add(pendingWaterAccountUser);
 
         GeographyUsers.AddGeographyNormalUserIfAbsent(_dbContext, user.UserID, waterAccount.GeographyID);
-        _dbContext.SaveChanges();
+        await _dbContext.SaveChangesAsync();
 
-        var mailMessage = new MailMessage
-        {
-            Subject = $"Water Account Invitation in the Groundwater Accounting Platform",
-            Body = $"Hello,<br /><br />" +
-                   $"{invitingUser.FullName} has added you to their {waterAccount.WaterAccountName} Water Account in the Groundwater Accounting Platform. <br /><br />" +
-                   $"If this is your first time on the platform, you will need to sign up for a user account. You can do that here: <br />" +
-                   $"https://groundwateraccounting.org. <br /><br />" +
-                   $"Be sure to sign up with the email address {invitingUser.FullName} invited you with ({addUserByEmailDto.Email}) so you can be automatically associated with this Water Account. <br /><br />" +
-                   $"If you think you have been added to this Water Account in error, please contact {invitingUser.FullName} at {invitingUser.Email}.<br /><br />" +
-                   $"Thank you,<br />The Groundwater Accounting Platform Team",
-            IsBodyHtml = true
-        };
+        await SendInviteUserEmail(addUserByEmailDto.Email, invitingUser.FullName, invitingUser.Email, waterAccount.WaterAccountNumber, waterAccount.Geography.GeographyName);
 
-        mailMessage.To.Add(new MailAddress(addUserByEmailDto.Email));
-        _sitkaSmtpClientService.Send(mailMessage);
         return pendingWaterAccountUser.AsWaterAccountUserMinimalDto();
     }
 
@@ -244,11 +238,12 @@ public class WaterAccountUserController : SitkaController<WaterAccountUserContro
     [HttpPost("water-accounts/{waterAccountID}/inviting-user/{invitingUserID}/resend")]
     [EntityNotFound(typeof(WaterAccount), "waterAccountID")]
     [WithWaterAccountRolePermission(PermissionEnum.WaterAccountUserRights, RightsEnum.Update)]
-    public ActionResult ResendInvitationToPendingUser([FromRoute] int waterAccountID, int invitingUserID,
+    public async Task<ActionResult> ResendInvitationToPendingUser([FromRoute] int waterAccountID, int invitingUserID,
         [FromBody] WaterAccountUserMinimalDto waterAccountUserMinimalDto)
     {
         var invitingUser = _dbContext.Users.Single(x => x.UserID == invitingUserID);
-        var waterAccount = _dbContext.WaterAccounts.Single(x => x.WaterAccountID == waterAccountID);
+        var waterAccount = _dbContext.WaterAccounts.Include(x => x.Geography)
+            .Single(x => x.WaterAccountID == waterAccountID);
         var inviteeEmail = _dbContext.Users.Single(x => x.UserID == waterAccountUserMinimalDto.UserID).Email;
         var mailMessage = new MailMessage
         {
@@ -263,8 +258,8 @@ public class WaterAccountUserController : SitkaController<WaterAccountUserContro
             IsBodyHtml = true
         };
 
-        mailMessage.To.Add(new MailAddress(waterAccountUserMinimalDto.UserEmail));
-        _sitkaSmtpClientService.Send(mailMessage);
+        await SendInviteUserEmail(inviteeEmail, invitingUser.FullName, invitingUser.Email,
+            waterAccount.WaterAccountNumber, waterAccount.Geography.GeographyName);
 
         WaterAccountUsers.UpdatePendingDate(_dbContext, waterAccountUserMinimalDto.UserEmail, waterAccountID);
         return Ok();
@@ -279,4 +274,20 @@ public class WaterAccountUserController : SitkaController<WaterAccountUserContro
         return Ok();
     }
 
+    private async Task SendInviteUserEmail(string recipientEmail, string invitingUserName, string invitingUserEmail, int waterAccountNumber, string geographyName)
+    {
+        var message = new SendGridMessage();
+        message.AddTo(new EmailAddress(recipientEmail));
+
+        var templateData = new SendGridInviteUserTemplateData()
+        {
+            Subject = "You've been invited to the Groundwater Accounting Platform",
+            InvitingUserName = invitingUserName,
+            InvitingUserEmail = invitingUserEmail,
+            WaterAccountNumber = waterAccountNumber,
+            GeographyLongName = geographyName
+        };
+
+        await sitkaSmtpClientService.SendInviteUserEmail(message, templateData);
+    }
 }

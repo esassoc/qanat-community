@@ -1,0 +1,55 @@
+@if (geography$ | async; as geography) {
+    <div class="full-width-page">
+        <page-header
+            pageTitle="Review Fallow Self Reports"
+            [templateAbove]="templateAbove"
+            [customRichTextTypeID]="customRichTextTypeID"
+            [customRichTextTypeGeographyID]="geography.GeographyID">
+            <ng-template #templateAbove>
+                <div class="back">
+                    <a [routerLink]="['/supply-and-usage', geography.GeographyName.toLowerCase(), 'activity-center']" class="back__link"> Back to Supply & Usage </a>
+                </div>
+            </ng-template>
+        </page-header>
+        <app-alert-display></app-alert-display>
+        @if (selfReports$ | async; as selfReports) {
+            <div class="section-header flex-start">
+                <h2 class="section-title text-primary">Review Self Reports</h2>
+                <div class="review-stats">
+                    <div class="orange">{{ submittedCount | number }} Submitted</div>
+                    <div>{{ approvedCount | number }} Approved</div>
+                </div>
+            </div>
+            <div class="table-responsive mt-2">
+                <qanat-grid
+                    height="400px"
+                    [rowData]="selfReports"
+                    [columnDefs]="columnDefs"
+                    [sizeColumnsToFitGrid]="true"
+                    [unsetHeaderGridActionWidth]="true"
+                    (gridReady)="onGridReady($event)"
+                    [rowSelection]="rowSelection"
+                    (selectionChanged)="onSelectionChanged()">
+                    <div customGridActionsRight>
+                        <button
+                            class="btn btn-sm btn-success mr-2"
+                            [buttonLoading]="isLoadingSubmit"
+                            (click)="approve(geography, selectedFallowStatusIDs)"
+                            [disabled]="isLoadingSubmit || selectedFallowStatusIDs.length === 0">
+                            Approve Selected
+                        </button>
+                        <button
+                            class="btn btn-sm btn-danger"
+                            [buttonLoading]="isLoadingSubmit"
+                            (click)="return(geography, selectedFallowStatusIDs)"
+                            [disabled]="isLoadingSubmit || selectedFallowStatusIDs.length === 0">
+                            Return Selected
+                        </button>
+                    </div>
+                </qanat-grid>
+            </div>
+        } @else {
+            <div [loadingSpinner]="{ loadingHeight: 700, isLoading: true }"></div>
+        }
+    </div>
+}

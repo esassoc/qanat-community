@@ -19,10 +19,13 @@ USING (VALUES
 	(19, 'AllocationPlanRights', 'AllocationPlanRights'),
 	(20, 'FrequentlyAskedQuestionRights', 'FrequentlyAskedQuestionRights'),
 	(21, 'CustomAttributeRights', 'CustomAttributeRights'),
-	(22, 'UsageEntityRights', 'UsageEntityRights'),
+	(22, 'UsageLocationRights', 'UsageLocationRights'),
 	(23, 'ModelRights', 'ModelRights'),
 	(24, 'ScenarioRights', 'ScenarioRights'),
-	(25, 'ScenarioRunRights', 'ScenarioRunRights')
+	(25, 'ScenarioRunRights', 'ScenarioRunRights'),
+	(26, 'MeterRights', 'MeterRights'),
+	(27, 'WellMeterReadingRights', 'WellMeterReadingRights'),
+	(28, 'StatementTemplateRights', 'StatementTemplateRights')
 )
 AS Source (PermissionID, PermissionName, PermissionDisplayName)
 ON Target.PermissionID = Source.PermissionID

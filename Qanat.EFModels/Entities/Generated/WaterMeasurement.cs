@@ -8,7 +8,8 @@ namespace Qanat.EFModels.Entities;
 
 [Table("WaterMeasurement")]
 [Index("GeographyID", "WaterMeasurementTypeID", "ReportedDate", Name = "IX_WaterMeasurement_GeographyID_WaterMeasurementTypeID_ReportedDate")]
-[Index("UsageEntityName", Name = "IX_WaterMeasurement_UsageEntityName")]
+[Index("UnitTypeID", Name = "IX_WaterMeasurement_UnitTypeID")]
+[Index("UsageLocationID", Name = "IX_WaterMeasurement_UsageLocationID")]
 public partial class WaterMeasurement
 {
     [Key]
@@ -16,26 +17,23 @@ public partial class WaterMeasurement
 
     public int GeographyID { get; set; }
 
+    public int UsageLocationID { get; set; }
+
     public int? WaterMeasurementTypeID { get; set; }
 
     public int? UnitTypeID { get; set; }
-
-    [Required]
-    [StringLength(100)]
-    [Unicode(false)]
-    public string UsageEntityName { get; set; }
 
     [Column(TypeName = "datetime")]
     public DateTime ReportedDate { get; set; }
 
     [Column(TypeName = "decimal(20, 4)")]
-    public decimal ReportedValue { get; set; }
+    public decimal? ReportedValueInNativeUnits { get; set; }
 
     [Column(TypeName = "decimal(20, 4)")]
-    public decimal? ReportedValueInAcreFeet { get; set; }
+    public decimal ReportedValueInAcreFeet { get; set; }
 
     [Column(TypeName = "decimal(20, 4)")]
-    public decimal? UsageEntityArea { get; set; }
+    public decimal ReportedValueInFeet { get; set; }
 
     [Column(TypeName = "datetime")]
     public DateTime LastUpdateDate { get; set; }
@@ -49,6 +47,10 @@ public partial class WaterMeasurement
     [ForeignKey("GeographyID")]
     [InverseProperty("WaterMeasurements")]
     public virtual Geography Geography { get; set; }
+
+    [ForeignKey("UsageLocationID")]
+    [InverseProperty("WaterMeasurements")]
+    public virtual UsageLocation UsageLocation { get; set; }
 
     [ForeignKey("WaterMeasurementTypeID")]
     [InverseProperty("WaterMeasurements")]

@@ -14,15 +14,14 @@ CREATE TABLE [dbo].[Geography]
 	[Color]														VARCHAR(9)		NULL,
 	[ContactEmail]												VARCHAR(100)	NULL,
 	[ContactPhoneNumber]										VARCHAR (30)	NULL,
+	[ContactAddressLine1]										VARCHAR (500)	NULL,
+	[ContactAddressLine2]										VARCHAR (500)	NULL,
 	[LandownerDashboardSupplyLabel]								VARCHAR(200)	NOT NULL DEFAULT('Supply'),
 	[LandownerDashboardUsageLabel]								VARCHAR(200)	NOT NULL DEFAULT('Usage'),
 
 	-- Spatial Data
 	[CoordinateSystem]											INT				NOT NULL,
 	[AreaToAcresConversionFactor]								INT				NOT NULL, 
-
-	-- Reporting Period/Temporal Data
-	[DefaultReportingPeriodID]									INT				NULL,	
 
 	-- Open ET Configuration 
 	[IsOpenETActive]											BIT				NOT NULL DEFAULT(0),
@@ -45,7 +44,8 @@ CREATE TABLE [dbo].[Geography]
 	-- Misc Configuration Bits
 	[FeeCalculatorEnabled]										BIT				NOT NULL DEFAULT(0),
 	[AllowWaterMeasurementSelfReporting]						BIT				NOT NULL DEFAULT(0),
-	[DisplayUsageGeometriesAsField]								BIT				NOT NULL DEFAULT(0),
+	[AllowFallowSelfReporting]									BIT				NOT NULL DEFAULT(0),
+	[AllowCoverCropSelfReporting]								BIT				NOT NULL DEFAULT(0),
 	[AllowLandownersToRequestAccountChanges]					BIT				NOT NULL DEFAULT(0),
     [IsDemoGeography]											BIT				NOT NULL DEFAULT(0),
 
@@ -53,7 +53,6 @@ CREATE TABLE [dbo].[Geography]
 	CONSTRAINT [PK_Geography_GeographyID]																		PRIMARY KEY ([GeographyID]),
 
 	CONSTRAINT [FK_Geography_GeographyConfiguration_GeographyConfigurationID]									FOREIGN KEY	([GeographyConfigurationID])				REFERENCES dbo.[GeographyConfiguration]([GeographyConfigurationID]),
-	CONSTRAINT [FK_Geography_ReportingPeriod_DefaultReportingPeriodID]											FOREIGN KEY ([DefaultReportingPeriodID])				REFERENCES dbo.[ReportingPeriod]([ReportingPeriodID]),
 	CONSTRAINT [FK_Geography_WaterMeasurementType_SourceOfRecordWaterMeasurementTypeID_WaterMeasurementTypeID]	FOREIGN KEY	([SourceOfRecordWaterMeasurementTypeID])	REFERENCES dbo.[WaterMeasurementType]([WaterMeasurementTypeID]),
 	CONSTRAINT [FK_Geography_WaterMeasurementType_WaterBudgetSlotAWaterMeasurementTypeID]						FOREIGN KEY ([WaterBudgetSlotAWaterMeasurementTypeID])	REFERENCES dbo.[WaterMeasurementType]([WaterMeasurementTypeID]),
 	CONSTRAINT [FK_Geography_WaterMeasurementType_WaterBudgetSlotBWaterMeasurementTypeID]						FOREIGN KEY ([WaterBudgetSlotBWaterMeasurementTypeID])	REFERENCES dbo.[WaterMeasurementType]([WaterMeasurementTypeID]),

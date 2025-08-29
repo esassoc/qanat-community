@@ -5,8 +5,7 @@ import { DecimalPipe } from "@angular/common";
     selector: "scenario-map-marker-input-card",
     templateUrl: "./scenario-map-marker-input-card.component.html",
     styleUrls: ["./scenario-map-marker-input-card.component.scss"],
-    standalone: true,
-    imports: [DecimalPipe],
+    imports: [DecimalPipe]
 })
 export class ScenarioMapMarkerInputCardComponent implements OnInit {
     @Input() latitude: number;

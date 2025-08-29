@@ -1,6 +1,4 @@
-﻿using System.IO;
-
-namespace Qanat.Models.DataTransferObjects
+﻿namespace Qanat.Models.DataTransferObjects
 {
     public class BlobDto
     {

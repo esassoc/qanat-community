@@ -1,14 +1,12 @@
 import { CdkDragDrop, transferArrayItem, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragHandle } from "@angular/cdk/drag-drop";
-import { Component, OnInit, ViewContainerRef } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { Router, RouterLink } from "@angular/router";
-import { BehaviorSubject, Observable, switchMap, tap } from "rxjs";
+import { BehaviorSubject, Observable, map, switchMap, tap } from "rxjs";
 import { AuthenticationService } from "src/app/shared/services/authentication.service";
 import { ConfirmService } from "src/app/shared/services/confirm/confirm.service";
-import { UpdateWaterAccountInfoComponent, WaterAccountContext } from "src/app/shared/components/water-account/modals/update-water-account-info/update-water-account-info.component";
+import { UpdateWaterAccountInfoComponent } from "src/app/shared/components/water-account/modals/update-water-account-info/update-water-account-info.component";
 import { UserService } from "src/app/shared/generated/api/user.service";
-import { WaterAccountService } from "src/app/shared/generated/api/water-account.service";
 import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
-import { GeographySimpleDto } from "src/app/shared/generated/model/geography-simple-dto";
 import { UserDto } from "src/app/shared/generated/model/user-dto";
 import { WaterAccountParcelsRequestChangesDto } from "src/app/shared/generated/model/water-account-parcels-request-changes-dto";
 import { WaterAccountRequestChangesDto } from "src/app/shared/generated/model/water-account-request-changes-dto";
@@ -17,38 +15,36 @@ import { ZoneDisplayDto } from "src/app/shared/generated/model/zone-display-dto"
 import { Alert } from "src/app/shared/models/alert";
 import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
 import { AlertService } from "src/app/shared/services/alert.service";
-import { ModalService, ModalSizeEnum, ModalThemeEnum } from "src/app/shared/services/modal/modal.service";
-import { SelectDropDownModule } from "ngx-select-dropdown";
 import { FormsModule } from "@angular/forms";
-import { NgIf, NgFor, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { IconComponent } from "src/app/shared/components/icon/icon.component";
 import { ParcelListItemComponent } from "src/app/shared/components/parcel/parcel-list-item/parcel-list-item.component";
 import {
     ModifiedWaterAccountContext,
-    WaterAccountModificationsContext,
     WaterAccountsConsolidateModalComponent,
-} from "src/app/shared/components/water-accounts-consolidate-modal/water-accounts-consolidate-modal.component";
-import { WaterAccountRequestChangesConfirmModalComponent } from "src/app/shared/components/water-account-request-changes-confirm-modal/water-account-request-changes-confirm-modal.component";
+} from "src/app/shared/components/water-account/modals/water-accounts-consolidate-modal/water-accounts-consolidate-modal.component";
+import { WaterAccountRequestChangesConfirmModalComponent } from "src/app/shared/components/water-account/modals/water-account-request-changes-confirm-modal/water-account-request-changes-confirm-modal.component";
 import { WaterAccountByGeographyService } from "src/app/shared/generated/api/water-account-by-geography.service";
 import { AlertDisplayComponent } from "src/app/shared/components/alert-display/alert-display.component";
 import { NoteComponent } from "src/app/shared/components/note/note.component";
 import { ButtonLoadingDirective } from "src/app/shared/directives/button-loading.directive";
 import { LoadingDirective } from "src/app/shared/directives/loading.directive";
 import { GeographyService } from "src/app/shared/generated/api/geography.service";
-import { GeographyMinimalDto } from "src/app/shared/generated/model/models";
+import { GeographyMinimalDto, ReportingPeriodDto } from "src/app/shared/generated/model/models";
+import { FormInputOption } from "src/app/shared/components/forms/form-field/form-field.component";
+import { NgSelectModule } from "@ng-select/ng-select";
+import { ReportingPeriodService } from "src/app/shared/generated/api/reporting-period.service";
+import { CurrentGeographyService } from "src/app/shared/services/current-geography.service";
+import { DialogService } from "@ngneat/dialog";
 
 @Component({
     selector: "water-account-request-changes",
     templateUrl: "./water-account-request-changes.component.html",
     styleUrl: "./water-account-request-changes.component.scss",
-    standalone: true,
     imports: [
-        NgIf,
         PageHeaderComponent,
         FormsModule,
-        NgFor,
-        SelectDropDownModule,
         LoadingDirective,
         AlertDisplayComponent,
         CdkDropListGroup,
@@ -61,6 +57,7 @@ import { GeographyMinimalDto } from "src/app/shared/generated/model/models";
         ButtonLoadingDirective,
         RouterLink,
         AsyncPipe,
+        NgSelectModule,
     ],
 })
 export class WaterAccountRequestChangesComponent implements OnInit {
@@ -68,13 +65,16 @@ export class WaterAccountRequestChangesComponent implements OnInit {
     private currentUser: UserDto;
 
     public geographies$: Observable<GeographyMinimalDto[]>;
-    public geographiesForTypeScript: GeographySimpleDto[];
-    public geographyID: number;
-    public selectedGeographyID: number;
-    public selectedGeographyNameLowered: string;
+    public geographies: GeographyMinimalDto[];
+    public currentGeography$: Observable<GeographyMinimalDto>;
 
-    public waterAccountHolders$: Observable<UserDto[]>;
-    public selectedUser: UserDto;
+    // selectedGeographyID is updated when a new geography is selected; if there are unsaved changes, a confirmation modal is launched
+    // before selection is pushed to geographyID and form is updated
+    public geographyID: number;
+    public geographyNameLowered: string;
+    public selectedGeographyID: number;
+
+    public waterAccountHolders$: Observable<FormInputOption[]>;
     public selectedUserID: number;
 
     public noWaterAccountHolders: boolean = false;
@@ -86,12 +86,14 @@ export class WaterAccountRequestChangesComponent implements OnInit {
     public selectedGeographyAllowRequests: boolean = false;
     public showForm: boolean = false;
 
-    public usersSubject = new BehaviorSubject<number>(null);
-
-    public waterAccountSubject = new BehaviorSubject<number>(null);
+    public geographyDataSubject = new BehaviorSubject<number>(null);
+    public userSubject = new BehaviorSubject<number>(null);
     public waterAccounts$: Observable<WaterAccountRequestChangesDto[]>;
     public waterAccounts: WaterAccountRequestChangesDto[];
     public waterAccountZones: { [waterAccountID: number]: ZoneDisplayDto } = {};
+
+    public reportingPeriods$: Observable<ReportingPeriodDto[]>;
+    public defaultYear: number;
 
     public waterAccountParcelIDsOnLoad: { [WaterAccountID: number]: number[] };
     public waterAccountParcelIDsOnLoadJSON: string;
@@ -104,24 +106,17 @@ export class WaterAccountRequestChangesComponent implements OnInit {
     public isConsolidatingAccounts: boolean = false;
     public isLoadingSubmit: boolean = false;
 
-    public userDropdownConfig = {
-        search: true,
-        height: "320px",
-        placeholder: "Select a user",
-        searchFn: (user: UserDto) => `${user.FullName} (${user.Email})`,
-        displayFn: (user: UserDto) => `${user.FullName} (${user.Email})`,
-    };
-
     constructor(
         private authenticationService: AuthenticationService,
         private waterAccountByGeographyService: WaterAccountByGeographyService,
         private geographyService: GeographyService,
         private userService: UserService,
         private confirmService: ConfirmService,
-        private modalService: ModalService,
-        private viewContainerRef: ViewContainerRef,
         private alertService: AlertService,
-        private router: Router
+        private router: Router,
+        private reportingPeriodService: ReportingPeriodService,
+        private currentGeographyService: CurrentGeographyService,
+        private dialogService: DialogService
     ) {}
 
     public ngOnInit() {
@@ -134,16 +129,31 @@ export class WaterAccountRequestChangesComponent implements OnInit {
                 this.isWaterManager = Object.keys(currentUser.GeographyRights).filter((x) => currentUser.GeographyRights[x].WaterAccountRights.CanUpdate).length > 0;
 
                 if (this.isAdmin || this.isWaterManager) {
-                    this.waterAccountHolders$ = this.usersSubject.pipe(
+                    this.waterAccountHolders$ = this.userSubject.pipe(
                         switchMap((geographyID) => {
                             if (!geographyID) return [];
-                            return this.waterAccountByGeographyService.geographiesGeographyIDWaterAccountsWaterAccountHoldersGet(geographyID);
+                            return this.waterAccountByGeographyService.listWaterAccountHoldersByGeographyIDWaterAccountByGeography(geographyID);
+                        }),
+                        map((users) => {
+                            return users.map((x) => {
+                                return {
+                                    Value: x.UserID,
+                                    Label: x.FullName,
+                                } as FormInputOption;
+                            });
                         }),
                         tap((users) => {
-                            this.selectedUser = users[0];
-                            this.selectedUserID = users[0]?.UserID;
                             this.noWaterAccountHolders = users?.length == 0;
-                            this.getSelectedUserData();
+
+                            var selectedUserIndex = users.findIndex((x) => x.UserID == this.selectedUserID);
+                            if (selectedUserIndex == -1) {
+                                this.selectedUserID = null;
+                                this.isWaterAccountHolder = false;
+                                this.isWaterAccountViewer = false;
+                                this.showForm = false;
+                            } else {
+                                this.getSelectedUserData();
+                            }
                         })
                     );
                 } else {
@@ -151,9 +161,9 @@ export class WaterAccountRequestChangesComponent implements OnInit {
                     this.getSelectedUserData();
                 }
 
-                this.geographies$ = this.geographyService.geographiesCurrentUserGet().pipe(
+                this.geographies$ = this.geographyService.listForCurrentUserGeography().pipe(
                     tap((geographies) => {
-                        this.geographiesForTypeScript = geographies;
+                        this.geographies = geographies;
                         if (geographies.length == 0) {
                             this.isWaterAccountViewer = true;
                             this.isWaterAccountHolder = false;
@@ -161,13 +171,17 @@ export class WaterAccountRequestChangesComponent implements OnInit {
                             return;
                         }
 
-                        const selectedGeography = geographies[0];
-                        this.selectedGeographyAllowRequests = selectedGeography.AllowLandownersToRequestAccountChanges || false;
-                        this.selectedGeographyID = selectedGeography.GeographyID;
-                        this.selectedGeographyNameLowered = selectedGeography.GeographyName.toLowerCase();
-                        this.geographyID = this.selectedGeographyID;
-                        this.refreshWaterAccounts();
-                        this.refreshUsers();
+                        this.currentGeography$ = this.currentGeographyService.getCurrentGeography().pipe(
+                            tap((currentGeography) => {
+                                const selectedGeography = currentGeography ?? this.geographies[0];
+                                this.selectedGeographyAllowRequests = selectedGeography.AllowLandownersToRequestAccountChanges || false;
+                                this.selectedGeographyID = selectedGeography.GeographyID;
+                                this.geographyID = this.selectedGeographyID;
+                                this.geographyNameLowered = selectedGeography.GeographyName.toLowerCase();
+                                this.refreshGeographyData();
+                                this.refreshUsers();
+                            })
+                        );
                     })
                 );
             })
@@ -175,11 +189,11 @@ export class WaterAccountRequestChangesComponent implements OnInit {
     }
 
     private getSelectedUserData() {
-        this.waterAccounts$ = this.waterAccountSubject.pipe(
+        this.waterAccounts$ = this.geographyDataSubject.pipe(
             tap(() => (this.isLoading = true)),
             switchMap((geographyID) => {
                 if (!geographyID || !this.selectedUserID) return [];
-                return this.userService.geographiesGeographyIDUsersUserIDWaterAccountsGet(geographyID, this.selectedUserID);
+                return this.geographyService.listWaterAccountsOwnedByCurrentUserGeography(geographyID, this.selectedUserID);
             }),
             tap((waterAccounts) => {
                 this.waterAccounts = waterAccounts;
@@ -196,6 +210,21 @@ export class WaterAccountRequestChangesComponent implements OnInit {
 
                 this.updateWaterAccountZones();
                 this.isLoading = false;
+            })
+        );
+
+        this.reportingPeriods$ = this.geographyDataSubject.pipe(
+            switchMap((geographyID) => {
+                if (!geographyID) return [];
+                return this.reportingPeriodService.listByGeographyIDReportingPeriod(geographyID);
+            }),
+            tap((reportingPeriods) => {
+                let defaultReportingPeriod = reportingPeriods.find((rp) => rp.IsDefault);
+                if (!defaultReportingPeriod) {
+                    defaultReportingPeriod = reportingPeriods[0];
+                }
+
+                this.defaultYear = new Date(defaultReportingPeriod.EndDate).getFullYear();
             })
         );
     }
@@ -219,13 +248,14 @@ export class WaterAccountRequestChangesComponent implements OnInit {
         return this.waterAccountParcelIDsOnLoadJSON == JSON.stringify(this.getWaterAccountParcelIDs());
     }
 
-    private refreshWaterAccounts() {
-        this.waterAccountSubject.next(this.geographyID);
+    private refreshGeographyData() {
+        this.geographyDataSubject.next(this.geographyID);
     }
 
     private refreshUsers() {
-        this.usersSubject.next(this.geographyID);
+        this.userSubject.next(this.geographyID);
     }
+
     public updateWaterAccountZones() {
         this.waterAccounts.forEach((x) => this.setWaterAccountZone(x));
     }
@@ -249,33 +279,24 @@ export class WaterAccountRequestChangesComponent implements OnInit {
         this.updateWaterAccountZones();
     }
 
-    public onUserSelected(selectedUser: UserDto) {
-        this.selectedUserID = selectedUser.UserID;
-        this.refreshWaterAccounts();
+    public onUserSelected() {
+        this.refreshGeographyData();
     }
 
     public onGeographySelected() {
         if (this.canExit()) {
-            this.geographyID = this.selectedGeographyID;
+            this.updateGeographyFromSelectedGeographyID();
 
-            const geography = this.geographiesForTypeScript.find((x) => {
-                return x.GeographyID == this.selectedGeographyID;
-            });
-
-            if (geography != null) {
-                this.selectedGeographyAllowRequests = geography.AllowLandownersToRequestAccountChanges || false;
-                this.selectedGeographyNameLowered = geography.GeographyName.toLowerCase();
-            }
-
-            this.refreshWaterAccounts();
+            this.refreshGeographyData();
             this.refreshUsers();
             return;
         }
 
         this.confirmAction("Switch Geographies", "switch geographies").then((confirmed) => {
             if (confirmed) {
-                this.geographyID = this.selectedGeographyID;
-                this.refreshWaterAccounts();
+                this.updateGeographyFromSelectedGeographyID();
+
+                this.refreshGeographyData();
                 this.refreshUsers();
             } else {
                 this.selectedGeographyID = this.geographyID;
@@ -283,15 +304,25 @@ export class WaterAccountRequestChangesComponent implements OnInit {
         });
     }
 
+    private updateGeographyFromSelectedGeographyID() {
+        this.geographyID = this.selectedGeographyID;
+
+        const geography = this.geographies.find((x) => x.GeographyID == this.selectedGeographyID);
+        if (!geography) return;
+
+        this.selectedGeographyAllowRequests = geography.AllowLandownersToRequestAccountChanges || false;
+        this.geographyNameLowered = geography.GeographyName.toLowerCase();
+    }
+
     public reset() {
         if (this.canExit()) {
-            this.refreshWaterAccounts();
+            this.refreshGeographyData();
             return;
         }
 
         this.confirmAction("Reset", "reset").then((confirmed) => {
             if (confirmed) {
-                this.refreshWaterAccounts();
+                this.refreshGeographyData();
             }
         });
     }
@@ -332,18 +363,19 @@ export class WaterAccountRequestChangesComponent implements OnInit {
     }
 
     public openUpdateInfoModal(waterAccount: WaterAccountRequestChangesDto): void {
-        this.modalService
-            .open(UpdateWaterAccountInfoComponent, this.viewContainerRef, { ModalSize: ModalSizeEnum.Medium, ModalTheme: ModalThemeEnum.Light }, {
+        const dialogRef = this.dialogService.open(UpdateWaterAccountInfoComponent, {
+            data: {
                 WaterAccountID: waterAccount.WaterAccountID,
                 GeographyID: this.geographyID,
-            } as WaterAccountContext)
-            .instance.result.then((result) => {
-                if (result) {
-                    waterAccount.WaterAccountName = result.WaterAccountName;
-                    waterAccount.ContactName = result.ContactName;
-                    waterAccount.ContactAddress = result.ContactAddress;
-                }
-            });
+            },
+            size: "sm",
+        });
+
+        dialogRef.afterClosed$.subscribe((result) => {
+            if (result) {
+                waterAccount.WaterAccountName = result.WaterAccountName;
+            }
+        });
     }
 
     public consolidateWaterAccounts() {
@@ -380,24 +412,26 @@ export class WaterAccountRequestChangesComponent implements OnInit {
                 RemovedParcelsCount: x.Parcels?.filter((y) => modifiedWaterAccountParcels[x.WaterAccountID].findIndex((z) => z.ParcelID == y.ParcelID) < 0).length ?? 0,
             } as ModifiedWaterAccountContext;
         });
-
-        this.modalService
-            .open(WaterAccountsConsolidateModalComponent, this.viewContainerRef, { ModalSize: ModalSizeEnum.Medium, ModalTheme: ModalThemeEnum.Light }, {
+        const dialogRef = this.dialogService.open(WaterAccountsConsolidateModalComponent, {
+            data: {
                 WaterAccounts: waterAccountModificationsModalContext,
                 GeographyID: this.geographyID,
-            } as WaterAccountModificationsContext)
-            .instance.result.then((confirmed) => {
-                if (confirmed) {
-                    this.isConsolidatingAccounts = true;
+            },
+            size: "sm",
+        });
 
-                    this.waterAccounts.forEach((x) => {
-                        x.Parcels = modifiedWaterAccountParcels[x.WaterAccountID];
-                    });
+        dialogRef.afterClosed$.subscribe((result) => {
+            if (result) {
+                this.isConsolidatingAccounts = true;
 
-                    this.updateWaterAccountZones();
-                    this.isConsolidatingAccounts = false;
-                }
-            });
+                this.waterAccounts.forEach((x) => {
+                    x.Parcels = modifiedWaterAccountParcels[x.WaterAccountID];
+                });
+
+                this.updateWaterAccountZones();
+                this.isConsolidatingAccounts = false;
+            }
+        });
     }
 
     public submitWaterAccountChanges() {
@@ -421,40 +455,43 @@ export class WaterAccountRequestChangesComponent implements OnInit {
 
         let hasInvalidZones = false;
         this.waterAccounts.forEach((waterAccount) => {
-            if (!waterAccount.Parcels || waterAccount.Parcels.length == 0) return;
-            const zoneID = waterAccount.Parcels[0].AllocationZone.ZoneID;
-            const conflictingZoneIndex = waterAccount.Parcels.findIndex((x) => x.AllocationZone.ZoneID != zoneID);
+            if (waterAccount.Parcels && waterAccount.Parcels.length != 0 && waterAccount.Parcels[0].AllocationZone != null) {
+                const zoneID = waterAccount.Parcels[0].AllocationZone?.ZoneID;
+                const conflictingZoneIndex = waterAccount.Parcels.findIndex((x) => x.AllocationZone.ZoneID != zoneID);
 
-            if (conflictingZoneIndex > 0) hasInvalidZones = true;
+                if (conflictingZoneIndex > 0) hasInvalidZones = true;
+            }
         });
-
-        this.modalService
-            .open(WaterAccountRequestChangesConfirmModalComponent, this.viewContainerRef, { ModalSize: ModalSizeEnum.Medium, ModalTheme: ModalThemeEnum.Light }, {
+        const dialogRef = this.dialogService.open(WaterAccountRequestChangesConfirmModalComponent, {
+            data: {
                 WaterAccounts: waterAccountModificationsModalContext,
                 GeographyID: this.geographyID,
                 HasInvalidZones: hasInvalidZones,
-            } as WaterAccountModificationsContext)
-            .instance.result.then((confirmed) => {
-                if (confirmed) {
-                    this.isLoadingSubmit = true;
+            },
+            size: "sm",
+        });
 
-                    const requestDto = new WaterAccountParcelsRequestChangesDto({
-                        WaterAccounts: this.waterAccounts,
-                        ParcelsToRemove: this.parcelsToRemove,
-                    });
+        dialogRef.afterClosed$.subscribe((result) => {
+            if (result) {
+                this.isLoadingSubmit = true;
 
-                    this.userService.geographiesGeographyIDUsersUserIDWaterAccountsPut(this.geographyID, this.selectedUserID, requestDto).subscribe({
-                        next: () => {
-                            this.isLoadingSubmit = false;
-                            this.waterAccountParcelIDsOnLoadJSON = null;
+                const requestDto = new WaterAccountParcelsRequestChangesDto({
+                    WaterAccounts: this.waterAccounts,
+                    ParcelsToRemove: this.parcelsToRemove,
+                });
 
-                            this.router.navigate(["water-dashboard", "water-accounts"]).then(() => {
-                                this.alertService.pushAlert(new Alert("Water account changes applied successfully.", AlertContext.Success));
-                            });
-                        },
-                        error: () => (this.isLoadingSubmit = false),
-                    });
-                }
-            });
+                this.geographyService.updateWaterAccountsOwnedByCurrentUserGeography(this.geographyID, this.selectedUserID, requestDto).subscribe({
+                    next: () => {
+                        this.isLoadingSubmit = false;
+                        this.waterAccountParcelIDsOnLoadJSON = null;
+
+                        this.router.navigate(["water-dashboard", "water-accounts"]).then(() => {
+                            this.alertService.pushAlert(new Alert("Water account changes applied successfully.", AlertContext.Success));
+                        });
+                    },
+                    error: () => (this.isLoadingSubmit = false),
+                });
+            }
+        });
     }
 }

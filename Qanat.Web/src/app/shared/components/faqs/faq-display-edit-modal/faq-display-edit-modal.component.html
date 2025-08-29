@@ -1,45 +1,38 @@
-<div>
+<div class="modal">
     <div class="modal-header">
         <div>
-            <h3 class="section-title">
-                <span><icon icon="ChatBubble"></icon></span>
-                Edit FAQs
-            </h3>
+            <h3 class="section-title">Edit FAQs</h3>
             <div class="copy copy-2">
                 Add, remove, and sort FAQs on this list. You can add only previously created FAQs. To create new FAQs, visit the
                 <a href="../platform-admin/frequently-asked-questions">Platform Admin</a>
                 .
             </div>
         </div>
-
-        <button type="button" class="close" (click)="close()">
-            <i class="fa fa-times-circle"></i>
-        </button>
     </div>
 
     <div class="modal-body">
         <div class="search">
             <h3 class="module-title">Add New FAQs</h3>
-            <div class="search-container">
-                <ngx-select-dropdown
-                    *ngIf="frequentlyAskedQuestions$ | async as faqs; else loading"
-                    [multiple]="true"
-                    [config]="dropdownConfig"
-                    name="selectedFaqs"
-                    [(ngModel)]="selectedFaqsModel"
-                    [options]="faqs"></ngx-select-dropdown>
-            </div>
+            @if (frequentlyAskedQuestions$ | async; as faqs) {
+                <div class="search-container">
+                    <ng-select
+                        class="form-control custom"
+                        [items]="faqs"
+                        bindLabel="QuestionText"
+                        name="selectedFaqs"
+                        [(ngModel)]="selectedFaqsModel"
+                        [multiple]="true"
+                        placeholder='(e.g. "What are Water Accounts...")'></ng-select>
+                </div>
+            } @else {
+                <div [loadingSpinner]="{ isLoading: true, loadingHeight: 300 }"></div>
+            }
         </div>
 
-        <ng-template #loading>
-            <div [loadingSpinner]="{ isLoading: true, loadingHeight: 300 }"></div>
-        </ng-template>
-
         <div class="card-body">
-            <faq-edit
-                *ngIf="frequentlyAskedQuestionForPage$ | async as frequentlyAskedQuestions"
-                [loadingSpinner]="{ isLoading: isLoadingSubmit }"
-                [frequentlyAskedQuestions]="selectedFaqsModel"></faq-edit>
+            @if (frequentlyAskedQuestionForPage$ | async; as frequentlyAskedQuestions) {
+                <faq-edit [loadingSpinner]="{ isLoading: isLoadingSubmit }" [frequentlyAskedQuestions]="selectedFaqsModel"></faq-edit>
+            }
         </div>
     </div>
 

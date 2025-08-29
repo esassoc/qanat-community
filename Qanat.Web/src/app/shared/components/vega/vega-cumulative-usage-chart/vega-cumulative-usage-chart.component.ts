@@ -1,13 +1,13 @@
 import { Component, Input, OnChanges, SimpleChanges } from "@angular/core";
 import { LoadingDirective } from "src/app/shared/directives/loading.directive";
+import { WaterTypeSupplyDto } from "src/app/shared/generated/model/models";
 import { MonthlyUsageSummaryDto } from "src/app/shared/generated/model/monthly-usage-summary-dto";
 import { WaterAccountWaterTypeMonthlySupplyDto } from "src/app/shared/generated/model/water-account-water-type-monthly-supply-dto";
 import { WaterTypeSimpleDto } from "src/app/shared/generated/model/water-type-simple-dto";
-import { vega, default as vegaEmbed, VisualizationSpec } from "vega-embed";
+import { default as vegaEmbed, VisualizationSpec } from "vega-embed";
 
 @Component({
     selector: "vega-cumulative-usage-chart",
-    standalone: true,
     imports: [LoadingDirective],
     templateUrl: "./vega-cumulative-usage-chart.component.html",
     styleUrls: ["./vega-cumulative-usage-chart.component.scss"],
@@ -19,7 +19,8 @@ export class VegaCumulativeUsageChartComponent implements OnChanges {
     @Input() usageLabel: string = "Usage";
     @Input() monthlyUsageSummaries: MonthlyUsageSummaryDto[];
 
-    @Input() waterTypesSupply: WaterAccountWaterTypeMonthlySupplyDto[];
+    @Input() waterTypesSupplyForWaterAccount: WaterAccountWaterTypeMonthlySupplyDto[];
+    @Input() waterTypesSupply: WaterTypeSupplyDto[];
 
     public chartData: {};
     public waterTypesWithData?: WaterTypeSimpleDto[];
@@ -32,7 +33,9 @@ export class VegaCumulativeUsageChartComponent implements OnChanges {
         this.isLoading = true;
 
         this.chartData = this.monthlyUsageSummaries;
-        if (this.waterTypesSupply) {
+        if (this.waterTypesSupplyForWaterAccount) {
+            this.populateWaterTypesSupplyChartDataForWaterAccount();
+        } else if (this.waterTypesSupply) {
             this.populateWaterTypesSupplyChartData();
         }
 
@@ -40,16 +43,16 @@ export class VegaCumulativeUsageChartComponent implements OnChanges {
         this.isLoading = false;
     }
 
-    private populateWaterTypesSupplyChartData() {
+    private populateWaterTypesSupplyChartDataForWaterAccount() {
         this.waterTypesWithData = [];
         let waterTypeIDsWithData = [];
 
         Object.keys(this.chartData).forEach((monthIndex) => {
             const effectiveMonth = parseInt(monthIndex) + 1;
-            this.waterTypesSupply
+            this.waterTypesSupplyForWaterAccount
                 .filter((x) => x.CumulativeSupplyByMonth !== null)
                 .forEach((waterTypeSupply) => {
-                    const previousWaterTypeSupplies = this.waterTypesSupply.filter(
+                    const previousWaterTypeSupplies = this.waterTypesSupplyForWaterAccount.filter(
                         (x) => x.CumulativeSupplyByMonth !== null && x.WaterTypeSortOrder < waterTypeSupply.WaterTypeSortOrder
                     );
                     const previousSupplyOffset = previousWaterTypeSupplies.reduce((a, b) => a + b.CumulativeSupplyByMonth[effectiveMonth], 0);
@@ -66,7 +69,38 @@ export class VegaCumulativeUsageChartComponent implements OnChanges {
                 });
         });
 
-        this.waterTypesWithData = this.waterTypesSupply.filter((x) => waterTypeIDsWithData.includes(x.WaterTypeID));
+        this.waterTypesWithData = this.waterTypesSupplyForWaterAccount
+            .filter((x) => waterTypeIDsWithData.includes(x.WaterTypeID))
+            .sort((a: any, b: any) => {
+                let aTotalCumulativeSupplyValue = 0;
+                let bTotalCumulativeSupplyValue = 0;
+
+                Object.keys(this.chartData).forEach((monthIndex) => {
+                    aTotalCumulativeSupplyValue += this.chartData[monthIndex][`CumulativeSupplyAmount${a.WaterTypeID}`];
+                    bTotalCumulativeSupplyValue += this.chartData[monthIndex][`CumulativeSupplyAmount${b.WaterTypeID}`];
+                });
+
+                return bTotalCumulativeSupplyValue - aTotalCumulativeSupplyValue;
+            });
+    }
+
+    private populateWaterTypesSupplyChartData() {
+        Object.keys(this.chartData).forEach((monthIndex) => {
+            this.waterTypesWithData = this.waterTypesSupply
+                .sort((a, b) => {
+                    return b.SortOrder - a.SortOrder;
+                })
+                .map((waterType) => {
+                    const previousWaterTypeSupplies = this.waterTypesSupply.filter((x) => x.SortOrder < waterType.SortOrder);
+                    const previousSupplyOffset = previousWaterTypeSupplies.reduce((a, b) => a + b.TotalSupply, 0);
+                    const previousSupplyDepthOffset = previousWaterTypeSupplies.reduce((a, b) => a + b.TotalSupplyDepth, 0);
+
+                    this.chartData[monthIndex][`CumulativeSupplyAmount${waterType.WaterTypeID}`] = waterType.TotalSupply + previousSupplyOffset;
+                    this.chartData[monthIndex][`CumulativeSupplyAmountDepth${waterType.WaterTypeID}`] = waterType.TotalSupplyDepth + previousSupplyDepthOffset;
+
+                    return waterType;
+                });
+        });
     }
 
     private setupChart() {
@@ -84,12 +118,13 @@ export class VegaCumulativeUsageChartComponent implements OnChanges {
                 ...this.createWaterTypeCalculatedFields(),
             ],
             config: {
-                legend: { orient: "bottom", labelFontSize: 12, symbolSize: 250, symbolStrokeWidth: 4, labelLimit: 300 },
+                legend: { orient: "right", labelFontSize: 12, symbolSize: 250, symbolStrokeWidth: 4, labelLimit: 300 },
             },
             width: "container",
             height: 400,
             padding: 0,
             layer: [
+                ...this.createWaterTypeChartLayers(),
                 {
                     mark: { type: "line", strokeWidth: 3, strokeDash: [3, 3] },
                     encoding: {
@@ -101,7 +136,11 @@ export class VegaCumulativeUsageChartComponent implements OnChanges {
                             axis: { labelFontSize: 12, labelAngle: -45, padding: 0 },
                         },
                         y: { field: "AverageCumulativeUsageValue", type: "quantitative", axis: { labelFontSize: 12, titleFontSize: 12 } },
-                        color: { datum: `Average ${this.usageLabel} (All Years)`, scale: { range: ["#aaa"] }, legend: { symbolDash: [3, 3] } },
+                        color: {
+                            datum: `Historic ${this.usageLabel} (All Years)`,
+                            scale: { range: ["#aaa"] },
+                            legend: { symbolDash: [3, 3], title: "Cumulative Usage", titleFontSize: 12, titlePadding: 5, titleLineHeight: 20, titleBaseline: "line-top" },
+                        },
                     },
                 },
                 {
@@ -131,7 +170,6 @@ export class VegaCumulativeUsageChartComponent implements OnChanges {
                         color: { datum: `${this.year} Cumulative ${this.usageLabel}`, scale: { range: ["#71c9e9"] } },
                     },
                 },
-                ...this.createWaterTypeChartLayers(),
                 {
                     mark: "rule",
                     encoding: {
@@ -142,9 +180,9 @@ export class VegaCumulativeUsageChartComponent implements OnChanges {
                         },
                         tooltip: [
                             { field: "EffectiveDate", type: "temporal", timeUnit: "utcyearmonth", scale: { type: "utc" }, title: "Date" },
-                            { field: "CurrentCumulativeUsageValue", type: "quantitative", title: `Cumulative ${this.usageLabel}`, format: ",.2f" },
-                            { field: "AverageCumulativeUsageValue", type: "quantitative", title: `Average ${this.usageLabel}`, format: ",.2f" },
                             ...this.createWaterTypeTooltipFields(),
+                            { field: "CurrentCumulativeUsageValue", type: "quantitative", title: `Cumulative ${this.usageLabel}`, format: ",.2f" },
+                            { field: "AverageCumulativeUsageValue", type: "quantitative", title: `Historic ${this.usageLabel}`, format: ",.2f" },
                         ],
                     },
                     params: [
@@ -166,7 +204,7 @@ export class VegaCumulativeUsageChartComponent implements OnChanges {
             },
         } as VisualizationSpec;
 
-        vegaEmbed("#vis", vegaSpec, { renderer: "svg" });
+        vegaEmbed("#vis", vegaSpec, { renderer: "svg", tooltip: { theme: "custom" } });
         this.isLoading = false;
     }
 
@@ -182,8 +220,15 @@ export class VegaCumulativeUsageChartComponent implements OnChanges {
     }
 
     public createWaterTypeTooltipFields() {
-        if (!this.waterTypesSupply) {
-            return this.supplyLabel ? [{ field: "TotalSupplyValue", type: "quantitative", title: `Total ${this.supplyLabel}`, format: ",.2f" }] : [];
+        if (!this.waterTypesSupplyForWaterAccount) {
+            return this.supplyLabel
+                ? [
+                      { field: "TotalSupplyValue", type: "quantitative", title: `Total ${this.supplyLabel}`, format: ",.2f" },
+                      ...this.waterTypesWithData.map((waterType) => {
+                          return { field: `CumulativeSupplyValue${waterType.WaterTypeID}`, type: "quantitative", title: waterType.WaterTypeName, format: ",.2f" };
+                      }),
+                  ]
+                : [];
         }
 
         return this.waterTypesWithData.map((waterType) => {
@@ -197,7 +242,7 @@ export class VegaCumulativeUsageChartComponent implements OnChanges {
     }
 
     public createWaterTypeChartLayers() {
-        if (!this.waterTypesSupply) {
+        if (!this.waterTypesSupplyForWaterAccount) {
             return [
                 {
                     mark: { type: "rule", strokeWidth: 3 },
@@ -206,10 +251,30 @@ export class VegaCumulativeUsageChartComponent implements OnChanges {
                         color: { datum: `Total ${this.supplyLabel}`, scale: { range: ["#ed6969"] } },
                     },
                 },
+                ...this.waterTypesSupply.map((waterType) => {
+                    return {
+                        mark: {
+                            type: "line",
+                            strokeDash: [6, 4],
+                        },
+                        encoding: {
+                            x: { field: "EffectiveDate", type: "temporal", timeUnit: "utcyearmonth" },
+                            y: { field: `CumulativeSupplyValue${waterType.WaterTypeID}`, type: "quantitative" },
+                            color: {
+                                datum: waterType.WaterTypeName,
+                                type: "nominal",
+                                scale: {
+                                    range: [waterType.WaterTypeColor],
+                                },
+                                legend: { symbolDash: [6, 4] },
+                            },
+                        },
+                    };
+                }),
             ];
         }
 
-        return this.waterTypesWithData.map((waterType) => {
+        return this.waterTypesWithData.map((waterType, i) => {
             return {
                 mark: {
                     type: "line",
@@ -224,7 +289,14 @@ export class VegaCumulativeUsageChartComponent implements OnChanges {
                         scale: {
                             range: [waterType.WaterTypeColor],
                         },
-                        legend: { symbolDash: [6, 4] },
+                        legend: {
+                            symbolDash: [6, 4],
+                            title: i == 0 ? "Cumulative Total Supply" : null,
+                            titleFontSize: 12,
+                            titlePadding: 5,
+                            titleLineHeight: 20,
+                            titleBaseline: "line-top",
+                        },
                     },
                 },
             };

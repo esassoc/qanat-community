@@ -15,8 +15,7 @@
         [rowData]="geospatialData$ | async"
         [columnDefs]="columnDefs"
         downloadFileName="geospatial-data"
-        [colIDsToExclude]="csvDownloadColIDsToExclude"
-        rowSelection="single"></qanat-grid>
+        [colIDsToExclude]="csvDownloadColIDsToExclude"></qanat-grid>
 
     <div class="map-section-wrapper pt-5">
         <h3 class="module-title">Preview Map</h3>
@@ -25,14 +24,16 @@
             Geospatial Data Layers are available on all maps within the platform. This map can be used to test and confirm the Geospatial Data Layers configuration.
         </div>
 
-        <div class="map-wrapper" *ngIf="geography$ | async as geography">
-            <parcel-map
-                mapID="parcelMap"
-                mapHeight="540px"
-                [cqlFilter]="mapCqlFilter"
-                [boundingBoxInput]="geography.BoundingBox"
-                [geographyID]="geography.GeographyID"></parcel-map>
-        </div>
+        @if (geography$ | async; as geography) {
+            <div class="map-wrapper">
+                <parcel-map
+                    mapID="parcelMap"
+                    mapHeight="540px"
+                    [cqlFilter]="mapCqlFilter"
+                    [boundingBoxInput]="geography.BoundingBox"
+                    [geographyID]="geography.GeographyID"></parcel-map>
+            </div>
+        }
     </div>
 </div>
 <div class="page-footer"></div>

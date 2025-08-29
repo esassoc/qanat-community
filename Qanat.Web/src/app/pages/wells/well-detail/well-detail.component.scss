@@ -58,3 +58,42 @@
 .map-container {
     z-index: 1;
 }
+
+.button-group {
+    padding: 0;
+    overflow: hidden;
+    &__item {
+        border: none;
+        border-radius: 0;
+    }
+}
+
+.tab-nav {
+    .btn-sm {
+        padding: 10px 15px 7px;
+        border-right: 1px solid $gray-200;
+
+        &:last-of-type {
+            border-right: none;
+            border-top-right-radius: 0.25rem;
+            border-bottom-right-radius: 0.25rem;
+        }
+    }
+
+    icon {
+        margin-right: 0.15rem;
+
+        ::ng-deep svg {
+            height: 12px;
+            width: 12px;
+        }
+    }
+}
+
+::ng-deep #documents .section-title {
+    font-size: clamp(1.25rem, 1.07rem + 0.89vw, 1.63rem);
+    font-weight: 700;
+    margin: 0;
+    padding: 0;
+    color: $black;
+}

@@ -66,33 +66,41 @@ begin
     join #parcelChanges pc on p.ParcelNumber = pc.ParcelNumber and p.GeographyID = pc.GeographyID
     where p.GeographyID = @geographyID and pc.ParcelStatusID != 2 -- only update if they are not inactive
 
-    -- set removed parcels to inactive and remove the water account association; we might have to revisit this if the effective year is less than the wap effective year
-    update wap
-    set wap.EndYear = case when @effectiveYear < wap.EffectiveYear then wap.EffectiveYear + 1 else @effectiveYear end
+    -- remove the water account associations
+	SELECT WAP.WaterAccountParcelID, p.ParcelID, WA.WaterAccountID, WA.WaterAccountNumber, WA.WaterAccountName, RP.ReportingPeriodID
+	INTO #WaterAccountParcelsToDelete
     from dbo.Parcel p
-    join #parcelChanges pc on p.ParcelNumber = pc.ParcelNumber and p.GeographyID = pc.GeographyID
+    join #parcelChanges			pc on p.ParcelNumber = pc.ParcelNumber and p.GeographyID = pc.GeographyID
     join dbo.WaterAccountParcel wap on p.ParcelID = wap.ParcelID and p.WaterAccountID = wap.WaterAccountID
-    where p.GeographyID = @geographyID and pc.ParcelStatusID = 2 and p.WaterAccountID is not null and wap.EndYear is null
+	join dbo.WaterAccount		wa on wa.WaterAccountID = wap.WaterAccountID
+	join dbo.ReportingPeriod	rp on rp.ReportingPeriodID = wap.ReportingPeriodID
+    where p.GeographyID = @geographyID and pc.ParcelStatusID = 2 and p.WaterAccountID is not null 
+	AND YEAR(rp.EndDate) = @effectiveYear
 
-    update p
-    set 
-        ParcelStatusID = pc.ParcelStatusID,
-        WaterAccountID = null
-    from dbo.Parcel p
-    join #parcelChanges pc on p.ParcelNumber = pc.ParcelNumber and p.GeographyID = pc.GeographyID
-    where p.GeographyID = @geographyID and pc.ParcelStatusID = 2
+	INSERT INTO dbo.ParcelWaterAccountHistory(GeographyID, ParcelID, ReportingPeriodID, FromWaterAccountID, FromWaterAccountNumber, FromWaterAccountName, Reason, CreateUserID, CreateDate)
+	SELECT @geographyID, WAPTD.ParcelID, WAPTD.ReportingPeriodID, WAPTD.WaterAccountID, WAPTD.WaterAccountNumber, WAPTD.WaterAccountName, 'Removed from parcel upload.', @uploadUserID, GETUTCDATE()
+	FROM #WaterAccountParcelsToDelete WAPTD
 
+	DELETE WAP FROM dbo.WaterAccountParcel WAP WHERE WAP.WaterAccountParcelID IN (SELECT WAPTD.WaterAccountParcelID FROM #WaterAccountParcelsToDelete WAPTD);
+
+	-- set parcel to Inactive
+	update p
+	set 
+		ParcelStatusID = pc.ParcelStatusID,
+		WaterAccountID = null
+	from dbo.Parcel p
+	join #parcelChanges pc on p.ParcelNumber = pc.ParcelNumber and p.GeographyID = pc.GeographyID
+	where p.GeographyID = @geographyID and pc.ParcelStatusID = 2
 
     -- log changes to ParcelOwnerHistory table; any change to OwnerName, OwnerAddress, or ParcelArea will be logged
-    insert into dbo.ParcelHistory(GeographyID, ParcelID, EffectiveYear, UpdateDate, UpdateUserID, OwnerName, OwnerAddress, ParcelArea, ParcelStatusID, IsReviewed, WaterAccountID)
-	select @geographyID, p.ParcelID, @effectiveYear, GETUTCDATE(), @uploadUserID, p.OwnerName, p.OwnerAddress, p.ParcelArea, p.ParcelStatusID,
+    insert into dbo.ParcelHistory(GeographyID, ParcelID, UpdateDate, UpdateUserID, OwnerName, OwnerAddress, ParcelArea, ParcelStatusID, IsReviewed)
+	select @geographyID, p.ParcelID, GETUTCDATE(), @uploadUserID, p.OwnerName, p.OwnerAddress, p.ParcelArea, p.ParcelStatusID,
 		case when (
 		LTRIM(RTRIM(isnull(p.OwnerName, ''))) != LTRIM(RTRIM(isnull(poh.OwnerName, '')))
         or LTRIM(RTRIM(isnull(p.OwnerAddress, ''))) != LTRIM(RTRIM(isnull(poh.OwnerAddress, '')))
         or cast(isnull(p.ParcelArea, 0) as decimal(10,2)) != isnull(poh.ParcelArea, 0)
 		or isnull(p.ParcelStatusID, 0) != isnull(poh.ParcelStatusID, 0)
-		) then 0 else 1 end as IsReviewed,
-        p.WaterAccountID
+		) then 0 else 1 end as IsReviewed
 	from dbo.Parcel p
 	left join 
     (
@@ -102,4 +110,18 @@ begin
     ) poh on p.ParcelID = poh.ParcelID and poh.Ranking = 1
 	where p.GeographyID = @geographyID
 	
+
+    --update geography's bounding box 
+    
+    declare @gsaboundary geometry
+    declare @extent geometry
+    select @gsaboundary = geometry::UnionAggregate(pg.Geometry4326)
+    from Parcel p
+    join ParcelGeometry pg on p.ParcelID = pg.ParcelID
+    where p.GeographyID = @geographyID
+
+    set @extent = @gsaboundary.STEnvelope().STBuffer(.03).STEnvelope()
+    update dbo.GeographyBoundary
+    set BoundingBox = @extent, GSABoundary = @gsaboundary
+    where GeographyID = @geographyID
 end

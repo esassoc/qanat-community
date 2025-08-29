@@ -2,10 +2,12 @@
     <ng-template #period>
         <div class="period-metadata">
             <h4>{{ allocationPlanPeriod.AllocationPeriodName }}</h4>
-            <div class="links mt-1" *ngIf="!readonly">
-                <button type="button" class="btn btn-text" (click)="openEditModal()">Edit</button>
-                <button type="button" class="btn btn-text text-danger" (click)="openDeleteModal()">Delete</button>
-            </div>
+            @if (!readonly) {
+                <div class="links mt-1">
+                    <button type="button" class="btn btn-text" (click)="openEditModal()">Edit</button>
+                    <button type="button" class="btn btn-text text-danger" (click)="openDeleteModal()">Delete</button>
+                </div>
+            }
         </div>
     </ng-template>
     <ng-template #slot>

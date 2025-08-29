@@ -1,6 +1,6 @@
-import { Component, OnInit, Inject, ChangeDetectorRef } from "@angular/core";
+import { Component, OnInit, Inject, ChangeDetectorRef, DOCUMENT } from "@angular/core";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
-import { AsyncPipe, DOCUMENT, NgIf } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { AuthenticationService } from "src/app/shared/services/authentication.service";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
@@ -24,8 +24,7 @@ import { GeographyMinimalDto } from "src/app/shared/generated/model/models";
     selector: "water-transactions-csv-upload-supply",
     templateUrl: "./water-transactions-csv-upload-supply.component.html",
     styleUrls: ["./water-transactions-csv-upload-supply.component.scss"],
-    standalone: true,
-    imports: [AsyncPipe, PageHeaderComponent, RouterLink, AlertDisplayComponent, FormsModule, ButtonComponent, NgSelectModule, FieldDefinitionComponent, NgIf],
+    imports: [AsyncPipe, PageHeaderComponent, RouterLink, AlertDisplayComponent, FormsModule, ButtonComponent, NgSelectModule, FieldDefinitionComponent]
 })
 export class WaterTransactionsCsvUploadSupplyComponent implements OnInit {
     public geography$: Observable<GeographyMinimalDto>;
@@ -54,7 +53,7 @@ export class WaterTransactionsCsvUploadSupplyComponent implements OnInit {
         this.geography$ = this.currentGeographyService.getCurrentGeography();
         this.waterTypes$ = this.geography$.pipe(
             switchMap((geography) => {
-                return this.waterTypeByGeographyService.geographiesGeographyIDWaterTypesGet(geography.GeographyID);
+                return this.waterTypeByGeographyService.getWaterTypesWaterTypeByGeography(geography.GeographyID);
             })
         );
     }
@@ -104,7 +103,7 @@ export class WaterTransactionsCsvUploadSupplyComponent implements OnInit {
             return;
         }
 
-        this.parcelSupplyByGeographyService.geographiesGeographyIDParcelSuppliesCsvPost(geography.GeographyID, this.fileUpload, this.effectiveDate, this.waterTypeID).subscribe(
+        this.parcelSupplyByGeographyService.newCSVUploadParcelSupplyByGeography(geography.GeographyID, this.fileUpload, this.effectiveDate, this.waterTypeID).subscribe(
             (response) => {
                 this.isLoadingSubmit = false;
 

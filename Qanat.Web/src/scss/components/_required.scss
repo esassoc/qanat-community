@@ -3,11 +3,10 @@
 .required {
     &::after {
         display: block;
-        content: "\f069";
+        content: "*";
         color: $red-default;
-        font-family: "Font Awesome 5 Free";
-        font-size: 0.5rem;
-        transform: translate3d(3px, -4px, 0);
+        font-size: 0.875rem;
+        transform: translate3d(1px, -3px, 0);
     }
 
     &-note {

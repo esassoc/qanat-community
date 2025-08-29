@@ -1,0 +1,170 @@
+﻿using NetTopologySuite.Geometries;
+using Qanat.Common.GeoSpatial;
+using Qanat.Models.DataTransferObjects;
+using System.Text.Json;
+
+namespace Qanat.EFModels.Entities
+{
+    public static class ParcelExtensionMethods
+    {
+        public static ParcelSimpleDto AsSimpleDto(this Parcel parcel)
+        {
+            var dto = new ParcelSimpleDto()
+            {
+                ParcelID = parcel.ParcelID,
+                GeographyID = parcel.GeographyID,
+                WaterAccountID = parcel.WaterAccountID,
+                ParcelNumber = parcel.ParcelNumber,
+                ParcelArea = parcel.ParcelArea,
+                ParcelStatusID = parcel.ParcelStatusID,
+                OwnerAddress = parcel.OwnerAddress,
+                OwnerName = parcel.OwnerName
+            };
+            return dto;
+        }
+
+        public static ParcelMinimalDto AsParcelMinimalDto(this Parcel parcel)
+        {
+            var parcelMinimalDto = new ParcelMinimalDto()
+            {
+                ParcelID = parcel.ParcelID,
+                GeographyID = parcel.GeographyID,
+                WaterAccountID = parcel.WaterAccountID,
+                ParcelNumber = parcel.ParcelNumber,
+                ParcelArea = parcel.ParcelArea,
+                ParcelStatusID = parcel.ParcelStatusID,
+                OwnerAddress = parcel.OwnerAddress,
+                OwnerName = parcel.OwnerName,
+                WaterAccount = parcel.WaterAccount?.AsDisplayDto(),
+                ParcelStatus = parcel.ParcelStatus.AsSimpleDto()
+            };
+            return parcelMinimalDto;
+        }
+
+        public static ParcelDisplayDto AsDisplayDto(this Parcel parcel)
+        {
+            return new ParcelDisplayDto
+            {
+                ParcelID = parcel.ParcelID,
+                ParcelNumber = parcel.ParcelNumber,
+                ParcelArea = parcel.ParcelArea,
+                GeographyID = parcel.GeographyID,
+                WaterAccountID = parcel.WaterAccountID
+            };
+        }
+
+        public static ParcelDetailDto AsDetailDto(this Parcel parcel)
+        {
+            return new ParcelDetailDto()
+            {
+                ParcelID = parcel.ParcelID,
+                GeographyID = parcel.GeographyID,
+                GeographyName = parcel.Geography.GeographyName,
+                WaterAccountID = parcel.WaterAccountID,
+                ParcelNumber = parcel.ParcelNumber,
+                ParcelArea = parcel.ParcelArea,
+                ParcelStatusID = parcel.ParcelStatusID,
+                OwnerAddress = parcel.OwnerAddress,
+                OwnerName = parcel.OwnerName,
+                WaterAccount = parcel.WaterAccount?.AsDisplayDto(),
+                ParcelStatus = parcel.ParcelStatus.AsSimpleDto(),
+                Zones = parcel.ParcelZones.Select(x => x.Zone.AsZoneMinimalDto()).ToList(),
+                WellsOnParcel = parcel.Wells.OrderBy(x => x.WellID).Select(x => x.AsSimpleDto()).ToList(),
+                IrrigatedByWells = parcel.WellIrrigatedParcels.OrderBy(x => x.WellID).Select(x => x.Well.AsSimpleDto()).ToList()
+            };
+        }
+
+        public static ParcelIndexGridDto AsIndexGridDto(this vParcelDetailed parcel)
+        {
+            return new ParcelIndexGridDto()
+            {
+                ParcelID = parcel.ParcelID,
+                GeographyID = parcel.GeographyID,
+                ParcelNumber = parcel.ParcelNumber,
+                ParcelArea = parcel.ParcelArea,
+                ParcelStatusID = parcel.ParcelStatusID,
+                ParcelStatusDisplayName = parcel.ParcelStatusDisplayName,
+                OwnerAddress = parcel.OwnerAddress,
+                OwnerName = parcel.OwnerName,
+                WaterAccountID = parcel.WaterAccountID,
+                WaterAccountName = parcel.WaterAccountName,
+                WaterAccountNumber = parcel.WaterAccountNumber,
+                ReportingPeriodID = parcel.ReportingPeriodID,
+                ZoneIDs = parcel.ZoneIDs,
+                CustomAttributes = string.IsNullOrWhiteSpace(parcel.CustomAttributes) ? null : JsonSerializer.Deserialize<Dictionary<string, string>>(parcel.CustomAttributes, GeoJsonSerializer.DefaultSerializerOptions),
+                WellsOnParcel = parcel.WellsOnParcel,
+                IrrigatedByWells = parcel.IrrigatedByWells
+            };
+        }
+        
+        public static ParcelPopupDto AsPopupDto(this Parcel parcel, int? reportingPeriodID = null)
+        {
+            var allocationPlanZoneGroup = parcel.Geography.GeographyAllocationPlanConfiguration?.ZoneGroup;
+            var zone = parcel.ParcelZones.SingleOrDefault(x => allocationPlanZoneGroup?.Zones.Select(y => y.ZoneID).Contains(x.ZoneID) ?? false);
+
+            var waterAccount = parcel.WaterAccount;
+            if (reportingPeriodID.HasValue)
+            {
+                waterAccount = parcel.WaterAccountParcels.FirstOrDefault(x => x.ReportingPeriodID == reportingPeriodID.Value)?.WaterAccount;
+            }
+
+            return new ParcelPopupDto
+            {
+                ParcelID = parcel.ParcelID,
+                ParcelNumber = parcel.ParcelNumber,
+                ParcelArea = parcel.ParcelArea,
+                WaterAccountID = waterAccount?.WaterAccountID,
+                WaterAccountName = waterAccount?.WaterAccountName,
+                WaterAccountNumber = waterAccount?.WaterAccountNumber,
+                GeographyName = parcel.Geography.GeographyName,
+                GeographyDisplayName = parcel.Geography.GeographyDisplayName,
+                AllocationZoneColor = zone?.Zone.ZoneColor,
+                AllocationZoneGroupName = allocationPlanZoneGroup?.ZoneGroupName,
+                AllocationZoneName = zone?.Zone.ZoneName,
+            };
+        }
+
+        public static ParcelWithGeoJSONDto AsParcelWithGeoJSONDto(this Parcel parcel)
+        {
+            return new ParcelWithGeoJSONDto
+            {
+                ParcelID = parcel.ParcelID,
+                ParcelNumber = parcel.ParcelNumber,
+                ParcelArea = parcel.ParcelArea,
+                WaterAccountID = parcel.WaterAccountID,
+                WaterAccountNameAndNumber = parcel.WaterAccount?.WaterAccountNumberAndName(),
+                GeoJSON = parcel.ParcelGeometry.Geometry4326.ToGeoJSON(),
+            };
+        }
+
+        public static ParcelWithGeometryDto AsParcelWithGeometryDto(this Parcel parcel)
+        {
+            return new ParcelWithGeometryDto
+            {
+                ParcelID = parcel.ParcelID,
+                ParcelNumber = parcel.ParcelNumber,
+                GeographyID = parcel.GeographyID,
+                GeometryWKT = parcel.ParcelGeometry?.GeometryNative.AsText(),
+                ParcelArea = parcel.ParcelArea,
+                ParcelStatus = parcel.ParcelStatus.ParcelStatusDisplayName,
+                WaterAccount = parcel.WaterAccount?.AsLinkDisplayDto()
+            };
+        }
+
+        public static ParcelSearchResultDto AsSearchResultDto(this Parcel parcel)
+        {
+            return new ParcelSearchResultDto()
+            {
+                WaterAccountID = parcel.WaterAccountID,
+                WaterAccountNumber = parcel.WaterAccount?.WaterAccountNumber,
+                WaterAccountName = parcel.WaterAccount?.WaterAccountName,
+                ContactName = parcel.OwnerName,
+                ContactAddress = parcel.OwnerAddress,
+                WaterAccountNameAndNumber = parcel.WaterAccount?.WaterAccountNumberAndName(),
+                ParcelID = parcel.ParcelID,
+                ParcelNumber = parcel.ParcelNumber
+            };
+        }
+
+    }
+}

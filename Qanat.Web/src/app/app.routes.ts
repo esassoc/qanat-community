@@ -40,7 +40,6 @@ import { ZoneGroupDetailComponent } from "./pages/supply-and-usage/zones/zone-gr
 import { WaterAccountBudgetsReportComponent } from "./pages/supply-and-usage/water-account-budgets-report/water-account-budgets-report.component";
 import { GrowerGuideComponent } from "./pages/grower-guide/grower-guide.component";
 import { ManagerGuideComponent } from "./pages/manager-guide/manager-guide.component";
-import { GettingStartedComponent } from "./pages/getting-started/getting-started.component";
 import { AllocationPlansConfigureComponent } from "./pages/configure/allocation-plans-configure/allocation-plans-configure.component";
 import { ScenarioActionAddAWellComponent as ScenarioRunAddAWellComponent } from "./pages/scenarios/scenario-run-add-a-well/scenario-run-add-a-well.component";
 import { DashboardScenarioPlannerComponent } from "./pages/scenarios/scenario-planner-layout-menu/scenario-planner-layout-menu.component";
@@ -50,7 +49,6 @@ import { ScenarioPlannerAllScenarioRunsComponent } from "./pages/scenarios/scena
 import { NotFoundComponent } from "./pages/not-found/not-found.component";
 import { ConfirmWellLocationComponent } from "./pages/well-registry-workflow/confirm-well-location/confirm-well-location.component";
 import { IrrigatedParcelsEditComponent } from "./pages/well-registry-workflow/irrigated-parcels-edit/irrigated-parcels-edit.component";
-import { wellRegistryEnabledGuard } from "./guards/geography-configuration/well-registry-enabled.guard";
 import { WellRegistrationDetailComponent } from "./pages/wells/well-registration-detail/well-registration-detail.component";
 import { GeographyLandingPageComponent } from "./pages/geography-landing-page/geography-landing-page.component";
 import { landingPageEnabledGuard } from "./guards/geography-configuration/landing-page-enabled.guard";
@@ -85,7 +83,7 @@ import { RasterUploadComponent } from "./pages/supply-and-usage/water-measuremen
 import { ActivityCenterComponent } from "./pages/supply-and-usage/activity-center/activity-center.component";
 import { AllocationPlanDetailComponent } from "./pages/supply-and-usage/allocation-plans/allocation-plan-detail/allocation-plan-detail.component";
 import { AllocationPlansComponent } from "./pages/supply-and-usage/allocation-plans/allocation-plans.component";
-import { MeterListComponent } from "./pages/supply-and-usage/meter-list/meter-list.component";
+import { MeterListComponent } from "./pages/wells/meter-list/meter-list.component";
 import { OpenetSyncIntegrationComponent } from "./pages/supply-and-usage/water-measurement-supply-and-usage-menu/openet-sync-integration/openet-sync-integration.component";
 import { ParcelBulkActionsComponent } from "./pages/parcels/parcel-bulk-actions/parcel-bulk-actions.component";
 import { ParcelsReviewChangesComponent } from "./pages/parcels/parcels-review-changes/parcels-review-changes.component";
@@ -96,7 +94,7 @@ import { SupplyAndUsageMenuLayoutComponent } from "./pages/supply-and-usage/supp
 import { UpdateParcelsConfirmComponent } from "./pages/parcels/dashboard-update-parcels/update-parcels-confirm/update-parcels-confirm.component";
 import { UpdateParcelsReviewComponent } from "./pages/parcels/dashboard-update-parcels/update-parcels-review/update-parcels-review.component";
 import { UpdateParcelsUploadComponent } from "./pages/parcels/dashboard-update-parcels/update-parcels-upload/update-parcels-upload.component";
-import { UploadUsageEntityGdbComponent } from "./pages/supply-and-usage/water-measurement-supply-and-usage-menu/upload-usage-entity-gdb/upload-usage-entity-gdb.component";
+import { UploadUsageLocationGdbComponent } from "./pages/supply-and-usage/usage-location-supply-and-usage-menu/upload-usage-location-gdb/upload-usage-location-gdb.component";
 import { WaterMeasurementSupplyAndUsageMenu } from "./pages/supply-and-usage/water-measurement-supply-and-usage-menu/water-measurement-supply-and-usage-menu";
 import { WaterAccountSuggestionsComponent } from "./pages/water-accounts/water-account-suggestions/water-account-suggestions.component";
 import { WaterTransactionsBulkCreateComponent } from "./pages/supply-and-usage/water-transactions/bulk-create/water-transactions-bulk-create.component";
@@ -123,36 +121,71 @@ import { RequestSupportComponent } from "./pages/request-support/request-support
 import { FeeCalculatorComponent } from "./pages/fee-calculator/fee-calculator.component";
 import { WellLocationEditComponent } from "./pages/wells/well-location-edit/well-location-edit.component";
 import { WellIrrigatedParcelsEditComponent } from "./pages/wells/well-irrigated-parcels-edit/well-irrigated-parcels-edit.component";
-import { SupportTicketInboxComponent } from "./pages/support-ticket-admin-pages/support-ticket-inbox/support-ticket-inbox.component";
+import { SupportTicketDetailComponent } from "./pages/support-ticket-admin-pages/support-ticket-detail/support-ticket-detail.component";
 import { NewsAndAnnouncementsComponent } from "./pages/news-and-announcements/news-and-announcements.component";
 import { WaterMeasurementSelfReportListComponent } from "./pages/water-accounts/water-measurement-self-report-list/water-measurement-self-report-list.component";
 import { WaterMeasurementSelfReportEditorComponent } from "./pages/water-accounts/water-measurement-self-report-editor/water-measurement-self-report-editor.component";
-import { ReviewSelfReportComponent } from "./pages/review-self-report/review-self-report.component";
+import { ReviewSelfReportComponent } from "./pages/supply-and-usage/review-self-report/review-self-report.component";
 import { ZoneGroupConfigureComponent } from "./pages/configure/zone-group-configure/zone-group-configure.component";
 import { WaterManagersConfigureComponent } from "./pages/configure/water-managers-configure/water-managers-configure.component";
 import { AboutComponent } from "./pages/about/about.component";
 import { ContactComponent } from "./pages/contact/contact.component";
 import { HelpComponent } from "./pages/help/help.component";
 import { LicenseComponent } from "./pages/license/license.component";
+import { GeographyUserListComponent } from "./pages/water-dashboard/geography-user-list/geography-user-list.component";
+import { UsageLocationListComponent } from "./pages/water-dashboard/usage-location-list/usage-location-list.component";
+import { UsageLocationSupplyAndUsageMenuComponent } from "./pages/supply-and-usage/usage-location-supply-and-usage-menu/usage-location-supply-and-usage-menu.component";
+import { MeterReadingEditComponent } from "./pages/wells/meter-reading-edit/meter-reading-edit.component";
+import { BulkSetWaterMeasurementsComponent } from "./pages/supply-and-usage/water-measurement-supply-and-usage-menu/bulk-set-water-measurements/bulk-set-water-measurements.component";
+import { MeterReadingCsvUploadComponent } from "./pages/meter-reading-csv-upload/meter-reading-csv-upload.component";
+import { StatementTemplateEditComponent } from "./pages/statement-template-edit/statement-template-edit.component";
+import { StatementTemplateListComponent } from "./pages/statement-template-list/statement-template-list.component";
+import { StatementBatchListComponent } from "./pages/supply-and-usage/statement-batch-list/statement-batch-list.component";
+import { StatementBatchCreateComponent } from "./pages/statement-batch-create/statement-batch-create.component";
+import { StatementBatchDetailComponent } from "./pages/supply-and-usage/statement-batch-detail/statement-batch-detail.component";
+import { FallowSelfReportListComponent } from "./pages/fallow-self-report-list/fallow-self-report-list.component";
+import { FallowSelfReportEditorComponent } from "./pages/fallow-self-report-editor/fallow-self-report-editor.component";
+import { CoverCropSelfReportListComponent } from "./pages/cover-crop-self-report-list/cover-crop-self-report-list.component";
+import { CoverCropSelfReportEditorComponent } from "./pages/cover-crop-self-report-editor/cover-crop-self-report-editor.component";
+import { CoverCropSelfReportReviewComponent } from "./pages/supply-and-usage/cover-crop-self-report-review/cover-crop-self-report-review.component";
+import { WaterDashboardActivityCenterComponent } from "./pages/water-dashboard/water-dashboard-activity-center/water-dashboard-activity-center.component";
+import { FallowSelfReportReviewComponent } from "./pages/supply-and-usage/fallow-self-report-review/fallow-self-report-review.component";
+import { UsageLocationTypeConfigureComponent } from "./pages/configure/usage-location-type-configure/usage-location-type-configure.component";
+import { UsageLocationBulkActionsComponent } from "./pages/supply-and-usage/usage-location-supply-and-usage-menu/usage-location-bulk-actions/usage-location-bulk-actions.component";
+import { UploadUsageLocationColumnReviewComponent } from "./pages/supply-and-usage/usage-location-supply-and-usage-menu/upload-usage-location-column-review/upload-usage-location-column-review.component";
+import { SelfReportingConfigureComponent } from "./pages/configure/self-reporting-configure/self-reporting-configure.component";
+import { WaterAccountContactListComponent } from "./pages/water-dashboard/water-account-contact-list/water-account-contact-list.component";
+import { WaterAccountContactDetailComponent } from "./pages/water-account-contacts/water-account-contact-detail/water-account-contact-detail.component";
+import { WaterAccountContactBulkActionsComponent } from "src/app/pages/water-account-contacts/water-account-contact-bulk-actions/water-account-contact-bulk-actions.component";
+import { TermsOfServiceComponent } from "./pages/terms-of-service/terms-of-service.component";
+import { GettingStartedWithTheApiComponent } from "src/app/pages/getting-started-with-the-api/getting-started-with-the-api.component";
 
 export const routeParams = {
-    userID: "userID",
-    fieldDefinitionID: "fieldDefinitionID",
-    parcelID: "parcelID",
-    tagID: "tagID",
-    wellRegistrationID: "wellRegistrationID",
-    wellID: "wellID",
-    modelShortName: "modelID",
-    scenarioShortName: "scenarioID",
-    scenarioRunID: "scenarioRunID",
-    geographyName: "geographyName",
-    waterAccountID: "waterAccountID",
+    coverCropSelfReportID: "coverCropSelfReportID",
     externalMapLayerID: "externalMapLayerID",
+    fallowSelfReportID: "fallowSelfReportID",
+    fieldDefinitionID: "fieldDefinitionID",
+    geographyID: "geographyID",
+    geographyName: "geographyName",
+    meterReadingID: "meterReadingID",
+    modelShortName: "modelID",
+    parcelID: "parcelID",
+    reportingPeriodID: "reportingPeriodID",
+    scenarioRunID: "scenarioRunID",
+    scenarioShortName: "scenarioID",
+    selfReportID: "selfReportID",
+    statementBatchID: "statementBatchID",
+    statementTemplateID: "statementTemplateID",
+    supportTicketID: "supportTicketID",
+    tagID: "tagID",
+    userID: "userID",
+    waterAccountID: "waterAccountID",
+    waterTypeSlug: "waterTypeSlug",
+    wellID: "wellID",
+    wellRegistrationID: "wellRegistrationID",
     zoneGroupSlug: "zoneGroupSlug",
     zoneSlug: "zoneSlug",
-    waterTypeSlug: "waterTypeSlug",
-    supportTicketID: "supportTicketID",
-    selfReportID: "selfReportID",
+    waterAccountContactID: "waterAccountContactID",
 };
 
 export const routes: Routes = [
@@ -184,22 +217,74 @@ export const routes: Routes = [
                 component: GeospatialDataCreateComponent,
                 canDeactivate: [UnsavedChangesGuard],
             },
-            { path: "landing-page", title: "Landing Page", component: LandingPageConfigureComponent, canDeactivate: [UnsavedChangesGuard] },
+            { path: "account-signup", title: "Account Sign-up", component: LandingPageConfigureComponent, canDeactivate: [UnsavedChangesGuard] },
             { path: "meter-data", title: "Meter Data", component: MeterDataConfigureComponent, canDeactivate: [UnsavedChangesGuard] },
             { path: "reporting-periods", title: "Reporting Periods", component: ReportingPeriodConfigureComponent, canDeactivate: [UnsavedChangesGuard] },
+            { path: "self-reporting", title: "Self Reporting", component: SelfReportingConfigureComponent, canDeactivate: [UnsavedChangesGuard] },
             { path: "setup", component: GeographySetupComponent, title: "Setup", canDeactivate: [UnsavedChangesGuard] },
+            { path: "statement-templates", component: StatementTemplateListComponent, title: "Statement Templates", canDeactivate: [UnsavedChangesGuard] },
+            { path: "usage-location-types", title: "Usage Location Types", component: UsageLocationTypeConfigureComponent, canDeactivate: [UnsavedChangesGuard] },
             { path: "water-managers", component: WaterManagersConfigureComponent, title: "Water Managers", canDeactivate: [UnsavedChangesGuard] },
             { path: "water-supply", title: "Water Supply", component: WaterSupplyConfigureComponent, canDeactivate: [UnsavedChangesGuard] },
             { path: "well-registry", title: "Well Registry", component: WellRegistryConfigureComponent },
             { path: "zones", title: "Zones", component: ZoneGroupConfigureComponent, canDeactivate: [UnsavedChangesGuard] },
         ],
     },
+    { path: `configure/:${routeParams.geographyName}/statement-templates/new`, component: StatementTemplateEditComponent, canDeactivate: [UnsavedChangesGuard] },
+    {
+        path: `configure/:${routeParams.geographyName}/statement-templates/:${routeParams.statementTemplateID}/edit`,
+        component: StatementTemplateEditComponent,
+        canDeactivate: [UnsavedChangesGuard],
+    },
+    {
+        path: "contacts",
+        canActivate: [MsalGuard],
+        children: [
+            { path: "", redirectTo: "/water-dashboard/contacts", pathMatch: "full" },
+            {
+                path: `:${routeParams.geographyName}/bulk-actions`,
+                title: "Bulk Contact Actions",
+                component: WaterAccountContactBulkActionsComponent,
+            },
+            {
+                path: `:${routeParams.waterAccountContactID}`,
+                title: "Contact Details",
+                component: WaterAccountContactDetailComponent,
+                canActivate: [MsalGuard],
+            },
+        ],
+    },
+    { path: "cover-crop-self-reports", title: "Cover Crop Self Reports", component: CoverCropSelfReportListComponent, canActivate: [MsalGuard] },
+    {
+        path: `geographies/:${routeParams.geographyID}/reporting-periods/:${routeParams.reportingPeriodID}/cover-crop-self-reports/:${routeParams.coverCropSelfReportID}`,
+        title: "Cover Crop Self Report",
+        component: CoverCropSelfReportEditorComponent,
+        canActivate: [MsalGuard],
+    },
+    {
+        path: `review-cover-crop-self-reports/:${routeParams.geographyName}`,
+        title: "Review Cover Crop Self Reports",
+        component: CoverCropSelfReportReviewComponent,
+        canActivate: [MsalGuard],
+    },
+    { path: "fallow-self-reports", title: "Fallow Self Reports", component: FallowSelfReportListComponent, canActivate: [MsalGuard] },
+    {
+        path: `geographies/:${routeParams.geographyID}/reporting-periods/:${routeParams.reportingPeriodID}/fallow-self-reports/:${routeParams.fallowSelfReportID}`,
+        title: "Fallow Self Report",
+        component: FallowSelfReportEditorComponent,
+        canActivate: [MsalGuard],
+    },
+    {
+        path: `review-fallow-self-reports/:${routeParams.geographyName}`,
+        title: "Review Fallow Self Reports",
+        component: FallowSelfReportReviewComponent,
+        canActivate: [MsalGuard],
+    },
     { path: "geographies", title: "Geographies", component: GeographiesComponent },
     {
         path: `geographies/:${routeParams.geographyName}`,
         title: "Geography",
         component: GeographyMenuLayoutComponent,
-
         children: [
             { path: "", redirectTo: "overview", pathMatch: "full" },
             {
@@ -224,6 +309,7 @@ export const routes: Routes = [
             { path: "support", title: "Support", component: GeographySupportComponent },
         ],
     },
+    { path: "getting-started-with-the-api", title: "Getting Started with the API", component: GettingStartedWithTheApiComponent, canActivate: [MsalGuard] },
     {
         path: `:${routeParams.geographyName}/claim-water-accounts`,
         title: "Onboard",
@@ -253,8 +339,15 @@ export const routes: Routes = [
                 title: "Edit Label Definition",
             },
             { path: "users", component: UserListComponent, title: "Users" },
-            { path: `users/:${routeParams.userID}`, component: UserDetailComponent, title: "User Detail", data: { displayProfileEdit: false } },
+            { path: `users/:${routeParams.userID}`, component: UserDetailComponent, title: "User Detail", data: { displayProfileEdit: false, geographySpecific: false } },
         ],
+    },
+    {
+        path: `geographies/:${routeParams.geographyName}/users/:${routeParams.userID}`,
+        component: UserDetailComponent,
+        title: "User Detail",
+        canActivate: [MsalGuard, withGeographyFlagGuard(FlagEnum.HasManagerDashboard)],
+        data: { displayProfileEdit: false, geographySpecific: true },
     },
     {
         path: "profile",
@@ -313,6 +406,12 @@ export const routes: Routes = [
         ],
     },
     {
+        path: `geographies/:${routeParams.geographyName}/bulk-upload-meter-readings`,
+        title: "Bulk Upload Meter Readings",
+        component: MeterReadingCsvUploadComponent,
+        canActivate: [MsalGuard, withGeographyFlagGuard(FlagEnum.HasManagerDashboard)],
+    },
+    {
         path: "supply-and-usage",
         component: SupplyAndUsageMenuLayoutComponent,
         canActivate: [MsalGuard],
@@ -338,6 +437,9 @@ export const routes: Routes = [
                     },
                 ],
             },
+            { path: "statements", title: "Statements", component: StatementBatchListComponent },
+            { path: "statements/new", title: "New Statement Batch", component: StatementBatchCreateComponent },
+            { path: `statements/:${routeParams.statementBatchID}`, title: "Statement Batch", component: StatementBatchDetailComponent },
             { path: "statistics", title: "Statistics", component: StatisticsComponent, canActivate: [MsalGuard, withGeographyFlagGuard(FlagEnum.HasManagerDashboard)] },
             {
                 path: "water-account-budgets-report",
@@ -345,11 +447,14 @@ export const routes: Routes = [
                 canActivate: [MsalGuard, withGeographyFlagGuard(FlagEnum.HasManagerDashboard)],
                 component: WaterAccountBudgetsReportComponent,
             },
+            { path: "usage-locations", title: "Usage Locations", component: UsageLocationSupplyAndUsageMenuComponent },
+            { path: "usage-locations/upload-usage-location-gdb", component: UploadUsageLocationGdbComponent, title: "Upload Usage Location GDB" },
+            { path: "usage-locations/upload-usage-location-gdb/review", component: UploadUsageLocationColumnReviewComponent, title: "Upload Usage Location GDB" },
             { path: "water-measurements", title: "Water Measurements", component: WaterMeasurementSupplyAndUsageMenu },
-            { path: "water-measurements/parcels/upload-usage-entity-gdb", component: UploadUsageEntityGdbComponent, title: "Upload Usage Entity GDB" },
             { path: "water-measurements/openet-integration", title: "OpenET Integration", component: OpenetSyncIntegrationComponent },
             { path: "water-measurements/raster-upload", title: "Upload Raster", component: RasterUploadComponent },
             { path: "water-measurements/upload-water-measurements", title: "Upload Water Measurements", component: WaterTransactionsCsvUploadUsageComponent },
+            { path: "water-measurements/bulk-set", title: "Bulk Set Water Measurements", component: BulkSetWaterMeasurementsComponent },
             { path: "water-supply", title: "Supply", component: WaterTransactionsComponent },
             { path: "water-supply/bulk-new", title: "Bulk Create Transactions", component: WaterTransactionsBulkCreateComponent },
             { path: "water-supply/csv-upload/supply", title: "Upload Supply", component: WaterTransactionsCsvUploadSupplyComponent },
@@ -363,6 +468,12 @@ export const routes: Routes = [
                 canActivate: [MsalGuard, withGeographyFlagGuard(FlagEnum.HasManagerDashboard)],
             },
         ],
+    },
+    {
+        path: `usage-location-bulk-actions/:${routeParams.geographyName}`,
+        title: "Usage Location Bulk Actions",
+        component: UsageLocationBulkActionsComponent,
+        canActivate: [MsalGuard, withGeographyFlagGuard(FlagEnum.HasManagerDashboard)],
     },
     {
         path: "parcels",
@@ -411,14 +522,20 @@ export const routes: Routes = [
             },
         ],
     },
-    { path: "support-tickets", title: "Support Ticket", component: SupportTicketListComponent },
-    { path: `support-tickets/:${routeParams.supportTicketID}`, title: "Inbox", component: SupportTicketInboxComponent },
+    { path: "support-tickets", title: "Inbox", component: SupportTicketListComponent, canActivate: [MsalGuard] },
+    { path: `support-tickets/:${routeParams.supportTicketID}`, title: "Support Ticket", component: SupportTicketDetailComponent, canActivate: [MsalGuard] },
     {
         path: "water-dashboard",
         title: "Water Dashboard",
         canActivate: [MsalGuard],
         children: [
             { path: "", redirectTo: "water-accounts", pathMatch: "full" },
+            {
+                path: "activity-center",
+                title: "Activity Center",
+                component: WaterDashboardActivityCenterComponent,
+                canActivate: [MsalGuard],
+            },
             {
                 path: "water-accounts",
                 title: "Water Accounts",
@@ -436,6 +553,22 @@ export const routes: Routes = [
                 title: "Wells",
                 component: WellListComponent,
                 canActivate: [MsalGuard],
+            },
+            {
+                path: "usage-locations",
+                title: "Usage Locations",
+                component: UsageLocationListComponent,
+                canActivate: [MsalGuard],
+            },
+            {
+                path: "users",
+                title: "Users",
+                component: GeographyUserListComponent,
+            },
+            {
+                path: "contacts",
+                title: "Contacts",
+                component: WaterAccountContactListComponent,
             },
         ],
     },
@@ -488,50 +621,72 @@ export const routes: Routes = [
         path: "wells",
         children: [
             { path: "", redirectTo: "/water-dashboard/wells", pathMatch: "full" },
-            { path: `:${routeParams.geographyName}/meters`, title: "Meters", component: MeterListComponent },
+            { path: `:${routeParams.geographyName}/meters`, title: "Meters", component: MeterListComponent, canActivate: [MsalGuard] },
             {
                 path: `:${routeParams.geographyName}/reference-wells`,
                 title: "Reference Wells",
                 component: ReferenceWellsListComponent,
-                canActivate: [withGeographyRolePermissionGuard(PermissionEnum.WellRights, RightsEnum.Read)],
+                canActivate: [MsalGuard, withGeographyRolePermissionGuard(PermissionEnum.WellRights, RightsEnum.Read)],
             },
-            { path: `:${routeParams.geographyName}/reference-wells/upload`, title: "Bulk Upload Reference Wells", component: ReferenceWellsUploadComponent },
+            {
+                path: `:${routeParams.geographyName}/reference-wells/upload`,
+                title: "Bulk Upload Reference Wells",
+                component: ReferenceWellsUploadComponent,
+                canActivate: [MsalGuard, withGeographyRolePermissionGuard(PermissionEnum.WellRights, RightsEnum.Update)],
+            },
             {
                 path: `:${routeParams.geographyName}/review-submitted-wells`,
                 title: "Review Submitted Wells",
                 component: ReviewSubmittedWellsComponent,
-                canActivate: [withGeographyRolePermissionGuard(PermissionEnum.WellRights, RightsEnum.Read)],
+                canActivate: [MsalGuard, withGeographyRolePermissionGuard(PermissionEnum.WellRights, RightsEnum.Read)],
             },
             { path: `:${routeParams.geographyName}/bulk-upload`, title: "Bulk Upload Wells", component: WellBulkUploadComponent },
             {
                 path: `:${routeParams.geographyName}/well-registrations`,
                 title: "Well Registrations",
                 component: WellRegistrationListComponent,
-                canActivate: [withGeographyRolePermissionGuard(PermissionEnum.WellRights, RightsEnum.Read)],
+                canActivate: [MsalGuard, withGeographyRolePermissionGuard(PermissionEnum.WellRights, RightsEnum.Read)],
             },
             {
                 path: `:${routeParams.geographyName}/well-registrations/:${routeParams.wellRegistrationID}`,
                 title: "Well Registration",
                 component: WellRegistrationDetailComponent,
+                canActivate: [MsalGuard],
             },
             {
-                path: `:${routeParams.wellID}`,
-                component: WellDetailComponent,
+                path: `:${routeParams.wellID}/edit-meter-reading/:${routeParams.meterReadingID}`,
+                component: MeterReadingEditComponent,
+                canActivate: [MsalGuard],
+                canDeactivate: [UnsavedChangesGuard],
             },
+            {
+                path: `:${routeParams.wellID}/new-meter-reading`,
+                component: MeterReadingEditComponent,
+                canActivate: [MsalGuard],
+                canDeactivate: [UnsavedChangesGuard],
+            },
+
             {
                 path: `:${routeParams.wellID}/update-location`,
                 component: WellLocationEditComponent,
+                canActivate: [MsalGuard],
             },
             {
                 path: `:${routeParams.wellID}/update-irrigated-parcels`,
                 component: WellIrrigatedParcelsEditComponent,
+                canActivate: [MsalGuard],
+            },
+            {
+                path: `:${routeParams.wellID}`,
+                component: WellDetailComponent,
+                canActivate: [MsalGuard],
             },
         ],
     },
     {
         path: `well-registry/:${routeParams.geographyName}`,
         title: "Well Registry",
-        canActivate: [MsalGuard, wellRegistryEnabledGuard],
+        canActivate: [MsalGuard],
         children: [
             { path: "", redirectTo: "new", pathMatch: "full" },
             {
@@ -548,6 +703,7 @@ export const routes: Routes = [
                 path: `well/:${routeParams.wellRegistrationID}/edit`,
                 title: "Edit Well",
                 component: WellRegistryWorkflowComponent,
+                canActivate: [MsalGuard],
                 children: [
                     { path: "", redirectTo: "select-parcel", pathMatch: "full" },
                     { path: "attachments", title: "Attachments", component: WellAttachmentsComponent },
@@ -558,7 +714,12 @@ export const routes: Routes = [
                     { path: "location", title: "Location", component: WellLocationComponent },
                     { path: "select-parcel", title: "Select a Parcel", component: WellRegistrySelectParcelComponent },
                     { path: "submit", title: "Submit", component: SubmitComponent },
-                    { path: "supporting-information", title: "Supporting Information", component: SupportingWellInfoComponent, canDeactivate: [UnsavedChangesGuard] },
+                    {
+                        path: "supporting-information",
+                        title: "Supporting Information",
+                        component: SupportingWellInfoComponent,
+                        canDeactivate: [UnsavedChangesGuard],
+                    },
                 ],
             },
         ],
@@ -573,10 +734,10 @@ export const routes: Routes = [
     { path: "create-user-callback", component: CreateUserCallbackComponent },
     { path: "example-map", title: "Example Map", component: ExampleMapComponent, canActivate: [MsalGuard, withGeographyFlagGuard(FlagEnum.HasManagerDashboard)] },
     { path: "frequently-asked-questions", title: "Frequently Asked Questions", component: FrequentlyAskedQuestionsComponent },
-    { path: "getting-started", title: "Getting Started", component: GettingStartedComponent },
     { path: "grower-guide", title: "Grower Guide", component: GrowerGuideComponent },
     { path: "help", title: "Help", component: HelpComponent },
     { path: "license", title: "License", component: LicenseComponent },
+    { path: "terms-of-service", title: "Terms of Service", component: TermsOfServiceComponent },
     { path: "manager-guide", title: "Manager Guide", component: ManagerGuideComponent },
     { path: "news-and-announcements", title: "News & Announcements", component: NewsAndAnnouncementsComponent },
     { path: "not-found", title: "Page Not Found", component: NotFoundComponent },

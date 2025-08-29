@@ -7,4 +7,5 @@ public class ZoneDisplayDto
     public string ZoneName { get; set; }
     public string ZoneColor { get; set; }
     public string ZoneAccentColor { get; set; }
+    public bool ZoneGroupDisplayToAccountHolders { get; set; }
 }

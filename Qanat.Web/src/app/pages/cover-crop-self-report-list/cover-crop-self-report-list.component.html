@@ -1,0 +1,173 @@
+<div class="page-wrapper">
+    <page-header pageTitle="Cover Crop Self-Reporting" icon="Clipboard"> </page-header>
+
+    <div class="page-content grid-12">
+        @if (geographies$ | async; as currentUserGeographies) {
+            <div class="rich-text-container g-col-12">
+                <icon class="info-icon" icon="Info"></icon>
+                <custom-rich-text [customRichTextTypeID]="richTextTypeID" style="width: 100%"></custom-rich-text>
+            </div>
+            <div class="filter-container g-col-12 grid-12">
+                <div class="g-col-2">
+                    <label class="field-label">Geography</label>
+                    @if (geographies$ | async; as currentUserGeographies) {
+                        <ng-select
+                            name="Geography"
+                            [(ngModel)]="selectedGeography"
+                            (ngModelChange)="onGeographySelected($event)"
+                            [compareWith]="compareGeography"
+                            [items]="currentUserGeographies"
+                            [clearable]="false"
+                            [searchable]="false"
+                            bindLabel="GeographyName"
+                            class="custom">
+                        </ng-select>
+                    }
+                </div>
+                <div class="g-col-2">
+                    <label class="field-label">Reporting Period</label>
+                    @if (reportingPeriods$ | async; as reportingPeriods) {
+                        <ng-select
+                            name="ReportingPeriod"
+                            [(ngModel)]="selectedReportingPeriod"
+                            (ngModelChange)="onReportingPeriodSelected($event)"
+                            [items]="reportingPeriods"
+                            [clearable]="false"
+                            [searchable]="false"
+                            bindLabel="Name"
+                            class="custom">
+                        </ng-select>
+                    }
+                </div>
+            </div>
+            <app-alert-display></app-alert-display>
+            <div class="self-reports-container grid-12 g-col-12" [loadingSpinner]="{ isLoading: isLoading, loadingHeight: 700 }">
+                <div class="self-reports-table-header grid-12 g-col-12">
+                    <div class="g-col-2">Status</div>
+                    <div class="g-col-4">Water Account</div>
+                    <div class="g-col-2"># of Usage Locations</div>
+                    <div class="g-col-2">Usage Location Area (acres)</div>
+                    <div class="g-col-2">Action</div>
+                </div>
+                <div class="self-reports-table-body">
+                    @for (selfReport of coverCropSelfReports$ | async; track selfReport.WaterAccount.WaterAccountID) {
+                        <div class="self-reports-table-row grid-12 g-col-12">
+                            <div class="g-col-2">
+                                <div class="status-circle-wrapper status-submitted" [class]="selfReport?.SelfReportStatus?.SelfReportStatusName?.toLowerCase()">
+                                    <div class="status-circle-inner"></div>
+                                </div>
+
+                                {{ selfReport?.SelfReportStatus?.SelfReportStatusDisplayName ?? "Not Started" }}
+                            </div>
+
+                            <div class="g-col-4">
+                                <a [routerLink]="['/water-accounts', selfReport.WaterAccount.WaterAccountID]">
+                                    <water-account-title
+                                        [waterAccountName]="selfReport.WaterAccount.WaterAccountName"
+                                        [waterAccountNumber]="selfReport.WaterAccount.WaterAccountNumber.toString()"></water-account-title>
+                                </a>
+                            </div>
+                            <div class="g-col-2">
+                                {{ selfReport.UsageLocations.length }}
+                            </div>
+                            <div class="g-col-2">
+                                {{ selfReport.UsageLocations | sum: "Area" | number: "1.0-2" }}
+                            </div>
+                            <div class="g-col-2">
+                                @if (selfReport.CurrentUserCanEdit) {
+                                    @if (!selfReport.SelfReportStatus) {
+                                        <button class="btn btn-primary" (click)="createCoverCropSelfReport(selfReport)" [disabled]="selfReport.UsageLocations.length == 0">
+                                            Start
+                                        </button>
+                                    } @else if (selfReport.SelfReportStatus.SelfReportStatusID === SelfReportStatusEnum.Draft) {
+                                        <button
+                                            class="btn btn-primary"
+                                            [routerLink]="[
+                                                '/geographies',
+                                                selectedGeography.GeographyID,
+                                                'reporting-periods',
+                                                selectedReportingPeriod.ReportingPeriodID,
+                                                'cover-crop-self-reports',
+                                                selfReport.WaterAccountCoverCropStatusID,
+                                            ]">
+                                            Continue
+                                        </button>
+                                    } @else if (
+                                        selfReport.SelfReportStatus.SelfReportStatusID === SelfReportStatusEnum.Submitted ||
+                                        selfReport.SelfReportStatus.SelfReportStatusID === SelfReportStatusEnum.Approved
+                                    ) {
+                                        <button
+                                            class="btn btn-secondary"
+                                            [routerLink]="[
+                                                '/geographies',
+                                                selectedGeography.GeographyID,
+                                                'reporting-periods',
+                                                selectedReportingPeriod.ReportingPeriodID,
+                                                'cover-crop-self-reports',
+                                                selfReport.WaterAccountCoverCropStatusID,
+                                            ]">
+                                            View
+                                        </button>
+                                    } @else if (selfReport.SelfReportStatus.SelfReportStatusID === SelfReportStatusEnum.Returned) {
+                                        <button
+                                            class="btn btn-secondary"
+                                            [routerLink]="[
+                                                '/geographies',
+                                                selectedGeography.GeographyID,
+                                                'reporting-periods',
+                                                selectedReportingPeriod.ReportingPeriodID,
+                                                'cover-crop-self-reports',
+                                                selfReport.WaterAccountCoverCropStatusID,
+                                            ]">
+                                            Revise
+                                        </button>
+                                    }
+                                }
+                                @if (selfReport.SelfReportStatus) {
+                                    <div class="toggle" [expandCollapse]="lineItemTable">
+                                        <i class="fas fa-angle-up"></i>
+                                    </div>
+                                }
+                            </div>
+                            <div class="line-item-table-container" #lineItemTable>
+                                <table class="table">
+                                    <colgroup>
+                                        <col style="width: 20%" />
+                                        <col style="width: 20%" />
+                                        <col style="width: 20%" />
+                                        <col style="width: 40%" />
+                                    </colgroup>
+                                    <thead>
+                                        <tr>
+                                            <th>Usage Location</th>
+                                            <th>Usage Location Type</th>
+                                            <th>Area (acres)</th>
+                                            <th>Cover Crop Note</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (usageLocation of selfReport.UsageLocations; track usageLocation.UsageLocationID) {
+                                            <tr>
+                                                <td>{{ usageLocation.Name }}</td>
+                                                <td>{{ usageLocation.UsageLocationType.Name }}</td>
+                                                <td>{{ usageLocation.Area | number: "1.0-2" }}</td>
+                                                <td>{{ usageLocation.CoverCropNote }}</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        } @else if (!geographiesLoading && !currentUserHasGeographiesThatAllowCoverCropSelfReporting) {
+            <note noteType="warning">
+                Your geography does not have Cover Crop Self-Reporting enabled at this time.
+                <a [routerLink]="['/request-support']" style="text-decoration: underline">Request Support</a> to ask your Water Managers about this functionality.
+            </note>
+        } @else {
+            <div [loadingSpinner]="{ isLoading: true, loadingHeight: 200 }"></div>
+        }
+    </div>
+</div>

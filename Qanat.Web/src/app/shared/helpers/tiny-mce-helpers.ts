@@ -10,11 +10,14 @@ export default class TinyMCEHelpers {
         const config = {
             base_url: "/tinymce", // root for resources
             suffix: ".min", // suffix to use when loading resources
-            plugins: "lists link image media table code help wordcount",
+            plugins: "lists link image media table code help wordcount codesample",
             menubar: false,
             toolbar:
-                "undo redo | styleselect | bold italic | bullist numlist | alignleft aligncenter alignright alignjustify | outdent indent | blockquote table | image media link unlink | styles | code",
+                "undo redo | styleselect | bold italic | bullist numlist | alignleft aligncenter alignright alignjustify | outdent indent | blockquote table | image media link unlink | styles | codesample | code",
             selector: "textarea",
+            codesample_global_prismjs: true,
+
+            content_css: "assets/prism/prism.css",
             file_picker_types: "image",
             images_file_types: "jpg,svg,webp,gif",
             image_title: true,

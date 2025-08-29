@@ -3,7 +3,7 @@ import { Observable } from "rxjs";
 import { switchMap, tap } from "rxjs/operators";
 import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
 import { AllocationPlanMinimalDto, GeographyMinimalDto } from "src/app/shared/generated/model/models";
-import { NgIf, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { AllocationPlanSelectComponent } from "src/app/shared/components/allocation-plan-select/allocation-plan-select.component";
 import { AlertDisplayComponent } from "src/app/shared/components/alert-display/alert-display.component";
@@ -14,8 +14,7 @@ import { CurrentGeographyService } from "src/app/shared/services/current-geograp
     selector: "allocation-plans",
     templateUrl: "./allocation-plans.component.html",
     styleUrls: ["./allocation-plans.component.scss"],
-    standalone: true,
-    imports: [PageHeaderComponent, NgIf, AlertDisplayComponent, AllocationPlanSelectComponent, AsyncPipe],
+    imports: [PageHeaderComponent, AlertDisplayComponent, AllocationPlanSelectComponent, AsyncPipe]
 })
 export class AllocationPlansComponent implements OnInit {
     public customRichTextID = CustomRichTextTypeEnum.AllocationPlanEdit;
@@ -32,7 +31,7 @@ export class AllocationPlansComponent implements OnInit {
 
         this.allocationPlans$ = this.geography$.pipe(
             switchMap((geography) => {
-                return this.publicService.publicGeographiesGeographyIDAllocationPlansGet(geography.GeographyID);
+                return this.publicService.listAllocationPlansByGeographyIDPublic(geography.GeographyID);
             })
         );
     }

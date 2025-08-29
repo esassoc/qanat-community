@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 namespace Qanat.EFModels.Entities;
 
 [Table("MonitoringWellMeasurement")]
+[Index("GeographyID", Name = "IX_MonitoringWellMeasurement_GeographyID")]
+[Index("MonitoringWellID", Name = "IX_MonitoringWellMeasurement_MonitoringWellID")]
 public partial class MonitoringWellMeasurement
 {
     [Key]

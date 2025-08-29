@@ -16,9 +16,7 @@ namespace Qanat.EFModels.Entities
         public static readonly CustomAttributeTypeParcel Parcel = CustomAttributeTypeParcel.Instance;
 
         public static readonly List<CustomAttributeType> All;
-        public static readonly List<CustomAttributeTypeSimpleDto> AllAsSimpleDto;
         public static readonly ReadOnlyDictionary<int, CustomAttributeType> AllLookupDictionary;
-        public static readonly ReadOnlyDictionary<int, CustomAttributeTypeSimpleDto> AllAsSimpleDtoLookupDictionary;
 
         /// <summary>
         /// Static type constructor to coordinate static initialization order
@@ -26,9 +24,7 @@ namespace Qanat.EFModels.Entities
         static CustomAttributeType()
         {
             All = new List<CustomAttributeType> { WaterAccount, Parcel };
-            AllAsSimpleDto = new List<CustomAttributeTypeSimpleDto> { WaterAccount.AsSimpleDto(), Parcel.AsSimpleDto() };
             AllLookupDictionary = new ReadOnlyDictionary<int, CustomAttributeType>(All.ToDictionary(x => x.CustomAttributeTypeID));
-            AllAsSimpleDtoLookupDictionary = new ReadOnlyDictionary<int, CustomAttributeTypeSimpleDto>(AllAsSimpleDto.ToDictionary(x => x.CustomAttributeTypeID));
         }
 
         /// <summary>

@@ -1,12 +1,9 @@
-import { CommonModule } from "@angular/common";
 import { Component, Input, OnChanges, AfterViewInit, SimpleChange } from "@angular/core";
 import { environment } from "src/environments/environment";
 import * as L from "leaflet";
 import { MapLayerBase } from "../map-layer-base.component";
 @Component({
     selector: "gsa-boundaries",
-    standalone: true,
-    imports: [CommonModule, MapLayerBase],
     templateUrl: "./gsa-boundaries.component.html",
     styleUrls: ["./gsa-boundaries.component.scss"],
 })

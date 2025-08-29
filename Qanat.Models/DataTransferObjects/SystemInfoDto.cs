@@ -1,6 +1,4 @@
 ﻿using System.Diagnostics;
-using System.IO;
-using System;
 using System.Reflection;
 
 namespace Qanat.Models.DataTransferObjects

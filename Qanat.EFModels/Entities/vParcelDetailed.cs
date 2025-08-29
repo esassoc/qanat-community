@@ -18,6 +18,8 @@ public class vParcelDetailed
 
     public double ParcelArea { get; set; }
 
+    public int? CurrentWaterAccountID { get; set; }
+
     [Required]
     [StringLength(500)]
     [Unicode(false)]
@@ -42,6 +44,9 @@ public class vParcelDetailed
     public string WaterAccountName { get; set; }
 
     public int? WaterAccountNumber { get; set; }
+
+    public int? ReportingPeriodID { get; set; }
+    public DateTime? ReportingPeriodEndDate { get; set; }
 
     [StringLength(7)]
     [Unicode(false)]

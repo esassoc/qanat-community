@@ -8,6 +8,7 @@ using NetTopologySuite.Geometries;
 namespace Qanat.EFModels.Entities;
 
 [Table("ParcelStaging")]
+[Index("GeographyID", Name = "IX_ParcelStaging_GeographyID")]
 public partial class ParcelStaging
 {
     [Key]
@@ -16,7 +17,7 @@ public partial class ParcelStaging
     public int GeographyID { get; set; }
 
     [Required]
-    [StringLength(20)]
+    [StringLength(64)]
     [Unicode(false)]
     public string ParcelNumber { get; set; }
 

@@ -19,7 +19,7 @@ public partial class vGeoServerZoneGroup
     public int GeographyID { get; set; }
 
     [Required]
-    [StringLength(20)]
+    [StringLength(64)]
     [Unicode(false)]
     public string ParcelNumber { get; set; }
 

@@ -7,9 +7,8 @@ import { UserDto } from "src/app/shared/generated/model/user-dto";
 import { AuthenticationService } from "src/app/shared/services/authentication.service";
 import { PageHeaderComponent } from "../../shared/components/page-header/page-header.component";
 import { FormFieldComponent, FormFieldType } from "../../shared/components/forms/form-field/form-field.component";
-import { AsyncPipe, NgIf } from "@angular/common";
-import { SearchWaterAccountsComponent } from "src/app/shared/components/search-water-accounts/search-water-accounts.component";
-import { SelectDropdownOption } from "src/app/shared/components/inputs/select-dropdown/select-dropdown.component";
+import { AsyncPipe } from "@angular/common";
+import { SelectDropdownOption } from "src/app/shared/components/forms/form-field/form-field.component";
 import { Alert } from "src/app/shared/models/alert";
 import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
 import { AlertService } from "src/app/shared/services/alert.service";
@@ -18,20 +17,18 @@ import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-ric
 import { FaqDisplayComponent } from "../../shared/components/faqs/faq-display/faq-display.component";
 import { FaqDisplayLocationTypeEnum } from "src/app/shared/generated/enum/faq-display-location-type-enum";
 import { PublicService } from "src/app/shared/generated/api/public.service";
-import { ReCaptchaV3Service, RecaptchaFormsModule, RecaptchaModule, RecaptchaV3Module } from "ng-recaptcha";
+import { ReCaptchaV3Service, RecaptchaFormsModule, RecaptchaModule, RecaptchaV3Module } from "ng-recaptcha-2";
 import { GeographyPublicDto } from "src/app/shared/generated/model/geography-public-dto";
 import { SupportTicketQuestionTypesAsSelectDropdownOptions } from "src/app/shared/generated/enum/support-ticket-question-type-enum";
+import { SupportTicketPriorities } from "src/app/shared/generated/enum/support-ticket-priority-enum";
 
 @Component({
     selector: "request-support",
-    standalone: true,
     imports: [
         PageHeaderComponent,
         FormFieldComponent,
         ReactiveFormsModule,
         AsyncPipe,
-        NgIf,
-        SearchWaterAccountsComponent,
         AlertDisplayComponent,
         FaqDisplayComponent,
         RecaptchaModule,
@@ -44,7 +41,7 @@ import { SupportTicketQuestionTypesAsSelectDropdownOptions } from "src/app/share
 export class RequestSupportComponent implements OnInit {
     public currentUser$: Observable<UserDto>;
     public geographyOptions$: Observable<SelectDropdownOption[]>;
-    public SupportTicketQuestionTypesSelectDropdownOptions= SupportTicketQuestionTypesAsSelectDropdownOptions;
+    public SupportTicketQuestionTypesSelectDropdownOptions = SupportTicketQuestionTypesAsSelectDropdownOptions;
     public FormFieldType = FormFieldType;
     public customRichTextID = CustomRichTextTypeEnum.RequestSupport;
     public faqDisplayLocationID = FaqDisplayLocationTypeEnum.RequestSupport;
@@ -55,7 +52,7 @@ export class RequestSupportComponent implements OnInit {
     public geographies: GeographyPublicDto[];
 
     public formGroup = new FormGroup<SupportTicketUpsertDtoForm>({
-        WaterAccount: SupportTicketUpsertDtoFormControls.WaterAccount(),
+        WaterAccountID: SupportTicketUpsertDtoFormControls.WaterAccountID(),
         Description: SupportTicketUpsertDtoFormControls.Description(),
         GeographyID: SupportTicketUpsertDtoFormControls.GeographyID(),
         ContactFirstName: SupportTicketUpsertDtoFormControls.ContactFirstName(),
@@ -64,6 +61,7 @@ export class RequestSupportComponent implements OnInit {
         ContactPhoneNumber: SupportTicketUpsertDtoFormControls.ContactPhoneNumber(),
         AssignedUserID: SupportTicketUpsertDtoFormControls.AssignedUserID(),
         SupportTicketQuestionTypeID: SupportTicketUpsertDtoFormControls.SupportTicketQuestionTypeID(),
+        SupportTicketPriorityID: SupportTicketUpsertDtoFormControls.SupportTicketPriorityID(),
     });
 
     constructor(
@@ -85,7 +83,13 @@ export class RequestSupportComponent implements OnInit {
                 this.formGroup.controls.ContactPhoneNumber.setValue(currentUser.Phone);
             })
         );
-        this.geographyOptions$ = this.publicService.publicGeographiesGet().pipe(
+        this.formGroup.controls.GeographyID.valueChanges.pipe(
+            tap((x) => {
+                this.formGroup.controls.WaterAccountID.setValue(null);
+            })
+        );
+
+        this.geographyOptions$ = this.publicService.geographiesListPublic().pipe(
             tap((geographies) => {
                 this.geographyData$ = this.route.queryParams.pipe(
                     tap((x) => {
@@ -103,8 +107,14 @@ export class RequestSupportComponent implements OnInit {
             }),
             map((geographies) => {
                 this.geographies = geographies;
-                let options = geographies.map((y) => ({ Value: y.GeographyID, Label: y.GeographyName } as SelectDropdownOption));
-                options = [{ Value: null, Label: "- Select -", Disabled: true }, ...options]; // insert an empty option at the front
+                let options = geographies.map(
+                    (y) =>
+                        ({
+                            Value: y.GeographyID,
+                            Label: y.GeographyName,
+                        }) as SelectDropdownOption
+                );
+                options = [{ Value: null, Label: "- Select -", disabled: true }, ...options]; // insert an empty option at the front
                 return options;
             })
         );
@@ -122,51 +132,29 @@ export class RequestSupportComponent implements OnInit {
                 GeographyID: this.formGroup.controls.GeographyID.value,
                 Description: this.formGroup.controls.Description.value,
                 SupportTicketQuestionTypeID: this.formGroup.controls.SupportTicketQuestionTypeID.value,
-                WaterAccount: this.formGroup.controls.WaterAccount.value,
+                SupportTicketPriorities: this.formGroup.controls.SupportTicketPriorityID.value,
+                WaterAccountID: this.formGroup.controls.WaterAccountID.value,
                 AssignedUserID: this.formGroup.controls.AssignedUserID.value,
                 ContactFirstName: this.formGroup.controls.ContactFirstName.value,
                 ContactLastName: this.formGroup.controls.ContactLastName.value,
                 ContactEmail: this.formGroup.controls.ContactEmail.value,
                 ContactPhoneNumber: this.formGroup.controls.ContactPhoneNumber.value,
+                RecaptchaToken: token,
             });
-            this.publicService
-                .publicSupportTicketsCreatePost(
-                    undefined,
-                    supportTicket.GeographyID,
-                    supportTicket.Description,
-                    undefined,
-                    undefined,
-                    supportTicket.SupportTicketQuestionTypeID,
-                    supportTicket.WaterAccount?.WaterAccountID,
-                    undefined,
-                    undefined,
-                    undefined,
-                    undefined,
-                    undefined,
-                    undefined,
-                    undefined,
-                    undefined,
-                    undefined,
-                    undefined,
-                    supportTicket.ContactFirstName,
-                    supportTicket.ContactLastName,
-                    supportTicket.ContactEmail,
-                    supportTicket.ContactPhoneNumber,
-                    token
-                )
-                .subscribe(
-                    (result) => {
-                        this.router.navigateByUrl(`/`).then((x) => {
-                            this.alertService.clearAlerts();
-                            this.alertService.pushAlert(
-                                new Alert("Your message has been submitted to the geography water managers and they will reach out soon", AlertContext.Success)
-                            );
-                        });
-                    },
-                    (error) => {
-                        this.alertService.pushAlert(new Alert("Error occurred while attempting to create a new support ticket.", AlertContext.Danger));
-                    }
-                );
+
+            this.publicService.createSupportTicketPublic(supportTicket).subscribe({
+                next: () => {
+                    this.router.navigateByUrl(`/`).then(() => {
+                        this.alertService.clearAlerts();
+                        this.alertService.pushAlert(
+                            new Alert("Your message has been submitted to the geography water managers and they will reach out soon", AlertContext.Success)
+                        );
+                    });
+                },
+                error: () => {
+                    this.alertService.pushAlert(new Alert("Error occurred while attempting to create a new support ticket.", AlertContext.Danger));
+                },
+            });
         });
     }
 }

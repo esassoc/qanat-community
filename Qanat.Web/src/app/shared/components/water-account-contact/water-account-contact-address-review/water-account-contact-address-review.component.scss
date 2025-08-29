@@ -1,0 +1,65 @@
+@use "/src/scss/abstracts" as *;
+
+.modal {
+    overflow: auto;
+}
+.modal-body {
+    display: grid;
+    gap: $spacing-500;
+}
+
+note {
+    .note-content {
+        display: flex;
+        justify-content: flex-start;
+        gap: $spacing-200;
+        line-height: 22px;
+        padding: $spacing-050;
+
+        icon.info::ng-deep svg path {
+            color: $blue-700;
+        }
+
+        icon.warning::ng-deep svg path {
+            color: $yellow-darker;
+        }
+    }
+}
+
+.radio-button-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: $spacing-300;
+    margin: $spacing-400 0;
+
+    @include tablet {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .radio-button {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: $spacing-400;
+        border-radius: $spacing-100;
+        padding: $spacing-300;
+
+        &.suggested-address {
+            border: 2px solid $blue-default;
+        }
+
+        &.entered-address {
+            border: 1px solid $gray-200;
+        }
+
+        .radio-label {
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .address {
+            margin-top: $spacing-400;
+            font-size: 1rem;
+            line-height: 1.25rem;
+        }
+    }
+}

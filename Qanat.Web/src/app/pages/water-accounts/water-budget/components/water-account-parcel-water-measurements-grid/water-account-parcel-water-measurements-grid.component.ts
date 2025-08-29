@@ -1,4 +1,4 @@
-import { AsyncPipe, DecimalPipe, NgIf } from "@angular/common";
+import { DecimalPipe } from "@angular/common";
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from "@angular/core";
 import { MonthlyUsageSummaryDto, WaterAccountParcelWaterMeasurementDto } from "src/app/shared/generated/model/models";
 import { ColDef, GridApi, GridReadyEvent } from "ag-grid-community";
@@ -8,8 +8,7 @@ import { QanatGridComponent } from "src/app/shared/components/qanat-grid/qanat-g
 
 @Component({
     selector: "water-account-parcel-water-measurements-grid",
-    standalone: true,
-    imports: [AsyncPipe, NgIf, QanatGridComponent, LoadingDirective],
+    imports: [QanatGridComponent, LoadingDirective],
     templateUrl: "./water-account-parcel-water-measurements-grid.component.html",
     styleUrl: "./water-account-parcel-water-measurements-grid.component.scss",
 })
@@ -117,7 +116,7 @@ export class WaterAccountParcelWaterMeasurementsGridComponent implements OnChang
         if (measurements) {
             const groupedByMeasurementTypeName = measurements.reduce((acc, curr) => {
                 if (!acc[curr.WaterMeasurementTypeName]) {
-                    acc[curr.WaterMeasurementTypeName] = { ...curr, WaterMeasurementTotalValue: null, WaterMeasurementMonthlyValues: [], UsageEntityArea: 0, ParcelArea: 0 };
+                    acc[curr.WaterMeasurementTypeName] = { ...curr, WaterMeasurementTotalValue: null, WaterMeasurementMonthlyValues: [], UsageLocationArea: 0, ParcelArea: 0 };
                 }
 
                 acc[curr.WaterMeasurementTypeName].ParcelID = null; // We are summing parcels together so removing the parcel ID to prevent confusion.
@@ -127,7 +126,7 @@ export class WaterAccountParcelWaterMeasurementsGridComponent implements OnChang
                     acc[curr.WaterMeasurementTypeName].WaterMeasurementTotalValue += curr.WaterMeasurementTotalValue;
                 }
 
-                acc[curr.WaterMeasurementTypeName].UsageEntityArea += curr.UsageEntityArea;
+                acc[curr.WaterMeasurementTypeName].UsageLocationArea += curr.UsageLocationArea;
                 acc[curr.WaterMeasurementTypeName].ParcelArea += curr.ParcelArea;
 
                 curr.WaterMeasurementMonthlyValues.forEach((month, index) => {

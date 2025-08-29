@@ -1,27 +1,26 @@
-<div class="modal-header">
-    <h3 class="section-title">Create a Frequently Asked Question</h3>
-    <button type="button" class="close" (click)="close()">
-        <i class="fa fa-times-circle"></i>
-    </button>
-</div>
+<div class="modal">
+    <div class="modal-header">
+        <h3 class="section-title">Create a Frequently Asked Question</h3>
+    </div>
 
-<div class="modal-body">
-    <form action="" class="form" [formGroup]="formGroup">
-        <form-field class="m-2" [formControl]="formGroup.controls.QuestionText" fieldLabel="Question" placeholder="Question" [type]="FormFieldType.Textarea"></form-field>
+    <div class="modal-body">
+        <form action="" class="form grid-12" [formGroup]="formGroup">
+            <form-field [formControl]="formGroup.controls.QuestionText" fieldLabel="Question" placeholder="Question" [type]="FormFieldType.Textarea"></form-field>
 
-        <form-field class="m-2" [formControl]="formGroup.controls.AnswerText" fieldLabel="Answer" placeholder="Answer" [type]="FormFieldType.RTE"></form-field>
+            <form-field [formControl]="formGroup.controls.AnswerText" fieldLabel="Answer" placeholder="Answer" [type]="FormFieldType.RTE"></form-field>
 
-        <ngx-select-dropdown
-            *ngIf="faqDisplayLocationTypes$ | async as faqDisplayLocationTypes"
-            [multiple]="true"
-            [config]="dropdownConfig"
-            [formControl]="dropdownFormControl"
-            (change)="changedDisplayLocations($event)"
-            [options]="faqDisplayLocationTypesFormInputOptions"></ngx-select-dropdown>
-    </form>
-</div>
+            <form-field
+                [formControl]="formGroup.controls.FaqDisplayLocationTypeIDs"
+                [formInputOptions]="faqDisplayLocationTypesFormInputOptions"
+                [multiple]="true"
+                fieldLabel="Pages to Display On"
+                placeholder="Select pages to display this question on"
+                [type]="FormFieldType.Select"></form-field>
+        </form>
+    </div>
 
-<div class="modal-footer">
-    <button class="btn btn-primary" (click)="save()" [disabled]="formGroup.invalid">Create</button>
-    <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+    <div class="modal-footer">
+        <button class="btn btn-primary" (click)="save()" [disabled]="formGroup.invalid">Create</button>
+        <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+    </div>
 </div>

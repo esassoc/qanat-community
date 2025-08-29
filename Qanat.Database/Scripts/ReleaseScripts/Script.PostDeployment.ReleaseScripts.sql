@@ -8,84 +8,44 @@ This file is generated on every build, DO NOT modify.
 PRINT N'Qanat.Database - Script.PostDeployment.ReleaseScripts.sql';
 GO
 
-:r ".\0110 - repopulate GeographyAllocationPlanConfiguration and related tables.sql"
+:r ".\0170 - Add SCNY Water Measurement Types.sql"
 GO
-:r ".\0111 - Add Allocation Plan rte.sql"
+:r ".\0171 - Rename field definitions for Fee Calculator.sql"
 GO
-:r ".\0112 - water use types for miugsa.sql"
+:r ".\0172 - Backfill Well data from WellRegistrationMetadatum.sql"
 GO
-:r ".\0113 - add link RTEs.sql"
+:r ".\0173 - Set SCNY source of record and remove water accounts with no parcels.sql"
 GO
-:r ".\0114 - update MSGSA openet.sql"
+:r ".\0174 - Configure Paso Basin Geography.sql"
 GO
-:r ".\0115 - update WaterMeasurementTypes.sql"
+:r ".\0175 - Populate NewStatementBatch RTE.sql"
 GO
-:r ".\0116 - update ParcelOwnershipHistory records.sql"
+:r ".\0175 - Populate StatementTemplate CustomLabels.sql"
 GO
-:r ".\0117 - usage entity table seeding.sql"
+:r ".\0176 - Configure Fallow Self Reporting.sql"
 GO
-:r ".\0118 - populate water account request changes RTEs.sql"
+:r ".\0177 - Configure GMD3 Geography.sql"
 GO
-:r ".\0119 - update zone accent colors.sql"
+:r ".\0178 - Configure Cover Crop Self Reporting.sql"
 GO
-:r ".\0120 - repopulate ParcelHistory table.sql"
+:r ".\0179 - Update GMD3 Water Measurement Types.sql"
 GO
-:r ".\0122 - delete account names for msgsa and ETSGSA.sql"
+:r ".\0180 - Setup initial Usage Location Types.sql"
 GO
-:r ".\0123 - update ETSGSA WaterMeasurementTypes.sql"
+:r ".\0181 - Rename StatementTemplate cols.sql"
 GO
-:r ".\0124 - update MIUGSA WaterMeasurementTypes.sql"
+:r ".\0182 - Update custom rich texts for ETSGSA.sql"
 GO
-:r ".\0125 - update ShowToLandowner bits for MIUGSA WaterMeasurementTypes.sql"
+:r ".\0183 - Set self reporting bits for demo and ETSGSA.sql"
 GO
-:r ".\0126 - clear MIUGSA ledger data.sql"
+:r ".\0184 - Add baseline usage location history.sql"
 GO
-:r ".\0127 - populating missing WaterMeasurement UsageEntityAreas.sql"
+:r ".\0185 - Configure cover crop effective precip for ETSGSA.sql"
 GO
-:r ".\0128 - update Zone precip multipliers.sql"
+:r ".\0186 - Populate WaterAccountContact table.sql"
 GO
-:r ".\0129 - repopulate ParcelSupply table.sql"
+:r ".\0187 - Add Well Types.sql"
 GO
-:r ".\0130 - Backfill WaterAccountUser and GeographyUser for MIUGSA.sql"
-GO
-:r ".\0131 - Add Extracted Groundwater Adjustment MeasurementType for MIUGSA.sql"
-GO
-:r ".\0132 - Backfill Extracted Groundwater Adjustments for MIUGSA.sql"
-GO
-:r ".\0133 - Set up water calculation dependencies.sql"
-GO
-:r ".\0134 - Add RTEs for Scenario Models.sql"
-GO
-:r ".\0135 - Missed ETSGSA Dependency.sql"
-GO
-:r ".\0136 - Add Raster Upload Guidance custom rich text.sql"
-GO
-:r ".\0137 - Update WaterTypeColor values.sql"
-GO
-:r ".\0138 - Update ETSGSA ShowSupplyOnWaterBudgetComponent.sql"
-GO
-:r ".\0139 - Update ETSGSA FeeCalculatorEnabled.sql"
-GO
-:r ".\0140 - Add lorem ipsum for Fee Calculator Your data tab.sql"
-GO
-:r ".\0141 - Update Yolo WaterMeasurementTypes.sql"
-GO
-:r ".\0142 - Remove unneeded calculation dependency.sql"
-GO
-:r ".\0143 - Mark ParcelHistories midchain as reviewed.sql"
-GO
-:r ".\0144 - Configure ETSGSA self reporting.sql"
-GO
-:r ".\0145 - Backfill missing parcel histories.sql"
-GO
-:r ".\0146 - Set parcel acreage to 4 decimal places.sql"
-GO
-:r ".\0147 - Updates to ETSGSA surface water measurement types.sql"
-GO
-:r ".\0148 - Prefill ModelUsers and ScenarioPlannerRole for users with existing actions.sql"
-GO
-:r ".\0149 - Rename GETAction to ScenarioRun.sql"
-GO
-:r ".\0150 - Add initial ReportingPeriods.sql"
+:r ".\0188 - Add RTE for Terms of Service.sql"
 GO
 

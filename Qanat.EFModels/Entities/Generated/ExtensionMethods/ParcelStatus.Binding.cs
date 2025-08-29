@@ -18,9 +18,7 @@ namespace Qanat.EFModels.Entities
         public static readonly ParcelStatusExcluded Excluded = ParcelStatusExcluded.Instance;
 
         public static readonly List<ParcelStatus> All;
-        public static readonly List<ParcelStatusSimpleDto> AllAsSimpleDto;
         public static readonly ReadOnlyDictionary<int, ParcelStatus> AllLookupDictionary;
-        public static readonly ReadOnlyDictionary<int, ParcelStatusSimpleDto> AllAsSimpleDtoLookupDictionary;
 
         /// <summary>
         /// Static type constructor to coordinate static initialization order
@@ -28,9 +26,7 @@ namespace Qanat.EFModels.Entities
         static ParcelStatus()
         {
             All = new List<ParcelStatus> { Assigned, Inactive, Unassigned, Excluded };
-            AllAsSimpleDto = new List<ParcelStatusSimpleDto> { Assigned.AsSimpleDto(), Inactive.AsSimpleDto(), Unassigned.AsSimpleDto(), Excluded.AsSimpleDto() };
             AllLookupDictionary = new ReadOnlyDictionary<int, ParcelStatus>(All.ToDictionary(x => x.ParcelStatusID));
-            AllAsSimpleDtoLookupDictionary = new ReadOnlyDictionary<int, ParcelStatusSimpleDto>(AllAsSimpleDto.ToDictionary(x => x.ParcelStatusID));
         }
 
         /// <summary>

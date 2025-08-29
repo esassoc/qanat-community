@@ -3,7 +3,7 @@ using Qanat.Models.DataTransferObjects;
 
 namespace Qanat.EFModels.Entities;
 
-public static partial class ModelBoundaryExtensionMethods
+public static class ModelBoundaryExtensionMethods
 {
     public static ModelBoundaryDto AsModelBoundaryDto(this ModelBoundary modelBoundary)
     {

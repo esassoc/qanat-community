@@ -91,6 +91,8 @@
 }
 
 .statistics {
+    gap: $spacing-400;
+
     &__module {
         margin-top: 0;
     }
@@ -112,6 +114,29 @@
             padding-top: unset;
         }
     }
+
+    &__filters {
+        position: sticky;
+        top: 0;
+        z-index: 9999;
+        gap: $spacing-200;
+        padding: $spacing-200;
+        align-items: center;
+
+        .units {
+            display: flex;
+            align-items: center;
+            gap: $spacing-200;
+            margin-left: $spacing-200;
+            h4 {
+                height: fit-content;
+            }
+        }
+    }
+
+    ::ng-deep &__filter-label {
+        margin-top: $spacing-200;
+    }
 }
 
 .faq-inline {
@@ -119,7 +144,6 @@
     border: 1px solid $blue-200;
     border-radius: $border-radius-200;
     padding: $spacing-400;
-    padding-top: $spacing-500;
     display: flex;
     align-items: center;
     gap: $spacing-300;

@@ -5,7 +5,7 @@ import { tap } from "rxjs/operators";
 import { UtilityFunctionsService } from "src/app/shared/services/utility-functions.service";
 import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
 import { ModelSimpleDto, ScenarioRunDto } from "src/app/shared/generated/model/models";
-import { NgIf, NgFor, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { LoadingDirective } from "../../../shared/directives/loading.directive";
 import { ModelRunCardComponent } from "src/app/shared/components/scenario-planner/model-run-card/model-run-card.component";
 import { QanatGridComponent } from "src/app/shared/components/qanat-grid/qanat-grid.component";
@@ -16,8 +16,7 @@ import { ScenarioRunService } from "src/app/shared/generated/api/scenario-run.se
     selector: "scenario-planner-all-scenario-runs",
     templateUrl: "./scenario-planner-all-scenario-runs.component.html",
     styleUrls: ["./scenario-planner-all-scenario-runs.component.scss"],
-    standalone: true,
-    imports: [LoadingDirective, PageHeaderComponent, NgIf, NgFor, ModelRunCardComponent, QanatGridComponent, AsyncPipe],
+    imports: [LoadingDirective, PageHeaderComponent, ModelRunCardComponent, QanatGridComponent, AsyncPipe]
 })
 export class ScenarioPlannerAllScenarioRunsComponent implements OnInit {
     public customRichTextTypeID = CustomRichTextTypeEnum.ScenarioPlannerScenarioRuns;
@@ -37,7 +36,7 @@ export class ScenarioPlannerAllScenarioRunsComponent implements OnInit {
     ngOnInit(): void {
         this.isLoading = true;
 
-        this.allModelRuns$ = this.scenarioRunService.scenarioRunsGet().pipe(
+        this.allModelRuns$ = this.scenarioRunService.listScenarioRunsScenarioRun().pipe(
             tap((x) => {
                 this.latestModelRuns = x.slice(0, 3);
                 this.isLoading = false;

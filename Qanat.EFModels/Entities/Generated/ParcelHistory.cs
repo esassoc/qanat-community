@@ -7,6 +7,10 @@ using Microsoft.EntityFrameworkCore;
 namespace Qanat.EFModels.Entities;
 
 [Table("ParcelHistory")]
+[Index("GeographyID", Name = "IX_ParcelHistory_GeographyID")]
+[Index("ParcelID", Name = "IX_ParcelHistory_ParcelID")]
+[Index("ParcelStatusID", Name = "IX_ParcelHistory_ParcelStatusID")]
+[Index("UpdateUserID", Name = "IX_ParcelHistory_UpdateUserID")]
 public partial class ParcelHistory
 {
     [Key]
@@ -15,8 +19,6 @@ public partial class ParcelHistory
     public int GeographyID { get; set; }
 
     public int ParcelID { get; set; }
-
-    public int EffectiveYear { get; set; }
 
     [Column(TypeName = "datetime")]
     public DateTime UpdateDate { get; set; }
@@ -43,8 +45,6 @@ public partial class ParcelHistory
     [Column(TypeName = "datetime")]
     public DateTime? ReviewDate { get; set; }
 
-    public int? WaterAccountID { get; set; }
-
     [ForeignKey("GeographyID")]
     [InverseProperty("ParcelHistories")]
     public virtual Geography Geography { get; set; }
@@ -56,8 +56,4 @@ public partial class ParcelHistory
     [ForeignKey("UpdateUserID")]
     [InverseProperty("ParcelHistories")]
     public virtual User UpdateUser { get; set; }
-
-    [ForeignKey("WaterAccountID")]
-    [InverseProperty("ParcelHistories")]
-    public virtual WaterAccount WaterAccount { get; set; }
 }

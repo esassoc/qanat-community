@@ -1,62 +1,71 @@
-import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, OnDestroy, ViewContainerRef } from "@angular/core";
-import { Router, ActivatedRoute } from "@angular/router";
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, OnDestroy } from "@angular/core";
+import { Router, ActivatedRoute, RouterLink } from "@angular/router";
 import { AuthenticationService } from "src/app/shared/services/authentication.service";
-import { Observable, forkJoin } from "rxjs";
+import { Observable, combineLatest, of } from "rxjs";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { Alert } from "src/app/shared/models/alert";
 import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
 import { FlagEnum } from "src/app/shared/generated/enum/flag-enum";
 import { routeParams } from "src/app/app.routes";
-import { tap } from "rxjs/operators";
+import { switchMap, tap } from "rxjs/operators";
 import { ConfirmService } from "src/app/shared/services/confirm/confirm.service";
-import { GeographySimpleDto, GeographyUserDto, UserDto, WaterAccountUserMinimalDto, WellRegistrationUserDetailDto } from "src/app/shared/generated/model/models";
+import { GeographyMinimalDto, GeographyUserDto, UserDto, WaterAccountUserMinimalDto, WellRegistrationUserDetailDto } from "src/app/shared/generated/model/models";
 import { UserService } from "src/app/shared/generated/api/user.service";
 import { ImpersonationService } from "src/app/shared/generated/api/impersonation.service";
 import { ColDef, GridApi, GridReadyEvent } from "ag-grid-community";
 import { UtilityFunctionsService } from "src/app/shared/services/utility-functions.service";
-import { ModalOptions, ModalService, ModalSizeEnum, ModalThemeEnum } from "src/app/shared/services/modal/modal.service";
 import { WellRegistrationStatusEnum } from "src/app/shared/generated/enum/well-registration-status-enum";
-import { DeleteWellModalComponent, WellContext } from "src/app/shared/components/well/delete-well-modal/delete-well-modal.component";
+import { DeleteWellModalComponent } from "src/app/shared/components/well/modals/delete-well-modal/delete-well-modal.component";
 import { WaterAccountUserService } from "src/app/shared/generated/api/water-account-user.service";
-import { GeographyRoleEnum } from "src/app/shared/generated/enum/geography-role-enum";
-import { UpdateUserInformationModalComponent, UserContext } from "./modals/update-user-information-modal/update-user-information-modal.component";
+import { UpdateUserInformationModalComponent } from "./modals/update-user-information-modal/update-user-information-modal.component";
 import { AddWaterAccountUserModalComponent } from "./modals/add-water-account-user-modal/add-water-account-user-modal.component";
 import { AlertDisplayComponent } from "../../shared/components/alert-display/alert-display.component";
-import { NgIf, NgFor, AsyncPipe, NgClass } from "@angular/common";
+import { AsyncPipe, NgClass } from "@angular/common";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { KeyValuePairListComponent } from "src/app/shared/components/key-value-pair-list/key-value-pair-list.component";
 import { KeyValuePairComponent } from "src/app/shared/components/key-value-pair/key-value-pair.component";
 import { IconComponent } from "src/app/shared/components/icon/icon.component";
 import { QanatGridComponent } from "src/app/shared/components/qanat-grid/qanat-grid.component";
-import {
-    UpdateWaterAccountUserRoleContext,
-    UpdateWaterAccountUserRoleModalComponent,
-} from "src/app/shared/components/update-water-account-user-role-modal/update-water-account-user-role-modal.component";
+import { UpdateWaterAccountUserRoleModalComponent } from "src/app/shared/components/update-water-account-user-role-modal/update-water-account-user-role-modal.component";
 import { AuthorizationHelper } from "src/app/shared/helpers/authorization-helper";
 import { environment } from "src/environments/environment";
-import { env } from "process";
+import { GeographyService } from "src/app/shared/generated/api/geography.service";
+import { CurrentGeographyService } from "src/app/shared/services/current-geography.service";
+import { AgGridAngular } from "ag-grid-angular";
+import { QanatGridHeaderComponent } from "src/app/shared/components/qanat-grid-header/qanat-grid-header.component";
+import { DialogService } from "@ngneat/dialog";
 
 @Component({
     selector: "template-user-detail",
     templateUrl: "./user-detail.component.html",
     styleUrls: ["./user-detail.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-    imports: [NgIf, PageHeaderComponent, AlertDisplayComponent, KeyValuePairListComponent, KeyValuePairComponent, NgFor, IconComponent, QanatGridComponent, AsyncPipe],
+    imports: [
+        NgClass,
+        PageHeaderComponent,
+        AlertDisplayComponent,
+        KeyValuePairListComponent,
+        KeyValuePairComponent,
+        IconComponent,
+        QanatGridHeaderComponent,
+        QanatGridComponent,
+        AsyncPipe,
+        RouterLink,
+    ],
 })
 export class UserDetailComponent implements OnInit, OnDestroy {
-    public userAndCurrentUser$: Observable<UserDto[]>;
+    public userAndCurrentUser$: Observable<[UserDto, UserDto, GeographyMinimalDto]>;
     public user: UserDto;
     private currentUser: UserDto;
     public isCurrentUser: boolean;
     public currentUserIsAdmin: boolean = false;
+    public currentUserIsWaterManager: boolean = false;
     public canImpersonateUser: boolean = false;
 
     public userWaterAccounts$: Observable<WaterAccountUserMinimalDto[]>;
     public userGeographyPermissions$: Observable<GeographyUserDto[]>;
     public wellRegistrations$: Observable<WellRegistrationUserDetailDto[]>;
     public userIsAdmin: boolean = false;
-    public geographiesWhereUserIsWaterManager: GeographySimpleDto[];
 
     public geographyWaterAccountRoleDictionary: { [key: number]: string } = {};
     public isGeographyWaterManagerDictionary: { [key: number]: string } = {};
@@ -64,17 +73,23 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     public waterAccountGridColumnDefs: ColDef[];
     public waterAccountCSVDownloadColIDsToExclude = ["0"];
     public waterAccountGridApi: GridApi;
+    public waterAccountGridRef: AgGridAngular;
 
     public wellRegistrationGridColumnDefs: ColDef[];
     public wellRegistrationCSVDownloadColIDsToExclude = ["0"];
     public wellRegistrationGridApi: GridApi;
 
     public displayProfileEdit: boolean = false;
+    public geographySpecific: boolean = false;
+    public geography$: Observable<GeographyMinimalDto>;
+    public apiKey$: Observable<string>;
 
     constructor(
         private route: ActivatedRoute,
         private router: Router,
         private userService: UserService,
+        private geographyService: GeographyService,
+        private currentGeographyService: CurrentGeographyService,
         private waterAccountUserService: WaterAccountUserService,
         private impersonationService: ImpersonationService,
         private authenticationService: AuthenticationService,
@@ -82,29 +97,44 @@ export class UserDetailComponent implements OnInit, OnDestroy {
         private alertService: AlertService,
         private confirmService: ConfirmService,
         private utilityFunctionsService: UtilityFunctionsService,
-        private modalService: ModalService,
-        private viewContainerRef: ViewContainerRef
+        private dialogService: DialogService
     ) {}
 
     ngOnInit() {
         const userIDFromRoute = parseInt(this.route.snapshot.paramMap.get(routeParams.userID));
         this.displayProfileEdit = this.route.snapshot.data.displayProfileEdit;
-        const userAction = isNaN(userIDFromRoute) ? this.authenticationService.getCurrentUser() : this.userService.usersUserIDGet(userIDFromRoute);
+        this.geographySpecific = this.route.snapshot.data.geographySpecific;
 
-        this.userAndCurrentUser$ = forkJoin([userAction, this.authenticationService.getCurrentUser()]).pipe(
-            tap((x) => {
-                this.user = x[0];
+        this.geography$ = this.route.params.pipe(
+            switchMap((params) => {
+                let geographyName = params[routeParams.geographyName];
+                if (geographyName) {
+                    return this.geographyService.getByNameAsMinimalDtoGeography(geographyName);
+                }
+                return of(null);
+            }),
+            tap((geography) => {
+                this.currentGeographyService.setCurrentGeography(geography);
+            })
+        );
+
+        const userAction = isNaN(userIDFromRoute) ? this.authenticationService.getCurrentUser() : this.userService.getUser(userIDFromRoute);
+
+        this.userAndCurrentUser$ = combineLatest([userAction, this.authenticationService.getCurrentUser(), this.geography$]).pipe(
+            tap(([userInQuestion, currentUser, geography]) => {
+                this.user = userInQuestion;
                 this.userIsAdmin = AuthorizationHelper.isSystemAdministrator(this.user);
-                this.currentUser = x[1];
+                this.currentUser = currentUser;
                 this.isCurrentUser = this.user.UserID == this.currentUser.UserID;
                 this.currentUserIsAdmin = AuthorizationHelper.isSystemAdministrator(this.currentUser);
+                this.currentUserIsWaterManager = geography ? AuthorizationHelper.hasGeographyFlag(geography.GeographyID, FlagEnum.HasManagerDashboard, this.currentUser) : false;
                 this.canImpersonateUser = !environment.production && this.authenticationService.hasFlag(this.currentUser, FlagEnum.CanImpersonateUsers);
-
+                this.cdr.detectChanges();
                 this.getWaterAccounts();
 
-                this.wellRegistrations$ = this.userService.usersUserIDWellRegistrationsGet(this.user.UserID);
+                this.wellRegistrations$ = this.userService.listWellRegistrationsUser(this.user.UserID);
 
-                this.userGeographyPermissions$ = this.userService.userUserIDPermissionsGet(this.user.UserID).pipe(
+                this.userGeographyPermissions$ = this.userService.getGeographyPermissionsUser(this.user.UserID).pipe(
                     tap((userGeographyPermissions) => {
                         const tempDictionary = {};
 
@@ -116,7 +146,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
                                 tempDictionary[geographyID] = new Set(); //Use a set to avoid duplicates.
                             }
 
-                            if (userGeographyPermission.GeographyRole.GeographyRoleID == GeographyRoleEnum.WaterManager) {
+                            if (AuthorizationHelper.hasGeographyFlag(geographyID, FlagEnum.HasManagerDashboard, userGeographyPermission.User)) {
                                 tempDictionary[geographyID].add(geographyRoleName);
                             }
                         });
@@ -125,12 +155,9 @@ export class UserDetailComponent implements OnInit, OnDestroy {
                             const sortedRoles = Array.from(tempDictionary[key]).sort();
                             this.isGeographyWaterManagerDictionary[key] = sortedRoles.join(", ");
                         });
-
-                        this.geographiesWhereUserIsWaterManager = userGeographyPermissions
-                            .filter((x) => x.GeographyRole.GeographyRoleID == GeographyRoleEnum.WaterManager)
-                            .map((x) => x.Geography);
                     })
                 );
+                this.apiKey$ = this.userService.getApiKeyUser(this.user.UserID);
             })
         );
 
@@ -139,7 +166,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     }
 
     getWaterAccounts() {
-        this.userWaterAccounts$ = this.waterAccountUserService.userUserIDWaterAccountsGet(this.user.UserID).pipe(
+        this.userWaterAccounts$ = this.waterAccountUserService.getUserWaterAccountsWaterAccountUser(this.user.UserID).pipe(
             tap((userWaterAccounts) => {
                 const tempDictionary = {};
 
@@ -165,7 +192,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     }
 
     impersonateUser(userID: number) {
-        this.impersonationService.impersonateUserIDPost(userID).subscribe((response) => {
+        this.impersonationService.impersonateUserImpersonation(userID).subscribe((response) => {
             this.currentUser = response;
             this.authenticationService.refreshUserInfo(response);
             this.cdr.detectChanges();
@@ -191,6 +218,27 @@ export class UserDetailComponent implements OnInit, OnDestroy {
             });
     }
 
+    generateNewApiKeyModal() {
+        this.confirmService
+            .confirm({
+                title: "Generate New API Key",
+                message: "Are you sure you want to generate a new API key? This will invalidate your current API key.",
+                buttonTextYes: "Confirm",
+                buttonTextNo: "Cancel",
+                buttonClassYes: "btn-primary",
+            })
+            .then((result) => {
+                if (result) {
+                    this.userService.generateNewApiKeyUser(this.user.UserID).subscribe((response) => {
+                        this.apiKey$ = of(response);
+                        this.alertService.clearAlerts();
+                        this.alertService.pushAlert(new Alert("New API Key generated successfully.", AlertContext.Success));
+                        this.cdr.markForCheck();
+                    });
+                }
+            });
+    }
+
     updateEmailAddress() {
         this.confirmService
             .confirm({
@@ -212,25 +260,20 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     }
 
     updateUserInformationModal(systemRoleUpdate: boolean) {
-        this.modalService
-            .open(
-                UpdateUserInformationModalComponent,
-                this.viewContainerRef,
-                {
-                    ModalSize: ModalSizeEnum.Large,
-                    ModalTheme: ModalThemeEnum.Light,
-                } as ModalOptions,
-                {
-                    User: this.user,
-                    SystemRoleEdit: systemRoleUpdate,
-                } as UserContext
-            )
-            .instance.result.then((result) => {
-                if (result) {
-                    this.user = result;
-                    this.cdr.markForCheck();
-                }
-            });
+        const dialogRef = this.dialogService.open(UpdateUserInformationModalComponent, {
+            data: {
+                User: this.user,
+                SystemRoleEdit: systemRoleUpdate,
+            },
+            size: "lg",
+        });
+
+        dialogRef.afterClosed$.subscribe((result) => {
+            if (result) {
+                this.user = result;
+                this.cdr.markForCheck();
+            }
+        });
     }
 
     createWaterAccountGridColumnDefs() {
@@ -274,7 +317,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
             }),
             this.utilityFunctionsService.createBasicColumnDef("Account Name", "WaterAccount.WaterAccountName"),
             this.utilityFunctionsService.createBasicColumnDef("Contact Name", "WaterAccount.ContactName"),
-            this.utilityFunctionsService.createBasicColumnDef("Contact Address", "WaterAccount.ContactAddress"),
+            this.utilityFunctionsService.createBasicColumnDef("Contact Address", "WaterAccount.FullAddress"),
         ];
     }
 
@@ -282,48 +325,44 @@ export class UserDetailComponent implements OnInit, OnDestroy {
         this.waterAccountGridApi = params.api;
     }
 
+    public onWaterAccountGridRefReady($event: AgGridAngular) {
+        this.waterAccountGridRef = $event;
+        this.cdr.detectChanges();
+    }
+
     public addWaterAccountUserModal() {
-        this.modalService
-            .open(
-                AddWaterAccountUserModalComponent,
-                this.viewContainerRef,
-                {
-                    ModalSize: ModalSizeEnum.Medium,
-                    ModalTheme: ModalThemeEnum.Light,
-                } as ModalOptions,
-                {
-                    User: this.user,
-                } as UserContext
-            )
-            .instance.result.then((result) => {
-                if (result) {
-                    this.getWaterAccounts();
-                    this.alertService.pushAlert(new Alert(`Water account succesfully added.`, AlertContext.Success, true));
-                    this.cdr.markForCheck();
-                }
-            });
+        const dialogRef = this.dialogService.open(AddWaterAccountUserModalComponent, {
+            data: {
+                User: this.user,
+                SystemRoleEdit: false,
+            },
+            size: "sm",
+        });
+
+        dialogRef.afterClosed$.subscribe((result) => {
+            if (result) {
+                this.getWaterAccounts();
+                this.alertService.pushAlert(new Alert(`Water account succesfully added.`, AlertContext.Success, true));
+                this.cdr.markForCheck();
+            }
+        });
     }
 
     public updateWaterAccountRoleForUserModal(waterAccountUser: WaterAccountUserMinimalDto) {
-        this.modalService
-            .open(
-                UpdateWaterAccountUserRoleModalComponent,
-                this.viewContainerRef,
-                {
-                    ModalSize: ModalSizeEnum.Medium,
-                    ModalTheme: ModalThemeEnum.Light,
-                } as ModalOptions,
-                {
-                    WaterAccountUser: waterAccountUser,
-                } as UpdateWaterAccountUserRoleContext
-            )
-            .instance.result.then((result) => {
-                if (result) {
-                    this.getWaterAccounts();
-                    this.alertService.pushAlert(new Alert(`Role successfully updated.`, AlertContext.Success, true));
-                    this.cdr.markForCheck();
-                }
-            });
+        const dialogRef = this.dialogService.open(UpdateWaterAccountUserRoleModalComponent, {
+            data: {
+                WaterAccountUser: waterAccountUser,
+            },
+            size: "sm",
+        });
+
+        dialogRef.afterClosed$.subscribe((result) => {
+            if (result) {
+                this.getWaterAccounts();
+                this.alertService.pushAlert(new Alert(`Water account succesfully added.`, AlertContext.Success, true));
+                this.cdr.markForCheck();
+            }
+        });
     }
 
     public removeUserFromWaterAccount(waterAccountUser: WaterAccountUserMinimalDto) {
@@ -338,7 +377,7 @@ export class UserDetailComponent implements OnInit, OnDestroy {
             .then((confirmed) => {
                 if (confirmed) {
                     this.waterAccountUserService
-                        .waterAccountsWaterAccountIDUserWaterAccountUserIDDelete(waterAccountUser.WaterAccount.WaterAccountID, waterAccountUser.WaterAccountUserID)
+                        .removeUserFromWaterAccountWaterAccountUser(waterAccountUser.WaterAccount.WaterAccountID, waterAccountUser.WaterAccountUserID)
                         .subscribe((response) => {
                             this.getWaterAccounts();
                             this.alertService.pushAlert(
@@ -400,13 +439,19 @@ export class UserDetailComponent implements OnInit, OnDestroy {
     }
 
     private deleteWell(wellID: number) {
-        this.modalService
-            .open(DeleteWellModalComponent, this.viewContainerRef, { ModalSize: ModalSizeEnum.Medium, ModalTheme: ModalThemeEnum.Light }, { WellID: wellID } as WellContext)
-            .instance.result.then((result) => {
-                if (result) {
-                    const selectedData = this.wellRegistrationGridApi.getSelectedRows();
-                    this.wellRegistrationGridApi.applyTransaction({ remove: selectedData });
-                }
-            });
+        const dialogRef = this.dialogService.open(DeleteWellModalComponent, {
+            data: {
+                WellID: wellID,
+                UpdatingTechnicalInfo: false,
+            },
+            size: "sm",
+        });
+
+        dialogRef.afterClosed$.subscribe((result) => {
+            if (result) {
+                const selectedData = this.wellRegistrationGridApi.getSelectedRows();
+                this.wellRegistrationGridApi.applyTransaction({ remove: selectedData });
+            }
+        });
     }
 }

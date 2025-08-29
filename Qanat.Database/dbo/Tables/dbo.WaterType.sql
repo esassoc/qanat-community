@@ -8,7 +8,7 @@ CREATE TABLE [dbo].[WaterType](
 	[IsSourcedFromApi] [bit] NOT NULL,
 	[SortOrder] [int] NOT NULL,
 	[WaterTypeSlug] [varchar](50) NOT NULL,
-	[WaterTypeColor] [varchar](7) NOT NULL default '#7F3C8D' -- todo: remove default once column is in prod
+	[WaterTypeColor] [varchar](7) NOT NULL,
 	CONSTRAINT [AK_WaterType_Unique_WaterTypeID_GeographyID] unique ([WaterTypeID], [GeographyID]),
 	CONSTRAINT [AK_WaterType_WaterTypeName_GeographyID] UNIQUE ([WaterTypeName], [GeographyID])
 )

@@ -14,7 +14,7 @@ import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
 import { WellRegistrationService } from "src/app/shared/generated/api/well-registration.service";
 import { ButtonComponent } from "../../../shared/components/button/button.component";
 import { ParcelTypeaheadComponent } from "../../../shared/components/parcel/parcel-typeahead/parcel-typeahead.component";
-import { NgIf, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { WorkflowBodyComponent } from "src/app/shared/components/workflow-body/workflow-body.component";
@@ -23,18 +23,7 @@ import { HighlightedParcelsLayerComponent } from "src/app/shared/components/leaf
     selector: "select-parcel",
     templateUrl: "./select-parcel.component.html",
     styleUrls: ["./select-parcel.component.scss"],
-    standalone: true,
-    imports: [
-        PageHeaderComponent,
-        WorkflowBodyComponent,
-        FormsModule,
-        NgIf,
-        ParcelTypeaheadComponent,
-        QanatMapComponent,
-        HighlightedParcelsLayerComponent,
-        ButtonComponent,
-        AsyncPipe,
-    ],
+    imports: [PageHeaderComponent, WorkflowBodyComponent, FormsModule, ParcelTypeaheadComponent, QanatMapComponent, HighlightedParcelsLayerComponent, ButtonComponent, AsyncPipe]
 })
 export class WellRegistrySelectParcelComponent implements OnInit, OnDestroy {
     public geography: GeographyDto;
@@ -68,7 +57,7 @@ export class WellRegistrySelectParcelComponent implements OnInit, OnDestroy {
             switchMap((wellID) => {
                 if (wellID) {
                     this.wellRegistrationID = wellID;
-                    return this.wellRegistrationService.wellRegistrationsWellRegistrationIDParcelGet(wellID);
+                    return this.wellRegistrationService.getParcelByWellRegistrationIDWellRegistration(wellID);
                 } else {
                     return of(null);
                 }
@@ -102,7 +91,7 @@ export class WellRegistrySelectParcelComponent implements OnInit, OnDestroy {
         const createWellRequest = new BeginWellRegistryRequestDto();
         createWellRequest.ParcelID = parcelID;
 
-        this.wellRegistrationService.geographiesGeographyIDWellRegistrationsPost(this.geography.GeographyID, createWellRequest).subscribe({
+        this.wellRegistrationService.createWellRegistrationWellRegistration(this.geography.GeographyID, createWellRequest).subscribe({
             next: (wellRegistration) => {
                 this.wellRegistryProgressService.updateProgress(this.wellRegistrationID);
                 this.isLoadingSubmit = false;
@@ -121,7 +110,7 @@ export class WellRegistrySelectParcelComponent implements OnInit, OnDestroy {
     private updateWellParcel() {
         this.isLoadingSubmit = true;
 
-        this.wellRegistrationService.wellRegistrationsWellRegistrationIDParcelPut(this.wellRegistrationID, this.selectedParcel?.ParcelID).subscribe({
+        this.wellRegistrationService.updateWellRegistrationParcelWellRegistration(this.wellRegistrationID, this.selectedParcel?.ParcelID).subscribe({
             next: () => {
                 this.wellRegistryProgressService.updateProgress(this.wellRegistrationID);
                 this.isLoadingSubmit = false;

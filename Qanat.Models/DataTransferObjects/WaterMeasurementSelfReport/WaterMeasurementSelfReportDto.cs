@@ -6,9 +6,9 @@ public class WaterMeasurementSelfReportDto
     public GeographySimpleDto Geography { get; set; }
     public WaterAccountSimpleDto WaterAccount { get; set; }
     public WaterMeasurementTypeSimpleDto WaterMeasurementType { get; set; }
-    public int ReportingYear { get; set; }
+    public ReportingPeriodSimpleDto ReportingPeriod { get; set; }
 
-    public WaterMeasurementSelfReportStatusSimpleDto WaterMeasurementSelfReportStatus { get; set; }
+    public SelfReportStatusSimpleDto WaterMeasurementSelfReportStatus { get; set; }
     public DateTime? SubmittedDate { get; set; }
     public DateTime? ApprovedDate { get; set; }
     public DateTime? ReturnedDate { get; set; }

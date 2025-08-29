@@ -1,48 +1,50 @@
-﻿using System;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using NetTopologySuite.Geometries;
 using Qanat.API.Services;
 using Qanat.API.Services.Attributes;
 using Qanat.EFModels.Entities;
 using Qanat.Models.DataTransferObjects;
+using Qanat.Models.DataTransferObjects.Geography;
+using Qanat.Models.DataTransferObjects.SupportTicket;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using NetTopologySuite.Geometries;
-using Microsoft.AspNetCore.Hosting;
-using Qanat.Models.DataTransferObjects.SupportTicket;
-using Qanat.Models.DataTransferObjects.Geography;
-using Qanat.API.Services.Authorization;
 
 namespace Qanat.API.Controllers;
 
 [ApiController]
 [Route("public")]
-public class PublicController : SitkaController<PublicController>
+public class PublicController(
+    QanatDbContext dbContext,
+    ILogger<PublicController> logger,
+    IOptions<QanatConfiguration> qanatConfiguration,
+    SitkaSmtpClientService sitkaSmtpClientService)
+    : SitkaController<PublicController>(dbContext, logger, qanatConfiguration)
 {
-    public PublicController(QanatDbContext dbContext, ILogger<PublicController> logger,
-        IOptions<QanatConfiguration> qanatConfiguration) : base(dbContext, logger, qanatConfiguration)
-    {
-    }
+    protected readonly SitkaSmtpClientService _sitkaSmtpClientService = sitkaSmtpClientService;
 
     [HttpGet("system-info")]
     [AllowAnonymous]
+    [LogIgnore]
     public ActionResult<SystemInfoDto> GetSystemInfo([FromServices] IWebHostEnvironment environment)
     {
-        SystemInfoDto systemInfo = new SystemInfoDto
+        var systemInfo = new SystemInfoDto
         {
             Environment = environment.EnvironmentName,
             CurrentTimeUTC = DateTime.UtcNow.ToString("o"),
             PodName = _qanatConfiguration.HostName
         };
+
         return Ok(systemInfo);
     }
 
-
-    [HttpGet("customRichTexts/{customRichTextTypeID}")]
+    [HttpGet("custom-rich-texts/{customRichTextTypeID}")]
     [AllowAnonymous]
     public ActionResult<CustomRichTextDto> GetCustomRichText([FromRoute] int customRichTextTypeID, [FromQuery] int? geographyID)
     {
@@ -50,25 +52,25 @@ public class PublicController : SitkaController<PublicController>
         return RequireNotNullLogIfNotFound(customRichTextDto, "CustomRichText", customRichTextTypeID);
     }
 
-    [HttpGet("faq")]
+    [HttpGet("faqs")]
     [AllowAnonymous]
-    public ActionResult<List<FrequentlyAskedQuestionGridDto>> Get()
+    public ActionResult<List<FrequentlyAskedQuestionGridDto>> ListFrequentlyAskedQuestions()
     {
         var faqs = FrequentlyAskedQuestions.GetAllFaqAsGridDto(_dbContext);
         return Ok(faqs);
     }
 
-    [HttpGet("faq/{frequentlyAskedQuestionID}")]
+    [HttpGet("faqs/{frequentlyAskedQuestionID}")]
     [AllowAnonymous]
-    public ActionResult<FrequentlyAskedQuestionGridDto> GetByID([FromRoute] int frequentlyAskedQuestionID)
+    public ActionResult<FrequentlyAskedQuestionGridDto> GetFrequentlyAskedQuestionByID([FromRoute] int frequentlyAskedQuestionID)
     {
         var returnDto = FrequentlyAskedQuestions.GetFaqByIDAsGridDto(_dbContext, frequentlyAskedQuestionID);
         return Ok(returnDto);
     }
 
-    [HttpGet("faq/location/{faqDisplayQuestionLocationTypeID}")]
+    [HttpGet("faqs/location/{faqDisplayQuestionLocationTypeID}")]
     [AllowAnonymous]
-    public ActionResult<List<FrequentlyAskedQuestionLocationDisplayDto>> GetByLocationID([FromRoute] int faqDisplayQuestionLocationTypeID)
+    public ActionResult<List<FrequentlyAskedQuestionLocationDisplayDto>> ListFrequentlyAskedQuestionsByLocationTypeID([FromRoute] int faqDisplayQuestionLocationTypeID)
     {
         var frequentlyAskedQuestions = FrequentlyAskedQuestions.GetByLocationID(_dbContext, faqDisplayQuestionLocationTypeID);
         return Ok(frequentlyAskedQuestions);
@@ -78,7 +80,7 @@ public class PublicController : SitkaController<PublicController>
     [AllowAnonymous]
     public ActionResult<List<StateSimpleDto>> StatesList()
     {
-        var stateList = State.AllAsSimpleDto;
+        var stateList = State.All.Select(x => x.AsSimpleDto());
         return Ok(stateList);
     }
 
@@ -107,20 +109,30 @@ public class PublicController : SitkaController<PublicController>
     [AllowAnonymous] // this is used on public geography dashboard
     public ActionResult<GeographyWithBoundingBoxDto> GetGeographyByNameWithBoundingBox([FromRoute] string geographyName)
     {
-        var geography = _dbContext.Geographies.Include(x => x.GeographyBoundary).AsNoTracking()
+        var geography = _dbContext.Geographies.AsNoTracking()
+            .Include(x => x.GeographyBoundary)
+            .Include(x => x.GeographyAllocationPlanConfiguration)
             .SingleOrDefault(x => x.GeographyName == geographyName);
-        if (geography == null) return NotFound(geographyName);
+
+        if (geography == null)
+        {
+            return NotFound(geographyName);
+        }
+
         var geographyWithBoundingBoxDto = new GeographyWithBoundingBoxDto()
         {
             GeographyID = geography.GeographyID,
             GeographyName = geography.GeographyName,
             GeographyDisplayName = geography.GeographyDisplayName,
-            BoundingBox = new BoundingBoxDto(new List<Geometry>() { geography.GeographyBoundary.BoundingBox })
+            BoundingBox = new BoundingBoxDto(new List<Geometry>() { geography.GeographyBoundary.BoundingBox }),
+            AllocationPlansVisibleToLandowners = geography.GeographyAllocationPlanConfiguration?.IsVisibleToLandowners ?? false,
+            AllocationPlansVisibleToPublic = geography.GeographyAllocationPlanConfiguration?.IsVisibleToPublic ?? false,
         };
+
         return Ok(geographyWithBoundingBoxDto);
     }
 
-    [HttpGet("geographyBoundaries")]
+    [HttpGet("geography-boundaries")]
     [AllowAnonymous]
     public ActionResult<List<GeographyBoundarySimpleDto>> ListBoundaries()
     {
@@ -179,20 +191,34 @@ public class PublicController : SitkaController<PublicController>
 
     [HttpGet("geographies/{geographyID}/zone-group/{zoneGroupSlug}")]
     [AllowAnonymous]
-    public ActionResult<ZoneGroupMinimalDto> GetByID([FromRoute] int geographyID, string zoneGroupSlug)
+    public ActionResult<ZoneGroupMinimalDto> GetZoneGroupBySlug([FromRoute] int geographyID, string zoneGroupSlug)
     {
-        return ZoneGroups.GetByZoneGroupSlugAsMinimalDto(_dbContext, zoneGroupSlug, geographyID);
+        return ZoneGroups.GetByZoneGroupSlugAsMinimalDto(_dbContext, geographyID, zoneGroupSlug, false);
     }
 
-    [HttpPost("support-tickets/create")]
+    [HttpPost("support-tickets")]
     [AllowAnonymous]
-    public async Task CreateSupportTicket([FromForm] SupportTicketUpsertDto supportTicketUpsertDto, [FromForm] string token)
+    public async Task<ActionResult> CreateSupportTicket([FromBody] SupportTicketUpsertDto supportTicketUpsertDto)
     {
-        if (await RecaptchaValidator.IsValidResponseAsync(token, _qanatConfiguration.RecaptchaSecretKey, _qanatConfiguration.RecaptchaVerifyUrl, _qanatConfiguration.RecaptchaScoreThreshold) == false)
+        if (await RecaptchaValidator.IsValidResponseAsync(supportTicketUpsertDto.RecaptchaToken, _qanatConfiguration.RecaptchaSecretKey, _qanatConfiguration.RecaptchaVerifyUrl, _qanatConfiguration.RecaptchaScoreThreshold) == false)
         {
-            throw new Exception("Recaptcha validation failed. Please try again.");
+            ModelState.AddModelError("Recaptcha", "Recaptcha validation failed. Please try again.");
         }
+
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         var userID = UserContext.GetUserFromHttpContext(_dbContext, HttpContext)?.UserID;
-        await SupportTickets.CreateSupportTicket(_dbContext, supportTicketUpsertDto, userID);
+        var supportTicket = await SupportTickets.CreateSupportTicket(_dbContext, supportTicketUpsertDto, userID);
+
+        var geographyManagerEmails = GeographyUsers.ListEmailAddressesForGeographyManagersWhoReceiveNotifications(_dbContext, supportTicketUpsertDto.GeographyID);
+        if (geographyManagerEmails.Any())
+        {
+            await _sitkaSmtpClientService.SendSupportTicketCreatedEmail(supportTicket, geographyManagerEmails);
+        }
+
+        return Ok();
     }
 }

@@ -158,7 +158,28 @@ namespace Qanat.Common.GeoSpatial
                         AUTHORITY[""EPSG"",""9003""]],
                     AXIS[""X"",EAST],
                     AXIS[""Y"",NORTH],
-                    AUTHORITY[""EPSG"",""2230""]]"
+                    AUTHORITY[""EPSG"",""2230""]]",
+            [3420] =@"
+                PROJCS[""NAD83 / Kansas South (ftUS)"",
+                    GEOGCS[""NAD83"",
+                        DATUM[""North_American_Datum_1983"",
+                            SPHEROID[""GRS 1980"",6378137,298.257222101]],
+                        PRIMEM[""Greenwich"",0,
+                            AUTHORITY[""EPSG"",""8901""]],
+                        UNIT[""degree"",0.0174532925199433,
+                            AUTHORITY[""EPSG"",""9122""]],
+                        AUTHORITY[""EPSG"",""4269""]],
+                    PROJECTION[""Lambert_Conformal_Conic_2SP""],
+                    PARAMETER[""latitude_of_origin"",36.6666666666667],
+                    PARAMETER[""central_meridian"",-98.5],
+                    PARAMETER[""standard_parallel_1"",38.5666666666667],
+                    PARAMETER[""standard_parallel_2"",37.2666666666667],
+                    PARAMETER[""false_easting"",1312333.3333],
+                    PARAMETER[""false_northing"",1312333.3333],
+                    UNIT[""US survey foot"",0.304800609601219],
+                    AXIS[""Easting"",EAST],
+                    AXIS[""Northing"",NORTH],
+                    AUTHORITY[""EPSG"",""3420""]]"
         };
 
         private static Geometry Transform(Geometry geom, MathTransform transform, int targetSrid)
@@ -174,8 +195,7 @@ namespace Qanat.Common.GeoSpatial
             if (geometry.SRID == 2227)
             {
                 return geometry;
-            }
-
+            } 
             var targetCoordinateSystem = new CoordinateSystemFactory().CreateFromWkt(CoordinateSystemsWkTs[2227]);
             var fromCoordinateSystem = geometry.SRID == 4326 
                 ? GeographicCoordinateSystem.WGS84 

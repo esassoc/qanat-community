@@ -5,7 +5,9 @@
     </div>
 
     <div class="faq-display__list">
-        <frequently-asked-question-display *ngFor="let faq of faqs$ | async" [faq]="faq"></frequently-asked-question-display>
+        @for (faq of faqs$ | async; track faq) {
+            <frequently-asked-question-display [faq]="faq"></frequently-asked-question-display>
+        }
     </div>
 
     <button *withRolePermission="rolePermissionCheck$ | async" class="btn btn-primary edit-button" (click)="openEditModal()">Edit</button>

@@ -1,36 +1,30 @@
-import { CommonModule } from "@angular/common";
-import { Component, ComponentRef, OnInit } from "@angular/core";
+import { Component, inject, OnInit } from "@angular/core";
 import { FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms";
-import { SelectDropDownModule } from "ngx-select-dropdown";
-import { ModalComponent } from "src/app/shared/components/modal/modal.component";
 import { WaterAccountUserService } from "src/app/shared/generated/api/water-account-user.service";
 import { AddUserByEmailDto, AddUserByEmailDtoForm } from "src/app/shared/generated/model/add-user-by-email-dto";
 import { AlertService } from "src/app/shared/services/alert.service";
-import { IModal, ModalService } from "src/app/shared/services/modal/modal.service";
 import { InviteToWaterAccountContext } from "../../users-and-settings.component";
 import { Alert } from "src/app/shared/models/alert";
 import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
 import { FormFieldComponent, FormFieldType } from "src/app/shared/components/forms/form-field/form-field.component";
 import { WaterAccountRolesAsSelectDropdownOptions } from "src/app/shared/generated/enum/water-account-role-enum";
+import { DialogRef } from "@ngneat/dialog";
+import { WaterAccountUserMinimalDto } from "src/app/shared/generated/model/models";
 
 @Component({
     selector: "invite-user-to-water-account-modal",
-    standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, SelectDropDownModule, FormFieldComponent],
+    imports: [ReactiveFormsModule, FormFieldComponent],
     templateUrl: "./invite-user-to-water-account-modal.component.html",
     styleUrl: "./invite-user-to-water-account-modal.component.scss",
 })
-export class InviteUserToWaterAccountModalComponent implements OnInit, IModal {
+export class InviteUserToWaterAccountModalComponent implements OnInit {
+    public ref: DialogRef<InviteToWaterAccountContext, WaterAccountUserMinimalDto> = inject(DialogRef);
     public FormFieldType = FormFieldType;
-
-    modalComponentRef: ComponentRef<ModalComponent>;
 
     public formGroup: FormGroup<AddUserByEmailDtoForm> = new FormGroup<AddUserByEmailDtoForm>({
         Email: new FormControl(null),
         WaterAccountRoleID: new FormControl(null),
     });
-
-    public modalContext: InviteToWaterAccountContext;
     public WaterAccountRolesSelectDropDownOptions = WaterAccountRolesAsSelectDropdownOptions;
 
     public isLoadingWaterAccounts: boolean = true;
@@ -38,14 +32,11 @@ export class InviteUserToWaterAccountModalComponent implements OnInit, IModal {
     public isLoadingSubmit = false;
 
     constructor(
-        private modalService: ModalService,
         private waterAccountUserService: WaterAccountUserService,
         private alertService: AlertService
     ) {}
 
-    ngOnInit(): void {
-
-    }
+    ngOnInit(): void {}
 
     save(): void {
         this.isLoadingSubmit = true;
@@ -55,22 +46,20 @@ export class InviteUserToWaterAccountModalComponent implements OnInit, IModal {
             WaterAccountRoleID: this.formGroup.get("WaterAccountRoleID").value,
         });
 
-        this.waterAccountUserService
-            .waterAccountsWaterAccountIDInvitingUserInvitingUserIDPost(this.modalContext.WaterAccountID, this.modalContext.CurrentUserID, addUserByEmailDto)
-            .subscribe({
-                next: (result) => {
-                    this.isLoadingSubmit = false;
-                    this.alertService.pushAlert(new Alert("User successfully added! An email has been sent to notify them.", AlertContext.Success, true));
-                    this.modalService.close(this.modalComponentRef, result);
-                },
-                error: () => {
-                    this.isLoadingSubmit = false;
-                    this.modalService.close(this.modalComponentRef);
-                },
-            });
+        this.waterAccountUserService.addUserOnWaterAccountByEmailWaterAccountUser(this.ref.data.WaterAccountID, this.ref.data.CurrentUserID, addUserByEmailDto).subscribe({
+            next: (result) => {
+                this.isLoadingSubmit = false;
+                this.alertService.pushAlert(new Alert("User successfully added! An email has been sent to notify them.", AlertContext.Success, true));
+                this.ref.close(result);
+            },
+            error: () => {
+                this.isLoadingSubmit = false;
+                this.ref.close(null);
+            },
+        });
     }
 
     close(): void {
-        this.modalService.close(this.modalComponentRef);
+        this.ref.close(null);
     }
 }

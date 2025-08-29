@@ -1,0 +1,50 @@
+<page-header icon="Review" [customRichTextTypeID]="richTextID"></page-header>
+
+<div class="page-body" [loadingSpinner]="{ isLoading: isLoading, loadingHeight: 200 }">
+    <app-alert-display></app-alert-display>
+    @if (currentGeography$ | async; as currentGeography) {
+        <div class="nav-container">
+            <div class="dashboard-navbar">
+                <div class="tab" [class.active]="activeTab === 'Cover Crop'" (click)="setActiveTab('Cover Crop')">
+                    <span class="enabled-circle" [class.enabled]="currentGeography.AllowCoverCropSelfReporting"></span>Cover Crop
+                </div>
+                <div class="tab" [class.active]="activeTab === 'Fallowing'" (click)="setActiveTab('Fallowing')">
+                    <span class="enabled-circle" [class.enabled]="currentGeography.AllowFallowSelfReporting"></span>Fallowing
+                </div>
+                <div class="tab" [class.active]="activeTab === 'Surface Water'" (click)="setActiveTab('Surface Water')">
+                    <span class="enabled-circle" [class.enabled]="currentGeography.AllowWaterMeasurementSelfReporting"></span>Surface Water
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="tab-content">
+        @if (reportingPeriods$ | async; as reportingPeriods) {
+            @if (usageLocationTypes$ | async; as usageLocationTypes) {
+                @if (activeTab === "Cover Crop") {
+                    <cover-crop-tab
+                        [currentGeography]="currentGeography"
+                        [reportingPeriods]="reportingPeriods"
+                        [usageLocationTypes]="usageLocationTypes"
+                        (updatedGeography)="onUpdatedGeography()"
+                        (updatedReportingPeriods)="onUpdatedReportingPeriods()"
+                        (updatedUsageLocationTypes)="onUpdatedUsageLocationTypes()"></cover-crop-tab>
+                }
+
+                @if (activeTab === "Fallowing") {
+                    <fallow-tab
+                        [currentGeography]="currentGeography"
+                        [reportingPeriods]="reportingPeriods"
+                        [usageLocationTypes]="usageLocationTypes"
+                        (updatedGeography)="onUpdatedGeography()"
+                        (updatedReportingPeriods)="onUpdatedReportingPeriods()"
+                        (updatedUsageLocationTypes)="onUpdatedUsageLocationTypes()"></fallow-tab>
+                }
+
+                @if (activeTab === "Surface Water") {
+                    <water-measurements-tab [currentGeography]="currentGeography" (updatedGeography)="onUpdatedGeography()"></water-measurements-tab>
+                }
+            }
+        }
+    </div>
+</div>

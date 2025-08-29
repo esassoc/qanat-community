@@ -12,7 +12,7 @@ namespace Qanat.EFModels.Entities
 {
     public abstract partial class WaterMeasurementCalculationType : IHavePrimaryKey
     {
-        public static readonly WaterMeasurementCalculationTypeCalculateEffectivePrecip CalculateEffectivePrecip = WaterMeasurementCalculationTypeCalculateEffectivePrecip.Instance;
+        public static readonly WaterMeasurementCalculationTypeCalculateEffectivePrecipByZone CalculateEffectivePrecipByZone = WaterMeasurementCalculationTypeCalculateEffectivePrecipByZone.Instance;
         public static readonly WaterMeasurementCalculationTypeCalculateSurfaceWaterConsumption CalculateSurfaceWaterConsumption = WaterMeasurementCalculationTypeCalculateSurfaceWaterConsumption.Instance;
         public static readonly WaterMeasurementCalculationTypeETMinusPrecipMinusTotalSurfaceWater ETMinusPrecipMinusTotalSurfaceWater = WaterMeasurementCalculationTypeETMinusPrecipMinusTotalSurfaceWater.Instance;
         public static readonly WaterMeasurementCalculationTypeCalculatePrecipitationCreditOffset CalculatePrecipitationCreditOffset = WaterMeasurementCalculationTypeCalculatePrecipitationCreditOffset.Instance;
@@ -21,21 +21,20 @@ namespace Qanat.EFModels.Entities
         public static readonly WaterMeasurementCalculationTypeCalculateExtractedGroundwater CalculateExtractedGroundwater = WaterMeasurementCalculationTypeCalculateExtractedGroundwater.Instance;
         public static readonly WaterMeasurementCalculationTypeCalculateExtractedAgainstSupply CalculateExtractedAgainstSupply = WaterMeasurementCalculationTypeCalculateExtractedAgainstSupply.Instance;
         public static readonly WaterMeasurementCalculationTypeCalculateOpenETConsumptiveUse CalculateOpenETConsumptiveUse = WaterMeasurementCalculationTypeCalculateOpenETConsumptiveUse.Instance;
+        public static readonly WaterMeasurementCalculationTypeCalculateConsumedGroundwater CalculateConsumedGroundwater = WaterMeasurementCalculationTypeCalculateConsumedGroundwater.Instance;
+        public static readonly WaterMeasurementCalculationTypeCalculateEffectivePrecipByScalarValue CalculateEffectivePrecipByScalarValue = WaterMeasurementCalculationTypeCalculateEffectivePrecipByScalarValue.Instance;
+        public static readonly WaterMeasurementCalculationTypeCoverCropAdjustment CoverCropAdjustment = WaterMeasurementCalculationTypeCoverCropAdjustment.Instance;
 
         public static readonly List<WaterMeasurementCalculationType> All;
-        public static readonly List<WaterMeasurementCalculationTypeSimpleDto> AllAsSimpleDto;
         public static readonly ReadOnlyDictionary<int, WaterMeasurementCalculationType> AllLookupDictionary;
-        public static readonly ReadOnlyDictionary<int, WaterMeasurementCalculationTypeSimpleDto> AllAsSimpleDtoLookupDictionary;
 
         /// <summary>
         /// Static type constructor to coordinate static initialization order
         /// </summary>
         static WaterMeasurementCalculationType()
         {
-            All = new List<WaterMeasurementCalculationType> { CalculateEffectivePrecip, CalculateSurfaceWaterConsumption, ETMinusPrecipMinusTotalSurfaceWater, CalculatePrecipitationCreditOffset, CalculatePositiveConsumedGroundwater, CalculateUnadjustedExtractedGroundwater, CalculateExtractedGroundwater, CalculateExtractedAgainstSupply, CalculateOpenETConsumptiveUse };
-            AllAsSimpleDto = new List<WaterMeasurementCalculationTypeSimpleDto> { CalculateEffectivePrecip.AsSimpleDto(), CalculateSurfaceWaterConsumption.AsSimpleDto(), ETMinusPrecipMinusTotalSurfaceWater.AsSimpleDto(), CalculatePrecipitationCreditOffset.AsSimpleDto(), CalculatePositiveConsumedGroundwater.AsSimpleDto(), CalculateUnadjustedExtractedGroundwater.AsSimpleDto(), CalculateExtractedGroundwater.AsSimpleDto(), CalculateExtractedAgainstSupply.AsSimpleDto(), CalculateOpenETConsumptiveUse.AsSimpleDto() };
+            All = new List<WaterMeasurementCalculationType> { CalculateEffectivePrecipByZone, CalculateSurfaceWaterConsumption, ETMinusPrecipMinusTotalSurfaceWater, CalculatePrecipitationCreditOffset, CalculatePositiveConsumedGroundwater, CalculateUnadjustedExtractedGroundwater, CalculateExtractedGroundwater, CalculateExtractedAgainstSupply, CalculateOpenETConsumptiveUse, CalculateConsumedGroundwater, CalculateEffectivePrecipByScalarValue, CoverCropAdjustment };
             AllLookupDictionary = new ReadOnlyDictionary<int, WaterMeasurementCalculationType>(All.ToDictionary(x => x.WaterMeasurementCalculationTypeID));
-            AllAsSimpleDtoLookupDictionary = new ReadOnlyDictionary<int, WaterMeasurementCalculationTypeSimpleDto>(AllAsSimpleDto.ToDictionary(x => x.WaterMeasurementCalculationTypeID));
         }
 
         /// <summary>
@@ -104,8 +103,12 @@ namespace Qanat.EFModels.Entities
         {
             switch (enumValue)
             {
-                case WaterMeasurementCalculationTypeEnum.CalculateEffectivePrecip:
-                    return CalculateEffectivePrecip;
+                case WaterMeasurementCalculationTypeEnum.CalculateConsumedGroundwater:
+                    return CalculateConsumedGroundwater;
+                case WaterMeasurementCalculationTypeEnum.CalculateEffectivePrecipByScalarValue:
+                    return CalculateEffectivePrecipByScalarValue;
+                case WaterMeasurementCalculationTypeEnum.CalculateEffectivePrecipByZone:
+                    return CalculateEffectivePrecipByZone;
                 case WaterMeasurementCalculationTypeEnum.CalculateExtractedAgainstSupply:
                     return CalculateExtractedAgainstSupply;
                 case WaterMeasurementCalculationTypeEnum.CalculateExtractedGroundwater:
@@ -120,6 +123,8 @@ namespace Qanat.EFModels.Entities
                     return CalculateSurfaceWaterConsumption;
                 case WaterMeasurementCalculationTypeEnum.CalculateUnadjustedExtractedGroundwater:
                     return CalculateUnadjustedExtractedGroundwater;
+                case WaterMeasurementCalculationTypeEnum.CoverCropAdjustment:
+                    return CoverCropAdjustment;
                 case WaterMeasurementCalculationTypeEnum.ETMinusPrecipMinusTotalSurfaceWater:
                     return ETMinusPrecipMinusTotalSurfaceWater;
                 default:
@@ -130,7 +135,7 @@ namespace Qanat.EFModels.Entities
 
     public enum WaterMeasurementCalculationTypeEnum
     {
-        CalculateEffectivePrecip = 1,
+        CalculateEffectivePrecipByZone = 1,
         CalculateSurfaceWaterConsumption = 2,
         ETMinusPrecipMinusTotalSurfaceWater = 3,
         CalculatePrecipitationCreditOffset = 4,
@@ -138,19 +143,22 @@ namespace Qanat.EFModels.Entities
         CalculateUnadjustedExtractedGroundwater = 6,
         CalculateExtractedGroundwater = 7,
         CalculateExtractedAgainstSupply = 8,
-        CalculateOpenETConsumptiveUse = 9
+        CalculateOpenETConsumptiveUse = 9,
+        CalculateConsumedGroundwater = 10,
+        CalculateEffectivePrecipByScalarValue = 11,
+        CoverCropAdjustment = 12
     }
 
-    public partial class WaterMeasurementCalculationTypeCalculateEffectivePrecip : WaterMeasurementCalculationType
+    public partial class WaterMeasurementCalculationTypeCalculateEffectivePrecipByZone : WaterMeasurementCalculationType
     {
-        private WaterMeasurementCalculationTypeCalculateEffectivePrecip(int waterMeasurementCalculationTypeID, string waterMeasurementCalculationTypeName, string waterMeasurementCalculationTypeDisplayName) : base(waterMeasurementCalculationTypeID, waterMeasurementCalculationTypeName, waterMeasurementCalculationTypeDisplayName) {}
-        public static readonly WaterMeasurementCalculationTypeCalculateEffectivePrecip Instance = new WaterMeasurementCalculationTypeCalculateEffectivePrecip(1, @"CalculateEffectivePrecip", @"Calculate Effective Precip");
+        private WaterMeasurementCalculationTypeCalculateEffectivePrecipByZone(int waterMeasurementCalculationTypeID, string waterMeasurementCalculationTypeName, string waterMeasurementCalculationTypeDisplayName) : base(waterMeasurementCalculationTypeID, waterMeasurementCalculationTypeName, waterMeasurementCalculationTypeDisplayName) {}
+        public static readonly WaterMeasurementCalculationTypeCalculateEffectivePrecipByZone Instance = new WaterMeasurementCalculationTypeCalculateEffectivePrecipByZone(1, @"CalculateEffectivePrecipByZone", @"Calculate Effective Precip By Zone");
     }
 
     public partial class WaterMeasurementCalculationTypeCalculateSurfaceWaterConsumption : WaterMeasurementCalculationType
     {
         private WaterMeasurementCalculationTypeCalculateSurfaceWaterConsumption(int waterMeasurementCalculationTypeID, string waterMeasurementCalculationTypeName, string waterMeasurementCalculationTypeDisplayName) : base(waterMeasurementCalculationTypeID, waterMeasurementCalculationTypeName, waterMeasurementCalculationTypeDisplayName) {}
-        public static readonly WaterMeasurementCalculationTypeCalculateSurfaceWaterConsumption Instance = new WaterMeasurementCalculationTypeCalculateSurfaceWaterConsumption(2, @"CalculateSurfaceWaterConsumption", @"Calculate SurfaceWater Consumption");
+        public static readonly WaterMeasurementCalculationTypeCalculateSurfaceWaterConsumption Instance = new WaterMeasurementCalculationTypeCalculateSurfaceWaterConsumption(2, @"CalculateSurfaceWaterConsumption", @"Calculate Surface Water Consumption");
     }
 
     public partial class WaterMeasurementCalculationTypeETMinusPrecipMinusTotalSurfaceWater : WaterMeasurementCalculationType
@@ -193,5 +201,23 @@ namespace Qanat.EFModels.Entities
     {
         private WaterMeasurementCalculationTypeCalculateOpenETConsumptiveUse(int waterMeasurementCalculationTypeID, string waterMeasurementCalculationTypeName, string waterMeasurementCalculationTypeDisplayName) : base(waterMeasurementCalculationTypeID, waterMeasurementCalculationTypeName, waterMeasurementCalculationTypeDisplayName) {}
         public static readonly WaterMeasurementCalculationTypeCalculateOpenETConsumptiveUse Instance = new WaterMeasurementCalculationTypeCalculateOpenETConsumptiveUse(9, @"CalculateOpenETConsumptiveUse", @"Calculate Open ET Consumptive Use");
+    }
+
+    public partial class WaterMeasurementCalculationTypeCalculateConsumedGroundwater : WaterMeasurementCalculationType
+    {
+        private WaterMeasurementCalculationTypeCalculateConsumedGroundwater(int waterMeasurementCalculationTypeID, string waterMeasurementCalculationTypeName, string waterMeasurementCalculationTypeDisplayName) : base(waterMeasurementCalculationTypeID, waterMeasurementCalculationTypeName, waterMeasurementCalculationTypeDisplayName) {}
+        public static readonly WaterMeasurementCalculationTypeCalculateConsumedGroundwater Instance = new WaterMeasurementCalculationTypeCalculateConsumedGroundwater(10, @"CalculateConsumedGroundwater", @"Calculate Consumed Groundwater");
+    }
+
+    public partial class WaterMeasurementCalculationTypeCalculateEffectivePrecipByScalarValue : WaterMeasurementCalculationType
+    {
+        private WaterMeasurementCalculationTypeCalculateEffectivePrecipByScalarValue(int waterMeasurementCalculationTypeID, string waterMeasurementCalculationTypeName, string waterMeasurementCalculationTypeDisplayName) : base(waterMeasurementCalculationTypeID, waterMeasurementCalculationTypeName, waterMeasurementCalculationTypeDisplayName) {}
+        public static readonly WaterMeasurementCalculationTypeCalculateEffectivePrecipByScalarValue Instance = new WaterMeasurementCalculationTypeCalculateEffectivePrecipByScalarValue(11, @"CalculateEffectivePrecipByScalarValue", @"Calculate Effective Precip By Scalar Value");
+    }
+
+    public partial class WaterMeasurementCalculationTypeCoverCropAdjustment : WaterMeasurementCalculationType
+    {
+        private WaterMeasurementCalculationTypeCoverCropAdjustment(int waterMeasurementCalculationTypeID, string waterMeasurementCalculationTypeName, string waterMeasurementCalculationTypeDisplayName) : base(waterMeasurementCalculationTypeID, waterMeasurementCalculationTypeName, waterMeasurementCalculationTypeDisplayName) {}
+        public static readonly WaterMeasurementCalculationTypeCoverCropAdjustment Instance = new WaterMeasurementCalculationTypeCoverCropAdjustment(12, @"CoverCropAdjustment", @"Cover Crop Adjustment");
     }
 }

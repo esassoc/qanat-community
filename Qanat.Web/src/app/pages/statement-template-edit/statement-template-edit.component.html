@@ -1,0 +1,94 @@
+@if (currentGeography$ | async) {
+  <div class="full-width-page">
+    @if (statementTemplate$ | async) {
+      <page-header pageTitle="{{ pageHeaderVerb }} Statement Template" icon="Statement" [templateAbove]="templateAbove">
+        <ng-template #templateAbove>
+          <div class="back">
+            <a [routerLink]="['/configure', geographySlug, 'statement-templates']" class="back__link"> Back to Statement Templates </a>
+          </div>
+        </ng-template>
+      </page-header>
+      <app-alert-display></app-alert-display>
+      <div class="grid-12">
+        <div class="g-col-8 preview-column">
+          <usage-statement-template-preview [geographyID]="geographyID" (editButtonClicked)="openEditModal($event)"></usage-statement-template-preview>
+          <note noteType="warning">
+            <div class="custom-content-warning">
+              <icon icon="Info"></icon>
+              Custom content that overflows its section will be hidden. Use the PDF preview to ensure all custom content is visible before saving.
+            </div>
+          </note>
+        </div>
+        <div class="g-col-4 configuration-column">
+          <div class="card">
+            <div class="card-header"><h2>Template Configuration</h2></div>
+            <div class="card-body configuration-form-wrapper" [loadingSpinner]="{ isLoading: isLoading }">
+              <form class="form grid-12" #statementTemplateForm="ngForm">
+                <div class="form-section-header">Details</div>
+                <div class="field">
+                  <form-field
+                    [formControl]="formGroup.controls.StatementTemplateTypeID"
+                    fieldLabel="Template Type"
+                    [type]="FormFieldType.Select"
+                  [formInputOptions]="statementTemplateTypeSelectOptions"></form-field>
+                </div>
+                <div class="field">
+                  <form-field [formControl]="formGroup.controls.TemplateTitle" fieldLabel="Template Title"></form-field>
+                </div>
+                <div class="field">
+                  <form-field [formControl]="formGroup.controls.InternalDescription" fieldLabel="Internal Description" [type]="FormFieldType.Textarea"></form-field>
+                </div>
+                <div class="field">
+                  <form-field [formControl]="balanceCustomLabelFormControl" fieldLabel="Balance Label"></form-field>
+                </div>
+              </form>
+              <form class="form grid-12" #pdfPreviewTemplateForm="ngForm">
+                <div class="form-section-header">Preview</div>
+                <div class="field">
+                  <form-field
+                    [formControl]="pdfPreviewFormGroup.controls.WaterAccountID"
+                    fieldLabel="Water Account"
+                    [geographyID]="geographyID"
+                  [type]="FormFieldType.WaterAccountSearch"></form-field>
+                </div>
+                <div class="field">
+                  @if (reportingPeriodSelectOptions$ | async; as dropdownOptions) {
+                    <form-field
+                      [formControl]="pdfPreviewFormGroup.controls.ReportingPeriodYear"
+                      fieldLabel="Reporting Period"
+                      [type]="FormFieldType.Select"
+                      [formInputOptions]="dropdownOptions"
+                    required></form-field>
+                  }
+                </div>
+              </form>
+              <div>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-primary-outline"
+                  (click)="downloadStatementTemplatePDF()"
+                  [buttonLoading]="isLoadingPdfPreview"
+                  [disabled]="pdfPreviewFormGroup.invalid || isLoadingPdfPreview">
+                  PDF Preview
+                </button>
+              </div>
+              <note noteType="info">
+                <div class="form-note">
+                  <icon icon="Info"></icon>
+                  <p>
+                    Templates allow you to customize the text present to account holders in the usage statements. Click on customizable areas to edit the text. You
+                    can select a Water Account above to test and preview the template.
+                  </p>
+                </div>
+              </note>
+            </div>
+            <div class="card-footer flex-end">
+              <button class="btn btn-primary" (click)="saveStatementTemplate()">Save</button>
+              <a class="btn btn-primary-outline" routerLink="..">Cancel</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+}

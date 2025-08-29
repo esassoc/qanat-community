@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using CsvHelper;
+﻿using CsvHelper;
 using Hangfire;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -19,54 +13,51 @@ using Qanat.EFModels.Entities;
 using Qanat.Models.DataTransferObjects;
 using Qanat.Models.Security;
 using Swashbuckle.AspNetCore.Annotations;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Qanat.API.Controllers;
 
 [ApiController]
 [RightsChecker]
-[Route("geographies/{geographyID}/water-measurements/")]
-public class WaterMeasurementController : SitkaController<WaterMeasurementController>
+[Route("geographies/{geographyID}/water-measurements")]
+public class WaterMeasurementController(QanatDbContext dbContext, ILogger<WaterMeasurementController> logger, IOptions<QanatConfiguration> qanatConfiguration, UserDto callingUser, RasterProcessingService rasterProcessingService, IBackgroundJobClient backgroundJobClient, FileService fileService)
+    : SitkaController<WaterMeasurementController>(dbContext, logger, qanatConfiguration)
 {
-    private readonly UserDto _callingUser;
-    private readonly RasterProcessingService _rasterProcessingService;
-    private readonly IBackgroundJobClient _backgroundJobClient;
-    private FileService _fileService;
-
-    public WaterMeasurementController(QanatDbContext dbContext, ILogger<WaterMeasurementController> logger, IOptions<QanatConfiguration> qanatConfiguration, UserDto callingUser, RasterProcessingService rasterProcessingService, IBackgroundJobClient backgroundJobClient, FileService fileService) : base(dbContext, logger, qanatConfiguration)
-    {
-        _callingUser = callingUser;
-        _rasterProcessingService = rasterProcessingService;
-        _backgroundJobClient = backgroundJobClient;
-        _fileService = fileService;
-    }
-
     [HttpGet("years/{year}/excel-download")]
     [EntityNotFound(typeof(Geography), "geographyID")]
     [WithGeographyRolePermission(PermissionEnum.WaterTransactionRights, RightsEnum.Create)]
     [SwaggerResponse(statusCode: 200, Type = typeof(FileContentResult))]
-    public async Task<IActionResult> ListWaterMeasurements([FromRoute] int geographyID, [FromRoute] int year)
+    public async Task<IActionResult> DownloadExcelWorkbookForGeographyAndYear([FromRoute] int geographyID, [FromRoute] int year)
     {
         var geography = Geographies.GetByID(_dbContext, geographyID);
-        var stream = await WaterMeasurementsXL.CreateWaterMeasurementWBForGeography(_dbContext, geographyID, year);
+        var stream = await WaterMeasurementsXL.CreateWaterMeasurementWBForGeographyAndYear(_dbContext, geographyID, year);
         return new FileContentResult(stream, "application/octet-stream") { FileDownloadName = $"waterMeasurementsFor{geography.GeographyName}_{year}.csv" };
     }
 
-    [HttpGet("source-of-record")]
+    [HttpGet("reporting-periods/{reportingPeriodID}/water-measurement-types/{waterMeasurementTypeID}")]
     [EntityNotFound(typeof(Geography), "geographyID")]
-    [WithRoleFlag(FlagEnum.CanClaimWaterAccounts)]
-    public ActionResult<WaterMeasurementTypeSimpleDto> GetSourceOfRecordWaterMeasurementType([FromRoute] int geographyID)
+    [EntityNotFound(typeof(ReportingPeriod), "reportingPeriodID")]
+    [EntityNotFound(typeof(WaterMeasurementType), "waterMeasurementTypeID")]
+    [WithGeographyRoleFlag(FlagEnum.HasManagerDashboard)]
+    public async Task<ActionResult<List<WaterMeasurementQualityAssuranceDto>>> ListByGeographyIDReportingPeriodIDWaterMeasurementTypeIDAndMonths([FromRoute] int geographyID, [FromRoute] int reportingPeriodID, [FromRoute] int waterMeasurementTypeID, [FromQuery] List<int> months)
     {
-        var sourceOfRecordWaterMeasurementTypeSimpleDto = Geographies.GetSourceOfRecordWaterMeasurementTypeByGeographyID(_dbContext, geographyID)?.AsSimpleDto();
-        return Ok(sourceOfRecordWaterMeasurementTypeSimpleDto);
+        var validMonths = months.Where(x => x is >= 1 and <= 12).ToList();
+        var waterMeasurementDtos = await vWaterMeasurements.ListByGeographyIDReportingPeriodIDWaterMeasurementTypeIDAndMonths(_dbContext, geographyID, reportingPeriodID, waterMeasurementTypeID, validMonths);;
+        return Ok(waterMeasurementDtos);
     }
 
     [HttpPost("calculations/years/{year}/months/{month}")]
     [EntityNotFound(typeof(Geography), "geographyID")]
     [WithGeographyRolePermission(PermissionEnum.WaterTransactionRights, RightsEnum.Create)]
-    public async Task<IActionResult> RunAllCalculationsForGeography([FromRoute] int geographyID, [FromRoute] int year, [FromRoute] int month)
+    public async Task<IActionResult> RunAllCalculationsForGeography([FromRoute] int geographyID, [FromRoute] int year, [FromRoute] int month, [FromBody] RefreshWaterMeasurementCalculationsDto refreshCalculationsDto)
     {
         var effectiveDate = new DateTime(year, month, 1).AddMonths(1).AddDays(-1);
-        await WaterMeasurementCalculations.RunAllMeasurementTypesForGeography(_dbContext, geographyID, effectiveDate);
+        await WaterMeasurementCalculations.RunAllMeasurementTypesForGeographyAsync(_dbContext, geographyID, effectiveDate, refreshCalculationsDto.UsageLocationIDs);
         return Ok();
     }
 
@@ -78,7 +69,7 @@ public class WaterMeasurementController : SitkaController<WaterMeasurementContro
     [WithWaterAccountRolePermission(PermissionEnum.WaterTransactionRights, RightsEnum.Read)]
     public ActionResult<List<ParcelWaterMeasurementChartDatumDto>> ListWaterMeasurementChartDataForParcel([FromRoute] int geographyID, [FromRoute] int parcelID)
     {
-        var chartDataDtos = WaterMeasurements.ListAsParcelWaterMeasurementChartDatumDto(_dbContext, geographyID, parcelID, _callingUser);
+        var chartDataDtos = WaterMeasurements.ListAsParcelWaterMeasurementChartDatumDto(_dbContext, geographyID, parcelID, callingUser);
 
         var geography = Geographies.GetByID(_dbContext, geographyID);
         if (!geography.IsOpenETActive)
@@ -95,10 +86,8 @@ public class WaterMeasurementController : SitkaController<WaterMeasurementContro
     [SwaggerResponse(statusCode: 200, Description = "CSV of Parcel Water Usage Estimates", ContentTypes = new string[] { "text/csv" }, Type = typeof(FileContentResult))]
     public async Task<IActionResult> ListWaterMeasurementsForParcel([FromRoute] int geographyID, [FromRoute] int parcelID)
     {
-        var usageEntityNames = _dbContext.UsageEntities.AsNoTracking().Where(x => x.ParcelID == parcelID).Select(x => x.UsageEntityName).ToList();
         var parcelNumber = _dbContext.Parcels.Single(x => x.ParcelID == parcelID).ParcelNumber;
-
-        var result = await WaterMeasurementsXL.CreateWaterMeasurementWBForGeography(_dbContext, geographyID, null, usageEntityNames);
+        var result = await WaterMeasurementsXL.CreateWaterMeasurementWBForGeographyAndParcel(_dbContext, geographyID, parcelID);
         var geography = Geographies.GetByID(_dbContext, geographyID);
         return new FileContentResult(result, "application/octet-stream") { FileDownloadName = $"waterMeasurementsFor{geography.GeographyName}_{parcelNumber}.csv" };
     }
@@ -145,7 +134,7 @@ public class WaterMeasurementController : SitkaController<WaterMeasurementContro
         var extension = Path.GetExtension(waterMeasurementCsvUpsertDto.UploadedFile.FileName);
         if (extension != ".csv")
         {
-            ModelState.AddModelError("FileResource", $"{extension[1..].ToUpper()} is not an accepted file extension");
+            ModelState.AddModelError("UploadedFile", $"{extension[1..].ToUpper()} is not an accepted file extension");
             return BadRequest(ModelState);
         }
 
@@ -155,10 +144,23 @@ public class WaterMeasurementController : SitkaController<WaterMeasurementContro
             return BadRequest(ModelState);
         }
 
-        var waterMeasurementType = _dbContext.WaterMeasurementTypes.Single(x => x.WaterMeasurementTypeID == waterMeasurementCsvUpsertDto.WaterMeasurementTypeID);
+        var waterMeasurementType = _dbContext.WaterMeasurementTypes.SingleOrDefault(x => x.WaterMeasurementTypeID == waterMeasurementCsvUpsertDto.WaterMeasurementTypeID);
+        if (waterMeasurementType == null)
+        {
+            ModelState.AddModelError("Water Measurement Type", $"Could not find a valid Water Measurement Type with the ID {waterMeasurementCsvUpsertDto.WaterMeasurementTypeID}.");
+            return BadRequest(ModelState);
+        }
+
         if (!waterMeasurementType.IsUserEditable)
         {
             ModelState.AddModelError("Water Measurement Type", "The selected Water Measurement Type is not editable.");
+            return BadRequest(ModelState);
+        }
+
+        var unitType = UnitType.All.SingleOrDefault(x => x.UnitTypeID == waterMeasurementCsvUpsertDto.UnitTypeID);
+        if (unitType == null)
+        {
+            ModelState.AddModelError("Unit Type", $"Could not find a valid Unit Type with the ID {waterMeasurementCsvUpsertDto.UnitTypeID}.");
             return BadRequest(ModelState);
         }
 
@@ -174,10 +176,17 @@ public class WaterMeasurementController : SitkaController<WaterMeasurementContro
             return BadRequest(ModelState);
         }
 
-        var effectiveDate = DateTime.Parse(waterMeasurementCsvUpsertDto.EffectiveDate);
-        var waterMeasurementCsvResponseDto = await WaterMeasurements.CreateFromCSV(_dbContext, records, effectiveDate, waterMeasurementCsvUpsertDto.WaterMeasurementTypeID.Value, waterMeasurementCsvUpsertDto.UnitTypeID.Value, geographyID);
+        var effectiveDate = DateTime.Parse(waterMeasurementCsvUpsertDto.EffectiveDate!);
 
-        await WaterMeasurementCalculations.RunMeasurementTypeForGeography(_dbContext, geographyID, waterMeasurementCsvUpsertDto.WaterMeasurementTypeID.Value, effectiveDate);
+        var waterMeasurementCsvResponseDto = await WaterMeasurements.CreateFromCSV(_dbContext, records, effectiveDate, waterMeasurementCsvUpsertDto.WaterMeasurementTypeID!.Value, waterMeasurementCsvUpsertDto.UnitTypeID!.Value, geographyID);
+
+        var reportingPeriod = await ReportingPeriods.GetByGeographyIDAndYearAsync(_dbContext, geographyID, effectiveDate.Year);
+        var usageLocationNames = records.Select(x => x.UsageLocationName).ToList();
+        var usageLocations = _dbContext.UsageLocations.AsNoTracking()
+            .Where(x => x.GeographyID == geographyID && x.ReportingPeriodID == reportingPeriod.ReportingPeriodID && usageLocationNames.Contains(x.Name));
+        var usageLocationIDs = usageLocations.Select(x => x.UsageLocationID).ToList();
+
+        await WaterMeasurementCalculations.RunMeasurementTypeForGeographyAsync(_dbContext, geographyID, waterMeasurementCsvUpsertDto.WaterMeasurementTypeID.Value, effectiveDate, usageLocationIDs);
 
         return Ok(waterMeasurementCsvResponseDto);
     }
@@ -205,8 +214,7 @@ public class WaterMeasurementController : SitkaController<WaterMeasurementContro
             var headerNamesDuplicated = csvReader.HeaderRecord.Where(x => !string.IsNullOrWhiteSpace(x)).GroupBy(x => x).Where(x => x.Count() > 1).ToList();
             if (headerNamesDuplicated.Any())
             {
-                ModelState.AddModelError("UploadedFile",
-                    $"The following header {(headerNamesDuplicated.Count > 1 ? "names appear" : "name appears")} more than once: {string.Join(", ", headerNamesDuplicated.OrderBy(x => x.Key).Select(x => x.Key))}");
+                ModelState.AddModelError("UploadedFile", $"The following header {(headerNamesDuplicated.Count > 1 ? "names appear" : "name appears")} more than once: {string.Join(", ", headerNamesDuplicated.OrderBy(x => x.Key).Select(x => x.Key))}");
                 return false;
             }
 
@@ -215,8 +223,7 @@ public class WaterMeasurementController : SitkaController<WaterMeasurementContro
         }
         catch
         {
-            ModelState.AddModelError("UploadedFile",
-                "There was an error parsing the CSV. Please ensure the file is formatted correctly.");
+            ModelState.AddModelError("UploadedFile", "There was an error parsing the CSV. Please ensure the file is formatted correctly.");
             headerNames = null;
             return false;
         }
@@ -237,23 +244,20 @@ public class WaterMeasurementController : SitkaController<WaterMeasurementContro
         catch (HeaderValidationException e)
         {
             var headerMessage = e.Message.Split('.')[0];
-            ModelState.AddModelError("UploadedFile",
-                $"{headerMessage}. Please check that the column name is not missing or misspelled.");
+            ModelState.AddModelError("UploadedFile", $"{headerMessage}. Please check that the column name is not missing or misspelled.");
             records = null;
             return false;
         }
         catch (CsvHelper.MissingFieldException e)
         {
             var headerMessage = e.Message.Split('.')[0];
-            ModelState.AddModelError("UploadedFile",
-                $"{headerMessage}. Please check that the column name is not missing or misspelled.");
+            ModelState.AddModelError("UploadedFile", $"{headerMessage}. Please check that the column name is not missing or misspelled.");
             records = null;
             return false;
         }
         catch
         {
-            ModelState.AddModelError("UploadedFile",
-                "There was an error parsing the CSV. Please ensure the file is formatted correctly.");
+            ModelState.AddModelError("UploadedFile", "There was an error parsing the CSV. Please ensure the file is formatted correctly.");
             records = null;
             return false;
         }
@@ -264,11 +268,10 @@ public class WaterMeasurementController : SitkaController<WaterMeasurementContro
         var isValid = true;
 
         // no null APNs
-        var nullUsageEntityNamesCount = records.Count(x => x.UsageEntityName == "");
-        if (nullUsageEntityNamesCount > 0)
+        var nullUsageLocationRecords = records.Count(x => x.UsageLocationName == "");
+        if (nullUsageLocationRecords > 0)
         {
-            ModelState.AddModelError("UploadedFile",
-                $"The uploaded file contains {nullUsageEntityNamesCount} {(nullUsageEntityNamesCount > 1 ? "rows" : "row")} specifying a value with no corresponding APN or Usage Entity Name.");
+            ModelState.AddModelError("UploadedFile", $"The uploaded file contains {nullUsageLocationRecords} {(nullUsageLocationRecords > 1 ? "rows" : "row")} specifying a value with no corresponding APN or Usage Location Name.");
             isValid = false;
         }
 
@@ -276,19 +279,18 @@ public class WaterMeasurementController : SitkaController<WaterMeasurementContro
         var nullQuantities = records.Where(x => x.Quantity == null).ToList();
         if (nullQuantities.Any())
         {
-            ModelState.AddModelError("UploadedFile",
-                $"The following {(nullQuantities.Count > 1 ? "APN/Usage Entity Names" : "APN/Usage Entity Name")} had no usage quantity entered: {string.Join(", ", nullQuantities.Select(x => x.UsageEntityName))}");
+            ModelState.AddModelError("UploadedFile", $"The following {(nullQuantities.Count > 1 ? "APN/Usage Location Names" : "APN/Usage Location Name")} had no usage quantity entered: {string.Join(", ", nullQuantities.Select(x => x.UsageLocationName))}");
             isValid = false;
         }
 
-        // no duplication APN/UsageEntityNames
-        var duplicateUsageEntityNames = records.GroupBy(x => x.UsageEntityName).Where(x => x.Count() > 1).ToList();
-        if (duplicateUsageEntityNames.Any())
+        // no duplication APN
+        var duplicateUsageLocationNames = records.GroupBy(x => x.UsageLocationName).Where(x => x.Count() > 1).ToList();
+        if (duplicateUsageLocationNames.Any())
         {
-            ModelState.AddModelError("UploadedFile",
-                               $"The following {(duplicateUsageEntityNames.Count > 1 ? "APN/Usage Entity Names" : "APN/Usage Entity Name")} appear more than once: {string.Join(", ", duplicateUsageEntityNames.Select(x => x.Key))}");
+            ModelState.AddModelError("UploadedFile", $"The following {(duplicateUsageLocationNames.Count > 1 ? "APN/Usage Location Names" : "APN/Usage Location Name")} appear more than once: {string.Join(", ", duplicateUsageLocationNames.Select(x => x.Key))}");
             isValid = false;
         }
+
         return isValid;
     }
 
@@ -338,13 +340,13 @@ public class WaterMeasurementController : SitkaController<WaterMeasurementContro
             return BadRequest(ModelState);
         }
 
-        var rasterFileResource = await _fileService.CreateFileResource(_dbContext, rasterFileUploadDto.UploadedFile, _callingUser.UserID);
+        var rasterFileResource = await fileService.CreateFileResource(_dbContext, rasterFileUploadDto.UploadedFile, callingUser.UserID);
 
         var firstOfMonth = new DateTime(effectiveDate.Year, effectiveDate.Month, 1);
         var reportedDate = firstOfMonth.AddMonths(1).AddDays(-1);
 
-        var backgroundJobID = _backgroundJobClient.Enqueue(() => _rasterProcessingService.ProcessRasterByFileCanonicalNameForAllUsageEntities(geographyAsDto, null, waterMeasurementType.WaterMeasurementTypeID, unitType.UnitTypeID, reportedDate, rasterFileResource.FileResourceCanonicalName, true, false));
-        var continuedWithJobID = _backgroundJobClient.ContinueJobWith(backgroundJobID, () => _rasterProcessingService.RunCalculations(geographyID, waterMeasurementType.WaterMeasurementTypeID, reportedDate));
+        var backgroundJobID = backgroundJobClient.Enqueue(() => rasterProcessingService.ProcessRasterByFileCanonicalNameForUsageLocations(geographyAsDto, null, waterMeasurementType.WaterMeasurementTypeID, unitType.UnitTypeID, reportedDate, rasterFileResource.FileResourceCanonicalName, null, true, false));
+        var continuedWithJobID = backgroundJobClient.ContinueJobWith(backgroundJobID, () => rasterProcessingService.RunCalculations(geographyID, waterMeasurementType.WaterMeasurementTypeID, reportedDate, null));
 
         var result = new HangfireBackgroundJobResultDto()
         {
@@ -353,6 +355,32 @@ public class WaterMeasurementController : SitkaController<WaterMeasurementContro
         };
 
         return Ok(result);
+    }
+
+    #endregion
+
+    #region Bulk Set
+
+    [HttpPost("bulk-set")]
+    [EntityNotFound(typeof(Geography), "geographyID")]
+    [WithRoleFlag(FlagEnum.IsSystemAdmin)]
+    [WithGeographyRoleFlag(FlagEnum.HasManagerDashboard)]
+    public async Task<IActionResult> BulkSetWaterMeasurements([FromRoute] int geographyID, [FromBody] WaterMeasurementBulkSetDto waterMeasurementBulkSetDto)
+    {
+        var validationErrors = await WaterMeasurements.ValidateBulkSetAsync(_dbContext, geographyID, waterMeasurementBulkSetDto);
+        validationErrors.ForEach(x => ModelState.AddModelError(x.Type, x.Message));
+
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var date = new DateTime(waterMeasurementBulkSetDto.Year!.Value, waterMeasurementBulkSetDto.Month!.Value, 1).AddMonths(1).AddDays(-1);
+
+        await WaterMeasurements.BulkSetWaterMeasurementsAsync(_dbContext, geographyID, date, waterMeasurementBulkSetDto);
+        await WaterMeasurementCalculations.RunMeasurementTypeForGeographyAsync(_dbContext, geographyID, waterMeasurementBulkSetDto.WaterMeasurementTypeID!.Value, date);
+
+        return Ok();
     }
 
     #endregion

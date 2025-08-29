@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Qanat.EFModels.Entities;
 
 [Table("WaterMeasurementSelfReportLineItem")]
-[Index("WaterMeasurementSelfReportID", "ParcelID", Name = "AK_WaterMeasurementSelfReportLineItem_WaterMeasurementSelfReportID_UsageEntityID", IsUnique = true)]
+[Index("WaterMeasurementSelfReportID", "ParcelID", Name = "AK_WaterMeasurementSelfReportLineItem_WaterMeasurementSelfReportID_Parcel", IsUnique = true)]
 public partial class WaterMeasurementSelfReportLineItem
 {
     [Key]

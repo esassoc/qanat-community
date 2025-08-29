@@ -16,9 +16,7 @@ namespace Qanat.EFModels.Entities
         public static readonly WellRegistrationContactTypeOwnerOperator OwnerOperator = WellRegistrationContactTypeOwnerOperator.Instance;
 
         public static readonly List<WellRegistrationContactType> All;
-        public static readonly List<WellRegistrationContactTypeSimpleDto> AllAsSimpleDto;
         public static readonly ReadOnlyDictionary<int, WellRegistrationContactType> AllLookupDictionary;
-        public static readonly ReadOnlyDictionary<int, WellRegistrationContactTypeSimpleDto> AllAsSimpleDtoLookupDictionary;
 
         /// <summary>
         /// Static type constructor to coordinate static initialization order
@@ -26,9 +24,7 @@ namespace Qanat.EFModels.Entities
         static WellRegistrationContactType()
         {
             All = new List<WellRegistrationContactType> { Landowner, OwnerOperator };
-            AllAsSimpleDto = new List<WellRegistrationContactTypeSimpleDto> { Landowner.AsSimpleDto(), OwnerOperator.AsSimpleDto() };
             AllLookupDictionary = new ReadOnlyDictionary<int, WellRegistrationContactType>(All.ToDictionary(x => x.WellRegistrationContactTypeID));
-            AllAsSimpleDtoLookupDictionary = new ReadOnlyDictionary<int, WellRegistrationContactTypeSimpleDto>(AllAsSimpleDto.ToDictionary(x => x.WellRegistrationContactTypeID));
         }
 
         /// <summary>

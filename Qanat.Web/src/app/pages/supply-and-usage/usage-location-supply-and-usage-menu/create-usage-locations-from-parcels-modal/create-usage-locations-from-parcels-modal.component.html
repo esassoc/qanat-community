@@ -1,0 +1,24 @@
+<div class="modal">
+    @if (ref.data && ref.data.Geography) {
+        <div class="modal-header">
+            <h3>Create {{ ref.data.Geography.GeographyName }} Usage Locations</h3>
+        </div>
+        <div class="modal-body grid-12" [loadingSpinner]="{ isLoading: isLoading }">
+            <div class="field">
+                @if (reportingPeriodSelectOptions$ | async; as dropdownOptions) {
+                    <form-field
+                        [formControl]="formGroup.controls.reportingPeriodID"
+                        fieldLabel="Reporting Period"
+                        [type]="FormFieldType.Select"
+                        [formInputOptions]="dropdownOptions"
+                        required></form-field>
+                }
+            </div>
+            <note noteType="danger"> This will delete all Water Measurements for the selected Reporting Period. Are you sure you want to proceed? </note>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" (click)="save()" [disabled]="isLoadingSubmit || !formGroup.valid" [buttonLoading]="isLoadingSubmit">Create Usage Locations</button>
+            <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+        </div>
+    }
+</div>

@@ -33,24 +33,29 @@
                     mask="(000) 000-0000"
                     placeholder="e.g. (123) 456-7890"></form-field>
             </div>
-            <div class="grid-12 mt-4" *ngIf="geographyOptions$ | async as geographyOptions">
-                <h5 class="section-header">Supporting Info</h5>
-                <form-field
-                    *ngIf="geographyData$ | async"
-                    class="g-col-6"
-                    [formInputOptions]="geographyOptions"
-                    [formControl]="formGroup.controls.GeographyID"
-                    [fieldLabel]="'Geography'"
-                    [required]="true"
-                    [type]="FormFieldType.Select"></form-field>
-                <div class="g-col-6" *ngIf="currentUser$ | async">
-                    <label class="field-label">Water Account</label>
-                    <search-water-accounts
-                        [geographyID]="formGroup.controls.GeographyID.value"
-                        [excludedWaterAccountIDs]="[]"
-                        formControlName="WaterAccount"></search-water-accounts>
+            @if (geographyOptions$ | async; as geographyOptions) {
+                <div class="grid-12 mt-4">
+                    <h5 class="section-header">Supporting Info</h5>
+                    @if (geographyData$ | async) {
+                        <form-field
+                            class="g-col-6"
+                            [formInputOptions]="geographyOptions"
+                            [formControl]="formGroup.controls.GeographyID"
+                            [fieldLabel]="'Geography'"
+                            [required]="true"
+                            [type]="FormFieldType.Select"></form-field>
+                    }
+                    @if (currentUser$ | async; as currentUser) {
+                        <form-field
+                            class="g-col-6"
+                            [geographyID]="formGroup.controls.GeographyID.value"
+                            [formControl]="formGroup.controls.WaterAccountID"
+                            fieldLabel="Water Account"
+                            [type]="FormFieldType.WaterAccountSearch">
+                        </form-field>
+                    }
                 </div>
-            </div>
+            }
             <form-field
                 class="m-2 g-col-8"
                 [formInputOptions]="SupportTicketQuestionTypesSelectDropdownOptions"
@@ -58,15 +63,15 @@
                 [required]="true"
                 fieldLabel="Question Type"
                 [type]="FormFieldType.Select"></form-field>
-            <form-field
-                *ngIf="currentUser$ | async; else anonymous"
-                class="m-2 g-col-8"
-                [formControl]="formGroup.controls.Description"
-                fieldLabel="Message"
-                placeholder="Message"
-                [required]="true"
-                [type]="FormFieldType.RTE"></form-field>
-            <ng-template #anonymous>
+            @if (currentUser$ | async) {
+                <form-field
+                    class="m-2 g-col-8"
+                    [formControl]="formGroup.controls.Description"
+                    fieldLabel="Message"
+                    placeholder="Message"
+                    [required]="true"
+                    [type]="FormFieldType.RTE"></form-field>
+            } @else {
                 <form-field
                     class="m-2 g-col-8"
                     [formControl]="formGroup.controls.Description"
@@ -74,7 +79,7 @@
                     placeholder="Message"
                     [required]="true"
                     [type]="FormFieldType.Textarea"></form-field>
-            </ng-template>
+            }
         </form>
         <div class="faqs g-col-4">
             <faq-display [faqDisplayLocationTypeID]="faqDisplayLocationID"></faq-display>

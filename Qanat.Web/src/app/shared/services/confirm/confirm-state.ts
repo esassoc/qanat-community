@@ -1,5 +1,5 @@
 import { ComponentRef, Injectable } from "@angular/core";
-import { ModalComponent } from "src/app/shared/components/modal/modal.component";
+
 import { ConfirmOptions } from "./confirm-options";
 
 @Injectable({

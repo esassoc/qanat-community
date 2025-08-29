@@ -1,6 +1,4 @@
 ﻿using Qanat.Models.DataTransferObjects;
-using System.Linq;
-using System.Collections.Generic;
 
 namespace Qanat.EFModels.Entities
 {

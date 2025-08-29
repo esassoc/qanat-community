@@ -6,6 +6,10 @@ namespace Qanat.EFModels.Entities
 {
     public partial class QanatDbContext
     {
+        public QanatDbContext()
+        {
+        }
+
         public QanatDbContext(string connectionString) : this(GetOptions(connectionString))
         {
         }
@@ -15,7 +19,7 @@ namespace Qanat.EFModels.Entities
             var optionsBuilder = new DbContextOptionsBuilder<QanatDbContext>();
             optionsBuilder.UseSqlServer(connectionString, x =>
             {
-                x.CommandTimeout((int)TimeSpan.FromMinutes(3).TotalSeconds);
+                x.CommandTimeout((int)TimeSpan.FromMinutes(4).TotalSeconds);
                 x.UseNetTopologySuite();
             });
             return optionsBuilder.Options;
@@ -51,6 +55,14 @@ namespace Qanat.EFModels.Entities
                     v => JsonSerializer.Deserialize<List<ParcelIDAndNumber>>(v, GeoJsonSerializer.DefaultSerializerOptions)
                     );
 
+            modelBuilder
+                .Entity<WaterAccountBudgetReportByGeographyAndReportingPeriod>()
+                .Property(e => e.WaterTypeSupplyBreakdown)
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v, GeoJsonSerializer.DefaultSerializerOptions),
+                    v => JsonSerializer.Deserialize<Dictionary<int, decimal>>(v, GeoJsonSerializer.DefaultSerializerOptions)
+                );
+
             modelBuilder.Entity<vParcelDetailed>(entity =>
             {
                 entity.ToView("vParcelDetailed");
@@ -69,11 +81,13 @@ namespace Qanat.EFModels.Entities
         public virtual DbSet<ParcelWaterSupplyAndUsage> ParcelWaterSupplyAndUsages { get; set; }
         public virtual DbSet<WaterTypeSupply> WaterTypeSupplies { get; set; }
         public virtual DbSet<WaterTypeMonthlySupply> WaterTypeMonthlySupplies { get; set; }
+        public virtual DbSet<WaterAccountWaterTypeSupply> WaterAccountWaterTypeSupplies { get; set; }
         public virtual DbSet<WaterAccountMostRecentEffectiveDate> WaterAccountMostRecentEffectiveDate { get; set; }
-        public virtual DbSet<WaterAccountBudgetReportByGeographyAndYear> WaterAccountBudgetReportByGeographyAndDateRanges { get; set; }
+        public virtual DbSet<WaterAccountBudgetReportByGeographyAndReportingPeriod> WaterAccountBudgetReportByGeographyAndReportingPeriod { get; set; }
         public virtual DbSet<MonthlyUsageSummary> MonthlyUsageSummary { get; set; }
         public virtual DbSet<WaterAccountSuggestion> WaterAccountSuggestions { get; set; }
         public virtual DbSet<ZoneGroupMonthlyUsage> ZoneGroupMonthlyUsage { get; set; }
+        public virtual DbSet<WaterAccountForUsageStatement> WaterAccountForUsageStatement { get; set; }
         public IQueryable<fParcelStagingChanges> fParcelStagingChanges(int geographyID) => FromExpression(() => fParcelStagingChanges(geographyID));
         public IQueryable<fWaterAccountUser> fWaterAccountUser(int userID) => FromExpression(() => fWaterAccountUser(userID));
         public IQueryable<fReportingPeriod> fReportingPeriod(int year) => FromExpression(() => fReportingPeriod(year));

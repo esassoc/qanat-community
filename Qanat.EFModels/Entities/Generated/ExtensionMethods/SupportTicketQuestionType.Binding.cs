@@ -20,9 +20,7 @@ namespace Qanat.EFModels.Entities
         public static readonly SupportTicketQuestionTypeOther Other = SupportTicketQuestionTypeOther.Instance;
 
         public static readonly List<SupportTicketQuestionType> All;
-        public static readonly List<SupportTicketQuestionTypeSimpleDto> AllAsSimpleDto;
         public static readonly ReadOnlyDictionary<int, SupportTicketQuestionType> AllLookupDictionary;
-        public static readonly ReadOnlyDictionary<int, SupportTicketQuestionTypeSimpleDto> AllAsSimpleDtoLookupDictionary;
 
         /// <summary>
         /// Static type constructor to coordinate static initialization order
@@ -30,9 +28,7 @@ namespace Qanat.EFModels.Entities
         static SupportTicketQuestionType()
         {
             All = new List<SupportTicketQuestionType> { AccessingData, PolicyQuestion, InterpretingDataQuestion, LogInQuestion, Bug, Other };
-            AllAsSimpleDto = new List<SupportTicketQuestionTypeSimpleDto> { AccessingData.AsSimpleDto(), PolicyQuestion.AsSimpleDto(), InterpretingDataQuestion.AsSimpleDto(), LogInQuestion.AsSimpleDto(), Bug.AsSimpleDto(), Other.AsSimpleDto() };
             AllLookupDictionary = new ReadOnlyDictionary<int, SupportTicketQuestionType>(All.ToDictionary(x => x.SupportTicketQuestionTypeID));
-            AllAsSimpleDtoLookupDictionary = new ReadOnlyDictionary<int, SupportTicketQuestionTypeSimpleDto>(AllAsSimpleDto.ToDictionary(x => x.SupportTicketQuestionTypeID));
         }
 
         /// <summary>

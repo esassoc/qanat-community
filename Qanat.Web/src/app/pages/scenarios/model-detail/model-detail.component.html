@@ -1,5 +1,5 @@
 <div [loadingSpinner]="{ isLoading, loadingHeight: 500 }">
-    <ng-container *ngIf="model$ | async as model">
+    @if (model$ | async; as model) {
         <page-header icon="Model" [pageTitle]="model.ModelName" [templateRight]="templateRight" [customRichTextTypeID]="customRichTextID">
             <div class="copy copy-2 copy-user-entered"></div>
             <ng-template #templateRight>
@@ -8,32 +8,31 @@
                 </div>
             </ng-template>
         </page-header>
-
         <div class="page-body">
             <scenario-actions-hero></scenario-actions-hero>
-
-            <ng-container *ngIf="allModelRuns$ | async as allModelRuns">
+            @if (allModelRuns$ | async; as allModelRuns) {
                 <div class="latest-runs">
                     <h2 class="section-title primary">Latest Scenario Runs</h2>
-                    <div *ngIf="latestModelRuns.length > 0; else noModelRuns" class="grid-12">
-                        <model-run-card *ngFor="let latestModelRun of latestModelRuns" [scenarioRun]="latestModelRun">
-                            {{ latestModelRun.RunName }}
-                        </model-run-card>
-                    </div>
+                    @if (latestModelRuns.length > 0) {
+                        <div class="grid-12">
+                            @for (latestModelRun of latestModelRuns; track latestModelRun) {
+                                <model-run-card [scenarioRun]="latestModelRun">
+                                    {{ latestModelRun.RunName }}
+                                </model-run-card>
+                            }
+                        </div>
+                    } @else {
+                        <div class="no-runs copy copy-2">
+                            <p>
+                                <em> There are no Scenario runs. Use the buttons above to create a Scenario run. </em>
+                            </p>
+                        </div>
+                    }
                 </div>
-
-                <ng-template #noModelRuns>
-                    <div class="no-runs copy copy-2">
-                        <p>
-                            <em> There are no Scenario runs. Use the buttons above to create a Scenario run. </em>
-                        </p>
-                    </div>
-                </ng-template>
-
                 <div class="all-runs">
                     <qanat-grid [rowData]="allModelRuns" [columnDefs]="columnDefs" [sizeColumnsToFitGrid]="true" downloadFileName="scenario-runs"></qanat-grid>
                 </div>
-            </ng-container>
+            }
         </div>
-    </ng-container>
+    }
 </div>

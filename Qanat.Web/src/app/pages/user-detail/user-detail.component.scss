@@ -8,6 +8,10 @@
     align-items: start;
 }
 
+.full-width-page {
+    padding: 2rem;
+}
+
 .user-detail::ng-deep {
     .alert {
         margin-bottom: 0; //MK 7/10/2024 - The alert had an odd amount of margin-bottom, this was the quickest way to make it look better in this instance. Happy to change if needed.

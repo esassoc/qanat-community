@@ -18,7 +18,7 @@ import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-ric
 import { GeographyRouteService } from "src/app/shared/services/geography-route.service";
 import { WellRegistrationService } from "src/app/shared/generated/api/well-registration.service";
 import { ButtonComponent } from "../../../shared/components/button/button.component";
-import { NgIf, AsyncPipe, DecimalPipe } from "@angular/common";
+import { AsyncPipe, DecimalPipe } from "@angular/common";
 import { ButtonGroupComponent } from "../../../shared/components/button-group/button-group.component";
 import { AlertDisplayComponent } from "../../../shared/components/alert-display/alert-display.component";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
@@ -29,8 +29,7 @@ import { WorkflowBodyComponent } from "src/app/shared/components/workflow-body/w
     selector: "well-location",
     templateUrl: "./well-location.component.html",
     styleUrls: ["./well-location.component.scss"],
-    standalone: true,
-    imports: [PageHeaderComponent, WorkflowHelpComponent, WorkflowBodyComponent, AlertDisplayComponent, ButtonGroupComponent, NgIf, ButtonComponent, AsyncPipe, DecimalPipe],
+    imports: [PageHeaderComponent, WorkflowHelpComponent, WorkflowBodyComponent, AlertDisplayComponent, ButtonGroupComponent, ButtonComponent, AsyncPipe, DecimalPipe]
 })
 export class WellLocationComponent implements AfterViewInit, OnDestroy {
     public customRichTextTypeID = CustomRichTextTypeEnum.WellRegistryMapYourWell;
@@ -136,7 +135,7 @@ export class WellLocationComponent implements AfterViewInit, OnDestroy {
         this.wellRegistrationLocation$ = this.route.paramMap.pipe(
             switchMap((paramMap) => {
                 const wellID = parseInt(paramMap.get(routeParams.wellRegistrationID));
-                return this.wellRegistrationService.wellRegistrationsWellRegistrationIDLocationGet(wellID);
+                return this.wellRegistrationService.getLocationByWellRegistrationIDWellRegistration(wellID);
             }),
             tap((wellRegistrationLocation) => {
                 this.wellRegistrationModel = wellRegistrationLocation;
@@ -164,7 +163,7 @@ export class WellLocationComponent implements AfterViewInit, OnDestroy {
                         } else {
                             this.updateMapBoundingBox(geography.BoundingBox);
                         }
-                        return this.wellService.geographiesGeographyIDReferenceWellsGet(geography.GeographyID);
+                        return this.wellService.getGeographyReferenceWellsForMapWell(geography.GeographyID);
                     }),
                     tap((referenceWells) => {
                         this.addReferenceWellsToMap(referenceWells);
@@ -282,7 +281,7 @@ export class WellLocationComponent implements AfterViewInit, OnDestroy {
         this.wellRegistrationModel.Longitude = this.selectByReferenceWell ? this.selectedReferenceWell.Longitude : this.wellMarker.Longitude;
         this.wellRegistrationModel.ReferenceWellID = this.selectByReferenceWell ? this.selectedReferenceWell.ReferenceWellID : null;
 
-        this.wellRegistrationService.wellRegistrationsWellRegistrationIDLocationPut(this.wellRegistrationModel.WellRegistrationID, this.wellRegistrationModel).subscribe({
+        this.wellRegistrationService.updateLocationWellRegistration(this.wellRegistrationModel.WellRegistrationID, this.wellRegistrationModel).subscribe({
             next: () => {
                 this.router.navigate([`../confirm-location`], { relativeTo: this.route }).then(() => {
                     this.isLoadingSubmit = false;

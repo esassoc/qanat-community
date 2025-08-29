@@ -1,81 +1,121 @@
-import { ChangeDetectorRef, Component, OnInit, ViewContainerRef } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { AuthenticationService } from "src/app/shared/services/authentication.service";
 import { UserDto } from "src/app/shared/generated/model/user-dto";
 import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
-import { Observable, switchMap, tap } from "rxjs";
+import { combineLatest, Observable, of, shareReplay, switchMap } from "rxjs";
 import { RightsEnum } from "src/app/shared/models/enums/rights.enum";
 import { PermissionEnum } from "src/app/shared/generated/enum/permission-enum";
-import { GeographyService } from "src/app/shared/generated/api/geography.service";
-import { GeographyDto } from "src/app/shared/generated/model/geography-dto";
 import { WaterMeasurementService } from "src/app/shared/generated/api/water-measurement.service";
-import { ActivatedRoute, RouterLink } from "@angular/router";
-import { AsyncPipe, NgIf } from "@angular/common";
+import { RouterLink } from "@angular/router";
+import { AsyncPipe, NgClass } from "@angular/common";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
-import { ModalService, ModalSizeEnum, ModalThemeEnum } from "src/app/shared/services/modal/modal.service";
-import {
-    RefreshWaterMeasurementCalculationsContext,
-    RefreshWaterMeasurementCalculationsModalComponent,
-} from "src/app/pages/supply-and-usage/water-measurement-supply-and-usage-menu/refresh-water-measurement-calculations-modal/refresh-water-measurement-calculations-modal.component";
+import { RefreshWaterMeasurementCalculationsModalComponent } from "src/app/pages/supply-and-usage/water-measurement-supply-and-usage-menu/refresh-water-measurement-calculations-modal/refresh-water-measurement-calculations-modal.component";
 import { AlertDisplayComponent } from "src/app/shared/components/alert-display/alert-display.component";
-import { ButtonComponent } from "src/app/shared/components/button/button.component";
 import { CurrentGeographyService } from "src/app/shared/services/current-geography.service";
-import { GeographyPublicDto } from "src/app/shared/generated/model/geography-public-dto";
-import { PublicService } from "src/app/shared/generated/api/public.service";
 import { GeographyMinimalDto } from "src/app/shared/generated/model/geography-minimal-dto";
-import { DownloadWaterMeasurementsContext, DownloadWaterMeasurementsModalComponent } from "./download-water-measurements-modal/download-water-measurements-modal.component";
+import { DownloadWaterMeasurementsModalComponent } from "./download-water-measurements-modal/download-water-measurements-modal.component";
+import { WaterMeasurementTypeSimpleDto } from "src/app/shared/generated/model/models";
+import { WaterMeasurementTypeService } from "src/app/shared/generated/api/water-measurement-type.service";
+import { QanatGridComponent } from "src/app/shared/components/qanat-grid/qanat-grid.component";
+import { ColDef } from "ag-grid-community";
+import { UtilityFunctionsService } from "src/app/shared/services/utility-functions.service";
+import { DialogService } from "@ngneat/dialog";
 
 @Component({
     selector: "water-measurement-supply-and-usage-menu",
     templateUrl: "./water-measurement-supply-and-usage-menu.html",
     styleUrls: ["./water-measurement-supply-and-usage-menu.scss"],
-    standalone: true,
-    imports: [PageHeaderComponent, AlertDisplayComponent, NgIf, ButtonComponent, RouterLink, AsyncPipe],
+    imports: [PageHeaderComponent, AlertDisplayComponent, RouterLink, AsyncPipe, NgClass, QanatGridComponent],
 })
 export class WaterMeasurementSupplyAndUsageMenu implements OnInit {
     public geography$: Observable<GeographyMinimalDto>;
+    public canCreateTransactions$: Observable<boolean>;
+    public waterMeasurementTypes$: Observable<WaterMeasurementTypeSimpleDto[]>;
 
     public currentUser$: Observable<UserDto>;
-    private currentUser: UserDto;
 
     public richTextTypeID = CustomRichTextTypeEnum.UsageEstimates;
     public downloadError: boolean = false;
     public downloadErrorMessage: string;
     public isDownloading: boolean = false;
+    public waterMeasurementTypeGridCols: ColDef[];
 
     constructor(
         private authenticationService: AuthenticationService,
         private currentGeographyService: CurrentGeographyService,
         private waterMeasurementService: WaterMeasurementService,
-        private modalService: ModalService,
-        private viewContainerRef: ViewContainerRef
-    ) {}
+        private waterMeasurementTypeService: WaterMeasurementTypeService,
+        private utilityFunctionsService: UtilityFunctionsService,
+        private dialogService: DialogService
+    ) {
+        this.waterMeasurementTypeGridCols = [
+            this.utilityFunctionsService.createBasicColumnDef("Water Measurement Type", "WaterMeasurementTypeName", {}),
+            this.utilityFunctionsService.createBasicColumnDef("Short Name", "ShortName", {}),
+            this.utilityFunctionsService.createDecimalColumnDef("Sort Order", "SortOrder", { MaxDecimalPlacesToDisplay: 0 }),
+            this.utilityFunctionsService.createBasicColumnDef("Water Measurement Category", "WaterMeasurementCategoryName", {
+                CustomDropdownFilterField: "WaterMeasurementCategoryName",
+            }),
+            this.utilityFunctionsService.createBasicColumnDef("Is Active", "IsActive", {
+                ValueGetter: (params) => this.utilityFunctionsService.booleanValueGetter(params.data.IsActive),
+                UseCustomDropdownFilter: true,
+            }),
+            this.utilityFunctionsService.createBasicColumnDef("Can Be Uploaded", "IsUserEditable", {
+                ValueGetter: (params) => this.utilityFunctionsService.booleanValueGetter(params.data.IsUserEditable),
+                UseCustomDropdownFilter: true,
+            }),
+            this.utilityFunctionsService.createBasicColumnDef("Is Self Reportable", "IsSelfReportable", {
+                ValueGetter: (params) => this.utilityFunctionsService.booleanValueGetter(params.data.IsSelfReportable),
+                UseCustomDropdownFilter: true,
+            }),
+            this.utilityFunctionsService.createBasicColumnDef("Show to Landowner", "ShowToLandowner", {
+                ValueGetter: (params) => this.utilityFunctionsService.booleanValueGetter(params.data.ShowToLandowner),
+                UseCustomDropdownFilter: true,
+            }),
+            this.utilityFunctionsService.createBasicColumnDef("Is Source of Record", "IsSourceOfRecord", {
+                ValueGetter: (params) => this.utilityFunctionsService.booleanValueGetter(params.data.IsSourceOfRecord),
+                UseCustomDropdownFilter: true,
+            }),
+            this.utilityFunctionsService.createBasicColumnDef("Water Measurement Calculation", "WaterMeasurementCalculationName", {}),
+            this.utilityFunctionsService.createBasicColumnDef("Calculation JSON", "CalculationJSON", {}),
+        ];
+    }
 
     ngOnInit(): void {
         this.geography$ = this.currentGeographyService.getCurrentGeography();
-        this.currentUser$ = this.authenticationService.getCurrentUser().pipe(
-            tap((user) => {
-                this.currentUser = user;
+        this.currentUser$ = this.authenticationService.getCurrentUser();
+
+        this.canCreateTransactions$ = combineLatest([this.geography$, this.currentUser$]).pipe(
+            switchMap(([geography, user]) => {
+                const hasPermission = this.authenticationService.hasOverallPermission(user, PermissionEnum.WaterTransactionRights, RightsEnum.Create, geography.GeographyID);
+                return of(hasPermission);
+            }),
+            shareReplay(1)
+        );
+
+        this.waterMeasurementTypes$ = this.geography$.pipe(
+            switchMap((geography) => {
+                return this.waterMeasurementTypeService.getWaterMeasurementTypesWaterMeasurementType(geography.GeographyID);
             })
         );
     }
 
-    public canCreateTransactions(geography: GeographyMinimalDto): boolean {
-        const hasPermission = this.authenticationService.hasOverallPermission(this.currentUser, PermissionEnum.WaterTransactionRights, RightsEnum.Create, geography.GeographyID);
-        return hasPermission;
-    }
-
     public openDownloadWaterMeasurementsModal(geography: GeographyMinimalDto) {
-        this.modalService
-            .open(DownloadWaterMeasurementsModalComponent, this.viewContainerRef, { ModalSize: ModalSizeEnum.Medium, ModalTheme: ModalThemeEnum.Light }, {
-                GeographyID: geography.GeographyID,
-                GeographyName: geography.GeographyName,
-                GeographyStartYear: geography.DefaultDisplayYear,
-            } as DownloadWaterMeasurementsContext)
-            .instance.result.then((result) => {
+        if (!this.isDownloading) {
+            const dialogRef = this.dialogService.open(DownloadWaterMeasurementsModalComponent, {
+                data: {
+                    GeographyID: geography.GeographyID,
+                    GeographyName: geography.GeographyName,
+                    GeographyStartYear: null,
+                },
+                size: "lg",
+            });
+
+            dialogRef.afterClosed$.subscribe((result) => {
                 if (result) {
-                    this.downloadWaterMeasurements(geography, result.year);
+                    this.downloadWaterMeasurements(geography, result);
                 }
             });
+        }
     }
 
     private downloadWaterMeasurements(geography: GeographyMinimalDto, year: number) {
@@ -83,7 +123,7 @@ export class WaterMeasurementSupplyAndUsageMenu implements OnInit {
         this.downloadErrorMessage = null;
         this.isDownloading = true;
 
-        this.waterMeasurementService.geographiesGeographyIDWaterMeasurementsYearsYearExcelDownloadGet(geography.GeographyID, year).subscribe(
+        this.waterMeasurementService.downloadExcelWorkbookForGeographyAndYearWaterMeasurement(geography.GeographyID, year).subscribe(
             (result) =>
                 this.handleDownloadSuccess(result, `${geography.GeographyName}_${year}_waterMeasurements`, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
             (error) => this.handleDownloadError(error)
@@ -117,12 +157,22 @@ export class WaterMeasurementSupplyAndUsageMenu implements OnInit {
     }
 
     public refreshWaterMeasurementCalculations(geography: GeographyMinimalDto) {
-        this.modalService
-            .open(RefreshWaterMeasurementCalculationsModalComponent, this.viewContainerRef, { ModalSize: ModalSizeEnum.Medium, ModalTheme: ModalThemeEnum.Light }, {
-                GeographyID: geography.GeographyID,
-                GeographyName: geography.GeographyName,
-                GeographyStartYear: geography.DefaultDisplayYear,
-            } as RefreshWaterMeasurementCalculationsContext)
-            .instance.result.then((result) => {});
+        if (!this.isDownloading) {
+            const dialogRef = this.dialogService.open(RefreshWaterMeasurementCalculationsModalComponent, {
+                data: {
+                    GeographyID: geography.GeographyID,
+                    GeographyName: geography.GeographyName,
+                    GeographyStartYear: null,
+                    UsageLocationIDs: null,
+                    ReportingPeriodID: null,
+                },
+                size: "sm",
+            });
+
+            dialogRef.afterClosed$.subscribe((result) => {
+                if (result) {
+                }
+            });
+        }
     }
 }

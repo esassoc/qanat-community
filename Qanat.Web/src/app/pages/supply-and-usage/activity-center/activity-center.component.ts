@@ -12,8 +12,7 @@ import { AsyncPipe, CommonModule } from "@angular/common";
     selector: "activity-center",
     templateUrl: "./activity-center.component.html",
     styleUrls: ["./activity-center.component.scss"],
-    standalone: true,
-    imports: [AsyncPipe, PageHeaderComponent, AlertDisplayComponent, RouterLink, CommonModule],
+    imports: [AsyncPipe, PageHeaderComponent, AlertDisplayComponent, RouterLink, CommonModule]
 })
 export class ActivityCenterComponent implements OnInit {
     public customRichTextTypeID: number = CustomRichTextTypeEnum.ActivityCenter;

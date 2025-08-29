@@ -39,12 +39,6 @@ public partial class FileResource
     [InverseProperty("FileResources")]
     public virtual User CreateUser { get; set; }
 
-    [InverseProperty("FileResource")]
-    public virtual ICollection<GETActionFileResource> GETActionFileResources { get; set; } = new List<GETActionFileResource>();
-
-    [InverseProperty("FileResource")]
-    public virtual ICollection<GETActionOutputFile> GETActionOutputFiles { get; set; } = new List<GETActionOutputFile>();
-
     [InverseProperty("RasterFileResource")]
     public virtual ICollection<OpenETSyncHistory> OpenETSyncHistories { get; set; } = new List<OpenETSyncHistory>();
 
@@ -53,6 +47,15 @@ public partial class FileResource
 
     [InverseProperty("FileResource")]
     public virtual ICollection<ScenarioRunOutputFile> ScenarioRunOutputFiles { get; set; } = new List<ScenarioRunOutputFile>();
+
+    [InverseProperty("FileResource")]
+    public virtual ICollection<StatementBatchWaterAccount> StatementBatchWaterAccounts { get; set; } = new List<StatementBatchWaterAccount>();
+
+    [InverseProperty("FileResource")]
+    public virtual ICollection<WaterMeasurementSelfReportFileResource> WaterMeasurementSelfReportFileResources { get; set; } = new List<WaterMeasurementSelfReportFileResource>();
+
+    [InverseProperty("FileResource")]
+    public virtual ICollection<WellFileResource> WellFileResources { get; set; } = new List<WellFileResource>();
 
     [InverseProperty("FileResource")]
     public virtual ICollection<WellRegistrationFileResource> WellRegistrationFileResources { get; set; } = new List<WellRegistrationFileResource>();

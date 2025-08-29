@@ -5,10 +5,9 @@ import { vega, default as vegaEmbed, VisualizationSpec } from "vega-embed";
 
 @Component({
     selector: "vega-monthly-usage-chart",
-    standalone: true,
     imports: [LoadingDirective],
     templateUrl: "./vega-monthly-usage-chart.component.html",
-    styleUrls: ["./vega-monthly-usage-chart.component.scss"],
+    styleUrls: ["./vega-monthly-usage-chart.component.scss"]
 })
 export class VegaMonthlyUsageChartComponent implements OnChanges {
     @Input() year: number;

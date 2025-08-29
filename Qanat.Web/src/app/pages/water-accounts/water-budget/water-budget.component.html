@@ -1,41 +1,37 @@
-<div *ngIf="currentWaterAccount$ | async as currentWaterAccount">
-    <page-header
-        [pageTitle]="'#' + currentWaterAccount.WaterAccountNumber"
-        [templateTitleAppend]="templateTitleAppend"
-        icon="WaterAccounts"
-        preTitle="Water Budget"
-        *ngIf="allocationPlans$ | async as allocationPlans">
-        <ng-template #templateTitleAppend>
-            <span
-                class="water-account-name"
-                *ngIf="currentWaterAccount.WaterAccountName?.length > 0 && currentWaterAccount.WaterAccountName !== currentWaterAccount.WaterAccountNumber.toString()"
-                title="{{ currentWaterAccount.WaterAccountName }}">
-                {{ currentWaterAccount.WaterAccountName }}
-            </span>
-            <name-tag
-                *ngIf="allocationPlans?.length > 0"
-                [name]="allocationPlans[0].ZoneName"
-                [color]="allocationPlans[0].ZoneColor"
-                [routerLink]="[
-                    '/geographies',
-                    currentWaterAccount.Geography.GeographyName.toLowerCase(),
-                    'allocation-plans',
-                    allocationPlans[0].WaterTypeSlug,
-                    allocationPlans[0].ZoneSlug,
-                ]"
-                class="zone-tag"
-                title="Allocation Plan Zone"></name-tag>
-        </ng-template>
-    </page-header>
-
-    <ng-container *ngIf="selectedYear$ | async as selectedYear">
+@if (currentWaterAccount$ | async; as currentWaterAccount) {
+    <div>
+        @if (allocationPlans$ | async; as allocationPlans) {
+            <page-header [pageTitle]="'#' + currentWaterAccount.WaterAccountNumber" [templateTitleAppend]="templateTitleAppend" icon="WaterAccounts" preTitle="Water Budget">
+                <ng-template #templateTitleAppend>
+                    @if (currentWaterAccount.WaterAccountName?.length > 0 && currentWaterAccount.WaterAccountName !== currentWaterAccount.WaterAccountNumber.toString()) {
+                        <span class="water-account-name" title="{{ currentWaterAccount.WaterAccountName }}">
+                            {{ currentWaterAccount.WaterAccountName }}
+                        </span>
+                    }
+                    @if (allocationPlans?.length > 0) {
+                        <name-tag
+                            [name]="allocationPlans[0].ZoneName"
+                            [color]="allocationPlans[0].ZoneColor"
+                            [routerLink]="[
+                                '/geographies',
+                                currentWaterAccount.Geography.GeographyName.toLowerCase(),
+                                'allocation-plans',
+                                allocationPlans[0].WaterTypeSlug,
+                                allocationPlans[0].ZoneSlug,
+                            ]"
+                            class="zone-tag"
+                            title="Allocation Plan Zone"></name-tag>
+                    }
+                </ng-template>
+            </page-header>
+        }
         <div class="page-body statistics grid-12">
-            <div class="statistics__filters | g-col-12">
+            <div class="statistics__filters g-col-12">
                 <div class="statistics__filter year">
                     <reporting-period-select
                         [geographyID]="currentWaterAccount.Geography.GeographyID"
-                        [defaultDisplayYear]="selectedYear"
-                        (selectionChanged)="updateDashboardForSelectedYear($event)"></reporting-period-select>
+                        [compact]="true"
+                        (selectionChanged)="onSelectedReportingPeriodChange($event)"></reporting-period-select>
                 </div>
                 <div class="statistics__filter units">
                     <h5 class="statistics__filter-label">Units</h5>
@@ -44,16 +40,25 @@
                         <button class="button-group__item" [ngClass]="{ active: getShowAcresFeet() === true }" (click)="changeUnits(true)">ac-ft</button>
                     </button-group>
                 </div>
-
-                <div class="last-updated" *ngIf="mostRecentEffectiveDates$ | async as mostRecentEffectiveDates">
-                    <em>
-                        Data last updated through
-                        {{ mostRecentEffectiveDates.MostRecentEffectiveDate | date: "M/d/yyyy" : "+0000" }}
-                    </em>
+                @if (mostRecentEffectiveDates$ | async; as mostRecentEffectiveDates) {
+                    <div class="last-updated">
+                        <em>
+                            Data last updated through
+                            {{ mostRecentEffectiveDates.MostRecentEffectiveDate | date: "M/d/yyyy" : "+0000" }}
+                        </em>
+                    </div>
+                }
+            </div>
+            <div class="faq-inline">
+                <div class="question">
+                    <icon icon="ChatBubble"></icon>
+                    <h3>What is a Water Account?</h3>
+                </div>
+                <div class="answer">
+                    <p>A water account is a group of parcels whose water supply and usage are pooled together.</p>
                 </div>
             </div>
-
-            <div class="grid-12" [loadingSpinner]="{ isLoading: this.isLoading }">
+            @if (selectedYear$ | async; as selectedYear) {
                 <div class="card">
                     <div class="card-header">
                         <h3 class="water-account-title | section-title">
@@ -62,188 +67,194 @@
                             <div class="water-budget-tag">{{ selectedYear }} Water Budget</div>
                         </h3>
                     </div>
-
-                    <div class="card-body grid-12" *ngIf="parcels$ | async as parcels">
-                        <div class="g-col-12">
-                            <key-value-pair-list>
-                                <key-value-pair>
-                                    <ng-container key>Parcel Area</ng-container>
-                                    <ng-container keyValue>
-                                        {{ parcels | sum: "ParcelArea" | number: "1.2-2" }} acres ({{ parcels.length }} {{ parcels.length === 1 ? "parcel" : "parcels" }})
-                                    </ng-container>
-                                </key-value-pair>
-                                <key-value-pair *ngIf="currentWaterAccount.Geography.DisplayUsageGeometriesAsField">
-                                    <ng-container key>Field Area</ng-container>
-                                    <ng-container keyValue *ngIf="usageEntities$ | async as usageEntities">
-                                        {{ usageEntities | sum: "UsageEntityArea" | number: "1.2-2" }} acres
-                                    </ng-container>
-                                </key-value-pair>
-                                <key-value-pair>
-                                    <ng-container key>Contact</ng-container>
-                                    <ng-container keyValue>
-                                        {{ currentWaterAccount.ContactName ?? "Not Available" }}
-                                        <br />
-                                        {{ currentWaterAccount.ContactAddress ?? "Not Available" }}
-                                    </ng-container>
-                                </key-value-pair>
-                            </key-value-pair-list>
-                        </div>
-
-                        <div class="g-col-4 stats-group">
-                            <div class="water-budget">
-                                <ng-template #noStatData>
-                                    <h4 class="stat__value">-</h4>
-                                </ng-template>
-                                <ng-container *ngIf="currentWaterAccount.Geography.ShowSupplyOnWaterBudgetComponent; else waterAccountBudgetStatsTemplate">
-                                    <div class="water-budget__stat">
-                                        <h3 class="water-budget__stat-header">Total {{ currentWaterAccount.Geography?.LandownerDashboardSupplyLabel }}</h3>
-
-                                        <h4 class="water-budget__stat-value" *ngIf="totalSupply !== null; else noStatData">
-                                            {{ (getShowAcresFeet() ? totalSupply : convertToAcresFeetAcre(totalSupply)) | number: "1.2-2" }}
-                                        </h4>
-                                        <p class="water-budget__stat-meta">
-                                            {{ getShowAcresFeet() ? acresFeetUnits : acresFeetAcreUnits }}
-                                        </p>
-                                    </div>
-
-                                    <div class="water-budget__stat">
-                                        <h3 class="water-budget__stat-header">Total {{ currentWaterAccount.Geography?.LandownerDashboardUsageLabel }}</h3>
-
-                                        <h4 class="water-budget__stat-value" *ngIf="usageToDate !== null; else noStatData">
-                                            {{ (getShowAcresFeet() ? usageToDate : convertToAcresFeetAcre(usageToDate)) | number: "1.2-2" }}
-                                        </h4>
-                                        <p class="water-budget__stat-meta">
-                                            {{ getShowAcresFeet() ? acresFeetUnits : acresFeetAcreUnits }}
-                                        </p>
-                                    </div>
-
-                                    <div class="water-budget__stat">
-                                        <h3 class="water-budget__stat-header">Balance</h3>
-
-                                        <h4 class="water-budget__stat-value" *ngIf="currentAvailable !== null; else noStatData">
-                                            {{ (getShowAcresFeet() ? currentAvailable : convertToAcresFeetAcre(currentAvailable)) | number: "1.2-2" }}
-                                        </h4>
-                                        <p class="water-budget__stat-meta">
-                                            {{ getShowAcresFeet() ? acresFeetUnits : acresFeetAcreUnits }}
-                                        </p>
-                                    </div>
-                                </ng-container>
-                                <ng-template #waterAccountBudgetStatsTemplate>
-                                    <ng-container *ngIf="waterAccountBudgetStats$ | async as waterAccountBudgetStats">
+                    @if (parcels$ | async; as parcels) {
+                        <div class="card-body grid-12">
+                            <div class="g-col-12">
+                                <key-value-pair-list>
+                                    <key-value-pair>
+                                        <ng-container key>Parcel Area</ng-container>
+                                        <ng-container keyValue>
+                                            {{ parcels | sum: "ParcelArea" | number: "1.2-2" }} acres ({{ parcels.length }} {{ parcels.length === 1 ? "parcel" : "parcels" }})
+                                        </ng-container>
+                                    </key-value-pair>
+                                    <key-value-pair>
+                                        <ng-container key>Usage Location Area</ng-container>
+                                        <ng-container keyValue>
+                                            @if (usageLocationsByReportingPeriod$ | async; as usageLocations) {
+                                                {{ usageLocations | sum: "Area" | number: "1.2-2" }} acres ({{ usageLocations.length }}
+                                                {{ usageLocations.length === 1 ? "usage location" : "usage locations" }})
+                                            }
+                                        </ng-container>
+                                    </key-value-pair>
+                                    <key-value-pair>
+                                        <ng-container key>Contact</ng-container>
+                                        <ng-container keyValue>
+                                            @if (waterAccountContacts$ | async; as waterAccountContacts) {
+                                                {{ waterAccountContacts.ContactName ?? "Not Available" }}
+                                                <br />
+                                                {{ waterAccountContacts.FullAddress ?? "Not Available" }}
+                                            }
+                                        </ng-container>
+                                    </key-value-pair>
+                                </key-value-pair-list>
+                            </div>
+                            <div class="g-col-4 stats-group">
+                                <div class="water-budget">
+                                    @if (currentWaterAccount.Geography.ShowSupplyOnWaterBudgetComponent) {
                                         <div class="water-budget__stat">
-                                            <h3 class="water-budget__stat-header">{{ currentWaterAccount.Geography.WaterBudgetSlotAHeader }}</h3>
-
-                                            <h4 class="water-budget__stat-value" *ngIf="waterAccountBudgetStats.SlotAValueInAcreFeet !== null; else noStatData">
-                                                {{
-                                                    (getShowAcresFeet()
-                                                        ? waterAccountBudgetStats.SlotAValueInAcreFeet
-                                                        : convertToAcresFeetAcre(waterAccountBudgetStats.SlotAValueInAcreFeet)
-                                                    ) | number: "1.2-2"
-                                                }}
-                                            </h4>
+                                            <h3 class="water-budget__stat-header">Total {{ currentWaterAccount.Geography?.LandownerDashboardSupplyLabel }}</h3>
+                                            @if (totalSupply !== null) {
+                                                <h4 class="water-budget__stat-value">
+                                                    {{ (getShowAcresFeet() ? totalSupply : convertToAcresFeetAcre(totalSupply)) | number: "1.2-2" }}
+                                                </h4>
+                                            } @else {
+                                                <h4 class="stat__value">-</h4>
+                                            }
                                             <p class="water-budget__stat-meta">
                                                 {{ getShowAcresFeet() ? acresFeetUnits : acresFeetAcreUnits }}
                                             </p>
                                         </div>
-
                                         <div class="water-budget__stat">
-                                            <h3 class="water-budget__stat-header">{{ currentWaterAccount.Geography.WaterBudgetSlotBHeader }}</h3>
-
-                                            <h4 class="water-budget__stat-value" *ngIf="waterAccountBudgetStats.SlotBValueInAcreFeet !== null; else noStatData">
-                                                {{
-                                                    (getShowAcresFeet()
-                                                        ? waterAccountBudgetStats.SlotBValueInAcreFeet
-                                                        : convertToAcresFeetAcre(waterAccountBudgetStats.SlotBValueInAcreFeet)
-                                                    ) | number: "1.2-2"
-                                                }}
-                                            </h4>
-
+                                            <h3 class="water-budget__stat-header">Total {{ currentWaterAccount.Geography?.LandownerDashboardUsageLabel }}</h3>
+                                            @if (usageToDate !== null) {
+                                                <h4 class="water-budget__stat-value">
+                                                    {{ (getShowAcresFeet() ? usageToDate : convertToAcresFeetAcre(usageToDate)) | number: "1.2-2" }}
+                                                </h4>
+                                            } @else {
+                                                <h4 class="stat__value">-</h4>
+                                            }
                                             <p class="water-budget__stat-meta">
                                                 {{ getShowAcresFeet() ? acresFeetUnits : acresFeetAcreUnits }}
                                             </p>
                                         </div>
-
                                         <div class="water-budget__stat">
-                                            <h3 class="water-budget__stat-header">{{ currentWaterAccount.Geography.WaterBudgetSlotCHeader }}</h3>
-
-                                            <h4 class="water-budget__stat-value" *ngIf="waterAccountBudgetStats.SlotCValueInAcreFeet !== null; else noStatData">
-                                                {{
-                                                    (getShowAcresFeet()
-                                                        ? waterAccountBudgetStats.SlotCValueInAcreFeet
-                                                        : convertToAcresFeetAcre(waterAccountBudgetStats.SlotCValueInAcreFeet)
-                                                    ) | number: "1.2-2"
-                                                }}
-                                            </h4>
+                                            <h3 class="water-budget__stat-header">Balance</h3>
+                                            @if (currentAvailable !== null) {
+                                                <h4 class="water-budget__stat-value">
+                                                    {{ (getShowAcresFeet() ? currentAvailable : convertToAcresFeetAcre(currentAvailable)) | number: "1.2-2" }}
+                                                </h4>
+                                            } @else {
+                                                <h4 class="stat__value">-</h4>
+                                            }
                                             <p class="water-budget__stat-meta">
                                                 {{ getShowAcresFeet() ? acresFeetUnits : acresFeetAcreUnits }}
                                             </p>
                                         </div>
-                                    </ng-container>
-                                </ng-template>
+                                    } @else {
+                                        @if (waterAccountBudgetStats$ | async; as waterAccountBudgetStats) {
+                                            <div class="water-budget__stat">
+                                                <h3 class="water-budget__stat-header">{{ currentWaterAccount.Geography.WaterBudgetSlotAHeader }}</h3>
+                                                @if (waterAccountBudgetStats.SlotAValueInAcreFeet !== null) {
+                                                    <h4 class="water-budget__stat-value">
+                                                        {{
+                                                            (getShowAcresFeet()
+                                                                ? waterAccountBudgetStats.SlotAValueInAcreFeet
+                                                                : convertToAcresFeetAcre(waterAccountBudgetStats.SlotAValueInAcreFeet)
+                                                            ) | number: "1.2-2"
+                                                        }}
+                                                    </h4>
+                                                } @else {
+                                                    <h4 class="stat__value">-</h4>
+                                                }
+                                                <p class="water-budget__stat-meta">
+                                                    {{ getShowAcresFeet() ? acresFeetUnits : acresFeetAcreUnits }}
+                                                </p>
+                                            </div>
+                                            <div class="water-budget__stat">
+                                                <h3 class="water-budget__stat-header">{{ currentWaterAccount.Geography.WaterBudgetSlotBHeader }}</h3>
+                                                @if (waterAccountBudgetStats.SlotBValueInAcreFeet !== null) {
+                                                    <h4 class="water-budget__stat-value">
+                                                        {{
+                                                            (getShowAcresFeet()
+                                                                ? waterAccountBudgetStats.SlotBValueInAcreFeet
+                                                                : convertToAcresFeetAcre(waterAccountBudgetStats.SlotBValueInAcreFeet)
+                                                            ) | number: "1.2-2"
+                                                        }}
+                                                    </h4>
+                                                } @else {
+                                                    <h4 class="stat__value">-</h4>
+                                                }
+                                                <p class="water-budget__stat-meta">
+                                                    {{ getShowAcresFeet() ? acresFeetUnits : acresFeetAcreUnits }}
+                                                </p>
+                                            </div>
+                                            <div class="water-budget__stat">
+                                                <h3 class="water-budget__stat-header">{{ currentWaterAccount.Geography.WaterBudgetSlotCHeader }}</h3>
+                                                @if (waterAccountBudgetStats.SlotCValueInAcreFeet !== null) {
+                                                    <h4 class="water-budget__stat-value">
+                                                        {{
+                                                            (getShowAcresFeet()
+                                                                ? waterAccountBudgetStats.SlotCValueInAcreFeet
+                                                                : convertToAcresFeetAcre(waterAccountBudgetStats.SlotCValueInAcreFeet)
+                                                            ) | number: "1.2-2"
+                                                        }}
+                                                    </h4>
+                                                } @else {
+                                                    <h4 class="stat__value">-</h4>
+                                                }
+                                                <p class="water-budget__stat-meta">
+                                                    {{ getShowAcresFeet() ? acresFeetUnits : acresFeetAcreUnits }}
+                                                </p>
+                                            </div>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                            <div class="g-col-8">
+                                <qanat-map (onMapLoad)="handleMapReady($event)" mapHeight="500px">
+                                    <div mapLayers [loadingSpinner]="{ isLoading: layerLoading, opacity: 0.33 }">
+                                        @if (mapIsReady) {
+                                            @if (parcelIDs) {
+                                                <parcel-layer
+                                                    [map]="map"
+                                                    [layerControl]="layerControl"
+                                                    [geographyID]="currentWaterAccount.Geography.GeographyID"
+                                                    [parcelIDs]="parcelIDs"
+                                                    [reportingPeriodID]="selectedReportingPeriod.ReportingPeriodID"
+                                                    [displayOnLoad]="true"
+                                                    (layerStartedLoading)="onLayerLoadStarted()"
+                                                    (layerFinishedLoading)="onLayerLoadFinished()"></parcel-layer>
+                                            }
+                                            @if (parcelIDs) {
+                                                <usage-location-layer
+                                                    [map]="map"
+                                                    [layerControl]="layerControl"
+                                                    [geographyID]="currentWaterAccount.Geography.GeographyID"
+                                                    [parcelIDs]="parcelIDs"
+                                                    [reportingPeriodID]="selectedReportingPeriod.ReportingPeriodID"
+                                                    [displayOnLoad]="true"></usage-location-layer>
+                                            }
+                                            <gsa-boundaries
+                                                [map]="map"
+                                                [layerControl]="layerControl"
+                                                [geographyID]="currentWaterAccount.Geography.GeographyID"
+                                                [displayOnLoad]="false"></gsa-boundaries>
+                                            @if (zoneGroups$ | async; as zoneGroups) {
+                                                @for (zone of zoneGroups; track zone) {
+                                                    <zone-group-layer
+                                                        [displayOnLoad]="false"
+                                                        [zoneGroupID]="zone.ZoneGroupID"
+                                                        [zoneGroupName]="zone.ZoneGroupName"
+                                                        [map]="map"
+                                                        [layerControl]="layerControl"></zone-group-layer>
+                                                }
+                                            }
+                                            @if (externalMapLayers$ | async; as externalMapLayers) {
+                                                @for (externalMapLayer of externalMapLayers; track externalMapLayer) {
+                                                    <geography-external-map-layer
+                                                        [map]="map"
+                                                        [layerControl]="layerControl"
+                                                        [externalMapLayer]="externalMapLayer"></geography-external-map-layer>
+                                                }
+                                            }
+                                        }
+                                    </div>
+                                </qanat-map>
                             </div>
                         </div>
-
-                        <div class="g-col-8">
-                            <qanat-map (onMapLoad)="handleMapReady($event)" mapHeight="500px">
-                                <ng-container *ngIf="mapIsReady">
-                                    <parcel-layer
-                                        *ngIf="parcelIDs"
-                                        [geographyID]="currentWaterAccount.Geography.GeographyID"
-                                        [parcelIDs]="parcelIDs"
-                                        [map]="map"
-                                        [layerControl]="layerControl"
-                                        [displayOnLoad]="true"></parcel-layer>
-
-                                    <usage-entities-layer
-                                        *ngIf="currentWaterAccount.Geography.DisplayUsageGeometriesAsField && parcelIDs"
-                                        [map]="map"
-                                        [layerControl]="layerControl"
-                                        [parcelIDs]="parcelIDs"
-                                        [displayOnLoad]="true"
-                                        [geographyID]="currentWaterAccount.Geography.GeographyID"></usage-entities-layer>
-
-                                    <gsa-boundaries
-                                        [map]="map"
-                                        [layerControl]="layerControl"
-                                        [geographyID]="currentWaterAccount.Geography.GeographyID"
-                                        [displayOnLoad]="false"></gsa-boundaries>
-
-                                    <ng-container *ngIf="zoneGroups$ | async as zoneGroups">
-                                        <zone-group-layer
-                                            *ngFor="let zone of zoneGroups"
-                                            [displayOnLoad]="false"
-                                            [zoneGroupID]="zone.ZoneGroupID"
-                                            [zoneGroupName]="zone.ZoneGroupName"
-                                            [map]="map"
-                                            [layerControl]="layerControl"></zone-group-layer>
-                                    </ng-container>
-
-                                    <ng-container *ngIf="externalMapLayers$ | async as externalMapLayers">
-                                        <geography-external-map-layer
-                                            *ngFor="let externalMapLayer of externalMapLayers"
-                                            [map]="map"
-                                            [layerControl]="layerControl"
-                                            [externalMapLayer]="externalMapLayer"></geography-external-map-layer>
-                                    </ng-container>
-                                </ng-container>
-                            </qanat-map>
-                        </div>
-                    </div>
+                    }
                 </div>
-
-                <div class="faq-inline">
-                    <div class="question">
-                        <icon icon="ChatBubble"></icon>
-
-                        <h3>What is a Water Account?</h3>
-                    </div>
-
-                    <div class="answer">
-                        <p>A water account is a group of parcels whose water supply and usage are pooled together.</p>
-                    </div>
-                </div>
-
-                <ng-container *ngIf="waterAccountParcelWaterMeasurements$ | async as waterAccountParcelWaterMeasurements">
+                @if (waterAccountParcelWaterMeasurements$ | async; as waterAccountParcelWaterMeasurements) {
                     <div class="statistics__module chart">
                         <div class="statistics__module-header underline mb-4">
                             <h3 class="statistics__title-large">{{ currentWaterAccount.Geography.LandownerDashboardUsageLabel }} Chart</h3>
@@ -255,7 +266,6 @@
                                         (click)="updateShowCumulativeWaterUsageChart(true)">
                                         Cumulative
                                     </button>
-
                                     <button
                                         class="button-group__item"
                                         [class.active]="showCumulativeWaterUsageChart === false"
@@ -265,18 +275,18 @@
                                 </button-group>
                             </div>
                         </div>
-
-                        <div class="cumulative" *ngIf="showCumulativeWaterUsageChart; else monthlyChart">
-                            <vega-cumulative-usage-chart
-                                *ngIf="waterTypeSupplies$ | async as waterTypeSupplies"
-                                [monthlyUsageSummaries]="monthlyUsageSummaries"
-                                [year]="selectedYear"
-                                [showAcreFeet]="getShowAcresFeet()"
-                                [usageLabel]="currentWaterAccount.Geography.LandownerDashboardUsageLabel"
-                                [waterTypesSupply]="waterTypeSupplies"></vega-cumulative-usage-chart>
-                        </div>
-
-                        <ng-template #monthlyChart>
+                        @if (showCumulativeWaterUsageChart) {
+                            <div class="cumulative">
+                                @if (waterTypeSupplies$ | async; as waterTypeSupplies) {
+                                    <vega-cumulative-usage-chart
+                                        [monthlyUsageSummaries]="monthlyUsageSummaries"
+                                        [year]="selectedYear"
+                                        [showAcreFeet]="getShowAcresFeet()"
+                                        [usageLabel]="currentWaterAccount.Geography.LandownerDashboardUsageLabel"
+                                        [waterTypesSupplyForWaterAccount]="waterTypeSupplies"></vega-cumulative-usage-chart>
+                                }
+                            </div>
+                        } @else {
                             <div class="monthly">
                                 <vega-monthly-usage-chart
                                     [monthlyUsageSummaries]="monthlyUsageSummaries"
@@ -284,9 +294,8 @@
                                     [showAcreFeet]="getShowAcresFeet()"
                                     [usageLabel]="currentWaterAccount.Geography.LandownerDashboardUsageLabel"></vega-monthly-usage-chart>
                             </div>
-                        </ng-template>
+                        }
                     </div>
-
                     <div class="statistics__module chart">
                         <div class="statistics__module-header underline mb-4">
                             <h3 class="statistics__title-large">Water Measurements</h3>
@@ -296,7 +305,6 @@
                                     <button class="button-group__item active" [class.active]="showWaterAccountRollup === true" (click)="updateShowWaterAccountRollup(true)">
                                         Water Account
                                     </button>
-
                                     <button class="button-group__item" [class.active]="showWaterAccountRollup === false" (click)="updateShowWaterAccountRollup(false)">
                                         Parcel
                                     </button>
@@ -309,12 +317,10 @@
                             [waterAccountParcelWaterMeasurements]="waterAccountParcelWaterMeasurements"
                             [showWaterAccountRollup]="showWaterAccountRollup"></water-account-parcel-water-measurements-grid>
                     </div>
-
                     <div class="statistics__module">
                         <div class="statistics__module-header">
                             <h3 class="statistics__title-small">Annual Usage Meter</h3>
                         </div>
-
                         <div class="statistics__usage-meter">
                             <div class="meter">
                                 <div class="usage" [style.width]="getPercentageOfWaterUsed() * 100 + '%'" [class.over]="getPercentageOfWaterUsed() > 1"></div>
@@ -327,26 +333,27 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="statistics__module">
                         <div class="statistics__module-header underline">
                             <h3 class="statistics__title-large">
                                 {{ currentWaterAccount.Geography.LandownerDashboardSupplyLabel }}
                             </h3>
                         </div>
-
-                        <div class="statistics__water-supply" *ngIf="waterTypeSupplies$ | async as waterTypeSupplies">
-                            <water-supply-type
-                                class="statistics__water-supply-type"
-                                [waterType]="waterType"
-                                [value]="getShowAcresFeet() ? waterType.TotalSupply : convertToAcresFeetAcre(waterType.TotalSupply)"
-                                [totalSupply]="getShowAcresFeet() ? totalSupply : convertToAcresFeetAcre(totalSupply)"
-                                [unit]="getShowAcresFeet() ? acresFeetUnits : acresFeetAcreUnits"
-                                *ngFor="let waterType of waterTypeSupplies"></water-supply-type>
-                        </div>
+                        @if (waterTypeSupplies$ | async; as waterTypeSupplies) {
+                            <div class="statistics__water-supply">
+                                @for (waterType of waterTypeSupplies; track waterType) {
+                                    <water-supply-type
+                                        class="statistics__water-supply-type"
+                                        [waterType]="waterType"
+                                        [value]="getShowAcresFeet() ? waterType.TotalSupply : convertToAcresFeetAcre(waterType.TotalSupply)"
+                                        [totalSupply]="getShowAcresFeet() ? totalSupply : convertToAcresFeetAcre(totalSupply)"
+                                        [unit]="getShowAcresFeet() ? acresFeetUnits : acresFeetAcreUnits"></water-supply-type>
+                                }
+                            </div>
+                        }
                     </div>
-                </ng-container>
-            </div>
+                }
+            }
         </div>
-    </ng-container>
-</div>
+    </div>
+}

@@ -8,6 +8,8 @@ namespace Qanat.EFModels.Entities;
 
 [Table("ParcelZone")]
 [Index("ParcelID", "ZoneID", Name = "AK_ParcelZone_Unique_ParcelID_ZoneID", IsUnique = true)]
+[Index("ParcelID", Name = "IX_ParcelZone_ParcelID")]
+[Index("ZoneID", Name = "IX_ParcelZone_ZoneID")]
 public partial class ParcelZone
 {
     [Key]

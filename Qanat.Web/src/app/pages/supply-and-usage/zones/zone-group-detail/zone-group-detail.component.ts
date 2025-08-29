@@ -6,7 +6,7 @@ import { ZoneGroupMinimalDto } from "src/app/shared/generated/model/models";
 import { VegaZoneGroupUsageChartComponent } from "../../../../shared/components/vega/vega-zone-group-usage-chart/vega-zone-group-usage-chart.component";
 import { ParcelMapComponent } from "../../../../shared/components/parcel/parcel-map/parcel-map.component";
 import { AlertDisplayComponent } from "../../../../shared/components/alert-display/alert-display.component";
-import { NgIf, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { PublicService } from "src/app/shared/generated/api/public.service";
 import { CurrentGeographyService } from "src/app/shared/services/current-geography.service";
@@ -15,8 +15,7 @@ import { CurrentGeographyService } from "src/app/shared/services/current-geograp
     selector: "zone-group-detail",
     templateUrl: "./zone-group-detail.component.html",
     styleUrls: ["./zone-group-detail.component.scss"],
-    standalone: true,
-    imports: [NgIf, PageHeaderComponent, RouterLink, AlertDisplayComponent, ParcelMapComponent, VegaZoneGroupUsageChartComponent, AsyncPipe],
+    imports: [PageHeaderComponent, RouterLink, AlertDisplayComponent, ParcelMapComponent, VegaZoneGroupUsageChartComponent, AsyncPipe]
 })
 export class ZoneGroupDetailComponent implements OnInit {
     public geography$: Observable<GeographyDto>;
@@ -44,7 +43,7 @@ export class ZoneGroupDetailComponent implements OnInit {
                 this.isLoading = true;
             }),
             switchMap(({ geography, zoneGroupSlug }) => {
-                return this.publicService.publicGeographiesGeographyIDZoneGroupZoneGroupSlugGet(geography.GeographyID, zoneGroupSlug);
+                return this.publicService.getZoneGroupBySlugPublic(geography.GeographyID, zoneGroupSlug);
             }),
             tap(() => {
                 this.isLoading = false;

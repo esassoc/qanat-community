@@ -1,0 +1,278 @@
+<div class="card geography-card">
+    <div class="card-header" [expandCollapse]="geographyContainer" [startOpen]="true">
+        <geography-logo [geographyID]="geographySummary.GeographyID"></geography-logo>
+        <div class="geography-name">
+            <h2>{{ geographySummary.GeographyName }}</h2>
+            <p>{{ geographySummary.GeographyDisplayName }}</p>
+        </div>
+        <div class="toggle">
+            <i class="fas fa-angle-up"></i>
+        </div>
+    </div>
+    <div class="card-body" #geographyContainer>
+        <div class="column">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Notifications</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (notifications$ | async; as notifications) {
+                        @if (notifications.length > 0) {
+                            @for (notification of notifications; track notification) {
+                                <tr>
+                                    <td>
+                                        <icon icon="Notification"></icon>
+                                        <span [innerHTML]="notification.Message"></span>
+                                        @if (notification.Link) {
+                                            <a [routerLink]="notification.Link" [queryParams]="notification.LinkQueryParams">{{ notification.LinkText }}</a>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        } @else {
+                            <tr>
+                                <td colspan="2" class="no-table-content-message">No notifications at this time</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Self Reporting</th>
+                        @if (geographySummary.AllowWaterMeasurementSelfReporting || geographySummary.AllowCoverCropSelfReporting || geographySummary.AllowFallowSelfReporting) {
+                            <th style="width: 30%"></th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- @if (geographySummary.AllowWaterMeasurementSelfReporting) {
+                        <tr>
+                            <td>Water Measurement Self Reporting</td>
+                            <td><a class="disabled">Report Water Measurements</a></td>
+                        </tr>
+                    } -->
+                    @if (geographySummary.AllowCoverCropSelfReporting) {
+                        @if (coverCropSelfReportSummaries$ | async; as coverCropSelfReportSummaries) {
+                            @if (coverCropSelfReportSummaries.length > 0) {
+                                @for (summary of coverCropSelfReportSummaries; track summary) {
+                                    <tr>
+                                        <td>
+                                            <div class="summary-container">
+                                                <div>
+                                                    <h4>
+                                                        {{ summary.ReportingPeriodName }}
+                                                        Cover Crops
+                                                    </h4>
+                                                </div>
+
+                                                <div class="summary-details">
+                                                    @if (summary.ApprovedCount > 0) {
+                                                        <div class="summary-item">
+                                                            <span class="summary-circle approved"></span>
+                                                            <div class="summary-text">{{ summary.ApprovedCount }} {{ summary.ApprovedCount > 1 ? "s" : "" }} Approved</div>
+                                                        </div>
+                                                    }
+                                                    @if (summary.ReturnedCount > 0) {
+                                                        <div class="summary-item">
+                                                            <span class="summary-circle returned"></span>
+                                                            <div class="summary-text">{{ summary.ReturnedCount }} Report{{ summary.ReturnedCount > 1 ? "s" : "" }} Returned</div>
+                                                        </div>
+                                                    }
+                                                    @if (summary.SubmittedCount > 0) {
+                                                        <div class="summary-item">
+                                                            <span class="summary-circle submitted"></span>
+                                                            <div class="summary-text">{{ summary.SubmittedCount }} Report{{ summary.SubmittedCount > 1 ? "s" : "" }} Submitted</div>
+                                                        </div>
+                                                    }
+                                                    @if (summary.InProgressCount > 0) {
+                                                        <div class="summary-item">
+                                                            <span class="summary-circle in-progress"></span>
+                                                            <div class="summary-text">
+                                                                {{ summary.InProgressCount }} Report{{ summary.InProgressCount > 1 ? "s" : "" }} In Progress
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                    @if (summary.NotStartedCount > 0) {
+                                                        <div class="summary-item">
+                                                            <span class="summary-circle not-started"></span>
+                                                            <div class="summary-text">
+                                                                {{ summary.NotStartedCount }} Report{{ summary.NotStartedCount > 1 ? "s" : "" }} Not Started
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <a
+                                                routerLink="/cover-crop-self-reports"
+                                                [queryParams]="{ geographyID: this.geographySummary.GeographyID, reportingPeriodID: summary.ReportingPeriodID }">
+                                                Report Cover Crops
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        }
+                    }
+                    @if (geographySummary.AllowFallowSelfReporting) {
+                        @if (fallowSelfReportSummaries$ | async; as fallowSelfReportSummaries) {
+                            @if (fallowSelfReportSummaries.length > 0) {
+                                @for (summary of fallowSelfReportSummaries; track summary) {
+                                    <tr>
+                                        <td>
+                                            <div class="summary-container">
+                                                <div>
+                                                    <h4>
+                                                        {{ summary.ReportingPeriodName }}
+                                                        Fallowing
+                                                    </h4>
+                                                </div>
+
+                                                <div class="summary-details">
+                                                    @if (summary.ApprovedCount > 0) {
+                                                        <div class="summary-item">
+                                                            <span class="summary-circle approved"></span>
+                                                            <div class="summary-text">{{ summary.ApprovedCount }} {{ summary.ApprovedCount > 1 ? "s" : "" }} Approved</div>
+                                                        </div>
+                                                    }
+                                                    @if (summary.ReturnedCount > 0) {
+                                                        <div class="summary-item">
+                                                            <span class="summary-circle returned"></span>
+                                                            <div class="summary-text">{{ summary.ReturnedCount }} Report{{ summary.ReturnedCount > 1 ? "s" : "" }} Returned</div>
+                                                        </div>
+                                                    }
+                                                    @if (summary.SubmittedCount > 0) {
+                                                        <div class="summary-item">
+                                                            <span class="summary-circle submitted"></span>
+                                                            <div class="summary-text">{{ summary.SubmittedCount }} Report{{ summary.SubmittedCount > 1 ? "s" : "" }} Submitted</div>
+                                                        </div>
+                                                    }
+                                                    @if (summary.InProgressCount > 0) {
+                                                        <div class="summary-item">
+                                                            <span class="summary-circle in-progress"></span>
+                                                            <div class="summary-text">
+                                                                {{ summary.InProgressCount }} Report{{ summary.InProgressCount > 1 ? "s" : "" }} In Progress
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                    @if (summary.NotStartedCount > 0) {
+                                                        <div class="summary-item">
+                                                            <span class="summary-circle not-started"></span>
+                                                            <div class="summary-text">
+                                                                {{ summary.NotStartedCount }} Report{{ summary.NotStartedCount > 1 ? "s" : "" }} Not Started
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <a
+                                                routerLink="/fallow-self-reports"
+                                                [queryParams]="{ geographyID: this.geographySummary.GeographyID, reportingPeriodID: summary.ReportingPeriodID }">
+                                                Report Fallowing
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        }
+                    }
+
+                    @if (geographySummary.AllowCoverCropSelfReporting || geographySummary.AllowFallowSelfReporting) {
+                        @if (coverCropReportingPeriodsDue.length + fallowingReportingPeriodsDue.length === 0) {
+                            <tr>
+                                <td colspan="2" class="no-table-content-message">No self reporting due at this time</td>
+                            </tr>
+                        }
+                    }
+
+                    @if (!geographySummary.AllowWaterMeasurementSelfReporting && !geographySummary.AllowCoverCropSelfReporting && !geographySummary.AllowFallowSelfReporting) {
+                        <tr>
+                            <td class="no-table-content-message">No self reporting configured at this time</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="column">
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Water Accounts</th>
+                            @if (!geographySummary.IsGeographyWaterManager) {
+                                <th></th>
+                                <th></th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (waterAccount of geographySummary.WaterAccounts; track waterAccount) {
+                            <tr>
+                                <td class="water-account-link">
+                                    <icon icon="WaterAccounts"></icon>
+                                    <a routerLink="/water-accounts/{{ waterAccount.WaterAccountID }}">#{{ waterAccount.WaterAccountNumber }}</a>
+                                    @for (zone of waterAccount.Zones; track zone) {
+                                        <span class="zone" [style.background-color]="zone.ZoneColor" [style.color]="zone.ZoneAccentColor" title="{{ zone.ZoneName }}">
+                                            {{ zone.ZoneName }}
+                                        </span>
+                                    }
+                                </td>
+                                <td class="gray"><icon icon="Parcels"></icon> {{ waterAccount.NumOfParcels }} Parcels</td>
+                                <td class="gray">{{ waterAccount.Area | number: "0.2-2" }} acres</td>
+                            </tr>
+                        }
+                        @if (geographySummary.IsGeographyWaterManager) {
+                            <tr>
+                                <td class="no-table-content-message">
+                                    As {{ isSystemAdmin ? "an administrator" : "a Water Manager" }}, you have access to manage all Water Accounts in this Geography.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Common Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <icon icon="PlusSquare"></icon>
+                            <a routerLink="/{{ geographySummary.GeographyName.toLowerCase() }}/claim-water-accounts">Claim a Water Account</a>
+                        </td>
+                    </tr>
+                    @if (geographySummary.AllowLandownersToRequestAccountChanges) {
+                        <tr>
+                            <td><icon icon="WaterAccounts"></icon> <a routerLink="/water-accounts/request-changes">Request Account Changes</a></td>
+                        </tr>
+                    }
+                    <tr>
+                        <td>
+                            <icon icon="Question"></icon>
+                            <a routerLink="/contact-support" [queryParams]="{ geographyName: '{{ geographySummary.GeographyName }}' }">Contact Support</a>
+                        </td>
+                    </tr>
+                    @if (geographySummary.WellRegistryEnabled) {
+                        <tr>
+                            <td>
+                                <icon icon="Wells"></icon>
+                                <a routerLink="/well-registry/{{ geographySummary.GeographyName }}/new">Register a Well</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

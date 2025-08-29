@@ -1,14 +1,12 @@
-import { Component, OnInit, ViewContainerRef } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
-import { Observable, Subscription } from "rxjs";
+import { BehaviorSubject, combineLatest, map, Observable, shareReplay, switchMap, tap } from "rxjs";
 import { routeParams } from "src/app/app.routes";
 import { WaterAccountService } from "src/app/shared/generated/api/water-account.service";
-import { GeographySimpleDto } from "src/app/shared/generated/model/geography-simple-dto";
 import { CommonModule } from "@angular/common";
 import { LoadingDirective } from "src/app/shared/directives/loading.directive";
 import { UpdateParcelsComponent } from "src/app/shared/components/water-account/modals/update-parcels/update-parcels.component";
-import { UpdateWaterAccountInfoComponent, WaterAccountContext } from "src/app/shared/components/water-account/modals/update-water-account-info/update-water-account-info.component";
-import { ModalService, ModalSizeEnum, ModalThemeEnum } from "src/app/shared/services/modal/modal.service";
+import { UpdateWaterAccountInfoComponent } from "src/app/shared/components/water-account/modals/update-water-account-info/update-water-account-info.component";
 import { DeleteWaterAccountComponent } from "src/app/shared/components/water-account/modals/delete-water-account/delete-water-account.component";
 import { MergeWaterAccountsComponent } from "src/app/shared/components/water-account/modals/merge-water-accounts/merge-water-accounts.component";
 import { CustomAttributeService } from "src/app/shared/generated/api/custom-attribute.service";
@@ -24,10 +22,17 @@ import { AlertService } from "src/app/shared/services/alert.service";
 import { Alert } from "src/app/shared/models/alert";
 import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
 import { AlertDisplayComponent } from "../../../shared/components/alert-display/alert-display.component";
+import { ParcelWaterAccountHistorySimpleDto, UsageLocationHistoryDto } from "src/app/shared/generated/model/models";
+import { WaterAccountParcelByWaterAccountService } from "src/app/shared/generated/api/water-account-parcel-by-water-account.service";
+import { ColDef, GridApi, GridReadyEvent } from "ag-grid-community";
+import { UtilityFunctionsService } from "src/app/shared/services/utility-functions.service";
+import { QanatGridComponent } from "../../../shared/components/qanat-grid/qanat-grid.component";
+import { WaterAccountContactUpdateComponent } from "src/app/shared/components/water-account-contact/modals/water-account-contact-update/water-account-contact-update.component";
+import { DialogService } from "@ngneat/dialog";
+import { UsageLocationHistoryService } from "src/app/shared/generated/api/usage-location-history.service";
 
 @Component({
     selector: "water-account-admin-panel",
-    standalone: true,
     imports: [
         PageHeaderComponent,
         CommonModule,
@@ -39,102 +44,178 @@ import { AlertDisplayComponent } from "../../../shared/components/alert-display/
         ModelNameTagComponent,
         RouterLink,
         AlertDisplayComponent,
+        QanatGridComponent,
     ],
     templateUrl: "./water-account-admin-panel.component.html",
     styleUrl: "./water-account-admin-panel.component.scss",
 })
 export class WaterAccountAdminPanelComponent implements OnInit {
-    public waterAccountID: number;
-    private accountIDSubscription: Subscription = Subscription.EMPTY;
+    public waterAccount$: Observable<WaterAccountDto>;
     public currentWaterAccount: WaterAccountDto;
-    public currentGeography: GeographySimpleDto;
-    public currentGeographySlug: string;
     public isLoading: boolean = false;
     public waterAccountCustomAttributes$: Observable<EntityCustomAttributesDto>;
+
+    public parcelWaterAccountHistories$: Observable<ParcelWaterAccountHistorySimpleDto[]>;
+    public refreshParcelWaterAccountHistories$: BehaviorSubject<void> = new BehaviorSubject<void>(null);
+
+    public usageLocationHistories$: Observable<UsageLocationHistoryDto[]>;
+
+    public parcelWaterAccountHistoriesColumnDefs: ColDef[];
+    public parcelWaterAccountHistoriesGridApi: GridApi;
+
+    public usageLocationHistoriesColumnDefs: ColDef[];
+    public usageLocationHistoriesGridApi: GridApi;
+
     allocationPlans: any;
 
     constructor(
         private route: ActivatedRoute,
         private waterAccountService: WaterAccountService,
-        private modalService: ModalService,
-        private viewContainerRef: ViewContainerRef,
+        private waterAccountParcelByWaterAccountService: WaterAccountParcelByWaterAccountService,
+        private usageLocationHistoryService: UsageLocationHistoryService,
         private customAttributeService: CustomAttributeService,
+        private utilityFunctionsService: UtilityFunctionsService,
         private alertService: AlertService,
-        private router: Router
-    ) {}
+        private router: Router,
+        private dialogService: DialogService
+    ) {
+        this.parcelWaterAccountHistoriesColumnDefs = [
+            this.utilityFunctionsService.createLinkColumnDef("APN", "ParcelNumber", "ParcelID", {
+                InRouterLink: "/parcels/",
+            }),
+            this.utilityFunctionsService.createBasicColumnDef("Reporting Period", "ReportingPeriodName"),
+            this.utilityFunctionsService.createLinkColumnDef("From Water Account", "FromWaterAccountNumberAndName", "FromWaterAccountID", {
+                InRouterLink: "/water-accounts/",
+            }),
+            this.utilityFunctionsService.createLinkColumnDef("To Water Account", "ToWaterAccountNumberAndName", "ToWaterAccountID", {
+                InRouterLink: "/water-accounts/",
+            }),
+            this.utilityFunctionsService.createBasicColumnDef("Reason", "Reason"),
+            this.utilityFunctionsService.createDateColumnDef("Date", "CreateDate", "short"),
+            this.utilityFunctionsService.createBasicColumnDef("User", "CreateUserFullName"),
+        ];
+
+        this.usageLocationHistoriesColumnDefs = [
+            this.utilityFunctionsService.createBasicColumnDef("Usage Location", "UsageLocationName"),
+            this.utilityFunctionsService.createBasicColumnDef("Usage Location Type", "UsageLocationTypeName", { UseCustomDropdownFilter: true }),
+            this.utilityFunctionsService.createBasicColumnDef("Reporting Period", "ReportingPeriodName", { UseCustomDropdownFilter: true }),
+            this.utilityFunctionsService.createDateColumnDef("Date", "CreateDate", "short", { Sort: "desc" }),
+            this.utilityFunctionsService.createBasicColumnDef("User", "CreateUserFullName", { UseCustomDropdownFilter: true }),
+            this.utilityFunctionsService.createBasicColumnDef("Note", "Note"),
+        ];
+    }
 
     ngOnInit(): void {
-        this.accountIDSubscription = this.route.paramMap.subscribe((paramMap) => {
-            this.waterAccountID = parseInt(paramMap.get(routeParams.waterAccountID));
-            this.waterAccountCustomAttributes$ = this.customAttributeService.customAttributesWaterAccountsWaterAccountIDGet(this.waterAccountID);
-            this.waterAccountService.waterAccountsWaterAccountIDGet(this.waterAccountID).subscribe((waterAccount) => {
+        this.waterAccount$ = this.route.paramMap.pipe(
+            map((paramMap) => parseInt(paramMap.get(routeParams.waterAccountID))),
+            tap((waterAccountID) => {
                 this.isLoading = true;
+            }),
+            switchMap((waterAccountID) => this.waterAccountService.getByIDWaterAccount(waterAccountID)),
+            tap((waterAccount) => {
                 this.currentWaterAccount = waterAccount;
-                this.currentGeography = waterAccount.Geography;
-                this.currentGeographySlug = waterAccount.Geography.GeographyName.replace(" ", "-").toLowerCase();
                 this.isLoading = false;
-            });
+            }),
+            shareReplay()
+        );
+
+        this.waterAccountCustomAttributes$ = this.waterAccount$.pipe(
+            switchMap((waterAccount) => {
+                return this.customAttributeService.listAllWaterAccountCustomAttributesCustomAttribute(waterAccount.WaterAccountID);
+            })
+        );
+
+        this.parcelWaterAccountHistories$ = combineLatest({ waterAccount: this.waterAccount$, _: this.refreshParcelWaterAccountHistories$ }).pipe(
+            switchMap(({ waterAccount: waterAccount }) => {
+                return this.waterAccountParcelByWaterAccountService.getWaterAccountParcelHistoryWaterAccountParcelByWaterAccount(waterAccount.WaterAccountID);
+            })
+        );
+
+        this.usageLocationHistories$ = this.waterAccount$.pipe(
+            switchMap((waterAccount) => {
+                return this.usageLocationHistoryService.listByWaterAccountUsageLocationHistory(waterAccount.Geography.GeographyID, waterAccount.WaterAccountID);
+            })
+        );
+    }
+
+    openUpdateInfoModal(waterAccount: WaterAccountDto): void {
+        const dialogRef = this.dialogService.open(UpdateWaterAccountInfoComponent, {
+            data: {
+                WaterAccountID: waterAccount.WaterAccountID,
+                GeographyID: waterAccount.Geography.GeographyID,
+            },
+            size: "sm",
+        });
+
+        dialogRef.afterClosed$.subscribe((result) => {
+            if (result) {
+                this.currentWaterAccount = result;
+                this.alertService.clearAlerts();
+                this.alertService.pushAlert(new Alert("Successfully updated Water Account!", AlertContext.Success));
+            }
         });
     }
 
-    openUpdateInfoModal(): void {
-        this.modalService
-            .open(UpdateWaterAccountInfoComponent, this.viewContainerRef, { ModalSize: ModalSizeEnum.Medium, ModalTheme: ModalThemeEnum.Light }, {
-                WaterAccountID: this.currentWaterAccount.WaterAccountID,
-                GeographyID: this.currentWaterAccount.Geography.GeographyID,
-            } as WaterAccountContext)
-            .instance.result.then((result) => {
-                if (result) {
-                    this.currentWaterAccount = result;
-                    this.alertService.clearAlerts();
-                    this.alertService.pushAlert(new Alert("Successfully updated Water Account!", AlertContext.Success));
-                }
-            });
+    openMergeModal(waterAccount: WaterAccountDto): void {
+        const dialogRef = this.dialogService.open(MergeWaterAccountsComponent, {
+            data: {
+                WaterAccountID: waterAccount.WaterAccountID,
+                GeographyID: waterAccount.Geography.GeographyID,
+            },
+            size: "lg",
+        });
+
+        dialogRef.afterClosed$.subscribe((result) => {
+            if (result) {
+                this.currentWaterAccount = result;
+                this.alertService.clearAlerts();
+                this.alertService.pushAlert(new Alert("Successfully merged water accounts.", AlertContext.Success));
+            }
+        });
     }
 
-    openMergeModal(): void {
-        this.modalService
-            .open(MergeWaterAccountsComponent, this.viewContainerRef, { ModalSize: ModalSizeEnum.Large, ModalTheme: ModalThemeEnum.Light }, {
-                WaterAccountID: this.currentWaterAccount.WaterAccountID,
-                GeographyID: this.currentWaterAccount.Geography.GeographyID,
-            } as WaterAccountContext)
-            .instance.result.then((result) => {
-                if (result) {
-                    this.currentWaterAccount = { ...result };
-                    this.alertService.clearAlerts();
-                    this.alertService.pushAlert(new Alert("Successfully merged Water Account!", AlertContext.Success));
-                }
-            });
+    openUpdateParcelsModal(waterAccount: WaterAccountDto): void {
+        const dialogRef = this.dialogService.open(UpdateParcelsComponent, {
+            data: {
+                WaterAccountID: waterAccount.WaterAccountID,
+                GeographyID: waterAccount.Geography.GeographyID,
+            },
+            size: "lg",
+        });
+
+        dialogRef.afterClosed$.subscribe((result) => {
+            if (result.success) {
+                this.refreshParcelWaterAccountHistories$.next();
+                this.alertService.clearAlerts();
+                this.alertService.pushAlert(new Alert("Successfully updated Parcels!", AlertContext.Success));
+            }
+        });
     }
 
-    openUpdateParcelsModal(): void {
-        this.modalService
-            .open(UpdateParcelsComponent, this.viewContainerRef, { ModalSize: ModalSizeEnum.ExtraLarge, ModalTheme: ModalThemeEnum.Light }, {
-                WaterAccountID: this.currentWaterAccount.WaterAccountID,
-                GeographyID: this.currentWaterAccount.Geography.GeographyID,
-            } as WaterAccountContext)
-            .instance.result.then((result) => {
-                if (result) {
-                    this.currentWaterAccount = { ...result };
+    openDeleteModal(waterAccount: WaterAccountDto): void {
+        const dialogRef = this.dialogService.open(DeleteWaterAccountComponent, {
+            data: {
+                WaterAccountID: waterAccount.WaterAccountID,
+                GeographyID: waterAccount.Geography.GeographyID,
+            },
+            size: "sm",
+        });
+
+        dialogRef.afterClosed$.subscribe((result) => {
+            if (result) {
+                this.router.navigate(["../.."], { relativeTo: this.route }).then(() => {
                     this.alertService.clearAlerts();
-                    this.alertService.pushAlert(new Alert("Successfully updated Parcels!", AlertContext.Success));
-                }
-            });
+                    this.alertService.pushAlert(new Alert("Successfully deleted Water Account!", AlertContext.Success));
+                });
+            }
+        });
     }
 
-    openDeleteModal(): void {
-        this.modalService
-            .open(DeleteWaterAccountComponent, this.viewContainerRef, { ModalSize: ModalSizeEnum.Medium, ModalTheme: ModalThemeEnum.Light }, {
-                WaterAccountID: this.currentWaterAccount.WaterAccountID,
-                GeographyID: this.currentWaterAccount.Geography.GeographyID,
-            } as WaterAccountContext)
-            .instance.result.then((result) => {
-                if (result) {
-                    this.router.navigate(["../.."], { relativeTo: this.route }).then(() => {
-                        this.alertService.clearAlerts();
-                        this.alertService.pushAlert(new Alert("Successfully deleted Water Account!", AlertContext.Success));
-                    });
-                }
-            });
+    onParcelWaterAccountHistoriesGridReady(event: GridReadyEvent): void {
+        this.parcelWaterAccountHistoriesGridApi = event.api;
+    }
+
+    onUsageLocationHistoriesGridReady(event: GridReadyEvent): void {
+        this.usageLocationHistoriesGridApi = event.api;
     }
 }

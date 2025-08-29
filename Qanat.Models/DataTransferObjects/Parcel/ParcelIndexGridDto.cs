@@ -13,6 +13,7 @@ public class ParcelIndexGridDto
     public int? WaterAccountID { get; set; }
     public int? WaterAccountNumber { get; set; }
     public string WaterAccountName { get; set; }
+    public int? ReportingPeriodID { get; set; }
     public List<WellLinkDisplayDto> WellsOnParcel { get; set; }
     public List<WellLinkDisplayDto> IrrigatedByWells { get; set; }
     public string ZoneIDs { get; set; }

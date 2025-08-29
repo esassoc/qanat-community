@@ -1,17 +1,17 @@
-import { Component, Input, OnInit, ViewContainerRef } from "@angular/core";
-import { CommonModule } from "@angular/common";
+import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
+
 import { AllocationPlanPeriodSimpleDto } from "src/app/shared/generated/model/allocation-plan-period-simple-dto";
 import { AllocationPlanTableRowComponent } from "../allocation-plan-table-row/allocation-plan-table-row.component";
 import { PeriodBodyComponent } from "./period-body/period-body.component";
-import { ModalOptions, ModalService, ModalSizeEnum, ModalThemeEnum } from "src/app/shared/services/modal/modal.service";
 import { AllocationPlanManageDto } from "src/app/shared/generated/model/allocation-plan-manage-dto";
 import { DeleteAllocationPeriodModalComponent } from "../delete-allocation-period-modal/delete-allocation-period-modal.component";
-import { AllocationPeriodContext, UpsertAllocationPeriodModalComponent } from "../upsert-allocation-period-modal/upsert-allocation-period-modal.component";
+import { UpsertAllocationPeriodModalComponent } from "../upsert-allocation-period-modal/upsert-allocation-period-modal.component";
+import { DialogService } from "@ngneat/dialog";
+import { AllocationPlanPeriodUpsertDto } from "../../generated/model/allocation-plan-period-upsert-dto";
 
 @Component({
     selector: "allocation-plan-period",
-    standalone: true,
-    imports: [CommonModule, AllocationPlanTableRowComponent, PeriodBodyComponent],
+    imports: [AllocationPlanTableRowComponent, PeriodBodyComponent],
     templateUrl: "./allocation-plan-period.component.html",
     styleUrls: ["./allocation-plan-period.component.scss"],
 })
@@ -21,13 +21,13 @@ export class AllocationPlanPeriodComponent implements OnInit {
     @Input() allocationPlanManageDto: AllocationPlanManageDto;
     @Input() readonly: boolean = true;
 
+    @Output() change = new EventEmitter<AllocationPlanPeriodUpsertDto>();
+    @Output() delete = new EventEmitter<number>();
+
     public startYear: number;
     public totalSpan: number;
 
-    constructor(
-        private modalService: ModalService,
-        private viewContainerRef: ViewContainerRef
-    ) {}
+    constructor(private dialogService: DialogService) {}
 
     ngOnInit(): void {
         // the total span on the allocation plan period is the number of year + carry over years + borrow forward years
@@ -45,44 +45,36 @@ export class AllocationPlanPeriodComponent implements OnInit {
     }
 
     openDeleteModal(): void {
-        this.modalService
-            .open(
-                DeleteAllocationPeriodModalComponent,
-                this.viewContainerRef,
-                {
-                    ModalSize: ModalSizeEnum.Medium,
-                    ModalTheme: ModalThemeEnum.Light,
-                } as ModalOptions,
-                {
-                    AllocationPlanPeriodSimpleDto: this.allocationPlanPeriod,
-                    AllocationPlanManageDto: this.allocationPlanManageDto,
-                } as AllocationPeriodContext
-            )
-            .instance.result.then((result) => {
-                if (result) {
-                }
-            });
+        const dialogRef = this.dialogService.open(DeleteAllocationPeriodModalComponent, {
+            data: {
+                AllocationPlanPeriodSimpleDto: this.allocationPlanPeriod,
+                AllocationPlanManageDto: this.allocationPlanManageDto,
+                Update: true,
+            },
+            size: "sm",
+        });
+
+        dialogRef.afterClosed$.subscribe((result) => {
+            if (result) {
+                this.delete.emit(result);
+            }
+        });
     }
 
     openEditModal(): void {
-        this.modalService
-            .open(
-                UpsertAllocationPeriodModalComponent,
-                this.viewContainerRef,
-                {
-                    ModalSize: ModalSizeEnum.ExtraLarge,
-                    ModalTheme: ModalThemeEnum.Light,
-                } as ModalOptions,
-                {
-                    AllocationPlanPeriodSimpleDto: this.allocationPlanPeriod,
-                    AllocationPlanManageDto: this.allocationPlanManageDto,
-                    Update: true,
-                } as AllocationPeriodContext
-            )
-            .instance.result.then((result) => {
-                if (result) {
-                    // this.setupObservable();
-                }
-            });
+        const dialogRef = this.dialogService.open(UpsertAllocationPeriodModalComponent, {
+            data: {
+                AllocationPlanPeriodSimpleDto: this.allocationPlanPeriod,
+                AllocationPlanManageDto: this.allocationPlanManageDto,
+                Update: true,
+            },
+            size: "lg",
+        });
+
+        dialogRef.afterClosed$.subscribe((result) => {
+            if (result) {
+                this.change.emit(result);
+            }
+        });
     }
 }

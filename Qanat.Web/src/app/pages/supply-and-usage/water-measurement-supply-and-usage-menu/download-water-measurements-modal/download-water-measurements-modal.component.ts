@@ -1,39 +1,36 @@
-import { Component, ComponentRef, OnInit } from "@angular/core";
-import { ModalComponent } from "src/app/shared/components/modal/modal.component";
-import { ModalService } from "src/app/shared/services/modal/modal.service";
+import { Component, inject, OnInit } from "@angular/core";
 import { ReportingPeriodSelectComponent } from "../../../../shared/components/reporting-period-select/reporting-period-select.component";
+import { ReportingPeriodDto } from "src/app/shared/generated/model/reporting-period-dto";
+import { DialogRef } from "@ngneat/dialog";
 
 @Component({
     selector: "download-water-measurements-modal",
-    standalone: true,
     imports: [ReportingPeriodSelectComponent],
     templateUrl: "./download-water-measurements-modal.component.html",
     styleUrl: "./download-water-measurements-modal.component.scss",
 })
 export class DownloadWaterMeasurementsModalComponent implements OnInit {
-    private modalComponentRef: ComponentRef<ModalComponent>;
-    public modalContext: DownloadWaterMeasurementsContext;
+    public ref: DialogRef<DownloadWaterMeasurementsContext, number> = inject(DialogRef);
 
     public reportingYear: number;
 
-    constructor(private modalService: ModalService) {}
+    constructor() {}
 
     ngOnInit(): void {
-        this.reportingYear = this.modalContext.GeographyStartYear;
+        this.reportingYear = this.ref.data.GeographyStartYear;
     }
 
-    public updateReportingYear($event: number) {
-        this.reportingYear = $event;
+    public onSelectedReportingPeriodChange($event: ReportingPeriodDto) {
+        let endDate = new Date($event.EndDate);
+        this.reportingYear = endDate.getUTCFullYear();
     }
 
     public download() {
-        this.modalService.close(this.modalComponentRef, {
-            year: this.reportingYear,
-        });
+        this.ref.close(this.reportingYear);
     }
 
     public close() {
-        this.modalService.close(this.modalComponentRef, null);
+        this.ref.close(null);
     }
 }
 

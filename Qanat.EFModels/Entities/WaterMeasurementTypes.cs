@@ -15,31 +15,28 @@ public class WaterMeasurementTypes
     public static List<WaterMeasurementTypeSimpleDto> ListAsSimpleDto(QanatDbContext dbContext, int geographyID)
     {
         return dbContext.WaterMeasurementTypes.AsNoTracking()
+            .Include(x => x.Geography)
             .Where(x => x.GeographyID == geographyID)
             .OrderBy(x => x.SortOrder)
-            .Select(x => x.AsSimpleDto()).ToList();
+            .Select(x => x.AsSimpleDtoWithExtras()).ToList();
     }
 
     public static List<WaterMeasurementTypeSimpleDto> ListActiveAndEditableAsSimpleDto(QanatDbContext dbContext, int geographyID)
     {
         return dbContext.WaterMeasurementTypes.AsNoTracking()
+            .Include(x => x.Geography)
             .Where(x => x.GeographyID == geographyID && x.IsActive && x.IsUserEditable)
             .OrderBy(x => x.SortOrder)
-            .Select(x => x.AsSimpleDto()).ToList();
+            .Select(x => x.AsSimpleDtoWithExtras()).ToList();
     }
 
     public static List<WaterMeasurementTypeSimpleDto> ListActiveAndSelfReportableAsSimpleDto(QanatDbContext dbContext, int geographyID)
     {
         return dbContext.WaterMeasurementTypes.AsNoTracking()
+            .Include(x => x.Geography)
             .Where(x => x.GeographyID == geographyID && x.IsActive && x.IsSelfReportable)
             .OrderBy(x => x.SortOrder)
-            .Select(x => x.AsSimpleDto()).ToList();
-    }
-
-    public static List<WaterMeasurementType> ListByGeographyIDAndWaterMeasurementTypeNames(QanatDbContext dbContext, int geographyID, List<string> waterMeasurementTypeNames)
-    {
-        return dbContext.WaterMeasurementTypes.AsNoTracking()
-            .Where(x => x.GeographyID == geographyID && waterMeasurementTypeNames.Contains(x.WaterMeasurementTypeName)).ToList();
+            .Select(x => x.AsSimpleDtoWithExtras()).ToList();
     }
 
     public static void UpdateIsActiveByGeographyIDAndMeasurementTypeNames(QanatDbContext dbContext, int geographyID, List<string> measurementNames, bool isActiveValue)
@@ -89,5 +86,15 @@ public class WaterMeasurementTypes
         }
 
         return dependencyChain;
+    }
+
+    public static async Task<WaterMeasurementTypeSimpleDto> GetAsync(QanatDbContext dbContext, int geographyID, int waterMeasurementTypeID)
+    {
+        var waterMeasurementType = await dbContext.WaterMeasurementTypes.AsNoTracking()
+            .Include(x => x.Geography)
+            .SingleOrDefaultAsync(x => x.GeographyID == geographyID && x.WaterMeasurementTypeID == waterMeasurementTypeID);
+
+        var waterMeasurementTypeAsSimpleDto = waterMeasurementType?.AsSimpleDtoWithExtras();
+        return waterMeasurementTypeAsSimpleDto;
     }
 }

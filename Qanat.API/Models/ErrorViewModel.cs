@@ -1,5 +1,3 @@
-using System;
-
 namespace Qanat.API.Models
 {
     public class ErrorViewModel

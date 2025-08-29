@@ -6,11 +6,11 @@ import { UtilityFunctionsService } from "src/app/shared/services/utility-functio
 import { ExternalMapLayerService } from "src/app/shared/generated/api/external-map-layer.service";
 import { GeographyService } from "src/app/shared/generated/api/geography.service";
 import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
-import { ExternalMapLayerDto } from "src/app/shared/generated/model/external-map-layer-dto";
+import { ExternalMapLayerSimpleDto } from "src/app/shared/generated/model/external-map-layer-simple-dto";
 import { GeographyDto } from "src/app/shared/generated/model/geography-dto";
 import { AgGridHelper } from "src/app/shared/helpers/ag-grid-helper";
 import { ParcelMapComponent } from "../../../shared/components/parcel/parcel-map/parcel-map.component";
-import { AsyncPipe, NgIf } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { QanatGridComponent } from "src/app/shared/components/qanat-grid/qanat-grid.component";
 import { AlertDisplayComponent } from "../../../shared/components/alert-display/alert-display.component";
 import { ModelNameTagComponent } from "../../../shared/components/name-tag/name-tag.component";
@@ -23,11 +23,10 @@ import { LoadingDirective } from "src/app/shared/directives/loading.directive";
     selector: "geospatial-data-configure",
     templateUrl: "./geospatial-data-configure.component.html",
     styleUrls: ["./geospatial-data-configure.component.scss"],
-    standalone: true,
-    imports: [AsyncPipe, PageHeaderComponent, ModelNameTagComponent, AlertDisplayComponent, RouterLink, QanatGridComponent, NgIf, ParcelMapComponent, LoadingDirective],
+    imports: [AsyncPipe, PageHeaderComponent, ModelNameTagComponent, AlertDisplayComponent, RouterLink, QanatGridComponent, ParcelMapComponent, LoadingDirective],
 })
 export class GeospatialDataConfigureComponent implements OnInit {
-    public geospatialData$: Observable<ExternalMapLayerDto[]>;
+    public geospatialData$: Observable<ExternalMapLayerSimpleDto[]>;
     public geography$: Observable<GeographyDto>;
     public isLoading: boolean;
 
@@ -53,21 +52,21 @@ export class GeospatialDataConfigureComponent implements OnInit {
             tap(() => (this.isLoading = true)),
             switchMap((params) => {
                 const geographyName = params[routeParams.geographyName];
-                return this.geographyService.geographiesGeographyNameGeographyNameMinimalGet(geographyName);
+                return this.geographyService.getByNameAsMinimalDtoGeography(geographyName);
             }),
             tap((geography) => {
                 this.mapCqlFilter = `GeographyID = ${geography.GeographyID}`;
                 this.currentGeographyService.setCurrentGeography(geography);
             }),
             switchMap((geography) => {
-                return this.externalMapLayerService.geographiesGeographyIDExternalMapLayersGet(geography.GeographyID);
+                return this.externalMapLayerService.getExternalMapLayer(geography.GeographyID);
             }),
             tap(() => (this.isLoading = false))
         );
 
         this.geography$ = this.currentGeographyService.getCurrentGeography().pipe(
             switchMap((geography) => {
-                return this.geographyService.geographiesGeographyIDGet(geography.GeographyID);
+                return this.geographyService.getGeographyByIDGeography(geography.GeographyID);
             })
         );
 
@@ -90,7 +89,7 @@ export class GeospatialDataConfigureComponent implements OnInit {
                 FieldDefinitionType: "ExternalMapLayersName",
                 FieldDefinitionLabelOverride: "Layer Name",
             }),
-            this.utilityFunctionsService.createBasicColumnDef("Layer Type", "ExternalMapLayerType.ExternalMapLayerTypeDisplayName", {
+            this.utilityFunctionsService.createBasicColumnDef("Layer Type", "ExternalMapLayerTypeDisplayName", {
                 FieldDefinitionType: "ExternalMapLayersType",
                 FieldDefinitionLabelOverride: "Layer Type",
             }),
@@ -98,14 +97,14 @@ export class GeospatialDataConfigureComponent implements OnInit {
                 headerName: "URL",
                 field: "ExternalMapLayerURL",
             },
-            {
-                headerName: "Visible By Default?",
-                field: "LayerIsOnByDefault",
-            },
-            {
-                headerName: "Active?",
-                field: "IsActive",
-            },
+            this.utilityFunctionsService.createBasicColumnDef("Visible By Default?", "", {
+                ValueGetter: (params) => this.utilityFunctionsService.booleanValueGetter(params.data.LayerIsOnByDefault),
+                UseCustomDropdownFilter: true,
+            }),
+            this.utilityFunctionsService.createBasicColumnDef("Active?", "", {
+                ValueGetter: (params) => this.utilityFunctionsService.booleanValueGetter(params.data.IsActive),
+                UseCustomDropdownFilter: true,
+            }),
             {
                 headerName: "Description",
                 field: "ExternalMapLayerDescription",

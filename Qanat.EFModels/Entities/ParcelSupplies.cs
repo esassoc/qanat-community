@@ -61,7 +61,7 @@ namespace Qanat.EFModels.Entities
 
                     return new ParcelActivityDto()
                     {
-                        EffectiveDate = x.Key.EffectiveDate.AddMonths(1).AddDays(-1),
+                        EffectiveDate = x.Key.EffectiveDate,
                         WaterTypeID = x.Key.WaterTypeID,
                         TransactionAmount = x.Sum(y =>   y.TransactionAmount),
                         ParcelSupplies = x.Select(y => y.AsDetailDto()).OrderBy(x => x.TransactionDate).ToList(),
@@ -104,7 +104,7 @@ namespace Qanat.EFModels.Entities
 
         public static int CreateFromCSV(QanatDbContext dbContext, List<ParcelTransactionCSV> records, string uploadedFileName, DateTime effectiveDate, int waterTypeID, int userID, int geographyID)
         {
-            var parcelNumbers = records.Select(x => x.UsageEntityName).ToList();
+            var parcelNumbers = records.Select(x => x.UsageLocationName).ToList();
             var parcels = Parcels.ListByGeographyIDAndParcelNumbers(dbContext, geographyID, parcelNumbers);
 
             var transactionDate = DateTime.UtcNow;
@@ -113,7 +113,7 @@ namespace Qanat.EFModels.Entities
             var parcelSupplies = new List<ParcelSupply>();
             foreach (var record in records)
             {
-                var parcel = parcels.SingleOrDefault(x => x.ParcelNumber == record.UsageEntityName);
+                var parcel = parcels.SingleOrDefault(x => x.ParcelNumber == record.UsageLocationName);
                 var parcelSupply = new ParcelSupply()
                 {
                     ParcelID = parcel.ParcelID,
@@ -132,33 +132,6 @@ namespace Qanat.EFModels.Entities
             dbContext.SaveChanges();
 
             return parcelSupplies.Count;
-        }
-
-        public static Dictionary<int, Dictionary<int, decimal>> GetSupplyByWaterAccountID(QanatDbContext dbContext, int geographyID, DateTime startDate, DateTime endDate)
-        {
-            var waterTypes = WaterTypes.ListByGeographyID(dbContext, geographyID);
-            var parcelSuppliesByParcelID = dbContext.ParcelSupplies.AsNoTracking().Where(x =>
-                    x.GeographyID == geographyID &&
-                    x.EffectiveDate >= startDate &&
-                    x.EffectiveDate <= endDate &&
-                    x.WaterType != null)
-                .ToLookup(x => x.ParcelID);
-
-            // todo: start year?
-            var waterAccountParcelGroups = dbContext.WaterAccountParcels.AsNoTracking()
-                .Where(x => x.GeographyID == geographyID && x.EffectiveYear <= endDate.Year).ToList()
-                .GroupBy(x => x.WaterAccountID);
-
-            return waterAccountParcelGroups.ToDictionary(waterAccountParcelGroup => waterAccountParcelGroup.Key, waterAccountParcels =>
-            {
-                var transactionAmountSumByWaterTypeID = waterAccountParcels.Select(x => x.ParcelID)
-                    .SelectMany(x => parcelSuppliesByParcelID.Contains(x) ? parcelSuppliesByParcelID[x] : new List<ParcelSupply>())
-                    .GroupBy(x => x.WaterTypeID)
-                    .ToDictionary(x => x.Key, x => x.Sum(y => y.TransactionAmount));
-
-                return waterTypes.ToDictionary(x => x.WaterTypeID, y =>
-                        transactionAmountSumByWaterTypeID.ContainsKey(y.WaterTypeID) ? transactionAmountSumByWaterTypeID[y.WaterTypeID] : 0);
-            });
         }
     }
 }

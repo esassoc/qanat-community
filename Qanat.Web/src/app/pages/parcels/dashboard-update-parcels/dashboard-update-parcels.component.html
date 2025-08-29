@@ -1,12 +1,16 @@
 <div class="dashboard">
     <aside class="sidebar">
         <div class="sidebar-header">
-            <h5 class="sidebar-title" *ngIf="geography$ | async as geography">
-                <a routerLink="upload">
-                    <img src="assets/main/logos/MIUGSA-logo.png" alt="MIUGSA Logo" *ngIf="geography.GeographyID == 1" />
-                    {{ geography.GeographyName }} Update Parcels
-                </a>
-            </h5>
+            @if (geography$ | async; as geography) {
+                <h5 class="sidebar-title">
+                    <a routerLink="upload">
+                        @if (geography.GeographyID == 1) {
+                            <img src="assets/main/logos/MIUGSA-logo.png" alt="MIUGSA Logo" />
+                        }
+                        {{ geography.GeographyName }} Update Parcels
+                    </a>
+                </h5>
+            }
         </div>
         <ul class="sidebar-nav">
             <li class="sidebar-item">
@@ -50,10 +54,11 @@
 
     <main class="main">
         <router-outlet #updateParcelsDashboard="outlet"></router-outlet>
-        <div *ngIf="!updateParcelsDashboard.isActivated">
-            <page-header pageTitle="Update Parcels"></page-header>
-
-            <div class="page-body grid-12"></div>
-        </div>
+        @if (!updateParcelsDashboard.isActivated) {
+            <div>
+                <page-header pageTitle="Update Parcels"></page-header>
+                <div class="page-body grid-12"></div>
+            </div>
+        }
     </main>
 </div>

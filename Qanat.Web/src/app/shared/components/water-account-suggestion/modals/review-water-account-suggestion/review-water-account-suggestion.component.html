@@ -1,79 +1,86 @@
-<div class="modal-header">
-    <h2 class="section-title">
-        <icon icon="WaterAccounts"></icon>
-        Review {{ getReviewSuggestionTitle() }}
-        <custom-rich-text [customRichTextTypeID]="customRichTextID" [showLoading]="false" [showInfoIcon]="false"></custom-rich-text>
-    </h2>
-    <button type="button" class="close" (click)="close()">
-        <i class="fa fa-times-circle"></i>
-    </button>
-</div>
+<div class="modal">
+    <div class="modal-header">
+        <h2 class="section-title">
+            Review {{ getReviewSuggestionTitle() }}
+            <custom-rich-text [customRichTextTypeID]="customRichTextID" [showLoading]="false" [showInfoIcon]="false"></custom-rich-text>
+        </h2>
+    </div>
 
-<div class="modal-body">
-    <div class="grid-12">
-        <div class="g-col-6">
-            <form action="" class="form" [formGroup]="formGroup">
-                <div class="field">
-                    <label class="field-label">Add Parcels</label>
-                    <div class="flex-between">
-                        <parcel-typeahead
-                            [geographyID]="modalContext.GeographyID"
-                            [selectedParcel]="selectedParcel"
-                            (change)="selectedParcelChanged($event)"
-                            [excludedParcelIDs]="waterAccountParcels | map: 'ParcelID'"
-                            style="flex-grow: 1"></parcel-typeahead>
-                        <button type="button" (click)="addSelectedParcel()" class="btn btn-primary" [disabled]="!this.selectedParcel">+ Add</button>
+    <div class="modal-body">
+        <div class="grid-12">
+            <div class="g-col-6">
+                <form action="" class="form" [formGroup]="formGroup">
+                    <div class="field">
+                        <label class="field-label">Add Parcels</label>
+                        <div class="flex-between">
+                            <parcel-typeahead
+                                [geographyID]="ref.data.GeographyID"
+                                [selectedParcel]="selectedParcel"
+                                (change)="selectedParcelChanged($event)"
+                                [excludedParcelIDs]="waterAccountParcels | map: 'ParcelID'"
+                                style="flex-grow: 1"></parcel-typeahead>
+                            <button type="button" (click)="addSelectedParcel()" class="btn btn-primary" [disabled]="!this.selectedParcel">+ Add</button>
+                        </div>
+                        <ol>
+                            @for (parcel of waterAccountParcels; track parcel; let i = $index) {
+                                <li>
+                                    <div class="flex-between">
+                                        <div>
+                                            <span class="parcel-index">{{ i + 1 }}.</span>
+                                            <parcel-icon-with-number [parcel]="parcel"></parcel-icon-with-number>
+                                        </div>
+                                        <button class="btn btn-muted" type="button" (click)="removeParcel(parcel)">
+                                            <i class="fas fa-times-circle"></i>
+                                            Remove
+                                        </button>
+                                    </div>
+                                </li>
+                            }
+                        </ol>
                     </div>
-                    <ol>
-                        <li *ngFor="let parcel of waterAccountParcels; let i = index">
-                            <div class="flex-between">
-                                <div>
-                                    <span class="parcel-index">{{ i + 1 }}.</span>
-                                    <parcel-icon-with-number [parcel]="parcel"></parcel-icon-with-number>
-                                </div>
-                                <button class="btn btn-muted" type="button" (click)="removeParcel(parcel)">
-                                    <i class="fas fa-times-circle"></i>
-                                    Remove
-                                </button>
+                    @if (reportingPeriodDropdownOptions$ | async; as selectDropdownOptions) {
+                        <form-field
+                            [formControl]="formGroup.controls.ReportingPeriodID"
+                            fieldLabel="Reporting Period"
+                            [type]="FormFieldType.Select"
+                            [formInputOptions]="selectDropdownOptions"></form-field>
+                    }
+                </form>
+                @if (ref.data.WellIDList) {
+                    <div class="mt-3">
+                        <label class="field-label">Well IDs</label>
+                        @for (wellID of ref.data.WellIDList; track wellID) {
+                            <div>
+                                <a [routerLink]="['/wells', wellID]" target="_blank">
+                                    <span class="text-muted">
+                                        <icon icon="ExternalLink"></icon>
+                                    </span>
+                                    {{ wellID }}
+                                </a>
                             </div>
-                        </li>
-                    </ol>
-                </div>
-                <form-field
-                    *ngIf="reportingPeriodDropdownOptions$ | async as selectDropdownOptions"
-                    [formControl]="formGroup.controls.EffectiveYear"
-                    fieldLabel="Effective Year"
-                    [type]="FormFieldType.Select"
-                    [formInputOptions]="selectDropdownOptions"></form-field>
-            </form>
-            <div class="mt-3" *ngIf="modalContext.WellIDList">
-                <label class="field-label">Well IDs</label>
-                <div *ngFor="let wellID of modalContext.WellIDList">
-                    <a [routerLink]="['/manage', modalContext.GeographyName.toLowerCase(), 'wells', wellID]" target="_blank">
-                        <span class="text-muted">
-                            <icon icon="ExternalLink"></icon>
-                        </span>
-                        {{ wellID }}
-                    </a>
-                </div>
+                        }
+                    </div>
+                }
             </div>
-        </div>
-        <div class="g-col-6" *ngIf="parcelsWithGeoJSON$ | async">
-            <parcel-map
-                mapID="UpdateParcelsMap"
-                mapHeight="500px"
-                [returnParcelOnClick]="true"
-                [displayParcelLayerOnLoad]="true"
-                (clickedOnParcel)="clickedOnParcel($event)"
-                [collapsedLayerControl]="true"
-                [customGeoJSONLayers]="customGeoJSONLayers"
-                [geographyID]="modalContext.GeographyID"></parcel-map>
+            @if (parcelsWithGeoJSON$ | async) {
+                <div class="g-col-6">
+                    <parcel-map
+                        mapID="UpdateParcelsMap"
+                        mapHeight="500px"
+                        [returnParcelOnClick]="true"
+                        [displayParcelLayerOnLoad]="true"
+                        (clickedOnParcel)="clickedOnParcel($event)"
+                        [collapsedLayerControl]="true"
+                        [customGeoJSONLayers]="customGeoJSONLayers"
+                        [geographyID]="ref.data.GeographyID"></parcel-map>
+                </div>
+            }
         </div>
     </div>
-</div>
 
-<div class="modal-footer">
-    <button class="btn btn-primary" (click)="save()" [disabled]="!formGroup.valid || isLoadingSubmit">Save & Approve</button>
-    <button class="btn btn-danger" (click)="reject()" [disabled]="isLoadingSubmit">Reject</button>
-    <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+    <div class="modal-footer">
+        <button class="btn btn-primary" (click)="save()" [disabled]="!formGroup.valid || isLoadingSubmit">Save & Approve</button>
+        <button class="btn btn-danger" (click)="reject()" [disabled]="isLoadingSubmit">Reject</button>
+        <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+    </div>
 </div>

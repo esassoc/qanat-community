@@ -1,16 +1,18 @@
-<page-header icon="Calendar" [templateRight]="templateRight"></page-header>
+<page-header icon="Calendar" [templateRight]="templateRight" [customRichTextTypeID]="richTextID"></page-header>
 <ng-template #templateRight>
-    <button class="btn btn-primary" (click)="addReportingPeriod()">+ Add Reporting Period</button>
+    <button class="btn btn-primary mb-2" (click)="addReportingPeriod()">+ Add Reporting Period</button>
 </ng-template>
 
 <div class="page-body" [loadingSpinner]="{ isLoading: isLoading, loadingHeight: 200 }">
-    <qanat-grid
-        *ngIf="reportingPeriods$ | async as reportingPeriods"
-        [rowData]="reportingPeriods"
-        [columnDefs]="columnDefs"
-        downloadFileName="reporting-periods"
-        [pagination]="true"
-        [sizeColumnsToFitGrid]="true"
-        (gridReady)="onGridReady($event)">
-    </qanat-grid>
+    <app-alert-display></app-alert-display>
+    @if (reportingPeriods$ | async; as reportingPeriods) {
+        <qanat-grid
+            [rowData]="reportingPeriods"
+            [columnDefs]="columnDefs"
+            downloadFileName="reporting-periods"
+            [pagination]="true"
+            [sizeColumnsToFitGrid]="true"
+            (gridReady)="onGridReady($event)">
+        </qanat-grid>
+    }
 </div>

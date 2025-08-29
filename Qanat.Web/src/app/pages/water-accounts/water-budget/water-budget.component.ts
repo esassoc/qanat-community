@@ -1,18 +1,19 @@
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute, RouterLink } from "@angular/router";
-import { BehaviorSubject, combineLatest, map, Observable, of, shareReplay, switchMap, tap } from "rxjs";
+import { BehaviorSubject, combineLatest, filter, map, Observable, of, shareReplay, switchMap, tap } from "rxjs";
 import { routeParams } from "src/app/app.routes";
-import { UsageEntityService } from "src/app/shared/generated/api/usage-entity.service";
 import { WaterAccountService } from "src/app/shared/generated/api/water-account.service";
 import {
     AllocationPlanMinimalDto,
-    ExternalMapLayerDto,
+    ExternalMapLayerSimpleDto,
     GeographySimpleDto,
     MonthlyUsageSummaryDto,
     MostRecentEffectiveDatesDto,
     ParcelMinimalDto,
-    UsageEntitySimpleDto,
+    ReportingPeriodDto,
+    UsageLocationDto,
     WaterAccountBudgetStatDto,
+    WaterAccountContactDto,
     WaterAccountMinimalDto,
     WaterAccountParcelWaterMeasurementDto,
     WaterAccountWaterTypeMonthlySupplyDto,
@@ -21,7 +22,7 @@ import {
 import { GeographyEnum } from "src/app/shared/models/enums/geography.enum";
 import { GroupByPipe } from "src/app/shared/pipes/group-by.pipe";
 import { SumPipe } from "src/app/shared/pipes/sum.pipe";
-import { NgIf, NgClass, NgFor, DecimalPipe, PercentPipe, DatePipe, AsyncPipe } from "@angular/common";
+import { NgClass, DecimalPipe, PercentPipe, DatePipe, AsyncPipe } from "@angular/common";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { IconComponent } from "src/app/shared/components/icon/icon.component";
 import { KeyValuePairListComponent } from "src/app/shared/components/key-value-pair-list/key-value-pair-list.component";
@@ -41,19 +42,17 @@ import { GeographyExternalMapLayerComponent } from "src/app/shared/components/le
 import { Map, layerControl } from "leaflet";
 import { ZoneGroupService } from "src/app/shared/generated/api/zone-group.service";
 import { ExternalMapLayerService } from "src/app/shared/generated/api/external-map-layer.service";
-import { UsageEntitiesLayerComponent } from "src/app/shared/components/leaflet/layers/usage-entities-layer/usage-entities-layer.component";
-import { WaterAccountParcelService } from "src/app/shared/generated/api/water-account-parcel.service";
+import { UsageLocationLayerComponent } from "src/app/shared/components/leaflet/layers/usage-location-layer/usage-location-layer.component";
+import { UsageLocationByWaterAccountService } from "src/app/shared/generated/api/usage-location-by-water-account.service";
+import { WaterAccountParcelByWaterAccountService } from "src/app/shared/generated/api/water-account-parcel-by-water-account.service";
 import { LoadingDirective } from "src/app/shared/directives/loading.directive";
-import { MapLayerBase } from "../../../shared/components/leaflet/layers/map-layer-base.component";
+import { WaterAccountContactService } from "src/app/shared/generated/api/water-account-contact.service";
 
 @Component({
     selector: "water-budget",
     templateUrl: "./water-budget.component.html",
     styleUrls: ["./water-budget.component.scss"],
-    standalone: true,
     imports: [
-        LoadingDirective,
-        NgIf,
         AsyncPipe,
         PageHeaderComponent,
         ModelNameTagComponent,
@@ -67,7 +66,6 @@ import { MapLayerBase } from "../../../shared/components/leaflet/layers/map-laye
         VegaCumulativeUsageChartComponent,
         VegaMonthlyUsageChartComponent,
         WaterAccountParcelWaterMeasurementsGridComponent,
-        NgFor,
         WaterSupplyTypeComponent,
         DecimalPipe,
         PercentPipe,
@@ -77,23 +75,29 @@ import { MapLayerBase } from "../../../shared/components/leaflet/layers/map-laye
         GsaBoundariesComponent,
         ZoneGroupLayerComponent,
         GeographyExternalMapLayerComponent,
-        UsageEntitiesLayerComponent,
+        UsageLocationLayerComponent,
         SumPipe,
+        LoadingDirective,
     ],
 })
 export class WaterBudgetComponent implements OnInit {
     public currentWaterAccount$: Observable<WaterAccountMinimalDto>;
+    public waterAccountContacts$: Observable<WaterAccountContactDto>;
     private selectedYearSubject = new BehaviorSubject<number | null>(null);
     public selectedYear$ = this.selectedYearSubject.asObservable();
     public allocationPlans$: Observable<AllocationPlanMinimalDto[]>;
     public zoneGroups$: Observable<ZoneGroupMinimalDto[]>;
-    public externalMapLayers$: Observable<ExternalMapLayerDto[]>;
+    public externalMapLayers$: Observable<ExternalMapLayerSimpleDto[]>;
     public waterTypeSupplies$: Observable<WaterAccountWaterTypeMonthlySupplyDto[]>;
     public parcels$: Observable<ParcelMinimalDto[]>;
     public waterAccountParcelWaterMeasurements$: Observable<WaterAccountParcelWaterMeasurementDto[]>;
-    public usageEntities$: Observable<UsageEntitySimpleDto[]>;
+    public usageLocations$: Observable<UsageLocationDto[]>;
+    public usageLocationsByReportingPeriod$: Observable<UsageLocationDto[]>;
     public waterAccountBudgetStats$: Observable<WaterAccountBudgetStatDto>;
     public mostRecentEffectiveDates$: Observable<MostRecentEffectiveDatesDto>;
+    public selectedReportingPeriodSubject = new BehaviorSubject<ReportingPeriodDto | null>(null);
+    public selectedReportingPeriod$: Observable<ReportingPeriodDto> = this.selectedReportingPeriodSubject.asObservable();
+    public selectedReportingPeriod: ReportingPeriodDto;
 
     public currentGeographySlug: string;
 
@@ -114,7 +118,6 @@ export class WaterBudgetComponent implements OnInit {
 
     public showCumulativeWaterUsageChart = true;
     public showWaterAccountRollup = true;
-    public isLoading: boolean = true;
 
     public map: Map;
     public layerControl: layerControl;
@@ -125,8 +128,8 @@ export class WaterBudgetComponent implements OnInit {
     constructor(
         private route: ActivatedRoute,
         private waterAccountService: WaterAccountService,
-        private waterAccountParcelService: WaterAccountParcelService,
-        private usageEntityService: UsageEntityService,
+        private waterAccountParcelByWaterAccountService: WaterAccountParcelByWaterAccountService,
+        private usageLocationByWaterAccountService: UsageLocationByWaterAccountService,
         private zoneGroupService: ZoneGroupService,
         private externalMapLayerService: ExternalMapLayerService,
         private sumPipe: SumPipe,
@@ -135,54 +138,58 @@ export class WaterBudgetComponent implements OnInit {
 
     ngOnInit(): void {
         this.currentWaterAccount$ = this.route.params.pipe(
-            tap(() => {
-                this.isLoading = true;
-            }),
             switchMap((params) => {
-                return this.waterAccountService.waterAccountsWaterAccountIDGet(params[routeParams.waterAccountID]);
+                return this.waterAccountService.getByIDWaterAccount(params[routeParams.waterAccountID]);
             }),
             tap((waterAccount) => {
-                this.selectedYearSubject.next(waterAccount.Geography.DefaultDisplayYear);
                 this.currentGeographySlug = waterAccount.Geography.GeographyName.replace(" ", "-").toLowerCase();
+            }),
+            shareReplay(1)
+        );
+
+        this.waterAccountContacts$ = this.currentWaterAccount$.pipe(
+            switchMap((waterAccount) => {
+                return this.waterAccountService.getWaterAccountContactByWaterAccountIDWaterAccount(waterAccount.WaterAccountID);
             })
         );
 
-        this.allocationPlans$ = this.route.params.pipe(
-            switchMap((params) => {
-                return this.waterAccountService.waterAccountsWaterAccountIDAllocationPlansGet(params[routeParams.waterAccountID]);
+        this.usageLocations$ = this.currentWaterAccount$.pipe(
+            switchMap((waterAccount) => {
+                return this.usageLocationByWaterAccountService.listUsageLocationByWaterAccount(waterAccount.Geography.GeographyID, waterAccount.WaterAccountID);
             })
         );
 
-        this.usageEntities$ = this.route.params.pipe(
-            switchMap((params) => {
-                return this.usageEntityService.waterAccountsWaterAccountIDUsageEntitiesGet(params[routeParams.waterAccountID]);
+        this.usageLocationsByReportingPeriod$ = combineLatest({ usageLocations: this.usageLocations$, selectedReportingPeriod: this.selectedReportingPeriod$ }).pipe(
+            switchMap(({ usageLocations, selectedReportingPeriod }) => {
+                return of(usageLocations.filter((x) => x.ReportingPeriod.ReportingPeriodID == selectedReportingPeriod.ReportingPeriodID));
             })
         );
 
         this.zoneGroups$ = this.currentWaterAccount$.pipe(
             switchMap((waterAccount) => {
-                return this.zoneGroupService.geographiesGeographyIDZoneGroupsGet(waterAccount.Geography.GeographyID);
+                return this.zoneGroupService.listZoneGroup(waterAccount.Geography.GeographyID);
             })
         );
 
         this.externalMapLayers$ = this.currentWaterAccount$.pipe(
             switchMap((waterAccount) => {
-                return this.externalMapLayerService.geographiesGeographyIDExternalMapLayersGet(waterAccount.Geography.GeographyID);
+                return this.externalMapLayerService.getExternalMapLayer(waterAccount.Geography.GeographyID);
             })
         );
 
         this.mostRecentEffectiveDates$ = combineLatest([this.currentWaterAccount$, this.selectedYear$]).pipe(
+            filter(([waterAccount, selectedYear]) => selectedYear != null),
             switchMap(([waterAccount, selectedYear]) => {
-                return this.waterAccountService.waterAccountsWaterAccountIDRecentEffectiveDatesYearsYearGet(waterAccount.WaterAccountID, selectedYear);
+                return this.waterAccountService.getMostRecentSupplyAndUsageDateByAccountIDWaterAccount(waterAccount.WaterAccountID, selectedYear);
             })
         );
 
         this.parcels$ = combineLatest([this.currentWaterAccount$, this.selectedYear$]).pipe(
             switchMap(([waterAccount, selectedYear]) => {
-                return this.waterAccountParcelService.waterAccountsWaterAccountIDParcelsMinimalsYearsYearGet(waterAccount.WaterAccountID, selectedYear);
+                return this.waterAccountParcelByWaterAccountService.getCurrentParcelsFromAccountIDWaterAccountParcelByWaterAccount(waterAccount.WaterAccountID, selectedYear);
             }),
             tap((parcels) => {
-                this.parcelIDs = parcels.map((x) => x.ParcelID);
+                this.parcelIDs = parcels.length > 0 ? parcels.map((x) => x.ParcelID) : [-1]; // in this case we want no hits
             })
         );
 
@@ -190,13 +197,13 @@ export class WaterBudgetComponent implements OnInit {
             switchMap(([waterAccount, selectedYear]) => {
                 return waterAccount.Geography.ShowSupplyOnWaterBudgetComponent
                     ? of(null)
-                    : this.waterAccountService.waterAccountsWaterAccountIDWaterBudgetStatsYearsYearGet(waterAccount.WaterAccountID, selectedYear);
+                    : this.waterAccountService.getWaterMeasurementStatsForWaterBudgetWaterAccount(waterAccount.WaterAccountID, selectedYear);
             })
         );
 
         this.waterTypeSupplies$ = combineLatest([this.currentWaterAccount$, this.selectedYear$]).pipe(
             switchMap(([waterAccount, selectedYear]) => {
-                return this.waterAccountService.waterAccountsWaterAccountIDWaterTypeMonthlySupplyYearsYearGet(waterAccount.WaterAccountID, selectedYear);
+                return this.waterAccountService.getWaterTypeSupplyFromAccountIDWaterAccount(waterAccount.WaterAccountID, selectedYear);
             }),
             tap((data) => {
                 if (data.length > 0) {
@@ -205,13 +212,13 @@ export class WaterBudgetComponent implements OnInit {
                     this.totalSupply = null;
                 }
             }),
-            shareReplay()
+            shareReplay(1)
         );
 
-        this.waterAccountParcelWaterMeasurements$ = combineLatest([this.currentWaterAccount$, this.selectedYear$]).pipe(
-            switchMap(([waterAccount, selectedYear]) => {
+        this.waterAccountParcelWaterMeasurements$ = combineLatest([this.currentWaterAccount$, this.selectedYear$, this.waterTypeSupplies$]).pipe(
+            switchMap(([waterAccount, selectedYear, _]) => {
                 return combineLatest({
-                    waterAccountParcelWaterMeasurements: this.waterAccountService.waterAccountsWaterAccountIDParcelSuppliesYearsYearMonthlyUsageSummaryGet(
+                    waterAccountParcelWaterMeasurements: this.waterAccountService.getMonthlyUsageSummaryForWaterAccountAndReportingPeriodWaterAccount(
                         waterAccount.WaterAccountID,
                         selectedYear
                     ),
@@ -220,17 +227,21 @@ export class WaterBudgetComponent implements OnInit {
             }),
             tap((data) => {
                 this.setSupplyAndUsageValues(data.geography, data.waterAccountParcelWaterMeasurements);
-                this.isLoading = false;
             }),
             map((data) => {
                 return data.waterAccountParcelWaterMeasurements;
-            })
+            }),
+            shareReplay(1)
         );
     }
 
-    public updateDashboardForSelectedYear(selectedYear: number) {
-        this.isLoading = true;
-        this.selectedYearSubject.next(selectedYear);
+    public onSelectedReportingPeriodChange(selectedReportingPeriod: ReportingPeriodDto) {
+        let endDate = new Date(selectedReportingPeriod.EndDate);
+        let endYear = endDate.getUTCFullYear();
+        this.selectedYearSubject.next(endYear);
+
+        this.selectedReportingPeriodSubject.next(selectedReportingPeriod);
+        this.selectedReportingPeriod = selectedReportingPeriod;
     }
 
     private getSourceOfRecordWaterMeasurementRollups(measurements: WaterAccountParcelWaterMeasurementDto[], parcelArea: number): MonthlyUsageSummaryDto[] {
@@ -334,5 +345,14 @@ export class WaterBudgetComponent implements OnInit {
         this.map = event.map;
         this.layerControl = event.layerControl;
         this.mapIsReady = true;
+    }
+
+    public layerLoading: boolean = true;
+    onLayerLoadStarted() {
+        this.layerLoading = true;
+    }
+
+    onLayerLoadFinished() {
+        this.layerLoading = false;
     }
 }

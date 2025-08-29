@@ -1,0 +1,94 @@
+<div class="form-group">
+    <div class="field">
+        <div class="search-container">
+            <div class="search-prepend">
+                <i class="fa" [class.fa-search]="!isSearching" [class.fa-spinner]="isSearching" [class.spin-animation]="isSearching"></i>
+            </div>
+            <input
+                onkeydown="return event.key != 'Enter';"
+                (keyup.arrowdown)="selectNext()"
+                (keyup.arrowup)="selectPrevious()"
+                (keyup.enter)="selectCurrent($event)"
+                type="text"
+                name="WaterAccountContactSearch"
+                placeholder="APN, Owner Name, Owner Address"
+                [formControl]="searchString"
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="none"
+                spellcheck="false" />
+            <div class="search-append">
+                @if (searchString.value) {
+                    <button class="clear" (click)="clearSearch()">
+                        <i class="fa fa-times-circle"></i>
+                    </button>
+                }
+                @if (isPartOfForm) {
+                    <button class="clear" (click)="toggleDropdown()">
+                        <icon icon="AngleDown"></icon>
+                    </button>
+                }
+            </div>
+        </div>
+        @if (searchResults$ | async; as searchResults) {
+            <div class="search-results">
+                @if (searchResults?.TotalResults > 10 && !isSearching && !val) {
+                    <div class="refine-search p-3">Displaying 10 of {{ searchResults?.TotalResults }} results.</div>
+                }
+                @if (val == null && !isSearching) {
+                    <ul>
+                        @for (result of searchResults.SearchResults; track result) {
+                            <li
+                                [id]="'WaterAccountContact_' + result.WaterAccountContact.WaterAccountContactID"
+                                [class.highlighted-search-result]="result == highlightedSearchResult">
+                                <button (click)="selectWaterAccountContact(result)">
+                                    <div class="button-head">
+                                        <icon icon="Contact"></icon>
+                                        <strong class="wa-name" [innerHTML]="result.WaterAccountContact.ContactName" [highlight]="searchString.value"></strong>
+                                    </div>
+                                    @if (searchString.value && searchString.value.length > 0) {
+                                        @if (result.MatchedFields.ContactName) {
+                                            <div class="button-metadata mt-1">
+                                                <small class="wa-apns wa-meta">
+                                                    <strong>Contact Name: </strong>
+                                                    <span [highlight]="searchString.value" [innerHTML]="result.WaterAccountContact.ContactName"></span>
+                                                </small>
+                                            </div>
+                                        }
+                                        @if (result.MatchedFields.Email) {
+                                            <div class="button-metadata mt-1">
+                                                <small class="wa-contact-name wa-meta">
+                                                    <strong>Email: </strong>
+                                                    <span [highlight]="searchString.value" [innerHTML]="result.WaterAccountContact.ContactEmail"></span>
+                                                </small>
+                                            </div>
+                                        }
+                                        @if (result.MatchedFields.PhoneNumber) {
+                                            <div class="button-metadata mt-1">
+                                                <small class="wa-contact-address wa-meta">
+                                                    <strong>Phone Number: </strong>
+                                                    <span [highlight]="searchString.value" [innerHTML]="result.WaterAccountContact.ContactPhoneNumber"></span>
+                                                </small>
+                                            </div>
+                                        }
+                                        @if (result.MatchedFields.FullAddress) {
+                                            <div class="button-metadata mt-1">
+                                                <small class="wa-contact-address wa-meta">
+                                                    <strong>Address: </strong>
+                                                    <span [highlight]="searchString.value" [innerHTML]="result.WaterAccountContact.FullAddress"></span>
+                                                </small>
+                                            </div>
+                                        }
+                                    }
+                                </button>
+                            </li>
+                        }
+                        @if (searchResults?.SearchResults?.length == 0 && searchString.value && searchString.value.length > 1) {
+                            <li class="p-3">No results</li>
+                        }
+                    </ul>
+                }
+            </div>
+        }
+    </div>
+</div>

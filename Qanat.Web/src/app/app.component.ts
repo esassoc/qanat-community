@@ -1,9 +1,8 @@
-import { Component, Inject, Renderer2, ViewContainerRef } from "@angular/core";
+import { Component, Inject, Renderer2, ViewContainerRef, DOCUMENT } from "@angular/core";
 import { environment } from "../environments/environment";
-import { Router, RouteConfigLoadStart, RouteConfigLoadEnd, NavigationEnd, RouterOutlet } from "@angular/router";
-import { BusyService } from "./shared/services";
+import { Router, RouterOutlet } from "@angular/router";
 import { Title } from "@angular/platform-browser";
-import { DOCUMENT, NgIf } from "@angular/common";
+
 import { UserDto } from "./shared/generated/model/user-dto";
 import { AuthenticationService } from "./shared/services/authentication.service";
 import { RoleEnum } from "./shared/generated/enum/role-enum";
@@ -17,8 +16,7 @@ declare let require: any;
     selector: "app-root",
     templateUrl: "./app.component.html",
     styleUrls: ["./app.component.scss"],
-    standalone: true,
-    imports: [HeaderNavComponent, NgIf, RouterOutlet, FooterNavComponent],
+    imports: [HeaderNavComponent, RouterOutlet, FooterNavComponent],
 })
 export class AppComponent {
     userClaimsUpsertStarted = false;
@@ -33,7 +31,6 @@ export class AppComponent {
     constructor(
         @Inject(DOCUMENT) private _document: Document,
         private router: Router,
-        private busyService: BusyService,
         private titleService: Title,
         private renderer: Renderer2,
         private authenticationService: AuthenticationService,
@@ -58,18 +55,6 @@ export class AppComponent {
             if (role) {
                 this.userRoleClassName = "role-" + this.utilityFunctionService.stringToKebabCase(role);
                 this.renderer.addClass(this._document.body, this.userRoleClassName);
-            }
-        });
-
-        this.router.events.subscribe((event: any) => {
-            if (event instanceof RouteConfigLoadStart) {
-                // lazy loaded route started
-                this.busyService.setBusy(true);
-            } else if (event instanceof RouteConfigLoadEnd) {
-                // lazy loaded route ended
-                this.busyService.setBusy(false);
-            } else if (event instanceof NavigationEnd) {
-                window.scrollTo(0, 0);
             }
         });
 

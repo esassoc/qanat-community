@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Qanat.Models.DataTransferObjects;
+﻿namespace Qanat.Models.DataTransferObjects;
 
 public class ZoneGroupIDsDto
 {

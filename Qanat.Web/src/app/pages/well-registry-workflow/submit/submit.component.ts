@@ -14,7 +14,7 @@ import { WellRegistryWorkflowProgressService } from "src/app/shared/services/wel
 import { ButtonComponent } from "../../../shared/components/button/button.component";
 import { CustomRichTextComponent } from "../../../shared/components/custom-rich-text/custom-rich-text.component";
 import { NoteComponent } from "../../../shared/components/note/note.component";
-import { NgIf, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { FormFieldComponent } from "../../../shared/components/forms/form-field/form-field.component";
 import { AlertDisplayComponent } from "../../../shared/components/alert-display/alert-display.component";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
@@ -24,7 +24,6 @@ import { WorkflowBodyComponent } from "src/app/shared/components/workflow-body/w
     selector: "submit",
     templateUrl: "./submit.component.html",
     styleUrls: ["./submit.component.scss"],
-    standalone: true,
     imports: [
         PageHeaderComponent,
         WorkflowBodyComponent,
@@ -32,12 +31,11 @@ import { WorkflowBodyComponent } from "src/app/shared/components/workflow-body/w
         FormsModule,
         FormFieldComponent,
         ReactiveFormsModule,
-        NgIf,
         NoteComponent,
         CustomRichTextComponent,
         ButtonComponent,
         AsyncPipe,
-    ],
+    ]
 })
 export class SubmitComponent implements OnInit {
     public customRichTextTypeID = CustomRichTextTypeEnum.WellRegistrySubmit;
@@ -69,7 +67,7 @@ export class SubmitComponent implements OnInit {
 
     submitWell(): void {
         this.isLoadingSubmit = true;
-        this.wellRegistrationService.wellRegistrationsWellRegistrationIDSubmitWellPost(this.wellID).subscribe(() => {
+        this.wellRegistrationService.submitWellRegistration(this.wellID).subscribe(() => {
             this.isLoadingSubmit = false;
             this.router.navigate(["profile"]).then(() => {
                 this.alertService.pushAlert(new Alert("Well registration successfully submitted!", AlertContext.Success));

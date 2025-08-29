@@ -15,7 +15,7 @@ public partial class vGeoServerAllParcel
     public int GeographyID { get; set; }
 
     [Required]
-    [StringLength(20)]
+    [StringLength(64)]
     [Unicode(false)]
     public string ParcelNumber { get; set; }
 
@@ -24,7 +24,13 @@ public partial class vGeoServerAllParcel
     [Column(TypeName = "geometry")]
     public Geometry ParcelGeometry { get; set; }
 
-    public int? WaterAccountID { get; set; }
+    public int? CurrentWaterAccountID { get; set; }
 
     public int ParcelStatusID { get; set; }
+
+    public int? ReportingPeriodID { get; set; }
+
+    public int? WaterAccountID { get; set; }
+
+    public bool? IsCurrent { get; set; }
 }

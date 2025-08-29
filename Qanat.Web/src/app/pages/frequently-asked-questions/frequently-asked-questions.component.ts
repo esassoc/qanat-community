@@ -5,7 +5,7 @@ import { FormFieldType } from "src/app/shared/components/forms/form-field/form-f
 import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
 import { FrequentlyAskedQuestionSimpleDto } from "src/app/shared/generated/model/frequently-asked-question-simple-dto";
 import { LoadingDirective } from "../../shared/directives/loading.directive";
-import { NgIf, NgFor, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { FormFieldComponent } from "../../shared/components/forms/form-field/form-field.component";
 import { AlertDisplayComponent } from "../../shared/components/alert-display/alert-display.component";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
@@ -16,19 +16,16 @@ import { PublicService } from "src/app/shared/generated/api/public.service";
     selector: "frequently-asked-questions",
     templateUrl: "./frequently-asked-questions.component.html",
     styleUrl: "./frequently-asked-questions.component.scss",
-    standalone: true,
     imports: [
         PageHeaderComponent,
         AlertDisplayComponent,
         FormFieldComponent,
         FormsModule,
         ReactiveFormsModule,
-        NgIf,
-        NgFor,
         FrequentlyAskedQuestionDisplayComponent,
         LoadingDirective,
         AsyncPipe,
-    ],
+    ]
 })
 export class FrequentlyAskedQuestionsComponent implements OnInit {
     frequentlyAskedQuestions$: Observable<FrequentlyAskedQuestionSimpleDto[]>;
@@ -43,7 +40,7 @@ export class FrequentlyAskedQuestionsComponent implements OnInit {
     constructor(private publicService: PublicService) {}
 
     ngOnInit(): void {
-        this.frequentlyAskedQuestions$ = this.publicService.publicFaqGet().pipe(
+        this.frequentlyAskedQuestions$ = this.publicService.listFrequentlyAskedQuestionsPublic().pipe(
             tap((faqs) => {
                 this.allFaqs = faqs;
                 this.faqsToDisplay$ = this.searchFormControl.valueChanges.pipe(

@@ -1,26 +1,30 @@
-<ng-container *ngIf="currentUserAvailableGeographies$ | async as currentUserAvailableGeographies">
-    <ng-container *ngIf="currentUserAvailableGeographies.length > 1">
-        <span class="dropdown sidebar-body__current" *ngIf="geography$ | async as geography">
-            <a
-                href="javascript:void(0);"
-                [dropdownToggle]="geographyToggle"
-                [title]="geography.GeographyDisplayName"
-                class="dropdown-toggle"
-                role="button"
-                data-toggle="dropdown"
-                aria-haspopup="true"
-                aria-expanded="false">
-                {{ geography.GeographyName }}
-                <icon icon="AngleDown"></icon>
-            </a>
-            <div #geographyToggle class="dropdown-menu">
-                <div class="dropdown-item__wrapper" *ngFor="let availableGeography of currentUserAvailableGeographies">
-                    <button class="dropdown-item" (click)="changeGeography(availableGeography)">
-                        <span class="short-name">{{ availableGeography.GeographyName }}</span>
-                        <span class="long-name">{{ availableGeography.GeographyDisplayName }}</span>
-                    </button>
+@if (currentUserAvailableGeographies$ | async; as currentUserAvailableGeographies) {
+    @if (currentUserAvailableGeographies.length > 1) {
+        @if (geography$ | async; as geography) {
+            <span class="dropdown sidebar-body__current">
+                <a
+                    href="javascript:void(0);"
+                    [dropdownToggle]="geographyToggle"
+                    [title]="geography.GeographyDisplayName"
+                    class="dropdown-toggle"
+                    role="button"
+                    data-toggle="dropdown"
+                    aria-haspopup="true"
+                    aria-expanded="false">
+                    {{ geography.GeographyName }}
+                    <icon icon="AngleDown"></icon>
+                </a>
+                <div #geographyToggle class="dropdown-menu">
+                    @for (availableGeography of currentUserAvailableGeographies; track availableGeography) {
+                        <div class="dropdown-item__wrapper">
+                            <button class="dropdown-item" (click)="changeGeography(availableGeography)">
+                                <span class="short-name">{{ availableGeography.GeographyName }}</span>
+                                <span class="long-name">{{ availableGeography.GeographyDisplayName }}</span>
+                            </button>
+                        </div>
+                    }
                 </div>
-            </div>
-        </span>
-    </ng-container>
-</ng-container>
+            </span>
+        }
+    }
+}

@@ -8,6 +8,10 @@
     width: 23rem;
 }
 
+.field.geography {
+    width: 10rem;
+}
+
 .drag-handle {
     cursor: move;
 }
@@ -168,8 +172,8 @@ note {
     justify-content: end;
     gap: $spacing-200;
     margin-bottom: $spacing-300;
+}
 
-    ngx-select-dropdown ::ng-deep .ngx-dropdown-button {
-        height: 3rem;
-    }
+.reporting-period-note {
+    text-align: left;
 }

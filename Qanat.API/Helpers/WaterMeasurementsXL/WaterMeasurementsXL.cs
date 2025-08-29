@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Data.SqlTypes;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,154 +12,155 @@ namespace Qanat.API.Helpers.WaterMeasurementsXL
 {
     public class WaterMeasurementsXL
     {
-        public static async Task<byte[]> CreateWaterMeasurementWBForGeography(QanatDbContext dbContext, int geographyID, int? year, List<string> usageEntityNames = null)
+        public static async Task<byte[]> CreateWaterMeasurementWBForGeographyAndYear(QanatDbContext dbContext, int geographyID, int year)
         {
-            var reportingPeriods = dbContext.fReportingPeriod(year ?? DateTime.UtcNow.Year);
-            var reportingPeriod = reportingPeriods.Single(x => x.GeographyID == geographyID);
-            var reportingMonth = reportingPeriod.StartMonth;
+            // this means we are looking at it from a geography's reporting period (year)'s perspective, so we want water measurements for given reporting period for all parcels
+            var reportingPeriod = await ReportingPeriods.GetByGeographyIDAndYearAsync(dbContext, geographyID, year);
 
-            var startDate = year == null ? SqlDateTime.MinValue.Value : reportingPeriod.StartDate;
-            var endDate = year == null ? SqlDateTime.MaxValue.Value : reportingPeriod.EndDate;
+            var waterMeasurements = await dbContext.WaterMeasurements.AsNoTracking()
+                .Include(x => x.WaterMeasurementType)
+                .Include(x => x.UsageLocation).ThenInclude(x => x.Parcel)
+                .Where(x => x.GeographyID == geographyID && x.ReportedDate >= reportingPeriod.StartDate && x.ReportedDate <= reportingPeriod.EndDate)
+                .ToListAsync();
+                
+            var waterMeasurementLookup = waterMeasurements.ToLookup(x => x.WaterMeasurementTypeID);
+
+            var waterAccountParcels = await dbContext.WaterAccountParcels.AsNoTracking()
+                .Include(x => x.WaterAccount)
+                .Where(x => x.GeographyID == geographyID && x.ReportingPeriodID == reportingPeriod.ReportingPeriodID)
+                .ToListAsync();
+
+            return await CreateWaterMeasurementWBImpl(dbContext, geographyID, waterMeasurementLookup, waterAccountParcels, [reportingPeriod]);
+        }
+
+        public static async Task<byte[]> CreateWaterMeasurementWBForGeographyAndParcel(QanatDbContext dbContext, int geographyID, int parcelID)
+        {
+            // this means we are looking at it from a parcel's perspective, so we want water measurements for all reporting periods for a parcel
+            var reportingPeriods = await ReportingPeriods.ListByGeographyIDAsync(dbContext, geographyID);
 
             var waterMeasurements = dbContext.WaterMeasurements.AsNoTracking()
                 .Include(x => x.WaterMeasurementType)
-                .Where(x => x.GeographyID == geographyID && x.ReportedDate >= startDate && x.ReportedDate <= endDate && (usageEntityNames == null || usageEntityNames.Contains(x.UsageEntityName)))
+                .Include(x => x.UsageLocation).ThenInclude(x => x.Parcel)
+                .Where(x => x.GeographyID == geographyID && x.UsageLocation.ParcelID == parcelID)
                 .ToLookup(x => x.WaterMeasurementTypeID);
 
-            var waterAccountParcelDtos = dbContext.WaterAccountParcels.AsNoTracking()
+            var waterAccountParcels = dbContext.WaterAccountParcels.AsNoTracking()
                 .Include(x => x.WaterAccount)
-                .Where(x => x.GeographyID == geographyID).ToList()
-                .Select(x => new WaterAccountParcelDto()
-                {
-                    GeographyID = x.GeographyID,
-                    ParcelID = x.ParcelID,
-                    EffectiveYear = x.EffectiveYear,
-                    WaterAccountID = x.WaterAccountID,
-                    WaterAccount = x.WaterAccount?.AsWaterAccountMinimalDto(),
+                .Where(x => x.GeographyID == geographyID && x.ParcelID == parcelID).ToList();
 
-                }).ToList()
-                .GroupBy(x => x.ParcelID)
-                .ToDictionary(x => x.Key, x => x.OrderByDescending(y => y.EffectiveYear).ToList());
+            return await CreateWaterMeasurementWBImpl(dbContext, geographyID, waterMeasurements, waterAccountParcels, reportingPeriods);
+        }
 
-            var parcelStatuses = dbContext.Parcels.AsNoTracking().Where(x => x.GeographyID == geographyID)
-                .ToDictionary(x => x.PrimaryKey, x => x.ParcelStatus);
-
-            var usageEntityDictionary = dbContext.UsageEntities.AsNoTracking()
-                .Include(x => x.Parcel)
-                .Where(x => x.GeographyID == geographyID && (usageEntityNames == null || usageEntityNames.Contains(x.UsageEntityName)))
-                .ToDictionary(x => x.UsageEntityName, y => new
-                {
-                    y.UsageEntityArea,
-                    y.Parcel.ParcelNumber,
-                    y.Parcel.ParcelID
-                });
-
+        private static async Task<byte[]> CreateWaterMeasurementWBImpl(QanatDbContext dbContext, int geographyID, ILookup<int?, WaterMeasurement> waterMeasurements, IEnumerable<WaterAccountParcel> waterAccountParcels, List<ReportingPeriodDto> reportingPeriods)
+        {
+            var waterAccountParcelLookup = waterAccountParcels.ToLookup(x => x.ParcelID);
             var waterTypesForGeography = dbContext.WaterMeasurementTypes.AsNoTracking().Where(x => x.GeographyID == geographyID).ToList();
 
             var workbook = new XLWorkbook();
             foreach (var waterType in waterTypesForGeography)
             {
                 var rowNumber = 1;
-                var sheetName = waterType.WaterMeasurementTypeName.Length > 31
-                    ? waterType.WaterMeasurementTypeName[..31]
-                    : waterType.WaterMeasurementTypeName;
+                var sheetName = waterType.ShortName;
 
                 var workSheet = workbook.Worksheets.Add(sheetName);
-                workSheet.Cell(rowNumber, 1).Value = "Usage Entity Name (APN or Field ID)";
+                workSheet.Cell(rowNumber, 1).Value = "Usage Location Name (APN or Field ID)";
                 workSheet.Cell(rowNumber, 2).Value = "APN";
-                workSheet.Cell(rowNumber, 3).Value = "Usage Entity Area (ac)";
-                workSheet.Cell(rowNumber, 4).Value = "Water Account #";
-                workSheet.Cell(rowNumber, 5).Value = "Effective Year";
+                workSheet.Cell(rowNumber, 3).Value = "Usage Location Area (ac)";
+                workSheet.Cell(rowNumber, 4).Value = "Reporting Period";
+                workSheet.Cell(rowNumber, 5).Value = "Water Account #";
                 workSheet.Cell(rowNumber, 6).Value = "Parcel Status";
 
                 var waterMeasurementsForWaterMeasurementType = waterMeasurements[waterType.WaterMeasurementTypeID].ToList();
-                var usageHeaders = waterMeasurementsForWaterMeasurementType
-                    .GroupBy(x => new { x.ReportedDate, x.WaterMeasurementType.WaterMeasurementTypeName, x.WaterMeasurementType.SortOrder })
-                    .OrderByDescending(x => x.Key.ReportedDate.Year)
-                    .ThenBy(x => x.Key.ReportedDate.Month)
-                    .ThenBy(x => x.Key.SortOrder)
-                    .Select(x => GetUsageHeader(x.Key.ReportedDate, x.Key.WaterMeasurementTypeName)).ToList();
+                var usageHeaders = new List<string>();
+                var reportingPeriod = reportingPeriods.First();
+                var startDate = reportingPeriod.StartDate;
+                while (startDate <= reportingPeriod.EndDate)
+                {
+                    usageHeaders.Add(GetUsageHeader(startDate));
+                    startDate = startDate.AddMonths(1);
+                }
 
                 var column = 7;
                 foreach (var usageHeader in usageHeaders)
                 {
                     workSheet.Cell(rowNumber, column).Value = usageHeader;
-                    workSheet.Cell(rowNumber, column + 1).Value = $"{usageHeader} Comments";
-                    column += 2;
+                    workSheet.Cell(rowNumber, column + 12).Value = $"{usageHeader} Comments";
+                    column++;
                 }
 
-                var usageEntityGroups = waterMeasurementsForWaterMeasurementType.GroupBy(x => x.UsageEntityName).OrderBy(x => x.Key);
-
-                foreach (var usageEntityGroup in usageEntityGroups)
+                var usageLocationGroups = waterMeasurementsForWaterMeasurementType.ToLookup(x => $"{x.UsageLocation.Name}").OrderBy(x => x.Key);
+                foreach (var usageLocationGroup in usageLocationGroups)
                 {
-                    rowNumber++;
-                    workSheet.Cell(rowNumber, 1).Value = usageEntityGroup.Key;
-                    if (usageEntityDictionary.TryGetValue(usageEntityGroup.Key, out var usageEntity))
+                    foreach (var reportingPeriodDto in reportingPeriods)
                     {
-                        var waterAccountParcelDto =
-                            waterAccountParcelDtos.TryGetValue(usageEntity.ParcelID, out var dto)
-                                ? dto.Where(x => IsEffectiveDateInReportingPeriod(x.EffectiveYear, reportingMonth))
-                                    .MaxBy(x => x.EffectiveYear)
-                                : null;
-                        var parcelStatus = parcelStatuses.TryGetValue(usageEntity.ParcelID, out var status) ? status : null;
-                        workSheet.Cell(rowNumber, 2).Value = usageEntity.ParcelNumber;
-                        workSheet.Cell(rowNumber, 3).Value =
-                            usageEntity.UsageEntityArea;
-                        if (waterAccountParcelDto != null)
+                        var waterMeasurementsForReportingPeriod = usageLocationGroup.Where(x => x.ReportedDate >= reportingPeriodDto.StartDate && x.ReportedDate <= reportingPeriodDto.EndDate).ToList();
+                        if (waterMeasurementsForReportingPeriod.Any())
                         {
-                            workSheet.Cell(rowNumber, 4).Value = waterAccountParcelDto.WaterAccount?.WaterAccountNumber;
-                            workSheet.Cell(rowNumber, 5).Value = waterAccountParcelDto.EffectiveYear;
-                        }
-                        workSheet.Cell(rowNumber, 6).Value = parcelStatus?.ParcelStatusDisplayName;
-                    }
-                    else
-                    {
-                        workSheet.Cell(rowNumber, 2).Value = string.Empty;
-                        workSheet.Cell(rowNumber, 3).Value = string.Empty;
-                        workSheet.Cell(rowNumber, 4).Value = string.Empty;
-                        workSheet.Cell(rowNumber, 5).Value = string.Empty;
-                    }
+                            rowNumber++;
+                            var first = waterMeasurementsForReportingPeriod.First();
+                            workSheet.Cell(rowNumber, 1).Value = first.UsageLocation.Name;
+                            workSheet.Cell(rowNumber, 2).Value = first.UsageLocation.Parcel.ParcelNumber;
+                            workSheet.Cell(rowNumber, 3).Value = first.UsageLocation.Parcel.ParcelArea;
+                            workSheet.Cell(rowNumber, 4).Value = reportingPeriodDto.EndDate.Year;
+                            var waterAccountParcelsForUsageLocation =
+                                waterAccountParcelLookup[first.UsageLocation.ParcelID].ToList();
+                            if (waterAccountParcelsForUsageLocation.Any())
+                            {
+                                var waterAccountParcelDto = waterAccountParcelsForUsageLocation.SingleOrDefault(x =>
+                                    x.ReportingPeriodID == reportingPeriodDto.ReportingPeriodID);
+                                if (waterAccountParcelDto != null)
+                                {
+                                    workSheet.Cell(rowNumber, 5).Value =
+                                        waterAccountParcelDto.WaterAccount?.WaterAccountNumber;
+                                }
+                                else
+                                {
+                                    workSheet.Cell(rowNumber, 5).Value = string.Empty;
+                                }
+                            }
+                            else
+                            {
+                                workSheet.Cell(rowNumber, 5).Value = string.Empty;
+                            }
 
-                    GetParcelUsage(usageEntityGroup, usageHeaders, workSheet, rowNumber);
+                            workSheet.Cell(rowNumber, 6).Value =
+                                first.UsageLocation.Parcel.ParcelStatus.ParcelStatusDisplayName;
+                            GetParcelUsage(waterMeasurementsForReportingPeriod, usageHeaders, workSheet, rowNumber);
+                        }
+                    }
                 }
             }
 
             await using var stream = new MemoryStream();
             workbook.SaveAs(stream);
-
             return stream.ToArray();
         }
 
-        private static void GetParcelUsage(IGrouping<string, WaterMeasurement> usageEntityGroup, List<string> usageHeaders, IXLWorksheet workSheet, int rowNumber)
+        private static void GetParcelUsage(List<WaterMeasurement> usageLocationGroup, List<string> usageHeaders, IXLWorksheet workSheet, int rowNumber)
         {
-            var parcelUsageByMonthYear = usageEntityGroup
-                .ToLookup(x => GetUsageHeader(x.ReportedDate, x.WaterMeasurementType.WaterMeasurementTypeName));
-
+            var lookup = usageLocationGroup.ToLookup(x => GetUsageHeader(x.ReportedDate));
             var columnNumber = 7;
-            foreach (var usages in usageHeaders.Select(header => parcelUsageByMonthYear[header].ToList()))
+            foreach (var usages in usageHeaders.Select(header => lookup[header].ToList()))
             {
                 if (usages.Any())
                 {
                     workSheet.Cell(rowNumber, columnNumber).Value = usages.Sum(x => x.ReportedValueInAcreFeet);
-                    workSheet.Cell(rowNumber, columnNumber + 1).Value = string.Join("; ", usages.Select(x => x.Comment));
+                    workSheet.Cell(rowNumber, columnNumber + 12).Value =
+                        string.Join("; ", usages.Select(x => x.Comment));
                 }
                 else
                 {
                     workSheet.Cell(rowNumber, columnNumber).Value = string.Empty;
-                    workSheet.Cell(rowNumber, columnNumber + 1).Value = string.Empty;
+                    workSheet.Cell(rowNumber, columnNumber + 12).Value = string.Empty;
                 }
-                columnNumber += 2;
+
+                columnNumber++;
             }
         }
 
-        private static string GetUsageHeader(DateTime reportedDate, string waterUseTypeName)
+        private static string GetUsageHeader(DateTime reportedDate)
         {
-            return $"{reportedDate:yyyy_MMM}_{waterUseTypeName}_AF";
-        }
-
-        private static bool IsEffectiveDateInReportingPeriod(int effectiveDate, int month)
-        {
-            return DateTime.Parse($"{month}/01/{effectiveDate}") <= DateTime.UtcNow;
+            return $"{reportedDate:MMM}_AF";
         }
     }
 }

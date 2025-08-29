@@ -33,7 +33,12 @@
         }
 
         icon {
-            margin-right: $spacing-200;
+            margin-right: $spacing-100;
+
+            ::ng-deep svg {
+                height: 16px;
+                width: 16px;
+            }
         }
     }
 }
@@ -69,7 +74,7 @@
     .dropdown {
         &-menu.active {
             position: absolute;
-            z-index: 1111;
+            z-index: 9999;
             top: 2rem;
             left: -6rem;
             background: white;

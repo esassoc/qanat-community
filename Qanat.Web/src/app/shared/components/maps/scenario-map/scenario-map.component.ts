@@ -39,7 +39,7 @@ export class ScenarioMapComponent implements OnInit, AfterViewInit, OnDestroy, A
     ngOnInit(): void {}
 
     ngAfterViewInit(): void {
-        this.modelService.modelsModelShortNameBoundaryGet(this.modelShortName).subscribe((modelBoundary) => {
+        this.modelService.getModelBoundaryByModelShortNameModel(this.modelShortName).subscribe((modelBoundary) => {
             const mapOptions: L.MapOptions = {
                 minZoom: 6,
                 maxZoom: 17,

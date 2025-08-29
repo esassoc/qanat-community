@@ -3,7 +3,7 @@
 //  Source Table: [dbo].[WaterMeasurementCategoryType]
 
 import { LookupTableEntry } from "src/app/shared/models/lookup-table-entry";
-import { SelectDropdownOption } from "src/app/shared/components/inputs/select-dropdown/select-dropdown.component"
+import { SelectDropdownOption } from "src/app/shared/components/forms/form-field/form-field.component"
 
 export enum WaterMeasurementCategoryTypeEnum {
   ET = 1,
@@ -26,4 +26,4 @@ export const WaterMeasurementCategoryTypes: LookupTableEntry[]  = [
   { Name: "Manual Adjustment", DisplayName: "ManualAdjustment", Value: 7 },
   { Name: "Self Reported", DisplayName: "SelfReported", Value: 8 }
 ];
-export const WaterMeasurementCategoryTypesAsSelectDropdownOptions = [{ Value: null, Label: "- Select -", Disabled: true }, ...WaterMeasurementCategoryTypes.map((x) => ({ Value: x.Value, Label: x.DisplayName } as SelectDropdownOption))];
+export const WaterMeasurementCategoryTypesAsSelectDropdownOptions = WaterMeasurementCategoryTypes.map((x) => ({ Value: x.Value, Label: x.DisplayName } as SelectDropdownOption));

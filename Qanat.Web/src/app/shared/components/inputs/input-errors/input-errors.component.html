@@ -1,5 +1,7 @@
-<ng-container *ngFor="let error of errors$ | async">
-    <note [noteType]="'danger'" class="mt-2" *ngIf="validateFormControl.touched">
-        {{ error }}
-    </note>
-</ng-container>
+@for (error of errors$ | async; track error) {
+    @if (validateFormControl.touched) {
+        <note [noteType]="'danger'" class="mt-2">
+            {{ error }}
+        </note>
+    }
+}

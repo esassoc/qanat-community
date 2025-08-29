@@ -1,31 +1,31 @@
-<ng-container *ngIf="geography$ | async as geography">
-    <ng-container *ngIf="zoneGroupSlug$ | async as zoneGroupSlug">
-        <div *ngIf="zoneGroup$ | async as zoneGroup">
-            <page-header icon="Zones" [templateAbove]="templateAbove" [pageTitle]="'Zones by ' + zoneGroup.ZoneGroupName">
-                <ng-template #templateAbove>
-                    <div class="back">
-                        <a routerLink="../" class="back__link">Back to Zones</a>
+@if (geography$ | async; as geography) {
+    @if (zoneGroupSlug$ | async; as zoneGroupSlug) {
+        @if (zoneGroup$ | async; as zoneGroup) {
+            <div>
+                <page-header icon="Zones" [templateAbove]="templateAbove" [pageTitle]="'Zones by ' + zoneGroup.ZoneGroupName">
+                    <ng-template #templateAbove>
+                        <div class="back">
+                            <a routerLink="../" class="back__link">Back to Zones</a>
+                        </div>
+                    </ng-template>
+                </page-header>
+                <div class="page-body">
+                    <div class="copy copy-2 pb-4">
+                        {{ zoneGroup.ZoneGroupDescription }}
                     </div>
-                </ng-template>
-            </page-header>
-
-            <div class="page-body">
-                <div class="copy copy-2 pb-4">
-                    {{ zoneGroup.ZoneGroupDescription }}
+                    <app-alert-display></app-alert-display>
+                    <parcel-map
+                        mapID="zoneGroup"
+                        mapHeight="540px"
+                        [boundingBoxInput]="geography?.BoundingBox"
+                        [geographyID]="geography.GeographyID"
+                        [collapsedLayerControl]="false"
+                        [displayParcelLayerOnLoad]="false"
+                        [visibleZoneGroupIDsOnLoad]="[zoneGroup.ZoneGroupID]"></parcel-map>
+                    <vega-zone-group-usage-chart [geographyID]="geography.GeographyID" [zoneGroupSlug]="zoneGroupSlug"></vega-zone-group-usage-chart>
                 </div>
-                <app-alert-display></app-alert-display>
-                <parcel-map
-                    mapID="zoneGroup"
-                    mapHeight="540px"
-                    [boundingBoxInput]="geography?.BoundingBox"
-                    [geographyID]="geography.GeographyID"
-                    [collapsedLayerControl]="false"
-                    [displayParcelLayerOnLoad]="false"
-                    [visibleZoneGroupIDsOnLoad]="[zoneGroup.ZoneGroupID]"></parcel-map>
-
-                <vega-zone-group-usage-chart [geographyID]="geography.GeographyID" [zoneGroupSlug]="zoneGroupSlug"></vega-zone-group-usage-chart>
+                <div class="page-footer"></div>
             </div>
-            <div class="page-footer"></div>
-        </div>
-    </ng-container>
-</ng-container>
+        }
+    }
+}

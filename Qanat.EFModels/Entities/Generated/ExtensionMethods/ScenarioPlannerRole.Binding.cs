@@ -16,9 +16,7 @@ namespace Qanat.EFModels.Entities
         public static readonly ScenarioPlannerRoleScenarioUser ScenarioUser = ScenarioPlannerRoleScenarioUser.Instance;
 
         public static readonly List<ScenarioPlannerRole> All;
-        public static readonly List<ScenarioPlannerRoleSimpleDto> AllAsSimpleDto;
         public static readonly ReadOnlyDictionary<int, ScenarioPlannerRole> AllLookupDictionary;
-        public static readonly ReadOnlyDictionary<int, ScenarioPlannerRoleSimpleDto> AllAsSimpleDtoLookupDictionary;
 
         /// <summary>
         /// Static type constructor to coordinate static initialization order
@@ -26,9 +24,7 @@ namespace Qanat.EFModels.Entities
         static ScenarioPlannerRole()
         {
             All = new List<ScenarioPlannerRole> { NoAccess, ScenarioUser };
-            AllAsSimpleDto = new List<ScenarioPlannerRoleSimpleDto> { NoAccess.AsSimpleDto(), ScenarioUser.AsSimpleDto() };
             AllLookupDictionary = new ReadOnlyDictionary<int, ScenarioPlannerRole>(All.ToDictionary(x => x.ScenarioPlannerRoleID));
-            AllAsSimpleDtoLookupDictionary = new ReadOnlyDictionary<int, ScenarioPlannerRoleSimpleDto>(AllAsSimpleDto.ToDictionary(x => x.ScenarioPlannerRoleID));
         }
 
         /// <summary>

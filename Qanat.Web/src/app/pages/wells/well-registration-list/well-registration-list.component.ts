@@ -17,10 +17,9 @@ import { ZipCodePipe as ZipCodePipe } from "src/app/shared/pipes/zipcode.pipe";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { LoadingDirective } from "../../../shared/directives/loading.directive";
 import { QanatGridComponent } from "src/app/shared/components/qanat-grid/qanat-grid.component";
-import { NgIf, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { AlertDisplayComponent } from "../../../shared/components/alert-display/alert-display.component";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
-import { IconComponent } from "src/app/shared/components/icon/icon.component";
 import { CurrentGeographyService } from "src/app/shared/services/current-geography.service";
 import { GeographyMinimalDto } from "src/app/shared/generated/model/models";
 import { FuelTypesAsSelectDropdownOptions } from "src/app/shared/generated/enum/fuel-type-enum";
@@ -31,8 +30,7 @@ import { WellRegistrationWaterUseTypesAsSelectDropdownOptions } from "src/app/sh
     templateUrl: "./well-registration-list.component.html",
     styleUrls: ["./well-registration-list.component.scss"],
     providers: [PhonePipe, ZipCodePipe],
-    standalone: true,
-    imports: [PageHeaderComponent, AlertDisplayComponent, NgIf, QanatGridComponent, LoadingDirective, AsyncPipe, IconComponent, RouterLink],
+    imports: [PageHeaderComponent, AlertDisplayComponent, QanatGridComponent, LoadingDirective, AsyncPipe, RouterLink],
 })
 export class WellRegistrationListComponent implements OnInit {
     public customRichTextId: number = CustomRichTextTypeEnum.ManageAllWellRegistrations;
@@ -61,7 +59,7 @@ export class WellRegistrationListComponent implements OnInit {
         this.allWells$ = this.geography$.pipe(
             switchMap((geography) => {
                 this.geography = geography;
-                return this.wellRegistrationService.geographiesGeographyIDWellRegistrationsGet(geography.GeographyID);
+                return this.wellRegistrationService.listWellRegistration(geography.GeographyID);
             }),
             tap((x) => {
                 this.setupColDefs();
@@ -213,7 +211,7 @@ export class WellRegistrationListComponent implements OnInit {
         };
         this.confirmService.confirm(confirmOptions).then((confirmed) => {
             if (confirmed) {
-                this.wellRegistrationService.wellRegistrationsWellRegistrationIDDelete(params.data.WellRegistrationID).subscribe(() => {
+                this.wellRegistrationService.deleteWellRegistrationWellRegistration(params.data.WellRegistrationID).subscribe(() => {
                     this.alertService.pushAlert(new Alert("Successfully deleted well registration", AlertContext.Success));
                     params.api.applyTransaction({ remove: [params.data] });
                 });

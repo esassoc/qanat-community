@@ -1,0 +1,47 @@
+<div class="document-upload-container g-col-12">
+    <div class="grid-12 mb-2 pb-2 underline">
+        <div class="title-container g-col-9">
+            <h3 class="section-title text-primary mr-2">{{ title }}</h3>
+            @if (fileResources) {
+                <div class="file-count">{{ fileResources?.length }}</div>
+            }
+        </div>
+        <div class="g-col-3 flex-end">
+            @if (allowEditing) {
+                <button class="btn btn-primary upload-button" (click)="openFileUploadModal()"><icon icon="Upload" class="mr-1 upload-icon"></icon>Upload</button>
+            }
+        </div>
+    </div>
+    <div class="existing-file-container mb-4">
+        @for (fileResource of fileResources; track fileResource) {
+            <div class="existing-file">
+                <div class="grid-12">
+                    <div class="g-col-2">
+                        <icon [icon]="'File'"></icon>
+                    </div>
+                    <div class="g-col-6">
+                        <div class="pb-2 copy copy-2">
+                            <b>
+                                <a (click)="downloadFileResource(fileResource.FileResource)" style="cursor: pointer">
+                                    {{ fileResource.FileResource.OriginalBaseFilename }}.{{ fileResource.FileResource.OriginalFileExtension }}
+                                </a>
+                            </b>
+                        </div>
+                        <div class="pb-2 copy copy-2 file-description">
+                            <em>{{ fileResource.FileDescription }}</em>
+                        </div>
+                        <div class="copy copy-4 file-upload-date">
+                            <b>Uploaded {{ fileResource.FileResource.CreateDate | date: "short" }} </b>
+                        </div>
+                    </div>
+                    @if (allowEditing) {
+                        <div class="g-col-4 actions">
+                            <icon class="edit-file-icon-button mr-2" [icon]="'CirclePencil'" (click)="openFileDescriptionUpdateModal(fileResource)"></icon>
+                            <icon class="delete-file-icon-button" [icon]="'CircleX'" (click)="deleteFileResource(fileResource)"></icon>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>

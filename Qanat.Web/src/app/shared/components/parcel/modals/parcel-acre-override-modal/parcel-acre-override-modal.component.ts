@@ -1,11 +1,7 @@
-import { CommonModule } from "@angular/common";
-import { Component, ComponentRef, OnInit } from "@angular/core";
+import { Component, inject, OnInit } from "@angular/core";
 import { FormGroup, FormsModule, ReactiveFormsModule, Validators } from "@angular/forms";
 import { FormFieldComponent, FormFieldType } from "../../../forms/form-field/form-field.component";
-import { IconComponent } from "../../../icon/icon.component";
 import { ParcelService } from "src/app/shared/generated/api/parcel.service";
-import { IModal, ModalService } from "src/app/shared/services/modal/modal.service";
-import { ModalComponent } from "../../../modal/modal.component";
 import { ParcelAcreUpdateDto, ParcelAcreUpdateDtoForm, ParcelAcreUpdateDtoFormControls } from "src/app/shared/generated/model/parcel-acre-update-dto";
 import { Observable, tap } from "rxjs";
 import { ParcelMinimalDto } from "src/app/shared/generated/model/parcel-minimal-dto";
@@ -14,19 +10,18 @@ import { AlertService } from "src/app/shared/services/alert.service";
 import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
 import { Alert } from "src/app/shared/models/alert";
 import { NoteComponent } from "../../../note/note.component";
+import { AsyncPipe } from "@angular/common";
+import { DialogRef } from "@ngneat/dialog";
 
 @Component({
     selector: "parcel-acre-override-modal",
     standalone: true,
-    imports: [CommonModule, IconComponent, FormsModule, ReactiveFormsModule, FormFieldComponent, NoteComponent],
+    imports: [FormsModule, ReactiveFormsModule, FormFieldComponent, NoteComponent, AsyncPipe],
     templateUrl: "./parcel-acre-override-modal.component.html",
     styleUrl: "./parcel-acre-override-modal.component.scss",
 })
-export class ParcelAcreOverrideModalComponent implements IModal, OnInit {
-    modalComponentRef: ComponentRef<ModalComponent>;
-
-    public modalContext: ParcelContext;
-
+export class ParcelAcreOverrideModalComponent implements OnInit {
+    public ref: DialogRef<ParcelContext, boolean> = inject(DialogRef);
     public parcel$: Observable<ParcelMinimalDto>;
 
     public isLoadingSubmit: boolean = false;
@@ -39,10 +34,13 @@ export class ParcelAcreOverrideModalComponent implements IModal, OnInit {
         }),
     });
 
-    constructor(private modalService: ModalService, private parcelService: ParcelService, private alertService: AlertService) {}
+    constructor(
+        private parcelService: ParcelService,
+        private alertService: AlertService
+    ) {}
 
     ngOnInit(): void {
-        this.parcel$ = this.parcelService.parcelsParcelIDGet(this.modalContext.ParcelID).pipe(
+        this.parcel$ = this.parcelService.getByIDParcel(this.ref.data.ParcelID).pipe(
             tap((parcel) => {
                 this.formGroup.setValue({ Acres: parcel.ParcelArea });
             })
@@ -50,7 +48,7 @@ export class ParcelAcreOverrideModalComponent implements IModal, OnInit {
     }
 
     close() {
-        this.modalService.close(this.modalComponentRef, false);
+        this.ref.close(false);
     }
 
     save() {
@@ -60,11 +58,11 @@ export class ParcelAcreOverrideModalComponent implements IModal, OnInit {
             Acres: this.formGroup.get("Acres").value,
         });
 
-        this.parcelService.parcelsParcelIDAcresPut(this.modalContext.ParcelID, parcelAcreUpdateDto).subscribe({
+        this.parcelService.updateParcelAcresParcel(this.ref.data.ParcelID, parcelAcreUpdateDto).subscribe({
             next: () => {
                 this.alertService.clearAlerts();
                 this.alertService.pushAlert(new Alert("Parcel acres successfully updated!", AlertContext.Success));
-                this.modalService.close(this.modalComponentRef, true);
+                this.ref.close(true);
             },
             error: () => (this.isLoadingSubmit = false),
         });

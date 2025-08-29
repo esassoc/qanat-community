@@ -27,12 +27,6 @@ public partial class QanatDbContext : DbContext
 
     public virtual DbSet<FrequentlyAskedQuestionFaqDisplayLocationType> FrequentlyAskedQuestionFaqDisplayLocationTypes { get; set; }
 
-    public virtual DbSet<GETAction> GETActions { get; set; }
-
-    public virtual DbSet<GETActionFileResource> GETActionFileResources { get; set; }
-
-    public virtual DbSet<GETActionOutputFile> GETActionOutputFiles { get; set; }
-
     public virtual DbSet<Geography> Geographies { get; set; }
 
     public virtual DbSet<GeographyAllocationPlanConfiguration> GeographyAllocationPlanConfigurations { get; set; }
@@ -46,6 +40,10 @@ public partial class QanatDbContext : DbContext
     public virtual DbSet<IrrigationMethod> IrrigationMethods { get; set; }
 
     public virtual DbSet<Meter> Meters { get; set; }
+
+    public virtual DbSet<MeterReading> MeterReadings { get; set; }
+
+    public virtual DbSet<MeterReadingMonthlyInterpolation> MeterReadingMonthlyInterpolations { get; set; }
 
     public virtual DbSet<ModelBoundary> ModelBoundaries { get; set; }
 
@@ -73,6 +71,8 @@ public partial class QanatDbContext : DbContext
 
     public virtual DbSet<ParcelSupply> ParcelSupplies { get; set; }
 
+    public virtual DbSet<ParcelWaterAccountHistory> ParcelWaterAccountHistories { get; set; }
+
     public virtual DbSet<ParcelZone> ParcelZones { get; set; }
 
     public virtual DbSet<ReferenceWell> ReferenceWells { get; set; }
@@ -85,6 +85,12 @@ public partial class QanatDbContext : DbContext
 
     public virtual DbSet<ScenarioRunOutputFile> ScenarioRunOutputFiles { get; set; }
 
+    public virtual DbSet<StatementBatch> StatementBatches { get; set; }
+
+    public virtual DbSet<StatementBatchWaterAccount> StatementBatchWaterAccounts { get; set; }
+
+    public virtual DbSet<StatementTemplate> StatementTemplates { get; set; }
+
     public virtual DbSet<SupportTicket> SupportTickets { get; set; }
 
     public virtual DbSet<SupportTicketNote> SupportTicketNotes { get; set; }
@@ -93,17 +99,29 @@ public partial class QanatDbContext : DbContext
 
     public virtual DbSet<UploadedWellGdb> UploadedWellGdbs { get; set; }
 
-    public virtual DbSet<UsageEntity> UsageEntities { get; set; }
+    public virtual DbSet<UsageLocation> UsageLocations { get; set; }
 
-    public virtual DbSet<UsageEntityCrop> UsageEntityCrops { get; set; }
+    public virtual DbSet<UsageLocationCrop> UsageLocationCrops { get; set; }
 
-    public virtual DbSet<UsageEntityGeometry> UsageEntityGeometries { get; set; }
+    public virtual DbSet<UsageLocationGeometry> UsageLocationGeometries { get; set; }
+
+    public virtual DbSet<UsageLocationHistory> UsageLocationHistories { get; set; }
+
+    public virtual DbSet<UsageLocationParcelHistory> UsageLocationParcelHistories { get; set; }
+
+    public virtual DbSet<UsageLocationType> UsageLocationTypes { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
 
     public virtual DbSet<WaterAccount> WaterAccounts { get; set; }
 
+    public virtual DbSet<WaterAccountContact> WaterAccountContacts { get; set; }
+
+    public virtual DbSet<WaterAccountCoverCropStatus> WaterAccountCoverCropStatuses { get; set; }
+
     public virtual DbSet<WaterAccountCustomAttribute> WaterAccountCustomAttributes { get; set; }
+
+    public virtual DbSet<WaterAccountFallowStatus> WaterAccountFallowStatuses { get; set; }
 
     public virtual DbSet<WaterAccountParcel> WaterAccountParcels { get; set; }
 
@@ -117,6 +135,8 @@ public partial class QanatDbContext : DbContext
 
     public virtual DbSet<WaterMeasurementSelfReport> WaterMeasurementSelfReports { get; set; }
 
+    public virtual DbSet<WaterMeasurementSelfReportFileResource> WaterMeasurementSelfReportFileResources { get; set; }
+
     public virtual DbSet<WaterMeasurementSelfReportLineItem> WaterMeasurementSelfReportLineItems { get; set; }
 
     public virtual DbSet<WaterMeasurementType> WaterMeasurementTypes { get; set; }
@@ -126,6 +146,8 @@ public partial class QanatDbContext : DbContext
     public virtual DbSet<WaterType> WaterTypes { get; set; }
 
     public virtual DbSet<Well> Wells { get; set; }
+
+    public virtual DbSet<WellFileResource> WellFileResources { get; set; }
 
     public virtual DbSet<WellIrrigatedParcel> WellIrrigatedParcels { get; set; }
 
@@ -143,13 +165,15 @@ public partial class QanatDbContext : DbContext
 
     public virtual DbSet<WellRegistrationWaterUse> WellRegistrationWaterUses { get; set; }
 
+    public virtual DbSet<WellType> WellTypes { get; set; }
+
     public virtual DbSet<Zone> Zones { get; set; }
 
     public virtual DbSet<ZoneGroup> ZoneGroups { get; set; }
 
     public virtual DbSet<vGeoServerAllParcel> vGeoServerAllParcels { get; set; }
 
-    public virtual DbSet<vGeoServerAllUsageEntity> vGeoServerAllUsageEntities { get; set; }
+    public virtual DbSet<vGeoServerAllUsageLocation> vGeoServerAllUsageLocations { get; set; }
 
     public virtual DbSet<vGeoServerCNRAMonitoringWell> vGeoServerCNRAMonitoringWells { get; set; }
 
@@ -160,6 +184,8 @@ public partial class QanatDbContext : DbContext
     public virtual DbSet<vGeoServerZoneGroup> vGeoServerZoneGroups { get; set; }
 
     public virtual DbSet<vGeoserverGeographyGSABoundary> vGeoserverGeographyGSABoundaries { get; set; }
+
+    public virtual DbSet<vMeterReading> vMeterReadings { get; set; }
 
     public virtual DbSet<vParcelSupplyTransactionHistory> vParcelSupplyTransactionHistories { get; set; }
 
@@ -229,31 +255,6 @@ public partial class QanatDbContext : DbContext
             entity.HasKey(e => e.FrequentlyAskedQuestionFaqDisplayLocationTypeID).HasName("PK_FrequentlyAskedQuestionFaqDisplayLocationType_FrequentlyAskedQuestionFaqDisplayLocationTypeID");
         });
 
-        modelBuilder.Entity<GETAction>(entity =>
-        {
-            entity.HasKey(e => e.GETActionID).HasName("PK_GETAction_GETActionID");
-
-            entity.HasOne(d => d.User).WithMany(p => p.GETActions).OnDelete(DeleteBehavior.ClientSetNull);
-        });
-
-        modelBuilder.Entity<GETActionFileResource>(entity =>
-        {
-            entity.HasKey(e => e.GETActionFileResourceID).HasName("PK_GETActionFileResource_GETActionFileResourceID");
-
-            entity.HasOne(d => d.FileResource).WithMany(p => p.GETActionFileResources).OnDelete(DeleteBehavior.ClientSetNull);
-
-            entity.HasOne(d => d.GETAction).WithMany(p => p.GETActionFileResources).OnDelete(DeleteBehavior.ClientSetNull);
-        });
-
-        modelBuilder.Entity<GETActionOutputFile>(entity =>
-        {
-            entity.HasKey(e => e.GETActionOutputFileID).HasName("PK_GETActionOutputFile_GETActionOutputFileID");
-
-            entity.HasOne(d => d.FileResource).WithMany(p => p.GETActionOutputFiles).OnDelete(DeleteBehavior.ClientSetNull);
-
-            entity.HasOne(d => d.GETAction).WithMany(p => p.GETActionOutputFiles).OnDelete(DeleteBehavior.ClientSetNull);
-        });
-
         modelBuilder.Entity<Geography>(entity =>
         {
             entity.HasKey(e => e.GeographyID).HasName("PK_Geography_GeographyID");
@@ -314,6 +315,28 @@ public partial class QanatDbContext : DbContext
             entity.HasKey(e => e.MeterID).HasName("PK_Meter_MeterID");
 
             entity.HasOne(d => d.Geography).WithMany(p => p.Meters).OnDelete(DeleteBehavior.ClientSetNull);
+        });
+
+        modelBuilder.Entity<MeterReading>(entity =>
+        {
+            entity.HasKey(e => e.MeterReadingID).HasName("PK_MeterReading_MeterReadingID");
+
+            entity.HasOne(d => d.Geography).WithMany(p => p.MeterReadings).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.Meter).WithMany(p => p.MeterReadings).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.Well).WithMany(p => p.MeterReadings).OnDelete(DeleteBehavior.ClientSetNull);
+        });
+
+        modelBuilder.Entity<MeterReadingMonthlyInterpolation>(entity =>
+        {
+            entity.HasKey(e => e.MeterReadingMonthlyInterpolationID).HasName("PK_MeterReadingMonthlyInterpolation_MeterReadingMonthlyInterpolationID");
+
+            entity.HasOne(d => d.Geography).WithMany(p => p.MeterReadingMonthlyInterpolations).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.Meter).WithMany(p => p.MeterReadingMonthlyInterpolations).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.Well).WithMany(p => p.MeterReadingMonthlyInterpolations).OnDelete(DeleteBehavior.ClientSetNull);
         });
 
         modelBuilder.Entity<ModelBoundary>(entity =>
@@ -401,8 +424,6 @@ public partial class QanatDbContext : DbContext
             entity.HasOne(d => d.UpdateUser).WithMany(p => p.ParcelHistories)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ParcelHistory_User_UpdateUserID_UserID");
-
-            entity.HasOne(d => d.WaterAccount).WithMany(p => p.ParcelHistories).HasConstraintName("ParcelHistory_WaterAccount_WaterAccountID");
         });
 
         modelBuilder.Entity<ParcelStaging>(entity =>
@@ -428,6 +449,21 @@ public partial class QanatDbContext : DbContext
             entity.HasOne(d => d.WaterTypeNavigation).WithMany(p => p.ParcelSupplyWaterTypeNavigations)
                 .HasPrincipalKey(p => new { p.WaterTypeID, p.GeographyID })
                 .HasForeignKey(d => new { d.WaterTypeID, d.GeographyID });
+        });
+
+        modelBuilder.Entity<ParcelWaterAccountHistory>(entity =>
+        {
+            entity.HasKey(e => e.ParcelWaterAccountHistoryID).HasName("PK_ParcelWaterAccountHistory_WaterAccountParcelID");
+
+            entity.Property(e => e.CreateDate).HasDefaultValueSql("(getutcdate())");
+
+            entity.HasOne(d => d.CreateUser).WithMany(p => p.ParcelWaterAccountHistories).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.Geography).WithMany(p => p.ParcelWaterAccountHistories).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.Parcel).WithMany(p => p.ParcelWaterAccountHistories).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.ReportingPeriod).WithMany(p => p.ParcelWaterAccountHistories).OnDelete(DeleteBehavior.ClientSetNull);
         });
 
         modelBuilder.Entity<ParcelZone>(entity =>
@@ -480,6 +516,43 @@ public partial class QanatDbContext : DbContext
             entity.HasOne(d => d.ScenarioRun).WithMany(p => p.ScenarioRunOutputFiles).OnDelete(DeleteBehavior.ClientSetNull);
         });
 
+        modelBuilder.Entity<StatementBatch>(entity =>
+        {
+            entity.HasKey(e => e.StatementBatchID).HasName("PK_StatementBatch_StatementBatchID");
+
+            entity.HasOne(d => d.Geography).WithMany(p => p.StatementBatches).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.ReportingPeriod).WithMany(p => p.StatementBatches).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.StatementTemplate).WithMany(p => p.StatementBatches).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.UpdateUser).WithMany(p => p.StatementBatches)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_StatementBatch_User_UpdateUserID_UserID");
+        });
+
+        modelBuilder.Entity<StatementBatchWaterAccount>(entity =>
+        {
+            entity.HasKey(e => e.StatementBatchWaterAccountID).HasName("PK_StatementBatchWaterAccount_StatementBatchWaterAccountID");
+
+            entity.HasOne(d => d.StatementBatch).WithMany(p => p.StatementBatchWaterAccounts).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.WaterAccount).WithMany(p => p.StatementBatchWaterAccounts).OnDelete(DeleteBehavior.ClientSetNull);
+        });
+
+        modelBuilder.Entity<StatementTemplate>(entity =>
+        {
+            entity.HasKey(e => e.StatementTemplateID).HasName("PK_StatementTemplate_StatementTemplateID");
+
+            entity.Property(e => e.CustomFieldsContent).HasDefaultValue("{}");
+
+            entity.HasOne(d => d.Geography).WithMany(p => p.StatementTemplates).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.UpdateUser).WithMany(p => p.StatementTemplates)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_StatementTemplate_User_UpdateUserID_UserID");
+        });
+
         modelBuilder.Entity<SupportTicket>(entity =>
         {
             entity.HasKey(e => e.SupportTicketID).HasName("PK_SupportTicket_SupportTicketID");
@@ -522,25 +595,69 @@ public partial class QanatDbContext : DbContext
                 .HasConstraintName("FK_UploadedWellGdbID_User_UserID");
         });
 
-        modelBuilder.Entity<UsageEntity>(entity =>
+        modelBuilder.Entity<UsageLocation>(entity =>
         {
-            entity.HasKey(e => e.UsageEntityID).HasName("PK_UsageEntity_UsageEntityID");
+            entity.HasKey(e => e.UsageLocationID).HasName("PK_UsageLocation_UsageLocationID");
 
-            entity.HasOne(d => d.Geography).WithMany(p => p.UsageEntities).OnDelete(DeleteBehavior.ClientSetNull);
+            entity.Property(e => e.CreateDate).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.CreateUserID).HasDefaultValue(2);
 
-            entity.HasOne(d => d.Parcel).WithMany(p => p.UsageEntities).OnDelete(DeleteBehavior.ClientSetNull);
+            entity.HasOne(d => d.CreateUser).WithMany(p => p.UsageLocationCreateUsers).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.Geography).WithMany(p => p.UsageLocations).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.Parcel).WithMany(p => p.UsageLocations).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.ReportingPeriod).WithMany(p => p.UsageLocations).OnDelete(DeleteBehavior.ClientSetNull);
         });
 
-        modelBuilder.Entity<UsageEntityCrop>(entity =>
+        modelBuilder.Entity<UsageLocationCrop>(entity =>
         {
-            entity.HasKey(e => e.UsageEntityCropID).HasName("PK_UsageEntityCrop_UsageEntityCropID");
+            entity.HasKey(e => e.UsageLocationCropID).HasName("PK_UsageLocationCrop_UsageLocationCropID");
         });
 
-        modelBuilder.Entity<UsageEntityGeometry>(entity =>
+        modelBuilder.Entity<UsageLocationGeometry>(entity =>
         {
-            entity.HasKey(e => e.UsageEntityID).HasName("PK_UsageEntityGeometry_UsageEntityID");
+            entity.HasKey(e => e.UsageLocationID).HasName("PK_UsageLocationGeometry_UsageLocationID");
 
-            entity.Property(e => e.UsageEntityID).ValueGeneratedNever();
+            entity.Property(e => e.UsageLocationID).ValueGeneratedNever();
+        });
+
+        modelBuilder.Entity<UsageLocationHistory>(entity =>
+        {
+            entity.HasKey(e => e.UsageLocationHistoryID).HasName("PK_UsageLocationHistory_UsageLocationHistoryID");
+
+            entity.Property(e => e.CreateDate).HasDefaultValueSql("(getutcdate())");
+
+            entity.HasOne(d => d.CreateUser).WithMany(p => p.UsageLocationHistories).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.Geography).WithMany(p => p.UsageLocationHistories).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.UsageLocation).WithMany(p => p.UsageLocationHistories).OnDelete(DeleteBehavior.ClientSetNull);
+        });
+
+        modelBuilder.Entity<UsageLocationParcelHistory>(entity =>
+        {
+            entity.HasKey(e => e.UsageLocationParcelHistoryID).HasName("PK_UsageLocationParcelHistory_UsageLocationParcelHistoryID");
+
+            entity.Property(e => e.CreateDate).HasDefaultValueSql("(getutcdate())");
+
+            entity.HasOne(d => d.CreateUser).WithMany(p => p.UsageLocationParcelHistories).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.Geography).WithMany(p => p.UsageLocationParcelHistories).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.ReportingPeriod).WithMany(p => p.UsageLocationParcelHistories).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.UsageLocation).WithMany(p => p.UsageLocationParcelHistories).OnDelete(DeleteBehavior.ClientSetNull);
+        });
+
+        modelBuilder.Entity<UsageLocationType>(entity =>
+        {
+            entity.HasKey(e => e.UsageLocationTypeID).HasName("PK_UsageLocationType_UsageLocationTypeID");
+
+            entity.HasOne(d => d.CreateUser).WithMany(p => p.UsageLocationTypeCreateUsers).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.Geography).WithMany(p => p.UsageLocationTypes).OnDelete(DeleteBehavior.ClientSetNull);
         });
 
         modelBuilder.Entity<User>(entity =>
@@ -556,9 +673,32 @@ public partial class QanatDbContext : DbContext
 
             entity.Property(e => e.WaterAccountNumber).HasComputedColumnSql("(isnull([WaterAccountID]+(10000),(0)))", false);
 
-            entity.HasOne(d => d.Geography).WithMany(p => p.WaterAccounts)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Account_Geography_GeographyID");
+            entity.HasOne(d => d.Geography).WithMany(p => p.WaterAccounts).OnDelete(DeleteBehavior.ClientSetNull);
+        });
+
+        modelBuilder.Entity<WaterAccountContact>(entity =>
+        {
+            entity.HasKey(e => e.WaterAccountContactID).HasName("PK_WaterAccountContact_WaterAccountContactID");
+
+            entity.Property(e => e.FullAddress).HasComputedColumnSql("(case when datalength([City])>(0) AND datalength([State])>(0) AND datalength([ZipCode])>(0) then concat([Address],case when datalength([SecondaryAddress])=(0) then '' else ', '+[SecondaryAddress] end,', ',[City],', ',[State],' ',[ZipCode]) else [Address] end)", false);
+            entity.Property(e => e.PrefersPhysicalCommunication).HasDefaultValue(true);
+
+            entity.HasOne(d => d.Geography).WithMany(p => p.WaterAccountContacts).OnDelete(DeleteBehavior.ClientSetNull);
+        });
+
+        modelBuilder.Entity<WaterAccountCoverCropStatus>(entity =>
+        {
+            entity.HasKey(e => e.WaterAccountCoverCropStatusID).HasName("PK_WaterAccountCoverCropStatus_WaterAccountCoverCropStatusID");
+
+            entity.Property(e => e.SelfReportStatusID).HasDefaultValue(1);
+
+            entity.HasOne(d => d.CreateUser).WithMany(p => p.WaterAccountCoverCropStatusCreateUsers).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.Geography).WithMany(p => p.WaterAccountCoverCropStatuses).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.ReportingPeriod).WithMany(p => p.WaterAccountCoverCropStatuses).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.WaterAccount).WithMany(p => p.WaterAccountCoverCropStatuses).OnDelete(DeleteBehavior.ClientSetNull);
         });
 
         modelBuilder.Entity<WaterAccountCustomAttribute>(entity =>
@@ -570,25 +710,32 @@ public partial class QanatDbContext : DbContext
             entity.HasOne(d => d.WaterAccount).WithOne(p => p.WaterAccountCustomAttribute).OnDelete(DeleteBehavior.ClientSetNull);
         });
 
+        modelBuilder.Entity<WaterAccountFallowStatus>(entity =>
+        {
+            entity.HasKey(e => e.WaterAccountFallowStatusID).HasName("PK_WaterAccountFallowStatus_WaterAccountFallowStatusID");
+
+            entity.Property(e => e.SelfReportStatusID).HasDefaultValue(1);
+
+            entity.HasOne(d => d.CreateUser).WithMany(p => p.WaterAccountFallowStatusCreateUsers).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.Geography).WithMany(p => p.WaterAccountFallowStatuses).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.ReportingPeriod).WithMany(p => p.WaterAccountFallowStatuses).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.WaterAccount).WithMany(p => p.WaterAccountFallowStatuses).OnDelete(DeleteBehavior.ClientSetNull);
+        });
+
         modelBuilder.Entity<WaterAccountParcel>(entity =>
         {
             entity.HasKey(e => e.WaterAccountParcelID).HasName("PK_WaterAccountParcel_WaterAccountParcelID");
 
             entity.HasOne(d => d.Geography).WithMany(p => p.WaterAccountParcels).OnDelete(DeleteBehavior.ClientSetNull);
 
-            entity.HasOne(d => d.Parcel).WithMany(p => p.WaterAccountParcelParcels).OnDelete(DeleteBehavior.ClientSetNull);
+            entity.HasOne(d => d.Parcel).WithMany(p => p.WaterAccountParcels).OnDelete(DeleteBehavior.ClientSetNull);
 
-            entity.HasOne(d => d.WaterAccount).WithMany(p => p.WaterAccountParcelWaterAccounts).OnDelete(DeleteBehavior.ClientSetNull);
+            entity.HasOne(d => d.ReportingPeriod).WithMany(p => p.WaterAccountParcels).OnDelete(DeleteBehavior.ClientSetNull);
 
-            entity.HasOne(d => d.ParcelNavigation).WithMany(p => p.WaterAccountParcelParcelNavigations)
-                .HasPrincipalKey(p => new { p.ParcelID, p.GeographyID })
-                .HasForeignKey(d => new { d.ParcelID, d.GeographyID })
-                .OnDelete(DeleteBehavior.ClientSetNull);
-
-            entity.HasOne(d => d.WaterAccountNavigation).WithMany(p => p.WaterAccountParcelWaterAccountNavigations)
-                .HasPrincipalKey(p => new { p.WaterAccountID, p.GeographyID })
-                .HasForeignKey(d => new { d.WaterAccountID, d.GeographyID })
-                .OnDelete(DeleteBehavior.ClientSetNull);
+            entity.HasOne(d => d.WaterAccount).WithMany(p => p.WaterAccountParcels).OnDelete(DeleteBehavior.ClientSetNull);
         });
 
         modelBuilder.Entity<WaterAccountReconciliation>(entity =>
@@ -635,6 +782,8 @@ public partial class QanatDbContext : DbContext
             entity.HasKey(e => e.WaterMeasurementID).HasName("PK_WaterMeasurement_WaterMeasurementID");
 
             entity.HasOne(d => d.Geography).WithMany(p => p.WaterMeasurements).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.UsageLocation).WithMany(p => p.WaterMeasurements).OnDelete(DeleteBehavior.ClientSetNull);
         });
 
         modelBuilder.Entity<WaterMeasurementSelfReport>(entity =>
@@ -645,9 +794,20 @@ public partial class QanatDbContext : DbContext
 
             entity.HasOne(d => d.Geography).WithMany(p => p.WaterMeasurementSelfReports).OnDelete(DeleteBehavior.ClientSetNull);
 
+            entity.HasOne(d => d.ReportingPeriod).WithMany(p => p.WaterMeasurementSelfReports).OnDelete(DeleteBehavior.ClientSetNull);
+
             entity.HasOne(d => d.WaterAccount).WithMany(p => p.WaterMeasurementSelfReports).OnDelete(DeleteBehavior.ClientSetNull);
 
             entity.HasOne(d => d.WaterMeasurementType).WithMany(p => p.WaterMeasurementSelfReports).OnDelete(DeleteBehavior.ClientSetNull);
+        });
+
+        modelBuilder.Entity<WaterMeasurementSelfReportFileResource>(entity =>
+        {
+            entity.HasKey(e => e.WaterMeasurementSelfReportFileResourceID).HasName("PK_WaterMeasurementSelfReportFileResource_WaterMeasurementSelfReportFileResourceID");
+
+            entity.HasOne(d => d.FileResource).WithMany(p => p.WaterMeasurementSelfReportFileResources).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.WaterMeasurementSelfReport).WithMany(p => p.WaterMeasurementSelfReportFileResources).OnDelete(DeleteBehavior.ClientSetNull);
         });
 
         modelBuilder.Entity<WaterMeasurementSelfReportLineItem>(entity =>
@@ -687,8 +847,6 @@ public partial class QanatDbContext : DbContext
         {
             entity.HasKey(e => e.WaterTypeID).HasName("PK_WaterType_WaterTypeID");
 
-            entity.Property(e => e.WaterTypeColor).HasDefaultValue("#7F3C8D");
-
             entity.HasOne(d => d.Geography).WithMany(p => p.WaterTypes).OnDelete(DeleteBehavior.ClientSetNull);
         });
 
@@ -699,6 +857,15 @@ public partial class QanatDbContext : DbContext
             entity.Property(e => e.WellStatusID).HasDefaultValue(1);
 
             entity.HasOne(d => d.Geography).WithMany(p => p.Wells).OnDelete(DeleteBehavior.ClientSetNull);
+        });
+
+        modelBuilder.Entity<WellFileResource>(entity =>
+        {
+            entity.HasKey(e => e.WellFileResourceID).HasName("PK_WellFileResource_WellFileResourceID");
+
+            entity.HasOne(d => d.FileResource).WithMany(p => p.WellFileResources).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.Well).WithMany(p => p.WellFileResources).OnDelete(DeleteBehavior.ClientSetNull);
         });
 
         modelBuilder.Entity<WellIrrigatedParcel>(entity =>
@@ -767,6 +934,15 @@ public partial class QanatDbContext : DbContext
             entity.HasOne(d => d.WellRegistration).WithMany(p => p.WellRegistrationWaterUses).OnDelete(DeleteBehavior.ClientSetNull);
         });
 
+        modelBuilder.Entity<WellType>(entity =>
+        {
+            entity.HasKey(e => e.WellTypeID).HasName("PK_WellType_WellTypeID");
+
+            entity.HasOne(d => d.CreateUser).WithMany(p => p.WellTypeCreateUsers).OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.Geography).WithMany(p => p.WellTypes).OnDelete(DeleteBehavior.ClientSetNull);
+        });
+
         modelBuilder.Entity<Zone>(entity =>
         {
             entity.HasKey(e => e.ZoneID).HasName("PK_Zone_ZoneID");
@@ -778,6 +954,8 @@ public partial class QanatDbContext : DbContext
         {
             entity.HasKey(e => e.ZoneGroupID).HasName("PK_ZoneGroup_ZoneGroupID");
 
+            entity.Property(e => e.DisplayToAccountHolders).HasDefaultValue(true);
+
             entity.HasOne(d => d.Geography).WithMany(p => p.ZoneGroups).OnDelete(DeleteBehavior.ClientSetNull);
         });
 
@@ -786,9 +964,9 @@ public partial class QanatDbContext : DbContext
             entity.ToView("vGeoServerAllParcels");
         });
 
-        modelBuilder.Entity<vGeoServerAllUsageEntity>(entity =>
+        modelBuilder.Entity<vGeoServerAllUsageLocation>(entity =>
         {
-            entity.ToView("vGeoServerAllUsageEntities");
+            entity.ToView("vGeoServerAllUsageLocations");
         });
 
         modelBuilder.Entity<vGeoServerCNRAMonitoringWell>(entity =>
@@ -820,6 +998,11 @@ public partial class QanatDbContext : DbContext
         modelBuilder.Entity<vGeoserverGeographyGSABoundary>(entity =>
         {
             entity.ToView("vGeoserverGeographyGSABoundaries");
+        });
+
+        modelBuilder.Entity<vMeterReading>(entity =>
+        {
+            entity.ToView("vMeterReading");
         });
 
         modelBuilder.Entity<vParcelSupplyTransactionHistory>(entity =>

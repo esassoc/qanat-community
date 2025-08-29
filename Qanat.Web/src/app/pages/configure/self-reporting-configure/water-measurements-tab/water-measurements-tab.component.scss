@@ -1,0 +1,9 @@
+@use "/src/scss/abstracts" as *;
+
+.blue-border-top {
+    border-top: $spacing-200 solid $teal-default;
+}
+
+.switch {
+    float: right;
+}

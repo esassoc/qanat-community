@@ -14,17 +14,15 @@ namespace Qanat.API.Controllers
 {
     [ApiController]
     [RightsChecker]
-
-    public class FileResourceController : SitkaController<FileResourceController>
+    [Route("file-resources")]
+    public class FileResourceController(
+        QanatDbContext dbContext,
+        ILogger<FileResourceController> logger,
+        IOptions<QanatConfiguration> qanatConfiguration,
+        FileService fileService)
+        : SitkaController<FileResourceController>(dbContext, logger, qanatConfiguration)
     {
-        private readonly FileService _fileService;
-
-        public FileResourceController(QanatDbContext dbContext, ILogger<FileResourceController> logger, IOptions<QanatConfiguration> qanatConfiguration, FileService fileService) : base(dbContext, logger, qanatConfiguration)
-        {
-            _fileService = fileService;
-        }
-
-        [HttpGet("fileResources/{fileResourceGuidAsString}")]
+        [HttpGet("{fileResourceGuidAsString}")]
         [WithRolePermission(PermissionEnum.FileResourceRights, RightsEnum.Read)]
         [ProducesResponseType(typeof(FileStreamResult), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> DownloadFileResource(string fileResourceGuidAsString)
@@ -33,7 +31,7 @@ namespace Qanat.API.Controllers
 
             if (fileResource != null)
             {
-                var fileStream = await _fileService.GetFileStreamFromBlobStorage(fileResource.FileResourceCanonicalName);
+                var fileStream = await fileService.GetFileStreamFromBlobStorage(fileResource.FileResourceCanonicalName);
                 if (fileStream != null)
                 {
                     var fileName = fileResource.OriginalBaseFilename;

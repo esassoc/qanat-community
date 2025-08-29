@@ -12,21 +12,21 @@ import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
 import { WellRegistrationService } from "src/app/shared/generated/api/well-registration.service";
 import { ButtonComponent } from "../../../shared/components/button/button.component";
 import { FormsModule } from "@angular/forms";
-import { NgIf, NgFor } from "@angular/common";
+
 import { CustomRichTextComponent } from "../../../shared/components/custom-rich-text/custom-rich-text.component";
 import { AlertDisplayComponent } from "../../../shared/components/alert-display/alert-display.component";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { WorkflowBodyComponent } from "src/app/shared/components/workflow-body/workflow-body.component";
 import { NgxMaskDirective, provideNgxMask } from "ngx-mask";
 import { PublicService } from "src/app/shared/generated/api/public.service";
+import { NgSelectModule } from "@ng-select/ng-select";
 
 @Component({
     selector: "well-contacts",
     templateUrl: "./well-contacts.component.html",
     styleUrls: ["./well-contacts.component.scss"],
-    standalone: true,
-    imports: [PageHeaderComponent, WorkflowBodyComponent, AlertDisplayComponent, CustomRichTextComponent, NgIf, FormsModule, NgFor, NgxMaskDirective, ButtonComponent],
-    providers: [provideNgxMask()],
+    imports: [PageHeaderComponent, WorkflowBodyComponent, AlertDisplayComponent, CustomRichTextComponent, FormsModule, NgxMaskDirective, ButtonComponent, NgSelectModule],
+    providers: [provideNgxMask()]
 })
 export class WellContactsComponent implements OnInit, IDeactivateComponent, OnDestroy {
     public customRichTextTypeID = CustomRichTextTypeEnum.WellRegistryContacts;
@@ -57,8 +57,8 @@ export class WellContactsComponent implements OnInit, IDeactivateComponent, OnDe
         if (id) {
             this.wellID = parseInt(id);
             forkJoin({
-                wellRegistrationContacts: this.wellRegistrationService.wellRegistrationsWellRegistrationIDContactsGet(this.wellID),
-                states: this.publicService.publicStatesGet(),
+                wellRegistrationContacts: this.wellRegistrationService.getWellRegistrationContactsUpsertDtoWellRegistration(this.wellID),
+                states: this.publicService.statesListPublic(),
             }).subscribe(({ wellRegistrationContacts, states }) => {
                 this.model = wellRegistrationContacts;
                 this.originalModel = JSON.stringify(wellRegistrationContacts);
@@ -94,7 +94,7 @@ export class WellContactsComponent implements OnInit, IDeactivateComponent, OnDe
             this.model.OwnerOperatorEmail = this.model.LandownerEmail;
         }
 
-        this.wellRegistrationService.wellRegistrationsWellRegistrationIDContactsPost(this.wellID, this.model).subscribe({
+        this.wellRegistrationService.addWellRegistrationContactWellRegistration(this.wellID, this.model).subscribe({
             next: () => {
                 this.originalModel = JSON.stringify(this.model);
                 this.isLoadingSubmit = false;

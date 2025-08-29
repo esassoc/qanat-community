@@ -19,6 +19,8 @@ namespace Qanat.EFModels.Entities
             public const int Color = 9;
             public const int ContactEmail = 100;
             public const int ContactPhoneNumber = 30;
+            public const int ContactAddressLine1 = 500;
+            public const int ContactAddressLine2 = 500;
             public const int LandownerDashboardSupplyLabel = 200;
             public const int LandownerDashboardUsageLabel = 200;
             public const int OpenETShapeFilePath = 100;

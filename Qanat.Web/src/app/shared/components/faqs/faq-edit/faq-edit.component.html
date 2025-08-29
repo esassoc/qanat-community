@@ -1,23 +1,26 @@
 <div class="grid-12">
     <ul cdkDropList class="faqs" (cdkDropListDropped)="drop($event)">
-        <li *ngFor="let frequentlyAskedQuestion of frequentlyAskedQuestions; index as i" class="faqs-row" cdkDrag>
-            <div class="faqs-question">
-                {{ frequentlyAskedQuestion.QuestionText }}
-            </div>
-            <div class="faqs-actions">
-                <button (click)="removefrequentlyAskedQuestion(i)" class="remove-button">
-                    <icon icon="Delete"></icon>
-                    Remove
-                </button>
-
-                <div class="reorderable__handle" cdkDragHandle>
-                    <i class="fas fa-bars"></i>
+        @for (frequentlyAskedQuestion of frequentlyAskedQuestions; track frequentlyAskedQuestion; let i = $index) {
+            <li class="faqs-row" cdkDrag>
+                <div class="faqs-question">
+                    {{ frequentlyAskedQuestion.QuestionText }}
                 </div>
-            </div>
-        </li>
+                <div class="faqs-actions">
+                    <button (click)="removefrequentlyAskedQuestion(i)" class="remove-button">
+                        <icon icon="Delete"></icon>
+                        Remove
+                    </button>
+                    <div class="reorderable__handle" cdkDragHandle>
+                        <i class="fas fa-bars"></i>
+                    </div>
+                </div>
+            </li>
+        }
     </ul>
 
-    <div *ngIf="frequentlyAskedQuestions?.length === 0" class="no-table-data">
-        <span>No FAQs to display</span>
-    </div>
+    @if (frequentlyAskedQuestions?.length === 0) {
+        <div class="no-table-data">
+            <span>No FAQs to display</span>
+        </div>
+    }
 </div>

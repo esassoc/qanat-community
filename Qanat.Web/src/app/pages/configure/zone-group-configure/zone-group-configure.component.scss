@@ -72,7 +72,7 @@
     margin-left: auto;
 }
 
-.zone-group-description {
+.gc-2 {
     grid-column: 2;
 }
 
@@ -97,6 +97,14 @@ input[type="color"] {
 
     &::-webkit-color-swatch {
         border-color: $gray-light;
+    }
+}
+
+.check-label {
+    display: flex;
+    gap: $spacing-400;
+    input {
+        transform: scale(150%);
     }
 }
 

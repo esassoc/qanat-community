@@ -1,6 +1,4 @@
-﻿using System.Reflection.Metadata;
-
-namespace Qanat.Models.DataTransferObjects;
+﻿namespace Qanat.Models.DataTransferObjects;
 
 public class MLRPIncentiveDto
 {
@@ -55,8 +53,8 @@ public static class MLRPIncentiveDtos
         },
         new MLRPIncentiveDto()
         {
-            Name = "Temporary Fallowing (Land Fallowing Program)",
-            Description = "Crop removal, cessation of irrigation, and Cover Cropping or dry-land farming for at least three years.",
+            Name = "Incentivized Fallowing Program",
+            Description = "Fallowing for at least three years, maintenance of vegetative cover (can be resident vegetation, non-irrigated crop or conservation cover seed mix).",
             DisplayOrder = 3,
             GroundwaterCredit = MLRPGroundwaterCredits.EffectivePrecipitationCredit,
             ContractDuration = "Three-year minimum",
@@ -70,68 +68,68 @@ public static class MLRPIncentiveDtos
         },
         new MLRPIncentiveDto()
         {
-            Name = "Rotational Extended Fallowing (MLRP)",
-            Description = "Extended Fallowing on a rotational basis for at least three years per plot over a period of 10 years. Promotion of multiple benefits by planting in beneficial cover crops such as pollinator seed mixes, establishment of hedge rows or other benefits.",
+            Name = "MLRP Rotational/Extended Fallowing",
+            Description = "Fallowing for at least three years and maintenance of beneficial conservation cover using a commercially-available seed mix (e.g., pollinator mix, native veg mix, etc.).",
             DisplayOrder = 4,
             GroundwaterCredit = MLRPGroundwaterCredits.EffectivePrecipitationCredit,
             ContractDuration = "Ten year rotational or programmatic commitment*",
             KeepsAllocation = false,
             KeepIrrigateAcres = false,
-            IncentivePayment = 850,
-            IncentivePaymentLabel = "$850/Acre/Year",
+            IncentivePayment = 890,
+            IncentivePaymentLabel = "$890/Acre/Year",
             Acres = null,
             FieldDefinitionType = "FeeCalculatorRotationalExtendedFallowingMLRP",
             UsedToAdjustAnnualConsumedGroundwater = false
         },
         new MLRPIncentiveDto()
         {
-            Name = "Rotational Extended Fallowing in Designated Buffer Zones (MLRP)",
-            Description = "Crop removal, cessation of irrigation, and Cover Cropping in proximity to schools, communities, or other sensitive areas for at least ten years.",
-            DisplayOrder = 5,
-            GroundwaterCredit = MLRPGroundwaterCredits.EffectivePrecipitationCredit,
-            ContractDuration = "Ten year commitment",
-            KeepsAllocation = false,
-            KeepIrrigateAcres = false,
-            IncentivePayment = 850,
-            IncentivePaymentLabel = "$850/Acre/Year",
-            Acres = null,
-            FieldDefinitionType = "FeeCalculatorRotationalExtendedFallowingInDesignatedBufferZonesMLRP",
-            UsedToAdjustAnnualConsumedGroundwater = false
-        },
-        new MLRPIncentiveDto()
-        {
-            Name = "Orchard Swale Rewilding (MLRP)",
-            Description = "Cessation of irrigation, orchard crop removal, and planting in pollinator-friendly or other beneficial cover crop.",
+            Name = "MLRP Orchard Swale Rewilding",
+            Description = "Tree removal, establishment and maintenance of beneficial conservation cover/hedgerows for at least 10 years. May be combined with one-time incentive payment for construction of stormwater retention basins in swales or topographic depressions.",
             DisplayOrder = 6,
             GroundwaterCredit = MLRPGroundwaterCredits.PossibleRechargeCredit,
             ContractDuration = "Ten year commitment",
             KeepsAllocation = false,
             KeepIrrigateAcres = false,
-            IncentivePayment = 1040,
-            IncentivePaymentLabel = "$1040/Acre/Year",
+            IncentivePayment = 1300,
+            IncentivePaymentLabel = "$1300/Acre/Year",
             Acres = null,
             FieldDefinitionType = "FeeCalculatorOrchardSwaleRewildingMLRP",
             UsedToAdjustAnnualConsumedGroundwater = false
         },
         new MLRPIncentiveDto()
         {
-            Name = "Floodplain Reconnection and Related Spreading and Recharge (MLRP)",
-            Description = "Modification of stream channels to promote restoration of natural flood hydrology. Cessation of irrigation, crop removal, and planting of riparian or other beneficial vegetation, land modification to promote seasonal flooding.",
+            Name = "MLRP Floodplain Reconnection and Related Spreading and Recharge",
+            Description = "Crop removal, establishment and maintenance of herbaceous riparian cover or grassed waterway for at least 10 years. May be combined with one-time incentive payment for construction of in-stream flow modifications (e.g. beaver dam analogs, woody revetments) and flow spreading and retention structures (berms, ditches and ponds).",
             DisplayOrder = 7,
             GroundwaterCredit = MLRPGroundwaterCredits.PossibleRechargeCredit,
             ContractDuration = "Ten year commitment",
             KeepsAllocation = false,
             KeepIrrigateAcres = false,
-            IncentivePayment = 1030,
-            IncentivePaymentLabel = "$1030/Acre/Year",
+            IncentivePayment = 1450,
+            IncentivePaymentLabel = "$1450/Acre/Year",
             Acres = null,
             FieldDefinitionType = "FeeCalculatorFloodplainReconnectionAndRelatedSpreadingAndRechargeMLRP",
             UsedToAdjustAnnualConsumedGroundwater = false
         },
         new MLRPIncentiveDto()
         {
-            Name = "Floodflow Spreading on Non-Floodplain Lands (MLRP)",
-            Description = "Modification of drainageways or canals to promote spreading of flood flows. Cessation of irrigation, crop removal, planting in pollinator-friendly or other beneficial cover crop, and seasonal spreading of floodflows.",
+            Name = "MLRP Flood Flow Spreading",
+            Description = "Crop removal , establishment and maintenance of herbaceous riparian cover, grassed waterway or other conservation cover for at least 10 years. Maintenance of erosion and sedimentation, periodic discing to maintain soil conditions suitable for recharge.  May be combined with one-time incentive payment for construction of flood flow conveyance infrastructure (e.g. pipelines, pump stations, weirs, etc.) and flow spreading and retention structures (berms, ditches and ponds).",
+            DisplayOrder = 8,
+            GroundwaterCredit = MLRPGroundwaterCredits.PossibleRechargeCredit,
+            ContractDuration = "Ten year commitment",
+            KeepsAllocation = false,
+            KeepIrrigateAcres = false,
+            IncentivePayment = 1590,
+            IncentivePaymentLabel = "$1590/Acre/Year",
+            Acres = null,
+            FieldDefinitionType = "FeeCalculatorFloodflowSpreadingOnNonFloodplainLandsMLRP",
+            UsedToAdjustAnnualConsumedGroundwater = false
+        },
+        new MLRPIncentiveDto()
+        {
+            Name = "MLRP Storage/Recharge Basins",
+            Description = "Crop removal, maintenance of storage or recharge basin for at least 10 years, including vegetation and vector management, and periodic regrading/surface conditioning as needed to maintain recharge function. May be combined with one-time incentive payment for basin and conveyance infrastructure construction.",
             DisplayOrder = 8,
             GroundwaterCredit = MLRPGroundwaterCredits.PossibleRechargeCredit,
             ContractDuration = "Ten year commitment",
@@ -139,21 +137,6 @@ public static class MLRPIncentiveDtos
             KeepIrrigateAcres = false,
             IncentivePayment = 1030,
             IncentivePaymentLabel = "$1030/Acre/Year",
-            Acres = null,
-            FieldDefinitionType = "FeeCalculatorFloodflowSpreadingOnNonFloodplainLandsMLRP",
-            UsedToAdjustAnnualConsumedGroundwater = false
-        },
-        new MLRPIncentiveDto()
-        {
-            Name = "Storage or Recharge Basins (MLRP)",
-            Description = "Cessation of irrigation, crop removal, and construction of storage or recharge basins within farm units.",
-            DisplayOrder = 8,
-            GroundwaterCredit = MLRPGroundwaterCredits.PossibleRechargeCredit,
-            ContractDuration = "Ten year commitment",
-            KeepsAllocation = false,
-            KeepIrrigateAcres = false,
-            IncentivePayment = 2960,
-            IncentivePaymentLabel = "$2960/Acre/Year",
             Acres = null,
             FieldDefinitionType = "FeeCalculatorStorageOrRechargeBasinsMLRP",
             UsedToAdjustAnnualConsumedGroundwater = false

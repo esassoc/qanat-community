@@ -10,26 +10,28 @@
             </div>
             <div>
                 <button class="btn btn-primary-outline" (click)="refreshGSABoundaries()" [disabled]="isLoadingSubmit">
-                    <span *ngIf="isLoadingSubmit" class="fa fa-spinner loading-spinner"></span>
-                    <i *ngIf="!isLoadingSubmit" class="fas fa-sync-alt"></i>
+                    @if (isLoadingSubmit) {
+                        <span class="fa fa-spinner loading-spinner"></span>
+                    }
+                    @if (!isLoadingSubmit) {
+                        <i class="fas fa-sync-alt"></i>
+                    }
                     Refresh GSA Boundaries
                 </button>
-                <ng-container *ngIf="geographyBoundaries$ | async as geographyBoundaries">
-                    <div class="mt-2 text-muted flex-end" *ngIf="lastUpdatedGSABoundariesDate">
-                        <small>
-                            <em> Last Updated: {{ lastUpdatedGSABoundariesDate | date: "short" }} </em>
-                        </small>
-                    </div>
-                </ng-container>
+                @if (geographyBoundaries$ | async; as geographyBoundaries) {
+                    @if (lastUpdatedGSABoundariesDate) {
+                        <div class="mt-2 text-muted flex-end">
+                            <small>
+                                <em> Last Updated: {{ lastUpdatedGSABoundariesDate | date: "short" }} </em>
+                            </small>
+                        </div>
+                    }
+                }
             </div>
         </div>
     </div>
 
-    <qanat-grid
-        *ngIf="geographies$ | async as geographies"
-        height="450px"
-        [rowData]="geographies"
-        [columnDefs]="columnDefs"
-        downloadFileName="geographies"
-        [colIDsToExclude]="colIDsToExclude"></qanat-grid>
+    @if (geographies$ | async; as geographies) {
+        <qanat-grid height="450px" [rowData]="geographies" [columnDefs]="columnDefs" downloadFileName="geographies" [colIDsToExclude]="colIDsToExclude"></qanat-grid>
+    }
 </div>

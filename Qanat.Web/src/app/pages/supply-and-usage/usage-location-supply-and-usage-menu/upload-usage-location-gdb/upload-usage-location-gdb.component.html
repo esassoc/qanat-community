@@ -1,0 +1,30 @@
+<page-header icon="Geography" pageTitle="Upload Usage Location GDB" [customRichTextTypeID]="customRichTextType"></page-header>
+
+<div class="page-body grid-12">
+    <app-alert-display [clearAlertsOnDestroy]="false"></app-alert-display>
+
+    @if (geography$ | async; as geography) {
+        <div [loadingSpinner]="{ isLoading: isLoading }">
+            <form class="form grid-12">
+                <div class="field g-col-12">
+                    <form-field
+                        [type]="FormFieldType.File"
+                        [formControl]="uploadFormField"
+                        [uploadFileAccepts]="'.gdb.zip,.zip'"
+                        [fieldLabel]="'GDB.zip File'"
+                        required></form-field>
+                </div>
+            </form>
+        </div>
+        <div class="card-footer flex-end pb-3">
+            <button
+                type="submit"
+                class="btn btn-primary"
+                [disabled]="isLoadingSubmit || !formGroup.valid || !uploadFormField.valid"
+                [buttonLoading]="isLoadingSubmit"
+                (click)="onSubmit()">
+                Continue
+            </button>
+        </div>
+    }
+</div>

@@ -1,0 +1,148 @@
+<div class="page-wrapper">
+    <page-header [templateAbove]="templateAbove" [templateRight]="templateRight" pageTitle="Fallow Self-Report" icon="Clipboard">
+        <ng-template #templateAbove>
+            <div class="back">
+                <a [routerLink]="['/fallow-self-reports']" class="back__link">Back to your Fallow Self Reports</a>
+            </div>
+        </ng-template>
+        <ng-template #templateRight>
+            @if (fallowSelfReport$ | async; as fallowSelfReport) {
+                <div class="extra-info">
+                    <div class="field mr-4">
+                        <div class="field-label">Water Account</div>
+                        <div>
+                            #{{ fallowSelfReport.WaterAccount.WaterAccountNumber }}
+                            @if (
+                                fallowSelfReport.WaterAccount.WaterAccountName?.length > 0 &&
+                                fallowSelfReport.WaterAccount.WaterAccountName != "" + fallowSelfReport.WaterAccount.WaterAccountNumber
+                            ) {
+                                <span class="water-account-name">
+                                    {{ fallowSelfReport.WaterAccount.WaterAccountName }}
+                                </span>
+                            }
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">Reporting Period</div>
+                        <div>
+                            {{ fallowSelfReport.ReportingPeriod.Name }}
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">Status</div>
+                        <div>
+                            {{ fallowSelfReport.SelfReportStatus.SelfReportStatusDisplayName }}
+                        </div>
+                    </div>
+                </div>
+            }
+        </ng-template>
+    </page-header>
+
+    <div class="page-content grid-12">
+        @if (fallowSelfReport$ | async; as fallowSelfReport) {
+            <div class="rich-text-container g-col-12">
+                <icon class="info-icon" icon="Info"></icon>
+                <custom-rich-text [customRichTextTypeID]="richTextTypeID" [geographyID]="fallowSelfReport.Geography.GeographyID" style="width: 100%"></custom-rich-text>
+            </div>
+
+            <app-alert-display></app-alert-display>
+
+            <div class="form-container g-col-4 card">
+                @if (selectedUsageLocation) {
+                    <div class="card-header">
+                        <h2>Fallow Self Report for {{ selectedUsageLocation?.Name }}</h2>
+                    </div>
+                    <div class="card-body">
+                        <form class="form grid-12" [formGroup]="formGroup">
+                            <div class="g-col-12">
+                                @if (selectedUsageLocation.UsageLocationType.CanBeSelectedInFallowForm) {
+                                    @if (usageLocationTypeSelectOptions$ | async; as usageLocationTypeSelectOptions) {
+                                        <form-field
+                                            [formControl]="formGroup.controls.UsageLocationTypeID"
+                                            fieldLabel="Usage Location Type"
+                                            [type]="FormFieldType.Select"
+                                            [formInputOptions]="usageLocationTypeSelectOptions"
+                                            placeholder="Select Usage Location Type"></form-field>
+                                    }
+                                } @else {
+                                    <label class="field-label">Usage Location Type</label>
+                                    <div class="field-value">
+                                        {{ selectedUsageLocation.UsageLocationType?.Name }}
+                                    </div>
+                                }
+                            </div>
+
+                            @if (selectedUsageLocation.UsageLocationType.CanBeSelectedInFallowForm) {
+                                <div class="g-col-12">
+                                    <form-field
+                                        [formControl]="formGroup.controls.FallowingNote"
+                                        fieldLabel="Fallowing Note"
+                                        [type]="FormFieldType.Textarea"
+                                        placeholder="Enter Fallowing Note"></form-field>
+                                </div>
+                            }
+                        </form>
+                    </div>
+                    <div class="card-footer grid-12">
+                        <div class="g-col-3"></div>
+                        <div class="g-col-3"></div>
+                        <div class="g-col-6">
+                            <button class="btn btn-primary" (click)="save()" [disabled]="!formGroup.valid || isLoadingSubmit" [buttonLoading]="isLoadingSubmit">Save</button>
+                        </div>
+                    </div>
+                } @else {
+                    <div>Please select a Usage Location on the map or the grid to continue.</div>
+                }
+            </div>
+
+            <div class="map-container g-col-8">
+                <qanat-map (onMapLoad)="handleMapReady($event)" mapHeight="400px" [loadingSpinner]="{ isLoading: layerLoading, opacity: 0.33 }">
+                    @if (mapIsReady) {
+                        <usage-location-layer
+                            [map]="map"
+                            [layerControl]="layerControl"
+                            [usageLocationIDs]="usageLocationIDs"
+                            [displayOnLoad]="true"
+                            [geographyID]="fallowSelfReport.Geography.GeographyID"
+                            (usageLocationSelected)="onMapSelected($event)"
+                            [selectedUsageLocationID]="selectedUsageLocation?.UsageLocationID"
+                            [displayFallowed]="true"
+                            (layerStartedLoading)="onLayerLoadStarted()"
+                            (layerFinishedLoading)="onLayerLoadFinished()"></usage-location-layer>
+                    }
+                </qanat-map>
+            </div>
+            <div class="grid-container g-col-12">
+                <qanat-grid
+                    height="400px"
+                    [rowData]="fallowSelfReport.UsageLocations"
+                    [columnDefs]="usageLocationColDefs$ | async"
+                    defaultRowSelection="singleRow"
+                    (gridReady)="onGridReady($event)"
+                    (selectionChanged)="onGridSelection()">
+                    @if (enableSubmit) {
+                        <div customGridActionsRight>
+                            <button
+                                class="btn btn-success"
+                                style="width: 100%"
+                                [buttonLoading]="isLoadingSubmit"
+                                (click)="submit(fallowSelfReport)"
+                                [disabled]="!enableSubmit || isLoadingSubmit">
+                                Submit
+                            </button>
+                        </div>
+                    }
+                </qanat-grid>
+            </div>
+            @if (currentUser$ | async; as currentUser) {
+                @if (currentUserIsWaterManagerOrAdmin && fallowSelfReport.SelfReportStatus.SelfReportStatusID === SelfReportStatusEnum.Submitted) {
+                    <div class="admin-banner flex-end">
+                        <button class="btn btn-primary mr-3" (click)="approve(fallowSelfReport)" [buttonLoading]="isLoadingSubmit" [disabled]="isLoadingSubmit">Approve</button>
+                        <button class="btn btn-danger mr-3" (click)="return(fallowSelfReport)" [buttonLoading]="isLoadingSubmit" [disabled]="isLoadingSubmit">Return</button>
+                    </div>
+                }
+            }
+        }
+    </div>
+</div>

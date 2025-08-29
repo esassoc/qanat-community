@@ -1,80 +1,89 @@
 import { Component, Input } from "@angular/core";
-import { CommonModule } from "@angular/common";
 
 @Component({
     selector: "icon",
-    standalone: true,
-    imports: [CommonModule],
+    imports: [],
     templateUrl: "./icon.component.html",
-    styleUrls: ["./icon.component.scss"],
+    styleUrls: ["./icon.component.scss"]
 })
 export class IconComponent {
-    @Input() icon: typeof IconInterface;
+    @Input() icon: IconInterface;
     @Input() enableFontSize: boolean = false;
 }
 
-export var IconInterface:
-    | "ActivityCenter"
-    | "Allocations"
-    | "AngleUp"
-    | "AngleDown"
-    | "ArrowLeft"
-    | "Budget"
-    | "BulletedList"
-    | "Calendar"
-    | "Calculator"
-    | "CaretDown"
-    | "CaretUp"
-    | "ChatBubble"
-    | "CircleCheckmark"
-    | "CircleX"
-    | "Code"
-    | "Configure"
-    | "Contact"
-    | "DataLayers"
-    | "Delete"
-    | "Download"
-    | "Dollar"
-    | "Drag"
-    | "ExternalLink"
-    | "Geography"
-    | "Geography-Alt"
-    | "Guide"
-    | "Inbox"
-    | "Info"
-    | "Layout"
-    | "License"
-    | "LineChart"
-    | "LineChartTrendingUp"
-    | "LineChartTrendingDown"
-    | "Logo"
-    | "Manage"
-    | "Map"
-    | "Measurements"
-    | "Model"
-    | "News"
-    | "Parcels"
-    | "Question"
-    | "Resend"
-    | "Review"
-    | "ReviewApprove"
-    | "ReviewReturn"
-    | "Satellite"
-    | "ScenarioPlanner"
-    | "ScenarioRun"
-    | "Star"
-    | "Statistics"
-    | "StepComplete"
-    | "StepIncomplete"
-    | "SupportLogo"
-    | "Transactions"
-    | "User"
-    | "Users"
-    | "VerticalMap"
-    | "Warning"
-    | "WaterAccounts"
-    | "WaterDrop"
-    | "WaterDropFilled"
-    | "WaterSupply"
-    | "Wells"
-    | "Zones";
+export const ICONS = [
+    "ActivityCenter",
+    "Allocations",
+    "AngleUp",
+    "AngleDown",
+    "ArrowLeft",
+    "Budget",
+    "BulletedList",
+    "Calendar",
+    "Calculator",
+    "CaretDown",
+    "CaretUp",
+    "ChatBubble",
+    "Clipboard",
+    "CircleCheckmark",
+    "CirclePencil",
+    "CircleX",
+    "Code",
+    "Configure",
+    "Contact",
+    "DataLayers",
+    "Delete",
+    "Download",
+    "Dollar",
+    "Drag",
+    "ExternalLink",
+    "File",
+    "Geography",
+    "Geography-Alt",
+    "Guide",
+    "Inbox",
+    "Info",
+    "Layout",
+    "License",
+    "LineChart",
+    "LineChartTrendingUp",
+    "LineChartTrendingDown",
+    "Logo",
+    "Manage",
+    "Map",
+    "Measurements",
+    "Meter",
+    "Model",
+    "News",
+    "Note",
+    "Parcels",
+    "PlusSquare",
+    "Question",
+    "Resend",
+    "Review",
+    "ReviewApprove",
+    "ReviewReturn",
+    "Satellite",
+    "ScenarioPlanner",
+    "ScenarioRun",
+    "Star",
+    "Statement",
+    "Statistics",
+    "StepComplete",
+    "StepIncomplete",
+    "SupportLogo",
+    "Transactions",
+    "Upload",
+    "User",
+    "Users",
+    "VerticalMap",
+    "Warning",
+    "WaterAccounts",
+    "WaterDrop",
+    "WaterDropFilled",
+    "WaterSupply",
+    "Wells",
+    "Zones",
+];
+
+export type IconInterface = (typeof ICONS)[number];

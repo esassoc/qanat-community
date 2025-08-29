@@ -12,8 +12,8 @@ import { Alert } from "src/app/shared/models/alert";
 import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { FormsModule } from "@angular/forms";
-import { NgIf, AsyncPipe, DecimalPipe, DatePipe } from "@angular/common";
-import { RouterLink } from "@angular/router";
+import { AsyncPipe, DecimalPipe, DatePipe } from "@angular/common";
+import { ActivatedRoute, RouterLink } from "@angular/router";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { IconComponent } from "src/app/shared/components/icon/icon.component";
 import { QanatGridComponent } from "src/app/shared/components/qanat-grid/qanat-grid.component";
@@ -23,17 +23,17 @@ import { ParcelReviewChangesCardComponent } from "src/app/shared/components/parc
 import { ParcelByGeographyService } from "src/app/shared/generated/api/parcel-by-geography.service";
 import { CurrentGeographyService } from "src/app/shared/services/current-geography.service";
 import { GeographyMinimalDto } from "src/app/shared/generated/model/models";
+import { routeParams } from "src/app/app.routes";
+import { GeographyService } from "src/app/shared/generated/api/geography.service";
 
 @Component({
     selector: "parcels-review-changes",
     templateUrl: "./parcels-review-changes.component.html",
     styleUrl: "./parcels-review-changes.component.scss",
-    standalone: true,
     imports: [
         PageHeaderComponent,
         RouterLink,
         AlertDisplayComponent,
-        NgIf,
         NoteComponent,
         IconComponent,
         ParcelReviewChangesCardComponent,
@@ -69,28 +69,32 @@ export class ParcelsReviewChangesComponent implements OnInit {
     public isLoadingSubmit: boolean = false;
 
     constructor(
+        private route: ActivatedRoute,
+        private geographyService: GeographyService,
         private parcelService: ParcelService,
         private parcelByGeographyService: ParcelByGeographyService,
-        private currentGeographyService: CurrentGeographyService,
         private utilityFunctionsService: UtilityFunctionsService,
         private alertService: AlertService,
         private confirmService: ConfirmService
     ) {}
 
     ngOnInit(): void {
-        this.geography$ = this.currentGeographyService.getCurrentGeography().pipe(
+        this.geography$ = this.route.params.pipe(
+            switchMap((params) => {
+                const geographyName = params[routeParams.geographyName];
+                return this.geographyService.getByNameAsMinimalDtoGeography(geographyName);
+            }),
             tap((geography) => {
                 this.geographyID = geography.GeographyID;
 
-                this.latestGDBUpload$ = this.parcelByGeographyService.geographiesGeographyIDParcelsUploadedGdbLatestGet(geography.GeographyID);
+                this.latestGDBUpload$ = this.parcelByGeographyService.getLatestUploadedFinalizedGDBUploadForGeographyParcelByGeography(geography.GeographyID);
 
                 this.parcels$ = this.parcelRefresh$.pipe(
                     tap(() => this.gridApi?.showLoadingOverlay()),
-                    switchMap(() => this.parcelByGeographyService.geographiesGeographyIDParcelsReviewChangesGridItemsGet(geography.GeographyID)),
+                    switchMap(() => this.parcelByGeographyService.getParcelReviewChangesGridItemsParcelByGeography(geography.GeographyID)),
                     tap((parcels) => {
                         this.parcels = parcels;
                         this.setParcelsToDisplay();
-                        this.gridApi?.hideOverlay();
 
                         this.reviewedParcelsCount = parcels.filter((x) => x.IsReviewed).length;
                         this.unreviewedParcelsCount = parcels.length - this.reviewedParcelsCount;
@@ -118,7 +122,9 @@ export class ParcelsReviewChangesComponent implements OnInit {
             {
                 headerName: "Parcel Changes",
                 cellRenderer: TagRendererComponent,
-                valueGetter: (params) => params.data.ParcelFieldDiffs.filter((x) => x.CurrentFieldValue != x.PreviousFieldValue).map((x) => x.FieldShortName),
+                valueGetter: (params) => {
+                    return params.data.ParcelFieldDiffs.filter((x) => x.CurrentFieldValue != x.PreviousFieldValue).map((x) => x.FieldShortName);
+                },
                 cellRendererParams: (params) => {
                     return { disabled: params.data.IsReviewed };
                 },
@@ -226,7 +232,7 @@ export class ParcelsReviewChangesComponent implements OnInit {
             .then((confirmed) => {
                 if (!confirmed) return;
 
-                this.parcelService.parcelsReviewPut(parcelIDs).subscribe({
+                this.parcelService.markParcelAsReviewedParcel(this.geographyID, parcelIDs).subscribe({
                     next: () => {
                         this.isLoadingSubmit = false;
                         this.selectedParcel = null;

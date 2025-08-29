@@ -1,4 +1,4 @@
-import { AsyncPipe, DecimalPipe, NgFor, NgIf } from "@angular/common";
+import { AsyncPipe, DecimalPipe } from "@angular/common";
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
 import { Observable, Subscription, combineLatest, forkJoin, map, switchMap, tap } from "rxjs";
@@ -8,12 +8,14 @@ import { ReportingPeriodSelectComponent } from "src/app/shared/components/report
 import { ButtonLoadingDirective } from "src/app/shared/directives/button-loading.directive";
 import { ExpandCollapseDirective } from "src/app/shared/directives/expand-collapse.directive";
 import { LoadingDirective } from "src/app/shared/directives/loading.directive";
+import { ReportingPeriodService } from "src/app/shared/generated/api/reporting-period.service";
 import { WaterAccountService } from "src/app/shared/generated/api/water-account.service";
 import { WaterMeasurementSelfReportService } from "src/app/shared/generated/api/water-measurement-self-report.service";
 import { WaterMeasurementTypeService } from "src/app/shared/generated/api/water-measurement-type.service";
 import { PermissionEnum } from "src/app/shared/generated/enum/permission-enum";
 import {
     AllocationPlanMinimalDto,
+    ReportingPeriodDto,
     UserDto,
     WaterAccountDto,
     WaterMeasurementSelfReportCreateDto,
@@ -28,15 +30,12 @@ import { AuthenticationService } from "src/app/shared/services/authentication.se
 
 @Component({
     selector: "water-measurement-self-report-list",
-    standalone: true,
     imports: [
         AsyncPipe,
-        NgIf,
         PageHeaderComponent,
         ModelNameTagComponent,
         RouterLink,
         ReportingPeriodSelectComponent,
-        NgFor,
         LoadingDirective,
         ButtonLoadingDirective,
         ExpandCollapseDirective,
@@ -44,7 +43,7 @@ import { AuthenticationService } from "src/app/shared/services/authentication.se
         SumPipe,
     ],
     templateUrl: "./water-measurement-self-report-list.component.html",
-    styleUrl: "./water-measurement-self-report-list.component.scss",
+    styleUrl: "./water-measurement-self-report-list.component.scss"
 })
 export class WaterMeasurementSelfReportListComponent implements OnInit, OnDestroy {
     public currentUser$: Observable<UserDto>;
@@ -62,8 +61,9 @@ export class WaterMeasurementSelfReportListComponent implements OnInit, OnDestro
 
     public selfReports$: Observable<SelfReportWaterMeasurementTypeViewModel[]>;
 
-    public selectedYear: number;
-    public selectedYear$: Observable<number>;
+    public selectedReportingPeriod: ReportingPeriodDto;
+    public selectedReportingPeriod$: Observable<ReportingPeriodDto>;
+    public reportingPeriods$: Observable<ReportingPeriodDto[]>;
 
     public selfReportsByWaterMeasurementType: SelfReportWaterMeasurementTypeViewModel[] = [];
 
@@ -73,6 +73,7 @@ export class WaterMeasurementSelfReportListComponent implements OnInit, OnDestro
         private waterAccountService: WaterAccountService,
         private waterMeasurementTypeService: WaterMeasurementTypeService,
         private waterMeasurementSelfReportService: WaterMeasurementSelfReportService,
+        private reportingPeriodService: ReportingPeriodService,
         private authenticationService: AuthenticationService,
         private router: Router,
         private route: ActivatedRoute
@@ -83,41 +84,48 @@ export class WaterMeasurementSelfReportListComponent implements OnInit, OnDestro
         this.waterAccount$ = this.route.paramMap.pipe(
             map((paramMap) => parseInt(paramMap.get("waterAccountID"))),
             switchMap((waterAccountID) =>
-                this.waterAccountService.waterAccountsWaterAccountIDGet(waterAccountID).pipe(
+                this.waterAccountService.getByIDWaterAccount(waterAccountID).pipe(
                     tap((waterAccount) => {
                         this.waterAccountID = waterAccountID;
                         this.geographyID = waterAccount.Geography.GeographyID;
-
-                        let query = this.route.snapshot.queryParamMap;
-                        this.selectedYear = parseInt(query.get("reportingPeriod")) || null;
-
-                        if (!this.selectedYear) {
-                            this.selectedYear = waterAccount.Geography.DefaultDisplayYear;
-                        }
                     })
                 )
             )
         );
 
-        this.selectedYear$ = this.route.queryParamMap.pipe(
-            map((queryParamMap) => parseInt(queryParamMap.get("reportingPeriod")) || null),
-            tap((selectedYear) => {
-                if (selectedYear) {
-                    this.selectedYear = selectedYear;
-                }
+        this.reportingPeriods$ = this.waterAccount$.pipe(
+            switchMap((waterAccount) => {
+                return this.reportingPeriodService.listByGeographyIDReportingPeriod(waterAccount.Geography.GeographyID);
             })
         );
 
-        this.selfReports$ = combineLatest([this.waterAccount$, this.selectedYear$]).pipe(
+        this.selectedReportingPeriod$ = combineLatest([this.reportingPeriods$, this.route.queryParamMap]).pipe(
+            map(([reportingPeriods, queryParamMap]) => {
+                let selectedReportingPeriodID = parseInt(queryParamMap.get("reportingPeriodID"));
+
+                if (!selectedReportingPeriodID) {
+                    let defaultReportingPeriod = reportingPeriods.find((rp) => rp.IsDefault);
+                    if (!defaultReportingPeriod) {
+                        defaultReportingPeriod = reportingPeriods[0];
+                    }
+
+                    selectedReportingPeriodID = defaultReportingPeriod.ReportingPeriodID;
+                }
+
+                return reportingPeriods.find((rp) => rp.ReportingPeriodID === selectedReportingPeriodID);
+            })
+        );
+
+        this.selfReports$ = combineLatest([this.waterAccount$, this.selectedReportingPeriod$]).pipe(
             tap(() => (this.pageIsLoading = true)),
             switchMap(() =>
                 forkJoin({
-                    waterMeasurementTypes: this.waterMeasurementTypeService.geographiesGeographyIDWaterMeasurementTypesSelfReportableGet(this.geographyID),
-                    allocationPlans: this.waterAccountService.waterAccountsWaterAccountIDAllocationPlansGet(this.waterAccountID),
-                    selfReports: this.waterMeasurementSelfReportService.geographiesGeographyIDWaterAccountsWaterAccountIDWaterMeasurementSelfReportsReportingPeriodsYearGet(
+                    waterMeasurementTypes: this.waterMeasurementTypeService.getActiveAndSelfReportableWaterMeasurementTypesWaterMeasurementType(this.geographyID),
+                    allocationPlans: this.waterAccountService.getAccountAllocationPlansByAccountIDWaterAccount(this.waterAccountID),
+                    selfReports: this.waterMeasurementSelfReportService.readListByYearWaterMeasurementSelfReport(
                         this.geographyID,
                         this.waterAccountID,
-                        this.selectedYear
+                        this.selectedReportingPeriod.ReportingPeriodID
                     ),
                 }).pipe(
                     tap(({ waterMeasurementTypes, allocationPlans, selfReports }) => {
@@ -156,11 +164,11 @@ export class WaterMeasurementSelfReportListComponent implements OnInit, OnDestro
         });
     }
 
-    updateReportingPeriod(selectedYear: number) {
-        this.selectedYear = selectedYear;
+    updateReportingPeriod(selectedReportingPeriod: ReportingPeriodDto) {
+        this.selectedReportingPeriod = selectedReportingPeriod;
         this.router.navigate([], {
             relativeTo: this.route,
-            queryParams: { reportingPeriod: selectedYear },
+            queryParams: { reportingPeriodID: selectedReportingPeriod.ReportingPeriodID },
             queryParamsHandling: "merge",
         });
     }
@@ -168,13 +176,13 @@ export class WaterMeasurementSelfReportListComponent implements OnInit, OnDestro
     startSelfReport(selfReportByWaterMeasurementType: SelfReportWaterMeasurementTypeViewModel) {
         let selfReportCreateDto = new WaterMeasurementSelfReportCreateDto({
             WaterMeasurementTypeID: selfReportByWaterMeasurementType.WaterMeasurementType.WaterMeasurementTypeID,
-            ReportingYear: this.selectedYear,
+            ReportingPeriodID: this.selectedReportingPeriod.ReportingPeriodID,
         });
 
         selfReportByWaterMeasurementType.PostRequestInProgress = true;
 
         let createRequest = this.waterMeasurementSelfReportService
-            .geographiesGeographyIDWaterAccountsWaterAccountIDWaterMeasurementSelfReportsPost(this.geographyID, this.waterAccountID, selfReportCreateDto)
+            .createWaterMeasurementSelfReport(this.geographyID, this.waterAccountID, selfReportCreateDto)
             .subscribe((selfReport) => {
                 this.router.navigate([selfReport.WaterMeasurementSelfReportID], { relativeTo: this.route });
             });
@@ -186,11 +194,7 @@ export class WaterMeasurementSelfReportListComponent implements OnInit, OnDestro
         selfReportByWaterMeasurementType.LineItemRequestInProgress = true;
 
         let getLineItemsRequest = this.waterMeasurementSelfReportService
-            .geographiesGeographyIDWaterAccountsWaterAccountIDWaterMeasurementSelfReportsWaterMeasurementSelfReportIDGet(
-                this.geographyID,
-                this.waterAccountID,
-                selfReportByWaterMeasurementType.SelfReport.WaterMeasurementSelfReportID
-            )
+            .readSingleWaterMeasurementSelfReport(this.geographyID, this.waterAccountID, selfReportByWaterMeasurementType.SelfReport.WaterMeasurementSelfReportID)
             .subscribe((selfReportDto) => {
                 selfReportByWaterMeasurementType.SelfReportLineItems = selfReportDto.LineItems;
                 selfReportByWaterMeasurementType.LineItemRequestInProgress = false;

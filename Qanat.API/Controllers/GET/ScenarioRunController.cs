@@ -272,7 +272,8 @@ public class ScenarioRunController(QanatDbContext dbContext, ILogger<ScenarioRun
         var modelRunEndingStorage = budgetOutput.Periods.Last().EndingStorage;
         scenarioRunResult.TotalChangeInAquiferStorage = modelRunEndingStorage - baselineEndingStorage;
         scenarioRunResult.TotalChangeInPumping = budgetOutput.Periods.Select((t, i) => budgetOutput.BaselinePeriods[i].Pumping - t.Pumping).ToList().Sum();
-        scenarioRunResult.TotalChangeInRecharge = budgetOutput.Periods.Select((t, i) => budgetOutput.BaselinePeriods[i].Recharge - t.Recharge).ToList().Sum();
+        scenarioRunResult.TotalChangeInRecharge = Math.Abs(budgetOutput.Periods.Select((t, i) => budgetOutput.BaselinePeriods[i].Recharge - t.Recharge).ToList().Sum());
+        scenarioRunResult.TotalChangeInGainFromStream = budgetOutput.Periods.Select((t, i) => budgetOutput.BaselinePeriods[i].GainFromStream - t.GainFromStream).ToList().Sum();
 
         var timeSeriesOutput = JsonSerializer.Deserialize<TimeSeriesOutput>(timeSeriesJsonString);
         var waterLevelChanges = (timeSeriesOutput.PivotedRunWellInputs.Select(input => input.TimeSteps.LastOrDefault())
@@ -312,7 +313,8 @@ public class ScenarioRunController(QanatDbContext dbContext, ILogger<ScenarioRun
         var cumulativeResult = budgetOutput.ResultSets.Single(x => x.Name == "Cumulative");
         scenarioRunResult.TotalChangeInAquiferStorage = cumulativeResult.DataSeries.Single(x => x.Name == "Storage").DataPoints.Last().Value;
         scenarioRunResult.TotalChangeInPumping = cumulativeResult.DataSeries.Single(x => x.Name == "Wells").DataPoints.Last().Value;
-        scenarioRunResult.TotalChangeInRecharge = cumulativeResult.DataSeries.Single(x => x.Name == "Recharge").DataPoints.Last().Value;
+        scenarioRunResult.TotalChangeInRecharge = Math.Abs(cumulativeResult.DataSeries.Single(x => x.Name == "Wells").DataPoints.Last().Value);
+        scenarioRunResult.TotalChangeInGainFromStream = cumulativeResult.DataSeries.SingleOrDefault(x => x.Name == "Stream Leakage")?.DataPoints.Last().Value;
 
         var timeSeriesOutput = JsonSerializer.Deserialize<RunResult>(timeSeriesJsonString);
         var pointsOfInterest = timeSeriesOutput.ResultSets.Single(x => x.Name == "Points of Interest")?.DataSeries;

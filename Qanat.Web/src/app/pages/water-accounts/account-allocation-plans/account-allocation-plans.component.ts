@@ -8,7 +8,7 @@ import { GeographyDto } from "src/app/shared/generated/model/geography-dto";
 import { AllocationPlanMinimalDto, WaterAccountDto, ZoneGroupMinimalDto, ZoneMinimalDto } from "src/app/shared/generated/model/models";
 import { WaterAccountService } from "src/app/shared/generated/api/water-account.service";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
-import { NgIf, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { AccountZoneCardComponent } from "src/app/shared/components/account-zone-card/account-zone-card.component";
 import { AlertDisplayComponent } from "src/app/shared/components/alert-display/alert-display.component";
 import { AllocationPlanSelectComponent } from "src/app/shared/components/allocation-plan-select/allocation-plan-select.component";
@@ -19,8 +19,7 @@ import { PublicService } from "src/app/shared/generated/api/public.service";
     selector: "account-allocation-plans",
     templateUrl: "./account-allocation-plans.component.html",
     styleUrls: ["./account-allocation-plans.component.scss"],
-    standalone: true,
-    imports: [NgIf, PageHeaderComponent, ModelNameTagComponent, RouterLink, AlertDisplayComponent, AccountZoneCardComponent, AllocationPlanSelectComponent, AsyncPipe],
+    imports: [PageHeaderComponent, ModelNameTagComponent, RouterLink, AlertDisplayComponent, AccountZoneCardComponent, AllocationPlanSelectComponent, AsyncPipe]
 })
 export class AccountAllocationPlansComponent implements OnInit {
     public geography: GeographyDto;
@@ -32,26 +31,28 @@ export class AccountAllocationPlansComponent implements OnInit {
     public customRichTextTypeID = CustomRichTextTypeEnum.AccountAllocationPlans;
     public isLoading = true;
 
-    constructor(private waterAccountService: WaterAccountService, private route: ActivatedRoute, private publicService: PublicService) {}
+    constructor(
+        private waterAccountService: WaterAccountService,
+        private route: ActivatedRoute,
+        private publicService: PublicService
+    ) {}
 
     ngOnInit(): void {
         this.waterAccount$ = this.route.paramMap.pipe(
             map((paramMap) => parseInt(paramMap.get(routeParams.waterAccountID))),
-            switchMap((waterAccountID) => this.waterAccountService.waterAccountsWaterAccountIDGet(waterAccountID)),
+            switchMap((waterAccountID) => this.waterAccountService.getByIDWaterAccount(waterAccountID)),
             tap((waterAccount) => {
                 this.geography = waterAccount.Geography;
                 this.isLoading = false;
 
-                this.allocationPlans$ = this.waterAccountService.waterAccountsWaterAccountIDAllocationPlansGet(waterAccount.WaterAccountID).pipe(
+                this.allocationPlans$ = this.waterAccountService.getAccountAllocationPlansByAccountIDWaterAccount(waterAccount.WaterAccountID).pipe(
                     tap((allocationPlans) => {
                         if (allocationPlans.length > 0) {
-                            this.zoneGroup$ = this.publicService
-                                .publicGeographiesGeographyIDZoneGroupZoneGroupSlugGet(this.geography.GeographyID, allocationPlans[0].ZoneGroupSlug)
-                                .pipe(
-                                    tap((zoneGroup) => {
-                                        this.accountZone = zoneGroup.ZoneList.find((x) => x.ZoneID == allocationPlans[0].ZoneID);
-                                    })
-                                );
+                            this.zoneGroup$ = this.publicService.getZoneGroupBySlugPublic(this.geography.GeographyID, allocationPlans[0].ZoneGroupSlug).pipe(
+                                tap((zoneGroup) => {
+                                    this.accountZone = zoneGroup.ZoneList.find((x) => x.ZoneID == allocationPlans[0].ZoneID);
+                                })
+                            );
                         }
                     })
                 );

@@ -100,7 +100,7 @@ export class AuthenticationService implements OnDestroy {
 
     private getUser(claims: any) {
         const globalID = claims.sub;
-        this.userClaimsService.userClaimsGlobalIDGet(globalID).subscribe(
+        this.userClaimsService.getByGlobalIDUserClaims(globalID).subscribe(
             (result) => {
                 this.updateUser(result);
             },
@@ -111,7 +111,7 @@ export class AuthenticationService implements OnDestroy {
     }
 
     private postUser() {
-        this.userClaimsService.userClaimsPost().subscribe(
+        this.userClaimsService.postUserClaimsUserClaims().subscribe(
             (result) => {
                 this.updateUser(result);
             },
@@ -189,7 +189,7 @@ export class AuthenticationService implements OnDestroy {
 
     public logout() {
         if (this.isCurrentUserBeingImpersonated(this.currentUser)) {
-            this.impersonationService.impersonateStopImpersonationPost().subscribe((response) => {
+            this.impersonationService.stopImpersonationImpersonation().subscribe((response) => {
                 this.refreshUserInfo(response);
                 this.router.navigateByUrl("/").then((x) => {
                     this.alertService.pushAlert(new Alert(`Finished impersonating`, AlertContext.Success));
@@ -258,47 +258,8 @@ export class AuthenticationService implements OnDestroy {
         this.setAuthRedirectUrl("");
     }
 
-    // todo: when clearing out these direct role references, do a global search for "RoleID =="
-
-    public isUserUnassigned(user: UserDto): boolean {
-        const role = user && user.RoleID ? user.RoleID : null;
-        return role === RoleEnum.NoAccess && user.IsActive;
-    }
-
-    public isUserRoleDisabled(user: UserDto): boolean {
-        const role = user && user.RoleID ? user.RoleID : null;
-        return role === RoleEnum.NoAccess && !user.IsActive;
-    }
-
     public isCurrentUserNullOrUndefined(): boolean {
         return !this.currentUser;
-    }
-
-    public isCurrentUserAnAdministrator(): boolean {
-        return this.isUserAnAdministrator(this.currentUser);
-    }
-
-    public doesCurrentUserHaveOneOfTheseRoles(roleIDs: Array<number>): boolean {
-        if (roleIDs.length === 0) {
-            return false;
-        }
-        const roleID = this.currentUser && this.currentUser.RoleID ? this.currentUser.RoleID : null;
-        return roleIDs.includes(roleID);
-    }
-
-    public isUserAnAdministrator(user: UserDto): boolean {
-        const role = user && user.RoleID ? user.RoleID : null;
-        return role === RoleEnum.SystemAdmin;
-    }
-
-    // todo: rights
-    public isUserALandOwner(user: UserDto): boolean {
-        const role = user && user.RoleID ? user.RoleID : null;
-        return role === RoleEnum.Normal;
-    }
-
-    public isCurrentUserALandOwner(): boolean {
-        return this.isUserALandOwner(this.currentUser);
     }
 
     public getCurrentUser(): Observable<UserDto> {

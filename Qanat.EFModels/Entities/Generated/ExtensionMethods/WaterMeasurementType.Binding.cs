@@ -13,6 +13,7 @@ namespace Qanat.EFModels.Entities
         public static class FieldLengths
         {
             public const int WaterMeasurementTypeName = 50;
+            public const int ShortName = 31;
         }
     }
 }

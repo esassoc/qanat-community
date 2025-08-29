@@ -6,9 +6,10 @@
 }
 
 .popup-wrapper {
-    width: 24rem;
+    width: fit-content;
+    min-width: $spacing-1000;
     display: grid;
-    gap: 1rem;
+    gap: 0.5rem;
     padding: 1.5rem;
 
     & > * {
@@ -21,7 +22,6 @@
     gap: 0.5rem;
     align-items: center;
     flex-wrap: wrap;
-    padding-bottom: 0.5rem;
 
     .pill {
         padding: 0.4rem 0.75rem 0.25rem 0.75rem;
@@ -40,6 +40,13 @@
         color: $primary;
         font-weight: 900;
         text-transform: uppercase;
+    }
+}
+
+.popup-body {
+    a {
+        font-size: $type-size-200;
+        color: $white;
     }
 }
 

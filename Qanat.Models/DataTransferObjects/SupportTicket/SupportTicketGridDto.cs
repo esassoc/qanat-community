@@ -13,6 +13,7 @@ public class SupportTicketGridDto
     public int? WaterAccountNumber { get; set; }
     public DateTime DateCreated { get; set; }
     public DateTime? DateUpdated { get; set; }
+    public DateTime? DateClosed { get; set; }
     public string CreateUserFullName { get; set; }
     public int? AssignedUserID { get; set; }
     public string? AssignedUserFullName { get; set; }
@@ -20,4 +21,5 @@ public class SupportTicketGridDto
     public string ContactLastName { get; set; }
     public string ContactEmail{ get; set; }
     public string ContactPhoneNumber{ get; set; }
+    public string MostRecentNoteMessage { get; set; }
 }

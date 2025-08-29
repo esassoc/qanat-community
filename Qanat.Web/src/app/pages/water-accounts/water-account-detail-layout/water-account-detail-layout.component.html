@@ -1,5 +1,5 @@
 <div class="dashboard">
-    <ng-container *ngIf="currentWaterAccount$ | async as currentWaterAccount; else isLoadingTemplate">
+    @if (currentWaterAccount$ | async; as currentWaterAccount) {
         <aside class="sidebar">
             <div class="sidebar-header">
                 <a routerLink="/water-dashboard/water-accounts">
@@ -23,35 +23,33 @@
                                     role="button"
                                     data-toggle="dropdown"
                                     aria-haspopup="true"
-                                    aria-expanded="false"
-                                    (click)="waterAccountSwitcher.toggleDropdown()">
+                                    aria-expanded="false">
                                     <span class="label">{{ currentWaterAccount.WaterAccountNameAndNumber }}</span>
-
                                     <icon icon="AngleDown"></icon>
                                 </a>
-
                                 <div #waterAccountToggle class="dropdown-menu">
                                     <search-water-accounts
                                         #waterAccountSwitcher
                                         [isPartOfForm]="false"
+                                        [initialWaterAccountID]="currentWaterAccount.WaterAccountID"
                                         [excludedWaterAccountIDs]="[currentWaterAccount.WaterAccountID]"
+                                        [isOpen]="true"
                                         (change)="changedWaterAccount($event, currentWaterAccount)"></search-water-accounts>
                                 </div>
                             </span>
                         </div>
                     </div>
                 </div>
-                <dashboard-menu *ngIf="pageMenu$ | async as pageMenu" [dashboardMenu]="pageMenu" [viewingDetailPage]="true"></dashboard-menu>
+                @if (pageMenu$ | async; as pageMenu) {
+                    <dashboard-menu [dashboardMenu]="pageMenu" [viewingDetailPage]="true"></dashboard-menu>
+                }
             </div>
         </aside>
-
         <main class="main">
             <router-outlet #manageOutlet="outlet"></router-outlet>
         </main>
-    </ng-container>
-
-    <ng-template #isLoadingTemplate>
+    } @else {
         <aside class="sidebar" [loadingSpinner]="{ isLoading: true }"></aside>
         <main class="main" [loadingSpinner]="{ isLoading: true }"></main>
-    </ng-template>
+    }
 </div>

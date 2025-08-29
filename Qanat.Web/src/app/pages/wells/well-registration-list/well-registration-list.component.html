@@ -10,12 +10,11 @@
     <div class="page-body">
         <app-alert-display></app-alert-display>
 
-        <qanat-grid
-            *ngIf="allWells$ | async as wells; else isLoading"
-            [rowData]="wells"
-            [colIDsToExclude]="['0']"
-            [downloadFileName]="geography.GeographyName + '-well-registrations'"
-            [columnDefs]="colDefs"></qanat-grid>
+        @if (allWells$ | async; as wells) {
+            <qanat-grid [rowData]="wells" [colIDsToExclude]="['0']" [downloadFileName]="geography.GeographyName + '-well-registrations'" [columnDefs]="colDefs"></qanat-grid>
+        } @else {
+            <div [loadingSpinner]="{ loadingHeight: 720, isLoading: true }"></div>
+        }
 
         <ng-template #isLoading>
             <div [loadingSpinner]="{ loadingHeight: 720, isLoading: true }"></div>

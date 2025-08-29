@@ -1,26 +1,21 @@
-import { NgIf } from "@angular/common";
-import { Component, ComponentRef, OnDestroy, OnInit } from "@angular/core";
+import { Component, inject, OnDestroy, OnInit } from "@angular/core";
 import { FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms";
+import { DialogRef } from "@ngneat/dialog";
 import { Subscription } from "rxjs";
 import { AlertDisplayComponent } from "src/app/shared/components/alert-display/alert-display.component";
 import { FormFieldComponent, FormFieldType } from "src/app/shared/components/forms/form-field/form-field.component";
-import { ModalComponent } from "src/app/shared/components/modal/modal.component";
 import { ReportingPeriodService } from "src/app/shared/generated/api/reporting-period.service";
 import { ReportingPeriodDto, ReportingPeriodUpsertDto, ReportingPeriodUpsertDtoForm, ReportingPeriodUpsertDtoFormControls } from "src/app/shared/generated/model/models";
-import { AlertService } from "src/app/shared/services/alert.service";
-import { ModalService } from "src/app/shared/services/modal/modal.service";
 
 @Component({
     selector: "upsert-reporting-period-modal",
-    standalone: true,
-    imports: [ReactiveFormsModule, FormFieldComponent, NgIf, AlertDisplayComponent],
+    imports: [ReactiveFormsModule, FormFieldComponent, AlertDisplayComponent],
     templateUrl: "./upsert-reporting-period-modal.component.html",
-    styleUrl: "./upsert-reporting-period-modal.component.scss",
+    styleUrl: "./upsert-reporting-period-modal.component.scss"
 })
 export class UpsertReportingPeriodModalComponent implements OnInit, OnDestroy {
+    public ref: DialogRef<UpsertReportingPeriodModalContext, boolean> = inject(DialogRef);
     public FormFieldType = FormFieldType;
-    public modalComponentRef: ComponentRef<ModalComponent>;
-    public modalContext: UpsertReportingPeriodModalContext;
 
     public isNewReportingPeriod: boolean = true;
     public endDate: string;
@@ -30,24 +25,26 @@ export class UpsertReportingPeriodModalComponent implements OnInit, OnDestroy {
         Name: ReportingPeriodUpsertDtoFormControls.Name(),
         StartDate: ReportingPeriodUpsertDtoFormControls.StartDate(),
         ReadyForAccountHolders: ReportingPeriodUpsertDtoFormControls.ReadyForAccountHolders(),
+        IsDefault: ReportingPeriodUpsertDtoFormControls.IsDefault(),
     });
 
     public endDateControl = new FormControl({}, []);
     public startDateChangeSubscription: Subscription;
 
-    constructor(
-        private reportingPeriodService: ReportingPeriodService,
-        private modalService: ModalService,
-        private alertService: AlertService
-    ) {}
+    constructor(private reportingPeriodService: ReportingPeriodService) {}
 
     ngOnInit(): void {
-        if (this.modalContext.ReportingPeriod) {
-            this.modalContext.ReportingPeriod.StartDate = new Date(this.modalContext.ReportingPeriod.StartDate).toISOString().split("T")[0];
-            this.formGroup.patchValue(this.modalContext.ReportingPeriod);
+        if (this.ref.data.ReportingPeriod) {
+            this.ref.data.ReportingPeriod.StartDate = new Date(this.ref.data.ReportingPeriod.StartDate).toISOString().split("T")[0];
+            this.formGroup.patchValue(this.ref.data.ReportingPeriod);
 
-            this.endDate = new Date(this.modalContext.ReportingPeriod.EndDate).toISOString().split("T")[0];
+            this.endDate = new Date(this.ref.data.ReportingPeriod.EndDate).toISOString().split("T")[0];
             this.endDateControl.setValue(this.endDate);
+
+            if (this.ref.data?.ReportingPeriod?.IsDefault) {
+                this.formGroup.get("IsDefault").disable();
+            }
+
             this.isNewReportingPeriod = false;
         }
 
@@ -80,33 +77,25 @@ export class UpsertReportingPeriodModalComponent implements OnInit, OnDestroy {
 
     save(): void {
         let upsertDto = this.formGroup.value as ReportingPeriodUpsertDto;
+        if (this.formGroup.get("IsDefault").value) {
+            upsertDto.IsDefault = true; //MK 3/3/2025 -- Need to set it explicity because if it's disabled its exlcuded from the formGroup.value.
+        }
+
         if (this.isNewReportingPeriod) {
-            this.addOrEditSubscription = this.reportingPeriodService.geographiesGeographyIDReportingPeriodsPost(this.modalContext.GeographyID, upsertDto).subscribe(
-                (response) => {
-                    this.modalService.close(this.modalComponentRef, response);
-                }
-                // (error) => {
-                //     //MK 2/3/2025: App Alert Display is on the parent page, not sure it makes sense to have it here as well.
-                //     this.modalService.close(this.modalComponentRef, null);
-                // }
-            );
+            this.addOrEditSubscription = this.reportingPeriodService.createReportingPeriod(this.ref.data.GeographyID, upsertDto).subscribe((response) => {
+                this.ref.close(true);
+            });
         } else {
             this.addOrEditSubscription = this.reportingPeriodService
-                .geographiesGeographyIDReportingPeriodsReportingPeriodIDPut(this.modalContext.GeographyID, this.modalContext.ReportingPeriod.ReportingPeriodID, upsertDto)
-                .subscribe(
-                    (response) => {
-                        this.modalService.close(this.modalComponentRef, response);
-                    }
-                    // (error) => {
-                    //     //MK 2/3/2025: App Alert Display is on the parent page, not sure it makes sense to have it here as well.
-                    //     this.modalService.close(this.modalComponentRef, null);
-                    // }
-                );
+                .updateReportingPeriod(this.ref.data.GeographyID, this.ref.data.ReportingPeriod.ReportingPeriodID, upsertDto)
+                .subscribe((response) => {
+                    this.ref.close(true);
+                });
         }
     }
 
     cancel(): void {
-        this.modalService.close(this.modalComponentRef, null);
+        this.ref.close(false);
     }
 }
 

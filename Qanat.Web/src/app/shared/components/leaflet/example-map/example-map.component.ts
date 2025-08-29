@@ -1,21 +1,20 @@
 import { Component, OnInit } from "@angular/core";
-import { CommonModule } from "@angular/common";
+
 import { QanatMapComponent, QanatMapInitEvent } from "../qanat-map/qanat-map.component";
 import { Control, Map } from "leaflet";
 import { GsaBoundariesComponent } from "../layers/gsa-boundaries/gsa-boundaries.component";
 
 @Component({
     selector: "example-map",
-    standalone: true,
-    imports: [CommonModule, QanatMapComponent, GsaBoundariesComponent],
+    imports: [QanatMapComponent, GsaBoundariesComponent],
     template: `
         <qanat-map (onMapLoad)="handleMapReady($event)" mapHeight="800px">
-            <ng-container *ngIf="mapIsReady">
+            @if (mapIsReady) {
                 <gsa-boundaries [displayOnLoad]="true" [geographyID]="geographyID" [map]="map" [layerControl]="layerControl"> </gsa-boundaries>
-            </ng-container>
+            }
         </qanat-map>
     `,
-    styles: [],
+    styles: []
 })
 export class ExampleMapComponent implements OnInit {
     public map: Map;

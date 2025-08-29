@@ -6,11 +6,10 @@ import { CustomRichTextComponent } from "../custom-rich-text/custom-rich-text.co
     selector: "geography-promo-card",
     templateUrl: "./geography-promo-card.component.html",
     styleUrls: ["./geography-promo-card.component.scss"],
-    standalone: true,
-    imports: [IconComponent, CustomRichTextComponent],
+    imports: [IconComponent, CustomRichTextComponent]
 })
 export class GeographyPromoCardComponent {
-    @Input() icon: typeof IconInterface;
+    @Input() icon: IconInterface;
     @Input() customRichTextTypeID: number;
     @Input() number: number;
     @Input() cardTitle: string;

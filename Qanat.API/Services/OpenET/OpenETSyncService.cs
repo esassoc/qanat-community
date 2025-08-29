@@ -52,7 +52,8 @@ public class OpenETSyncService
         var openETDataType = OpenETDataType.AllLookupDictionary[openETDataTypeID];
         var otherSyncInProgress = _qanatDbContext.OpenETSyncHistories.AsNoTracking()
             .Include(x => x.OpenETSync)
-            .Any(x => x.OpenETSync.Year == year
+            .Any(x => x.OpenETSync.GeographyID == geographyID
+                   && x.OpenETSync.Year == year
                    && x.OpenETSync.Month == month
                    && x.OpenETSync.OpenETDataTypeID == openETDataTypeID
                    && (x.OpenETSyncResultTypeID == (int)OpenETSyncResultTypeEnum.Created || x.OpenETSyncResultTypeID == (int)OpenETSyncResultTypeEnum.InProgress)

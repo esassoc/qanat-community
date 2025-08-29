@@ -4,37 +4,34 @@
     <form class="form grid-12" #wellParcelForm="ngForm">
         <div class="field g-col-12">
             <div class="field-label">APN where your well is located</div>
-            <ng-container *ngIf="selectedParcel$ | async as selectedParcel; else noParcel">
-                <parcel-typeahead
-                    *ngIf="geography"
-                    [geographyID]="geography.GeographyID"
-                    [selectedParcel]="selectedParcel ?? null"
-                    (change)="selectedParcelChanged($event)"></parcel-typeahead>
-            </ng-container>
-            <ng-template #noParcel>
-                <parcel-typeahead
-                    [selectedParcel]="selectedParcel ?? null"
-                    *ngIf="geography"
-                    [geographyID]="geography.GeographyID"
-                    (change)="selectedParcelChanged($event)"></parcel-typeahead>
-            </ng-template>
+            @if (selectedParcel$ | async; as selectedParcel) {
+                @if (geography) {
+                    <parcel-typeahead [geographyID]="geography.GeographyID" [selectedParcel]="selectedParcel ?? null" (change)="selectedParcelChanged($event)"></parcel-typeahead>
+                }
+            } @else {
+                @if (geography) {
+                    <parcel-typeahead [selectedParcel]="selectedParcel ?? null" [geographyID]="geography.GeographyID" (change)="selectedParcelChanged($event)"></parcel-typeahead>
+                }
+            }
             <div class="mt-2 copy copy-3">
                 <i class="fa fa-info-circle"></i>
                 If you don't know your APN or your well is not located on a parcel, you can proceed without completing this field.
             </div>
         </div>
-        <div class="g-col-12" *ngIf="selectedParcel && geography">
-            <qanat-map (onMapLoad)="handleMapReady($event)" mapHeight="500px">
-                <ng-container *ngIf="mapIsReady">
-                    <highlighted-parcels-layer
-                        [displayOnLoad]="true"
-                        [map]="map"
-                        [geographyID]="geography.GeographyID"
-                        [highlightedParcelIDs]="[selectedParcel.ParcelID]"
-                        [layerControl]="layerControl"></highlighted-parcels-layer>
-                </ng-container>
-            </qanat-map>
-        </div>
+        @if (selectedParcel && geography) {
+            <div class="g-col-12">
+                <qanat-map (onMapLoad)="handleMapReady($event)" mapHeight="500px">
+                    @if (mapIsReady) {
+                        <highlighted-parcels-layer
+                            [displayOnLoad]="true"
+                            [map]="map"
+                            [geographyID]="geography.GeographyID"
+                            [highlightedParcelIDs]="[selectedParcel.ParcelID]"
+                            [layerControl]="layerControl"></highlighted-parcels-layer>
+                    }
+                </qanat-map>
+            </div>
+        }
     </form>
 </workflow-body>
 

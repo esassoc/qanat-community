@@ -1,10 +1,12 @@
-﻿using System.Diagnostics;
-
-namespace Qanat.Common.Util;
+﻿namespace Qanat.Common.Util;
 
 public static class UnitConversionHelper
 {
     private const decimal MillimetersToFeetConversionFactor = 304.8m;
+    private const decimal GallonsToAcreFeetConversionFactor = 325851m;
+    private const decimal GallonsToCubicInchesConversionFactor = 231m;
+    private const decimal AcreToSquareFootConversionFactor = 43560m;
+    private const decimal SquareFootToSquareInchesConversionFactor = 144m;
 
     public static decimal ConvertMillimetersToAcreFeet(decimal millimeters, decimal acres)
     {
@@ -24,5 +26,24 @@ public static class UnitConversionHelper
     public static decimal ConvertAcreFeetToInches(decimal acreFeet, decimal acres)
     {
         return (acreFeet / acres) * 12;
+    }
+
+    public static decimal ConvertAcreFeetToGallons(decimal acreFeet)
+    {
+        return acreFeet * GallonsToAcreFeetConversionFactor;
+    }
+
+    public static decimal ConvertGallonsToAcreFeet(decimal gallons)
+    {
+        return gallons / GallonsToAcreFeetConversionFactor;
+    }
+
+    public static decimal ConvertGallonsToInches(decimal gallons, decimal acres)
+    {
+        var cubicInches = gallons * GallonsToCubicInchesConversionFactor;
+        var squareInches = acres * AcreToSquareFootConversionFactor * SquareFootToSquareInchesConversionFactor;
+
+        var inchesOfDepth = cubicInches / squareInches;
+        return inchesOfDepth;
     }
 }

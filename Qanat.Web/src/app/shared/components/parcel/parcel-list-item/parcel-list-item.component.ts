@@ -4,10 +4,9 @@ import { WaterAccountRequestChangesParcelDto } from "../../../generated/model/wa
 
 @Component({
     selector: "parcel-list-item",
-    standalone: true,
     imports: [IconComponent],
     templateUrl: "./parcel-list-item.component.html",
-    styleUrl: "./parcel-list-item.component.scss",
+    styleUrl: "./parcel-list-item.component.scss"
 })
 export class ParcelListItemComponent {
     @Input() parcel: WaterAccountRequestChangesParcelDto;

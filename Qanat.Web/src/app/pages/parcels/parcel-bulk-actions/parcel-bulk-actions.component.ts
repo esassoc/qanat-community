@@ -1,10 +1,9 @@
 import { Component, ChangeDetectorRef, ViewContainerRef, OnInit } from "@angular/core";
 import { UtilityFunctionsService } from "src/app/shared/services/utility-functions.service";
 import { ColDef, GridApi, GridReadyEvent } from "ag-grid-community";
-import { forkJoin, Observable, share, tap } from "rxjs";
+import { forkJoin, Observable, share, switchMap, tap } from "rxjs";
 import { GeographyDto } from "src/app/shared/generated/model/geography-dto";
 import { AgGridHelper } from "src/app/shared/helpers/ag-grid-helper";
-import { ModalOptions, ModalService, ModalSizeEnum, ModalThemeEnum } from "src/app/shared/services/modal/modal.service";
 import { CustomAttributeSimpleDto, ParcelWaterSupplyDto, GeographyMinimalDto, ZoneGroupMinimalDto } from "src/app/shared/generated/model/models";
 import { GeographyService } from "src/app/shared/generated/api/geography.service";
 import { ZoneGroupService } from "src/app/shared/generated/api/zone-group.service";
@@ -13,21 +12,21 @@ import { CustomAttributeService } from "src/app/shared/generated/api/custom-attr
 import { CustomAttributeTypeEnum } from "src/app/shared/generated/enum/custom-attribute-type-enum";
 import { QanatGridComponent } from "src/app/shared/components/qanat-grid/qanat-grid.component";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
-import { BulkUpdateParcelStatusModalComponent, ParcelUpdateContext } from "src/app/shared/components/bulk-update-parcel-status-modal/bulk-update-parcel-status-modal.component";
+import { BulkUpdateParcelStatusModalComponent } from "src/app/shared/components/bulk-update-parcel-status-modal/bulk-update-parcel-status-modal.component";
 import { AlertDisplayComponent } from "src/app/shared/components/alert-display/alert-display.component";
 import { LoadingDirective } from "src/app/shared/directives/loading.directive";
-import { IconComponent } from "src/app/shared/components/icon/icon.component";
-import { RouterLink } from "@angular/router";
-import { AsyncPipe, NgIf } from "@angular/common";
+import { ActivatedRoute, RouterLink } from "@angular/router";
+import { AsyncPipe } from "@angular/common";
 import { ParcelByGeographyService } from "src/app/shared/generated/api/parcel-by-geography.service";
 import { CurrentGeographyService } from "src/app/shared/services/current-geography.service";
+import { routeParams } from "src/app/app.routes";
+import { DialogService } from "@ngneat/dialog";
 
 @Component({
     selector: "parcel-bulk-actions",
     templateUrl: "./parcel-bulk-actions.component.html",
     styleUrl: "./parcel-bulk-actions.component.scss",
-    standalone: true,
-    imports: [PageHeaderComponent, AlertDisplayComponent, QanatGridComponent, LoadingDirective, IconComponent, RouterLink, NgIf, AsyncPipe],
+    imports: [PageHeaderComponent, AlertDisplayComponent, QanatGridComponent, LoadingDirective, RouterLink, AsyncPipe],
 })
 export class ParcelBulkActionsComponent implements OnInit {
     public geography$: Observable<GeographyMinimalDto>;
@@ -56,15 +55,20 @@ export class ParcelBulkActionsComponent implements OnInit {
         private geographyService: GeographyService,
         private currentGeographyService: CurrentGeographyService,
         private zoneGroupService: ZoneGroupService,
-        private modalService: ModalService,
-        private viewContainerRef: ViewContainerRef,
-        private customAttributeService: CustomAttributeService
+        private customAttributeService: CustomAttributeService,
+        private route: ActivatedRoute,
+        private dialogService: DialogService
     ) {}
 
     ngOnInit() {
-        this.geography$ = this.currentGeographyService.getCurrentGeography().pipe(
+        this.geography$ = this.route.params.pipe(
+            switchMap((params) => {
+                const geographyName = params[routeParams.geographyName];
+                return this.geographyService.getByNameAsMinimalDtoGeography(geographyName);
+            }),
             tap((geography) => {
                 this.geographyID = geography.GeographyID;
+                this.currentGeographyService.setCurrentGeography(geography);
                 this.getDataForGeographyID(this.geographyID);
             }),
             share()
@@ -72,20 +76,21 @@ export class ParcelBulkActionsComponent implements OnInit {
     }
 
     getDataForGeographyID(geographyID: number) {
-        forkJoin([this.zoneGroupService.geographiesGeographyIDZoneGroupsGet(this.geographyID)]).subscribe(([zoneGroups]) => {
-            this.gridApi?.showLoadingOverlay();
+        forkJoin([this.zoneGroupService.listZoneGroup(this.geographyID)]).subscribe(([zoneGroups]) => {
+            this.gridApi?.setGridOption("loading", true);
+
             this.zoneGroups = zoneGroups;
 
             forkJoin([
-                this.parcelByGeographyService.geographiesGeographyIDParcelsGet(geographyID),
-                this.geographyService.geographiesGeographyIDGet(geographyID),
-                this.customAttributeService.geographiesGeographyIDCustomAttributesCustomAttributeTypeIDGet(geographyID, CustomAttributeTypeEnum.Parcel),
+                this.parcelByGeographyService.listByGeographyIDParcelByGeography(geographyID),
+                this.geographyService.getGeographyByIDGeography(geographyID),
+                this.customAttributeService.listCustomAttributesForGeographyCustomAttribute(geographyID, CustomAttributeTypeEnum.Parcel),
             ]).subscribe(([parcels, geography, customAttributes]) => {
                 this.isLoading = false;
                 this.parcels = parcels;
                 this.geography = geography;
                 this.customAttributes = customAttributes;
-                this.gridApi.hideOverlay();
+                this.gridApi?.setGridOption("loading", false);
                 this.cdr.detectChanges();
 
                 this.createColumnDefs();
@@ -95,7 +100,6 @@ export class ParcelBulkActionsComponent implements OnInit {
 
     private createColumnDefs() {
         this.columnDefs = [
-            this.utilityFunctionsService.createCheckboxSelectionColumnDef(),
             this.utilityFunctionsService.createLinkColumnDef("APN", "ParcelNumber", "ParcelID", {
                 ValueGetter: (params) => {
                     return { LinkValue: `${params.data.ParcelID}/detail`, LinkDisplay: params.data.ParcelNumber };
@@ -139,28 +143,23 @@ export class ParcelBulkActionsComponent implements OnInit {
 
     public changeStatus() {
         this.isLoading = true;
-        this.parcelByGeographyService.geographiesGeographyIDParcelsWaterAccountStartYearPost(this.geographyID, this.selectedParcelIDs).subscribe((years) => {
+        this.parcelByGeographyService.getYearsForParcelsParcelByGeography(this.geographyID, this.selectedParcelIDs).subscribe((years) => {
             this.years = years;
-            this.modalService
-                .open(
-                    BulkUpdateParcelStatusModalComponent,
-                    this.viewContainerRef,
-                    {
-                        ModalSize: ModalSizeEnum.Medium,
-                        ModalTheme: ModalThemeEnum.Light,
-                    } as ModalOptions,
-                    {
-                        ParcelIDs: this.selectedParcelIDs,
-                        Years: this.years,
-                        GeographyID: this.geographyID,
-                    } as ParcelUpdateContext
-                )
-                .instance.result.then((submitted) => {
-                    if (submitted === true) {
-                        this.getDataForGeographyID(this.geographyID);
-                        this.isLoading = false;
-                    }
-                });
+            const dialogRef = this.dialogService.open(BulkUpdateParcelStatusModalComponent, {
+                data: {
+                    ParcelIDs: this.selectedParcelIDs,
+                    Years: this.years,
+                    GeographyID: this.geographyID,
+                },
+                size: "sm",
+            });
+
+            dialogRef.afterClosed$.subscribe((result) => {
+                if (result) {
+                    this.getDataForGeographyID(this.geographyID);
+                }
+                this.isLoading = false;
+            });
         });
     }
 }

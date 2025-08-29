@@ -21,14 +21,14 @@ public static class FeeCalculatorHelper
     {
         var result = new FeeCalculatorOutputDto();
 
-        var waterAccount = WaterAccounts.GetByIDAsDto(dbContext, input.WaterAccountID);
-        var parcelIDs = waterAccount.Parcels.Select(x => x.ParcelID);
-
-        var reportingPeriod = await ReportingPeriods.GetByGeographyIDAndYearAsync(dbContext, geography.GeographyID, input.ReportingYear);
+        var reportingPeriod = await dbContext.ReportingPeriods.AsNoTracking().FirstOrDefaultAsync(x => x.ReportingPeriodID == input.ReportingPeriodID);
         if (reportingPeriod == null)
         {
             return new FeeCalculatorOutputDto();
         }
+
+        var waterAccount = WaterAccounts.GetByIDAsDto(dbContext, input.WaterAccountID, reportingPeriod.ReportingPeriodID);
+        var parcelIDs = waterAccount.Parcels.Select(x => x.ParcelID);
 
         var reportingPeriodStart = reportingPeriod.StartDate;
         var reportingPeriodEnd = reportingPeriod.EndDate;
@@ -70,13 +70,13 @@ public static class FeeCalculatorHelper
             irrigatedAcres -= disposedIrrigatedAcres;
         }
 
-        var totalET = etMeasurements.Sum(x => x.ReportedValueInAcreFeet).GetValueOrDefault(0);
-        var totalPrecip = precipMeasurements.Sum(x => x.ReportedValueInAcreFeet).GetValueOrDefault(0);
+        var totalET = etMeasurements.Sum(x => x.ReportedValueInAcreFeet);
+        var totalPrecip = precipMeasurements.Sum(x => x.ReportedValueInAcreFeet);
 
-        if(!isBaselineScenario)
+        if (!isBaselineScenario)
         {
-            var irrigatedAcreRatio = waterAccount.IrrigatedAcres != 0 
-                ? irrigatedAcres / (decimal)waterAccount.IrrigatedAcres 
+            var irrigatedAcreRatio = waterAccount.IrrigatedAcres != 0
+                ? irrigatedAcres / (decimal)waterAccount.IrrigatedAcres
                 : 0;
 
             totalET *= irrigatedAcreRatio;
@@ -203,8 +203,8 @@ public static class FeeCalculatorHelper
         var totalRemainingAllocationsInAcreFeet = feeCategoryOutputs.Sum(x => x.AllocationRemainingInAcreFeet.GetValueOrDefault(0));
 
         var lastCategoryUsed = feeCategoryOutputs.LastOrDefault(x => x.AllocationUsedInAcreFeet.HasValue);
-        var totalRemainingGroundwaterConsumption = lastCategoryUsed.RemainingGroundwaterConsumptionInAcreFeet == 0 
-            ? null 
+        var totalRemainingGroundwaterConsumption = lastCategoryUsed.RemainingGroundwaterConsumptionInAcreFeet == 0
+            ? null
             : lastCategoryUsed.RemainingGroundwaterConsumptionInAcreFeet;
 
         var scenario = new FeeCalculatorOutputScenarioDto()
@@ -216,8 +216,8 @@ public static class FeeCalculatorHelper
 
             Acres = parcelAcres.Round(4),
             IrrigatedAcres = irrigatedAcres.Round(4),
-            TransitionedAcres = isBaselineScenario 
-                ? null 
+            TransitionedAcres = isBaselineScenario
+                ? null
                 : input?.MLRPIncentives?.Sum(x => x.Acres),
 
             EstimatedConsumedGroundwaterInAcreFeetByParcelAcres = estimatedConsumedGroundwaterInAcreFeetByParcelAcres,

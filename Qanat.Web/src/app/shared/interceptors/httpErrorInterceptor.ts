@@ -7,14 +7,12 @@ import { Router } from "@angular/router";
 import { AlertService } from "../services/alert.service";
 import { AlertContext } from "../models/enums/alert-context.enum";
 import { Alert } from "../models/alert";
-import { AuthenticationService } from "src/app/shared/services/authentication.service";
 
 @Injectable()
 export class HttpErrorInterceptor implements HttpInterceptor {
     constructor(
         private router: Router,
-        private alertService: AlertService,
-        private authenticationService: AuthenticationService
+        private alertService: AlertService
     ) {}
     intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
         return next.handle(request).pipe(
@@ -28,8 +26,25 @@ export class HttpErrorInterceptor implements HttpInterceptor {
                     console.error(`Backend returned code ${error.status}, body was: ${error.error}`);
 
                     if (error instanceof HttpErrorResponse) {
+                        if (error.status == 400) {
+                            if (!error.error) {
+                                return throwError(() => error);
+                            }
+
+                            if (error.error.errors) {
+                                for (const key of Object.keys(error.error.errors)) {
+                                    const newLocal = new Alert((error.error.errors[key] as string[]).join("<br/>"), AlertContext.Danger);
+                                    this.alertService.pushAlert(newLocal);
+                                }
+                            } else {
+                                for (const key of Object.keys(error.error)) {
+                                    const newLocal = new Alert((error.error[key] as string[]).join("<br/>"), AlertContext.Danger);
+                                    this.alertService.pushAlert(newLocal);
+                                }
+                            }
+                        }
                         if (error.status == 401) {
-                            this.router.navigateByUrl("/unauthenticated", { replaceUrl: false }).then((x) => {
+                            this.router.navigateByUrl("/unauthenticated", { replaceUrl: false }).then(() => {
                                 if (typeof error.error === "string") {
                                     this.alertService.pushAlert(new Alert(error.error, AlertContext.Danger));
                                 }
@@ -45,22 +60,16 @@ export class HttpErrorInterceptor implements HttpInterceptor {
                         if (error.status == 404) {
                             if (typeof error.error == "string" && error.error.includes("User with GUID ")) {
                                 // we want the login-callback to create the user to trigger so we just let it pass through and have authentication-service handle it
-                                return throwError(error);
+                                return throwError(() => error);
                             } else {
-                                return throwError(error);
+                                this.router.navigate(["/not-found"]);
                             }
                         }
                     }
                 }
 
-                // If you want to return a new response:
-                //return of(new HttpResponse({body: [{name: "Default value..."}]}));
-
-                // If you want to return nothing:
-                //return EMPTY;
-
                 // Otherwise pass it on to the upper level and let them take care of it:
-                return throwError(error);
+                return throwError(() => error);
             })
         );
     }

@@ -19,6 +19,8 @@ public partial class GeographyUser
 
     public int GeographyRoleID { get; set; }
 
+    public bool ReceivesNotifications { get; set; }
+
     [ForeignKey("GeographyID")]
     [InverseProperty("GeographyUsers")]
     public virtual Geography Geography { get; set; }

@@ -32,16 +32,23 @@
     }
 
     &-menu {
-        background: $white;
-        box-shadow: 0 0 1rem rgba($black, 0.1);
-        border: 1px solid rgba($black, 0.05);
         position: absolute;
-        z-index: 1111;
         top: 1.25rem;
         left: 0;
+        z-index: 1111;
         width: 363px;
-        border-radius: 0.25rem;
-        z-index: 100;
+
+        ::ng-deep .ng-select.ng-select-single .ng-select-container .ng-value-container .ng-input {
+            top: 0;
+            height: 100%;
+            input {
+                height: 3rem;
+                line-height: 3rem;
+                font-size: clamp(0.87rem, 0.74rem + 0.62vw, 1.13rem);
+                top: 5px;
+                position: relative;
+            }
+        }
     }
 
     &-item {

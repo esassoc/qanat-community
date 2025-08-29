@@ -9,6 +9,7 @@ using Qanat.Common.Services.GDAL;
 using Qanat.EFModels.Entities;
 using Qanat.Models.DataTransferObjects;
 using Qanat.Models.DataTransferObjects.Geography;
+using Qanat.Models.DataTransferObjects.User;
 using Qanat.Models.Security;
 using System;
 using System.Collections.Generic;
@@ -20,21 +21,19 @@ namespace Qanat.API.Controllers;
 [ApiController]
 [RightsChecker]
 [Route("geographies")]
-public class GeographyController : SitkaController<GeographyController>
+public class GeographyController(
+    QanatDbContext dbContext,
+    ILogger<GeographyController> logger,
+    IOptions<QanatConfiguration> qanatConfiguration,
+    GeographyGISBoundaryService geographyGisBoundaryService,
+    GDALAPIService gdalApiService,
+    FileService fileService, UserDto callingUser)
+    : SitkaController<GeographyController>(dbContext, logger, qanatConfiguration)
 {
-    private readonly GeographyGISBoundaryService _geographyGISBoundaryService;
-    private readonly GDALAPIService _gdalApiService;
-    private readonly FileService _fileService;
+    private readonly GDALAPIService _gdalApiService = gdalApiService;
+    private readonly FileService _fileService = fileService;
 
-    public GeographyController(QanatDbContext dbContext, ILogger<GeographyController> logger, IOptions<QanatConfiguration> qanatConfiguration, GeographyGISBoundaryService geographyGISBoundaryService, GDALAPIService gdalApiService, FileService fileService)
-        : base(dbContext, logger, qanatConfiguration)
-    {
-        _geographyGISBoundaryService = geographyGISBoundaryService;
-        _gdalApiService = gdalApiService;
-        _fileService = fileService;
-    }
-
-    #region Read/Update
+    #region Read/UpdateAsync
 
     [HttpGet]
     [WithRolePermission(PermissionEnum.GeographyRights, RightsEnum.Read)]
@@ -70,8 +69,22 @@ public class GeographyController : SitkaController<GeographyController>
         return Ok();
     }
 
+    [HttpPut("{geographyID}/self-reporting")]
+    [EntityNotFound(typeof(Geography), "geographyID")]
+    [WithRolePermission(PermissionEnum.GeographyRights, RightsEnum.Update)]
+    public async Task<ActionResult<GeographyMinimalDto>> UpdateGeographySelfReporting([FromRoute] int geographyID, [FromBody] GeographySelfReportEnabledUpdateDto updateDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var geography = await Geographies.UpdateGeographySelfReportingAsync(_dbContext, geographyID, updateDto);
+        return Ok(geography);
+    }
+
     #endregion
-        
+
     [HttpGet("geography-name/{geographyName}/for-admin-editor")]
     [WithRolePermission(PermissionEnum.GeographyRights, RightsEnum.Read)]
     public ActionResult<GeographyForAdminEditorsDto> GetByGeographyNameForAdminEditor([FromRoute] string geographyName)
@@ -103,68 +116,75 @@ public class GeographyController : SitkaController<GeographyController>
     [AuthenticatedWithUser]
     public ActionResult<List<GeographyMinimalDto>> ListForCurrentUser()
     {
-        var user = UserContext.GetUserFromHttpContext(_dbContext, HttpContext);
-        var waterAccounts = WaterAccounts.ListByUserAsMinimalDtos(_dbContext, user);
-        var geographyIDs = waterAccounts.Select(x => x.GeographyID).Distinct().ToList();
+        callingUser.Flags.TryGetValue(Flag.IsSystemAdmin.FlagName, out var isAdmin);
+        if (isAdmin)
+        {
+            var geographiesForAdmin = Geographies.ListAsGeographyMinimalDto(_dbContext);
+            return Ok(geographiesForAdmin);
+        }
+
+        var geographyIDsWhereUserIsManager = callingUser.GeographyFlags.Where(x => x.Value[Flag.HasManagerDashboard.FlagName]).Select(x => x.Key);
+        var waterAccounts = WaterAccounts.ListByUserAsMinimalDtos(_dbContext, callingUser);
+        var geographyIDs = waterAccounts.Select(x => x.GeographyID).Union(geographyIDsWhereUserIsManager).Distinct().ToList();
         var geographies = Geographies.ListByIDsAsGeographyMinimalDto(_dbContext, geographyIDs);
         return Ok(geographies);
-    }
-
-    [HttpGet("{geographyID}/effectiveYears")]
-    [EntityNotFound(typeof(Geography), "geographyID")]
-    [WithGeographyRolePermission(PermissionEnum.ParcelRights, RightsEnum.Read)]
-    public ActionResult<List<int>> GetEffectiveYearsForGeography([FromRoute] int geographyID)
-    {
-        var startYear = WaterAccountParcels.GetNextAvailableEffectiveYearForGeography(_dbContext, geographyID);
-        var maxYear = DateTime.UtcNow.Year + 1;
-        var years = Enumerable.Range(startYear, maxYear - startYear + 1).ToList();
-        return Ok(years);
-    }
-
-    [HttpPost("{geographyID}/upload-parcel-gdb")]
-    [EntityNotFound(typeof(Geography), "geographyID")]
-    [RequestSizeLimit(10L * 1024L * 1024L * 1024L)]
-    [RequestFormLimits(MultipartBodyLengthLimit = 10L * 1024L * 1024L * 1024L)]
-    [WithGeographyRolePermission(PermissionEnum.ParcelRights, RightsEnum.Create)]
-    public async Task<ActionResult> UploadGDBAndParseFeatureClasses([FromForm] UploadedGdbRequestDto uploadedGdbRequestDto, [FromRoute] int geographyID)
-    {
-        if (ParcelHistories.GeographyHasUnreviewedParcels(_dbContext, geographyID))
-        {
-            return BadRequest("This geography has unreviewed parcel changes. Please review all current changes before uploading any new parcel data.");
-        }
-
-        var user = UserContext.GetUserFromHttpContext(_dbContext, HttpContext);
-
-        // save the gdb file contents to UploadedGdb so user doesn't have to wait for upload of file again
-        var uploadedGdb = await UploadedGdbs.CreateNew(_dbContext, user.UserID, geographyID);
-        await using (var stream = uploadedGdbRequestDto.File.OpenReadStream())
-        {
-            await _fileService.SaveFileStreamToAzureBlobStorage(uploadedGdb.CanonicalName, stream);
-        }
-
-        var ogrInfoRequestDto = new OgrInfoRequestDto { BlobContainer = FileService.FileContainerName, CanonicalName = uploadedGdb.CanonicalName };
-        var srid = await _gdalApiService.OgrInfoGdbGetSRID(ogrInfoRequestDto);
-
-        uploadedGdb.SRID = srid;
-        await _dbContext.SaveChangesAsync();
-
-        return Ok();
     }
 
     [HttpPut("{geographyID}/water-managers")]
     [EntityNotFound(typeof(Geography), "geographyID")]
     [WithGeographyRoleFlag(FlagEnum.HasManagerDashboard)]
-    public ActionResult<GeographyDto> EditGeographyWaterManagers([FromBody] List<UserDto> userDetailedDtos, [FromRoute] int geographyID)
+    public ActionResult<GeographyDto> EditGeographyWaterManagers([FromBody] List<GeographyWaterManagerDto> geographyWaterManagerDtos, [FromRoute] int geographyID)
     {
-        var errors = Geographies.ValidateUpdateGeographyWaterManagers(_dbContext, geographyID, userDetailedDtos);
+        var errors = Geographies.ValidateUpdateGeographyWaterManagers(_dbContext, geographyID, geographyWaterManagerDtos);
         errors.ForEach(vm => { ModelState.AddModelError(vm.Type, vm.Message); });
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
 
-        var geography = Geographies.UpdateGeographyWaterManagers(_dbContext, geographyID, userDetailedDtos);
+        var geography = Geographies.UpdateGeographyWaterManagers(_dbContext, geographyID, geographyWaterManagerDtos);
         return Ok(geography);
+    }
+
+    [HttpGet("{geographyID}/landing-page")]
+    [EntityNotFound(typeof(Geography), "geographyID")]
+    [WithRoleFlag(FlagEnum.CanClaimWaterAccounts)]
+    public ActionResult<GeographyLandingPageDto> GetNumberOfWellsAndParcelsRegisteredToUser([FromRoute] int geographyID)
+    {
+        var wellRegistrationCount = Users.GetNumberOfWellRegistrationsForUser(_dbContext, callingUser.UserID, geographyID);
+        var waterAccountCount = Users.GetNumberOfWaterAccountForUser(_dbContext, callingUser.UserID, geographyID);
+        return Ok(new GeographyLandingPageDto()
+        {
+            NumberOfWaterAccounts = waterAccountCount,
+            NumberOfWellRegistrations = wellRegistrationCount
+        });
+    }
+
+
+    [HttpGet("{geographyID}/users/{userID}/water-accounts")]
+    [EntityNotFound(typeof(Geography), "geographyID")]
+    [WithRoleFlag(FlagEnum.CanClaimWaterAccounts)]
+    public ActionResult ListWaterAccountsOwnedByCurrentUser([FromRoute] int geographyID, [FromRoute] int userID)
+    {
+        var waterAccountDtos = WaterAccounts.ListByGeographyIDAndUserIDAsWaterAccountRequestChangesDto(_dbContext, geographyID, userID);
+
+        return Ok(waterAccountDtos);
+    }
+
+    [HttpPut("{geographyID}/users/{userID}/water-accounts")]
+    [EntityNotFound(typeof(Geography), "geographyID")]
+    [WithRoleFlag(FlagEnum.CanClaimWaterAccounts)]
+    public async Task<ActionResult> UpdateWaterAccountsOwnedByCurrentUser([FromRoute] int geographyID, [FromRoute] int userID, [FromBody] WaterAccountParcelsRequestChangesDto requestDto)
+    {
+        var errors = WaterAccounts.ValidateRequestedWaterAccountChanges(_dbContext, geographyID, userID, requestDto);
+        errors.ForEach(vm => { ModelState.AddModelError(vm.Type, vm.Message); });
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        await WaterAccounts.ApplyRequestedWaterAccountChanges(_dbContext, geographyID, userID, requestDto, callingUser);
+        return Ok();
     }
 
     [HttpPut("gsa-boundaries")]
@@ -173,7 +193,7 @@ public class GeographyController : SitkaController<GeographyController>
     {
         try
         {
-            await _geographyGISBoundaryService.RefreshGeographyGSABoundaries();
+            await geographyGisBoundaryService.RefreshGeographyGSABoundaries();
             var geographyBoundarySimpleDtos = _dbContext.GeographyBoundaries.AsNoTracking().Select(x => x.AsSimpleDto()).ToList();
             return Ok(geographyBoundarySimpleDtos);
         }
@@ -182,5 +202,4 @@ public class GeographyController : SitkaController<GeographyController>
             return BadRequest(e);
         }
     }
-
 }

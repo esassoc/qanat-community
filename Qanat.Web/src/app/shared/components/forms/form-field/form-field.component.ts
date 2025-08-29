@@ -4,10 +4,11 @@ import { TinyMceConfigPipe } from "../../../pipes/tiny-mce-config.pipe";
 import { RequiredPipe } from "../../../pipes/required.pipe";
 import { InputErrorsComponent } from "../../inputs/input-errors/input-errors.component";
 import { FieldDefinitionComponent } from "../../field-definition/field-definition.component";
-import { SelectDropdownComponent } from "../../inputs/select-dropdown/select-dropdown.component";
 import { EditorComponent, TINYMCE_SCRIPT_SRC } from "@tinymce/tinymce-angular";
-import { NgSwitch, NgSwitchCase, NgIf, NgFor } from "@angular/common";
+
 import { NgxMaskDirective, provideNgxMask } from "ngx-mask";
+import { NgSelectModule } from "@ng-select/ng-select";
+import { SearchWaterAccountsComponent } from "../../search-water-accounts/search-water-accounts.component";
 
 @Component({
     selector: "form-field",
@@ -25,21 +26,17 @@ import { NgxMaskDirective, provideNgxMask } from "ngx-mask";
         },
         provideNgxMask(),
     ],
-    standalone: true,
     imports: [
-        NgSwitch,
-        NgSwitchCase,
         NgxMaskDirective,
         FormsModule,
         ReactiveFormsModule,
-        NgIf,
         EditorComponent,
-        SelectDropdownComponent,
-        NgFor,
         FieldDefinitionComponent,
         InputErrorsComponent,
         RequiredPipe,
         TinyMceConfigPipe,
+        NgSelectModule,
+        SearchWaterAccountsComponent,
     ],
 })
 export class FormFieldComponent {
@@ -49,7 +46,6 @@ export class FormFieldComponent {
     @Input() fieldLabel: string = "";
     @Input() placeholder: string = "";
     @Input() type: FormFieldType = FormFieldType.Text;
-    @Input() formInputOptions: FormInputOption[];
     @Input() toggleTrue: string = "On";
     @Input() toggleFalse: string = "Off";
     @Input() checkLabel: string;
@@ -58,6 +54,15 @@ export class FormFieldComponent {
     @Input() fieldDefinitionName: string;
     @Input() toggleHeight: string = "";
     @Input() mask: string;
+
+    // for select dropdown
+    @Input() formInputOptions: FormInputOption[];
+    @Input() multiple: boolean = false;
+
+    // for water account search
+    @Input() geographyID: number;
+    @Input() excludedWaterAccountIDs: number[] = [];
+
     /**
      * comma separated list of file types: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file#accept
      */
@@ -111,16 +116,21 @@ export enum FormFieldType {
     Check = "check",
     Toggle = "toggle",
     Date = "date",
+    Time = "time",
     Select = "select",
     Number = "number",
     Radio = "radio",
     RTE = "rte",
     File = "file",
+    WaterAccountSearch = "waterAccountSearch",
 }
 
 export interface FormInputOption {
     Value: any;
     Label: string;
-    Disabled: boolean | null | undefined;
     Group?: string | null | undefined;
+
+    disabled: boolean | null | undefined; // Needs to be lowercase to match ng-select's disabled property
 }
+
+export interface SelectDropdownOption extends FormInputOption {}

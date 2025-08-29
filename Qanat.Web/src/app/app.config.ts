@@ -1,5 +1,5 @@
-import { ErrorHandler, ApplicationConfig, importProvidersFrom } from "@angular/core";
-import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
+import { ErrorHandler, ApplicationConfig, importProvidersFrom, provideAppInitializer, inject } from "@angular/core";
+import { HTTP_INTERCEPTORS, provideHttpClient, withFetch, withInterceptorsFromDi } from "@angular/common/http";
 import { RouterModule, TitleStrategy, provideRouter } from "@angular/router";
 import { DecimalPipe, CurrencyPipe, DatePipe, AsyncPipe, KeyValuePipe, PercentPipe } from "@angular/common";
 import { HttpErrorInterceptor } from "./shared/interceptors/httpErrorInterceptor";
@@ -34,7 +34,8 @@ import { TinyMceConfigPipe } from "./shared/pipes/tiny-mce-config.pipe";
 import { RequiredPipe } from "./shared/pipes/required.pipe";
 import { CommaJoinPipe } from "./shared/pipes/comma-join.pipe";
 import { MapPipe } from "./shared/pipes/map.pipe";
-import { RECAPTCHA_V3_SITE_KEY } from "ng-recaptcha";
+import { provideDialogConfig } from "@ngneat/dialog";
+import { RECAPTCHA_V3_SITE_KEY } from "ng-recaptcha-2";
 
 export function init_app(datadogService: DatadogService) {
     return () => {
@@ -65,7 +66,7 @@ export function MSALGuardConfigFactory(): MsalGuardConfiguration {
 export function MSALInterceptorConfigFactory(): MsalInterceptorConfiguration {
     const protectedResourceMap = new Map<string, Array<string | ProtectedResourceScopes> | null>([
         [`${environment.mainAppApiUrl}/public/*`, [{ httpMethod: "GET", scopes: null }]],
-        [`${environment.mainAppApiUrl}/public/support-tickets/create/`, [{ httpMethod: "POST", scopes: null }]],
+        [`${environment.mainAppApiUrl}/public/support-tickets`, [{ httpMethod: "POST", scopes: null }]],
         [`${environment.mainAppApiUrl}/*`, b2cPolicies.apiScopes],
     ]);
 
@@ -83,6 +84,10 @@ export function MSALInterceptorConfigFactory(): MsalInterceptorConfiguration {
             return originalAuthRequest;
         },
     };
+}
+
+export function initializeMsal(pca: IPublicClientApplication) {
+    return () => pca.initialize();
 }
 
 export const appConfig: ApplicationConfig = {
@@ -103,7 +108,7 @@ export const appConfig: ApplicationConfig = {
                 anchorScrolling: "enabled",
             })
         ),
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(withInterceptorsFromDi(), withFetch()),
         provideAnimations(),
         { provide: HTTP_INTERCEPTORS, useClass: MsalInterceptor, multi: true },
         {
@@ -146,5 +151,23 @@ export const appConfig: ApplicationConfig = {
         RequiredPipe,
         CommaJoinPipe,
         MapPipe,
+        provideDialogConfig({
+            sizes: {
+                sm: {
+                    width: "100%",
+                    maxWidth: "540px",
+                    maxHeight: "90vh",
+                },
+                lg: {
+                    width: "100%",
+                    maxWidth: "1280px",
+                    maxHeight: "90vh",
+                },
+            },
+        }),
+        provideAppInitializer(() => {
+            const pca = inject<IPublicClientApplication>(MSAL_INSTANCE);
+            return pca.initialize();
+        }),
     ],
 };

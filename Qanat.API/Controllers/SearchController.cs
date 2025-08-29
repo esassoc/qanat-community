@@ -23,16 +23,25 @@ public class SearchController : SitkaController<SearchController>
     public ActionResult<WaterAccountSearchSummaryDto> SearchWaterAccounts([FromBody] WaterAccountSearchDto waterAccountSearchDto)
     {
         var user = UserContext.GetUserFromHttpContext(_dbContext, HttpContext);
-        var results = WaterAccounts.GetBySearchString(_dbContext, waterAccountSearchDto.GeographyID, waterAccountSearchDto.SearchString, user);
+        var results = WaterAccounts.GetBySearchString(_dbContext, waterAccountSearchDto, user);
         return Ok(results);
     }
 
     [HttpPost("search/parcels")]
     [WithRoleFlag(FlagEnum.CanClaimWaterAccounts)]
-    public ActionResult<ParcelSearchSummaryDto> SearchParcels([FromBody] ParcelSearchDto parcelSearchDto)
+    public ActionResult<ParcelSearchSummaryDto> SearchParcels([FromBody] ParcelSearchDto searchDto)
     {
         var user = UserContext.GetUserFromHttpContext(_dbContext, HttpContext);
-        var results = Parcels.GetBySearchString(_dbContext, parcelSearchDto.GeographyID, parcelSearchDto.SearchString, user);
+        var results = Parcels.GetBySearchString(_dbContext, searchDto.GeographyID, searchDto.SearchString, user);
+        return Ok(results);
+    }
+
+    [HttpPost("search/water-account-contacts")]
+    [WithRoleFlag(FlagEnum.CanClaimWaterAccounts)]
+    public ActionResult<WaterAccountContactSearchSummaryDto> SearchWaterAccountContacts([FromBody] WaterAccountContactSearchDto searchDto)
+    {
+        var user = UserContext.GetUserFromHttpContext(_dbContext, HttpContext);
+        var results = WaterAccountContacts.GetBySearchString(_dbContext, searchDto.GeographyID, searchDto.SearchString, user);
         return Ok(results);
     }
 }

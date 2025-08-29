@@ -49,8 +49,10 @@
         </li>
     </ul>
 
-    <div class="system-info g-col-12" *ngIf="systemInfo$ | async as systemInfo">
-        <span class="system-info__detail" [title]="systemInfo.FullInformationalVersion"> Version: {{ systemInfo.Version }} - {{ systemInfo.Environment }} </span>
-        <span class="system-info__detail">Built on: {{ systemInfo.CompilationDateTime | date: "short" }}</span>
-    </div>
+    @if (systemInfo$ | async; as systemInfo) {
+        <div class="system-info g-col-12">
+            <span class="system-info__detail" [title]="systemInfo.FullInformationalVersion"> Version: {{ systemInfo.Version }} - {{ systemInfo.Environment }} </span>
+            <span class="system-info__detail">Built on: {{ systemInfo.CompilationDateTime | date: "short" }}</span>
+        </div>
+    }
 </footer>

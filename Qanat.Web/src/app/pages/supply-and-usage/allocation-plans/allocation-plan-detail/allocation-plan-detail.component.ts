@@ -1,32 +1,23 @@
-import { Component, OnDestroy, OnInit, ViewContainerRef } from "@angular/core";
+import { Component, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { Observable, Subscription } from "rxjs";
-import { filter, switchMap, tap } from "rxjs/operators";
+import { Observable } from "rxjs";
+import { switchMap, tap } from "rxjs/operators";
 import { AllocationPlanManageDto, AllocationPlanMinimalDto } from "src/app/shared/generated/model/models";
 import { WaterAccountService } from "src/app/shared/generated/api/water-account.service";
-import { NgIf, AsyncPipe, DatePipe } from "@angular/common";
+import { AsyncPipe, DatePipe } from "@angular/common";
 import { AllocationPlanTableComponent } from "src/app/shared/components/allocation-plan-table/allocation-plan-table.component";
 import { routeParams } from "src/app/app.routes";
-import {
-    CopiedAllocationPlanEvent,
-    CopyExistingAllocationPlanModalComponent,
-} from "src/app/shared/components/copy-existing-allocation-plan-modal/copy-existing-allocation-plan-modal.component";
-import { DeletedAllocationPeriodEvent } from "src/app/shared/components/delete-allocation-period-modal/delete-allocation-period-modal.component";
-import {
-    UpsertAllocationPeriodEvent,
-    UpsertAllocationPeriodModalComponent,
-    AllocationPeriodContext,
-} from "src/app/shared/components/upsert-allocation-period-modal/upsert-allocation-period-modal.component";
+import { CopyExistingAllocationPlanModalComponent } from "src/app/shared/components/copy-existing-allocation-plan-modal/copy-existing-allocation-plan-modal.component";
+import { UpsertAllocationPeriodModalComponent } from "src/app/shared/components/upsert-allocation-period-modal/upsert-allocation-period-modal.component";
 import { TimeAgoPipe } from "src/app/shared/pipes/time-ago.pipe";
-import { ModalService, ModalEvent, ModalSizeEnum, ModalThemeEnum, ModalOptions } from "src/app/shared/services/modal/modal.service";
 import { PublicService } from "src/app/shared/generated/api/public.service";
+import { DialogService } from "@ngneat/dialog";
 
 @Component({
     selector: "allocation-plan-detail",
     templateUrl: "./allocation-plan-detail.component.html",
     styleUrls: ["./allocation-plan-detail.component.scss"],
-    standalone: true,
-    imports: [NgIf, AllocationPlanTableComponent, AsyncPipe, DatePipe, TimeAgoPipe],
+    imports: [AllocationPlanTableComponent, AsyncPipe, DatePipe, TimeAgoPipe],
 })
 export class AllocationPlanDetailComponent implements OnInit, OnDestroy {
     public isLoading: boolean = true;
@@ -38,27 +29,16 @@ export class AllocationPlanDetailComponent implements OnInit, OnDestroy {
     public editing: boolean;
     public canCopyFromExisting: boolean;
 
-    private modalEventSubscription: Subscription = Subscription.EMPTY;
-
     constructor(
         private route: ActivatedRoute,
         private publicService: PublicService,
-        private modalService: ModalService,
-        private viewContainerRef: ViewContainerRef,
-        private waterAccountService: WaterAccountService
+        private waterAccountService: WaterAccountService,
+        private dialogService: DialogService
     ) {}
 
-    ngOnDestroy(): void {
-        this.modalEventSubscription.unsubscribe();
-    }
+    ngOnDestroy(): void {}
 
     ngOnInit(): void {
-        this.modalEventSubscription = this.modalService.modalEventObservable
-            .pipe(filter((e): e is ModalEvent => e instanceof DeletedAllocationPeriodEvent || e instanceof UpsertAllocationPeriodEvent || e instanceof CopiedAllocationPlanEvent))
-            .subscribe((event) => {
-                // should only get delete and upsert events here
-                this.getGeographyID();
-            });
         this.getGeographyID();
 
         this.editing = this.route.snapshot.data.editable ?? false;
@@ -70,8 +50,8 @@ export class AllocationPlanDetailComponent implements OnInit, OnDestroy {
         const waterAccountID = this.route.snapshot.paramMap.get(routeParams.waterAccountID);
 
         let request;
-        if (geographyName) request = this.publicService.publicGeographiesNameGeographyNameGet(geographyName);
-        if (waterAccountID) request = this.waterAccountService.waterAccountsWaterAccountIDGet(parseInt(waterAccountID));
+        if (geographyName) request = this.publicService.getGeographyByNamePublic(geographyName);
+        if (waterAccountID) request = this.waterAccountService.getByIDWaterAccount(parseInt(waterAccountID));
 
         if (!request) return;
 
@@ -85,19 +65,17 @@ export class AllocationPlanDetailComponent implements OnInit, OnDestroy {
         this.allocationPlan$ = this.route.params.pipe(
             tap((params) => (this.isLoading = true)),
             switchMap((params) =>
-                this.publicService
-                    .publicGeographiesGeographyIDAllocationPlansWaterTypeSlugZoneSlugGet(this.geographyID, params[routeParams.waterTypeSlug], params[routeParams.zoneSlug])
-                    .pipe(
-                        tap(
-                            (allocationPlan) =>
-                                (this.allocationPlans$ = this.publicService.publicGeographiesGeographyIDAllocationPlansGet(this.geographyID).pipe(
-                                    tap((allocationPlans) => {
-                                        this.canCopyFromExisting =
-                                            allocationPlans.filter((x) => x.AllocationPlanID != allocationPlan.AllocationPlanID && x.AllocationPeriodsCount > 0).length > 0;
-                                    })
-                                ))
-                        )
+                this.publicService.getAllocationPlanByWaterTypeSlugAndZoneSlugPublic(this.geographyID, params[routeParams.waterTypeSlug], params[routeParams.zoneSlug]).pipe(
+                    tap(
+                        (allocationPlan) =>
+                            (this.allocationPlans$ = this.publicService.listAllocationPlansByGeographyIDPublic(this.geographyID).pipe(
+                                tap((allocationPlans) => {
+                                    this.canCopyFromExisting =
+                                        allocationPlans.filter((x) => x.AllocationPlanID != allocationPlan.AllocationPlanID && x.AllocationPeriodsCount > 0).length > 0;
+                                })
+                            ))
                     )
+                )
             ),
             tap((x) => {
                 this.isLoading = false;
@@ -107,43 +85,36 @@ export class AllocationPlanDetailComponent implements OnInit, OnDestroy {
     }
 
     addAllocationPeriod(): void {
-        this.modalService
-            .open(
-                UpsertAllocationPeriodModalComponent,
-                this.viewContainerRef,
-                {
-                    ModalSize: ModalSizeEnum.ExtraLarge,
-                    ModalTheme: ModalThemeEnum.Light,
-                } as ModalOptions,
-                {
-                    AllocationPlanManageDto: this.allocationPlan,
-                    Update: false,
-                } as AllocationPeriodContext
-            )
-            .instance.result.then((result) => {
-                if (result) {
-                    this.setupObservable();
-                }
-            });
+        const dialogRef = this.dialogService.open(UpsertAllocationPeriodModalComponent, {
+            data: {
+                AllocationPlanPeriodSimpleDto: null,
+                AllocationPlanManageDto: this.allocationPlan,
+                Update: false,
+            },
+            size: "lg",
+        });
+
+        dialogRef.afterClosed$.subscribe((result) => {
+            if (result) {
+                this.setupObservable();
+            }
+        });
     }
 
     copyFromExistingPeriod(): void {
-        this.modalService
-            .open(
-                CopyExistingAllocationPlanModalComponent,
-                this.viewContainerRef,
-                {
-                    ModalSize: ModalSizeEnum.Medium,
-                    ModalTheme: ModalThemeEnum.Light,
-                } as ModalOptions,
-                {
-                    AllocationPlanManageDto: this.allocationPlan,
-                } as AllocationPeriodContext
-            )
-            .instance.result.then((result) => {
-                if (result) {
-                    this.setupObservable();
-                }
-            });
+        const dialogRef = this.dialogService.open(CopyExistingAllocationPlanModalComponent, {
+            data: {
+                AllocationPlanPeriodSimpleDto: null,
+                AllocationPlanManageDto: this.allocationPlan,
+                Update: false,
+            },
+            size: "sm",
+        });
+
+        dialogRef.afterClosed$.subscribe((result) => {
+            if (result) {
+                this.setupObservable();
+            }
+        });
     }
 }

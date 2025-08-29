@@ -6,8 +6,7 @@ namespace Qanat.EFModels.Entities;
 
 public static class WaterTypeMonthlySupplies
 {
-    public static IEnumerable<WaterAccountWaterTypeMonthlySupplyDto> ListByYearAndWaterAccount(
-        QanatDbContext dbContext, int year, int waterAccountID)
+    public static IEnumerable<WaterAccountWaterTypeMonthlySupplyDto> ListByYearAndWaterAccount(QanatDbContext dbContext, int year, int waterAccountID)
     {
         var yearParam = new SqlParameter("year", year);
         var waterAccountIDParam = new SqlParameter("waterAccountID", waterAccountID);
@@ -25,10 +24,11 @@ public static class WaterTypeMonthlySupplies
                     WaterTypeName = x.First().WaterTypeName,
                     WaterTypeColor = x.First().WaterTypeColor,
                     WaterTypeSortOrder = x.First().WaterTypeSortOrder,
+                    WaterTypeDefinition = x.First().WaterTypeDefinition,
                     TotalSupply = x.Sum(y => y.CurrentSupplyAmount)
                 };
-                var waterTypeMonthlySuppliesWithValues
-                    = x.Where(y => y.CurrentCumulativeSupplyAmount.HasValue).ToList();
+
+                var waterTypeMonthlySuppliesWithValues = x.Where(y => y.CurrentCumulativeSupplyAmount.HasValue).ToList();
                 if (waterTypeMonthlySuppliesWithValues.Any())
                 {
                     dto.CumulativeSupplyDepthByMonth = waterTypeMonthlySuppliesWithValues.ToDictionary(

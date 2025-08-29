@@ -1,5 +1,4 @@
-﻿using System.Security.Cryptography.X509Certificates;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Qanat.Common.Util;
 using Qanat.Models.DataTransferObjects;
 
@@ -81,14 +80,30 @@ public static class FrequentlyAskedQuestions
                         faq.FaqDisplayLocationTypeIDs.Contains(x.FaqDisplayLocationTypeID)).ToList();
 
             var updated = faq.FaqDisplayLocationTypeIDs
-                .Select(x => new FrequentlyAskedQuestionFaqDisplayLocationType()
+                .Select(x =>
                 {
-                    FrequentlyAskedQuestionID = (int) faq.FrequentlyAskedQuestionID,
-                    FaqDisplayLocationTypeID = x,
-                    SortOrder = existingFaqLocations.Count == 0 
-                        ? 0 
-                        : existingFaqLocations.SingleOrDefault(y => y.FaqDisplayLocationTypeID == x && y.FrequentlyAskedQuestionID == (int) faq.FrequentlyAskedQuestionID)?.SortOrder 
-                            ?? existingFaqLocations.Where(y => y.FaqDisplayLocationTypeID == x).Max(y => y.SortOrder) + 1
+                    var frequentlyAskedQuestionFaqDisplayLocationType = new FrequentlyAskedQuestionFaqDisplayLocationType()
+                    {
+                        FrequentlyAskedQuestionID = faq.FrequentlyAskedQuestionID!.Value,
+                        FaqDisplayLocationTypeID = x
+                    };
+                    if (existingFaqLocations.Count == 0)
+                    {
+                        frequentlyAskedQuestionFaqDisplayLocationType.SortOrder = 0;
+                    }
+                    else
+                    {
+                        var sortOrder = existingFaqLocations.SingleOrDefault(
+                            y =>
+                                y.FaqDisplayLocationTypeID == x && y.FrequentlyAskedQuestionID ==
+                                (int)faq.FrequentlyAskedQuestionID)?.SortOrder;
+                        var frequentlyAskedQuestionFaqDisplayLocationTypes = existingFaqLocations.Where(y => y.FaqDisplayLocationTypeID == x).ToList();
+                        var sortOrder2 = frequentlyAskedQuestionFaqDisplayLocationTypes.Any() ? frequentlyAskedQuestionFaqDisplayLocationTypes
+                            .Max(y => y.SortOrder) + 1 : 0;
+                        frequentlyAskedQuestionFaqDisplayLocationType.SortOrder = sortOrder ?? sortOrder2;
+                    }
+
+                    return frequentlyAskedQuestionFaqDisplayLocationType;
                 }).ToList();
 
 

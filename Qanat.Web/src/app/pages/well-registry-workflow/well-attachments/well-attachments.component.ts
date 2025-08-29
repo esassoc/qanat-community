@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, ComponentRef, TemplateRef, ViewContainerRef, OnInit } from "@angular/core";
+import { ChangeDetectorRef, Component, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { routeParams } from "src/app/app.routes";
 import { AuthenticationService } from "src/app/shared/services/authentication.service";
@@ -6,9 +6,7 @@ import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { Alert } from "src/app/shared//models/alert";
 import { FileResourceSimpleDto } from "src/app/shared/generated/model/file-resource-simple-dto";
-import { ModalService } from "src/app/shared/services/modal/modal.service";
 import { ConfirmService } from "src/app/shared/services/confirm/confirm.service";
-import { ModalComponent } from "src/app/shared/components/modal/modal.component";
 import { UserDto, WellRegistrationFileResourceDto, WellRegistrationFileResourceUpdateDto } from "src/app/shared/generated/model/models";
 import { WellRegistryWorkflowProgressService } from "src/app/shared/services/well-registry-workflow-progress.service";
 import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
@@ -16,19 +14,20 @@ import { FileResourceService } from "src/app/shared/generated/api/file-resource.
 import { saveAs } from "file-saver";
 import { WellRegistrationFileResourceService } from "src/app/shared/generated/api/well-registration-file-resource.service";
 import { WellRegistrationService } from "src/app/shared/generated/api/well-registration.service";
-import { NgIf, NgFor, DatePipe } from "@angular/common";
+import { DatePipe } from "@angular/common";
 import { ButtonComponent } from "../../../shared/components/button/button.component";
 import { FormsModule } from "@angular/forms";
 import { AlertDisplayComponent } from "../../../shared/components/alert-display/alert-display.component";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { WorkflowBodyComponent } from "src/app/shared/components/workflow-body/workflow-body.component";
+import { DialogService } from "@ngneat/dialog";
+import { UpdateWellRegistrationFileResourceModalComponent } from "../../update-well-registration-file-resource-modal/update-well-registration-file-resource-modal.component";
 
 @Component({
     selector: "well-attachments",
     templateUrl: "./well-attachments.component.html",
     styleUrls: ["./well-attachments.component.scss"],
-    standalone: true,
-    imports: [PageHeaderComponent, AlertDisplayComponent, WorkflowBodyComponent, FormsModule, ButtonComponent, NgIf, NgFor, DatePipe],
+    imports: [PageHeaderComponent, AlertDisplayComponent, WorkflowBodyComponent, FormsModule, ButtonComponent, DatePipe],
 })
 export class WellAttachmentsComponent implements OnInit {
     public customRichTextTypeID = CustomRichTextTypeEnum.WellRegistryAttachments;
@@ -43,8 +42,6 @@ export class WellAttachmentsComponent implements OnInit {
     public fileUploadElementID = "file-upload";
 
     public isLoadingSubmit = false;
-
-    private updateModalComponent: ComponentRef<ModalComponent>;
     public wellRegistrationFileResourceToUpdate: WellRegistrationFileResourceDto;
     public model: WellRegistrationFileResourceUpdateDto;
 
@@ -57,10 +54,9 @@ export class WellAttachmentsComponent implements OnInit {
         private wellRegistrationFileResourceService: WellRegistrationFileResourceService,
         private alertService: AlertService,
         private confirmService: ConfirmService,
-        private modalService: ModalService,
-        private viewContainerRef: ViewContainerRef,
         private fileResourceService: FileResourceService,
-        private wellRegistryProgressService: WellRegistryWorkflowProgressService
+        private wellRegistryProgressService: WellRegistryWorkflowProgressService,
+        private dialogService: DialogService
     ) {}
 
     ngOnInit(): void {
@@ -71,7 +67,7 @@ export class WellAttachmentsComponent implements OnInit {
             if (id) {
                 this.wellID = parseInt(id);
 
-                this.wellRegistrationService.wellRegistrationsWellRegistrationIDFileResourcesGet(this.wellID).subscribe((wellRegistrationFileResources) => {
+                this.wellRegistrationService.listWellRegistrationFileResourcesByWellRegistrationIDWellRegistration(this.wellID).subscribe((wellRegistrationFileResources) => {
                     this.wellRegistrationFileResources = wellRegistrationFileResources;
                 });
             }
@@ -90,7 +86,7 @@ export class WellAttachmentsComponent implements OnInit {
     }
 
     public openFileResourceLink(fileResource: FileResourceSimpleDto) {
-        this.fileResourceService.fileResourcesFileResourceGuidAsStringGet(fileResource.FileResourceGUID).subscribe((response) => {
+        this.fileResourceService.downloadFileResourceFileResource(fileResource.FileResourceGUID).subscribe((response) => {
             saveAs(response, `${fileResource.OriginalBaseFilename}.${fileResource.OriginalFileExtension}`);
         });
     }
@@ -121,7 +117,7 @@ export class WellAttachmentsComponent implements OnInit {
         }
 
         this.isLoadingSubmit = true;
-        this.wellRegistrationFileResourceService.wellRegistrationsWellRegistrationIDFileResourcesPost(this.wellID, this.wellID, this.fileUpload, this.fileDescription).subscribe({
+        this.wellRegistrationFileResourceService.createWellFileResourceWellRegistrationFileResource(this.wellID, this.wellID, this.fileUpload, this.fileDescription).subscribe({
             next: (wellRegistrationFileResources) => {
                 this.isLoadingSubmit = false;
                 this.alertService.pushAlert(new Alert("File successfully uploaded", AlertContext.Success));
@@ -148,7 +144,7 @@ export class WellAttachmentsComponent implements OnInit {
             .then((confirmed) => {
                 if (confirmed) {
                     this.wellRegistrationFileResourceService
-                        .wellRegistrationsWellRegistrationIDFileResourcesWellRegistrationFileResourceIDDelete(
+                        .deleteWellFileResourceWellRegistrationFileResource(
                             wellRegistrationFileResource.WellRegistrationID,
                             wellRegistrationFileResource.WellRegistrationFileResourceID
                         )
@@ -161,36 +157,28 @@ export class WellAttachmentsComponent implements OnInit {
             });
     }
 
-    open(template: TemplateRef<any>, wellRegistrationFileResource): void {
+    open(wellRegistrationFileResource): void {
         this.wellRegistrationFileResourceToUpdate = wellRegistrationFileResource;
         this.model.FileDescription = wellRegistrationFileResource.FileDescription;
         this.model.WellRegistrationFileResourceID = wellRegistrationFileResource.WellRegistrationFileResourceID;
 
-        this.updateModalComponent = this.modalService.open(template, this.viewContainerRef);
-    }
+        const dialogRef = this.dialogService.open(UpdateWellRegistrationFileResourceModalComponent, {
+            data: {
+                wellID: this.wellID,
+                wellRegistrationFileResourceToUpdate: this.wellRegistrationFileResourceToUpdate,
+            },
+            size: "sm",
+        });
 
-    close(): void {
-        if (!this.updateModalComponent) return;
-        this.modalService.close(this.updateModalComponent);
-    }
-
-    public updateWellRegistrationFileResource() {
-        this.close();
-        this.alertService.clearAlerts();
-
-        this.wellRegistrationFileResourceService
-            .wellRegistrationsWellRegistrationIDFileResourcesWellRegistrationFileResourceIDPut(
-                this.wellID,
-                this.wellRegistrationFileResourceToUpdate.WellRegistrationFileResourceID,
-                this.model
-            )
-            .subscribe(() => {
-                this.wellRegistrationFileResourceToUpdate.FileDescription = this.model.FileDescription;
+        dialogRef.afterClosed$.subscribe((result) => {
+            if (result) {
+                this.wellRegistrationFileResourceToUpdate.FileDescription = result.FileDescription;
 
                 this.wellRegistrationFileResourceToUpdate = null;
                 this.model.FileDescription = "";
 
                 this.alertService.pushAlert(new Alert("File description successfully updated", AlertContext.Success));
-            });
+            }
+        });
     }
 }

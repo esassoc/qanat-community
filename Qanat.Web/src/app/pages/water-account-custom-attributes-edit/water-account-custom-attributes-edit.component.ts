@@ -10,7 +10,7 @@ import { Alert } from "src/app/shared/models/alert";
 import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { EntityCustomAttributesEditComponent as EntityCustomAttributesEditComponent_1 } from "../../shared/components/entity-custom-attributes-edit/entity-custom-attributes-edit.component";
-import { NgIf, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { AlertDisplayComponent } from "../../shared/components/alert-display/alert-display.component";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 
@@ -18,8 +18,7 @@ import { PageHeaderComponent } from "src/app/shared/components/page-header/page-
     selector: "water-account-custom-attributes-edit",
     templateUrl: "./water-account-custom-attributes-edit.component.html",
     styleUrl: "./water-account-custom-attributes-edit.component.scss",
-    standalone: true,
-    imports: [PageHeaderComponent, AlertDisplayComponent, NgIf, EntityCustomAttributesEditComponent_1, AsyncPipe],
+    imports: [PageHeaderComponent, AlertDisplayComponent, EntityCustomAttributesEditComponent_1, AsyncPipe]
 })
 export class WaterAccountCustomAttributesEditComponent implements OnInit {
     @ViewChild(EntityCustomAttributesEditComponent) entityCustomAttributesEditComponent: EntityCustomAttributesEditComponent;
@@ -40,7 +39,7 @@ export class WaterAccountCustomAttributesEditComponent implements OnInit {
         this.waterAccountCustomAttributes$ = this.route.paramMap.pipe(
             switchMap((paramMap) => {
                 this.waterAccountID = parseInt(paramMap.get(routeParams.waterAccountID));
-                return this.customAttributeService.customAttributesWaterAccountsWaterAccountIDGet(this.waterAccountID);
+                return this.customAttributeService.listAllWaterAccountCustomAttributesCustomAttribute(this.waterAccountID);
             })
         );
     }
@@ -55,7 +54,7 @@ export class WaterAccountCustomAttributesEditComponent implements OnInit {
         // populate a dictionary of custom attributes with entered values
         const requestDto = new EntityCustomAttributesDto({ CustomAttributes: customAttributes });
 
-        this.customAttributeService.customAttributesWaterAccountsWaterAccountIDPost(this.waterAccountID, requestDto).subscribe({
+        this.customAttributeService.updateWaterAccountCustomAttributesCustomAttribute(this.waterAccountID, requestDto).subscribe({
             next: () => {
                 this.isLoadingSubmit = false;
                 this.router.navigate([".."], { relativeTo: this.route }).then(() => {

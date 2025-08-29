@@ -1,0 +1,68 @@
+@if (currentGeography$ | async) {
+    <water-dashboard-nav [geography]="currentGeography"></water-dashboard-nav>
+    <div class="full-width-page">
+        <page-header
+            pageTitle="Water Account Contacts"
+            icon="Contact"
+            preTitle="Water Dashboard"
+            [customRichTextTypeID]="customRichTextTypeID"
+            [templateTitleAppend]="templateTitleAppend"
+            [templateBottomRight]="templateBottomRight">
+            <ng-template #templateTitleAppend>
+                <name-tag name="Admin" color="#000" class="mb-2 name-tag-nudge"></name-tag>
+            </ng-template>
+            <ng-template #templateBottomRight>
+                <button (click)="openCreateModal()" class="btn btn-orange">+ New Contact</button>
+            </ng-template>
+        </page-header>
+        @if (currentUserGeographies$ | async; as currentUserGeographies) {
+            <div class="page-body" [loadingSpinner]="{ isLoading: isLoading && firstLoad, loadingHeight: 700 }">
+                <app-alert-display></app-alert-display>
+                @if (currentUserGeographies.length > 0) {
+                    @if (gridRef) {
+                        <qanat-grid-header [grid]="gridRef" [leftAlignClearFiltersButton]="true">
+                            <div customGridActionsRight>
+                                <div class="form-field" class="geography-selector">
+                                    <div class="field">
+                                        <ng-select
+                                            name="Geography"
+                                            [(ngModel)]="currentGeography"
+                                            (ngModelChange)="onGeographySelected($event)"
+                                            [compareWith]="compareGeography"
+                                            [items]="currentUserGeographies"
+                                            [clearable]="false"
+                                            [searchable]="false"
+                                            bindLabel="GeographyName"
+                                            class="custom small">
+                                        </ng-select>
+                                    </div>
+                                </div>
+                            </div>
+                        </qanat-grid-header>
+                    }
+                    <div class="grid-12 mt-3">
+                        @if (waterAccountContacts$ | async; as waterAccountContacts) {
+                            <div class="tab-nav-panel g-col-12">
+                                <qanat-grid
+                                    height="675px"
+                                    [rowData]="waterAccountContacts"
+                                    [columnDefs]="columnDefs"
+                                    [overrideDefaultGridHeader]="true"
+                                    (gridReady)="gridReady($event)"
+                                    (gridRefReady)="gridRef = $event"
+                                    downloadFileName="{{ currentGeography.GeographyName.toLowerCase() }}-contacts"></qanat-grid>
+                            </div>
+                        }
+                    </div>
+                } @else {
+                    <div class="alert alert-info">
+                        <div class="alert-content">
+                            <i class="fa fa-info"></i>
+                            Your user profile does not currently have access to view contacts for this geography.
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+}

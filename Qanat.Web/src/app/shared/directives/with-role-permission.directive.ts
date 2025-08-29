@@ -23,7 +23,10 @@ export class WithRolePermissionDirective {
         }
     }
 
-    constructor(private templateRef: TemplateRef<any>, private viewContainer: ViewContainerRef) {}
+    constructor(
+        private templateRef: TemplateRef<any>,
+        private viewContainer: ViewContainerRef
+    ) {}
 }
 
 export interface RolePermissionCheck {

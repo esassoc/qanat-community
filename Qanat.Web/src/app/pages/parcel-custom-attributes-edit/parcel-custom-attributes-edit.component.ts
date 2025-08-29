@@ -10,7 +10,7 @@ import { Alert } from "src/app/shared/models/alert";
 import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { EntityCustomAttributesEditComponent as EntityCustomAttributesEditComponent_1 } from "../../shared/components/entity-custom-attributes-edit/entity-custom-attributes-edit.component";
-import { NgIf, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { AlertDisplayComponent } from "../../shared/components/alert-display/alert-display.component";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 
@@ -18,8 +18,7 @@ import { PageHeaderComponent } from "src/app/shared/components/page-header/page-
     selector: "parcel-custom-attributes-edit",
     templateUrl: "./parcel-custom-attributes-edit.component.html",
     styleUrl: "./parcel-custom-attributes-edit.component.scss",
-    standalone: true,
-    imports: [PageHeaderComponent, AlertDisplayComponent, NgIf, EntityCustomAttributesEditComponent_1, AsyncPipe],
+    imports: [PageHeaderComponent, AlertDisplayComponent, EntityCustomAttributesEditComponent_1, AsyncPipe]
 })
 export class ParcelCustomAttributesEditComponent implements OnInit {
     @ViewChild(EntityCustomAttributesEditComponent) entityCustomAttributesEditComponent: EntityCustomAttributesEditComponent;
@@ -40,7 +39,7 @@ export class ParcelCustomAttributesEditComponent implements OnInit {
         this.parcelCustomAttributes$ = this.route.paramMap.pipe(
             switchMap((paramMap) => {
                 this.parcelID = parseInt(paramMap.get(routeParams.parcelID));
-                return this.customAttributeService.customAttributesParcelsParcelIDGet(this.parcelID);
+                return this.customAttributeService.listAllParcelCustomAttributesCustomAttribute(this.parcelID);
             })
         );
     }
@@ -55,7 +54,7 @@ export class ParcelCustomAttributesEditComponent implements OnInit {
         // populate a dictionary of custom attributes with entered values
         const requestDto = new EntityCustomAttributesDto({ CustomAttributes: customAttributes });
 
-        this.customAttributeService.customAttributesParcelsParcelIDPost(this.parcelID, requestDto).subscribe({
+        this.customAttributeService.updateParcelCustomAttributesCustomAttribute(this.parcelID, requestDto).subscribe({
             next: () => {
                 this.isLoadingSubmit = false;
                 this.router.navigate([".."], { relativeTo: this.route }).then(() => {

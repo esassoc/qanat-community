@@ -1,0 +1,202 @@
+<div class="dashboard">
+    @if (supportTicket$ | async; as supportTicket) {
+        <aside class="sidebar support-sidebar">
+            <div class="sidebar-header support-sidebar__header">
+                <icon class="support-logo" icon="SupportLogo"></icon>
+                <h2 class="support-sidebar__title">Questions & Support Desk</h2>
+            </div>
+            <div class="sidebar-body sticky-nav">
+                @if (pageMenu) {
+                    <dashboard-menu [dashboardMenu]="pageMenu" [viewingDetailPage]="true"></dashboard-menu>
+                }
+            </div>
+        </aside>
+        <main class="main">
+            <page-header pageTitle="Support Request: # {{ supportTicketID }}" icon="Inbox" class="support-page-header" [templateRight]="templateRight"> </page-header>
+            <ng-template #templateRight>
+                <div class="support-ticket-date">
+                    @if (supportTicketClosed) {
+                        Closed on {{ supportTicket.DateClosed | date: dateFormatString }}
+                    } @else {
+                        {{ supportTicket.DateCreated | timeElapsed }} open
+                    }
+                    <ng-template #timeElapsed>{{ supportTicket.DateCreated | timeElapsed }} open</ng-template>
+                </div>
+            </ng-template>
+            <app-alert-display></app-alert-display>
+            <div class="page-body grid-12">
+                <div class="card g-col-8" id="details">
+                    <div class="card-header">
+                        <h2>Details</h2>
+                    </div>
+                    <div class="card-body">
+                        <key-value-pair-list>
+                            <key-value-pair [horizontal]="true">
+                                <ng-container key>Name</ng-container>
+                                <ng-container keyValue>
+                                    <div>{{ supportTicket.ContactFirstName }} {{ supportTicket.ContactLastName }}</div>
+                                </ng-container>
+                            </key-value-pair>
+                            <key-value-pair [horizontal]="true">
+                                <ng-container key>Email</ng-container>
+                                <ng-container keyValue>
+                                    @if (supportTicket.ContactEmail) {
+                                        <div>{{ supportTicket.ContactEmail }}</div>
+                                    } @else {
+                                        <div class="not-available">Not Available</div>
+                                    }
+                                </ng-container>
+                            </key-value-pair>
+                            <key-value-pair [horizontal]="true">
+                                <ng-container key>Phone</ng-container>
+                                <ng-container keyValue>
+                                    @if (supportTicket.ContactPhoneNumber) {
+                                        <div>{{ supportTicket.ContactPhoneNumber | phone }}</div>
+                                    } @else {
+                                        <div class="not-available">Not Available</div>
+                                    }
+                                </ng-container>
+                            </key-value-pair>
+                            <key-value-pair [horizontal]="true">
+                                <ng-container key>Geography</ng-container>
+                                <ng-container keyValue>
+                                    @if (supportTicket.GeographyName) {
+                                        <div>{{ supportTicket.GeographyName }}</div>
+                                    } @else {
+                                        <div class="not-available">Not Available</div>
+                                    }
+                                </ng-container>
+                            </key-value-pair>
+                            <key-value-pair [horizontal]="true">
+                                <ng-container key>Water Account</ng-container>
+                                <ng-container keyValue>
+                                    @if (supportTicket.WaterAccountID) {
+                                        <a [routerLink]="['/water-accounts', supportTicket.WaterAccountID]">#{{ supportTicket.WaterAccountNumber }}</a>
+                                    } @else {
+                                        <div class="not-available">Not Available</div>
+                                    }
+                                </ng-container>
+                            </key-value-pair>
+                            <key-value-pair [horizontal]="true">
+                                <ng-container key>Type</ng-container>
+                                <ng-container keyValue>
+                                    <div>{{ supportTicket.SupportTicketQuestionType.SupportTicketQuestionTypeDisplayName }}</div>
+                                </ng-container>
+                            </key-value-pair>
+                            <key-value-pair [horizontal]="true">
+                                <ng-container key>Description</ng-container>
+                                <ng-container keyValue>
+                                    <div class="copy copy-3 flow" [innerHtml]="supportTicket.Description | trustHtml"></div>
+                                </ng-container>
+                            </key-value-pair>
+                            <key-value-pair [horizontal]="true">
+                                <ng-container key>Date Created</ng-container>
+                                <ng-container keyValue>
+                                    <div>{{ supportTicket.DateCreated | date: dateFormatString }}</div>
+                                </ng-container>
+                            </key-value-pair>
+                            @if (supportTicketClosed) {
+                                <key-value-pair [horizontal]="true">
+                                    <ng-container key>Date Closed</ng-container>
+                                    <ng-container keyValue>
+                                        <div>{{ supportTicket.DateClosed | date: dateFormatString }}</div>
+                                    </ng-container>
+                                </key-value-pair>
+                            }
+                        </key-value-pair-list>
+                    </div>
+                    <div class="card-footer">
+                        <div>
+                            <icon icon="Info"></icon>
+                            <a (click)="openUpdateDetailsModal(supportTicket)">
+                                <span>Update Details</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card g-col-4">
+                    <div class="card-header">
+                        <h2>Status</h2>
+                    </div>
+                    <div class="card-body">
+                        <key-value-pair-list>
+                            <key-value-pair [horizontal]="true">
+                                <ng-container key>Status</ng-container>
+                                <ng-container keyValue>
+                                    <div>{{ supportTicket.SupportTicketStatus.SupportTicketStatusDisplayName }}</div>
+                                </ng-container>
+                            </key-value-pair>
+                            <key-value-pair [horizontal]="true">
+                                <ng-container key>Assignee</ng-container>
+                                <ng-container keyValue>
+                                    @if (supportTicket.AssignedUserFullName) {
+                                        <div>{{ supportTicket.AssignedUserFullName }}</div>
+                                    } @else {
+                                        <div class="not-available">Not Available</div>
+                                    }
+                                </ng-container>
+                            </key-value-pair>
+                            <key-value-pair [horizontal]="true">
+                                <ng-container key>Priority</ng-container>
+                                <ng-container keyValue>
+                                    <div>{{ supportTicket.SupportTicketPriority.SupportTicketPriorityDisplayName }}</div>
+                                </ng-container>
+                            </key-value-pair>
+                        </key-value-pair-list>
+                    </div>
+                    <div class="card-footer">
+                        <div>
+                            <icon icon="Info"></icon>
+                            <a (click)="openUpdateStatusModal(supportTicket)">
+                                <span>Update Status</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                @if (supportTicketNotes$ | async; as supportTicketNotes) {
+                    <div class="card g-col-12" id="responses-and-notes">
+                        <div class="card-header flex-start">
+                            <h2>Responses & Notes</h2>
+                            @if (supportTicketNotes.length > 0) {
+                                <div class="counter">{{ supportTicketNotes.length }}</div>
+                            }
+                        </div>
+                        <div class="card-body support-ticket-notes-wrapper">
+                            @for (supportTicketNote of supportTicketNotes; track supportTicketNote) {
+                                <div class="support-ticket-note">
+                                    <div class="support-ticket-note__metadata">
+                                        <div class="date">{{ supportTicketNote.CreateDate | date: dateFormatString }}</div>
+                                        <div class="user">{{ supportTicketNote.CreateUserFullName }}</div>
+                                    </div>
+                                    <div class="support-ticket-note__body">
+                                        <div class="header" [class.internal-note]="supportTicketNote.InternalNote">
+                                            {{ supportTicketNote.InternalNote ? "Internal Note" : "Platform Response" }}
+                                        </div>
+                                        <div class="content" [class.internal-note]="supportTicketNote.InternalNote" [innerHTML]="supportTicketNote.Message | trustHtml"></div>
+                                    </div>
+                                </div>
+                            }
+                            @if (supportTicketNotes.length == 0) {
+                                <div class="no-responses">This support ticket does not have any responses yet.</div>
+                            }
+                        </div>
+                        <div class="card-footer">
+                            <div>
+                                <icon icon="ChatBubble"></icon>
+                                <a (click)="openResponseModal(supportTicket, false)">
+                                    <span>Add a Response</span>
+                                </a>
+                            </div>
+                            <div>
+                                <icon icon="Note"></icon>
+                                <a (click)="openResponseModal(supportTicket, true)">
+                                    <span>Add a Note</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </main>
+    }
+</div>

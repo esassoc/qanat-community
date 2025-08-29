@@ -9,7 +9,7 @@ import { Alert } from "src/app/shared/models/alert";
 import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { QanatGridComponent } from "src/app/shared/components/qanat-grid/qanat-grid.component";
-import { NgIf, AsyncPipe, DatePipe } from "@angular/common";
+import { AsyncPipe, DatePipe } from "@angular/common";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { AlertDisplayComponent } from "src/app/shared/components/alert-display/alert-display.component";
 import { PublicService } from "src/app/shared/generated/api/public.service";
@@ -18,8 +18,7 @@ import { PublicService } from "src/app/shared/generated/api/public.service";
     selector: "admin-geographies",
     templateUrl: "./admin-geographies.component.html",
     styleUrls: ["./admin-geographies.component.scss"],
-    standalone: true,
-    imports: [PageHeaderComponent, AlertDisplayComponent, NgIf, QanatGridComponent, AsyncPipe, DatePipe],
+    imports: [PageHeaderComponent, AlertDisplayComponent, QanatGridComponent, AsyncPipe, DatePipe]
 })
 export class AdminGeographiesComponent implements OnInit {
     public geographies$: Observable<GeographyDto[]>;
@@ -40,11 +39,11 @@ export class AdminGeographiesComponent implements OnInit {
 
     ngOnInit(): void {
         this.geographies$ = this.geographyService
-            .geographiesGet()
+            .listGeography()
             .pipe(map((geographies) => geographies.sort((a, b) => (a.GeographyDisplayName > b.GeographyDisplayName ? 1 : -1))));
 
         this.geographyBoundaries$ = this.publicService
-            .publicGeographyBoundariesGet()
+            .listBoundariesPublic()
             .pipe(
                 tap(
                     (geographyBoundaries) =>
@@ -60,7 +59,6 @@ export class AdminGeographiesComponent implements OnInit {
             { headerName: "Long Name", field: "GeographyDisplayName" },
             { headerName: "Short Name", field: "GeographyName" },
             this.utilityFunctionsService.createYearColumnDef("Start Year", "StartYear"),
-            this.utilityFunctionsService.createYearColumnDef("Default Display Year", "DefaultDisplayYear"),
             { headerName: "APN Regex", field: "APNRegexPattern" },
             { headerName: "APN Regex Display", field: "APNRegexPatternDisplay" },
             { headerName: "Landowner Dashboard Supply Label", field: "LandownerDashboardSupplyLabel" },
@@ -68,15 +66,16 @@ export class AdminGeographiesComponent implements OnInit {
             { headerName: "Coordinate System", field: "CoordinateSystem" },
             { headerName: "Contact Email", field: "ContactEmail" },
             this.utilityFunctionsService.createPhoneNumberColumnDef("Contact Phone", "ContactPhoneNumber"),
+            { headerName: "Contact Address Line 1", field: "ContactAddressLine1" },
+            { headerName: "Contact Address Line 2", field: "ContactAddressLine2" },
             { headerName: "Is Demo Geography?", valueGetter: (params) => (params.data.IsDemoGeography ? "Yes" : "No") },
-            { headerName: "Display Usage Geometries as Field?", valueGetter: (params) => (params.data.DisplayUsageGeometriesAsField ? "Yes" : "No") },
         ];
     }
 
     refreshGSABoundaries() {
         this.isLoadingSubmit = true;
 
-        this.geographyService.geographiesGsaBoundariesPut().subscribe({
+        this.geographyService.refreshGSABoundariesGeography().subscribe({
             next: (geographyBoundaries) => {
                 this.isLoadingSubmit = false;
                 this.alertService.pushAlert(new Alert("Geography GSA boundaries successfully refreshed", AlertContext.Success));
@@ -89,7 +88,7 @@ export class AdminGeographiesComponent implements OnInit {
     }
 
     triggerMonitorWellsCNRA() {
-        this.monitoringWellService.monitoringWellMeasurementsPost().subscribe((response) => {
+        this.monitoringWellService.updateMonitoringWellDataMonitoringWell().subscribe((response) => {
             this.alertService.pushAlert(new Alert("Monitoring Wells Job triggered successfully!", AlertContext.Success, true));
         });
     }

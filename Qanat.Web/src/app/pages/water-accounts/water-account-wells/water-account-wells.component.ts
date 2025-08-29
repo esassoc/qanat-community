@@ -1,16 +1,15 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from "@angular/core";
-import { ActivatedRoute, RouterLink } from "@angular/router";
+import { ActivatedRoute } from "@angular/router";
 import { routeParams } from "src/app/app.routes";
 import { Observable } from "rxjs";
 import { WaterAccountDto } from "src/app/shared/generated/model/water-account-dto";
-import { ExternalMapLayerDto, WellMinimalDto, ZoneGroupMinimalDto } from "src/app/shared/generated/model/models";
+import { ExternalMapLayerSimpleDto, WellMinimalDto, ZoneGroupMinimalDto } from "src/app/shared/generated/model/models";
 import { map, switchMap, tap } from "rxjs/operators";
 import { ColDef, GridApi, GridReadyEvent, SelectionChangedEvent } from "ag-grid-community";
 import { UtilityFunctionsService } from "src/app/shared/services/utility-functions.service";
-import { NgIf, AsyncPipe, NgForOf } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { QanatGridComponent } from "src/app/shared/components/qanat-grid/qanat-grid.component";
-import { ModelNameTagComponent } from "src/app/shared/components/name-tag/name-tag.component";
 import { QanatMapComponent, QanatMapInitEvent } from "src/app/shared/components/leaflet/qanat-map/qanat-map.component";
 import { WellService } from "src/app/shared/generated/api/well.service";
 import { WaterAccountService } from "src/app/shared/generated/api/water-account.service";
@@ -26,12 +25,8 @@ import { ExternalMapLayerService } from "src/app/shared/generated/api/external-m
     selector: "water-account-wells",
     templateUrl: "./water-account-wells.component.html",
     styleUrls: ["./water-account-wells.component.scss"],
-    standalone: true,
     imports: [
-        NgIf,
         PageHeaderComponent,
-        ModelNameTagComponent,
-        RouterLink,
         QanatGridComponent,
         AsyncPipe,
         QanatMapComponent,
@@ -39,7 +34,6 @@ import { ExternalMapLayerService } from "src/app/shared/generated/api/external-m
         LoadingDirective,
         ZoneGroupLayerComponent,
         GeographyExternalMapLayerComponent,
-        NgForOf,
     ],
 })
 export class WaterAccountWellsComponent implements OnInit, OnDestroy {
@@ -49,7 +43,7 @@ export class WaterAccountWellsComponent implements OnInit, OnDestroy {
     public wells$: Observable<WellMinimalDto[]>;
     public geographyWellDict: { [GeographyName: string]: WellMinimalDto[] } = {};
     public zoneGroups$: Observable<ZoneGroupMinimalDto[]>;
-    public externalMapLayers$: Observable<ExternalMapLayerDto[]>;
+    public externalMapLayers$: Observable<ExternalMapLayerSimpleDto[]>;
 
     public selectedParcelIDs: number[];
 
@@ -84,13 +78,13 @@ export class WaterAccountWellsComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         this.waterAccount$ = this.route.paramMap.pipe(
             map((paramMap) => parseInt(paramMap.get(routeParams.waterAccountID))),
-            switchMap((waterAccountID) => this.waterAccountService.waterAccountsWaterAccountIDGet(waterAccountID)),
+            switchMap((waterAccountID) => this.waterAccountService.getByIDWaterAccount(waterAccountID)),
             tap((waterAccount) => {
                 this.geographyID = waterAccount.Geography.GeographyID;
 
-                this.wells$ = this.wellService.waterAccountsWaterAccountIDWellsGet(waterAccount.WaterAccountID);
-                this.zoneGroups$ = this.zoneGroupService.geographiesGeographyIDZoneGroupsGet(this.geographyID);
-                this.externalMapLayers$ = this.externalMapLayerService.geographiesGeographyIDExternalMapLayersGet(this.geographyID);
+                this.wells$ = this.wellService.listWellsByWaterAccountIDWell(waterAccount.WaterAccountID);
+                this.zoneGroups$ = this.zoneGroupService.listZoneGroup(this.geographyID);
+                this.externalMapLayers$ = this.externalMapLayerService.getExternalMapLayer(this.geographyID);
             })
         );
 

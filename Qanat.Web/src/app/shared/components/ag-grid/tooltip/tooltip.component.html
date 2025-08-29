@@ -1,3 +1,5 @@
-<div *ngIf="displayValue" class="custom-tooltip" [copyToClipboard]="true">
-    {{ displayValue }}
-</div>
+@if (displayValue) {
+    <div class="custom-tooltip" [copyToClipboard]="true">
+        {{ displayValue }}
+    </div>
+}

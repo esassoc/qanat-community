@@ -55,6 +55,14 @@ public partial class Geography
     [Unicode(false)]
     public string ContactPhoneNumber { get; set; }
 
+    [StringLength(500)]
+    [Unicode(false)]
+    public string ContactAddressLine1 { get; set; }
+
+    [StringLength(500)]
+    [Unicode(false)]
+    public string ContactAddressLine2 { get; set; }
+
     [Required]
     [StringLength(200)]
     [Unicode(false)]
@@ -68,8 +76,6 @@ public partial class Geography
     public int CoordinateSystem { get; set; }
 
     public int AreaToAcresConversionFactor { get; set; }
-
-    public int? DefaultReportingPeriodID { get; set; }
 
     public bool IsOpenETActive { get; set; }
 
@@ -111,7 +117,9 @@ public partial class Geography
 
     public bool AllowWaterMeasurementSelfReporting { get; set; }
 
-    public bool DisplayUsageGeometriesAsField { get; set; }
+    public bool AllowFallowSelfReporting { get; set; }
+
+    public bool AllowCoverCropSelfReporting { get; set; }
 
     public bool AllowLandownersToRequestAccountChanges { get; set; }
 
@@ -125,10 +133,6 @@ public partial class Geography
 
     [InverseProperty("Geography")]
     public virtual ICollection<CustomRichText> CustomRichTexts { get; set; } = new List<CustomRichText>();
-
-    [ForeignKey("DefaultReportingPeriodID")]
-    [InverseProperty("Geographies")]
-    public virtual ReportingPeriod DefaultReportingPeriod { get; set; }
 
     [InverseProperty("Geography")]
     public virtual ICollection<ExternalMapLayer> ExternalMapLayers { get; set; } = new List<ExternalMapLayer>();
@@ -148,6 +152,12 @@ public partial class Geography
 
     [InverseProperty("Geography")]
     public virtual ICollection<IrrigationMethod> IrrigationMethods { get; set; } = new List<IrrigationMethod>();
+
+    [InverseProperty("Geography")]
+    public virtual ICollection<MeterReadingMonthlyInterpolation> MeterReadingMonthlyInterpolations { get; set; } = new List<MeterReadingMonthlyInterpolation>();
+
+    [InverseProperty("Geography")]
+    public virtual ICollection<MeterReading> MeterReadings { get; set; } = new List<MeterReading>();
 
     [InverseProperty("Geography")]
     public virtual ICollection<Meter> Meters { get; set; } = new List<Meter>();
@@ -174,6 +184,9 @@ public partial class Geography
     public virtual ICollection<ParcelSupply> ParcelSupplies { get; set; } = new List<ParcelSupply>();
 
     [InverseProperty("Geography")]
+    public virtual ICollection<ParcelWaterAccountHistory> ParcelWaterAccountHistories { get; set; } = new List<ParcelWaterAccountHistory>();
+
+    [InverseProperty("Geography")]
     public virtual ICollection<Parcel> Parcels { get; set; } = new List<Parcel>();
 
     [InverseProperty("Geography")]
@@ -187,6 +200,12 @@ public partial class Geography
     public virtual WaterMeasurementType SourceOfRecordWaterMeasurementType { get; set; }
 
     [InverseProperty("Geography")]
+    public virtual ICollection<StatementBatch> StatementBatches { get; set; } = new List<StatementBatch>();
+
+    [InverseProperty("Geography")]
+    public virtual ICollection<StatementTemplate> StatementTemplates { get; set; } = new List<StatementTemplate>();
+
+    [InverseProperty("Geography")]
     public virtual ICollection<SupportTicket> SupportTickets { get; set; } = new List<SupportTicket>();
 
     [InverseProperty("Geography")]
@@ -196,7 +215,25 @@ public partial class Geography
     public virtual ICollection<UploadedWellGdb> UploadedWellGdbs { get; set; } = new List<UploadedWellGdb>();
 
     [InverseProperty("Geography")]
-    public virtual ICollection<UsageEntity> UsageEntities { get; set; } = new List<UsageEntity>();
+    public virtual ICollection<UsageLocationHistory> UsageLocationHistories { get; set; } = new List<UsageLocationHistory>();
+
+    [InverseProperty("Geography")]
+    public virtual ICollection<UsageLocationParcelHistory> UsageLocationParcelHistories { get; set; } = new List<UsageLocationParcelHistory>();
+
+    [InverseProperty("Geography")]
+    public virtual ICollection<UsageLocationType> UsageLocationTypes { get; set; } = new List<UsageLocationType>();
+
+    [InverseProperty("Geography")]
+    public virtual ICollection<UsageLocation> UsageLocations { get; set; } = new List<UsageLocation>();
+
+    [InverseProperty("Geography")]
+    public virtual ICollection<WaterAccountContact> WaterAccountContacts { get; set; } = new List<WaterAccountContact>();
+
+    [InverseProperty("Geography")]
+    public virtual ICollection<WaterAccountCoverCropStatus> WaterAccountCoverCropStatuses { get; set; } = new List<WaterAccountCoverCropStatus>();
+
+    [InverseProperty("Geography")]
+    public virtual ICollection<WaterAccountFallowStatus> WaterAccountFallowStatuses { get; set; } = new List<WaterAccountFallowStatus>();
 
     [InverseProperty("Geography")]
     public virtual ICollection<WaterAccountParcel> WaterAccountParcels { get; set; } = new List<WaterAccountParcel>();
@@ -236,6 +273,9 @@ public partial class Geography
 
     [InverseProperty("Geography")]
     public virtual ICollection<WellRegistration> WellRegistrations { get; set; } = new List<WellRegistration>();
+
+    [InverseProperty("Geography")]
+    public virtual ICollection<WellType> WellTypes { get; set; } = new List<WellType>();
 
     [InverseProperty("Geography")]
     public virtual ICollection<Well> Wells { get; set; } = new List<Well>();

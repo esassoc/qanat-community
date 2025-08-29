@@ -1,4 +1,3 @@
-import { CommonModule } from "@angular/common";
 import { AfterViewInit, Component, EventEmitter, Input, OnChanges, OnDestroy, Output } from "@angular/core";
 import * as L from "leaflet";
 import { MapLayerBase } from "../map-layer-base.component";
@@ -8,8 +7,6 @@ import { LeafletHelperService } from "src/app/shared/services/leaflet-helper.ser
 import { WellMinimalDto } from "src/app/shared/generated/model/well-minimal-dto";
 @Component({
     selector: "wells-layer",
-    standalone: true,
-    imports: [CommonModule, MapLayerBase],
     templateUrl: "./wells-layer.component.html",
     styleUrls: ["./wells-layer.component.scss"],
 })
@@ -28,36 +25,50 @@ export class WellsLayerComponent extends MapLayerBase implements AfterViewInit, 
     get wells(): WellLocationDto[] | WellMinimalDto[] {
         return this._wells;
     }
-    private _highlightedWellID: number = null;
-    @Input() set highlightedWellID(value: number) {
-        if (this.highlightedWellID != value) {
-            this._highlightedWellID = value;
-            this.popupOpened.emit(new OpenedWellPopupEvent(this.map, this.layerControl, value));
-            this.changedWell(value);
-        }
-    }
-    get highlightedWellID(): number {
-        return this._highlightedWellID;
-    }
+
+    private selectedFromMap: boolean = false;
+    @Input() highlightedWellID: number;
+
     private wellIcon = this.leafletHelperService.blueIconLarge;
     public layer: L.Layer;
-    private updateSubscriptionDebounoced = Subscription.EMPTY;
+    private updateSubscriptionDebounced = Subscription.EMPTY;
 
     constructor(private leafletHelperService: LeafletHelperService) {
         super();
     }
 
+    ngOnChanges(changes: any): void {
+        if (changes.highlightedWellID) {
+            if (this.selectedFromMap) {
+                this.selectedFromMap = false;
+                return;
+            }
+
+            if (changes.highlightedWellID.currentValue == changes.highlightedWellID.previousValue) {
+                return;
+            }
+
+            this.popupOpened.emit(new OpenedWellPopupEvent(this.map, this.layerControl, changes.highlightedWellID.value));
+            this.changedWell(changes.highlightedWellID.currentValue, true);
+        }
+    }
+
     ngOnDestroy() {
-        this.updateSubscriptionDebounoced.unsubscribe();
+        this.updateSubscriptionDebounced.unsubscribe();
+        this.map.removeLayer(this.layer);
+        this.layerControl.removeLayer(this.layer);
     }
 
     ngAfterViewInit(): void {
-        this.updateSubscriptionDebounoced = this.wellsSubject
+        this.updateSubscriptionDebounced = this.wellsSubject
             .asObservable()
             .pipe(debounceTime(100))
             .subscribe((value: WellLocationDto[]) => {
                 this._wells = value;
-                if (!this.layer) this.setupLayer();
+
+                if (!this.layer) {
+                    this.setupLayer();
+                }
                 this.updateLayer();
             });
     }
@@ -73,14 +84,16 @@ export class WellsLayerComponent extends MapLayerBase implements AfterViewInit, 
                 .bindPopup(`<well-popup-custom-element well-id="${well.WellID}"></well-popup-custom-element>`, {
                     maxWidth: 475,
                     keepInView: true,
+                    autoPan: false,
                 })
                 .on("popupopen", (e) => {
                     this.popupOpened.emit(new OpenedWellPopupEvent(this.map, this.layerControl, well.WellID));
                     this.highlightedWellID = well.WellID;
-                    this.map.fitBounds(latLng);
                 })
                 .on("click", (e) => {
-                    this.changedWell(Number(well.WellID));
+                    this.selectedFromMap = true;
+                    this.highlightedWellID = well.WellID;
+                    this.changedWell(Number(well.WellID), false);
                 });
         });
 
@@ -90,20 +103,22 @@ export class WellsLayerComponent extends MapLayerBase implements AfterViewInit, 
         this.map.fitBounds(this.layer.getBounds());
     }
 
-    changedWell(wellID: number) {
+    changedWell(wellID: number, zoomToFeature: boolean) {
         this.map.closePopup();
-        this.highlightedWellID = wellID;
 
         this.layer.eachLayer((layer) => {
             if (layer.options.title == wellID) {
+                if (zoomToFeature) {
+                    let latLng = layer.getLatLng();
+                    this.map.fitBounds([latLng]);
+                }
                 layer.openPopup();
-                this.map.fitBounds(layer.getBounds());
             }
         });
     }
 
     setupLayer() {
-        this.layer = L.featureGroup();
+        this.layer = L.markerClusterGroup();
         this.initLayer();
     }
 }

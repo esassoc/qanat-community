@@ -1,5 +1,13 @@
-<div class="mt-2" *ngIf="alerts.length > 0">
-    <alert *ngFor="let alert of alerts" [alert]="alert">
-        <span [innerHTML]="alert.message"></span>
-    </alert>
-</div>
+@if (alerts.length > 0) {
+    <div class="mt-2">
+        @for (alert of alerts | slice: 0 : 3; track alert; let i = $index) {
+            <alert [alert]="alert">
+                <span [innerHTML]="alert.message" style="width: 100%"> </span>
+                @if (i == 2 && alerts.length > 3) {
+                    <div style="width: 100%; flex-basis: 100%"></div>
+                    <div style="min-width: 10rem">Showing 3 of {{ alerts.length }} alerts.</div>
+                }
+            </alert>
+        }
+    </div>
+}

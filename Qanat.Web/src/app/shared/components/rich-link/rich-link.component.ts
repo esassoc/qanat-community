@@ -6,11 +6,10 @@ import { CustomRichTextComponent } from "../custom-rich-text/custom-rich-text.co
     selector: "rich-link",
     templateUrl: "./rich-link.component.html",
     styleUrls: ["./rich-link.component.scss"],
-    standalone: true,
-    imports: [IconComponent, CustomRichTextComponent],
+    imports: [IconComponent, CustomRichTextComponent]
 })
 export class RichLinkComponent {
     @Input() customRichTextTypeID: number;
-    @Input() icon: typeof IconInterface;
+    @Input() icon: IconInterface;
     @Input() cardTitle: string;
 }

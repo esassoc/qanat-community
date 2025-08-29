@@ -1,29 +1,72 @@
 @use "/src/scss/abstracts" as *;
 
-.support-sidebar {
-    &__header {
-        display: grid;
-        gap: $spacing-400;
-        place-items: center;
-        border-bottom: 1px solid $gray-100;
-        padding: $spacing-800 0;
-    }
+.nav-container {
+    height: 100%;
+}
 
-    &__title {
-        color: $blue-700;
-        font-size: $type-size-500;
-        font-weight: 600;
-    }
+.dashboard-navbar {
+    display: flex;
+    align-items: flex-start;
+    background-color: $gray-50;
+    border-bottom: 1px solid $gray-200;
+    border-radius: $spacing-200 $spacing-200 0 0;
+    height: 98%;
+    max-height: 60px;
 
-    .support-logo {
-        ::ng-deep svg path {
-            fill: $blue-700;
+    .tab {
+        background-color: $white;
+        color: $primary;
+        padding: $spacing-400 $spacing-500;
+        height: 100%;
+        border: none;
+        border-left: 1px solid $gray-200;
+
+        &:first-child {
+            border: none;
         }
-    }
 
-    .inbox-link:hover {
-        ::ng-deep svg.no-fill path {
-            stroke: $gray-0;
+        &:last-of-type {
+            border-right: 1px solid $gray-200;
+        }
+
+        &.active {
+            height: 103%;
+            border-top-left-radius: $spacing-200;
+        }
+
+        icon {
+            margin-right: $spacing-200;
+
+            ::ng-deep svg {
+                height: 16px;
+                transform: translateY(2px);
+            }
+
+            &.large ::ng-deep svg {
+                height: 24px;
+                transform: translateY(6px);
+                margin-top: -8px;
+            }
         }
     }
 }
+
+// .support-sidebar {
+//     &__header {
+//         display: grid;
+//         gap: $spacing-400;
+//         padding: $spacing-700 $spacing-600;
+//         text-align: center;
+//     }
+
+//     &__title {
+//         font-size: 16px;
+//         color: $blue-700;
+//     }
+
+//     .support-logo {
+//         ::ng-deep svg path {
+//             fill: $blue-700;
+//         }
+//     }
+// }

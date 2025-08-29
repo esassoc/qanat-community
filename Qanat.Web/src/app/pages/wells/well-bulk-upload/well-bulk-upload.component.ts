@@ -8,7 +8,7 @@ import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-ric
 import { Alert } from "src/app/shared/models/alert";
 import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
 import { AlertService } from "src/app/shared/services/alert.service";
-import { AsyncPipe, NgIf } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { AlertDisplayComponent } from "src/app/shared/components/alert-display/alert-display.component";
 import { ButtonComponent } from "src/app/shared/components/button/button.component";
@@ -21,8 +21,7 @@ import { GeographyService } from "src/app/shared/generated/api/geography.service
     selector: "well-bulk-upload",
     templateUrl: "./well-bulk-upload.component.html",
     styleUrls: ["./well-bulk-upload.component.scss"],
-    standalone: true,
-    imports: [AsyncPipe, PageHeaderComponent, AlertDisplayComponent, FormsModule, ReactiveFormsModule, NgIf, ButtonComponent, CustomRichTextComponent, RouterLink],
+    imports: [AsyncPipe, PageHeaderComponent, AlertDisplayComponent, FormsModule, ReactiveFormsModule, ButtonComponent, CustomRichTextComponent, RouterLink],
 })
 export class WellBulkUploadComponent implements OnInit {
     public geography$: Observable<GeographyMinimalDto>;
@@ -58,7 +57,7 @@ export class WellBulkUploadComponent implements OnInit {
         this.geography$ = this.route.params.pipe(
             switchMap((params) => {
                 const geographyName = params.geographyName;
-                return this.geographyService.geographiesGeographyNameGeographyNameMinimalGet(geographyName);
+                return this.geographyService.getByNameAsMinimalDtoGeography(geographyName);
             }),
             tap((geography) => {
                 this.currentGeographyService.setCurrentGeography(geography);
@@ -111,10 +110,13 @@ export class WellBulkUploadComponent implements OnInit {
         }
 
         this.isLoadingSubmit = true;
-        this.wellService.geographiesGeographyIDUploadWellsPost(geography.GeographyID, this.gdbInputFile).subscribe(
+        this.wellService.uploadGDBAndParseFeatureClassesWell(geography.GeographyID, this.gdbInputFile).subscribe(
             (response) => {
                 this.isLoadingSubmit = false;
-                this.router.navigate(["../"], { relativeTo: this.route });
+                this.router.navigate(["water-dashboard/wells"]);
+                setTimeout(() => {
+                    this.alertService.pushAlert(new Alert("GDB uploaded and processed successfully.", AlertContext.Success));
+                });
             },
             (error) => {
                 this.alertService.pushAlert(new Alert("Failed to upload GDB! If available, error details are below.", AlertContext.Danger));

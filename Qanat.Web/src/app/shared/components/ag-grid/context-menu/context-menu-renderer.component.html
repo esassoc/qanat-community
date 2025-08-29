@@ -1,21 +1,30 @@
-<div class="menu-container" *ngIf="params && !params.hidden">
-    <a class="btn btn-primary-outline btn-small" id="menu-dropdown" [dropdownToggle]="contextMenu">
-        {{ params.title }}
-        <icon icon="CaretDown"></icon>
-    </a>
-
-    <div class="context-menu-wrapper">
-        <div #contextMenu class="context-menu" aria-labelledby="menu-dropdown">
-            <ng-container *ngFor="let action of params.value">
-                <button *ngIf="action.ActionHandler" (click)="action.ActionHandler()">
-                    <span *ngIf="action.ActionIcon" [class]="action.ActionIcon"></span>
-                    {{ action.ActionName }}
-                </button>
-                <a *ngIf="!action.ActionHandler" [routerLink]="[action.ActionLink]">
-                    <span *ngIf="action.ActionIcon" [class]="action.ActionIcon"></span>
-                    {{ action.ActionName }}
-                </a>
-            </ng-container>
+@if (params && !params.hidden) {
+    <div class="menu-container">
+        <a class="btn btn-primary-outline btn-small" id="menu-dropdown" [dropdownToggle]="contextMenu">
+            {{ params.title }}
+            <icon icon="CaretDown"></icon>
+        </a>
+        <div class="context-menu-wrapper">
+            <div #contextMenu class="context-menu" aria-labelledby="menu-dropdown">
+                @for (action of params.value; track action) {
+                    @if (action.ActionHandler) {
+                        <button (click)="action.ActionHandler()">
+                            @if (action.ActionIcon) {
+                                <span [class]="action.ActionIcon"></span>
+                            }
+                            {{ action.ActionName }}
+                        </button>
+                    }
+                    @if (!action.ActionHandler) {
+                        <a [routerLink]="[action.ActionLink]">
+                            @if (action.ActionIcon) {
+                                <span [class]="action.ActionIcon"></span>
+                            }
+                            {{ action.ActionName }}
+                        </a>
+                    }
+                }
+            </div>
         </div>
     </div>
-</div>
+}

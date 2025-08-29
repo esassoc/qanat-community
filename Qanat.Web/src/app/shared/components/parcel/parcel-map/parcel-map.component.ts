@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy, ApplicationRef, ViewContainerRef, ChangeDetectorRef } from "@angular/core";
+import { AfterViewInit, Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy, ApplicationRef, ChangeDetectorRef } from "@angular/core";
 import { environment } from "src/environments/environment";
 import { WfsService } from "../../../services/wfs.service";
 import { Control, FitBoundsOptions, LeafletEvent, LeafletMouseEvent, Map, MapOptions, tileLayer, WMSOptions } from "leaflet";
@@ -16,27 +16,24 @@ import { LeafletHelperService } from "src/app/shared/services/leaflet-helper.ser
 import GestureHandling from "leaflet-gesture-handling";
 import { ExternalMapLayerTypeEnum } from "../../../generated/enum/external-map-layer-type-enum";
 import { FeatureCollection } from "geojson";
-import { ModalService, ModalSizeEnum, ModalThemeEnum } from "../../../services/modal/modal.service";
-import {
-    MonitoringWellMeasurementChartComponent,
-    MonitoringWellContext,
-} from "../../monitoring-wells/modal/monitoring-well-measurement-chart/monitoring-well-measurement-chart.component";
+import { MonitoringWellMeasurementChartComponent } from "../../monitoring-wells/modal/monitoring-well-measurement-chart/monitoring-well-measurement-chart.component";
 import { GeographyEnum as GeographyEnum } from "../../../models/enums/geography.enum";
-import { ExternalMapLayerDto, WellMinimalDto, ZoneGroupMinimalDto } from "../../../generated/model/models";
+import { ExternalMapLayerSimpleDto, WellMinimalDto, ZoneGroupMinimalDto } from "../../../generated/model/models";
 import { ParcelService } from "../../../generated/api/parcel.service";
 import { WellService } from "../../../generated/api/well.service";
 import { ExternalMapLayerService } from "../../../generated/api/external-map-layer.service";
 import { ZoneGroupService } from "../../../generated/api/zone-group.service";
-import { NgIf } from "@angular/common";
+
 import { GsaBoundariesComponent } from "../../leaflet/layers/gsa-boundaries/gsa-boundaries.component";
+import { DialogService } from "@ngneat/dialog";
+import { UsageLocationLayerComponent } from "../../leaflet/layers/usage-location-layer/usage-location-layer.component";
 
 @Component({
     selector: "parcel-map",
     templateUrl: "./parcel-map.component.html",
     styleUrls: ["./parcel-map.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-    imports: [NgIf, GsaBoundariesComponent],
+    imports: [GsaBoundariesComponent, UsageLocationLayerComponent],
 })
 export class ParcelMapComponent implements OnInit, AfterViewInit {
     public _mapID: string = "";
@@ -221,9 +218,8 @@ export class ParcelMapComponent implements OnInit, AfterViewInit {
     boundingBox: BoundingBoxDto;
     private selectedParcelLayer: any;
     private highlightedParcelLayer: any;
-    private selectedWellLayer: any;
     private highlightedWellLayer: any;
-    private externalMapLayers: ExternalMapLayerDto[];
+    private externalMapLayers: ExternalMapLayerSimpleDto[];
 
     private wellIcon = this.leafletHelperService.blueIcon;
     private selectedWellIcon = this.leafletHelperService.yellowIconLarge;
@@ -252,9 +248,8 @@ export class ParcelMapComponent implements OnInit, AfterViewInit {
         private leafletHelperService: LeafletHelperService,
         private externalMapLayerService: ExternalMapLayerService,
         private zoneGroupService: ZoneGroupService,
-        private modalService: ModalService,
-        private viewContainerRef: ViewContainerRef,
-        private cdr: ChangeDetectorRef
+        private cdr: ChangeDetectorRef,
+        private dialogService: DialogService
     ) {}
 
     public ngOnInit(): void {
@@ -286,7 +281,7 @@ export class ParcelMapComponent implements OnInit, AfterViewInit {
     }
 
     private fitBoundsToSelectedParcels(parcelIDs: Array<number>) {
-        this.parcelService.parcelsBoundingBoxPost(parcelIDs).subscribe((boundingBox) => {
+        this.parcelService.getBoundingBoxByParcelIDsParcel(parcelIDs).subscribe((boundingBox) => {
             this.boundingBox = boundingBox;
             this.map.fitBounds(
                 [
@@ -299,7 +294,7 @@ export class ParcelMapComponent implements OnInit, AfterViewInit {
     }
 
     private fitBoundsToSelectedZoneGroups(zoneGroupIDs: Array<number>) {
-        this.zoneGroupService.zoneGroupBoundingBoxPost(zoneGroupIDs).subscribe((boundingBox) => {
+        this.zoneGroupService.getBoundingBoxForZoneGroupZoneGroup(zoneGroupIDs).subscribe((boundingBox) => {
             this.boundingBox = boundingBox;
             this.map.fitBounds(
                 [
@@ -312,7 +307,7 @@ export class ParcelMapComponent implements OnInit, AfterViewInit {
     }
 
     private fitBoundsToSelectedWells(wellIDs: Array<number>) {
-        this.wellService.wellsBoundingBoxPost(wellIDs).subscribe((boundingBox) => {
+        this.wellService.getBoundingBoxByWellRegistrationIDsWell(wellIDs).subscribe((boundingBox) => {
             this.boundingBox = boundingBox;
             this.map.fitBounds(
                 [
@@ -345,10 +340,10 @@ export class ParcelMapComponent implements OnInit, AfterViewInit {
         }
 
         forkJoin({
-            wells: this.wellService.geographiesGeographyIDWellsGet(this.geographyID),
-            wellLocations: this.wellService.geographiesGeographyIDWellsLocationGet(this.geographyID),
-            externalMapLayers: this.externalMapLayerService.geographiesGeographyIDExternalMapLayersActiveGet(this.geographyID),
-            zoneGroups: this.zoneGroupService.geographiesGeographyIDZoneGroupsGet(this.geographyID),
+            wells: this.wellService.listWellsWell(this.geographyID),
+            wellLocations: this.wellService.listWellLocationsByGeographyIDWell(this.geographyID),
+            externalMapLayers: this.externalMapLayerService.getActiveExternalMapLayersExternalMapLayer(this.geographyID),
+            zoneGroups: this.zoneGroupService.listZoneGroup(this.geographyID),
         }).subscribe(({ wells, wellLocations, externalMapLayers, zoneGroups }) => {
             this.wells = wells;
             this.wellLocations = wellLocations;
@@ -574,13 +569,19 @@ export class ParcelMapComponent implements OnInit, AfterViewInit {
             geoJson.addTo(this.map);
 
             geoJson.on("click", (e) => {
-                this.modalService
-                    .open(MonitoringWellMeasurementChartComponent, null, { ModalSize: ModalSizeEnum.ExtraLarge, ModalTheme: ModalThemeEnum.Light, TopLayer: false }, {
+                const dialogRef = this.dialogService.open(MonitoringWellMeasurementChartComponent, {
+                    data: {
                         GeographyID: this.geographyID,
                         SiteCode: e.layer.feature.properties.SiteCode,
                         MonitoringWellName: e.layer.feature.properties.MonitoringWellName,
-                    } as MonitoringWellContext)
-                    .instance.result.then((result) => {});
+                    },
+                    size: "lg",
+                });
+
+                dialogRef.afterClosed$.subscribe((result) => {
+                    if (result) {
+                    }
+                });
             });
             this.layerControl.addOverlay(geoJson, "CNRA Monitoring Wells");
         });
@@ -599,18 +600,19 @@ export class ParcelMapComponent implements OnInit, AfterViewInit {
             geoJson.addTo(this.map);
 
             geoJson.on("click", (e) => {
-                this.modalService
-                    .open(
-                        MonitoringWellMeasurementChartComponent,
-                        this.viewContainerRef,
-                        { ModalSize: ModalSizeEnum.ExtraLarge, ModalTheme: ModalThemeEnum.Light, TopLayer: false },
-                        {
-                            GeographyID: this.geographyID,
-                            SiteCode: e.layer.feature.properties.SiteCode,
-                            MonitoringWellName: e.layer.feature.properties.MonitoringWellName,
-                        } as MonitoringWellContext
-                    )
-                    .instance.result.then((result) => {});
+                const dialogRef = this.dialogService.open(MonitoringWellMeasurementChartComponent, {
+                    data: {
+                        GeographyID: e.layer.feature.properties.GeographyID,
+                        SiteCode: e.layer.feature.properties.SiteCode,
+                        MonitoringWellName: e.layer.feature.properties.MonitoringWellName,
+                    },
+                    size: "lg",
+                });
+
+                dialogRef.afterClosed$.subscribe((result) => {
+                    if (result) {
+                    }
+                });
             });
             this.layerControl.addOverlay(geoJson, "Yolo WRID Monitoring Wells");
         });
@@ -619,7 +621,7 @@ export class ParcelMapComponent implements OnInit, AfterViewInit {
     private addExternalMapLayers() {
         this.externalMapLayers.forEach((mapLayer) => {
             let newFeatureLayer;
-            switch (mapLayer.ExternalMapLayerType.ExternalMapLayerTypeID) {
+            switch (mapLayer.ExternalMapLayerTypeID) {
                 case ExternalMapLayerTypeEnum.ESRIMapServer:
                     newFeatureLayer = esri.tiledMapLayer({
                         url: mapLayer.ExternalMapLayerURL,
@@ -642,7 +644,7 @@ export class ParcelMapComponent implements OnInit, AfterViewInit {
                     });
                     break;
                 default:
-                    console.error(`Invalid ExternalMapLayerTypeEnum ${mapLayer.ExternalMapLayerType.ExternalMapLayerTypeID}.`);
+                    console.error(`Invalid ExternalMapLayerTypeEnum ${mapLayer.ExternalMapLayerTypeID}.`);
             }
 
             this.overlayLayers[mapLayer.ExternalMapLayerDisplayName] = newFeatureLayer;

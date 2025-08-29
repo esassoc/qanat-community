@@ -37,7 +37,11 @@ export class DropdownToggleDirective implements OnDestroy {
         this.toggleMenu();
     }
 
-    constructor(private el: ElementRef, private renderer: Renderer2, private router: Router) {
+    constructor(
+        private el: ElementRef,
+        private renderer: Renderer2,
+        private router: Router
+    ) {
         this.routerNavigationEndSubscription = router.events.subscribe((e) => {
             if (e instanceof NavigationEnd) {
                 this.showMenu = false;

@@ -1,9 +1,12 @@
 <div class="allocation-plan-table scroll-shadow-x">
     <allocation-plan-table-header [years]="years"></allocation-plan-table-header>
-    <allocation-plan-period
-        *ngFor="let period of allocationPlan.AllocationPlanPeriods"
-        [years]="years"
-        [allocationPlanManageDto]="allocationPlan"
-        [allocationPlanPeriod]="period"
-        [readonly]="readonly"></allocation-plan-period>
+    @for (period of allocationPlan.AllocationPlanPeriods; track period) {
+        <allocation-plan-period
+            [years]="years"
+            [allocationPlanManageDto]="allocationPlan"
+            [allocationPlanPeriod]="period"
+            [readonly]="readonly"
+            (change)="onChange($event)"
+            (delete)="onDelete($event)"></allocation-plan-period>
+    }
 </div>

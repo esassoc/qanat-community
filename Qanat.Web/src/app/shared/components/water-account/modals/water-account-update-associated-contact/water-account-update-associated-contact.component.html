@@ -1,0 +1,65 @@
+<div class="modal">
+    <div class="modal-header">
+        <custom-rich-text [customRichTextTypeID]="customRichTextID" [showLoading]="false" [showInfoIcon]="false"></custom-rich-text>
+    </div>
+    @if (!isReviewingAddress) {
+        <div class="nav-container">
+            <div class="navbar">
+                <div class="tab" [class.active]="activeTab === 'SelectExistingContact'" (click)="setActiveTab('SelectExistingContact')">Select Existing Contact</div>
+                <div class="tab" [class.active]="activeTab === 'CreateNewContact'" (click)="setActiveTab('CreateNewContact')">Create New Contact</div>
+            </div>
+        </div>
+        <div class="content-container">
+            <div class="modal-body">
+                @if (activeTab === "SelectExistingContact") {
+                    <form action="" class="form grid-8 existing-contact-form">
+                        <div class="field g-col-5">
+                            <div class="field-label">Water Account Contact</div>
+                            <search-water-account-contacts
+                                [geographyID]="ref.data.GeographyID"
+                                [excludedWaterAccountContactIDs]="[ref.data.WaterAccountContactID]"
+                                (change)="updateSelectedContact($event)"
+                                class="g-col-6">
+                            </search-water-account-contacts>
+                        </div>
+
+                        <note noteType="info" class="g-col-3">
+                            <div class="note-content">
+                                <icon icon="Info" class="info"></icon>
+                                <p>Search existing contacts by name, email, phone number, or address, and select the contact you want to associate with this water account.</p>
+                            </div>
+                        </note>
+                    </form>
+                } @else {
+                    <water-account-contact-upsert-form [formGroup]="newContactFormGroup"></water-account-contact-upsert-form>
+                }
+            </div>
+
+            @if (ref.data.WaterAccountContactID) {
+                <note class="warning-note">
+                    <div class="note-content">
+                        <icon icon="Warning" class="warning"></icon>
+                        <p>
+                            Are you sure you want to replace current contact <b>{{ ref.data.WaterAccountContactName }}</b
+                            >?
+                        </p>
+                    </div>
+                </note>
+            }
+        </div>
+    } @else {
+        <div class="modal-body">
+            <water-account-contact-address-review [formGroup]="newContactFormGroup" [mapboxResponseDto]="mapboxResponseDto"></water-account-contact-address-review>
+        </div>
+    }
+    <div class="modal-footer sticky-footer">
+        @if (isReviewingAddress) {
+            <button class="btn btn-underline back-button" (click)="backToContactForm()"><icon icon="ArrowLeft"></icon> Return to form</button>
+        }
+
+        <div class="sticky-footer-content">
+            <button class="btn btn-primary mr-2" (click)="save()" [disabled]="!currentFormGroup.valid || isLoadingSubmit">Save</button>
+            <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+        </div>
+    </div>
+</div>

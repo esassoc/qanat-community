@@ -1,27 +1,31 @@
-<page-header *ngIf="geography$ | async as geography" icon="Info" [templateTitleAppend]="templateTitleAppend" pageTitle="Geography Overview">
-    <ng-template #templateTitleAppend>
-        <name-tag [name]="geography.GeographyName" class="mb-2"></name-tag>
-    </ng-template>
-</page-header>
+@if (geography$ | async; as geography) {
+    <page-header icon="Info" [templateTitleAppend]="templateTitleAppend" pageTitle="Geography Overview">
+        <ng-template #templateTitleAppend>
+            <name-tag [name]="geography.GeographyName" class="mb-2"></name-tag>
+        </ng-template>
+    </page-header>
+}
 
 <div class="page-body grid-12">
     <app-alert-display></app-alert-display>
 
     <qanat-map class="location-card" (onMapLoad)="handleMapReady($event)" mapHeight="600px">
-        <ng-container *ngIf="mapIsReady">
-            <gsa-boundaries
-                *ngIf="geography$ | async as geography"
-                [displayOnLoad]="true"
-                [map]="map"
-                [controlTitle]="geography.GeographyDisplayName"
-                [geographyID]="geography.GeographyID"
-                [layerControl]="layerControl"></gsa-boundaries>
-
+        @if (mapIsReady) {
+            @if (geography$ | async; as geography) {
+                <gsa-boundaries
+                    [displayOnLoad]="true"
+                    [map]="map"
+                    [controlTitle]="geography.GeographyDisplayName"
+                    [geographyID]="geography.GeographyID"
+                    [layerControl]="layerControl"></gsa-boundaries>
+            }
             <monitoring-wells-layer [map]="map" [layerControl]="layerControl" [displayOnLoad]="true" [editingMap]="false"></monitoring-wells-layer>
-        </ng-container>
+        }
     </qanat-map>
 
     <div class="copy copy-2">
-        <custom-rich-text *ngIf="geography$ | async as geography" [customRichTextTypeID]="customRichTextTypeID" [geographyID]="geography.GeographyID"></custom-rich-text>
+        @if (geography$ | async; as geography) {
+            <custom-rich-text [customRichTextTypeID]="customRichTextTypeID" [geographyID]="geography.GeographyID"></custom-rich-text>
+        }
     </div>
 </div>

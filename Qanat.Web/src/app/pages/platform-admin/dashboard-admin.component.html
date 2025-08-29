@@ -39,10 +39,11 @@
 
     <main class="main">
         <router-outlet #adminOutlet="outlet"></router-outlet>
-        <div *ngIf="!adminOutlet.isActivated">
-            <page-header pageTitle="Dashboard"></page-header>
-
-            <div class="page-body grid-12"></div>
-        </div>
+        @if (!adminOutlet.isActivated) {
+            <div>
+                <page-header pageTitle="Dashboard"></page-header>
+                <div class="page-body grid-12"></div>
+            </div>
+        }
     </main>
 </div>

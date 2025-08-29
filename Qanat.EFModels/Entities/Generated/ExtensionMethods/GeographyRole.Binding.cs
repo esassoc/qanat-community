@@ -16,9 +16,7 @@ namespace Qanat.EFModels.Entities
         public static readonly GeographyRoleNormal Normal = GeographyRoleNormal.Instance;
 
         public static readonly List<GeographyRole> All;
-        public static readonly List<GeographyRoleSimpleDto> AllAsSimpleDto;
         public static readonly ReadOnlyDictionary<int, GeographyRole> AllLookupDictionary;
-        public static readonly ReadOnlyDictionary<int, GeographyRoleSimpleDto> AllAsSimpleDtoLookupDictionary;
 
         /// <summary>
         /// Static type constructor to coordinate static initialization order
@@ -26,9 +24,7 @@ namespace Qanat.EFModels.Entities
         static GeographyRole()
         {
             All = new List<GeographyRole> { WaterManager, Normal };
-            AllAsSimpleDto = new List<GeographyRoleSimpleDto> { WaterManager.AsSimpleDto(), Normal.AsSimpleDto() };
             AllLookupDictionary = new ReadOnlyDictionary<int, GeographyRole>(All.ToDictionary(x => x.GeographyRoleID));
-            AllAsSimpleDtoLookupDictionary = new ReadOnlyDictionary<int, GeographyRoleSimpleDto>(AllAsSimpleDto.ToDictionary(x => x.GeographyRoleID));
         }
 
         /// <summary>
@@ -124,12 +120,12 @@ namespace Qanat.EFModels.Entities
     public partial class GeographyRoleWaterManager : GeographyRole
     {
         private GeographyRoleWaterManager(int geographyRoleID, string geographyRoleName, string geographyRoleDisplayName, string geographyRoleDescription, int sortOrder, string rights, string flags) : base(geographyRoleID, geographyRoleName, geographyRoleDisplayName, geographyRoleDescription, sortOrder, rights, flags) {}
-        public static readonly GeographyRoleWaterManager Instance = new GeographyRoleWaterManager(1, @"WaterManager", @"Water Manager", @"", 10, @"{""UserRights"":15,""WaterAccountRights"":15,""ParcelRights"":15,""WellRights"":15,""WaterTransactionRights"":15,""ReportingPeriodRights"":15,""WaterTypeRights"":15, ""ExternalMapLayerRights"": 15, ""WaterAccountUserRights"": 15, ""ZoneGroupRights"": 15, ""MonitoringWellRights"":15, ""AllocationPlanRights"": 15, ""GeographyRights"": 15, ""CustomAttributeRights"": 15, ""UsageEntityRights"": 1}", @"{""HasManagerDashboard"":true,""CanReviewWells"":true, ""CanUseScenarioPlanner"":true}");
+        public static readonly GeographyRoleWaterManager Instance = new GeographyRoleWaterManager(1, @"WaterManager", @"Water Manager", @"", 10, @"{""UserRights"":15,""WaterAccountRights"":15,""ParcelRights"":15,""WellRights"":15,""WaterTransactionRights"":15,""ReportingPeriodRights"":15,""WaterTypeRights"":15, ""ExternalMapLayerRights"": 15, ""WaterAccountUserRights"": 15, ""ZoneGroupRights"": 15, ""MonitoringWellRights"":15, ""AllocationPlanRights"": 15, ""GeographyRights"": 15, ""CustomAttributeRights"": 15, ""UsageLocationRights"": 15, ""MeterRights"": 15, ""WellMeterReadingRights"": 15, ""StatementTemplateRights"": 15}", @"{""HasManagerDashboard"":true,""CanReviewWells"":true, ""CanUseScenarioPlanner"":true}");
     }
 
     public partial class GeographyRoleNormal : GeographyRole
     {
         private GeographyRoleNormal(int geographyRoleID, string geographyRoleName, string geographyRoleDisplayName, string geographyRoleDescription, int sortOrder, string rights, string flags) : base(geographyRoleID, geographyRoleName, geographyRoleDisplayName, geographyRoleDescription, sortOrder, rights, flags) {}
-        public static readonly GeographyRoleNormal Instance = new GeographyRoleNormal(2, @"Normal", @"Normal", @"", 20, @"{""UserRights"":1,""WaterAccountRights"":0,""ParcelRights"":0,""WellRights"":1,""WaterTransactionRights"":0,""ReportingPeriodRights"":1,""WaterTypeRights"":1, ""ExternalMapLayerRights"": 1, ""WaterAccountUserRights"": 0, ""ZoneGroupRights"": 1, ""MonitoringWellRights"":1, ""AllocationPlanRights"": 1, ""CustomAttributeRights"": 0, ""UsageEntityRights"": 0}", @"{""HasManagerDashboard"":false,""CanReviewWells"":false, ""CanUseScenarioPlanner"":false}");
+        public static readonly GeographyRoleNormal Instance = new GeographyRoleNormal(2, @"Normal", @"Normal", @"", 20, @"{""UserRights"":1,""WaterAccountRights"":0,""ParcelRights"":0,""WellRights"":1,""WaterTransactionRights"":0,""ReportingPeriodRights"":1,""WaterTypeRights"":1, ""ExternalMapLayerRights"": 1, ""WaterAccountUserRights"": 0, ""ZoneGroupRights"": 1, ""MonitoringWellRights"":1, ""AllocationPlanRights"": 1, ""CustomAttributeRights"": 0, ""UsageLocationRights"": 0, ""MeterRights"": 0, ""WellMeterReadingRights"": 0, ""StatementTemplateRights"": 0}", @"{""HasManagerDashboard"":false,""CanReviewWells"":false, ""CanUseScenarioPlanner"":false}");
     }
 }

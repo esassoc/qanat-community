@@ -1,17 +1,15 @@
 import { CdkDragDrop, moveItemInArray, CdkDropList, CdkDrag, CdkDragHandle } from "@angular/cdk/drag-drop";
-import { Component, ComponentRef, OnInit, TemplateRef, ViewChild, ViewContainerRef } from "@angular/core";
+import { Component, OnInit, ViewChild } from "@angular/core";
 import { map, Observable, switchMap, tap } from "rxjs";
-import { ModalComponent } from "src/app/shared/components/modal/modal.component";
 import { ZoneGroupService } from "src/app/shared/generated/api/zone-group.service";
 import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
 import { ZoneGroupMinimalDto, ZoneMinimalDto } from "src/app/shared/generated/model/models";
 import { Alert } from "src/app/shared/models/alert";
 import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
 import { AlertService } from "src/app/shared/services/alert.service";
-import { ModalService } from "src/app/shared/services/modal/modal.service";
 import { NoteComponent } from "../../../shared/components/note/note.component";
 import { FormsModule } from "@angular/forms";
-import { AsyncPipe, NgFor, NgIf } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { AlertDisplayComponent } from "../../../shared/components/alert-display/alert-display.component";
 import { ModelNameTagComponent } from "../../../shared/components/name-tag/name-tag.component";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
@@ -21,12 +19,14 @@ import { ActivatedRoute } from "@angular/router";
 import { GeographyService } from "src/app/shared/generated/api/geography.service";
 import { routeParams } from "src/app/app.routes";
 import { LoadingDirective } from "src/app/shared/directives/loading.directive";
+import { ConfirmService } from "src/app/shared/services/confirm/confirm.service";
+import { ConfirmOptions } from "src/app/shared/services/confirm/confirm-options";
+import { D } from "@angular/cdk/keycodes";
 
 @Component({
     selector: "zone-group-configure",
     templateUrl: "./zone-group-configure.component.html",
     styleUrls: ["./zone-group-configure.component.scss"],
-    standalone: true,
     imports: [
         AsyncPipe,
         PageHeaderComponent,
@@ -34,9 +34,7 @@ import { LoadingDirective } from "src/app/shared/directives/loading.directive";
         ModelNameTagComponent,
         AlertDisplayComponent,
         CdkDropList,
-        NgFor,
         CdkDrag,
-        NgIf,
         IconComponent,
         CdkDragHandle,
         FormsModule,
@@ -44,8 +42,6 @@ import { LoadingDirective } from "src/app/shared/directives/loading.directive";
     ],
 })
 export class ZoneGroupConfigureComponent implements OnInit {
-    @ViewChild("deleteZoneGroupModal") deleteZoneGroupModal;
-
     public zoneGroups$: Observable<ZoneGroupMinimalDto[]>;
     public geographyID: number;
     public isLoading: boolean;
@@ -58,7 +54,6 @@ export class ZoneGroupConfigureComponent implements OnInit {
     public zoneGroupList: ZoneGroupMinimalDto[];
     public editingZoneGroup: ZoneGroupMinimalDto;
     public newZone: ZoneMinimalDto;
-    private openModalComponent: ComponentRef<ModalComponent>;
     public richTextTypeID: number = CustomRichTextTypeEnum.ZoneGroupsEdit;
 
     public colorOrder = [
@@ -83,10 +78,9 @@ export class ZoneGroupConfigureComponent implements OnInit {
         private route: ActivatedRoute,
         private zoneGroupService: ZoneGroupService,
         private alertService: AlertService,
-        private modalService: ModalService,
-        private viewContainerRef: ViewContainerRef,
         private currentGeographyService: CurrentGeographyService,
-        private geographyService: GeographyService
+        private geographyService: GeographyService,
+        private confirmService: ConfirmService
     ) {}
 
     ngOnInit(): void {
@@ -96,14 +90,14 @@ export class ZoneGroupConfigureComponent implements OnInit {
             }),
             switchMap((params) => {
                 const geographyName = params[routeParams.geographyName];
-                return this.geographyService.geographiesGeographyNameGeographyNameMinimalGet(geographyName);
+                return this.geographyService.getByNameAsMinimalDtoGeography(geographyName);
             }),
             tap((geography) => {
                 this.currentGeographyService.setCurrentGeography(geography);
                 this.geographyID = geography.GeographyID;
             }),
             switchMap((geography) => {
-                return this.zoneGroupService.geographiesGeographyIDZoneGroupsGet(geography.GeographyID);
+                return this.zoneGroupService.listZoneGroup(geography.GeographyID);
             }),
             map((zoneGroups) => {
                 return this.initializeZoneGroups(zoneGroups);
@@ -137,6 +131,7 @@ export class ZoneGroupConfigureComponent implements OnInit {
                             })
                     ),
                     SortOrder: x.SortOrder,
+                    DisplayToAccountHolders: x.DisplayToAccountHolders,
                 })
         );
         this.isLoadingSubmit = false;
@@ -192,6 +187,7 @@ export class ZoneGroupConfigureComponent implements OnInit {
         zoneGroup.ZoneGroupName = this.newZoneGroupName();
         zoneGroup.ZoneGroupDescription = "Description";
         zoneGroup.ZoneList = this.addZoneList();
+        zoneGroup.DisplayToAccountHolders = true;
 
         this.zoneGroupList.push(zoneGroup);
         this.editZoneGroup(zoneGroup);
@@ -266,7 +262,7 @@ export class ZoneGroupConfigureComponent implements OnInit {
                 })
         );
         this.editingZoneGroup.ZoneList = temp;
-        this.zoneGroupService.geographiesGeographyIDZoneGroupsPost(this.geographyID, this.editingZoneGroup).subscribe((zoneGroups) => {
+        this.zoneGroupService.updateZoneGroup(this.geographyID, this.editingZoneGroup).subscribe((zoneGroups) => {
             this.initializeZoneGroups(zoneGroups);
             this.alertService.pushAlert(new Alert("Successfully saved Zone Group.", AlertContext.Success, true));
         });
@@ -274,8 +270,7 @@ export class ZoneGroupConfigureComponent implements OnInit {
 
     deleteZoneGroup() {
         this.isLoadingSubmit = true;
-        this.zoneGroupService.geographiesGeographyIDZoneGroupZoneGroupIDDelete(this.geographyID, this.editingZoneGroup.ZoneGroupID).subscribe((zoneGroups) => {
-            this.close();
+        this.zoneGroupService.deleteZoneGroup(this.geographyID, this.editingZoneGroup.ZoneGroupID).subscribe((zoneGroups) => {
             this.initializeZoneGroups(zoneGroups);
             this.alertService.pushAlert(new Alert("Successfully deleted Zone Group.", AlertContext.Success, true));
         });
@@ -303,16 +298,22 @@ export class ZoneGroupConfigureComponent implements OnInit {
                     SortOrder: i,
                 })
         );
-        this.zoneGroupService.geographiesGeographyIDZoneGroupsSortOrderPut(this.geographyID, temp).subscribe((response) => {});
+        this.zoneGroupService.updateSortOrderZoneGroup(this.geographyID, temp).subscribe((response) => {});
     }
 
-    open(template: TemplateRef<any>): void {
-        this.openModalComponent = this.modalService.open(template, this.viewContainerRef);
-    }
-
-    close(): void {
-        if (!this.openModalComponent) return;
-        this.modalService.close(this.openModalComponent);
+    open(): void {
+        const options = {
+            title: "Warning",
+            message: "Are you sure you want to delete this zone group?",
+            buttonClassYes: "btn-danger",
+            buttonTextYes: "Delete",
+            buttonTextNo: "Cancel",
+        } as ConfirmOptions;
+        this.confirmService.confirm(options).then((confirmed) => {
+            if (confirmed) {
+                this.deleteZoneGroup();
+            }
+        });
     }
 
     newZoneGroupName(): string {

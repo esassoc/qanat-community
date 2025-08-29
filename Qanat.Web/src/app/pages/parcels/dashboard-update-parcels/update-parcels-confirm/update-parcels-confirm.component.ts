@@ -1,16 +1,14 @@
-import { ChangeDetectorRef, Component, ComponentRef, OnDestroy, OnInit, TemplateRef, ViewContainerRef } from "@angular/core";
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from "@angular/core";
 import { UntypedFormGroup, UntypedFormControl, Validators, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
 import { Observable, switchMap, tap } from "rxjs";
 import { ParcelLayerUpdateDto } from "src/app/shared/generated/model/parcel-layer-update-dto";
 import { ParcelUpdateExpectedResultsDto } from "src/app/shared/generated/model/parcel-update-expected-results-dto";
 import { AlertService } from "src/app/shared/services/alert.service";
-import { ModalComponent } from "src/app/shared/components/modal/modal.component";
-import { ModalService } from "src/app/shared/services/modal/modal.service";
 import { Alert } from "src/app/shared/models/alert";
 import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
 import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
-import { NgIf, DecimalPipe, AsyncPipe } from "@angular/common";
+import { DecimalPipe, AsyncPipe } from "@angular/common";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { AlertDisplayComponent } from "src/app/shared/components/alert-display/alert-display.component";
 import { ButtonComponent } from "src/app/shared/components/button/button.component";
@@ -20,18 +18,17 @@ import { CurrentGeographyService } from "src/app/shared/services/current-geograp
 import { GeographyPublicDto } from "src/app/shared/generated/model/geography-public-dto";
 import { GeographyService } from "src/app/shared/generated/api/geography.service";
 import { GeographyMinimalDto } from "src/app/shared/generated/model/geography-minimal-dto";
+import { ConfirmService } from "src/app/shared/services/confirm/confirm.service";
 
 @Component({
     selector: "update-parcels-confirm",
     templateUrl: "./update-parcels-confirm.component.html",
     styleUrls: ["./update-parcels-confirm.component.scss"],
-    standalone: true,
     imports: [
         AsyncPipe,
         PageHeaderComponent,
         RouterLink,
         AlertDisplayComponent,
-        NgIf,
         FormsModule,
         ReactiveFormsModule,
         CustomRichTextComponent,
@@ -43,8 +40,6 @@ import { GeographyMinimalDto } from "src/app/shared/generated/model/geography-mi
 export class UpdateParcelsConfirmComponent implements OnInit, OnDestroy {
     public geography$: Observable<GeographyPublicDto>;
     public resultsPreview$: Observable<ParcelUpdateExpectedResultsDto>;
-
-    public modalReference: ComponentRef<ModalComponent>;
 
     public parcelLayerUpdateDto: ParcelLayerUpdateDto;
     public submitForPreviewForm = new UntypedFormGroup({
@@ -60,18 +55,17 @@ export class UpdateParcelsConfirmComponent implements OnInit, OnDestroy {
         private router: Router,
         private alertService: AlertService,
         private parcelByGeographyService: ParcelByGeographyService,
-        private modalService: ModalService,
         private geographyService: GeographyService,
         private currentGeographyService: CurrentGeographyService,
-        private viewContainerRef: ViewContainerRef,
-        private cdr: ChangeDetectorRef
+        private cdr: ChangeDetectorRef,
+        private confirmService: ConfirmService
     ) {}
 
     ngOnInit() {
         this.geography$ = this.route.params.pipe(
             switchMap((params) => {
                 const geographyName = params.geographyName;
-                return this.geographyService.geographiesGeographyNameGeographyNameMinimalGet(geographyName);
+                return this.geographyService.getByNameAsMinimalDtoGeography(geographyName);
             }),
             tap((geography) => {
                 this.currentGeographyService.setCurrentGeography(geography);
@@ -80,7 +74,7 @@ export class UpdateParcelsConfirmComponent implements OnInit, OnDestroy {
 
         this.resultsPreview$ = this.geography$.pipe(
             switchMap((geography) => {
-                return this.parcelByGeographyService.geographiesGeographyIDParcelsGetExpectedResultsGet(geography.GeographyID);
+                return this.parcelByGeographyService.getExpectedResultsParcelByGeography(geography.GeographyID);
             }),
             tap((results) => {
                 this.expectedResultsRetrievedSuccessfully = true;
@@ -97,13 +91,8 @@ export class UpdateParcelsConfirmComponent implements OnInit, OnDestroy {
     }
 
     public onSubmitChanges(geography: GeographyMinimalDto) {
-        if (this.modalReference) {
-            this.modalService.close(this.modalReference);
-            this.modalReference = null;
-        }
-
         this.isLoadingSubmit = true;
-        this.parcelByGeographyService.geographiesGeographyIDParcelsEnactGDBChangesPost(geography.GeographyID).subscribe(
+        this.parcelByGeographyService.enactGDBChangesParcelByGeography(geography.GeographyID).subscribe(
             () => {
                 this.isLoadingSubmit = false;
                 this.router.navigate(["../../update"], { relativeTo: this.route }).then(() => {
@@ -117,12 +106,19 @@ export class UpdateParcelsConfirmComponent implements OnInit, OnDestroy {
         );
     }
 
-    public launchModal(template: TemplateRef<any>): void {
-        this.modalReference = this.modalService.open(template, this.viewContainerRef);
-    }
+    public launchModal(geography: GeographyMinimalDto): void {
+        const confirmOptions = {
+            title: "Finalize Water Account and Parcel Changes",
+            message: `Are you sure you want to finalize these changes? This action cannot be undone.`,
+            buttonClassYes: "btn btn-secondary",
+            buttonTextYes: "Save",
+            buttonTextNo: "Cancel",
+        };
 
-    public close(): void {
-        if (!this.modalReference) return;
-        this.modalService.close(this.modalReference);
+        this.confirmService.confirm(confirmOptions).then((confirmed) => {
+            if (confirmed) {
+                this.onSubmitChanges(geography);
+            }
+        });
     }
 }

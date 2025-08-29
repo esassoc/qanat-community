@@ -1,36 +1,27 @@
-<div class="modal-header">
-    <h3 class="section-title">Edit a Frequently Asked Question</h3>
-    <button type="button" class="close" (click)="close()">
-        <i class="fa fa-times-circle"></i>
-    </button>
-</div>
+<div class="modal">
+    <div class="modal-header">
+        <h3 class="section-title">Edit a Frequently Asked Question</h3>
+    </div>
 
-<div class="modal-body" *ngIf="frequentlyAskedQuestion$ | async">
-    <form action="" class="form" [formGroup]="formGroup">
-        <form-field class="m-2" [formControl]="formGroup.controls.QuestionText" fieldLabel="Question" placeholder="Question" [type]="FormFieldType.Textarea"></form-field>
+    @if (frequentlyAskedQuestion$ | async) {
+        <div class="modal-body">
+            <form action="" class="form" [formGroup]="formGroup">
+                <form-field class="m-2" [formControl]="formGroup.controls.QuestionText" fieldLabel="Question" placeholder="Question" [type]="FormFieldType.Textarea"></form-field>
+                <form-field class="m-2" [formControl]="formGroup.controls.AnswerText" fieldLabel="Answer" placeholder="Answer" [type]="FormFieldType.RTE"></form-field>
+                <form-field
+                    class="m-2"
+                    [multiple]="true"
+                    [formControl]="formGroup.controls.FaqDisplayLocationTypeIDs"
+                    fieldLabel="Display On"
+                    [formInputOptions]="FaqDisplayLocationTypesAsSelectDropdownOptions"
+                    [type]="FormFieldType.Select">
+                </form-field>
+            </form>
+        </div>
+    }
 
-        <form-field class="m-2" [formControl]="formGroup.controls.AnswerText" fieldLabel="Answer" placeholder="Answer" [type]="FormFieldType.RTE"></form-field>
-
-        <!-- <form-field
-            *ngIf="faqDisplayLocationTypes$ | async as faqDisplayLocationTypes"
-            class="m-2"
-            [formControl]="formGroup.controls.FaqDisplayLocationTypeID"
-            fieldLabel="Display On"
-            [formInputOptions]="faqDisplayLocationTypesFormInputOptions"
-            [type]="FormFieldType.Select">
-        </form-field> -->
-
-        <ngx-select-dropdown
-            *ngIf="faqDisplayLocationTypes$ | async as faqDisplayLocationTypes"
-            [multiple]="true"
-            [config]="dropdownConfig"
-            [formControl]="dropdownFormControl"
-            (change)="changedDisplayLocations($event)"
-            [options]="faqDisplayLocationTypes"></ngx-select-dropdown>
-    </form>
-</div>
-
-<div class="modal-footer">
-    <button class="btn btn-primary" (click)="save()" [disabled]="formGroup.invalid">Update and Save</button>
-    <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+    <div class="modal-footer">
+        <button class="btn btn-primary" (click)="save()" [disabled]="formGroup.invalid">Update and Save</button>
+        <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+    </div>
 </div>

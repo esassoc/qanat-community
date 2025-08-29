@@ -1,15 +1,3 @@
-<div (click)="onSortRequested($event)" class="flex-between">
-    <div #header class="custom-header-label">
-        <field-definition [fieldDefinitionType]="params.fieldDefinitionType" [labelOverride]="params.labelOverride" [inline]="false" [useBodyContainer]="true"></field-definition>
-    </div>
-    <div class="filter-indicator" *ngIf="filtered">*</div>
-
-    <div [hidden]="!params.enableSorting" class="sort-buttons">
-        <i *ngIf="this.sorted === 'desc'" class="fa fa-long-arrow-down"></i>
-        <i *ngIf="this.sorted === 'asc'" class="fa fa-long-arrow-up"></i>
-    </div>
-
-    <div class="custom-filter-button" (click)="onMenuClick($event)">
-        <i class="fas fa-filter" [class.filtered]="filtered"></i>
-    </div>
+<div #header class="custom-header-label">
+    <field-definition [fieldDefinitionType]="params.fieldDefinitionType" [labelOverride]="params.labelOverride" [inline]="false" [useBodyContainer]="true"></field-definition>
 </div>

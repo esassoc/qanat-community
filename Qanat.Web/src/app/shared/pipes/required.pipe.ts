@@ -4,6 +4,7 @@ import { AbstractControl, FormControl } from "@angular/forms";
 @Pipe({
     name: "isRequired",
     standalone: true,
+    pure: false,
 })
 export class RequiredPipe implements PipeTransform {
     transform(formControl: FormControl): boolean {

@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Qanat.Models.DataTransferObjects;
-using System.Threading.Tasks;
-using NetTopologySuite.Features;
 
 namespace Qanat.EFModels.Entities;
 
@@ -33,23 +28,26 @@ public static class UploadedGdbs
     public static List<ErrorMessage> ValidateUploadedGDB(QanatDbContext dbContext, int userID)
     {
         var results = new List<ErrorMessage>();
-        var uploadedGdbDto = dbContext.UploadedGdbs.AsNoTracking().OrderByDescending(x => x.UploadDate)
+        var uploadedGdbDto = dbContext.UploadedGdbs.AsNoTracking()
+            .OrderByDescending(x => x.UploadDate)
             .FirstOrDefault(x => x.UserID == userID);
+
         if (uploadedGdbDto == null)
         {
-            results.Add(new ErrorMessage()  { Type = "Missing file", Message = "You have not uploaded a file for review. Please upload one."});
+            results.Add(new ErrorMessage() { Type = "Missing file", Message = "You have not uploaded a file for review. Please upload one." });
         }
 
         return results;
     }
 
-    public static List<ErrorMessage> ValidateEffectiveYear(QanatDbContext dbContext, int effectiveYear, int geographyID)
+    public static async Task<List<ErrorMessage>> ValidateEffectiveYearAsync(QanatDbContext dbContext, int effectiveYear, int geographyID)
     {
         var results = new List<ErrorMessage>();
-        var lastEffectiveYear = WaterAccountParcels.GetNextAvailableEffectiveYearForGeography(dbContext, geographyID);
-        if (lastEffectiveYear > effectiveYear)
+
+        var reportingPeriod = await ReportingPeriods.GetByGeographyIDAndYearAsync(dbContext, geographyID, effectiveYear);
+        if (reportingPeriod == null)
         {
-            results.Add(new ErrorMessage() { Type = "Effective Year", Message = $"Your Effective Year must be greater than equal to {lastEffectiveYear}" });
+            results.Add(new ErrorMessage() { Type = "Effective Year", Message = $"Could not find a Reporting Period for the year {effectiveYear}." });
         }
 
         return results;
@@ -57,7 +55,11 @@ public static class UploadedGdbs
 
     public static UploadedGdbDto GetByID(QanatDbContext dbContext, int uploadedGdbID)
     {
-        var dto = dbContext.UploadedGdbs.Include(x => x.User).Include(x => x.Geography).Single(x => x.UploadedGdbID == uploadedGdbID).AsDto();
+        var dto = dbContext.UploadedGdbs.AsNoTracking()
+            .Include(x => x.User)
+            .Include(x => x.Geography)
+            .Single(x => x.UploadedGdbID == uploadedGdbID).AsDto();
+
         return dto;
     }
 }

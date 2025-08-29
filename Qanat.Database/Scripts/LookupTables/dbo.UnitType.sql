@@ -1,8 +1,9 @@
 ﻿MERGE INTO dbo.UnitType AS Target
 USING (VALUES
-(1, 'Inches', 'inches', 'in'),
-(2, 'Millimeters', 'millimeters', 'mm')
---(3, 'AcreFeet', 'acre-feet', 'ac-ft') # commented out because our water measurements process groups by depth,
+	(1, 'Inches', 'inches', 'in')
+,	(2, 'Millimeters', 'millimeters', 'mm')
+,	(3, 'AcreFeet', 'acre-feet', 'ac-ft')
+,	(4, 'AcreFeetPerAcre', 'acre-feet/acre', 'ac-ft/ac')
 )
 AS Source (UnitTypeID, UnitTypeName, UnitTypeDisplayName, UnitTypeAbbreviation)
 ON Target.UnitTypeID = Source.UnitTypeID

@@ -7,6 +7,7 @@
     padding: $spacing-200;
     margin-bottom: $spacing-200;
     background-color: $gray-lighter;
+    gap: unset;
 
     .global-filter {
         justify-self: flex-start;
@@ -32,5 +33,15 @@
         &:first-child {
             border: none;
         }
+    }
+}
+
+.grid-actions {
+    width: 33.333%;
+}
+
+::ng-deep {
+    .clear-action-widths .grid-header .grid-actions {
+        width: unset;
     }
 }

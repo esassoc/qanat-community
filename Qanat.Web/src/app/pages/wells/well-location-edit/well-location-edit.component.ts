@@ -13,7 +13,7 @@ import { GeographyDto } from "src/app/shared/generated/model/geography-dto";
 import { ConfirmService } from "src/app/shared/services/confirm/confirm.service";
 import { ConfirmOptions } from "src/app/shared/services/confirm/confirm-options";
 import { WellLocationPreviewDto } from "src/app/shared/generated/model/well-location-preview-dto";
-import { NgIf, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { AlertDisplayComponent } from "src/app/shared/components/alert-display/alert-display.component";
 import { WellLocationEditMapComponent } from "src/app/shared/components/maps/well-location-edit-map/well-location-edit-map.component";
@@ -22,8 +22,7 @@ import { WellLocationEditMapComponent } from "src/app/shared/components/maps/wel
     selector: "well-location-edit",
     templateUrl: "./well-location-edit.component.html",
     styleUrl: "./well-location-edit.component.scss",
-    standalone: true,
-    imports: [PageHeaderComponent, AlertDisplayComponent, NgIf, WellLocationEditMapComponent, RouterLink, AsyncPipe],
+    imports: [PageHeaderComponent, AlertDisplayComponent, WellLocationEditMapComponent, RouterLink, AsyncPipe]
 })
 export class WellLocationEditComponent implements OnInit, OnDestroy {
     public geography$: Observable<GeographyDto>;
@@ -48,7 +47,7 @@ export class WellLocationEditComponent implements OnInit, OnDestroy {
         this.wellLocation$ = this.route.paramMap.pipe(
             switchMap((paramMap) => {
                 const wellID = parseInt(paramMap.get(routeParams.wellID));
-                return this.wellService.wellsWellIDLocationGet(wellID);
+                return this.wellService.getLocationByWellIDWell(wellID);
             }),
             tap((wellLocation) => {
                 this.model = { ...wellLocation };
@@ -69,7 +68,7 @@ export class WellLocationEditComponent implements OnInit, OnDestroy {
     public previewChanges() {
         this.isLoadingSubmit = true;
 
-        this.wellService.wellsWellIDLocationPreviewPut(this.model.WellID, this.model).subscribe((response) => {
+        this.wellService.previewWellLocationUpdateWell(this.model.WellID, this.model).subscribe((response) => {
             if (response.ParcelID == this.model.ParcelID) {
                 // bypass confirmation modal if Parcel hasn't changed
                 this.save();
@@ -105,7 +104,7 @@ export class WellLocationEditComponent implements OnInit, OnDestroy {
     }
 
     public save() {
-        this.wellService.wellsWellIDLocationPut(this.model.WellID, this.model).subscribe({
+        this.wellService.updateWellLocationWell(this.model.WellID, this.model).subscribe({
             next: () => {
                 this.router.navigate([".."], { relativeTo: this.route }).then(() => {
                     this.alertService.clearAlerts();

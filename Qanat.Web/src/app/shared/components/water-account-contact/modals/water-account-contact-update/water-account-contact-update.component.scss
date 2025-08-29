@@ -1,0 +1,34 @@
+@use "/src/scss/abstracts" as *;
+
+.modal {
+    overflow: auto;
+}
+
+note {
+    margin-top: $spacing-400;
+
+    .note-content {
+        display: flex;
+        justify-content: flex-start;
+        gap: $spacing-200;
+        line-height: 22px;
+        padding: $spacing-100;
+
+        icon.warning::ng-deep svg path {
+            color: $yellow-darker;
+        }
+    }
+}
+
+.back-button {
+    margin-right: auto;
+    line-height: 14px;
+
+    icon::ng-deep svg {
+        margin-right: $spacing-100;
+        color: $gray-500;
+        height: 14px;
+        width: 14px;
+        transform: translateY(1px);
+    }
+}

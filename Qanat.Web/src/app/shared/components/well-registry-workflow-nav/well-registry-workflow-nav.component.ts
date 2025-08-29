@@ -1,5 +1,4 @@
 import { Component, OnInit } from "@angular/core";
-import { CommonModule } from "@angular/common";
 import { routeParams } from "src/app/app.routes";
 import { ActivatedRoute } from "@angular/router";
 import { Observable, tap } from "rxjs";
@@ -8,13 +7,13 @@ import { WorkflowNavComponent } from "../workflow-nav/workflow-nav.component";
 import { WorkflowNavItemComponent } from "../workflow-nav/workflow-nav-item/workflow-nav-item.component";
 import { WellRegistryWorkflowProgressDto } from "src/app/shared/generated/model/well-registry-workflow-progress-dto";
 import { WellRegistrationStatusEnum } from "src/app/shared/generated/enum/well-registration-status-enum";
+import { AsyncPipe } from "@angular/common";
 
 @Component({
     selector: "well-registry-workflow-nav",
-    standalone: true,
-    imports: [CommonModule, WorkflowNavComponent, WorkflowNavItemComponent],
+    imports: [WorkflowNavComponent, WorkflowNavItemComponent, AsyncPipe],
     templateUrl: "./well-registry-workflow-nav.component.html",
-    styleUrls: ["./well-registry-workflow-nav.component.scss"],
+    styleUrls: ["./well-registry-workflow-nav.component.scss"]
 })
 export class WellRegistryWorkflowNavComponent implements OnInit {
     public wellRegistrationID: number;

@@ -7,15 +7,14 @@ import { GeographyDto } from "src/app/shared/generated/model/geography-dto";
 import { UserDto } from "src/app/shared/generated/model/user-dto";
 import { IconComponent } from "src/app/shared/components/icon/icon.component";
 import { GeographyLogoComponent } from "../../../shared/components/geography-logo/geography-logo.component";
-import { NgIf, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { PublicService } from "src/app/shared/generated/api/public.service";
 
 @Component({
     selector: "dashboard-onboard",
     templateUrl: "./dashboard-onboard.component.html",
     styleUrls: ["./dashboard-onboard.component.scss"],
-    standalone: true,
-    imports: [NgIf, RouterLink, GeographyLogoComponent, RouterLinkActive, IconComponent, RouterOutlet, AsyncPipe],
+    imports: [RouterLink, GeographyLogoComponent, RouterLinkActive, IconComponent, RouterOutlet, AsyncPipe]
 })
 export class DashboardOnboardComponent implements OnInit, OnDestroy {
     private currentUserSubscription: Subscription;
@@ -23,7 +22,11 @@ export class DashboardOnboardComponent implements OnInit, OnDestroy {
 
     public geography$: Observable<GeographyDto>;
 
-    constructor(private authenticationService: AuthenticationService, private route: ActivatedRoute, private publicService: PublicService) {}
+    constructor(
+        private authenticationService: AuthenticationService,
+        private route: ActivatedRoute,
+        private publicService: PublicService
+    ) {}
 
     ngOnInit(): void {
         this.currentUserSubscription = this.authenticationService.currentUserSetObservable.subscribe((user) => {
@@ -31,7 +34,7 @@ export class DashboardOnboardComponent implements OnInit, OnDestroy {
         });
 
         const geographyName = this.route.snapshot.paramMap.get(routeParams.geographyName);
-        this.geography$ = this.publicService.publicGeographiesNameGeographyNameGet(geographyName);
+        this.geography$ = this.publicService.getGeographyByNamePublic(geographyName);
     }
 
     ngOnDestroy(): void {

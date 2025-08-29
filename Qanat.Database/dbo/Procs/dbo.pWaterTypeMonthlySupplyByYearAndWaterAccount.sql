@@ -26,7 +26,7 @@ FROM #waterAccountParcels wap
 JOIN dbo.Parcel P ON P.ParcelID = wap.ParcelID)
 
 select WaterAccountID, EffectiveDate,
-	wawted.WaterTypeID, wawted.WaterTypeName, wawted.WaterTypeColor, wawted.WaterTypeSortOrder,
+	wawted.WaterTypeID, wawted.WaterTypeName, wawted.WaterTypeColor, wawted.WaterTypeSortOrder, wawted.WaterTypeDefinition,
 	CurrentSupplyAmount,
 	sum(CurrentSupplyAmount) over(partition by wawted.WaterTypeID order by wawted.EffectiveDate rows unbounded preceding) as CurrentCumulativeSupplyAmount,
 	CASE 
@@ -35,7 +35,7 @@ select WaterAccountID, EffectiveDate,
 	END as CurrentCumulativeSupplyAmountDepth
 from (
 	select wa.WaterAccountID, ed.EffectiveDate,
-		wt.WaterTypeID, wt.WaterTypeName, wt.WaterTypeColor, wt.SortOrder as WaterTypeSortOrder 
+		wt.WaterTypeID, wt.WaterTypeName, wt.WaterTypeColor, wt.SortOrder as WaterTypeSortOrder, wt.WaterTypeDefinition
 	from dbo.WaterAccount wa
 	join dbo.WaterType wt on wa.GeographyID = wt.GeographyID
 	cross join #effectiveDates ed
@@ -49,6 +49,6 @@ left join (
 	join dbo.fReportingPeriod(@year) rp on ps.GeographyID = rp.GeographyID and ps.EffectiveDate between rp.StartDate and rp.EndDate
 	group by ps.WaterTypeID, month(ps.EffectiveDate)
 ) mps on month(wawted.EffectiveDate) = mps.EffectiveMonth and wawted.WaterTypeID = mps.WaterTypeID
-order by EffectiveDate, WaterTypeID
+order by wawted.EffectiveDate, wawted.WaterTypeID
 
 GO

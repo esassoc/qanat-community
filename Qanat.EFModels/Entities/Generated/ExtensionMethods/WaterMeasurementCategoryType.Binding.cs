@@ -22,9 +22,7 @@ namespace Qanat.EFModels.Entities
         public static readonly WaterMeasurementCategoryTypeSelfReported SelfReported = WaterMeasurementCategoryTypeSelfReported.Instance;
 
         public static readonly List<WaterMeasurementCategoryType> All;
-        public static readonly List<WaterMeasurementCategoryTypeSimpleDto> AllAsSimpleDto;
         public static readonly ReadOnlyDictionary<int, WaterMeasurementCategoryType> AllLookupDictionary;
-        public static readonly ReadOnlyDictionary<int, WaterMeasurementCategoryTypeSimpleDto> AllAsSimpleDtoLookupDictionary;
 
         /// <summary>
         /// Static type constructor to coordinate static initialization order
@@ -32,9 +30,7 @@ namespace Qanat.EFModels.Entities
         static WaterMeasurementCategoryType()
         {
             All = new List<WaterMeasurementCategoryType> { ET, Precip, Meter, SurfaceWater, Calculated, PrecipitationCredit, ManualAdjustment, SelfReported };
-            AllAsSimpleDto = new List<WaterMeasurementCategoryTypeSimpleDto> { ET.AsSimpleDto(), Precip.AsSimpleDto(), Meter.AsSimpleDto(), SurfaceWater.AsSimpleDto(), Calculated.AsSimpleDto(), PrecipitationCredit.AsSimpleDto(), ManualAdjustment.AsSimpleDto(), SelfReported.AsSimpleDto() };
             AllLookupDictionary = new ReadOnlyDictionary<int, WaterMeasurementCategoryType>(All.ToDictionary(x => x.WaterMeasurementCategoryTypeID));
-            AllAsSimpleDtoLookupDictionary = new ReadOnlyDictionary<int, WaterMeasurementCategoryTypeSimpleDto>(AllAsSimpleDto.ToDictionary(x => x.WaterMeasurementCategoryTypeID));
         }
 
         /// <summary>

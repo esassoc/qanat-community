@@ -3,12 +3,13 @@ using Microsoft.EntityFrameworkCore.Query;
 using NetTopologySuite.Geometries;
 using Qanat.Models.DataTransferObjects;
 using Qanat.Models.DataTransferObjects.Geography;
+using Qanat.Models.DataTransferObjects.User;
 
 namespace Qanat.EFModels.Entities;
 
 public static class Geographies
 {
-    public static int GSABoundaryBuffer = 0;
+    public const int GSABoundaryBuffer = 0;
 
     private static IIncludableQueryable<Geography, User> GetImpl(QanatDbContext dbContext)
     {
@@ -17,11 +18,9 @@ public static class Geographies
             .Include(x => x.GeographyConfiguration)
             .Include(x => x.GeographyBoundary)
             .Include(x => x.GeographyAllocationPlanConfiguration)
-            .Include(x => x.DefaultReportingPeriod).ThenInclude(x => x.Geography)
-            .Include(x => x.DefaultReportingPeriod).ThenInclude(x => x.CreateUser)
-            .Include(x => x.DefaultReportingPeriod).ThenInclude(x => x.UpdateUser)
             .Include(x => x.GeographyUsers).ThenInclude(x => x.User);
     }
+
     public static List<GeographyPublicDto> ListAsPublicDto(QanatDbContext dbContext)
     {
         return dbContext.Geographies.AsNoTracking().Include(x => x.GeographyAllocationPlanConfiguration)
@@ -57,9 +56,9 @@ public static class Geographies
         return dbContext.Geographies.AsNoTracking().SingleOrDefault(x => x.GeographyID == geographyID);
     }
 
-    public static GeographyDto GetByNameAsDto(QanatDbContext dbContext, string geographyName)
+    public static GeographyDisplayDto GetByIDAsDisplayDto(QanatDbContext dbContext, int geographyID)
     {
-        return GetImpl(dbContext).AsNoTracking().SingleOrDefault(x => x.GeographyName.ToLower() == geographyName)?.AsDto();
+        return dbContext.Geographies.AsNoTracking().SingleOrDefault(x => x.GeographyID == geographyID)?.AsDisplayDto();
     }
 
     public static GeographyPublicDto GetByNameAsPublicDto(QanatDbContext dbContext, string geographyName)
@@ -87,6 +86,16 @@ public static class Geographies
         return geography?.AsMinimalDto();
     }
 
+    public static List<GeographyMinimalDto> ListAsGeographyMinimalDto(QanatDbContext dbContext)
+    {
+        return dbContext.Geographies.AsNoTracking()
+            .Include(x => x.GeographyConfiguration)
+            .Include(x => x.GeographyAllocationPlanConfiguration)
+            .OrderBy(x => x.IsDemoGeography ? 0 : 1).ThenBy(x => x.GeographyName)
+            .Select(x => x.AsMinimalDto())
+            .ToList();
+    }
+
     public static List<GeographyMinimalDto> ListByIDsAsGeographyMinimalDto(QanatDbContext dbContext, List<int> geographyIDs)
     {
         return dbContext.Geographies.AsNoTracking()
@@ -95,6 +104,15 @@ public static class Geographies
             .Where(x => geographyIDs.Contains(x.GeographyID)).AsEnumerable()
             .OrderBy(x => x.IsDemoGeography ? 0 : 1).ThenBy(x => x.GeographyName)
             .Select(x => x.AsMinimalDto())
+            .ToList();
+    }
+
+    public static List<GeographyDisplayDto> ListByIDsAsGeographyDisplayDto(QanatDbContext dbContext, List<int> geographyIDs)
+    {
+        return dbContext.Geographies.AsNoTracking()
+            .Where(x => geographyIDs.Contains(x.GeographyID)).AsEnumerable()
+            .OrderBy(x => x.GeographyName)
+            .Select(x => x.AsDisplayDto())
             .ToList();
     }
 
@@ -114,16 +132,15 @@ public static class Geographies
         {
             GeographyID = geography.GeographyID,
             GeographyDisplayName = geography.GeographyDisplayName,
-            DefaultReportingPeriodID = geography.DefaultReportingPeriodID,
             APNRegexPattern = geography.APNRegexPattern,
             APNRegexDisplay = geography.APNRegexPatternDisplay,
             LandownerDashboardSupplyLabel = geography.LandownerDashboardSupplyLabel,
             LandownerDashboardUsageLabel = geography.LandownerDashboardUsageLabel,
             ContactEmail = geography.ContactEmail,
             ContactPhoneNumber = geography.ContactPhoneNumber,
-            DisplayUsageGeometriesAsField = geography.DisplayUsageGeometriesAsField,
+            ContactAddressLine1 = geography.ContactAddressLine1,
+            ContactAddressLine2 = geography.ContactAddressLine2,
             AllowLandownersToRequestAccountChanges = geography.AllowLandownersToRequestAccountChanges,
-            AllowWaterMeasurementSelfReporting = geography.AllowWaterMeasurementSelfReporting,
             ShowSupplyOnWaterBudgetComponent = geography.ShowSupplyOnWaterBudgetComponent,
             WaterBudgetSlotAHeader = geography.WaterBudgetSlotAHeader,
             WaterBudgetSlotAWaterMeasurementTypeID = geography.WaterBudgetSlotAWaterMeasurementTypeID,
@@ -145,20 +162,6 @@ public static class Geographies
     public static List<ErrorMessage> ValidateGeographyUpdate(QanatDbContext dbContext, GeographyForAdminEditorsDto requestDto)
     {
         var errors = new List<ErrorMessage>();
-
-        var currentYear = DateTime.Now.Year;
-
-        var reportingPeriod = dbContext.ReportingPeriods.AsNoTracking()
-            .SingleOrDefault(x => x.ReportingPeriodID == requestDto.DefaultReportingPeriodID);
-
-        if (reportingPeriod == null)
-        {
-            errors.Add(new ErrorMessage() { Type = "Default Reporting Period", Message = $"Could not find a Reporting Period with the ID {requestDto.DefaultReportingPeriodID}." });
-        }
-        else if (reportingPeriod.StartDate.Year > currentYear) //MK 1/30/2025: Not sure this check is still relevant, seems like it can break non calendar year reporting periods.
-        {
-            errors.Add(new ErrorMessage() { Type = "Default Reporting Period", Message = $"Can not set Default Reporting Period to a future year." });
-        }
 
         try
         {
@@ -241,16 +244,15 @@ public static class Geographies
         var geography = dbContext.Geographies.Single(x => x.GeographyID == geographyID);
 
         geography.GeographyDisplayName = requestDto.GeographyDisplayName;
-        geography.DefaultReportingPeriodID = requestDto.DefaultReportingPeriodID;
         geography.APNRegexPattern = requestDto.APNRegexPattern;
         geography.APNRegexPatternDisplay = requestDto.APNRegexDisplay;
         geography.LandownerDashboardSupplyLabel = requestDto.LandownerDashboardSupplyLabel;
         geography.LandownerDashboardUsageLabel = requestDto.LandownerDashboardUsageLabel;
         geography.ContactEmail = requestDto.ContactEmail;
         geography.ContactPhoneNumber = requestDto.ContactPhoneNumber;
-        geography.DisplayUsageGeometriesAsField = requestDto.DisplayUsageGeometriesAsField;
+        geography.ContactAddressLine1 = requestDto.ContactAddressLine1;
+        geography.ContactAddressLine2 = requestDto.ContactAddressLine2;
         geography.AllowLandownersToRequestAccountChanges = requestDto.AllowLandownersToRequestAccountChanges;
-        geography.AllowWaterMeasurementSelfReporting = requestDto.AllowWaterMeasurementSelfReporting;
         geography.ShowSupplyOnWaterBudgetComponent = requestDto.ShowSupplyOnWaterBudgetComponent;
         geography.WaterBudgetSlotAHeader = requestDto.WaterBudgetSlotAHeader;
         geography.WaterBudgetSlotAWaterMeasurementTypeID = requestDto.WaterBudgetSlotAWaterMeasurementTypeID;
@@ -262,53 +264,63 @@ public static class Geographies
         dbContext.SaveChanges();
     }
 
-    public static List<ErrorMessage> ValidateUpdateGeographyWaterManagers(QanatDbContext dbContext, int geographyID, List<UserDto> users)
+    public static async Task<GeographyMinimalDto> UpdateGeographySelfReportingAsync(QanatDbContext dbContext, int geographyID, GeographySelfReportEnabledUpdateDto updateDto)
+    {
+        var geography = dbContext.Geographies.Single(x => x.GeographyID == geographyID);
+
+        geography.AllowWaterMeasurementSelfReporting = updateDto.AllowWaterMeasurementSelfReporting;
+        geography.AllowFallowSelfReporting = updateDto.AllowFallowSelfReporting;
+        geography.AllowCoverCropSelfReporting = updateDto.AllowCoverCropSelfReporting;
+
+        await dbContext.SaveChangesAsync();
+
+        var updatedGeography = await GetByIDAsMinimalDtoAsync(dbContext, geographyID);
+        return updatedGeography;
+    }
+
+    public static List<ErrorMessage> ValidateUpdateGeographyWaterManagers(QanatDbContext dbContext, int geographyID, List<GeographyWaterManagerDto> geographyWaterManagerDtos)
     {
         var errors = new List<ErrorMessage>();
 
         var existingNonManagers = dbContext.GeographyUsers.Where(x => x.GeographyRoleID != (int)GeographyRoleEnum.WaterManager && x.GeographyID == geographyID).ToList();
-        var usersAssignedToSpecificWaterAccounts = users.Where(x => existingNonManagers.Select(y => y.UserID).Contains(x.UserID)).ToList();
+        var usersAssignedToSpecificWaterAccounts = geographyWaterManagerDtos.Where(x => existingNonManagers.Select(y => y.UserID).Contains(x.UserID)).ToList();
 
         foreach (var usersAssignedToSpecificWaterAccount in usersAssignedToSpecificWaterAccounts)
         {
-            errors.Add(new ErrorMessage() { Type = "User", Message = $"{usersAssignedToSpecificWaterAccount.FullName} can't be both a Water Manager and be assigned to specific Water Accounts." });
+            errors.Add(new ErrorMessage() { Type = "User", Message = $"{usersAssignedToSpecificWaterAccount.UserFullName} can't be added as a Water Manager while assigned to specific water accounts within this geography." });
         }
 
         return errors;
     }
 
-    public static GeographyDto UpdateGeographyWaterManagers(QanatDbContext dbContext, int geographyID, List<UserDto> users)
+    public static GeographyDto UpdateGeographyWaterManagers(QanatDbContext dbContext, int geographyID, List<GeographyWaterManagerDto> geographyWaterManagerDtos)
     {
         var waterManagerRole = (int)GeographyRoleEnum.WaterManager;
 
         var existingWaterManagersForGeography = dbContext.GeographyUsers.Where(x =>
             x.GeographyRoleID == waterManagerRole && x.GeographyID == geographyID).ToList();
 
-        var usersToAdd = users.Where(x => !existingWaterManagersForGeography.Select(y => y.UserID).Contains(x.UserID));
+        var userIDsWhoReceiveNotifications = geographyWaterManagerDtos.Where(x => x.ReceivesNotifications)
+            .Select(x => x.UserID).ToList();
+        existingWaterManagersForGeography.ForEach(x => x.ReceivesNotifications = userIDsWhoReceiveNotifications.Contains(x.UserID));
 
         var usersToRemove =
-            existingWaterManagersForGeography.Where(x => !users.Select(y => y.UserID).Contains(x.UserID));
+            existingWaterManagersForGeography.Where(x => !geographyWaterManagerDtos.Select(y => y.UserID).Contains(x.UserID)).ToList();
+        var usersToAdd = geographyWaterManagerDtos
+            .Where(x => !existingWaterManagersForGeography.Select(y => y.UserID).Contains(x.UserID))
+            .Select(x => new GeographyUser()
+            {
+                GeographyID = geographyID,
+                UserID = x.UserID,
+                GeographyRoleID = waterManagerRole,
+                ReceivesNotifications = x.ReceivesNotifications
+            }).ToList();
 
         dbContext.GeographyUsers.RemoveRange(usersToRemove);
-        dbContext.GeographyUsers.AddRange(usersToAdd.Select(x => new GeographyUser()
-        {
-            GeographyID = geographyID,
-            UserID = x.UserID,
-            GeographyRoleID = waterManagerRole
-        }));
+        dbContext.GeographyUsers.AddRange(usersToAdd);
 
         dbContext.SaveChanges();
 
         return GetByIDAsDto(dbContext, geographyID);
-    }
-
-    public static void UpdateIsOpenETConfiguration(QanatDbContext dbContext, int geographyID, OpenETConfigurationDto openETConfigurationDto)
-    {
-        var geography = dbContext.Geographies.Single(x => x.GeographyID == geographyID);
-
-        geography.IsOpenETActive = openETConfigurationDto.IsOpenETActive;
-        geography.OpenETShapeFilePath = openETConfigurationDto.OpenETShapefilePath;
-
-        dbContext.SaveChanges();
     }
 }

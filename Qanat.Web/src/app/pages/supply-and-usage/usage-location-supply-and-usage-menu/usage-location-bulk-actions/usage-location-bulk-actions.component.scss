@@ -1,0 +1,55 @@
+@use "/src/scss/abstracts/" as *;
+
+::ng-deep .page-header {
+    margin-bottom: $spacing-200;
+}
+
+.statistics {
+    gap: $spacing-100;
+
+    &__module {
+        margin-top: 0;
+    }
+
+    ::ng-deep {
+        dl {
+            display: grid;
+            gap: 2rem;
+            border-bottom: 1px solid $gray-100;
+            padding-bottom: $spacing-400;
+
+            @include desktop-medium {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
+        key-value-pair + key-value-pair {
+            margin-top: unset;
+            padding-top: unset;
+        }
+    }
+
+    &__filters {
+        //position: sticky;
+        //top: 0;
+        //z-index: 9999;
+        gap: $spacing-200;
+        padding: $spacing-200;
+        align-items: center;
+    }
+
+    ::ng-deep .ng-select-multiple {
+        ::ng-deep .ng-select-container {
+            max-height: 3rem;
+        }
+
+        ::ng-deep .ng-value-container {
+            max-height: 3rem;
+            overflow-y: scroll;
+        }
+    }
+}
+
+::ng-deep.statistics__filter-label {
+    padding-bottom: $spacing-200 !important;
+}

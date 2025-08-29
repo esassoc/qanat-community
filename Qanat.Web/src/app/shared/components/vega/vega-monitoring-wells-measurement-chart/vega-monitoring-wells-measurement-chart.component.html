@@ -9,7 +9,9 @@
         </div>
     </div>
 
-    <div *ngIf="chartData?.length == 0" class="flex-center" style="min-height: 300px">
-        <i>This Monitoring Well does not currently have any measurement data.</i>
-    </div>
+    @if (chartData?.length == 0) {
+        <div class="flex-center" style="min-height: 300px">
+            <i>This Monitoring Well does not currently have any measurement data.</i>
+        </div>
+    }
 </div>

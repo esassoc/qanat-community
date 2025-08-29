@@ -1,9 +1,5 @@
 using System;
 using System.Collections.Generic;
-using NetTopologySuite.Geometries;
-using Newtonsoft.Json.Converters;
-using Newtonsoft.Json;
-using NetTopologySuite.Features;
 
 namespace Qanat.API.Models;
 

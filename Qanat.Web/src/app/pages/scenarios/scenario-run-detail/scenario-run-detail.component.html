@@ -1,5 +1,5 @@
 <div [loadingSpinner]="{ isLoading: isLoadingSubmit, loadingHeight: 500 }">
-    <ng-container *ngIf="scenarioRun$ | async as scenarioRun">
+    @if (scenarioRun$ | async; as scenarioRun) {
         <page-header
             [preTitle]="scenarioRun.Scenario.ScenarioName"
             [icon]="scenarioRun.Scenario.ScenarioID == ScenarioEnum.AddaWell ? 'Wells' : 'WaterDropFilled'"
@@ -9,46 +9,48 @@
                 <name-tag [name]="scenarioRun.Model.ModelShortName"></name-tag>
             </ng-template>
         </page-header>
-
         <div class="page-body">
             <app-alert-display></app-alert-display>
             <div class="flex-between mb-4">
                 <div class="flex">
                     <scenario-run-status-bar [scenarioRun]="scenarioRun"></scenario-run-status-bar>
-                    <ng-container *ngIf="scenarioRun.ScenarioRunStatus.ScenarioRunStatusID != ScenarioRunStatusEnum.Complete && currentUser$ | async as currentUser">
+                    @if (scenarioRun.ScenarioRunStatus.ScenarioRunStatusID != ScenarioRunStatusEnum.Complete && currentUser$ | async; as currentUser) {
                         <a href="javascript:void(0);" (click)="checkStatus()" *withFlag="{ currentUser: currentUser, flag: FlagEnum.IsSystemAdmin }">
-                            <span *ngIf="isLoadingSubmit" class="fa fa-spinner loading-spinner mr-1"></span>
+                            @if (isLoadingSubmit) {
+                                <span class="fa fa-spinner loading-spinner mr-1"></span>
+                            }
                             <i class="fa fa-refresh"></i>
                             Refresh
                         </a>
-                    </ng-container>
+                    }
                 </div>
-                <a
-                    class="btn btn-secondary-outline btn-rounded"
-                    [class.disabled]="isLoadingSubmit"
-                    (click)="downloadOutputJson()"
-                    *ngIf="scenarioRun.ScenarioRunStatus.ScenarioRunStatusID == ScenarioRunStatusEnum.Complete">
-                    <span *ngIf="isLoadingSubmit" class="fa fa-spinner loading-spinner mr-1"></span>
-                    Download JSON Results
-                </a>
+                @if (scenarioRun.ScenarioRunStatus.ScenarioRunStatusID == ScenarioRunStatusEnum.Complete) {
+                    <a class="btn btn-secondary-outline btn-rounded" [class.disabled]="isLoadingSubmit" (click)="downloadOutputJson()">
+                        @if (isLoadingSubmit) {
+                            <span class="fa fa-spinner loading-spinner mr-1"></span>
+                        }
+                        Download JSON Results
+                    </a>
+                }
             </div>
-
-            <ng-container *ngIf="scenarioRun.ScenarioRunStatus.ScenarioRunStatusID == ScenarioRunStatusEnum.Complete; else scenarioRunIncomplete">
-                <time-series-output *ngIf="scenarioRunResult$ | async as output" [getScenarioRunResult]="output" [scenarioRun]="scenarioRun"></time-series-output>
-            </ng-container>
+            @if (scenarioRun.ScenarioRunStatus.ScenarioRunStatusID == ScenarioRunStatusEnum.Complete) {
+                @if (scenarioRunResult$ | async; as output) {
+                    <time-series-output [getScenarioRunResult]="output" [scenarioRun]="scenarioRun"></time-series-output>
+                }
+            } @else {
+                <div class="alert alert-info">
+                    <div class="alert-content">
+                        <i class="fa fa-info"></i>
+                        Scenario run has not yet completed.
+                    </div>
+                </div>
+                <fresca-button (click)="checkStatus()" [disabled]="isLoadingSubmit">
+                    @if (isLoadingSubmit) {
+                        <span class="fa fa-spinner loading-spinner mr-1"></span>
+                    }
+                    <span>Check Status</span>
+                </fresca-button>
+            }
         </div>
-
-        <ng-template #scenarioRunIncomplete>
-            <div class="alert alert-info">
-                <div class="alert-content">
-                    <i class="fa fa-info"></i>
-                    Scenario run has not yet completed.
-                </div>
-            </div>
-            <fresca-button (click)="checkStatus()" [disabled]="isLoadingSubmit">
-                <span *ngIf="isLoadingSubmit" class="fa fa-spinner loading-spinner mr-1"></span>
-                <span>Check Status</span>
-            </fresca-button>
-        </ng-template>
-    </ng-container>
+    }
 </div>

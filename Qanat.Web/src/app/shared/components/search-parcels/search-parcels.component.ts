@@ -3,10 +3,8 @@ import { FormControl, FormsModule, NG_VALUE_ACCESSOR, ReactiveFormsModule } from
 import { Observable, timer, switchMap, of, map, tap, debounce } from "rxjs";
 import { SearchService } from "../../generated/api/search.service";
 import { ParcelSearchDto, ParcelSearchResultDto, ParcelSearchResultWithMatchedFieldsDto, ParcelSearchSummaryDto } from "../../generated/model/models";
-import { NgIf, NgFor, AsyncPipe, DecimalPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { HighlightDirective } from "../../directives/highlight.directive";
-import { CommaJoinPipe } from "../../pipes/comma-join.pipe";
-import { SumPipe } from "../../pipes/sum.pipe";
 import { IconComponent } from "../icon/icon.component";
 
 @Component({
@@ -20,8 +18,7 @@ import { IconComponent } from "../icon/icon.component";
             useExisting: SearchParcelsComponent,
         },
     ],
-    standalone: true,
-    imports: [FormsModule, ReactiveFormsModule, NgIf, NgFor, HighlightDirective, AsyncPipe, DecimalPipe, SumPipe, CommaJoinPipe, IconComponent],
+    imports: [FormsModule, ReactiveFormsModule, HighlightDirective, AsyncPipe, IconComponent],
 })
 export class SearchParcelsComponent implements OnInit, OnDestroy {
     @Input() geographyID: number;
@@ -62,13 +59,13 @@ export class SearchParcelsComponent implements OnInit, OnDestroy {
                     const waterAccountSearchDto = new ParcelSearchDto();
                     waterAccountSearchDto.GeographyID = this.geographyID;
                     waterAccountSearchDto.SearchString = searchString;
-                    return this.searchService.searchParcelsPost(waterAccountSearchDto);
+                    return this.searchService.searchParcelsSearch(waterAccountSearchDto);
                 }
                 return of(new ParcelSearchSummaryDto());
             }),
             map((x: ParcelSearchSummaryDto) => {
                 if (this.excludedParcelIDs.length == 0) return x;
-                x.ParcelSearchResults = x.ParcelSearchResults?.filter((y) => !this.excludedParcelIDs.includes(y.Parcel.ParcelID) ?? null);
+                x.ParcelSearchResults = x.ParcelSearchResults?.filter((y) => !this.excludedParcelIDs.includes(y.Parcel.ParcelID));
                 return x;
             }),
             tap((x: ParcelSearchSummaryDto) => {

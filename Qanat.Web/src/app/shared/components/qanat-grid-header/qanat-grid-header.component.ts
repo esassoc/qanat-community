@@ -1,16 +1,15 @@
 import { Component, Input, OnDestroy, OnInit } from "@angular/core";
 import { ClearGridFiltersButtonComponent } from "../clear-grid-filters-button/clear-grid-filters-button.component";
 import { FormsModule } from "@angular/forms";
-import { NgIf } from "@angular/common";
+
 import { AgGridAngular } from "ag-grid-angular";
 import { Subscription } from "rxjs";
 
 @Component({
     selector: "qanat-grid-header",
-    standalone: true,
-    imports: [ClearGridFiltersButtonComponent, FormsModule, NgIf],
+    imports: [ClearGridFiltersButtonComponent, FormsModule],
     templateUrl: "./qanat-grid-header.component.html",
-    styleUrl: "./qanat-grid-header.component.scss",
+    styleUrl: "./qanat-grid-header.component.scss"
 })
 export class QanatGridHeaderComponent implements OnInit, OnDestroy {
     @Input() grid: AgGridAngular;
@@ -19,6 +18,7 @@ export class QanatGridHeaderComponent implements OnInit, OnDestroy {
     @Input() multiSelectEnabled: boolean = false;
     @Input() leftAlignClearFiltersButton: boolean = false;
     @Input() disableGlobalFilter: boolean = false;
+    @Input() unsetHeaderGridActionWidth: boolean = false;
 
     public quickFilterText: string;
     public selectedRowsCount: number = 0;

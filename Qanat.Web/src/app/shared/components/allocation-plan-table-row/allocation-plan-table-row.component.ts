@@ -3,10 +3,9 @@ import { CommonModule } from "@angular/common";
 
 @Component({
     selector: "allocation-plan-table-row",
-    standalone: true,
     imports: [CommonModule],
     templateUrl: "./allocation-plan-table-row.component.html",
-    styleUrls: ["./allocation-plan-table-row.component.scss"],
+    styleUrls: ["./allocation-plan-table-row.component.scss"]
 })
 export class AllocationPlanTableRowComponent implements OnInit {
     @Input() years: number[] = [];

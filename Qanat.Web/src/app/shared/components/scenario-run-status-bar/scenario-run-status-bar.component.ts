@@ -5,10 +5,9 @@ import { ScenarioRunDto } from "../../generated/model/models";
 
 @Component({
     selector: "scenario-run-status-bar",
-    standalone: true,
     imports: [CommonModule],
     templateUrl: "./scenario-run-status-bar.component.html",
-    styleUrls: ["./scenario-run-status-bar.component.scss"],
+    styleUrls: ["./scenario-run-status-bar.component.scss"]
 })
 export class ScenarioRunStatusBarComponent implements OnInit {
     public statusColor: string;

@@ -1,26 +1,24 @@
-﻿using System.Collections.Generic;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Qanat.API;
+using Qanat.API.Services;
 using Qanat.API.Services.Authorization;
+using Qanat.EFModels.Entities;
+using Qanat.Models.DataTransferObjects;
+using Qanat.Models.DataTransferObjects.Geography;
+using Qanat.Models.Security;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Abstractions;
-using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.Routing;
-using Qanat.API.Services;
-using Qanat.EFModels.Entities;
-using Qanat.Models.DataTransferObjects;
 using VerifyMSTest;
-using System;
-using Newtonsoft.Json;
-using Qanat.Models.DataTransferObjects.Geography;
-using VerifyTests;
-using Qanat.Models.Security;
 
 namespace Qanat.Tests.API.Permissions
 {
@@ -31,19 +29,12 @@ namespace Qanat.Tests.API.Permissions
     ///             -> WaterAccount.
     ///     All Rights and Flags should be defined at the General role level. At the more specific levels, they are sparsely populated depending on what we want to override.
     /// </summary>
-    
+
     // todo: rename class
     [TestClass]
     [UsesVerify]
-    public partial class WithRightsTest
+    public class WithRightsTest : VerifyBase
     {
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            VerifierSettings.UseUtf8NoBom();
-            VerifierSettings.ScrubLinesWithReplace(line => line.Replace("\r\n", "\n"));
-        }
-
         private const int MIUGSAGeographyID = 1;
         private const int MSGSAGeographyID = 6;
 
@@ -80,9 +71,9 @@ namespace Qanat.Tests.API.Permissions
             var controllerHttpMethods = controllerTypes.Where(x => x.Name != "PublicController").SelectMany(type => type.GetMethods())
                 .Where(m => m.IsPublic && m.CustomAttributes.Any(ca => ca.AttributeType.BaseType == typeof(HttpMethodAttribute)));
 
-            var actionMethodsWithAllowAnonymousAttribute = controllerHttpMethods.Where(m =>  m.GetCustomAttributes(typeof(AllowAnonymousAttribute)).Any());
+            var actionMethodsWithAllowAnonymousAttribute = controllerHttpMethods.Where(m => m.GetCustomAttributes(typeof(AllowAnonymousAttribute)).Any());
 
-            var matchingEndpoints = actionMethodsWithAllowAnonymousAttribute.Select(m => (HttpMethodAttribute) m.GetCustomAttributes(typeof(HttpMethodAttribute)).Single()).ToList().Where(x => x.Name != "GetSystemInfo" && !x.Template!.StartsWith("public")).ToList();
+            var matchingEndpoints = actionMethodsWithAllowAnonymousAttribute.Select(m => (HttpMethodAttribute)m.GetCustomAttributes(typeof(HttpMethodAttribute)).Single()).ToList().Where(x => x.Name != "GetSystemInfo" && !x.Template!.StartsWith("public")).ToList();
             Assert.IsNotNull(matchingEndpoints);
             Assert.IsTrue(!matchingEndpoints.Any(),
                 $"All Actions that are AllowAnonymous are required to be prefixed with \"public/\", Found {matchingEndpoints.Count()} actions: " +
@@ -108,7 +99,7 @@ namespace Qanat.Tests.API.Permissions
 
             var hierarchyContext = CreateTestHierarchyContext();
             var geographyRoles = new Dictionary<int, GeographyRole> { { MIUGSAGeographyID, GeographyRole.Normal } };
-            var waterAccountRoles = new Dictionary<int, WaterAccountRole> {  };
+            var waterAccountRoles = new Dictionary<int, WaterAccountRole> { };
             var testSystemAdminDto = CreateTestUserDto(Role.SystemAdmin, geographyRoles, waterAccountRoles);
             var testNormalDto = CreateTestUserDto(Role.Normal, geographyRoles, waterAccountRoles);
             var testPendingLoginDto = CreateTestUserDto(Role.PendingLogin, geographyRoles, waterAccountRoles);
@@ -127,8 +118,8 @@ namespace Qanat.Tests.API.Permissions
                     if (withPermissionAttribute != null)
                     {
                         var systemAdmin = withPermissionAttribute.HasPermission(testSystemAdminDto, CreateTestAuthorizationFilterContext(), hierarchyContext);
-                        var normal = withPermissionAttribute.HasPermission(testNormalDto,CreateTestAuthorizationFilterContext(), hierarchyContext);
-                        var pendingLogin = withPermissionAttribute.HasPermission(testPendingLoginDto,CreateTestAuthorizationFilterContext(), hierarchyContext);
+                        var normal = withPermissionAttribute.HasPermission(testNormalDto, CreateTestAuthorizationFilterContext(), hierarchyContext);
+                        var pendingLogin = withPermissionAttribute.HasPermission(testPendingLoginDto, CreateTestAuthorizationFilterContext(), hierarchyContext);
                         var noAccess = withPermissionAttribute.HasPermission(testNoAccessDto, CreateTestAuthorizationFilterContext(), hierarchyContext);
 
                         var controllerActionPermissionResult = new ControllerActionPermissionResultForBaseRole(controllerActionName, systemAdmin, normal, pendingLogin, noAccess, httpMethodAttribute.AttributeType.Name);
@@ -148,8 +139,8 @@ namespace Qanat.Tests.API.Permissions
 
             var hierarchyContext = CreateTestHierarchyContext();
             var geographyRoles = new Dictionary<int, GeographyRole> { { MIUGSAGeographyID, GeographyRole.Normal } };
-            var testOwnerDto = CreateTestUserDto(Role.Normal, geographyRoles, new Dictionary<int, WaterAccountRole>{ { 1, WaterAccountRole.WaterAccountHolder } } );
-            var testViewerDto = CreateTestUserDto(Role.Normal, geographyRoles, new Dictionary<int, WaterAccountRole>{ { 1, WaterAccountRole.WaterAccountViewer } } );
+            var testOwnerDto = CreateTestUserDto(Role.Normal, geographyRoles, new Dictionary<int, WaterAccountRole> { { 1, WaterAccountRole.WaterAccountHolder } });
+            var testViewerDto = CreateTestUserDto(Role.Normal, geographyRoles, new Dictionary<int, WaterAccountRole> { { 1, WaterAccountRole.WaterAccountViewer } });
             var testNotPartOfWaterAccountDto = CreateTestUserDto(Role.Normal, new Dictionary<int, GeographyRole>(), new Dictionary<int, WaterAccountRole> { });
 
             var controllerActionPermissionResults = new List<ControllerActionPermissionResultForWaterAccountRole>();
@@ -167,7 +158,7 @@ namespace Qanat.Tests.API.Permissions
                         var waterAccountViewer = withPermissionAttribute.HasPermission(testViewerDto, CreateTestAuthorizationFilterContext(), hierarchyContext);
                         var waterAccountNoPermission = withPermissionAttribute.HasPermission(testNotPartOfWaterAccountDto, CreateTestAuthorizationFilterContext(), hierarchyContext);
 
-                        var controllerActionPermissionResult =new ControllerActionPermissionResultForWaterAccountRole(controllerActionName, waterAccountOwner, waterAccountViewer, waterAccountNoPermission, httpMethodAttribute!.AttributeType.Name);
+                        var controllerActionPermissionResult = new ControllerActionPermissionResultForWaterAccountRole(controllerActionName, waterAccountOwner, waterAccountViewer, waterAccountNoPermission, httpMethodAttribute!.AttributeType.Name);
                         controllerActionPermissionResults.Add(controllerActionPermissionResult);
                     }
                 }
@@ -198,6 +189,7 @@ namespace Qanat.Tests.API.Permissions
             var testWaterManager = CreateTestUserDto(Role.Normal, new Dictionary<int, GeographyRole> { { geographyID, GeographyRole.WaterManager } }, null);
 
             var controllerActionPermissionResults = new List<ControllerActionPermissionResultForGeographyRole>();
+            var controllerActionsWithoutProperRouteTemplate = new List<string>();
             foreach (var controllerType in controllerTypes)
             {
                 var controllerMethods = controllerType.GetMethods().Where(m => m.IsPublic && m.CustomAttributes.Any(ca => ca.AttributeType.BaseType == typeof(HttpMethodAttribute))).OrderBy(x => x.Name);
@@ -209,6 +201,15 @@ namespace Qanat.Tests.API.Permissions
                     var httpMethodAttribute = methodInfo.CustomAttributes.FirstOrDefault(ca => ca.AttributeType.BaseType == typeof(HttpMethodAttribute));
                     if (withPermissionAttribute != null)
                     {
+                        //MK 3/3/2025: This isn't quite what we want as the HierarchyContext crawls up the hierarchy to find the geographyID, see HierarchyContext.GetParcelFromPath for example.
+                        //Having trouble thinking of how to test this with reflection atm without just checking each hierarchy that can fill out the HierarchyContext. Would require updating if new hierarchies are added.
+
+                        //var routeTemplate = RouteHelper.GetRouteTemplateFor(controllerType, methodInfo);
+                        //if (!routeTemplate.Contains("geographies/{geographyID}"))
+                        //{
+                        //    controllerActionsWithoutProperRouteTemplate.Add($"{controllerType.FullName}.{methodInfo.Name}");
+                        //}
+
                         var normal = withPermissionAttribute.HasPermission(testNormal, CreateTestAuthorizationFilterContext(), hierarchyContext);
                         var waterManager = withPermissionAttribute.HasPermission(testWaterManager, CreateTestAuthorizationFilterContext(), hierarchyContext);
 
@@ -216,6 +217,16 @@ namespace Qanat.Tests.API.Permissions
                         controllerActionPermissionResults.Add(controllerActionPermissionResult);
                     }
                 }
+            }
+
+            if (controllerActionsWithoutProperRouteTemplate.Any())
+            {
+                foreach (var controllerAction in controllerActionsWithoutProperRouteTemplate)
+                {
+                    Console.WriteLine($"{controllerAction}");
+                }
+
+                Assert.Fail("Controller actions are missing the proper route template required for HierarchyContext to find a Geography.");
             }
 
             var result = "HttpVerb\tController.ActionName\tWaterManager\tNormal\n" + string.Join("\n", controllerActionPermissionResults);
@@ -342,8 +353,8 @@ namespace Qanat.Tests.API.Permissions
             {
                 RoleID = role.RoleID,
                 RoleDisplayName = role.RoleDisplayName,
-                Rights = JsonConvert.DeserializeObject<Dictionary<string, Rights>>(role.Rights),
-                Flags = JsonConvert.DeserializeObject<Dictionary<string, bool>>(role.Flags),
+                Rights = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, Rights>>(role.Rights, AssemblySteps.DefaultJsonSerializerOptions),
+                Flags = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, bool>>(role.Flags),
                 GeographyRights = geographyRoles?.ToDictionary(x => x.Key, x => x.Value.AsGeographyRights()),
                 WaterAccountRights = waterAccountRoles?.ToDictionary(x => x.Key, x => x.Value.AsWaterAccountRights()),
                 GeographyFlags = geographyRoles?.ToDictionary(x => x.Key, x => x.Value.AsGeographyFlags())
@@ -359,9 +370,9 @@ namespace Qanat.Tests.API.Permissions
 
         private static HierarchyContext CreateTestHierarchyContext()
         {
-            var geographyDto = new GeographyDto(){GeographyID = MIUGSAGeographyID };
-            var waterAccountDto = new WaterAccountDto(){WaterAccountID = 1};
-            return new HierarchyContext(MIUGSAGeographyID, geographyDto, 1, waterAccountDto, 2, new WellRegistrationMinimalDto(), 3, new ParcelMinimalDto());
+            var geographyDto = new GeographyDisplayDto { GeographyID = MIUGSAGeographyID };
+            var waterAccountDto = new WaterAccountDisplayDto { WaterAccountID = 1 };
+            return new HierarchyContext(MIUGSAGeographyID, geographyDto, 1, waterAccountDto, 2, new WellRegistrationMinimalDto(), 3, new ParcelDisplayDto());
         }
     }
 

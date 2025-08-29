@@ -28,9 +28,7 @@ namespace Qanat.EFModels.Entities
         public static readonly ScenarioRunStatusRunningAnalysis RunningAnalysis = ScenarioRunStatusRunningAnalysis.Instance;
 
         public static readonly List<ScenarioRunStatus> All;
-        public static readonly List<ScenarioRunStatusSimpleDto> AllAsSimpleDto;
         public static readonly ReadOnlyDictionary<int, ScenarioRunStatus> AllLookupDictionary;
-        public static readonly ReadOnlyDictionary<int, ScenarioRunStatusSimpleDto> AllAsSimpleDtoLookupDictionary;
 
         /// <summary>
         /// Static type constructor to coordinate static initialization order
@@ -38,9 +36,7 @@ namespace Qanat.EFModels.Entities
         static ScenarioRunStatus()
         {
             All = new List<ScenarioRunStatus> { Created, GETIntegrationFailure, CreatedInGET, Queued, Processing, Complete, SystemError, InvalidOutput, InvalidInput, HasDryCells, AnalysisFailed, AnalysisSuccess, ProcesingInputs, RunningAnalysis };
-            AllAsSimpleDto = new List<ScenarioRunStatusSimpleDto> { Created.AsSimpleDto(), GETIntegrationFailure.AsSimpleDto(), CreatedInGET.AsSimpleDto(), Queued.AsSimpleDto(), Processing.AsSimpleDto(), Complete.AsSimpleDto(), SystemError.AsSimpleDto(), InvalidOutput.AsSimpleDto(), InvalidInput.AsSimpleDto(), HasDryCells.AsSimpleDto(), AnalysisFailed.AsSimpleDto(), AnalysisSuccess.AsSimpleDto(), ProcesingInputs.AsSimpleDto(), RunningAnalysis.AsSimpleDto() };
             AllLookupDictionary = new ReadOnlyDictionary<int, ScenarioRunStatus>(All.ToDictionary(x => x.ScenarioRunStatusID));
-            AllAsSimpleDtoLookupDictionary = new ReadOnlyDictionary<int, ScenarioRunStatusSimpleDto>(AllAsSimpleDto.ToDictionary(x => x.ScenarioRunStatusID));
         }
 
         /// <summary>

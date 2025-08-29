@@ -8,11 +8,11 @@ as
 begin
 
 drop table if exists #waterAccountParcels
-select p.ParcelID, p.ParcelNumber, cast(p.ParcelArea as decimal(20, 4)) as ParcelArea, cast(sum(ue.UsageEntityArea) as decimal(20, 4)) as UsageEntityArea
+select p.ParcelID, p.ParcelNumber, cast(p.ParcelArea as decimal(20, 4)) as ParcelArea, cast(sum(ul.Area) as decimal(20, 4)) as UsageLocationArea
 into #waterAccountParcels
 from dbo.Parcel p
 join dbo.fWaterAccountParcelByGeographyAndYear(@geographyID, @year) wap on p.ParcelID = wap.ParcelID
-left join dbo.UsageEntity ue on p.ParcelID = ue.ParcelID
+join dbo.UsageLocation ul on p.ParcelID = ul.ParcelID AND UL.ReportingPeriodID = wap.ReportingPeriodID --MK 2/18/2025: Filter out parcels without usage locations.
 group by p.ParcelID, p.ParcelNumber, p.ParcelArea
 
 drop table if exists #reportingPeriods
@@ -37,17 +37,17 @@ join dbo.WaterMeasurementCategoryType wmct on wmt.WaterMeasurementCategoryTypeID
 where g.GeographyID = @geographyID
 
 
-select m.ParcelID, m.ParcelNumber, @WaterMeasurementTypeID as WaterMeasurementTypeID, @WaterMeasurementTypeName as WaterMeasurementTypeName, @WaterMeasurementCategoryTypeName as WaterMeasurementCategoryTypeName, @WaterMeasurementTypeSortOrder as WaterMeasurementTypeSortOrder, m.EffectiveDate
+select m.ParcelID, m.ParcelNumber, m.ParcelArea, @WaterMeasurementTypeID as WaterMeasurementTypeID, @WaterMeasurementTypeName as WaterMeasurementTypeName, @WaterMeasurementCategoryTypeName as WaterMeasurementCategoryTypeName, @WaterMeasurementTypeSortOrder as WaterMeasurementTypeSortOrder, m.EffectiveDate
 , u.CurrentUsageAmount
-, CASE WHEN m.UsageEntityArea != 0 THEN u.CurrentUsageAmount / m.UsageEntityArea ELSE NULL END as CurrentUsageAmountDepth
+, CASE WHEN m.ParcelArea != 0 THEN u.CurrentUsageAmount / m.ParcelArea ELSE NULL END as CurrentUsageAmountDepth
 , uavg.AverageUsageAmount
-, CASE WHEN m.UsageEntityArea != 0 THEN uavg.AverageUsageAmount / m.UsageEntityArea ELSE NULL END as AverageUsageAmountDepth
-, case when CurrentUsageAmount is null then null else sum(CurrentUsageAmount) over(order by m.EffectiveDate rows unbounded preceding) end as CurrentCumulativeUsageAmount
-, case when AverageUsageAmount is null then null else sum(AverageUsageAmount) over(order by m.EffectiveDate rows unbounded preceding) end as AverageCumulativeUsageAmount
-, m.UsageEntityArea
+, CASE WHEN m.ParcelArea != 0 THEN uavg.AverageUsageAmount / m.ParcelArea ELSE NULL END as AverageUsageAmountDepth
+, case when CurrentUsageAmount is null then null else sum(CurrentUsageAmount) over(partition by m.ParcelID order by m.EffectiveDate rows unbounded preceding) end as CurrentCumulativeUsageAmount
+, case when AverageUsageAmount is null then null else sum(AverageUsageAmount) over(partition by m.ParcelID order by m.EffectiveDate rows unbounded preceding) end as AverageCumulativeUsageAmount
+, m.UsageLocationArea
 from 
 (
-    select ParcelID, ParcelNumber, UsageEntityArea, EffectiveDate
+    select ParcelID, ParcelNumber, ParcelArea, UsageLocationArea, EffectiveDate
     from 
     #waterAccountParcels
     cross join #effectiveDates

@@ -1,31 +1,33 @@
-<div class="modal-header">
-    <h3 class="section-title">
-        <span *ngIf="!modalContext.ReportingPeriod">Add Reporting Period</span>
-        <span *ngIf="modalContext.ReportingPeriod">Update Reporting Period</span>
-    </h3>
-    <button type="button" class="close" (click)="cancel()">
-        <i class="fa fa-times-circle"></i>
-    </button>
-</div>
+<div class="modal">
+    <div class="modal-header">
+        <h3>
+            @if (ref.data && ref.data.ReportingPeriod) {
+                Update Reporting Period
+            } @else {
+                Add Reporting Period
+            }
+        </h3>
+    </div>
 
-<div class="modal-body grid-12">
-    <app-alert-display></app-alert-display>
+    <div class="modal-body">
+        <app-alert-display></app-alert-display>
 
-    <form class="form grid-12" [formGroup]="formGroup">
-        <form-field class="g-col-6" [formControl]="formGroup.controls.Name" fieldLabel="Name" placeholder="Name" [required]="true" [type]="FormFieldType.Text"></form-field>
-        <form-field
-            class="g-col-6"
-            [formControl]="formGroup.controls.ReadyForAccountHolders"
-            fieldLabel="Ready For Account Holders"
-            [required]="true"
-            [type]="FormFieldType.Check"></form-field>
+        <form class="form grid-12" [formGroup]="formGroup">
+            <form-field class="g-col-12" [formControl]="formGroup.controls.Name" fieldLabel="Name" placeholder="Name" [required]="true" [type]="FormFieldType.Text"></form-field>
+            <form-field class="g-col-6" [formControl]="formGroup.controls.StartDate" fieldLabel="Start Date" [required]="true" [type]="FormFieldType.Date"></form-field>
+            <form-field class="g-col-6" [formControl]="endDateControl" fieldLabel="End Date" [required]="true" [type]="FormFieldType.Date"></form-field>
+            <form-field
+                class="g-col-6"
+                [formControl]="formGroup.controls.ReadyForAccountHolders"
+                fieldLabel="Ready For Account Holders"
+                [required]="false"
+                [type]="FormFieldType.Check"></form-field>
+            <form-field class="g-col-6" [formControl]="formGroup.controls.IsDefault" fieldLabel="Is Default" [required]="false" [type]="FormFieldType.Check"></form-field>
+        </form>
+    </div>
 
-        <form-field class="g-col-6" [formControl]="formGroup.controls.StartDate" fieldLabel="Start Date" [required]="true" [type]="FormFieldType.Date"></form-field>
-        <form-field class="g-col-6" [formControl]="endDateControl" fieldLabel="End Date" [required]="true" [type]="FormFieldType.Date"></form-field>
-    </form>
-</div>
-
-<div class="modal-footer">
-    <button class="btn btn-primary" (click)="save()" [disabled]="formGroup.invalid">Save</button>
-    <button class="btn btn-primary-outline" (click)="cancel()">Cancel</button>
+    <div class="modal-footer">
+        <button class="btn btn-primary btn-sm" (click)="save()" [disabled]="formGroup.invalid">Save</button>
+        <button class="btn btn-primary-outline btn-sm" (click)="cancel()">Cancel</button>
+    </div>
 </div>

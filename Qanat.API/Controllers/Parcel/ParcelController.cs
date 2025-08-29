@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using Qanat.API.Models.ExtensionMethods;
 using Qanat.API.Services.Attributes;
 using Qanat.API.Services.Authorization;
 using Qanat.Models.Security;
@@ -26,8 +27,6 @@ public class ParcelController : SitkaController<ParcelController>
         _callingUser = callingUser;
     }
 
-    #region CRUD
-
     [HttpGet("{parcelID}")]
     [EntityNotFound(typeof(Parcel), "parcelID")]
     [WithWaterAccountRolePermission(PermissionEnum.ParcelRights, RightsEnum.Read)]
@@ -37,13 +36,11 @@ public class ParcelController : SitkaController<ParcelController>
         return RequireNotNullLogIfNotFound(parcelMinimalDto, "ParcelMinimalDto", parcelID);
     }
 
-    #endregion
-
-    [HttpPut("review")]
+    [HttpPut("geographies/{geographyID}/review")] //MK 2/26/2025 -- GeographyID in the route is required for WithGeographyRolePermission to work.
     [WithGeographyRolePermission(PermissionEnum.ParcelRights, RightsEnum.Update)]
-    public async Task<ActionResult> MarkParcelAsReviewed([FromBody] List<int> parcelIDs)
+    public async Task<ActionResult> MarkParcelAsReviewed([FromRoute] int geographyID, [FromBody] List<int> parcelIDs)
     {
-        await ParcelHistories.MarkAsReviewedByParcelIDs(_dbContext, parcelIDs);
+        await ParcelHistories.MarkAsReviewedByParcelIDsAsync(_dbContext, parcelIDs);
         return Ok();
     }
 
@@ -55,7 +52,7 @@ public class ParcelController : SitkaController<ParcelController>
         return Ok(parcelDisplayDtos);
     }
 
-    [HttpPost("boundingBox")]
+    [HttpPost("bounding-box")]
     [WithRoleFlag(FlagEnum.CanClaimWaterAccounts)]
     public ActionResult<BoundingBoxDto> GetBoundingBoxByParcelIDs([FromBody] List<int> parcelIDs)
     {
@@ -78,16 +75,34 @@ public class ParcelController : SitkaController<ParcelController>
         return RequireNotNullLogIfNotFound(parcelPopupDto, "ParcelPopupDto", parcelID);
     }
 
+    [HttpGet("{parcelID}/map-popup/reporting-periods/{reportingPeriodID}")]
+    [EntityNotFound(typeof(Parcel), "parcelID")]
+    [EntityNotFound(typeof(ReportingPeriod), "reportingPeriodID")]
+    [WithWaterAccountRolePermission(PermissionEnum.ParcelRights, RightsEnum.Read)]
+    public ActionResult<ParcelPopupDto> GetParcelPopupDtoByIDAndReportingPeriod([FromRoute] int parcelID, [FromRoute] int reportingPeriodID)
+    {
+        var parcelPopupDto = Parcels.GetParcelPopupDtoByID(_dbContext, parcelID, reportingPeriodID);
+
+        return RequireNotNullLogIfNotFound(parcelPopupDto, "ParcelPopupDto", parcelID);
+    }
+
+
     [HttpGet("{parcelID}/zones")]
     [EntityNotFound(typeof(Parcel), "parcelID")]
     [WithWaterAccountRolePermission(PermissionEnum.ParcelRights, RightsEnum.Read)]
     public ActionResult<ParcelDetailDto> GetParcelWithZonesDtoByID([FromRoute] int parcelID)
     {
         var parcelWithZonesDto = Parcels.GetByID(_dbContext, parcelID).AsDetailDto();
+
+        if (!_callingUser.IsAdminOrWaterManager(parcelWithZonesDto.GeographyID))
+        {
+            parcelWithZonesDto.Zones = parcelWithZonesDto.Zones.Where(x => x.ZoneGroupDisplayToAccountHolders).ToList();
+        }
+
         return Ok(parcelWithZonesDto);
     }
 
-    [HttpGet("{parcelID}/getSupplyEntries")]
+    [HttpGet("{parcelID}/get-supply-entries")]
     [EntityNotFound(typeof(Parcel), "parcelID")]
     [WithWaterAccountRolePermission(PermissionEnum.ParcelRights, RightsEnum.Read)]
     public ActionResult<List<ParcelSupplyDetailDto>> GetAllSupplyEntriesByParcelID([FromRoute] int parcelID)
@@ -96,27 +111,12 @@ public class ParcelController : SitkaController<ParcelController>
         return Ok(parcelSupplyDetailDtos);
     }
 
-    [HttpGet("{parcelID}/waterAccountParcels")]
-    [EntityNotFound(typeof(Parcel), "parcelID")]
-    [WithGeographyRolePermission(PermissionEnum.ParcelRights, RightsEnum.Read)]
-    public ActionResult<List<WaterAccountParcelDto>> GetWaterAccountParcelsByParcelID([FromRoute] int parcelID)
-    {
-        var waterAccountParcelDtos = _dbContext.WaterAccountParcels.AsNoTracking()
-            .Include(x => x.WaterAccount)
-            .Where(x => x.ParcelID == parcelID)
-            .OrderBy(x => x.EndYear != null).ThenByDescending(x => x.EndYear)
-            .Select(x => x.AsWaterAccountParcelDto()).ToList();
-
-        return Ok(waterAccountParcelDtos);
-    }
-
     [HttpGet("{parcelID}/history")]
     [EntityNotFound(typeof(Parcel), "parcelID")]
     [WithGeographyRolePermission(PermissionEnum.ParcelRights, RightsEnum.Read)]
     public ActionResult<List<ParcelHistoryDto>> GetHistory([FromRoute] int parcelID)
     {
         var parcelHistoryDtos = _dbContext.ParcelHistories.AsNoTracking()
-            .Include(x => x.WaterAccount)
             .Include(x => x.UpdateUser)
             .Where(x => x.ParcelID == parcelID).ToList()
             .Select(x => new ParcelHistoryDto()
@@ -124,7 +124,6 @@ public class ParcelController : SitkaController<ParcelController>
                 ParcelHistoryID = x.ParcelHistoryID,
                 GeographyID = x.GeographyID,
                 ParcelID = x.ParcelID,
-                EffectiveYear = x.EffectiveYear,
                 UpdateDate = x.UpdateDate,
                 UpdateUserID = x.UpdateUserID,
                 UpdateUserFullName = x.UpdateUser.FullName,
@@ -135,8 +134,6 @@ public class ParcelController : SitkaController<ParcelController>
                 IsReviewed = x.IsReviewed,
                 IsManualOverride = x.IsManualOverride,
                 ReviewDate = x.ReviewDate,
-                WaterAccountID = x.WaterAccountID,
-                WaterAccount = x.WaterAccount?.AsDisplayDto(),
                 ParcelStatus = x.ParcelStatus.AsSimpleDto()
 
             }).ToList()
@@ -155,22 +152,6 @@ public class ParcelController : SitkaController<ParcelController>
             .Where(x => x.ParcelID == parcelID)
             .Select(x => x.AsLocationDto(true)).ToList();
         return Ok(wells);
-    }
-
-    [HttpPost("{parcelID}/update-water-account/{waterAccountID}")]
-    [WithGeographyRolePermission(PermissionEnum.ParcelRights, RightsEnum.Update)]
-    [EntityNotFound(typeof(Parcel), "parcelID")]
-    [EntityNotFound(typeof(WaterAccount), "waterAccountID")]
-    public async Task<ActionResult> UpdateParcelWaterAccount([FromRoute] int parcelID, [FromRoute] int waterAccountID, [FromBody] int effectiveYear)
-    {
-        // take advantage of the update water accounts method that handles everything as a pinch point for updating parcel relationships.
-        var updatedParcelIDsForWaterAccount = _dbContext.WaterAccountParcels.AsNoTracking()
-            .Where(x => x.WaterAccountID == waterAccountID).Select(x => x.ParcelID).ToList();
-
-        updatedParcelIDsForWaterAccount.Add(parcelID);
-        var user = UserContext.GetUserFromHttpContext(_dbContext, HttpContext);
-        await WaterAccounts.UpdateWaterAccountParcels(_dbContext, waterAccountID, effectiveYear, updatedParcelIDsForWaterAccount, user.UserID);
-        return Ok();
     }
 
     [HttpPost("{parcelID}/edit-zone-assignments")]

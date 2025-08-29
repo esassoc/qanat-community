@@ -1,24 +1,22 @@
-<div class="modal-header">
-    <div>
-        <h3 class="section-title">Delete Allocation Period</h3>
+<div class="modal">
+    <div class="modal-header">
+        <div>
+            <h3 class="section-title">Delete Allocation Period</h3>
+        </div>
     </div>
 
-    <button type="button" class="close" (click)="close()">
-        <i class="fa fa-times-circle"></i>
-    </button>
-</div>
-
-<div class="modal-body">
-    <div class="copy copy-3">
-        <note>
-            Are you sure you want to delete the
-            <strong>{{ modalContext.AllocationPlanPeriodSimpleDto.AllocationPeriodName }}</strong>
-            period?
-        </note>
+    <div class="modal-body">
+        <div class="copy copy-3">
+            <note>
+                Are you sure you want to delete the
+                <strong>{{ ref.data.AllocationPlanPeriodSimpleDto.AllocationPeriodName }}</strong>
+                period?
+            </note>
+        </div>
     </div>
-</div>
 
-<div class="modal-footer">
-    <button class="btn btn-danger" (click)="save()">Delete Period</button>
-    <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+    <div class="modal-footer">
+        <button class="btn btn-danger" (click)="save()">Delete Period</button>
+        <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+    </div>
 </div>

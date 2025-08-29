@@ -1,6 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Qanat.Common.GeoSpatial;
-using Qanat.Common.Util;
 using Qanat.Models.DataTransferObjects;
 
 namespace Qanat.EFModels.Entities;
@@ -51,39 +49,72 @@ public class WaterAccounts
         return waterAccountMinimalDtos;
     }
 
-    public static List<WaterAccountIndexGridDto> ListByGeographyIDAsIndexGridDtos(QanatDbContext dbContext, int geographyID)
+    public static async Task<List<WaterAccountIndexGridDto>> ListByGeographyIDAsIndexGridDtos(QanatDbContext dbContext, int geographyID)
     {
-        return dbContext.WaterAccounts.AsNoTracking()
-            .Include(x => x.Parcels)
+        var currentYear = DateTime.UtcNow.Year;
+        var currentReportingPeriod = await ReportingPeriods.GetByGeographyIDAndYearAsync(dbContext, geographyID, currentYear);
+
+        var waterAccountIndexGridDtos = await dbContext.WaterAccounts.AsNoTracking()
+            .Include(x => x.WaterAccountParcels).ThenInclude(x => x.Parcel)
             .Include(x => x.WaterAccountUsers).ThenInclude(x => x.User)
+            .Include(x => x.WaterAccountContact)
             .Where(x => x.GeographyID == geographyID)
-            .Select(x => x.AsIndexGridDto())
-            .ToList();
+            .Select(x => x.AsIndexGridDto(currentReportingPeriod.ReportingPeriodID))
+            .ToListAsync();
+
+        return waterAccountIndexGridDtos;
     }
 
-    public static List<WaterAccountIndexGridDto> ListByGeographyIDAndUserIDAsIndexGridDtos(QanatDbContext dbContext, int geographyID, int userID)
+    public static async Task<List<WaterAccountIndexGridDto>> ListByGeographyIDAndUserIDAsIndexGridDtos(QanatDbContext dbContext, int geographyID, int userID)
     {
-        return dbContext.WaterAccounts.AsNoTracking()
-            .Include(x => x.Parcels)
+        var currentYear = DateTime.UtcNow.Year;
+        var currentReportingPeriod = await ReportingPeriods.GetByGeographyIDAndYearAsync(dbContext, geographyID, currentYear);
+
+        var waterAccountIndexGridDtos = await dbContext.WaterAccounts.AsNoTracking()
+            .Include(x => x.WaterAccountParcels).ThenInclude(x => x.Parcel)
             .Include(x => x.WaterAccountUsers).ThenInclude(x => x.User)
+            .Include(x => x.WaterAccountContact)
             .Where(x => x.GeographyID == geographyID && x.WaterAccountUsers.Any(y => y.UserID == userID))
-            .Select(x => x.AsIndexGridDto())
-            .ToList();
+            .Select(x => x.AsIndexGridDto(currentReportingPeriod.ReportingPeriodID))
+            .ToListAsync();
+
+        return waterAccountIndexGridDtos;
     }
 
-    public static WaterAccount GetByID(QanatDbContext dbContext, int waterAccountID)
+    public static async Task<List<WaterAccountIndexGridDto>> ListByGeographyIDAndYearAsIndexGridDtos(QanatDbContext dbContext, int geographyID, int year)
     {
-        return dbContext.WaterAccounts.AsNoTracking()
-            .Include(x => x.Geography).ThenInclude(x => x.DefaultReportingPeriod)
-            .Include(x => x.WaterAccountUsers)
-            .ThenInclude(x => x.User)
-            .Include(x => x.Parcels).ThenInclude(x => x.UsageEntities)
+        var reportingPeriod = await ReportingPeriods.GetByGeographyIDAndYearAsync(dbContext, geographyID, year);
+        var waterAccountIndexGridDtos = await dbContext.WaterAccounts.AsNoTracking()
+            .Include(x => x.WaterAccountParcels).ThenInclude(x => x.Parcel)
+            .Include(x => x.WaterAccountUsers).ThenInclude(x => x.User)
+            .Include(x => x.WaterAccountContact)
+            .Where(x => x.GeographyID == geographyID)
+            .Select(x => x.AsIndexGridDto(reportingPeriod.ReportingPeriodID))
+            .ToListAsync();
+
+        return waterAccountIndexGridDtos;
+    }
+
+    public static WaterAccountDto GetByIDAsDto(QanatDbContext dbContext, int waterAccountID, int? reportingPeriodID = null)
+    {
+        var waterAccount = dbContext.WaterAccounts.AsNoTracking()
+            .Include(x => x.Geography)
+            .Include(x => x.WaterAccountContact)
+            .Include(x => x.WaterAccountUsers).ThenInclude(x => x.User)
             .SingleOrDefault(x => x.WaterAccountID == waterAccountID);
-    }
+        if (!reportingPeriodID.HasValue)
+        {
+            var defaultReportingPeriod = dbContext.ReportingPeriods.AsNoTracking()
+                .FirstOrDefault(x => x.GeographyID == waterAccount.GeographyID && x.IsDefault);
+            reportingPeriodID = defaultReportingPeriod?.ReportingPeriodID ?? dbContext.ReportingPeriods
+                .First(x => x.GeographyID == waterAccount.GeographyID).ReportingPeriodID;
+        }
 
-    public static WaterAccountDto GetByIDAsDto(QanatDbContext dbContext, int waterAccountID)
-    {
-        return GetByID(dbContext, waterAccountID).AsWaterAccountDto();
+        var parcels = dbContext.WaterAccountParcels.AsNoTracking()
+            .Include(x => x.Parcel).ThenInclude(x => x.UsageLocations)
+            .Where(x => x.WaterAccountID == waterAccountID && x.ReportingPeriodID == reportingPeriodID)
+            .Select(x => x.Parcel).ToList();
+        return waterAccount.AsWaterAccountDto(reportingPeriodID.Value, parcels);
     }
 
     public static WaterAccountMinimalDto GetByIDAsMinimalDto(QanatDbContext dbContext, int waterAccountID)
@@ -92,123 +123,57 @@ public class WaterAccounts
             .Single(x => x.WaterAccountID == waterAccountID).AsWaterAccountMinimalDto();
     }
 
-    public static WaterAccountGeoJSONDto GetByIDAsWaterAccountGeoJSONDto(QanatDbContext dbContext, int waterAccountID)
+    public static WaterAccountDisplayDto GetByIDAsDisplayDto(QanatDbContext dbContext, int waterAccountID)
     {
-        var parcels = dbContext.Parcels
-            .Include(x => x.WaterAccount)
-            .Include(x => x.ParcelGeometry)
-            .Include(x => x.UsageEntities).ThenInclude(x => x.UsageEntityGeometry)
-            .Include(x => x.UsageEntities).ThenInclude(x => x.UsageEntityCrops)
-            .AsNoTracking()
-            .Where(x => x.WaterAccountID == waterAccountID)
-            .ToList();
-
-        var waterAccountGeoJSONDto = new WaterAccountGeoJSONDto()
-        {
-            BoundingBox = new BoundingBoxDto(parcels.Select(x => x.ParcelGeometry.Geometry4326)),
-            Parcels = parcels.Select(x => new ParcelWithGeoJSONDto
-            {
-                ParcelID = x.ParcelID,
-                ParcelNumber = x.ParcelNumber,
-                ParcelArea = x.ParcelArea,
-                WaterAccountID = x.WaterAccountID,
-                WaterAccountNameAndNumber = x.WaterAccount.WaterAccountNumberAndName(),
-                WaterAccountOwnerName = x.WaterAccount.ContactName,
-                GeoJSON = x.ParcelGeometry.Geometry4326.ToGeoJSON()
-            }
-            ).ToList(),
-            UsageEntities = parcels.SelectMany(x => x.UsageEntities.Select(y => new UsageEntityWithGeoJSONDto()
-            {
-                Area = y.UsageEntityArea,
-                CropNames = y.UsageEntityCrops.Select(z => z.UsageEntityCropName).ToList(),
-                GeoJSON = y.UsageEntityGeometry?.Geometry4326.ToGeoJSON(),
-                ParcelID = x.ParcelID,
-                UsageEntityID = y.UsageEntityID,
-                UsageEntityName = y.UsageEntityName
-            })).ToList()
-        };
-
-        return waterAccountGeoJSONDto;
+        return dbContext.WaterAccounts.AsNoTracking()
+            .SingleOrDefault(x => x.WaterAccountID == waterAccountID).AsDisplayDto();
     }
 
-    public static WaterAccountDto UpdateAccountEntity(QanatDbContext dbContext, int waterAccountID,
-        WaterAccountUpdateDto waterAccountUpdateDto)
+    public static WaterAccountDto UpdateWaterAccount(QanatDbContext dbContext, int waterAccountID, WaterAccountUpdateDto waterAccountUpdateDto)
     {
-        var account = dbContext.WaterAccounts
+        var waterAccount = dbContext.WaterAccounts
             .Single(x => x.WaterAccountID == waterAccountID);
 
-        account.WaterAccountName = waterAccountUpdateDto.WaterAccountName;
-        account.ContactName = waterAccountUpdateDto.ContactName;
-        account.ContactAddress = waterAccountUpdateDto.ContactAddress;
-        account.UpdateDate = DateTime.UtcNow;
-        account.Notes = waterAccountUpdateDto.Notes ?? account.Notes;
+        waterAccount.WaterAccountName = waterAccountUpdateDto.WaterAccountName;
+        waterAccount.Notes = waterAccountUpdateDto.Notes ?? waterAccount.Notes;
+        waterAccount.UpdateDate = DateTime.UtcNow;
 
         dbContext.SaveChanges();
-        dbContext.Entry(account).Reload();
+        dbContext.Entry(waterAccount).Reload();
         return GetByIDAsDto(dbContext, waterAccountID);
     }
 
-    public static WaterAccountMinimalDto SetAssociatedUsers(QanatDbContext dbContext, int waterAccountID,
-        List<WaterAccountUserMinimalDto> waterAccountUserMinimalDtos, out List<int> addedUserIDs)
+    public static List<ErrorMessage> ValidateUpdateWaterAccountContact(QanatDbContext dbContext, int waterAccountID, int waterAccountContactID)
     {
-        var newAccountUsers = waterAccountUserMinimalDtos.Select(minimalDto => new WaterAccountUser()
+        var errors = new List<ErrorMessage>();
+
+        var waterAccount = dbContext.WaterAccounts.AsNoTracking().SingleOrDefault(x => x.WaterAccountID == waterAccountID);
+        if (waterAccount == null)
         {
-            WaterAccountID = waterAccountID,
-            UserID = minimalDto.User.UserID,
-            ClaimDate = DateTime.UtcNow,
-            WaterAccountRoleID = minimalDto.WaterAccountRoleID
-        }).ToList();
+            errors.Add(new ErrorMessage() { Type = "Water Account Contact", Message = "The provided water account does not exist." });
+        }
 
+        var waterAccountContact = dbContext.WaterAccountContacts.AsNoTracking()
+            .SingleOrDefault(x => x.WaterAccountContactID == waterAccountContactID && x.GeographyID == waterAccount.GeographyID);
 
-        var existingWaterAccountUsers = dbContext.WaterAccountUsers
-            .Where(x => x.WaterAccountID == waterAccountID).ToList();
+        if (waterAccountContact == null)
+        {
+            errors.Add(new ErrorMessage() { Type = "Water Account Contact", Message = "The provided contact does not exist within this geography."});
+        }
 
-        addedUserIDs = waterAccountUserMinimalDtos
-            .Where(x => !existingWaterAccountUsers.Select(y => y.UserID).Contains(x.User.UserID))
-            .Select(x => x.UserID).ToList();
-
-
-        var allInDatabase = dbContext.WaterAccountUsers;
-        existingWaterAccountUsers.Merge(newAccountUsers, allInDatabase, (x, y) => x.WaterAccountID == y.WaterAccountID && x.UserID == y.UserID,
-            (existing, updated) =>
-            {
-                existing.WaterAccountRoleID = updated.WaterAccountRoleID;
-            });
-
-
-        dbContext.SaveChanges();
-
-        return GetByIDAsMinimalDto(dbContext, waterAccountID);
+        return errors;
     }
 
-    public static void BulkCreateWithListOfNames(QanatDbContext dbContext, List<fParcelLayerUpdateDifferencesInParcelsAssociatedWithAccount> uniqueAccountNameOwnerAddress, int geographyID)
+    public static WaterAccountDto UpdateWaterAccountContact(QanatDbContext dbContext, int waterAccountID, int? waterAccountContactID)
     {
-        var listOfAccountsToCreate = new List<WaterAccount>();
-        var currentWaterAccountPiNs = GetCurrentWaterAccountPINs(dbContext);
-        var parcelStagings = dbContext.ParcelStagings;
+        var waterAccount = dbContext.WaterAccounts.Single(x => x.WaterAccountID == waterAccountID);
 
-        uniqueAccountNameOwnerAddress.ForEach(uniqueAccount =>
-        {
-            var parcelStaging =
-                parcelStagings.First(y => y.OwnerName == uniqueAccount.AccountName && y.OwnerAddress == uniqueAccount.OwnerAddress);
-
-            var waterAccountPIN =
-                GenerateAndVerifyWaterAccountPIN("ABCDEFGHIJKLMNOPQRSTUVWXYZ,0123456789",
-                    currentWaterAccountPiNs);
-            currentWaterAccountPiNs.Add(waterAccountPIN);
-
-            listOfAccountsToCreate.Add(new WaterAccount()
-            {
-                GeographyID = geographyID,
-                WaterAccountName = parcelStaging.OwnerName,
-                CreateDate = DateTime.UtcNow,
-                WaterAccountPIN = waterAccountPIN
-            });
-        });
-
-        dbContext.WaterAccounts.AddRange(listOfAccountsToCreate);
+        waterAccount.WaterAccountContactID = waterAccountContactID;
+        waterAccount.UpdateDate = DateTime.UtcNow;
 
         dbContext.SaveChanges();
+        dbContext.Entry(waterAccount).Reload();
+        return GetByIDAsDto(dbContext, waterAccountID);
     }
 
     public static List<string> GetCurrentWaterAccountPINs(QanatDbContext dbContext)
@@ -238,8 +203,7 @@ public class WaterAccounts
             new string(Enumerable.Repeat(applicableWaterAccountPINChars[1], 3).Select(x => x[random.Next(x.Length)]).ToArray());
     }
 
-
-    public static WaterAccountSearchSummaryDto GetBySearchString(QanatDbContext dbContext, int? geographyID, string searchString, UserDto user)
+    public static WaterAccountSearchSummaryDto GetBySearchString(QanatDbContext dbContext, WaterAccountSearchDto waterAccountSearchDto, UserDto user)
     {
         const int searchResultLimit = 10;
 
@@ -260,30 +224,56 @@ public class WaterAccounts
                 .Where(x => managedGeographyIDs.Contains(x.GeographyID) || x.WaterAccountUsers.Any(y => y.UserID == user.UserID));
         }
 
-        var waterAccountsToFilter = geographyID.HasValue ? waterAccounts.Where(x => x.GeographyID == geographyID.Value) : waterAccounts;
-        var matchedWaterAccounts =
-            waterAccountsToFilter.Include(x => x.Parcels).AsNoTracking()
+        var waterAccountsToFilter = waterAccountSearchDto.GeographyID.HasValue ? waterAccounts.Where(x => x.GeographyID == waterAccountSearchDto.GeographyID.Value) : waterAccounts;
+        var matchedWaterAccounts = waterAccountsToFilter.AsNoTracking()
+                .Include(x => x.Parcels)
+                .Include(x => x.WaterAccountContact)
             .Where(x =>
-                x.WaterAccountName.Contains(searchString) ||
-                x.ContactAddress.Contains(searchString) ||
-                x.ContactName.Contains(searchString) ||
-                x.WaterAccountNumber.ToString().Contains(searchString) ||
-                x.Parcels.Any(y => y.ParcelNumber.Contains(searchString)))
-            .ToList()
-            .Select(x => AsWaterAccountWithMatchedFieldsDto(searchString, x))
+                x.WaterAccountName.Contains(waterAccountSearchDto.SearchString) ||
+                x.WaterAccountContact != null && x.WaterAccountContact.FullAddress.Contains(waterAccountSearchDto.SearchString) ||
+                x.WaterAccountContact != null && x.WaterAccountContact.ContactName.Contains(waterAccountSearchDto.SearchString) ||
+                x.WaterAccountNumber.ToString().Contains(waterAccountSearchDto.SearchString) ||
+                x.Parcels.Any(y => y.ParcelNumber.Contains(waterAccountSearchDto.SearchString)))
             .ToList();
+
+            var waterAccountWithMatchedFieldsDtos = matchedWaterAccounts
+                .Select(x => AsWaterAccountWithMatchedFieldsDto(waterAccountSearchDto.SearchString, x))
+                .ToList();
+
+        var waterAccountSearchResultWithMatchedFieldsDtos = waterAccountWithMatchedFieldsDtos
+            .Take(searchResultLimit).ToList();
+
+        if (waterAccountSearchDto.WaterAccountID != null && !waterAccountSearchResultWithMatchedFieldsDtos.Any(x => x.WaterAccount.WaterAccountID == waterAccountSearchDto.WaterAccountID))
+        {
+            var selectedWaterAccount = waterAccountsToFilter.Include(x => x.Parcels).AsNoTracking()
+                .SingleOrDefault(x => x.WaterAccountID == waterAccountSearchDto.WaterAccountID);
+
+            if (selectedWaterAccount != null)
+            {
+                var selectedWaterAccountDto = AsWaterAccountWithMatchedFieldsDto(waterAccountSearchDto.SearchString, selectedWaterAccount);
+                waterAccountSearchResultWithMatchedFieldsDtos.Insert(0, selectedWaterAccountDto);
+            }
+        }
 
         return new WaterAccountSearchSummaryDto()
         {
-            TotalResults = matchedWaterAccounts.Count,
-            WaterAccountSearchResults = matchedWaterAccounts
-                .Take(searchResultLimit).ToList()
+            TotalResults = matchedWaterAccounts.Count(),
+            WaterAccountSearchResults = waterAccountSearchResultWithMatchedFieldsDtos.Take(searchResultLimit).ToList()
         };
     }
 
 
     private static WaterAccountSearchResultWithMatchedFieldsDto AsWaterAccountWithMatchedFieldsDto(string searchString, WaterAccount waterAccount)
     {
+        if (string.IsNullOrEmpty(searchString))
+        {
+            return new WaterAccountSearchResultWithMatchedFieldsDto()
+            {
+                WaterAccount = waterAccount.AsSearchResultDto(),
+                MatchedFields = new Dictionary<WaterAccountSearchMatchEnum, bool>()
+            };
+        }
+
         return new WaterAccountSearchResultWithMatchedFieldsDto()
         {
             WaterAccount = waterAccount.AsSearchResultDto(),
@@ -296,11 +286,11 @@ public class WaterAccounts
                 },
                 {
                     WaterAccountSearchMatchEnum.ContactAddress,
-                    waterAccount.ContactAddress?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false
+                    waterAccount.WaterAccountContact?.FullAddress?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false
                 },
                 {
                     WaterAccountSearchMatchEnum.ContactName,
-                    waterAccount.ContactName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false
+                    waterAccount.WaterAccountContact?.ContactName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false
                 },
                 {
                     WaterAccountSearchMatchEnum.WaterAccountNumber,
@@ -314,17 +304,26 @@ public class WaterAccounts
         };
     }
 
-    public static List<ErrorMessage> ValidateMergeWaterAccounts(QanatDbContext dbContext, int primaryWaterAccountID,
-        int secondaryWaterAccountID, MergeWaterAccountsDto mergeDto)
+    public static async Task<List<ErrorMessage>> ValidateMergeWaterAccounts(QanatDbContext dbContext, int primaryWaterAccountID, int secondaryWaterAccountID, MergeWaterAccountsDto mergeDto, UserDto callingUser)
     {
         var results = new List<ErrorMessage>();
+
+        if (primaryWaterAccountID == secondaryWaterAccountID)
+        {
+            results.Add(new ErrorMessage()
+            {
+                Type = "WaterAccount",
+                Message = "Cannot merge the same water account"
+            });
+
+            return results;
+        }
 
         var primaryWaterAccount = dbContext.WaterAccounts.AsNoTracking()
             .SingleOrDefault(x => x.WaterAccountID == primaryWaterAccountID);
 
         var secondaryWaterAccount = dbContext.WaterAccounts.AsNoTracking()
-            .Include(x => x.Parcels)
-                .ThenInclude(x => x.WaterAccountParcelParcels)
+            .Include(x => x.Parcels).ThenInclude(x => x.WaterAccountParcels).ThenInclude(x => x.ReportingPeriod)
             .SingleOrDefault(x => x.WaterAccountID == secondaryWaterAccountID);
 
         if (primaryWaterAccount == null)
@@ -364,26 +363,26 @@ public class WaterAccounts
             return results;
         }
 
-        // validate the effective date 
-        var minEffectiveYear = secondaryWaterAccount.Parcels.SelectMany(x => x.WaterAccountParcelParcels)
-            .MaxBy(x => x.EffectiveYear)?.EffectiveYear;
-
-        if (!mergeDto.PrimaryReportingPeriodYear.HasValue)
+        // Validate reporting period.
+        if (!mergeDto.ReportingPeriodID.HasValue)
         {
             results.Add(new ErrorMessage()
             {
-                Type = "ReportingPeriod",
+                Type = "ReportingPeriodID",
                 Message = "The Reporting Period field is required for a Preserve Merge."
             });
         }
-        else if (minEffectiveYear.HasValue && mergeDto.PrimaryReportingPeriodYear < minEffectiveYear)
+        else
         {
-            results.Add(new ErrorMessage()
+            var reportingPeriod = await ReportingPeriods.GetAsync(dbContext, primaryWaterAccount.GeographyID, mergeDto.ReportingPeriodID.Value, callingUser);
+            if (reportingPeriod == null)
             {
-                Type = "Effective Year",
-                Message = "The selected Effective Year must be equal to or after the the latest Effective Years of the parcels' water account relationship. " +
-                          $"For the {secondaryWaterAccount.WaterAccountName} Water Account, the earliest allowable year is {minEffectiveYear}."
-            });
+                results.Add(new ErrorMessage()
+                {
+                    Type = "ReportingPeriodID",
+                    Message = "The Reporting Period could not be found."
+                });
+            }
         }
 
         return results;
@@ -392,283 +391,177 @@ public class WaterAccounts
     public static async Task<WaterAccountMinimalDto> MergeWaterAccounts(QanatDbContext dbContext, int primaryWaterAccountID, int secondaryWaterAccountID, MergeWaterAccountsDto mergeDto, UserDto callingUser)
     {
         // get both water accounts
-
         var primaryWaterAccount = dbContext.WaterAccounts
             .Include(x => x.Parcels)
-            .Include(x => x.WaterAccountParcelWaterAccounts).Include(x => x.WaterAccountUsers).Single(x => x.WaterAccountID == primaryWaterAccountID);
+            .Include(x => x.WaterAccountParcels)
+            .Include(x => x.WaterAccountUsers)
+            .Single(x => x.WaterAccountID == primaryWaterAccountID);
+
         var secondaryWaterAccount = dbContext.WaterAccounts
             .Include(x => x.Parcels)
-            .Include(x => x.WaterAccountParcelWaterAccounts).Include(x => x.WaterAccountUsers).Single(x => x.WaterAccountID == secondaryWaterAccountID);
+            .Include(x => x.WaterAccountParcels)
+            .Single(x => x.WaterAccountID == secondaryWaterAccountID);
 
-        foreach (var parcel in secondaryWaterAccount.Parcels)
-        {
-            parcel.WaterAccountID = primaryWaterAccountID;
-            var parcelHistory = ParcelHistories.CreateNew(parcel, callingUser.UserID, mergeDto.PrimaryReportingPeriodYear.Value);
-            await dbContext.ParcelHistories.AddAsync(parcelHistory);
-        }
+        var reportingPeriods = await dbContext.ReportingPeriods.AsNoTracking().Where(x => x.GeographyID == primaryWaterAccount.GeographyID).ToListAsync();
 
         if (mergeDto.IsDeleteMerge)
         {
-            // in a delete merge, we want to transfer any WaterAccountParcel records over to the primary water account
-            // and then delete the water account
-            foreach (var waterAccountParcelToTransfer in secondaryWaterAccount.WaterAccountParcelWaterAccounts)
+            // if necessary, backfill WaterAccountParcel records for the parcels being merged
+            // so that a record exists for each reporting period where the primary water account has parcel data
+            // (this only applies to parcels that have belonged to the secondary water account since the "beginning of time")
+
+            var parcelIDsToBeMerged = secondaryWaterAccount.WaterAccountParcels.Select(x => x.ParcelID)
+                .Distinct().AsEnumerable();
+
+            var earliestWaterAccountParcelsForParcelsToBeMerged = dbContext.Parcels.AsNoTracking()
+                .Include(x => x.WaterAccountParcels).ThenInclude(x => x.ReportingPeriod)
+                .Where(x => parcelIDsToBeMerged.Contains(x.ParcelID)).AsEnumerable()
+                .Select(x => x.WaterAccountParcels.MinBy(y => y.ReportingPeriod.EndDate)).ToList();
+
+            var earliestWaterAccountParcelsAssociatedWithSecondaryWaterAccount = earliestWaterAccountParcelsForParcelsToBeMerged
+                .Where(x => x.WaterAccountID == secondaryWaterAccountID).ToList();
+
+            var primaryWaterAccountReportingPeriodIDs = primaryWaterAccount.WaterAccountParcels.Select(x => x.ReportingPeriodID).ToList();
+            var primaryWaterAccountReportingPeriods = reportingPeriods.Where(x => primaryWaterAccountReportingPeriodIDs.Contains(x.ReportingPeriodID)).ToList();
+
+            var newWaterAccountParcels = new List<WaterAccountParcel>();
+            foreach (var waterAccountParcel in earliestWaterAccountParcelsAssociatedWithSecondaryWaterAccount)
+            {
+                foreach (var reportingPeriod in primaryWaterAccountReportingPeriods.Where(x => x.EndDate < waterAccountParcel.ReportingPeriod.EndDate))
+                {
+                    newWaterAccountParcels.Add(new WaterAccountParcel()
+                    {
+                        WaterAccountID = primaryWaterAccountID,
+                        ParcelID = waterAccountParcel.ParcelID,
+                        GeographyID = primaryWaterAccount.GeographyID,
+                        ReportingPeriodID = reportingPeriod.ReportingPeriodID
+                    });
+                }
+            }
+            await dbContext.WaterAccountParcels.AddRangeAsync(newWaterAccountParcels);
+
+            // create history records
+            var secondaryWaterAccountEarliestWaterAccountParcels = dbContext.Parcels.AsNoTracking()
+                .Include(x => x.WaterAccountParcels).ThenInclude(x => x.ReportingPeriod)
+                .Where(x => parcelIDsToBeMerged.Contains(x.ParcelID)).AsEnumerable()
+                .Select(x => x.WaterAccountParcels.Where(y => y.WaterAccountID == secondaryWaterAccountID).MinBy(y => y.ReportingPeriod.EndDate))
+                .ToList();
+
+            var newParcelWaterAccountHistories = new List<ParcelWaterAccountHistory>();
+            foreach (var waterAccountParcel in secondaryWaterAccountEarliestWaterAccountParcels)
+            {
+                newParcelWaterAccountHistories.Add(new ParcelWaterAccountHistory()
+                {
+                    GeographyID = primaryWaterAccount.GeographyID,
+                    ParcelID = waterAccountParcel.ParcelID,
+                    ReportingPeriodID = waterAccountParcel.ReportingPeriodID,
+                    FromWaterAccountID = secondaryWaterAccountID,
+                    FromWaterAccountNumber = secondaryWaterAccount.WaterAccountNumber,
+                    FromWaterAccountName = secondaryWaterAccount.WaterAccountName,
+                    ToWaterAccountID = primaryWaterAccountID,
+                    ToWaterAccountNumber = primaryWaterAccount.WaterAccountNumber,
+                    ToWaterAccountName = primaryWaterAccount.WaterAccountName,
+                    Reason = $"Manually merged",
+                    CreateUserID = callingUser.UserID,
+                    CreateDate = DateTime.UtcNow,
+                });
+            }
+            await dbContext.ParcelWaterAccountHistories.AddRangeAsync(newParcelWaterAccountHistories);
+
+            // transfer secondary water account's WaterAccountParcel records to the primary water account
+            // then delete the secondary water account
+
+            foreach (var waterAccountParcelToTransfer in secondaryWaterAccount.WaterAccountParcels)
             {
                 waterAccountParcelToTransfer.WaterAccountID = primaryWaterAccountID;
             }
 
-            dbContext.WaterAccountUsers.RemoveRange(secondaryWaterAccount.WaterAccountUsers);
-            dbContext.WaterAccounts.Remove(secondaryWaterAccount);
+            var parcelsToUpdate = dbContext.Parcels.Where(x => x.WaterAccountID == secondaryWaterAccountID);
+            foreach (var parcel in parcelsToUpdate)
+            {
+                parcel.WaterAccountID = primaryWaterAccountID;
+            }
+
+            await dbContext.SaveChangesAsync();
+            await DeleteWaterAccount(dbContext, secondaryWaterAccountID, callingUser);
         }
         else
         {
-            // move the parcels from the secondary account into the primary account
-            // make sure to set the EndDate to the effective date - 1 on the
-            // parcel water account history on the old one
-            var secondaryWaterAccountParcelIDs = secondaryWaterAccount.Parcels.Select(x => x.ParcelID).ToList();
+            var selectedReportingPeriod = reportingPeriods.Single(x => x.ReportingPeriodID == mergeDto.ReportingPeriodID!.Value);
 
-            foreach (var parcelID in secondaryWaterAccountParcelIDs)
+            // Need to apply the changes for each WaterAccountParcel for the selected reportingPeriod and all those in the future.
+            var reportingPeriodsToApplyMergeOn = reportingPeriods.Where(x => x.EndDate >= selectedReportingPeriod.EndDate).ToList();
+            var reportingPeriodIDsToApplyMergeOn = reportingPeriodsToApplyMergeOn.Select(x => x.ReportingPeriodID).ToList();
+            var waterAccountParcelsToMove = secondaryWaterAccount.WaterAccountParcels.Where(x => reportingPeriodIDsToApplyMergeOn.Contains(x.ReportingPeriodID));
+
+            foreach (var waterAccountParcel in waterAccountParcelsToMove)
             {
-                var parcelRelationshipsForParcelID = dbContext.WaterAccountParcels
-                    .Where(x => x.ParcelID == parcelID).ToList();
+                waterAccountParcel.WaterAccountID = primaryWaterAccountID;
 
-                parcelRelationshipsForParcelID.ForEach(parcelRelationship =>
-                {
-                    // dirty transfer. Notes on these types of transfers on the UpdateWaterAccountParcels method below
-                    if (parcelRelationship.EffectiveYear >= mergeDto.PrimaryReportingPeriodYear)
-                    {
-                        dbContext.WaterAccountParcels.Remove(parcelRelationship);
-                    }
-                    // clean transfer
-                    else if (parcelRelationship.EndYear == null)
-                    {
-                        parcelRelationship.EndYear = mergeDto.PrimaryReportingPeriodYear;
-                    }
-                });
+                if (waterAccountParcel.ReportingPeriodID != selectedReportingPeriod.ReportingPeriodID) continue;
 
-                var newWaterAccountParcel = new WaterAccountParcel()
+                var parcelWaterAccountHistory = new ParcelWaterAccountHistory()
                 {
-                    EffectiveYear = mergeDto.PrimaryReportingPeriodYear.Value,
-                    WaterAccountID = primaryWaterAccount.WaterAccountID,
-                    ParcelID = parcelID,
                     GeographyID = primaryWaterAccount.GeographyID,
+                    ParcelID = waterAccountParcel.ParcelID,
+                    ReportingPeriodID = waterAccountParcel.ReportingPeriodID,
+                    FromWaterAccountID = secondaryWaterAccountID,
+                    FromWaterAccountNumber = secondaryWaterAccount.WaterAccountNumber,
+                    FromWaterAccountName = secondaryWaterAccount.WaterAccountName,
+                    ToWaterAccountID = primaryWaterAccountID,
+                    ToWaterAccountNumber = primaryWaterAccount.WaterAccountNumber,
+                    ToWaterAccountName = primaryWaterAccount.WaterAccountName,
+                    Reason = $"Manually merged.",
+                    CreateUserID = callingUser.UserID,
+                    CreateDate = DateTime.UtcNow,
                 };
-                dbContext.WaterAccountParcels.Add(newWaterAccountParcel);
+
+                await dbContext.ParcelWaterAccountHistories.AddAsync(parcelWaterAccountHistory);
             }
 
-            // deactivate the secondary water account?
-            //TODO: do we want to delete?
             secondaryWaterAccount.UpdateDate = DateTime.UtcNow;
+            await dbContext.SaveChangesAsync();
         }
 
-        await dbContext.SaveChangesAsync();
-
-        await RemoveEmptyWaterAccountsFromUsers(dbContext, [primaryWaterAccountID, secondaryWaterAccountID]);
+        await RemoveEmptyWaterAccountsFromUsers(dbContext, new List<int>() { primaryWaterAccountID, secondaryWaterAccountID });
 
         var parcelIDToReview = primaryWaterAccount.Parcels.Select(x => x.ParcelID).Union(secondaryWaterAccount.Parcels.Select(x => x.ParcelID)).Distinct().ToList();
-        await ParcelHistories.MarkAsReviewedByParcelIDs(dbContext, parcelIDToReview);
+        await ParcelHistories.MarkAsReviewedByParcelIDsAsync(dbContext, parcelIDToReview);
 
         return GetByIDAsMinimalDto(dbContext, primaryWaterAccountID);
     }
 
-    public static List<ErrorMessage> ValidateAddOrphanedParcelToWaterAccount(QanatDbContext dbContext, int waterAccountID, int parcelID)
-    {
-        var errors = new List<ErrorMessage>();
-
-        var waterAccount = dbContext.WaterAccounts.SingleOrDefault(x => x.WaterAccountID == waterAccountID);
-        if (waterAccount == null)
-        {
-            errors.Add(new ErrorMessage() { Type = "Parcel", Message = $"Could not find the water account with the WaterAccountID of {waterAccountID}." });
-        }
-
-        var parcel = dbContext.Parcels.SingleOrDefault(x => x.ParcelID == parcelID);
-        if (parcel == null)
-        {
-            errors.Add(new ErrorMessage() { Type = "Parcel", Message = $"Could not find the parcel with the ParcelID of {parcelID}." });
-        }
-        else if (parcel.GeographyID != waterAccount.GeographyID)
-        {
-            errors.Add(new ErrorMessage() { Type = "Geography", Message = "The geography of the selected water account doesn't match the selected parcel." });
-        }
-        else if (parcel.WaterAccountID.HasValue)
-        {
-            errors.Add(new ErrorMessage() { Type = "Parcel", Message = "The selected parcel is already associated with a water account. This operation is intended only for orphaned parcels." });
-        }
-
-        return errors;
-    }
-
-    public static async Task<WaterAccountMinimalDto> AddOrphanedParcelToWaterAccount(QanatDbContext dbContext, int waterAccountID, int parcelID, UserDto callingUser)
-    {
-        var parcel = dbContext.Parcels.Single(x => x.ParcelID == parcelID);
-        parcel.WaterAccountID = waterAccountID;
-
-        var year = DateTime.UtcNow.Year;
-        var parcelHistory = ParcelHistories.CreateNew(parcel, callingUser.UserID, year);
-        await dbContext.ParcelHistories.AddAsync(parcelHistory);
-
-        var waterAccount = dbContext.WaterAccounts.Single(x => x.WaterAccountID == waterAccountID);
-
-        var waterAccountParcel = new WaterAccountParcel()
-        {
-            WaterAccountID = waterAccountID,
-            ParcelID = parcelID,
-            EffectiveYear = year,
-            GeographyID = waterAccount.GeographyID
-        };
-
-        await dbContext.WaterAccountParcels.AddAsync(waterAccountParcel);
-        await dbContext.SaveChangesAsync();
-
-        await ParcelHistories.MarkAsReviewedByParcelIDs(dbContext, [parcel.ParcelID]);
-
-        return GetByIDAsMinimalDto(dbContext, waterAccountID);
-    }
-
-
-    /**
-     * SMG: I realize this method is a bit wordy and not algorithmically great, but this is the way I understood it the clearest.
-     * The queries aren't big so I'm really not concerned about performance.
-     *
-     * There are a few things we need to consider when transferring parcels to and from water accounts.
-     * 1. The effective date is CRITICAL 
-     * 2. Removal of a parcel from a water account
-     *  a. Clean: If the form submitted EffectiveDate is greater than the EffectiveDate on the current ownership we can simply set the EndDate
-     *  b. Dirty: If the form submitted EffectiveDate is less    than the EffectiveDate on the current ownership can remove the ownership record altogether
-     * 3. Transfer from another water account or adding an orphaned parcel
-     *  a. Create a new record of ownership starting at the effective date on form submission
-     *  b. Clean: (i.e.: the new effective date is past the current ownership on another water account) we can update the EndDate on that record
-     *  c. Dirty: (i.e.: backdating ownership), we need to clean up any ownership records that are beyond that backdated EffectiveDate
-     *
-     * RL 11/21/23: Updated rules: Since we can no longer set an effective year in the past, not really sure how much of the dirty case we will encounter.
-     * We are also adding a WaterAccountID to the Parcel table to reflect the current WaterAccount a parcel belongs to
-     * We also need to set Parcel Status of Assigned or Unassigned
-     * Steps should be simpler:
-     * 1. Get existing parcels for this water account if any and set WaterAccountID to null for ones that are not part of the parcelIDs passed in
-     * 2. Set an end year for WaterAccountParcel records for those removed parcels
-     * 3. For the parcelIDs passed in, set the WaterAccountID to this WaterAccountID
-     * 4. Add WaterAccountParcel records if necessary; if already exists no need for one, if not we need to check if it already belongs to another WaterAccount.  If it belongs to another WaterAccount we need to set the end year to the effective year and then add a new record to this WaterAccountParcel
-     *
-     * RL: 6/20/24: New rule: if a water account has zero parcels after a merge/consolidate, it will be removed from all users who can view/manage that water account
-     */
-    public static async Task<WaterAccountMinimalDto> UpdateWaterAccountParcels(QanatDbContext dbContext, int waterAccountID, int effectiveYear, List<int> parcelIDs, int userID)
-    {
-        var waterAccount = dbContext.WaterAccounts.Include(x => x.WaterAccountParcelWaterAccounts).Single(x => x.WaterAccountID == waterAccountID);
-        var parcelsCurrentlyAssociatedWithWaterAccount = dbContext.Parcels.Where(x => x.WaterAccountID == waterAccountID).ToList();
-
-        var parcelsThatShouldBeAssociatedWithWaterAccount = dbContext.Parcels.Include(x => x.WaterAccountParcelParcels).Where(x => parcelIDs.Contains(x.ParcelID)).ToList();
-        // REMOVED PARCELS
-        var removedParcels = parcelsCurrentlyAssociatedWithWaterAccount.Where(x => !parcelIDs.Contains(x.ParcelID)).ToList();
-        foreach (var parcel in removedParcels)
-        {
-            var removedParcelRelationships = dbContext.WaterAccountParcels.Where(x => x.WaterAccountID == waterAccountID && x.ParcelID == parcel.ParcelID).ToList();
-            // dirty transfer
-            dbContext.WaterAccountParcels.RemoveRange(removedParcelRelationships.Where(x => x.EffectiveYear >= effectiveYear));
-            // clean transfer
-            foreach (var waterAccountParcel in removedParcelRelationships.Where(x => x.EffectiveYear <= effectiveYear && x.EndYear == null))
-            {
-                waterAccountParcel.EndYear = effectiveYear;
-            }
-
-            // remove them from this water account and set the parcel to Unassigned
-            parcel.WaterAccountID = null;
-            parcel.ParcelStatusID = (int)ParcelStatusEnum.Unassigned;
-
-            // we also need to add a ParcelHistory record
-            var newParcelHistoryRecord = ParcelHistories.CreateNew(parcel, userID, effectiveYear);
-            await dbContext.ParcelHistories.AddAsync(newParcelHistoryRecord);
-        }
-
-        // ADDED OR EXISTING PARCELS
-        var parcelIDsCurrentlyAssociatedWithWaterAccount = parcelsCurrentlyAssociatedWithWaterAccount.Select(x => x.ParcelID).ToList();
-        foreach (var parcel in parcelsThatShouldBeAssociatedWithWaterAccount)
-        {
-            // set the WaterAccountID and ParcelStatus to Assigned for the parcels that should be associated to this water account
-            parcel.WaterAccountID = waterAccountID;
-            parcel.ParcelStatusID = (int)ParcelStatusEnum.Assigned;
-
-            // leave the existing relationships alone
-            if (parcelIDsCurrentlyAssociatedWithWaterAccount.Contains(parcel.ParcelID))
-            {
-                continue;
-            }
-
-            // adjust the existing relationships, (e.g. remove if past the effective date or update EndDate if accurate)
-            // dirty transfer
-            dbContext.WaterAccountParcels.RemoveRange(parcel.WaterAccountParcelParcels.Where(x => x.EffectiveYear >= effectiveYear));
-            // clean transfer
-            foreach (var waterAccountParcel in parcel.WaterAccountParcelParcels.Where(x => x.EffectiveYear <= effectiveYear && x.EndYear == null))
-            {
-                waterAccountParcel.EndYear = effectiveYear;
-            }
-
-            // add the new record
-            var newRecord = new WaterAccountParcel()
-            {
-                GeographyID = waterAccount.GeographyID,
-                EffectiveYear = effectiveYear,
-                WaterAccountID = waterAccountID,
-                ParcelID = parcel.ParcelID
-            };
-            await dbContext.WaterAccountParcels.AddAsync(newRecord);
-
-            // we also need to add a ParcelHistory record
-            var newParcelHistoryRecord = ParcelHistories.CreateNew(parcel, userID, effectiveYear);
-            await dbContext.ParcelHistories.AddAsync(newParcelHistoryRecord);
-        }
-
-        await dbContext.SaveChangesAsync();
-
-        // we need to mark any existing parcel history records for the affected parcels as IsReviewed = true
-        await ParcelHistories.MarkAsReviewedByParcelIDs(dbContext, removedParcels.Select(x => x.ParcelID).Union(parcelsThatShouldBeAssociatedWithWaterAccount.Select(x => x.ParcelID)).ToList());
-
-        await RemoveEmptyWaterAccountsFromUsers(dbContext, [waterAccountID]);
-
-        return GetByIDAsMinimalDto(dbContext, waterAccountID);
-    }
-
-    public static List<ErrorMessage> ValidateUpdateWaterAccountParcels(QanatDbContext dbContext, int waterAccountID, UpdateWaterAccountParcelsDto dto)
-    {
-        var results = new List<ErrorMessage>();
-
-        var waterAccount = dbContext.WaterAccounts.AsNoTracking()
-            .Include(x => x.Parcels)
-            .Single(x => x.WaterAccountID == waterAccountID);
-
-        // validate the effective date
-        var waterAccountParcelIDs = waterAccount.Parcels.Select(x => x.ParcelID).ToList();
-
-        var addedParcelIDs = dto.ParcelIDs.Where(x => !waterAccountParcelIDs.Contains(x)).ToList();
-        var minEffectiveYearForAddedParcels = dbContext.WaterAccountParcels
-            .Where(x => addedParcelIDs.Contains(x.ParcelID)).ToList()
-            .MaxBy(x => x.EffectiveYear)?.EffectiveYear;
-
-        var minEffectiveYearForRemovedParcels = waterAccount.Parcels.Where(x => !dto.ParcelIDs.Contains(x.ParcelID))
-            .SelectMany(x => x.WaterAccountParcelParcels).ToList()
-            .MaxBy(x => x.EffectiveYear)?.EffectiveYear;
-
-        var minEffectiveYear = minEffectiveYearForAddedParcels > minEffectiveYearForRemovedParcels ? minEffectiveYearForAddedParcels : minEffectiveYearForRemovedParcels;
-
-        if (minEffectiveYear.HasValue && dto.EffectiveYear < minEffectiveYear)
-        {
-            results.Add(new ErrorMessage()
-            {
-                Type = "Effective Year",
-                Message = "The selected Effective Year must be equal to or after the the latest Effective Years of the parcels' water account relationship. " +
-                          $"For the selected parcels, the earliest allowable year is {minEffectiveYear}."
-            });
-        }
-
-        return results;
-    }
-
-    public static async Task DeleteWaterAccount(QanatDbContext dbContext, int waterAccountID)
+    public static async Task DeleteWaterAccount(QanatDbContext dbContext, int waterAccountID, UserDto callingUser)
     {
         await dbContext.Parcels.Where(x => x.WaterAccountID == waterAccountID)
             .ExecuteUpdateAsync(x => x
                 .SetProperty(y => y.WaterAccountID, y => null)
                 .SetProperty(y => y.ParcelStatusID, y => (int)ParcelStatusEnum.Unassigned));
 
-        await dbContext.ParcelHistories.Where(x => x.WaterAccountID == waterAccountID).ExecuteDeleteAsync();
+        var waterAccountParcels = await dbContext.WaterAccountParcels.Include(x => x.WaterAccount).Where(x => x.WaterAccountID == waterAccountID).ToListAsync();
+        foreach (var waterAccountParcel in waterAccountParcels)
+        {
+            var waterAccountParcelHistory = new ParcelWaterAccountHistory()
+            {
+                GeographyID = waterAccountParcel.GeographyID,
+                ReportingPeriodID = waterAccountParcel.ReportingPeriodID,
+                ParcelID = waterAccountParcel.ParcelID,
+                FromWaterAccountID = waterAccountParcel.WaterAccountID,
+                FromWaterAccountNumber = waterAccountParcel.WaterAccount.WaterAccountNumber,
+                FromWaterAccountName = waterAccountParcel.WaterAccount.WaterAccountName,
+                Reason = "Water Account Deleted",
+                CreateUserID = callingUser.UserID,
+                CreateDate = DateTime.UtcNow
+            };
+
+            dbContext.ParcelWaterAccountHistories.Add(waterAccountParcelHistory);
+        }
+
+        await dbContext.SaveChangesAsync();
+
+        await dbContext.WaterAccountCoverCropStatuses.Where(x => x.WaterAccountID == waterAccountID).ExecuteDeleteAsync();
+        await dbContext.StatementBatchWaterAccounts.Where(x => x.WaterAccountID == waterAccountID).ExecuteDeleteAsync();
+        await dbContext.WaterAccountFallowStatuses.Where(x => x.WaterAccountID == waterAccountID).ExecuteDeleteAsync();
         await dbContext.WaterAccountParcels.Where(x => x.WaterAccountID == waterAccountID).ExecuteDeleteAsync();
         await dbContext.WaterAccountUsers.Where(x => x.WaterAccountID == waterAccountID).ExecuteDeleteAsync();
         await dbContext.WaterAccountUserStagings.Where(x => x.WaterAccountID == waterAccountID).ExecuteDeleteAsync();
@@ -677,29 +570,67 @@ public class WaterAccounts
         await dbContext.WaterAccounts.Where(x => x.WaterAccountID == waterAccountID).ExecuteDeleteAsync();
     }
 
-    public static async Task<WaterAccount> CreateWaterAccount(QanatDbContext dbContext, int geographyID, WaterAccountCreateDto waterAccountDto)
+    public static async Task<WaterAccount> CreateWaterAccount(QanatDbContext dbContext, int geographyID, WaterAccountUpsertDto waterAccountUpsertDto)
     {
-        return await CreateWaterAccount(dbContext, geographyID, waterAccountDto.WaterAccountName, waterAccountDto.ContactName,
-            waterAccountDto.ContactAddress);
+        return await CreateImpl(dbContext, geographyID, waterAccountUpsertDto.WaterAccountName, waterAccountUpsertDto.ContactName, waterAccountUpsertDto.ContactEmail, waterAccountUpsertDto.ContactPhoneNumber, waterAccountUpsertDto.Address, waterAccountUpsertDto.SecondaryAddress, waterAccountUpsertDto.City, waterAccountUpsertDto.State, waterAccountUpsertDto.ZipCode, waterAccountUpsertDto.PrefersPhysicalCommunication);
     }
 
-    public static async Task<WaterAccount> CreateWaterAccount(QanatDbContext dbContext, int geographyID, string waterAccountName, string contactName, string contactAddress)
+    public static async Task<WaterAccountMinimalDto> CreateWaterAccountFromSuggestion(QanatDbContext dbContext, int geographyID, CreateWaterAccountFromSuggestionDto dto, UserDto callingUser)
     {
-        var waterAccountPIN =
-            GenerateAndVerifyWaterAccountPIN("ABCDEFGHIJKLMNOPQRSTUVWXYZ,0123456789",
-                GetCurrentWaterAccountPINs(dbContext));
+        // todo: need to call geocoding api to split address from parcel to individual address fields
+        var waterAccount = await CreateImpl(dbContext, geographyID, dto.WaterAccountName, dto.ContactName, null, null, dto.ContactAddress, null, null, null, null, null);
+        await WaterAccountParcels.UpdateWaterAccountParcelByWaterAccountAndReportingPeriodAsync(dbContext, waterAccount.WaterAccountID, dto.ReportingPeriodID, dto.ParcelIDList, callingUser);
+        return GetByIDAsMinimalDto(dbContext, waterAccount.WaterAccountID);
+    }
+
+    private static async Task<WaterAccount> CreateImpl(QanatDbContext dbContext, int geographyID, string waterAccountName, string contactName, string contactEmail, string contactPhoneNumber, string address, string secondaryAddress, string city, string state, string zipCode, bool? prefersPhysicalCommunication)
+    {
+        var waterAccountPIN = GenerateAndVerifyWaterAccountPIN("ABCDEFGHIJKLMNOPQRSTUVWXYZ,0123456789", GetCurrentWaterAccountPINs(dbContext));
         var waterAccount = new WaterAccount
         {
             GeographyID = geographyID,
             CreateDate = DateTime.UtcNow,
-            ContactName = contactName,
-            ContactAddress = contactAddress,
             WaterAccountPIN = waterAccountPIN,
             WaterAccountName = waterAccountName
         };
+
+        var waterAccountContacts = await dbContext.WaterAccountContacts.AsNoTracking()
+            .Where(x => x.GeographyID == geographyID && x.ContactName == contactName 
+                                                     && ((x.Address == address && x.SecondaryAddress == secondaryAddress && x.City == city && x.State == state && x.ZipCode == zipCode) 
+                                                         || x.FullAddress == address))
+            .ToListAsync();
+
+        if (waterAccountContacts.Any())
+        {
+            waterAccount.WaterAccountContactID = waterAccountContacts.First().WaterAccountContactID;
+        }
+        else
+        {
+            var waterAccountContact = new WaterAccountContact()
+            {
+                GeographyID = geographyID,
+                ContactName = contactName,
+                ContactEmail = contactEmail,
+                ContactPhoneNumber = contactPhoneNumber,
+                Address = address,
+                SecondaryAddress = secondaryAddress,
+                City = city,
+                State = state,
+                ZipCode = zipCode,
+                PrefersPhysicalCommunication = prefersPhysicalCommunication ?? false
+            };
+
+            dbContext.WaterAccountContacts.Add(waterAccountContact);
+            await dbContext.SaveChangesAsync();
+            await dbContext.Entry(waterAccountContact).ReloadAsync();
+
+            waterAccount.WaterAccountContactID = waterAccountContact.WaterAccountContactID;
+        }
+
         await dbContext.WaterAccounts.AddAsync(waterAccount);
         await dbContext.SaveChangesAsync();
         await dbContext.Entry(waterAccount).ReloadAsync();
+
         return waterAccount;
     }
 
@@ -727,7 +658,7 @@ public class WaterAccounts
         return results;
     }
 
-    public static List<ZoneDisplayDto> GetZonesForParcel(WaterAccount waterAccount, Dictionary<int, ZoneDisplayDto> zonesDict, IEnumerable<int> allocationZoneIDs)
+    public static List<ZoneDisplayDto> GetZonesForParcels(WaterAccount waterAccount, Dictionary<int, ZoneDisplayDto> zonesDict, IEnumerable<int> allocationZoneIDs, UserDto callingUser)
     {
         var zoneIDs = new List<int>();
         foreach (var parcel in waterAccount.Parcels)
@@ -739,7 +670,22 @@ public class WaterAccounts
             zoneIDs.AddRange(parcelZoneIDs);
         }
 
-        return zoneIDs.Distinct().Select(x => zonesDict[x]).ToList();
+        callingUser.Flags.TryGetValue(Flag.IsSystemAdmin.FlagName, out var isSystemAdmin);
+
+        var isWaterManager = false;
+        callingUser.GeographyFlags.TryGetValue(waterAccount.GeographyID, out var geographyFlags);
+        geographyFlags?.TryGetValue(Flag.HasManagerDashboard.FlagName, out isWaterManager);
+
+        var callingUserIsAdminOrWaterManager = isSystemAdmin || isWaterManager;
+
+        var zoneDisplayDtos = zoneIDs.Distinct().Select(x => zonesDict[x]);
+
+        if (!callingUserIsAdminOrWaterManager)
+        {
+            zoneDisplayDtos = zoneDisplayDtos.Where(x => x.ZoneGroupDisplayToAccountHolders);
+        }
+
+        return zoneDisplayDtos.ToList();
     }
 
     public static List<WaterAccountRequestChangesDto> ListByGeographyIDAndUserIDAsWaterAccountRequestChangesDto(QanatDbContext dbContext, int geographyID, int userID)
@@ -751,20 +697,23 @@ public class WaterAccounts
             .Where(x => x.UserID == userID && x.WaterAccountRoleID == WaterAccountRole.WaterAccountHolder.WaterAccountRoleID)
             .Select(x => x.WaterAccountID).ToList();
 
+        var currentReportingPeriod = ReportingPeriods.GetByGeographyIDAndYearAsync(dbContext, geographyID, DateTime.UtcNow.Year).Result;
+
         return dbContext.WaterAccounts.AsNoTracking()
-            .Include(x => x.WaterAccountParcelWaterAccounts)
+            .Include(x => x.WaterAccountContact)
+            .Include(x => x.WaterAccountParcels)
             .ThenInclude(x => x.Parcel)
             .ThenInclude(x => x.ParcelZones)
             .ThenInclude(x => x.Zone)
             .Where(x => x.GeographyID == geographyID && ownedWaterAccountIDs.Contains(x.WaterAccountID))
+            .ToList()
             .Select(x => new WaterAccountRequestChangesDto()
             {
                 WaterAccountID = x.WaterAccountID,
                 WaterAccountName = x.WaterAccountName,
                 WaterAccountNumber = x.WaterAccountNumber,
-                ContactName = x.ContactName,
-                ContactAddress = x.ContactAddress,
-                Parcels = x.WaterAccountParcelWaterAccounts.Where(x => x.EndYear == null)
+                WaterAccountContact = x.WaterAccountContact?.AsDto(),
+                Parcels = x.WaterAccountParcels.Where(x => x.ReportingPeriodID == currentReportingPeriod.ReportingPeriodID).ToList()
                     .Select(y => new WaterAccountRequestChangesParcelDto()
                     {
                         ParcelID = y.ParcelID,
@@ -774,7 +723,7 @@ public class WaterAccounts
                         AllocationZone = !geographyAllocationPlanConfigurationZoneGroupID.HasValue || y.Parcel.ParcelZones.All(z => z.Zone.ZoneGroupID != geographyAllocationPlanConfigurationZoneGroupID)
                             ? null
                             : y.Parcel.ParcelZones.Single(z => z.Zone.ZoneGroupID == geographyAllocationPlanConfigurationZoneGroupID).Zone.AsDisplayDto()
-                    }).ToList()
+                    }).Distinct().ToList()
             })
             .OrderBy(x => x.Parcels.Count > 0 ? 1 : 2).ThenBy(x => x.WaterAccountName)
             .ToList();
@@ -797,6 +746,7 @@ public class WaterAccounts
         // check all parcels are within the expected geography (just in case)
         var parcelIDs = requestDto.WaterAccounts.SelectMany(x => x.Parcels).AsEnumerable()
             .Select(x => x.ParcelID).ToList();
+
         parcelIDs.AddRange(requestDto.ParcelsToRemove.Select(x => x.ParcelID).ToList());
 
         var parcels = dbContext.Parcels.AsNoTracking()
@@ -836,8 +786,12 @@ public class WaterAccounts
         return errors;
     }
 
-    public static async Task ApplyRequestedWaterAccountChanges(QanatDbContext dbContext, int geographyID, int userID, WaterAccountParcelsRequestChangesDto requestDto)
+    public static async Task ApplyRequestedWaterAccountChanges(QanatDbContext dbContext, int geographyID, int userID, WaterAccountParcelsRequestChangesDto requestDto, UserDto callingUser)
     {
+        var reportingPeriods = await ReportingPeriods.ListByGeographyIDAsync(dbContext, geographyID, callingUser);
+        var defaultReportingPeriod = reportingPeriods.FirstOrDefault(x => x.IsDefault) ?? reportingPeriods.First();
+        var reportingPeriodIDsDefaultToCurrent = reportingPeriods.Where(x => x.EndDate >= defaultReportingPeriod.EndDate).Select(x => x.ReportingPeriodID).ToList();
+
         // remove current WaterAccountParcels
         var parcelIDs = requestDto.WaterAccounts.SelectMany(x => x.Parcels.Select(y => y.ParcelID)).ToList();
 
@@ -845,57 +799,72 @@ public class WaterAccounts
         parcelIDs.AddRange(parcelIDsToInactivate);
 
         await dbContext.WaterAccountParcels
-            .Where(x => x.GeographyID == geographyID && parcelIDs.Contains(x.ParcelID)).ExecuteDeleteAsync();
+            .Where(x => x.GeographyID == geographyID && parcelIDs.Contains(x.ParcelID) && reportingPeriodIDsDefaultToCurrent.Contains(x.ReportingPeriodID))
+            .ExecuteDeleteAsync();
 
         // create new WaterAccountParcels and update existing Parcels' WaterAccountIDs
-        var geography = Geographies.GetByID(dbContext, geographyID);
-
-        var parcelByParcelID = dbContext.Parcels.Where(x => x.GeographyID == geographyID && parcelIDs.Contains(x.ParcelID))
-            .ToDictionary(x => x.ParcelID);
-
-        var latestParcelHistoryByParcelID = dbContext.ParcelHistories.AsNoTracking()
-            .Where(x => parcelIDs.Contains(x.ParcelID))
-            .GroupBy(x => x.ParcelID)
-            .ToDictionary(x => x.Key, x => x.MaxBy(y => y.UpdateDate));
+        var parcelByParcelID = await dbContext.Parcels
+            .Include(x => x.WaterAccount)
+            .Where(x => x.GeographyID == geographyID && parcelIDs.Contains(x.ParcelID))
+            .ToDictionaryAsync(x => x.ParcelID);
 
         var modifiedParcels = parcelIDsToInactivate.Where(x => parcelByParcelID.ContainsKey(x))
             .Select(x => parcelByParcelID[x]).ToList();
 
+        var waterAccountIDs = requestDto.WaterAccounts.Select(x => x.WaterAccountID).ToList();
+        var parcelIDsByWaterAccountID = dbContext.WaterAccountParcels.AsNoTracking()
+            .Where(x => x.GeographyID == geographyID && waterAccountIDs.Contains(x.WaterAccountID) && x.ReportingPeriodID == defaultReportingPeriod.ReportingPeriodID)
+            .ToLookup(x => x.WaterAccountID, x => x.ParcelID);
+
         var newWaterAccountParcels = new List<WaterAccountParcel>();
-
-        var geographyReportingPeriods = dbContext.ReportingPeriods.AsNoTracking().Where(x => x.GeographyID == geographyID);
-        var startingReportingPeriod = geographyReportingPeriods.MinBy(x => x.StartDate);
-
         foreach (var waterAccount in requestDto.WaterAccounts)
         {
             foreach (var parcel in waterAccount.Parcels)
             {
-                if (!parcelByParcelID.ContainsKey(parcel.ParcelID)) continue;
+                if (parcelIDsByWaterAccountID[waterAccount.WaterAccountID].Contains(parcel.ParcelID))
+                {
+                    continue; // WaterAccountParcel already exists.
+                }
 
-                // add new WaterAccountParcel record
-                newWaterAccountParcels.Add(new WaterAccountParcel()
+                // add new WaterAccountParcel records
+                newWaterAccountParcels.AddRange(reportingPeriodIDsDefaultToCurrent.Select(x => new WaterAccountParcel()
                 {
                     GeographyID = geographyID,
                     WaterAccountID = waterAccount.WaterAccountID,
                     ParcelID = parcel.ParcelID,
-                    EffectiveYear = startingReportingPeriod.StartDate.Year
-                });
+                    ReportingPeriodID = x
+                }));
 
                 // update WaterAccount col on Parcel table
                 var existingParcel = parcelByParcelID[parcel.ParcelID];
+                var fromWaterAccountID = existingParcel.WaterAccountID;
+                var fromWaterAccountNumber = existingParcel.WaterAccount?.WaterAccountNumber;
+                var fromWaterAccountName = existingParcel.WaterAccount?.WaterAccountName;
+
                 existingParcel.WaterAccountID = waterAccount.WaterAccountID;
+                existingParcel.ParcelStatusID = ParcelStatus.Assigned.ParcelStatusID;
 
-                // determine whether a new ParcelHistory record should be added
-                var latestParcelHistory = latestParcelHistoryByParcelID.ContainsKey(parcel.ParcelID)
-                    ? latestParcelHistoryByParcelID[parcel.ParcelID]
-                    : null;
-
-                if (existingParcel.WaterAccountID != latestParcelHistory?.WaterAccountID || latestParcelHistory?.EffectiveYear != startingReportingPeriod.StartDate.Year)
+                // Add ParcelWaterAccountHistories for new associations.
+                var newParcelWaterAccountHistory = new ParcelWaterAccountHistory()
                 {
-                    modifiedParcels.Add(existingParcel);
-                }
+                    GeographyID = existingParcel.GeographyID,
+                    ParcelID = parcel.ParcelID,
+                    ReportingPeriodID = defaultReportingPeriod.ReportingPeriodID,
+                    ToWaterAccountID = waterAccount.WaterAccountID,
+                    ToWaterAccountNumber = waterAccount.WaterAccountNumber,
+                    ToWaterAccountName = waterAccount.WaterAccountName,
+                    FromWaterAccountID = fromWaterAccountID,
+                    FromWaterAccountNumber = fromWaterAccountNumber,
+                    FromWaterAccountName = fromWaterAccountName,
+                    Reason = "Added while applying requested Water Account changes.",
+                    CreateUserID = callingUser.UserID,
+                    CreateDate = DateTime.UtcNow
+                };
+
+                dbContext.ParcelWaterAccountHistories.Add(newParcelWaterAccountHistory);
             }
         }
+
         dbContext.WaterAccountParcels.AddRange(newWaterAccountParcels);
 
         // set removed parcels to unassigned
@@ -905,37 +874,58 @@ public class WaterAccounts
             parcel.WaterAccountID = null;
             parcel.ParcelStatusID = ParcelStatus.Unassigned.ParcelStatusID;
 
-            var parcelHistory = ParcelHistories.CreateNew(parcel, userID, startingReportingPeriod.StartDate.Year);
+            var waterAccountParcelToRemove = dbContext.WaterAccountParcels
+                .Include(x => x.WaterAccount)
+                .Include(x => x.ReportingPeriod)
+                .SingleOrDefault(x => x.GeographyID == geographyID && x.ParcelID == parcel.ParcelID && x.ReportingPeriod.EndDate >= defaultReportingPeriod.EndDate);
+
+            if (waterAccountParcelToRemove != null)
+            {
+                var fromWaterAccountID = waterAccountParcelToRemove.WaterAccountID;
+                var fromWaterAccountNumber = waterAccountParcelToRemove.WaterAccount.WaterAccountNumber;
+                var fromWaterAccountName = waterAccountParcelToRemove.WaterAccount.WaterAccountName;
+
+                dbContext.WaterAccountParcels.Remove(waterAccountParcelToRemove);
+
+                var parcelWaterAccountHistory = new ParcelWaterAccountHistory()
+                {
+                    GeographyID = parcel.GeographyID,
+                    ParcelID = parcel.ParcelID,
+                    ReportingPeriodID = defaultReportingPeriod.ReportingPeriodID,
+                    FromWaterAccountID = fromWaterAccountID,
+                    FromWaterAccountNumber = fromWaterAccountNumber,
+                    FromWaterAccountName = fromWaterAccountName,
+                    Reason = "Removed while applying requested Water Account changes.",
+                    CreateUserID = callingUser.UserID,
+                    CreateDate = DateTime.UtcNow
+                };
+
+                dbContext.ParcelWaterAccountHistories.Add(parcelWaterAccountHistory);
+            }
+
+            var parcelHistory = ParcelHistories.CreateNew(parcel, userID);
             await dbContext.ParcelHistories.AddAsync(parcelHistory);
         }
 
         // add new ParcelHistory records
-        dbContext.ParcelHistories.AddRange(modifiedParcels.Select(x => ParcelHistories.CreateNew(x, userID, startingReportingPeriod.StartDate.Year)).ToList());
+        dbContext.ParcelHistories.AddRange(modifiedParcels.Select(x => ParcelHistories.CreateNew(x, userID)).ToList());
 
         await dbContext.SaveChangesAsync();
 
         // we need to mark any existing parcel history records for the provided parcels as IsReviewed = true
-        await ParcelHistories.MarkAsReviewedByParcelIDs(dbContext, modifiedParcels.Select(x => x.ParcelID).ToList());
+        await ParcelHistories.MarkAsReviewedByParcelIDsAsync(dbContext, modifiedParcels.Select(x => x.ParcelID).ToList());
 
         // finally if any of the water accounts get into a state of not having any parcels, we need to remove it from the water account users table
-        var waterAccountIDs = requestDto.WaterAccounts.Select(x => x.WaterAccountID).ToList();
         await RemoveEmptyWaterAccountsFromUsers(dbContext, waterAccountIDs);
     }
 
-    private static async Task RemoveEmptyWaterAccountsFromUsers(QanatDbContext dbContext, List<int> waterAccountIDs)
+    public static async Task RemoveEmptyWaterAccountsFromUsers(QanatDbContext dbContext, List<int> waterAccountIDs)
     {
-        var waterAccountIDsWithNoParcels = dbContext.WaterAccounts.Include(x => x.Parcels).Where(x => waterAccountIDs.Contains(x.WaterAccountID) && !x.Parcels.Any())
+        var waterAccountIDsWithNoParcels = dbContext.WaterAccounts
+            .Include(x => x.WaterAccountParcels)
+            .Where(x => !x.WaterAccountParcels.Any())
             .Select(x => x.WaterAccountID).ToList();
-        await dbContext.WaterAccountUsers.Where(x => waterAccountIDsWithNoParcels.Contains(x.WaterAccountID))
-            .ExecuteDeleteAsync();
-    }
 
-    public static async Task<WaterAccountMinimalDto> CreateWaterAccountFromSuggestion(QanatDbContext dbContext, int geographyID, CreateWaterAccountFromSuggestionDto dto, int userID)
-    {
-        var waterAccount = await CreateWaterAccount(dbContext, geographyID, dto.WaterAccountName,
-            dto.ContactName, dto.ContactAddress);
-        var waterAccountMinimalDto = await UpdateWaterAccountParcels(dbContext, waterAccount.WaterAccountID,
-            dto.EffectiveYear, dto.ParcelIDList, userID);
-        return waterAccountMinimalDto;
+        await dbContext.WaterAccountUsers.Where(x => waterAccountIDsWithNoParcels.Contains(x.WaterAccountID)).ExecuteDeleteAsync();
     }
 }

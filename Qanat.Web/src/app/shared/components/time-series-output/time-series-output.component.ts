@@ -12,7 +12,6 @@ import { ModelService } from "../../generated/api/model.service";
 
 @Component({
     selector: "time-series-output",
-    standalone: true,
     imports: [CommonModule, TimeSeriesOutputChartComponent, ScenarioOutputStatComponent],
     templateUrl: "./time-series-output.component.html",
     styleUrls: ["./time-series-output.component.scss"],
@@ -30,6 +29,7 @@ export class TimeSeriesOutputComponent implements OnInit {
     public totalChangeInAquiferStorage: number;
     public totalChangeInPumping: number;
     public totalChangeInRecharge: number;
+    public totalChangeInGainFromStreams: number;
 
     private markers: L.marker[] = [];
 
@@ -57,7 +57,7 @@ export class TimeSeriesOutputComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        this.modelService.modelsModelShortNameBoundaryGet(this.scenarioRun.Model.ModelShortName).subscribe((modelBoundary) => {
+        this.modelService.getModelBoundaryByModelShortNameModel(this.scenarioRun.Model.ModelShortName).subscribe((modelBoundary) => {
             const geoJsonObject = JSON.parse(modelBoundary.GeoJson);
 
             if (geoJsonObject) {
@@ -78,6 +78,7 @@ export class TimeSeriesOutputComponent implements OnInit {
         this.totalChangeInAquiferStorage = this.getScenarioRunResult.TotalChangeInAquiferStorage;
         this.totalChangeInPumping = this.getScenarioRunResult.TotalChangeInPumping;
         this.totalChangeInRecharge = this.getScenarioRunResult.TotalChangeInRecharge;
+        this.totalChangeInGainFromStreams = this.getScenarioRunResult.TotalChangeInGainFromStream;
     }
 
     public onMapReady(map: Map) {

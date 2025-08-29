@@ -1,0 +1,34 @@
+<div class="full-width-page">
+    <div class="list-view">
+        <page-header icon="Contact" pageTitle="Bulk Water Account Contact Actions" [templateAbove]="templateAbove"></page-header>
+
+        <ng-template #templateAbove>
+            <div class="back">
+                <a routerLink="/water-dashboard/contacts" class="back__link">Back to All Contacts</a>
+            </div>
+        </ng-template>
+
+        <div class="page-body grid-12">
+            <app-alert-display></app-alert-display>
+            @if (currentGeography$ | async) {
+                @if (waterAccountContacts$ | async; as waterAccountContacts) {
+                    <qanat-grid
+                        [rowData]="waterAccountContacts"
+                        [columnDefs]="columnDefs"
+                        downloadFileName="water-account-contacts"
+                        defaultRowSelection="multiRow"
+                        [pagination]="true"
+                        (gridReady)="onGridReady($event)"
+                        (selectionChanged)="onSelectionChanged()"
+                        class="clear-action-widths">
+                        <div customGridActionsRight>
+                            <button class="btn btn-sm btn-primary" [disabled]="isLoadingSubmit || selectedWaterAccountContactIDs?.length === 0" (click)="validateAddresses()">
+                                Validate Addresses
+                            </button>
+                        </div>
+                    </qanat-grid>
+                }
+            }
+        </div>
+    </div>
+</div>

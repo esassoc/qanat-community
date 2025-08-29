@@ -1,37 +1,46 @@
-<div class="modal-header">
-    <h2>
-        <icon icon="WaterAccounts"></icon>
-        Update Water Account
-    </h2>
-    <button type="button" class="close" (click)="close()">
-        <i class="fa fa-times-circle"></i>
-    </button>
-</div>
+<div class="modal">
+    <div class="modal-header">
+        <h2>Update Water Account</h2>
+    </div>
 
-<div class="modal-body">
-    <form action="" class="grid-12" [formGroup]="formGroup" *ngIf="parcel$ | async as parcel">
-        <div>
-            <label class="field-label">New Water Account</label>
-            <search-water-accounts
-                [geographyID]="modalContext.GeographyID"
-                formControlName="WaterAccount"
-                [excludedWaterAccountIDs]="[parcel.WaterAccountID]"></search-water-accounts>
-        </div>
-        <form-field
-            *ngIf="effectiveYearOptions$ | async as effectiveYearOptions"
-            [formInputOptions]="effectiveYearOptions"
-            [formControl]="formGroup.controls.EffectiveYear"
-            [fieldLabel]="'Effective Year'"
-            [type]="FormFieldType.Select"></form-field>
-        <note>
-            Are you sure you want to update parcel
-            <strong>{{ parcel.ParcelNumber }}</strong>
-            to a new Water Account?
-        </note>
-    </form>
-</div>
+    <div class="modal-body">
+        @if (parcel$ | async; as parcel) {
+            <form action="" class="grid-12" [formGroup]="formGroup">
+                @if (reportingPeriods$ | async; as reportingPeriods) {
+                    @if (waterAccountParcels$ | async) {
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 25%">Reporting Period</th>
+                                        <th style="width: 50%">Water Account</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (reportingPeriod of reportingPeriods; track reportingPeriod) {
+                                        <tr>
+                                            <td>
+                                                {{ reportingPeriod.Name }}
+                                            </td>
+                                            <td>
+                                                <form-field
+                                                    [formControl]="waterAccountFormControls[reportingPeriod.ReportingPeriodID]"
+                                                    [geographyID]="ref.data.GeographyID"
+                                                    [type]="FormFieldType.WaterAccountSearch"></form-field>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                }
+            </form>
+        }
+    </div>
 
-<div class="modal-footer">
-    <button class="btn btn-primary" (click)="save()" [class.disabled]="!formGroup.valid">Transfer Water Account</button>
-    <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+    <div class="modal-footer">
+        <button class="btn btn-primary" (click)="save()" [class.disabled]="!formGroup.valid">Save</button>
+        <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+    </div>
 </div>

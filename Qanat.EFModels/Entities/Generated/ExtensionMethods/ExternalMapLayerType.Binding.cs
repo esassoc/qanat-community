@@ -16,9 +16,7 @@ namespace Qanat.EFModels.Entities
         public static readonly ExternalMapLayerTypeESRIMapServer ESRIMapServer = ExternalMapLayerTypeESRIMapServer.Instance;
 
         public static readonly List<ExternalMapLayerType> All;
-        public static readonly List<ExternalMapLayerTypeSimpleDto> AllAsSimpleDto;
         public static readonly ReadOnlyDictionary<int, ExternalMapLayerType> AllLookupDictionary;
-        public static readonly ReadOnlyDictionary<int, ExternalMapLayerTypeSimpleDto> AllAsSimpleDtoLookupDictionary;
 
         /// <summary>
         /// Static type constructor to coordinate static initialization order
@@ -26,9 +24,7 @@ namespace Qanat.EFModels.Entities
         static ExternalMapLayerType()
         {
             All = new List<ExternalMapLayerType> { ESRIFeatureServer, ESRIMapServer };
-            AllAsSimpleDto = new List<ExternalMapLayerTypeSimpleDto> { ESRIFeatureServer.AsSimpleDto(), ESRIMapServer.AsSimpleDto() };
             AllLookupDictionary = new ReadOnlyDictionary<int, ExternalMapLayerType>(All.ToDictionary(x => x.ExternalMapLayerTypeID));
-            AllAsSimpleDtoLookupDictionary = new ReadOnlyDictionary<int, ExternalMapLayerTypeSimpleDto>(AllAsSimpleDto.ToDictionary(x => x.ExternalMapLayerTypeID));
         }
 
         /// <summary>

@@ -1,0 +1,20 @@
+<page-header pageTitle="Statements" icon="Statement" [customRichTextTypeID]="customRichTextTypeID" [templateRight]="templateRight"> </page-header>
+<ng-template #templateRight>
+  <a class="btn btn-primary" routerLink="new">+ New Statement Batch</a>
+</ng-template>
+
+<app-alert-display></app-alert-display>
+
+@if (currentGeography$ | async) {
+  <div [loadingSpinner]="{ isLoading: isLoading }">
+    @if (statementBatchDtos$ | async; as statementBatchDtos) {
+      <qanat-grid
+        [rowData]="statementBatchDtos"
+        [columnDefs]="columnDefs"
+        [sizeColumnsToFitGrid]="true"
+        downloadFileName="statement-batches"
+        (gridReady)="onGridReady($event)">
+      </qanat-grid>
+    }
+  </div>
+}

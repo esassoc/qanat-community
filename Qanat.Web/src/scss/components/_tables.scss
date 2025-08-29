@@ -4,7 +4,7 @@
     width: 100%;
     font-size: $type-size-200;
     border: 1px solid $gray-light;
-    border-radius: $spacing-200;
+    border-radius: $spacing-100;
     border-collapse: separate;
 
     thead {
@@ -15,10 +15,13 @@
             padding: 1rem 0.75rem;
             vertical-align: middle;
             &:first-child {
-                border-radius: $spacing-200 0 0 0;
+                border-radius: $spacing-100 0 0 0;
             }
             &:last-child {
-                border-radius: 0 $spacing-200 0 0;
+                border-radius: 0 $spacing-100 0 0;
+            }
+            &:only-child {
+                border-radius: $spacing-100 $spacing-100 0 0;
             }
         }
     }

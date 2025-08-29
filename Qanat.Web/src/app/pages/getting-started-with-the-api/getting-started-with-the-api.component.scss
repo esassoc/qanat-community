@@ -1,0 +1,33 @@
+@use "/src/scss/abstracts" as *;
+
+.toggle-key-visibility-button {
+    padding: 0.66rem 0.5rem 0.5rem 0.5rem;
+    padding-bottom: 0.5rem !important;
+}
+
+.card-footer {
+    display: flex;
+    gap: 3rem;
+    align-items: center;
+
+    a {
+        color: $black;
+        letter-spacing: 0;
+        cursor: pointer;
+        text-decoration: underline;
+    }
+
+    icon {
+        display: inline-block;
+        @include svg-100-deep;
+        color: $primary;
+        width: 20px;
+        height: 20px;
+        margin-right: $spacing-200;
+        transform: translateY(4px);
+
+        &.red {
+            color: $red-default;
+        }
+    }
+}

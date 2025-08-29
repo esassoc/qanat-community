@@ -3,14 +3,13 @@ import { FormControl, Validators } from "@angular/forms";
 import { Observable } from "rxjs";
 import { map, startWith } from "rxjs/operators";
 import { NoteComponent } from "../../note/note.component";
-import { NgFor, NgIf, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 
 @Component({
     selector: "input-errors",
     templateUrl: "./input-errors.component.html",
     styleUrls: ["./input-errors.component.scss"],
-    standalone: true,
-    imports: [NgFor, NgIf, NoteComponent, AsyncPipe],
+    imports: [NoteComponent, AsyncPipe]
 })
 export class InputErrorsComponent implements OnInit {
     @Input() validateFormControl: FormControl<any>;

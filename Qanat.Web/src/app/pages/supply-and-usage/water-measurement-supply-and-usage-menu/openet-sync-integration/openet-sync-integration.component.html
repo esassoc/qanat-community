@@ -1,15 +1,16 @@
 <page-header icon="Satellite" pageTitle="OpenET Integration" [customRichTextTypeID]="richTextTypeID"></page-header>
 
-<div class="page-body" *ngIf="openETSyncs$ | async as openETSyncs">
-    <app-alert-display></app-alert-display>
-
-    <qanat-grid
-        [rowData]="openETSyncs"
-        [columnDefs]="columnDefs"
-        downloadFileName="opentET-syncs"
-        [colIDsToExclude]="['0']"
-        [pagination]="true"
-        [paginationPageSize]="100"
-        #openETGrid></qanat-grid>
-</div>
+@if (openETSyncs$ | async; as openETSyncs) {
+    <div class="page-body">
+        <app-alert-display></app-alert-display>
+        <qanat-grid
+            [rowData]="openETSyncs"
+            [columnDefs]="columnDefs"
+            downloadFileName="opentET-syncs"
+            [colIDsToExclude]="['0']"
+            [pagination]="true"
+            [paginationPageSize]="100"
+            #openETGrid></qanat-grid>
+    </div>
+}
 <div class="page-footer"></div>

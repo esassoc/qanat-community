@@ -15,7 +15,7 @@ as
 select  @waterAccountID as WaterAccountID, 
 (
 	select top 1 ps.EffectiveDate
-    from dbo.fWaterAccountParcelByWaterAccountAndYear(@waterAccountID, @year) wap
+    from waterAccountParcels wap
     join dbo.ParcelSupply ps on wap.ParcelID = ps.ParcelID
     join dbo.fReportingPeriod(@year) rp on ps.GeographyID = rp.GeographyID and ps.EffectiveDate between rp.StartDate and rp.EndDate
     where wap.WaterAccountID = @waterAccountID

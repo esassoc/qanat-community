@@ -1,3 +1,5 @@
-<span *ngFor="let value of params?.value" class="tag">
-    {{ value }}
-</span>
+@for (value of params?.value; track value) {
+    <span class="tag">
+        {{ value }}
+    </span>
+}

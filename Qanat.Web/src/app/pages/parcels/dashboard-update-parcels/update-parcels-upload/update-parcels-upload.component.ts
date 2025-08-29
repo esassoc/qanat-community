@@ -1,4 +1,4 @@
-import { AsyncPipe, NgIf } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { ChangeDetectorRef, Component, OnDestroy, OnInit, QueryList, ViewChildren } from "@angular/core";
 import { UntypedFormGroup, UntypedFormControl, Validators, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
@@ -20,8 +20,7 @@ import { GeographyService } from "src/app/shared/generated/api/geography.service
     selector: "update-parcels-upload",
     templateUrl: "./update-parcels-upload.component.html",
     styleUrls: ["./update-parcels-upload.component.scss"],
-    standalone: true,
-    imports: [AsyncPipe, PageHeaderComponent, RouterLink, AlertDisplayComponent, NgIf, FormsModule, ReactiveFormsModule, CustomRichTextComponent, ButtonComponent],
+    imports: [AsyncPipe, PageHeaderComponent, RouterLink, AlertDisplayComponent, FormsModule, ReactiveFormsModule, CustomRichTextComponent, ButtonComponent],
 })
 export class UpdateParcelsUploadComponent implements OnInit, OnDestroy {
     public geography$: Observable<GeographyMinimalDto>;
@@ -62,7 +61,7 @@ export class UpdateParcelsUploadComponent implements OnInit, OnDestroy {
         this.geography$ = this.route.params.pipe(
             switchMap((params) => {
                 const geographyName = params.geographyName;
-                return this.geographyService.geographiesGeographyNameGeographyNameMinimalGet(geographyName);
+                return this.geographyService.getByNameAsMinimalDtoGeography(geographyName);
             }),
             tap((geography) => {
                 this.currentGeographyService.setCurrentGeography(geography);
@@ -119,14 +118,13 @@ export class UpdateParcelsUploadComponent implements OnInit, OnDestroy {
         }
 
         this.isLoadingSubmit = true;
-        this.parcelByGeographyService.geographiesGeographyIDParcelsUploadParcelGdbPost(geography.GeographyID, this.gdbInputFile).subscribe(
+        this.parcelByGeographyService.uploadGDBAndParseFeatureClassesParcelByGeography(geography.GeographyID, this.gdbInputFile).subscribe(
             () => {
                 this.isLoadingSubmit = false;
                 this.router.navigate(["../review-parcels"], { relativeTo: this.route });
             },
             () => {
                 this.alertService.pushAlert(new Alert("Failed to upload GDB! If available, error details are above.", AlertContext.Danger));
-                // this.apiService.handleError(error);
                 this.isLoadingSubmit = false;
             }
         );

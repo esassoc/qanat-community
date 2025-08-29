@@ -4,15 +4,14 @@ import * as vega from "vega";
 import { WaterMeasurementService } from "src/app/shared/generated/api/water-measurement.service";
 import { ParcelMinimalDto, ParcelWaterMeasurementChartDatumDto } from "src/app/shared/generated/model/models";
 import { LoadingDirective } from "../../../directives/loading.directive";
-import { NgIf } from "@angular/common";
+
 import { ButtonComponent } from "../../button/button.component";
 
 @Component({
     selector: "vega-parcel-usage-chart",
     templateUrl: "./vega-parcel-usage-chart.component.html",
     styleUrls: ["./vega-parcel-usage-chart.component.scss"],
-    standalone: true,
-    imports: [ButtonComponent, NgIf, LoadingDirective],
+    imports: [ButtonComponent, LoadingDirective]
 })
 export class VegaParcelUsageChartComponent implements OnInit {
     @Input() parcel: ParcelMinimalDto;
@@ -31,7 +30,7 @@ export class VegaParcelUsageChartComponent implements OnInit {
     }
 
     getChartData() {
-        this.waterMeasurementService.geographiesGeographyIDWaterMeasurementsParcelsParcelIDChartDataGet(this.parcel.GeographyID, this.parcel.ParcelID).subscribe((response) => {
+        this.waterMeasurementService.listWaterMeasurementChartDataForParcelWaterMeasurement(this.parcel.GeographyID, this.parcel.ParcelID).subscribe((response) => {
             this.allChartData = response;
             this.isLoading = false;
             if (this.allChartData.length != 0) {
@@ -175,7 +174,7 @@ export class VegaParcelUsageChartComponent implements OnInit {
         this.downloadErrorMessage = null;
         this.isDownloading = true;
 
-        this.waterMeasurementService.geographiesGeographyIDWaterMeasurementsParcelsParcelIDExcelDownloadGet(this.parcel.GeographyID, this.parcel.ParcelID).subscribe((result) => {
+        this.waterMeasurementService.listWaterMeasurementChartDataForParcelWaterMeasurement(this.parcel.GeographyID, this.parcel.ParcelID).subscribe((result) => {
             this.handleDownloadSuccess(result, `${this.parcel.ParcelNumber}_waterMeasurements`, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
                 (error) => this.handleDownloadError(error);
         });

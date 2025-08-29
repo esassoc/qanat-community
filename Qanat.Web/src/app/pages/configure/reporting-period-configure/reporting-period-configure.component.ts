@@ -1,6 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import { NgIf, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { AlertDisplayComponent } from "../../../shared/components/alert-display/alert-display.component";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { LoadingDirective } from "src/app/shared/directives/loading.directive";
@@ -12,14 +12,16 @@ import { ReportingPeriodService } from "src/app/shared/generated/api/reporting-p
 import { UtilityFunctionsService } from "src/app/shared/services/utility-functions.service";
 import { CurrentGeographyService } from "src/app/shared/services/current-geography.service";
 import { QanatGridComponent } from "src/app/shared/components/qanat-grid/qanat-grid.component";
-import { ModalService, ModalSizeEnum, ModalThemeEnum } from "src/app/shared/services/modal/modal.service";
-import { UpsertReportingPeriodModalComponent, UpsertReportingPeriodModalContext } from "./upsert-reporting-period-modal/upsert-reporting-period-modal.component";
+import { UpsertReportingPeriodModalComponent } from "./upsert-reporting-period-modal/upsert-reporting-period-modal.component";
+import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
+import { DialogService } from "@ngneat/dialog";
+import { CopyWaterAccountParcelsModalComponent } from "./copy-water-account-parcels-modal/copy-water-account-parcels-modal.component";
+
 @Component({
     selector: "reporting-period-configure",
     templateUrl: "./reporting-period-configure.component.html",
     styleUrls: ["./reporting-period-configure.component.scss"],
-    standalone: true,
-    imports: [AsyncPipe, LoadingDirective, PageHeaderComponent, NgIf, FormsModule, AgGridModule, QanatGridComponent],
+    imports: [AsyncPipe, LoadingDirective, PageHeaderComponent, FormsModule, AgGridModule, QanatGridComponent, AlertDisplayComponent],
 })
 export class ReportingPeriodConfigureComponent implements OnInit {
     public isLoading: boolean = true;
@@ -33,11 +35,13 @@ export class ReportingPeriodConfigureComponent implements OnInit {
     public gridApi: GridApi;
     public columnDefs: ColDef[];
 
+    public richTextID: number = CustomRichTextTypeEnum.ReportingPeriodConfiguration;
+
     constructor(
         private currentGeographyService: CurrentGeographyService,
         private reportingPeriodService: ReportingPeriodService,
         private utilityFunctionsService: UtilityFunctionsService,
-        private modalService: ModalService
+        private dialogService: DialogService
     ) {}
 
     ngOnInit(): void {
@@ -48,10 +52,12 @@ export class ReportingPeriodConfigureComponent implements OnInit {
                 this.geographyID = geography.GeographyID;
             }),
             switchMap(({ geography }) => {
-                return this.reportingPeriodService.geographiesGeographyIDReportingPeriodsGet(geography.GeographyID);
+                return this.reportingPeriodService.listByGeographyIDReportingPeriod(geography.GeographyID);
             }),
-            tap(() => {
+            tap((reportingPeriods) => {
                 this.isLoading = false;
+
+                this.initializeGrid(reportingPeriods);
                 if (this.gridApi) {
                     setTimeout(() => {
                         this.gridApi.sizeColumnsToFit();
@@ -59,11 +65,9 @@ export class ReportingPeriodConfigureComponent implements OnInit {
                 }
             })
         );
-
-        this.initializeGrid();
     }
 
-    initializeGrid(): void {
+    initializeGrid(reportingPeriods: ReportingPeriodDto[]): void {
         this.columnDefs = [
             this.utilityFunctionsService.createActionsColumnDef((params: any) => {
                 return [
@@ -73,13 +77,24 @@ export class ReportingPeriodConfigureComponent implements OnInit {
                         ActionIcon: null,
                         ActionHandler: () => this.updateReportingPeriod(params.data as ReportingPeriodDto),
                     },
+                    {
+                        ActionName: "Copy Parcel Water Account Assignments",
+                        CssClasses: "btn btn-primary btn-sm",
+                        ActionIcon: null,
+                        ActionHandler: () => this.copyWaterAccountParcels(params.data as ReportingPeriodDto, reportingPeriods),
+                    },
                 ];
             }),
             this.utilityFunctionsService.createBasicColumnDef("Name", "Name"),
             this.utilityFunctionsService.createDateColumnDef("Start Date", "StartDate", "M/d/yyyy", { IgnoreLocalTimezone: true }),
             this.utilityFunctionsService.createDateColumnDef("End Date", "EndDate", "M/d/yyyy", { IgnoreLocalTimezone: true }),
             this.utilityFunctionsService.createBasicColumnDef("Ready for Account Holders", "ReadyForAccountHolders", {
-                ValueFormatter: (params) => (params.value ? "Yes" : "No"),
+                ValueGetter: (params) => (params.data.ReadyForAccountHolders ? "Yes" : "No"),
+                UseCustomDropdownFilter: true,
+            }),
+            this.utilityFunctionsService.createBasicColumnDef("Is Default", "IsDefault", {
+                ValueGetter: (params) => (params.data.IsDefault ? "Yes" : "No"),
+                UseCustomDropdownFilter: true,
             }),
         ];
     }
@@ -90,28 +105,51 @@ export class ReportingPeriodConfigureComponent implements OnInit {
     }
 
     addReportingPeriod() {
-        this.modalService
-            .open(UpsertReportingPeriodModalComponent, null, { CloseOnClickOut: false, TopLayer: false, ModalSize: ModalSizeEnum.Large, ModalTheme: ModalThemeEnum.Light }, {
+        const dialogRef = this.dialogService.open(UpsertReportingPeriodModalComponent, {
+            data: {
                 GeographyID: this.geographyID,
                 ReportingPeriod: null,
-            } as UpsertReportingPeriodModalContext)
-            .instance.result.then((result) => {
-                if (result) {
-                    this.refreshReportingPeriodsTrigger.next();
-                }
-            });
+            },
+            size: "sm",
+        });
+
+        dialogRef.afterClosed$.subscribe((result) => {
+            if (result) {
+                this.refreshReportingPeriodsTrigger.next();
+            }
+        });
     }
 
     updateReportingPeriod(reportingPeriod: ReportingPeriodDto) {
-        this.modalService
-            .open(UpsertReportingPeriodModalComponent, null, { CloseOnClickOut: false, TopLayer: false, ModalSize: ModalSizeEnum.Large, ModalTheme: ModalThemeEnum.Light }, {
+        const dialogRef = this.dialogService.open(UpsertReportingPeriodModalComponent, {
+            data: {
                 GeographyID: this.geographyID,
                 ReportingPeriod: reportingPeriod,
-            } as UpsertReportingPeriodModalContext)
-            .instance.result.then((result) => {
-                if (result) {
-                    this.refreshReportingPeriodsTrigger.next();
-                }
-            });
+            },
+            size: "sm",
+        });
+
+        dialogRef.afterClosed$.subscribe((result) => {
+            if (result) {
+                this.refreshReportingPeriodsTrigger.next();
+            }
+        });
+    }
+
+    copyWaterAccountParcels(reportingPeriod: ReportingPeriodDto, reportingPeriods: ReportingPeriodDto[]) {
+        const dialogRef = this.dialogService.open(CopyWaterAccountParcelsModalComponent, {
+            data: {
+                GeographyID: this.geographyID,
+                ToReportingPeriod: reportingPeriod,
+                ReportingPeriods: reportingPeriods,
+            },
+            size: "sm",
+        });
+
+        dialogRef.afterClosed$.subscribe((result) => {
+            if (result) {
+                this.refreshReportingPeriodsTrigger.next();
+            }
+        });
     }
 }

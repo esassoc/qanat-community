@@ -1,22 +1,19 @@
-import { CommonModule } from "@angular/common";
 import { AfterViewInit, Component, Input, OnChanges, SimpleChange } from "@angular/core";
 import * as esri from "esri-leaflet";
 import "esri-leaflet-renderers";
 
 import { MapLayerBase } from "../map-layer-base.component";
 import { WfsService } from "src/app/shared/services/wfs.service";
-import { ExternalMapLayerDto } from "src/app/shared/generated/model/external-map-layer-dto";
+import { ExternalMapLayerSimpleDto } from "src/app/shared/generated/model/external-map-layer-simple-dto";
 import { ExternalMapLayerTypeEnum } from "src/app/shared/generated/enum/external-map-layer-type-enum";
 @Component({
     selector: "geography-external-map-layer",
-    standalone: true,
-    imports: [CommonModule, MapLayerBase],
     templateUrl: "./geography-external-map-layer.component.html",
     styleUrls: ["./geography-external-map-layer.component.scss"],
 })
 export class GeographyExternalMapLayerComponent extends MapLayerBase implements OnChanges, AfterViewInit {
     public isLoading: boolean = false;
-    @Input({ required: true }) externalMapLayer: ExternalMapLayerDto;
+    @Input({ required: true }) externalMapLayer: ExternalMapLayerSimpleDto;
 
     public layer;
 
@@ -60,7 +57,7 @@ export class GeographyExternalMapLayerComponent extends MapLayerBase implements 
     }
 
     setupLayer() {
-        switch (this.externalMapLayer.ExternalMapLayerType.ExternalMapLayerTypeID) {
+        switch (this.externalMapLayer.ExternalMapLayerTypeID) {
             case ExternalMapLayerTypeEnum.ESRIMapServer:
                 this.layer = esri.tiledMapLayer({
                     url: this.externalMapLayer.ExternalMapLayerURL,
@@ -83,7 +80,7 @@ export class GeographyExternalMapLayerComponent extends MapLayerBase implements 
                 });
                 break;
             default:
-                console.error(`Invalid ExternalMapLayerTypeEnum ${this.externalMapLayer.ExternalMapLayerType.ExternalMapLayerTypeID}.`);
+                console.error(`Invalid ExternalMapLayerTypeEnum ${this.externalMapLayer.ExternalMapLayerTypeID}.`);
         }
 
         this.initLayer();

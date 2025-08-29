@@ -1,0 +1,26 @@
+@use "/src/scss/abstracts" as *;
+:host {
+    margin: -13px -24px -13px -20px;
+    display: flex;
+}
+
+.popup-wrapper {
+    width: 475px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 24px 32px 32px 32px;
+    & > * {
+        font-family: $overpass;
+    }
+}
+
+.popup-title {
+}
+
+.popup-body {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    font-size: $type-size-200;
+}

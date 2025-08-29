@@ -10,7 +10,7 @@ import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-ric
 import { Observable, switchMap, tap } from "rxjs";
 import { ParcelMinimalDto, UserDto, GeographyMinimalDto, WaterTypeSimpleDto } from "src/app/shared/generated/model/models";
 import { ParcelService } from "src/app/shared/generated/api/parcel.service";
-import { AsyncPipe, NgIf } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { NgSelectModule } from "@ng-select/ng-select";
 import { FormsModule } from "@angular/forms";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
@@ -26,19 +26,7 @@ import { CurrentGeographyService } from "src/app/shared/services/current-geograp
     selector: "water-transactions-create",
     templateUrl: "./water-transactions-create.component.html",
     styleUrls: ["./water-transactions-create.component.scss"],
-    standalone: true,
-    imports: [
-        AsyncPipe,
-        PageHeaderComponent,
-        RouterLink,
-        AlertDisplayComponent,
-        FormsModule,
-        ParcelTypeaheadComponent,
-        NgSelectModule,
-        FieldDefinitionComponent,
-        ButtonComponent,
-        NgIf,
-    ],
+    imports: [AsyncPipe, PageHeaderComponent, RouterLink, AlertDisplayComponent, FormsModule, ParcelTypeaheadComponent, NgSelectModule, FieldDefinitionComponent, ButtonComponent]
 })
 export class WaterTransactionsCreateComponent implements OnInit {
     public geography$: Observable<GeographyMinimalDto>;
@@ -71,7 +59,7 @@ export class WaterTransactionsCreateComponent implements OnInit {
 
                 const id = parseInt(this.route.snapshot.paramMap.get(routeParams.parcelID));
                 if (id) {
-                    this.parcelService.parcelsParcelIDGet(id).subscribe((parcel) => {
+                    this.parcelService.getByIDParcel(id).subscribe((parcel) => {
                         this.selectedParcel = parcel;
                     });
                 } else {
@@ -82,7 +70,7 @@ export class WaterTransactionsCreateComponent implements OnInit {
 
         this.waterTypes$ = this.geography$.pipe(
             switchMap((geography) => {
-                return this.waterTypeByGeographyService.geographiesGeographyIDWaterTypesActiveGet(geography.GeographyID);
+                return this.waterTypeByGeographyService.getActiveWaterTypesWaterTypeByGeography(geography.GeographyID);
             })
         );
     }
@@ -101,7 +89,7 @@ export class WaterTransactionsCreateComponent implements OnInit {
         this.alertService.clearAlerts();
         this.model.ParcelIDs.push(this.selectedParcel.ParcelID);
 
-        this.parcelSupplyByGeographyService.geographiesGeographyIDParcelSuppliesPost(geography.GeographyID, this.model).subscribe({
+        this.parcelSupplyByGeographyService.newParcelSupplyByGeography(geography.GeographyID, this.model).subscribe({
             next: () => {
                 this.router.navigate(["../"], { relativeTo: this.route }).then((x) => {
                     this.alertService.pushAlert(new Alert("Your transaction was successfully created.", AlertContext.Success));

@@ -16,7 +16,8 @@ public class Parcels
                 .ThenInclude(x => x.Zone)
                     .ThenInclude(z => z.ZoneGroup)
             .Include(x => x.WellIrrigatedParcels).ThenInclude(x => x.Well)
-            .Include(x => x.Wells);
+            .Include(x => x.Wells)
+            .Include(x => x.WaterAccountParcels).ThenInclude(x => x.WaterAccount);
     }
 
     public static IEnumerable<Parcel> List(QanatDbContext dbContext, int geographyID)
@@ -26,7 +27,10 @@ public class Parcels
 
     public static List<ParcelDisplayDto> ListAsDisplayDto(QanatDbContext dbContext, int geographyID)
     {
-        return List(dbContext, geographyID).Select(x => x.AsDisplayDto()).ToList();
+        return dbContext.Parcels.AsNoTracking()
+            .Include(x => x.Geography)
+            .Include(x => x.WaterAccount)
+            .Where(x => x.GeographyID == geographyID).Select(x => x.AsDisplayDto()).ToList();
     }
 
     public static List<Parcel> ListByIDs(QanatDbContext dbContext, List<int> parcelIDs)
@@ -36,14 +40,24 @@ public class Parcels
 
     public static List<ParcelIndexGridDto> ListByWaterAccountIDAsIndexGridDtos(QanatDbContext dbContext, int waterAccountID)
     {
-        return dbContext.vParcelDetaileds.AsNoTracking().Where(x => x.WaterAccountID == waterAccountID).Select(x => x.AsIndexGridDto()).ToList();
+        var parcels = dbContext.vParcelDetaileds.AsNoTracking()
+            .Where(x => x.CurrentWaterAccountID == waterAccountID).AsEnumerable()
+            .OrderByDescending(x => x.ReportingPeriodEndDate) //MK 2/28/2025: This OrderByDescending should ensure that the DistinctBy will pick up the most recent reporting period for each parcel.
+            .Select(x => x.AsIndexGridDto())
+            .DistinctBy(x => x.ParcelID).ToList();
+
+        return parcels;
     }
 
     public static List<ParcelIndexGridDto> ListByGeographyIDAsIndexGridDtos(QanatDbContext dbContext, int geographyID)
     {
-        return dbContext.vParcelDetaileds.AsNoTracking()
-            .Where(x => x.GeographyID == geographyID)
-            .Select(x => x.AsIndexGridDto()).ToList();
+        var parcels = dbContext.vParcelDetaileds.AsNoTracking()
+            .Where(x => x.GeographyID == geographyID).AsEnumerable()
+            .OrderByDescending(x => x.ReportingPeriodEndDate) //MK 2/28/2025: This OrderByDescending should ensure that the DistinctBy will pick up the most recent reporting period for each parcel.
+            .Select(x => x.AsIndexGridDto())
+            .DistinctBy(x => x.ParcelID).ToList();
+
+        return parcels;
     }
 
     public static List<ParcelIndexGridDto> ListByGeographyIDAndUserIDAsIndexGridDtos(QanatDbContext dbContext, int geographyID, int userID)
@@ -53,12 +67,73 @@ public class Parcels
             .Where(x => x.WaterAccountUsers.Any(y => y.UserID == userID))
             .Select(x => x.WaterAccountID).ToList();
 
-        return dbContext.vParcelDetaileds.AsNoTracking()
+        var parcels = dbContext.vParcelDetaileds.AsNoTracking()
             .Where(x => x.GeographyID == geographyID && x.WaterAccountID.HasValue && waterAccountIDs.Contains(x.WaterAccountID.Value))
-            .Select(x => x.AsIndexGridDto()).ToList();
+            .AsEnumerable()
+            .OrderByDescending(x => x.ReportingPeriodEndDate) //MK 2/28/2025: This OrderByDescending should ensure that the DistinctBy will pick up the most recent reporting period for each parcel.
+            .Select(x => x.AsIndexGridDto())
+            .DistinctBy(x => x.ParcelID).ToList();
+
+        return parcels;
     }
 
-    public static ParcelPopupDto GetParcelPopupDtoByID(QanatDbContext dbContext, int parcelID)
+    public static List<ParcelIndexGridDto> ListByGeographyIDAndReportingPeriodAsIndexGridDtos(QanatDbContext dbContext, int geographyID, int reportingPeriodID)
+    {
+        var parcels = dbContext.vParcelDetaileds.AsNoTracking()
+            .Where(x => x.GeographyID == geographyID && x.ReportingPeriodID == reportingPeriodID)
+            .Select(x => x.AsIndexGridDto()).ToList();
+
+        return parcels;
+    }
+
+    public static List<ParcelIndexGridDto> ListByGeographyIDAndReportingPeriodIDAndUserIDAsIndexGridDtos(QanatDbContext dbContext, int geographyID, int reportingPeriodID, int userID)
+    {
+        var waterAccountIDs = dbContext.WaterAccounts.AsNoTracking()
+            .Include(x => x.WaterAccountUsers)
+            .Where(x => x.WaterAccountUsers.Any(y => y.UserID == userID))
+            .Select(x => x.WaterAccountID).ToList();
+
+        var parcels = dbContext.vParcelDetaileds.AsNoTracking()
+            .Where(x => x.GeographyID == geographyID && x.ReportingPeriodID == reportingPeriodID && x.WaterAccountID.HasValue && waterAccountIDs.Contains(x.WaterAccountID.Value))
+            .Select(x => x.AsIndexGridDto()).ToList();
+
+        return parcels;
+    }
+
+    public static List<ParcelLinkDisplayDto> ListByGeographyIDAndReportingPeriodAsLinkDisplayDtos(QanatDbContext dbContext, int geographyID, int reportingPeriodID)
+    {
+        var parcels = dbContext.vParcelDetaileds.AsNoTracking()
+            .Where(x => x.GeographyID == geographyID && x.ReportingPeriodID == reportingPeriodID)
+            .Select(x => new ParcelLinkDisplayDto()
+            {
+                ParcelID = x.ParcelID,
+                LinkDisplay = x.ParcelNumber
+            }).ToList();
+
+        return parcels;
+    }
+
+    public static List<ParcelLinkDisplayDto> ListByGeographyIDAndReportingPeriodIDAndUserIDAsLinkDisplayDtos(QanatDbContext dbContext, int geographyID, int reportingPeriodID, int userID)
+    {
+        var waterAccountIDs = dbContext.WaterAccounts.AsNoTracking()
+            .Include(x => x.WaterAccountUsers)
+            .Where(x => x.WaterAccountUsers.Any(y => y.UserID == userID))
+            .Select(x => x.WaterAccountID)
+            .ToList();
+
+        var parcels = dbContext.vParcelDetaileds.AsNoTracking()
+            .Where(x => x.GeographyID == geographyID && x.ReportingPeriodID == reportingPeriodID && x.WaterAccountID.HasValue && waterAccountIDs.Contains(x.WaterAccountID.Value))
+            .Select(x => new ParcelLinkDisplayDto()
+            {
+                ParcelID = x.ParcelID,
+                LinkDisplay = x.ParcelNumber
+            })
+            .ToList();
+
+        return parcels;
+    }
+
+    public static ParcelPopupDto GetParcelPopupDtoByID(QanatDbContext dbContext, int parcelID, int? reportingPeriodID = null)
     {
         var parcel = dbContext.Parcels.AsNoTracking()
             .Include(x => x.Geography)
@@ -69,9 +144,10 @@ public class Parcels
             .Include(x => x.ParcelZones)
                 .ThenInclude(x => x.Zone)
                     .ThenInclude(z => z.ZoneGroup)
+            .Include(x => x.WaterAccountParcels).ThenInclude(x => x.WaterAccount)
             .SingleOrDefault(x => x.ParcelID == parcelID);
 
-        return parcel.AsPopupDto();
+        return parcel.AsPopupDto(reportingPeriodID);
     }
 
     public static List<Parcel> ListByWaterAccountID(QanatDbContext dbContext, int waterAccountID)
@@ -91,11 +167,11 @@ public class Parcels
 
     public static ParcelDisplayDto GetByIDAsDisplayDto(QanatDbContext dbContext, int parcelID)
     {
-        var parcel = GetByID(dbContext, parcelID);
+        var parcel = dbContext.Parcels.AsNoTracking().SingleOrDefault(x => x.ParcelID == parcelID);
         return parcel?.AsDisplayDto();
     }
 
-    public static List<ParcelWithGeometryDto> GetByGeographyAndParcelNumberAsFeatureCollection(QanatDbContext dbContext, int geographyID, string parcelNumber)
+    public static List<ParcelWithGeometryDto> GetByGeographyAndParcelNumberAsParcelWithGeometryDto(QanatDbContext dbContext, int geographyID, string parcelNumber)
     {
         return dbContext.Parcels
             .Include(x => x.ParcelGeometry)
@@ -162,13 +238,10 @@ public class Parcels
 
     public static List<ParcelMinimalDto> ListParcelsFromAccountIDAndEndDate(QanatDbContext dbContext, int waterAccountID, DateTime endDate)
     {
-        int geographyID = dbContext.WaterAccounts.AsNoTracking().Single(x => x.WaterAccountID == waterAccountID).GeographyID;
-
-        // todo: start year?
+        var geographyID = dbContext.WaterAccounts.AsNoTracking().Single(x => x.WaterAccountID == waterAccountID).GeographyID;
         var parcels = dbContext.WaterAccountParcels
-            .Include(x => x.Parcel)
-            .ThenInclude(x => x.Geography)
-            .Where(x => x.GeographyID == geographyID && x.WaterAccountID == waterAccountID && x.EffectiveYear <= endDate.Year)
+            .Include(x => x.Parcel).ThenInclude(x => x.Geography)
+            .Where(x => x.GeographyID == geographyID && x.WaterAccountID == waterAccountID && x.ReportingPeriod.EndDate.Year <= endDate.Year)
             .Select(x => x.Parcel.AsParcelMinimalDto()).ToList();
 
         return parcels;
@@ -181,6 +254,7 @@ public class Parcels
         {
             results.Add(new ErrorMessage() { Type = "Owner Name", Message = "The Owner Name field is required." });
         }
+
         if (string.IsNullOrWhiteSpace(ownershipRequestDto.OwnerAddress))
         {
             results.Add(new ErrorMessage() { Type = "Owner Address", Message = "The Owner Address field is required." });
@@ -189,81 +263,105 @@ public class Parcels
         return results;
     }
 
-    public static async Task UpdateOwnership(QanatDbContext dbContext, int parcelID,
-        ParcelUpdateOwnershipRequestDto requestDto, int userID)
+    public static async Task UpdateOwnership(QanatDbContext dbContext, int parcelID, ParcelUpdateOwnershipRequestDto requestDto, int userID)
     {
         var parcel = dbContext.Parcels.Single(x => x.ParcelID == parcelID);
 
         parcel.OwnerName = requestDto.OwnerName;
         parcel.OwnerAddress = requestDto.OwnerAddress;
 
-        var mostRecentParcelHistory = dbContext.ParcelHistories.AsNoTracking()
-            .Where(x => x.ParcelID == parcelID).ToList()
-            .MaxBy(x => x.UpdateDate);
-
-        var effectiveYear = mostRecentParcelHistory.EffectiveYear;
-
-        var parcelHistory = ParcelHistories.CreateNew(parcel, userID, effectiveYear);
+        var parcelHistory = ParcelHistories.CreateNew(parcel, userID);
         await dbContext.ParcelHistories.AddAsync(parcelHistory);
         await dbContext.SaveChangesAsync();
         // we need to mark any existing parcel history records for the provided parcels as IsReviewed = true
-        await ParcelHistories.MarkAsReviewedByParcelIDs(dbContext, [parcelID]);
+        await ParcelHistories.MarkAsReviewedByParcelIDsAsync(dbContext, [parcelID]);
     }
 
-    public static async Task UpdateParcelStatus(QanatDbContext dbContext, ParcelBulkUpdateParcelStatusDto parcelBulkUpdateParcelStatusDto, int userID)
+    public static async Task UpdateParcelStatus(QanatDbContext dbContext, int geographyID, ParcelBulkUpdateParcelStatusDto parcelBulkUpdateParcelStatusDto, int userID)
     {
-        var parcels = dbContext.Parcels.Where(parcel => parcelBulkUpdateParcelStatusDto.ParcelIDs.Contains(parcel.ParcelID)).ToList();
-        var waterAccountParcels = dbContext.WaterAccountParcels.Where(parcel => parcelBulkUpdateParcelStatusDto.ParcelIDs.Contains(parcel.ParcelID)).ToList();
+        var parcels = await dbContext.Parcels
+            .Include(x => x.WaterAccount)
+            .Where(parcel => parcelBulkUpdateParcelStatusDto.ParcelIDs.Contains(parcel.ParcelID))
+            .ToListAsync();
+
+        var currentReportingPeriod = await ReportingPeriods.GetByGeographyIDAndYearAsync(dbContext, geographyID, DateTime.UtcNow.Year);
+        var reportingPeriodIDsForCurrentAndFuture = dbContext.ReportingPeriods.AsNoTracking()
+            .Where(x => x.GeographyID == geographyID && x.EndDate >= currentReportingPeriod.EndDate)
+            .Select(x => x.ReportingPeriodID).ToList();
+
         foreach (var parcel in parcels)
         {
-            // relationships where the effective year is greater than or equal to the EndYear selected
-            var waterAccountParcelsToRemove = waterAccountParcels.Where(x =>
-                x.ParcelID == parcel.ParcelID && x.EffectiveYear >= parcelBulkUpdateParcelStatusDto.EndYear);
-            dbContext.WaterAccountParcels.RemoveRange(waterAccountParcelsToRemove);
+            parcel.ParcelStatusID = parcelBulkUpdateParcelStatusDto.ParcelStatusID;
 
-            var waterAccountParcelsToUpdateEndDate = waterAccountParcels.Where(x =>
-                x.ParcelID == parcel.ParcelID && (x.EndYear == null || x.EndYear > parcelBulkUpdateParcelStatusDto.EndYear));
-            foreach (var waterAccountParcel in waterAccountParcelsToUpdateEndDate)
+            if (parcelBulkUpdateParcelStatusDto.ParcelStatusID == ParcelStatus.Unassigned.ParcelStatusID || parcelBulkUpdateParcelStatusDto.ParcelStatusID == ParcelStatus.Excluded.ParcelStatusID || parcelBulkUpdateParcelStatusDto.ParcelStatusID == ParcelStatus.Inactive.ParcelStatusID)
             {
-                waterAccountParcel.EndYear = parcelBulkUpdateParcelStatusDto.EndYear;
+                var fromWaterAccountID = parcel.WaterAccountID;
+                var fromWaterAccountNumber = parcel.WaterAccount?.WaterAccountNumber;
+                var fromWaterAccountName = parcel.WaterAccount?.WaterAccountName;
+
+                parcel.WaterAccountID = null;
+
+                //Remove water account parcel for current reporting period and any reporting period after the current 
+                await dbContext.WaterAccountParcels
+                    .Include(x => x.ReportingPeriod)
+                    .Where(x => x.ParcelID == parcel.ParcelID && x.ReportingPeriod.EndDate >= currentReportingPeriod.EndDate)
+                    .ExecuteDeleteAsync();
+
+                var parcelStatus = ParcelStatus.All.Single(x => x.ParcelStatusID == parcelBulkUpdateParcelStatusDto.ParcelStatusID);
+
+                var parcelWaterAccountHistoriesToAdd = new List<ParcelWaterAccountHistory>();
+                foreach (var reportingPeriodID in reportingPeriodIDsForCurrentAndFuture)
+                {
+                    var parcelWaterAccountHistory = new ParcelWaterAccountHistory()
+                    {
+                        GeographyID = geographyID,
+                        ReportingPeriodID = reportingPeriodID,
+                        ParcelID = parcel.ParcelID,
+                        FromWaterAccountID = fromWaterAccountID,
+                        FromWaterAccountName = fromWaterAccountName,
+                        FromWaterAccountNumber = fromWaterAccountNumber,
+                        Reason = $"Parcel status changed to {parcelStatus.ParcelStatusDisplayName}.",
+                        CreateUserID = userID,
+                        CreateDate = DateTime.UtcNow
+                    };
+
+                    parcelWaterAccountHistoriesToAdd.Add(parcelWaterAccountHistory);
+                }
+
+                await dbContext.ParcelWaterAccountHistories.AddRangeAsync(parcelWaterAccountHistoriesToAdd);
             }
 
-            parcel.WaterAccountID = null;
-            parcel.ParcelStatusID = parcelBulkUpdateParcelStatusDto.ParcelStatusID;
             // create a ParcelHistory record when status changes
-            var parcelHistory = ParcelHistories.CreateNew(parcel, userID, parcelBulkUpdateParcelStatusDto.EndYear);
+            var parcelHistory = ParcelHistories.CreateNew(parcel, userID);
             await dbContext.ParcelHistories.AddAsync(parcelHistory);
         }
 
         await dbContext.SaveChangesAsync();
 
         // we need to mark any existing parcel history records for the provided parcels as IsReviewed = true
-        await ParcelHistories.MarkAsReviewedByParcelIDs(dbContext, parcelBulkUpdateParcelStatusDto.ParcelIDs);
+        await ParcelHistories.MarkAsReviewedByParcelIDsAsync(dbContext, parcelBulkUpdateParcelStatusDto.ParcelIDs);
     }
 
     public static List<int> ListWaterAccountParcelEffectiveYearsByParcelIDs(QanatDbContext dbContext, int geographyID, List<int> parcelIDs)
     {
-        var latestStartYear = dbContext.WaterAccountParcels
-            .Include(x => x.Parcel)
-            .Where(x => x.GeographyID == geographyID
-                        && parcelIDs.Contains(x.ParcelID) && x.EndYear == null
-                        && x.Parcel.ParcelStatusID == (int)ParcelStatusEnum.Assigned)
-            .OrderByDescending(x => x.EffectiveYear).FirstOrDefault()?.EffectiveYear;
+        var endYears = dbContext.WaterAccountParcels.AsNoTracking()
+            .Include(x => x.ReportingPeriod)
+            .Where(x => parcelIDs.Contains(x.ParcelID) && x.ReportingPeriod.GeographyID == geographyID)
+            .Select(x => x.ReportingPeriod.EndDate.Year).Distinct().ToList();
 
-        return latestStartYear != null ? Enumerable.Range((int)latestStartYear, DateTime.Today.Year - (int)latestStartYear + 1).ToList() : null;
+        return endYears;
     }
 
-    public static async Task UpdateParcelZoneAssignments(QanatDbContext dbContext,
-        ParcelZoneAssignmentFormDto zoneAssignmentFormDto)
+    public static async Task UpdateParcelZoneAssignments(QanatDbContext dbContext, ParcelZoneAssignmentFormDto zoneAssignmentFormDto)
     {
         var existingParcelZones = await dbContext.ParcelZones.Where(x => x.ParcelID == zoneAssignmentFormDto.ParcelID).ToListAsync();
 
         var updatedParcelZones = zoneAssignmentFormDto.ParcelZoneAssignments
-            .Where(x => x.ZoneID != null).Select(x => new ParcelZone() { ParcelID = zoneAssignmentFormDto.ParcelID, ZoneID = (int)x.ZoneID }).ToList();
+            .Where(x => x.ZoneID != null)
+            .Select(x => new ParcelZone() { ParcelID = zoneAssignmentFormDto.ParcelID, ZoneID = (int)x.ZoneID })
+            .ToList();
 
-        existingParcelZones.Merge(updatedParcelZones,
-            dbContext.ParcelZones,
-            (x, y) => x.ParcelID == y.ParcelID && x.ZoneID == y.ZoneID);
+        existingParcelZones.Merge(updatedParcelZones, dbContext.ParcelZones, (x, y) => x.ParcelID == y.ParcelID && x.ZoneID == y.ZoneID);
         await dbContext.SaveChangesAsync();
     }
 
@@ -285,21 +383,18 @@ public class Parcels
 
             parcels = dbContext.Parcels.AsNoTracking()
                 .Include(x => x.WaterAccount)
-                .Include(x => x.WaterAccountParcelParcels)
+                .Include(x => x.WaterAccountParcels)
                 .ThenInclude(x => x.WaterAccount)
                 .ThenInclude(x => x.WaterAccountUsers)
-                .Where(x => managedGeographyIDs.Contains(x.GeographyID) ||
-                            x.WaterAccount.WaterAccountUsers.Any(y => y.UserID == user.UserID));
+                .Where(x => managedGeographyIDs.Contains(x.GeographyID) || x.WaterAccount.WaterAccountUsers.Any(y => y.UserID == user.UserID));
         }
 
         var parcelsToFilter = geographyID.HasValue ? parcels.Where(x => x.GeographyID == geographyID.Value).ToList() : parcels.ToList();
         var matchedParcels =
             parcelsToFilter
             .Where(x =>
-                (x.WaterAccount != null &&
-                 (!string.IsNullOrEmpty(x.WaterAccount.WaterAccountName) && x.WaterAccount.WaterAccountName.ToUpper().Contains(searchString.ToUpper()))) ||
-                (x.WaterAccount != null &&
-                  x.WaterAccount.WaterAccountNumber.ToString().Contains(searchString)) ||
+                (x.WaterAccount != null && (!string.IsNullOrEmpty(x.WaterAccount.WaterAccountName) && x.WaterAccount.WaterAccountName.ToUpper().Contains(searchString.ToUpper()))) ||
+                (x.WaterAccount != null && x.WaterAccount.WaterAccountNumber.ToString().Contains(searchString)) ||
                 x.OwnerName.Contains(searchString.ToUpper()) ||
                 x.OwnerAddress.Contains(searchString.ToUpper()) ||
                 x.ParcelNumber.Contains(searchString))
@@ -382,21 +477,14 @@ public class Parcels
         parcel.ParcelArea = updatedAcres;
 
         await dbContext.SaveChangesAsync();
-        //Audit history requires an effective year, but we are just in the context of a parcel. Pick the latest effective year if we have one, otherwise dropback to the current year.
-        var waterAccountParcels = dbContext.WaterAccountParcels.AsNoTracking()
-            .Where(x => x.ParcelID == parcelID);
 
-        var effectiveYear = waterAccountParcels.Any()
-            ? waterAccountParcels.Max(x => x.EffectiveYear)
-            : DateTime.UtcNow.Year;
-
-        var newAuditEntry = ParcelHistories.CreateNew(parcel, callingUser.UserID, effectiveYear);
+        var newAuditEntry = ParcelHistories.CreateNew(parcel, callingUser.UserID);
         await dbContext.ParcelHistories.AddAsync(newAuditEntry);
 
         await dbContext.SaveChangesAsync();
 
         // we need to mark any existing parcel history records for the parcel as IsReviewed = true
-        await ParcelHistories.MarkAsReviewedByParcelIDs(dbContext, [parcel.ParcelID]);
+        await ParcelHistories.MarkAsReviewedByParcelIDsAsync(dbContext, [parcel.ParcelID]);
 
         await dbContext.Entry(parcel).ReloadAsync();
         await dbContext.Entry(newAuditEntry).ReloadAsync();

@@ -1,1 +1,3 @@
-<img *ngIf="image$ | async as image" [src]="image" />
+@if (image$ | async; as image) {
+    <img [src]="image" />
+}

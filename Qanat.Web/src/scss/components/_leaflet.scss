@@ -5,6 +5,10 @@
     }
 }
 
+.leaflet-control-layers .leaflet-control-layers-list input {
+    vertical-align: baseline;
+}
+
 .leaflet-control-layers-close {
     color: #0078a8 !important;
     border: none;
@@ -21,4 +25,9 @@
 // for the get action boundaries
 .selecting-location .leaflet-interactive.boundary {
     cursor: crosshair !important;
+}
+
+.leaflet-popup-content {
+    width: auto !important;
+    min-width: 150px;
 }

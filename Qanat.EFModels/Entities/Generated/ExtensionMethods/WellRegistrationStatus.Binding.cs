@@ -18,9 +18,7 @@ namespace Qanat.EFModels.Entities
         public static readonly WellRegistrationStatusApproved Approved = WellRegistrationStatusApproved.Instance;
 
         public static readonly List<WellRegistrationStatus> All;
-        public static readonly List<WellRegistrationStatusSimpleDto> AllAsSimpleDto;
         public static readonly ReadOnlyDictionary<int, WellRegistrationStatus> AllLookupDictionary;
-        public static readonly ReadOnlyDictionary<int, WellRegistrationStatusSimpleDto> AllAsSimpleDtoLookupDictionary;
 
         /// <summary>
         /// Static type constructor to coordinate static initialization order
@@ -28,9 +26,7 @@ namespace Qanat.EFModels.Entities
         static WellRegistrationStatus()
         {
             All = new List<WellRegistrationStatus> { Draft, Submitted, Returned, Approved };
-            AllAsSimpleDto = new List<WellRegistrationStatusSimpleDto> { Draft.AsSimpleDto(), Submitted.AsSimpleDto(), Returned.AsSimpleDto(), Approved.AsSimpleDto() };
             AllLookupDictionary = new ReadOnlyDictionary<int, WellRegistrationStatus>(All.ToDictionary(x => x.WellRegistrationStatusID));
-            AllAsSimpleDtoLookupDictionary = new ReadOnlyDictionary<int, WellRegistrationStatusSimpleDto>(AllAsSimpleDto.ToDictionary(x => x.WellRegistrationStatusID));
         }
 
         /// <summary>

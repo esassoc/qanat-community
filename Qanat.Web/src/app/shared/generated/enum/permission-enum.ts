@@ -3,7 +3,7 @@
 //  Source Table: [dbo].[Permission]
 
 import { LookupTableEntry } from "src/app/shared/models/lookup-table-entry";
-import { SelectDropdownOption } from "src/app/shared/components/inputs/select-dropdown/select-dropdown.component"
+import { SelectDropdownOption } from "src/app/shared/components/forms/form-field/form-field.component"
 
 export enum PermissionEnum {
   CustomRichTextRights = 2,
@@ -25,10 +25,13 @@ export enum PermissionEnum {
   AllocationPlanRights = 19,
   FrequentlyAskedQuestionRights = 20,
   CustomAttributeRights = 21,
-  UsageEntityRights = 22,
+  UsageLocationRights = 22,
   ModelRights = 23,
   ScenarioRights = 24,
-  ScenarioRunRights = 25
+  ScenarioRunRights = 25,
+  MeterRights = 26,
+  WellMeterReadingRights = 27,
+  StatementTemplateRights = 28
 }
 
 export const Permissions: LookupTableEntry[]  = [
@@ -51,9 +54,12 @@ export const Permissions: LookupTableEntry[]  = [
   { Name: "AllocationPlanRights", DisplayName: "AllocationPlanRights", Value: 19 },
   { Name: "FrequentlyAskedQuestionRights", DisplayName: "FrequentlyAskedQuestionRights", Value: 20 },
   { Name: "CustomAttributeRights", DisplayName: "CustomAttributeRights", Value: 21 },
-  { Name: "UsageEntityRights", DisplayName: "UsageEntityRights", Value: 22 },
+  { Name: "UsageLocationRights", DisplayName: "UsageLocationRights", Value: 22 },
   { Name: "ModelRights", DisplayName: "ModelRights", Value: 23 },
   { Name: "ScenarioRights", DisplayName: "ScenarioRights", Value: 24 },
-  { Name: "ScenarioRunRights", DisplayName: "ScenarioRunRights", Value: 25 }
+  { Name: "ScenarioRunRights", DisplayName: "ScenarioRunRights", Value: 25 },
+  { Name: "MeterRights", DisplayName: "MeterRights", Value: 26 },
+  { Name: "WellMeterReadingRights", DisplayName: "WellMeterReadingRights", Value: 27 },
+  { Name: "StatementTemplateRights", DisplayName: "StatementTemplateRights", Value: 28 }
 ];
-export const PermissionsAsSelectDropdownOptions = [{ Value: null, Label: "- Select -", Disabled: true }, ...Permissions.map((x) => ({ Value: x.Value, Label: x.DisplayName } as SelectDropdownOption))];
+export const PermissionsAsSelectDropdownOptions = Permissions.map((x) => ({ Value: x.Value, Label: x.DisplayName } as SelectDropdownOption));

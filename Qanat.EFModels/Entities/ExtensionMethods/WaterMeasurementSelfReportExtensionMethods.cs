@@ -2,15 +2,38 @@ using Qanat.Models.DataTransferObjects;
 
 namespace Qanat.EFModels.Entities;
 
-public static partial class WaterMeasurementSelfReportExtensionMethods
+public static class WaterMeasurementSelfReportExtensionMethods
 {
+    public static WaterMeasurementSelfReportSimpleDto AsSimpleDto(this WaterMeasurementSelfReport waterMeasurementSelfReport)
+    {
+        var dto = new WaterMeasurementSelfReportSimpleDto()
+        {
+            WaterMeasurementSelfReportID = waterMeasurementSelfReport.WaterMeasurementSelfReportID,
+            GeographyID = waterMeasurementSelfReport.GeographyID,
+            WaterAccountID = waterMeasurementSelfReport.WaterAccountID,
+            WaterMeasurementTypeID = waterMeasurementSelfReport.WaterMeasurementTypeID,
+            ReportingPeriodID = waterMeasurementSelfReport.ReportingPeriodID,
+            WaterMeasurementSelfReportStatusID = waterMeasurementSelfReport.WaterMeasurementSelfReportStatusID,
+            SubmittedDate = waterMeasurementSelfReport.SubmittedDate,
+            ApprovedDate = waterMeasurementSelfReport.ApprovedDate,
+            ReturnedDate = waterMeasurementSelfReport.ReturnedDate,
+            CreateDate = waterMeasurementSelfReport.CreateDate,
+            CreateUserID = waterMeasurementSelfReport.CreateUserID,
+            UpdateDate = waterMeasurementSelfReport.UpdateDate,
+            UpdateUserID = waterMeasurementSelfReport.UpdateUserID
+        };
+        return dto;
+    }
+
     public static WaterMeasurementSelfReportSimpleDto AsSimpleDtoWithExtras(this WaterMeasurementSelfReport waterMeasurementSelfReport)
     {
         var simpleDto = AsSimpleDto(waterMeasurementSelfReport);
         simpleDto.WaterAccountNumberAndName = waterMeasurementSelfReport.WaterAccount?.WaterAccountNumberAndName();
+        simpleDto.ReportingPeriodName = waterMeasurementSelfReport.ReportingPeriod?.Name;
         simpleDto.WaterMeasurementTypeName = waterMeasurementSelfReport.WaterMeasurementType?.WaterMeasurementTypeName;
-        simpleDto.WaterMeasurementSelfReportStatusDisplayName = waterMeasurementSelfReport.WaterMeasurementSelfReportStatus?.WaterMeasurementSelfReportStatusDisplayName;
+        simpleDto.WaterMeasurementSelfReportStatusDisplayName = waterMeasurementSelfReport.WaterMeasurementSelfReportStatus?.SelfReportStatusDisplayName;
         simpleDto.TotalVolume = waterMeasurementSelfReport.WaterMeasurementSelfReportLineItems.Sum(x => x.TotalAcreFeet);
+        simpleDto.FileCount = waterMeasurementSelfReport.WaterMeasurementSelfReportFileResources.Count;
         simpleDto.CreateUserFullName = waterMeasurementSelfReport.CreateUser?.FullName;
         simpleDto.UpdateUserFullName = waterMeasurementSelfReport.UpdateUser?.FullName;
         return simpleDto;
@@ -24,7 +47,7 @@ public static partial class WaterMeasurementSelfReportExtensionMethods
             Geography = waterMeasurementSelfReport.Geography.AsSimpleDto(),
             WaterAccount = waterMeasurementSelfReport.WaterAccount.AsSimpleDto(),
             WaterMeasurementType = waterMeasurementSelfReport.WaterMeasurementType.AsSimpleDto(),
-            ReportingYear = waterMeasurementSelfReport.ReportingYear,
+            ReportingPeriod = waterMeasurementSelfReport.ReportingPeriod.AsSimpleDto(),
             WaterMeasurementSelfReportStatus = waterMeasurementSelfReport.WaterMeasurementSelfReportStatus.AsSimpleDto(),
             SubmittedDate = waterMeasurementSelfReport.SubmittedDate,
             ApprovedDate = waterMeasurementSelfReport.ApprovedDate,
@@ -37,31 +60,5 @@ public static partial class WaterMeasurementSelfReportExtensionMethods
         };
 
         return dto;
-    }
-}
-
-public static partial class WaterMeasurementSelfReportLineItemExtensionMethods
-{
-    public static WaterMeasurementSelfReportLineItemSimpleDto AsSimpleDtoWithExtras(this WaterMeasurementSelfReportLineItem lineItem)
-    {
-        var simpleDto = AsSimpleDto(lineItem);
-
-        simpleDto.ParcelNumber = lineItem.Parcel?.ParcelNumber;
-        simpleDto.ParcelArea = lineItem.Parcel?.ParcelArea;
-        simpleDto.IrrigationMethodName = lineItem.IrrigationMethod?.Name;
-        simpleDto.LineItemTotal = lineItem.JanuaryOverrideValueInAcreFeet.GetValueOrDefault(0) 
-            + lineItem.FebruaryOverrideValueInAcreFeet.GetValueOrDefault(0)
-            + lineItem.MarchOverrideValueInAcreFeet.GetValueOrDefault(0)
-            + lineItem.AprilOverrideValueInAcreFeet.GetValueOrDefault(0)
-            + lineItem.MayOverrideValueInAcreFeet.GetValueOrDefault(0)
-            + lineItem.JuneOverrideValueInAcreFeet.GetValueOrDefault(0)
-            + lineItem.JulyOverrideValueInAcreFeet.GetValueOrDefault(0)
-            + lineItem.AugustOverrideValueInAcreFeet.GetValueOrDefault(0)
-            + lineItem.SeptemberOverrideValueInAcreFeet.GetValueOrDefault(0)
-            + lineItem.OctoberOverrideValueInAcreFeet.GetValueOrDefault(0)
-            + lineItem.NovemberOverrideValueInAcreFeet.GetValueOrDefault(0)
-            + lineItem.DecemberOverrideValueInAcreFeet.GetValueOrDefault(0);
-
-        return simpleDto;
     }
 }

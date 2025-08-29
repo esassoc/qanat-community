@@ -16,9 +16,7 @@ namespace Qanat.EFModels.Entities
         public static readonly WaterAccountRoleWaterAccountViewer WaterAccountViewer = WaterAccountRoleWaterAccountViewer.Instance;
 
         public static readonly List<WaterAccountRole> All;
-        public static readonly List<WaterAccountRoleSimpleDto> AllAsSimpleDto;
         public static readonly ReadOnlyDictionary<int, WaterAccountRole> AllLookupDictionary;
-        public static readonly ReadOnlyDictionary<int, WaterAccountRoleSimpleDto> AllAsSimpleDtoLookupDictionary;
 
         /// <summary>
         /// Static type constructor to coordinate static initialization order
@@ -26,9 +24,7 @@ namespace Qanat.EFModels.Entities
         static WaterAccountRole()
         {
             All = new List<WaterAccountRole> { WaterAccountHolder, WaterAccountViewer };
-            AllAsSimpleDto = new List<WaterAccountRoleSimpleDto> { WaterAccountHolder.AsSimpleDto(), WaterAccountViewer.AsSimpleDto() };
             AllLookupDictionary = new ReadOnlyDictionary<int, WaterAccountRole>(All.ToDictionary(x => x.WaterAccountRoleID));
-            AllAsSimpleDtoLookupDictionary = new ReadOnlyDictionary<int, WaterAccountRoleSimpleDto>(AllAsSimpleDto.ToDictionary(x => x.WaterAccountRoleID));
         }
 
         /// <summary>
@@ -124,12 +120,12 @@ namespace Qanat.EFModels.Entities
     public partial class WaterAccountRoleWaterAccountHolder : WaterAccountRole
     {
         private WaterAccountRoleWaterAccountHolder(int waterAccountRoleID, string waterAccountRoleName, string waterAccountRoleDisplayName, string waterAccountRoleDescription, int sortOrder, string rights, string flags) : base(waterAccountRoleID, waterAccountRoleName, waterAccountRoleDisplayName, waterAccountRoleDescription, sortOrder, rights, flags) {}
-        public static readonly WaterAccountRoleWaterAccountHolder Instance = new WaterAccountRoleWaterAccountHolder(1, @"WaterAccountHolder", @"Account Holder", @"", 10, @"{""WaterAccountRights"":15,""ParcelRights"":15,""WaterTransactionRights"":15,""WaterAccountUserRights"":15,""AllocationPlanRights"":1, ""UsageEntityRights"": 1}", @"{}");
+        public static readonly WaterAccountRoleWaterAccountHolder Instance = new WaterAccountRoleWaterAccountHolder(1, @"WaterAccountHolder", @"Account Holder", @"", 10, @"{""WaterAccountRights"":15,""ParcelRights"":15,""WaterTransactionRights"":15,""WaterAccountUserRights"":15,""AllocationPlanRights"":1, ""UsageLocationRights"": 1, ""MeterRights"": 1, ""WellMeterReadingRights"": 1}", @"{}");
     }
 
     public partial class WaterAccountRoleWaterAccountViewer : WaterAccountRole
     {
         private WaterAccountRoleWaterAccountViewer(int waterAccountRoleID, string waterAccountRoleName, string waterAccountRoleDisplayName, string waterAccountRoleDescription, int sortOrder, string rights, string flags) : base(waterAccountRoleID, waterAccountRoleName, waterAccountRoleDisplayName, waterAccountRoleDescription, sortOrder, rights, flags) {}
-        public static readonly WaterAccountRoleWaterAccountViewer Instance = new WaterAccountRoleWaterAccountViewer(2, @"WaterAccountViewer", @"Viewer", @"", 20, @"{""WaterAccountRights"":1,""ParcelRights"":1,""WaterTransactionRights"":1,""WaterAccountUserRights"":1,""AllocationPlanRights"":1, ""UsageEntityRights"": 1}", @"{}");
+        public static readonly WaterAccountRoleWaterAccountViewer Instance = new WaterAccountRoleWaterAccountViewer(2, @"WaterAccountViewer", @"Viewer", @"", 20, @"{""WaterAccountRights"":1,""ParcelRights"":1,""WaterTransactionRights"":1,""WaterAccountUserRights"":1,""AllocationPlanRights"":1, ""UsageLocationRights"": 1, ""MeterRights"": 1, ""WellMeterReadingRights"": 1}", @"{}");
     }
 }

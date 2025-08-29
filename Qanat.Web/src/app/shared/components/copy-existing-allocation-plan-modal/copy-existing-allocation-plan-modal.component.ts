@@ -1,7 +1,5 @@
-import { Component, ComponentRef, OnInit } from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { IModal, ModalEvent, ModalService } from "src/app/shared/services/modal/modal.service";
-import { ModalComponent } from "src/app/shared/components/modal/modal.component";
+import { Component, inject, OnInit } from "@angular/core";
+
 import { AlertService } from "src/app/shared/services/alert.service";
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 import { inOutAnimation } from "src/app/shared/animations/in-out.animation";
@@ -9,7 +7,7 @@ import { AllocationPlanService } from "src/app/shared/generated/api/allocation-p
 import { Alert } from "src/app/shared/models/alert";
 import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
 import { AllocationPeriodContext } from "../upsert-allocation-period-modal/upsert-allocation-period-modal.component";
-import { SelectDropdownOption } from "src/app/shared/components/inputs/select-dropdown/select-dropdown.component";
+import { SelectDropdownOption } from "src/app/shared/components/forms/form-field/form-field.component";
 import { Observable, of } from "rxjs";
 import { switchMap } from "rxjs/operators";
 import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
@@ -18,18 +16,18 @@ import { CustomRichTextComponent } from "src/app/shared/components/custom-rich-t
 import { NoteComponent } from "src/app/shared/components/note/note.component";
 import { AllocationPlanMinimalDto } from "src/app/shared/generated/model/allocation-plan-minimal-dto";
 import { PublicService } from "../../generated/api/public.service";
+import { AsyncPipe } from "@angular/common";
+import { DialogRef } from "@ngneat/dialog";
 
 @Component({
     selector: "copy-existing-allocation-plan-modal",
-    standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, CustomRichTextComponent, FormFieldComponent, NoteComponent],
+    imports: [ReactiveFormsModule, CustomRichTextComponent, FormFieldComponent, NoteComponent, AsyncPipe],
     templateUrl: "./copy-existing-allocation-plan-modal.component.html",
     styleUrls: ["./copy-existing-allocation-plan-modal.component.scss"],
     animations: [inOutAnimation],
 })
-export class CopyExistingAllocationPlanModalComponent implements OnInit, IModal {
-    modalComponentRef: ComponentRef<ModalComponent>;
-    public modalContext: AllocationPeriodContext;
+export class CopyExistingAllocationPlanModalComponent implements OnInit {
+    public ref: DialogRef<AllocationPeriodContext, any> = inject(DialogRef);
     public FormFieldType = FormFieldType;
 
     public formGroup: FormGroup<CopyAllocationPlanForm> = new FormGroup<CopyAllocationPlanForm>({
@@ -43,7 +41,6 @@ export class CopyExistingAllocationPlanModalComponent implements OnInit, IModal 
     public richTextTypeID = CustomRichTextTypeEnum.CloneAllocationPlan;
 
     constructor(
-        private modalService: ModalService,
         private allocationPlanService: AllocationPlanService,
         private publicService: PublicService,
         private alertService: AlertService
@@ -51,13 +48,13 @@ export class CopyExistingAllocationPlanModalComponent implements OnInit, IModal 
 
     ngOnInit(): void {
         this.allocationPlanDropdownOptions$ = this.publicService
-            .publicGeographiesGeographyIDAllocationPlansGet(this.modalContext.AllocationPlanManageDto.GeographyAllocationPlanConfiguration.GeographyID)
+            .listAllocationPlansByGeographyIDPublic(this.ref.data.AllocationPlanManageDto.GeographyAllocationPlanConfiguration.GeographyID)
             .pipe(
                 switchMap((plans) => {
                     return of([
-                        { Value: null, Disabled: true, Label: "Select an Allocation Plan" },
+                        { Value: null, disabled: true, Label: "Select an Allocation Plan" },
                         ...plans
-                            .filter((x) => x.AllocationPlanID != this.modalContext.AllocationPlanManageDto.AllocationPlanID && x.AllocationPeriodsCount > 0)
+                            .filter((x) => x.AllocationPlanID != this.ref.data.AllocationPlanManageDto.AllocationPlanID && x.AllocationPeriodsCount > 0)
                             .map((x) => {
                                 return { Value: x, Label: `${x.WaterTypeName} / ${x.ZoneName}` } as SelectDropdownOption;
                             }),
@@ -68,28 +65,23 @@ export class CopyExistingAllocationPlanModalComponent implements OnInit, IModal 
 
     save(): void {
         this.allocationPlanService
-            .geographiesGeographyIDAllocationPlansCopyToAllocationPlanIDCopyFromCopyFromAllocationPlanIDPost(
-                this.modalContext.AllocationPlanManageDto.GeographyAllocationPlanConfiguration.GeographyID,
-                this.modalContext.AllocationPlanManageDto.AllocationPlanID,
+            .copyAllocationPlanAllocationPlan(
+                this.ref.data.AllocationPlanManageDto.GeographyAllocationPlanConfiguration.GeographyID,
+                this.ref.data.AllocationPlanManageDto.AllocationPlanID,
                 this.formGroup.controls.SelectedAllocationPlan.value.AllocationPlanID
             )
             .subscribe((response) => {
                 this.alertService.clearAlerts();
                 this.alertService.pushAlert(new Alert(`Successfully copied Allocation Plan.`, AlertContext.Success));
-                this.modalService.close(this.modalComponentRef, response, new CopiedAllocationPlanEvent(response));
+                this.ref.close(response);
             });
     }
 
     close(): void {
-        this.modalService.close(this.modalComponentRef);
+        this.ref.close(null);
     }
 }
 
-export class CopiedAllocationPlanEvent extends ModalEvent {
-    constructor(value: any) {
-        super(value);
-    }
-}
 export interface CopyAllocationPlanForm {
     SelectedAllocationPlan: FormControl<AllocationPlanMinimalDto>;
 }

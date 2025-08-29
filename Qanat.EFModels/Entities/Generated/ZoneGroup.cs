@@ -32,6 +32,8 @@ public partial class ZoneGroup
 
     public int SortOrder { get; set; }
 
+    public bool DisplayToAccountHolders { get; set; }
+
     [ForeignKey("GeographyID")]
     [InverseProperty("ZoneGroups")]
     public virtual Geography Geography { get; set; }

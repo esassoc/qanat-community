@@ -2,6 +2,7 @@ using CsvHelper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Qanat.API.Models.ExtensionMethods;
 using Qanat.API.Services;
 using Qanat.API.Services.Authorization;
 using Qanat.EFModels.Entities;
@@ -18,34 +19,30 @@ namespace Qanat.API.Controllers;
 
 [ApiController]
 [RightsChecker]
-public class ZoneGroupController : SitkaController<ZoneGroupController>
+public class ZoneGroupController(QanatDbContext dbContext, ILogger<ZoneGroupController> logger, IOptions<QanatConfiguration> qanatConfiguration, UserDto callingUser)
+    : SitkaController<ZoneGroupController>(dbContext, logger, qanatConfiguration)
 {
-    public ZoneGroupController(QanatDbContext dbContext, ILogger<ZoneGroupController> logger, IOptions<QanatConfiguration> qanatConfiguration)
-        : base(dbContext, logger, qanatConfiguration)
-    {
-    }
-
     [HttpGet("geographies/{geographyID}/zone-groups")]
     [WithGeographyRolePermission(PermissionEnum.ZoneGroupRights, RightsEnum.Read)]
-    public ActionResult<List<ZoneGroupMinimalDto>> Get([FromRoute] int geographyID)
+    public ActionResult<List<ZoneGroupMinimalDto>> List([FromRoute] int geographyID)
     {
-        var zoneGroupMinimalDtos = ZoneGroups.GetZoneGroupsByGeography(_dbContext, geographyID);
+        var zoneGroupMinimalDtos = ZoneGroups.GetZoneGroupsByGeography(_dbContext, geographyID, callingUser.IsAdminOrWaterManager(geographyID));
         return zoneGroupMinimalDtos;
     }
 
     [HttpGet("geographies/{geographyID}/zone-groups-detailed")]
     [WithGeographyRolePermission(PermissionEnum.ZoneGroupRights, RightsEnum.Read)]
-    public ActionResult<List<ZoneGroupDto>> GetDetailed([FromRoute] int geographyID)
+    public ActionResult<List<ZoneGroupDto>> ListDetailed([FromRoute] int geographyID)
     {
-        var zoneGroupMinimalDtos = ZoneGroups.ListByGeographyAsDto(_dbContext, geographyID);
-        return zoneGroupMinimalDtos;
+        var zoneGroupDtos = ZoneGroups.ListByGeographyAsDto(_dbContext, geographyID, callingUser.IsAdminOrWaterManager(geographyID));
+        return zoneGroupDtos;
     }
 
     [HttpGet("geographies/{geographyID}/zones")]
     [WithGeographyRolePermission(PermissionEnum.ZoneGroupRights, RightsEnum.Read)]
-    public ActionResult<List<ZoneDetailedDto>> GetZones([FromRoute] int geographyID)
+    public ActionResult<List<ZoneDetailedDto>> ListZones([FromRoute] int geographyID)
     {
-        var zoneDetailedDtos = Zones.ListByGeographyIDAsZoneDetailedDto(_dbContext, geographyID);
+        var zoneDetailedDtos = Zones.ListByGeographyIDAsZoneDetailedDto(_dbContext, geographyID, callingUser.IsAdminOrWaterManager(geographyID));
         return zoneDetailedDtos;
     }
 
@@ -62,16 +59,21 @@ public class ZoneGroupController : SitkaController<ZoneGroupController>
     [SwaggerResponse(statusCode: 200, Description = "CSV of Zone Group Data", ContentTypes = new string[] { "text/csv" }, Type = typeof(FileContentResult))]
     public IActionResult ListZoneGroupData([FromRoute] int geographyID, [FromRoute] string zoneGroupSlug)
     {
-        var zoneGroup = ZoneGroups.GetByZoneGroupSlugAsMinimalDto(_dbContext, zoneGroupSlug, geographyID);
+        var zoneGroup = ZoneGroups.GetByZoneGroupSlugAsMinimalDto(_dbContext, geographyID, zoneGroupSlug, callingUser.IsAdminOrWaterManager(geographyID));
+        if (zoneGroup == null)
+        {
+            return NotFound();
+        }
+
         var result = ZoneGroups.ListZoneGroupDataAsCsvByteArray(_dbContext, geographyID, zoneGroup.ZoneGroupID);
         return new FileContentResult(result, "text/csv") { FileDownloadName = $"ZoneGroupDataFor{zoneGroup.ZoneGroupName}.csv" };
     }
 
     [HttpGet("geographies/{geographyID}/zone-group/{zoneGroupSlug}/water-usage")]
     [WithGeographyRolePermission(PermissionEnum.ZoneGroupRights, RightsEnum.Read)]
-    public ActionResult<List<ZoneGroupMonthlyUsageDto>> GetWaterUsageByZoneGroupSlug([FromRoute] int geographyID, string zoneGroupSlug)
+    public ActionResult<List<ZoneGroupMonthlyUsageDto>> ListWaterUsageByZoneGroupSlug([FromRoute] int geographyID, [FromRoute] string zoneGroupSlug)
     {
-        var zoneGroup = ZoneGroups.GetByZoneGroupSlug(_dbContext, zoneGroupSlug, geographyID);
+        var zoneGroup = ZoneGroups.GetByZoneGroupSlug(_dbContext, geographyID, zoneGroupSlug, callingUser.IsAdminOrWaterManager(geographyID));
         if (zoneGroup == null)
         {
             return NotFound();
@@ -86,8 +88,9 @@ public class ZoneGroupController : SitkaController<ZoneGroupController>
     public ActionResult<List<ZoneGroupMinimalDto>> Update([FromRoute] int geographyID, [FromBody] ZoneGroupMinimalDto zoneGroupMinimalDto)
     {
         var errors = ZoneGroups.ValidateZoneGroup(_dbContext, geographyID, zoneGroupMinimalDto);
-        var zoneErrors = Zones.ValidateZones(zoneGroupMinimalDto.ZoneList);
         errors.ForEach(vm => { ModelState.AddModelError(vm.Type, vm.Message); });
+
+        var zoneErrors = Zones.ValidateZones(_dbContext, zoneGroupMinimalDto.ZoneGroupID, zoneGroupMinimalDto.ZoneList);
         zoneErrors.ForEach(vm => { ModelState.AddModelError(vm.Type, vm.Message); });
 
         if (!ModelState.IsValid)
@@ -96,14 +99,14 @@ public class ZoneGroupController : SitkaController<ZoneGroupController>
         }
 
         ZoneGroups.CreateOrUpdateZoneGroup(_dbContext, zoneGroupMinimalDto);
-        var zoneGroups = ZoneGroups.GetZoneGroupsByGeography(_dbContext, geographyID);
+
+        var zoneGroups = ZoneGroups.GetZoneGroupsByGeography(_dbContext, geographyID, callingUser.IsAdminOrWaterManager(geographyID));
         return zoneGroups;
     }
 
     [HttpPut("geographies/{geographyID}/zone-groups/sort-order")]
     [WithGeographyRolePermission(PermissionEnum.ZoneGroupRights, RightsEnum.Update)]
-    public ActionResult UpdateSortOrder([FromRoute] int geographyID,
-        [FromBody] List<ZoneGroupMinimalDto> zoneGroupMinimalDtos)
+    public ActionResult UpdateSortOrder([FromRoute] int geographyID, [FromBody] List<ZoneGroupMinimalDto> zoneGroupMinimalDtos)
     {
         ZoneGroups.UpdateZoneGroupSortOrder(_dbContext, zoneGroupMinimalDtos);
         return Ok();
@@ -114,6 +117,15 @@ public class ZoneGroupController : SitkaController<ZoneGroupController>
     public ActionResult<List<ZoneGroupMinimalDto>> Delete([FromRoute] int geographyID, int zoneGroupID)
     {
         var zoneGroup = ZoneGroups.GetByID(_dbContext, zoneGroupID);
+
+        //If they press the delete button on a zone group that does not exist, return the list of zone groups
+        List<ZoneGroupMinimalDto> zoneGroups;
+        if (zoneGroup == null)
+        {
+            zoneGroups = ZoneGroups.GetZoneGroupsByGeography(_dbContext, geographyID, callingUser.IsAdminOrWaterManager(geographyID));
+            return Ok(zoneGroups);
+        }
+
         if (zoneGroup.GeographyAllocationPlanConfigurations.Any())
         {
             ModelState.AddModelError("Zone Group", "This Zone Group cannot be deleted because it is currently associated with an Allocation Plan.");
@@ -121,8 +133,8 @@ public class ZoneGroupController : SitkaController<ZoneGroupController>
         }
 
         ZoneGroups.DeleteZoneGroup(_dbContext, zoneGroupID);
-        var zoneGroups = ZoneGroups.GetZoneGroupsByGeography(_dbContext, geographyID);
-        return zoneGroups;
+        zoneGroups = ZoneGroups.GetZoneGroupsByGeography(_dbContext, geographyID, callingUser.IsAdminOrWaterManager(geographyID));
+        return Ok(zoneGroups);
     }
 
     [HttpDelete("geographies/{geographyID}/zone-group/{zoneGroupID}/clear")]
@@ -145,6 +157,7 @@ public class ZoneGroupController : SitkaController<ZoneGroupController>
             ModelState.AddModelError("FileResource", $"{extension[1..].ToUpper()} is not an accepted file extension");
             return BadRequest(ModelState);
         }
+
         if (zoneGroupCsvUpsertDto.APNColumnName == zoneGroupCsvUpsertDto.ZoneColumnName)
         {
             ModelState.AddModelError("Value Column", "The selected Value column cannot match the selected APN column. Two distinct header names are required.");
@@ -152,7 +165,6 @@ public class ZoneGroupController : SitkaController<ZoneGroupController>
         }
 
         var fileData = await HttpUtilities.GetIFormFileData(zoneGroupCsvUpsertDto.UploadedFile);
-
         if (!ParseCsvUpload(fileData, zoneGroupCsvUpsertDto.APNColumnName, zoneGroupCsvUpsertDto.ZoneColumnName, out var records))
         {
             return BadRequest(ModelState);
@@ -169,11 +181,10 @@ public class ZoneGroupController : SitkaController<ZoneGroupController>
         {
             return BadRequest(ModelState);
         }
-        var response = ZoneGroups.CreateFromCSV(_dbContext, records, geographyID, zoneGroupID);
 
+        var response = ZoneGroups.CreateFromCSV(_dbContext, records, geographyID, zoneGroupID);
         return Ok(response);
     }
-
 
     private bool ParseCsvUpload(byte[] fileData, string apnColumnName, string zoneColumnName, out List<ZoneGroupCSV> records)
     {
@@ -190,23 +201,20 @@ public class ZoneGroupController : SitkaController<ZoneGroupController>
         catch (HeaderValidationException e)
         {
             var headerMessage = e.Message.Split('.')[0];
-            ModelState.AddModelError("UploadedFile",
-                $"{headerMessage}. Please check that the column name is not missing or misspelled.");
+            ModelState.AddModelError("UploadedFile", $"{headerMessage}. Please check that the column name is not missing or misspelled.");
             records = null;
             return false;
         }
-        catch (CsvHelper.MissingFieldException e)
+        catch (MissingFieldException e)
         {
             var headerMessage = e.Message.Split('.')[0];
-            ModelState.AddModelError("UploadedFile",
-                $"{headerMessage}. Please check that the column name is not missing or misspelled.");
+            ModelState.AddModelError("UploadedFile", $"{headerMessage}. Please check that the column name is not missing or misspelled.");
             records = null;
             return false;
         }
         catch
         {
-            ModelState.AddModelError("UploadedFile",
-                "There was an error parsing the CSV. Please ensure the file is formatted correctly.");
+            ModelState.AddModelError("UploadedFile", "There was an error parsing the CSV. Please ensure the file is formatted correctly.");
             records = null;
             return false;
         }
@@ -221,8 +229,7 @@ public class ZoneGroupController : SitkaController<ZoneGroupController>
         var nullAPNsCount = records.Count(x => x.APN == "");
         if (nullAPNsCount > 0)
         {
-            ModelState.AddModelError("UploadedFile",
-                $"The uploaded file contains {nullAPNsCount} {(nullAPNsCount > 1 ? "rows" : "row")} specifying a value with no corresponding APN.");
+            ModelState.AddModelError("UploadedFile", $"The uploaded file contains {nullAPNsCount} {(nullAPNsCount > 1 ? "rows" : "row")} specifying a value with no corresponding APN.");
             isValid = false;
         }
 
@@ -230,13 +237,10 @@ public class ZoneGroupController : SitkaController<ZoneGroupController>
         var nullQuantities = records.Where(x => x.Zone == null).ToList();
         if (nullQuantities.Any())
         {
-            ModelState.AddModelError("UploadedFile",
-                $"The following {(nullQuantities.Count > 1 ? "APNs" : "APN")} had no usage quantity entered: {string.Join(", ", nullQuantities.Select(x => x.APN))}");
+            ModelState.AddModelError("UploadedFile", $"The following {(nullQuantities.Count > 1 ? "APNs" : "APN")} had no usage quantity entered: {string.Join(", ", nullQuantities.Select(x => x.APN))}");
             isValid = false;
         }
 
         return isValid;
     }
-
-
 }

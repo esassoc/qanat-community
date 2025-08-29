@@ -64,9 +64,7 @@ namespace Qanat.EFModels.Entities
         public static readonly StateWyoming Wyoming = StateWyoming.Instance;
 
         public static readonly List<State> All;
-        public static readonly List<StateSimpleDto> AllAsSimpleDto;
         public static readonly ReadOnlyDictionary<int, State> AllLookupDictionary;
-        public static readonly ReadOnlyDictionary<int, StateSimpleDto> AllAsSimpleDtoLookupDictionary;
 
         /// <summary>
         /// Static type constructor to coordinate static initialization order
@@ -74,9 +72,7 @@ namespace Qanat.EFModels.Entities
         static State()
         {
             All = new List<State> { Alabama, Alaska, Arizona, Arkansas, California, Colorado, Connecticut, Delaware, Florida, Georgia, Hawaii, Idaho, Illinois, Indiana, Iowa, Kansas, Kentucky, Louisiana, Maine, Maryland, Massachusetts, Michigan, Minnesota, Mississippi, Missouri, Montana, Nebraska, Nevada, NewHampshire, NewJersey, NewMexico, NewYork, NorthCarolina, NorthDakota, Ohio, Oklahoma, Oregon, Pennsylvania, RhodeIsland, SouthCarolina, SouthDakota, Tennessee, Texas, Utah, Vermont, Virginia, Washington, WestVirginia, Wisconsin, Wyoming };
-            AllAsSimpleDto = new List<StateSimpleDto> { Alabama.AsSimpleDto(), Alaska.AsSimpleDto(), Arizona.AsSimpleDto(), Arkansas.AsSimpleDto(), California.AsSimpleDto(), Colorado.AsSimpleDto(), Connecticut.AsSimpleDto(), Delaware.AsSimpleDto(), Florida.AsSimpleDto(), Georgia.AsSimpleDto(), Hawaii.AsSimpleDto(), Idaho.AsSimpleDto(), Illinois.AsSimpleDto(), Indiana.AsSimpleDto(), Iowa.AsSimpleDto(), Kansas.AsSimpleDto(), Kentucky.AsSimpleDto(), Louisiana.AsSimpleDto(), Maine.AsSimpleDto(), Maryland.AsSimpleDto(), Massachusetts.AsSimpleDto(), Michigan.AsSimpleDto(), Minnesota.AsSimpleDto(), Mississippi.AsSimpleDto(), Missouri.AsSimpleDto(), Montana.AsSimpleDto(), Nebraska.AsSimpleDto(), Nevada.AsSimpleDto(), NewHampshire.AsSimpleDto(), NewJersey.AsSimpleDto(), NewMexico.AsSimpleDto(), NewYork.AsSimpleDto(), NorthCarolina.AsSimpleDto(), NorthDakota.AsSimpleDto(), Ohio.AsSimpleDto(), Oklahoma.AsSimpleDto(), Oregon.AsSimpleDto(), Pennsylvania.AsSimpleDto(), RhodeIsland.AsSimpleDto(), SouthCarolina.AsSimpleDto(), SouthDakota.AsSimpleDto(), Tennessee.AsSimpleDto(), Texas.AsSimpleDto(), Utah.AsSimpleDto(), Vermont.AsSimpleDto(), Virginia.AsSimpleDto(), Washington.AsSimpleDto(), WestVirginia.AsSimpleDto(), Wisconsin.AsSimpleDto(), Wyoming.AsSimpleDto() };
             AllLookupDictionary = new ReadOnlyDictionary<int, State>(All.ToDictionary(x => x.StateID));
-            AllAsSimpleDtoLookupDictionary = new ReadOnlyDictionary<int, StateSimpleDto>(AllAsSimpleDto.ToDictionary(x => x.StateID));
         }
 
         /// <summary>

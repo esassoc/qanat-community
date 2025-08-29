@@ -1,12 +1,9 @@
-import { CommonModule } from "@angular/common";
 import { Component, Input, OnChanges, OnInit } from "@angular/core";
 import { environment } from "src/environments/environment";
 import * as L from "leaflet";
 import { MapLayerBase } from "../map-layer-base.component";
 @Component({
     selector: "geography-parcels-layer",
-    standalone: true,
-    imports: [CommonModule, MapLayerBase],
     templateUrl: "./geography-parcels-layer.component.html",
     styleUrls: ["./geography-parcels-layer.component.scss"],
 })
@@ -23,7 +20,9 @@ export class GeographyParcelsLayerComponent extends MapLayerBase implements OnIn
     ngOnInit(): void {}
 
     ngAfterViewInit(): void {
-        const cql_filter = this.geographyID ? `GeographyID = ${this.geographyID}` : "";
+        let cql_filter = this.geographyID ? `GeographyID = ${this.geographyID}` : "";
+        cql_filter += ` and IsCurrent = 1`;
+
         this.wmsOptions = {
             layers: "Qanat:AllParcels",
             transparent: true,

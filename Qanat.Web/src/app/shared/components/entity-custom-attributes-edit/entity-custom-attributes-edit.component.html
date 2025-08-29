@@ -1,19 +1,23 @@
-<div class="card" *ngIf="entityCustomAttributes">
-    <div class="card-header">
-        <h3 class="card-title">Edit Attributes</h3>
+@if (entityCustomAttributes) {
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Edit Attributes</h3>
+        </div>
+        <div class="card-body">
+            @if (formGroup) {
+                <form class="form grid-12" [formGroup]="formGroup">
+                    @for (control of formGroup.controls | keyvalue; track control) {
+                        <div class="field g-col">
+                            <div class="field-label">{{ control.key }}</div>
+                            <input class="form-control" type="text" [placeholder]="control.key" [formControlName]="control.key" [name]="control.key" />
+                        </div>
+                    }
+                </form>
+            }
+        </div>
+        <div class="card-footer flex-end">
+            <button type="submit" class="btn btn-primary" [disabled]="isLoadingSubmit" [buttonLoading]="isLoadingSubmit" (click)="onSave()">Save</button>
+            <a class="btn btn-primary-outline" routerLink="..">Cancel</a>
+        </div>
     </div>
-
-    <div class="card-body">
-        <form class="form grid-12" *ngIf="formGroup" [formGroup]="formGroup">
-            <div class="field g-col" *ngFor="let control of formGroup.controls | keyvalue">
-                <div class="field-label">{{ control.key }}</div>
-                <input class="form-control" type="text" [placeholder]="control.key" [formControlName]="control.key" [name]="control.key" />
-            </div>
-        </form>
-    </div>
-
-    <div class="card-footer flex-end">
-        <button type="submit" class="btn btn-primary" [disabled]="isLoadingSubmit" [buttonLoading]="isLoadingSubmit" (click)="onSave()">Save</button>
-        <a class="btn btn-primary-outline" routerLink="..">Cancel</a>
-    </div>
-</div>
+}

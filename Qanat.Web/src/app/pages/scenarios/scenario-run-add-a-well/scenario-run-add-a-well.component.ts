@@ -21,7 +21,7 @@ import { ScenarioMapComponent } from "../../../shared/components/maps/scenario-m
 import { FormsModule } from "@angular/forms";
 import { AlertDisplayComponent } from "../../../shared/components/alert-display/alert-display.component";
 import { ModelNameTagComponent } from "../../../shared/components/name-tag/name-tag.component";
-import { NgIf, NgFor, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { MonitoringWellsLayerComponent } from "src/app/shared/components/leaflet/layers/monitoring-wells-layer/monitoring-wells-layer.component";
 import { ModelService } from "src/app/shared/generated/api/model.service";
@@ -31,9 +31,7 @@ import { ScenarioRunService } from "src/app/shared/generated/api/scenario-run.se
     selector: "scenario-run-add-a-well",
     templateUrl: "./scenario-run-add-a-well.component.html",
     styleUrls: ["./scenario-run-add-a-well.component.scss"],
-    standalone: true,
     imports: [
-        NgIf,
         PageHeaderComponent,
         ModelNameTagComponent,
         AlertDisplayComponent,
@@ -41,11 +39,10 @@ import { ScenarioRunService } from "src/app/shared/generated/api/scenario-run.se
         ScenarioMapComponent,
         ScenarioMapMarkerLayerComponent,
         MonitoringWellsLayerComponent,
-        NgFor,
         ScenarioMapMarkerInputCardComponent,
         ButtonLoadingDirective,
         AsyncPipe,
-    ],
+    ]
 })
 export class ScenarioActionAddAWellComponent implements OnInit, OnDestroy {
     public scenarioID = ScenarioEnum.AddaWell;
@@ -87,7 +84,7 @@ export class ScenarioActionAddAWellComponent implements OnInit, OnDestroy {
         if (modelShortName) {
             this.modelShortName = modelShortName;
 
-            this.getModel$ = this.modelSerivce.modelsModelShortNameGet(modelShortName).pipe(
+            this.getModel$ = this.modelSerivce.getModelByIDModel(modelShortName).pipe(
                 tap((model) => {
                     this.model.ModelID = model.ModelID;
                 })
@@ -198,7 +195,7 @@ export class ScenarioActionAddAWellComponent implements OnInit, OnDestroy {
     public runScenario() {
         this.isLoadingSubmit = true;
         this.alertService.clearAlerts();
-        this.scenarioRunService.scenarioRunsAddAWellPost(this.model).subscribe(
+        this.scenarioRunService.startAddAWellScenarioRunScenarioRun(this.model).subscribe(
             () => {
                 this.isLoadingSubmit = false;
                 this.initModel();

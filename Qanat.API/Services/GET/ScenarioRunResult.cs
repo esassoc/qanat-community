@@ -10,6 +10,7 @@ public class ScenarioRunResult
     public double PercentChangeInAquiferStorage { get; set; }
     public double TotalChangeInPumping { get; set; }
     public double TotalChangeInRecharge { get; set; }
+    public double? TotalChangeInGainFromStream { get; set; }
 
     public List<ScenarioRunResultPointOfInterest> PointsOfInterest { get; set; }
     public DateTime ModelRunEndDate { get; set; }

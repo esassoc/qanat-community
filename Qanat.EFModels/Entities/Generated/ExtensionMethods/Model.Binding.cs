@@ -17,9 +17,7 @@ namespace Qanat.EFModels.Entities
         public static readonly ModelYSGAWaterResourcesModel YSGAWaterResourcesModel = ModelYSGAWaterResourcesModel.Instance;
 
         public static readonly List<Model> All;
-        public static readonly List<ModelSimpleDto> AllAsSimpleDto;
         public static readonly ReadOnlyDictionary<int, Model> AllLookupDictionary;
-        public static readonly ReadOnlyDictionary<int, ModelSimpleDto> AllAsSimpleDtoLookupDictionary;
 
         /// <summary>
         /// Static type constructor to coordinate static initialization order
@@ -27,9 +25,7 @@ namespace Qanat.EFModels.Entities
         static Model()
         {
             All = new List<Model> { MercedWaterResourcesModel, KernC2VSimFGKern, YSGAWaterResourcesModel };
-            AllAsSimpleDto = new List<ModelSimpleDto> { MercedWaterResourcesModel.AsSimpleDto(), KernC2VSimFGKern.AsSimpleDto(), YSGAWaterResourcesModel.AsSimpleDto() };
             AllLookupDictionary = new ReadOnlyDictionary<int, Model>(All.ToDictionary(x => x.ModelID));
-            AllAsSimpleDtoLookupDictionary = new ReadOnlyDictionary<int, ModelSimpleDto>(AllAsSimpleDto.ToDictionary(x => x.ModelID));
         }
 
         /// <summary>

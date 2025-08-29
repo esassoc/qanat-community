@@ -1,0 +1,20 @@
+<div class="modal-header">
+    <h2 class="modal-title">Confirm:</h2>
+</div>
+<div class="modal-body">
+    <div class="accept-certification">
+        <form class="form grid-12" [formGroup]="formGroup">
+            <form-field [formControl]="formGroup.controls.CoverCropSelfReportStartDate" fieldLabel="Self Report Start Date" [type]="FormFieldType.Date"></form-field>
+            <form-field [formControl]="formGroup.controls.CoverCropSelfReportEndDate" fieldLabel="Self Report End Date" [type]="FormFieldType.Date"></form-field>
+            <form-field
+                [formControl]="formGroup.controls.CoverCropSelfReportReadyForAccountHolders"
+                fieldLabel="Ready for Account Holders"
+                [type]="FormFieldType.Check"
+                [checkLabel]="formGroup.controls.CoverCropSelfReportReadyForAccountHolders.value ? 'Yes' : 'No'"></form-field>
+        </form>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-primary" (click)="save()" [disabled]="!formGroup.valid">Save</button>
+    <button class="btn btn-primary-outline" (click)="cancel()">Cancel</button>
+</div>

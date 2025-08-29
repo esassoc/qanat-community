@@ -1,4 +1,6 @@
 <div class="scenario-icon">
-    <img *ngIf="image$ | async as image" [src]="image" />
+    @if (image$ | async; as image) {
+        <img [src]="image" />
+    }
     <icon [icon]="scenario.ScenarioID === ScenarioEnum.AddaWell ? 'Wells' : 'WaterDropFilled'"></icon>
 </div>

@@ -6,7 +6,7 @@ import { WellService } from "src/app/shared/generated/api/well.service";
 import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
 import { ReferenceWellManageGridDto } from "src/app/shared/generated/model/reference-well-manage-grid-dto";
 import { QanatGridComponent } from "src/app/shared/components/qanat-grid/qanat-grid.component";
-import { NgIf, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { ActivatedRoute, RouterLink } from "@angular/router";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { AlertDisplayComponent } from "src/app/shared/components/alert-display/alert-display.component";
@@ -18,8 +18,7 @@ import { GeographyService } from "src/app/shared/generated/api/geography.service
     selector: "reference-wells-list",
     templateUrl: "./reference-wells-list.component.html",
     styleUrls: ["./reference-wells-list.component.scss"],
-    standalone: true,
-    imports: [PageHeaderComponent, RouterLink, AlertDisplayComponent, NgIf, QanatGridComponent, AsyncPipe, RouterLink],
+    imports: [PageHeaderComponent, RouterLink, AlertDisplayComponent, QanatGridComponent, AsyncPipe, RouterLink],
 })
 export class ReferenceWellsListComponent implements OnInit {
     public richTextID: number = CustomRichTextTypeEnum.ReferenceWellsList;
@@ -40,7 +39,7 @@ export class ReferenceWellsListComponent implements OnInit {
         this.geography$ = this.route.params.pipe(
             switchMap((params) => {
                 const geographyName = params.geographyName;
-                return this.geographyService.geographiesGeographyNameGeographyNameMinimalGet(geographyName);
+                return this.geographyService.getByNameAsMinimalDtoGeography(geographyName);
             }),
             tap((geography) => {
                 this.currentGeographyService.setCurrentGeography(geography);
@@ -49,7 +48,7 @@ export class ReferenceWellsListComponent implements OnInit {
 
         this.referenceWells$ = this.geography$.pipe(
             switchMap((geography) => {
-                return this.wellService.geographiesGeographyIDReferenceWellsGridGet(geography.GeographyID);
+                return this.wellService.getGeographyReferenceWellsForGridWell(geography.GeographyID);
             })
         );
 
@@ -70,12 +69,7 @@ export class ReferenceWellsListComponent implements OnInit {
                 field: "WellName",
                 filter: true,
             },
-            {
-                headerName: "Well Depth",
-                field: "WellDepth",
-                filter: true,
-            },
-
+            this.utilityFunctionsService.createDecimalColumnDef("Well Depth", "WellDepth", { MaxDecimalPlacesToDisplay: 0 }),
             { headerName: "County Permit No", field: "CountyWellPermitNo", filter: true },
             { headerName: "State WCR Number", field: "StateWCRNumber", filter: true },
             this.utilityFunctionsService.createLatLonColumnDef("Latitude", "Latitude"),

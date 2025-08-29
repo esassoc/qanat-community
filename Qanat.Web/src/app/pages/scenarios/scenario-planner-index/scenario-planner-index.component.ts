@@ -5,7 +5,7 @@ import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-ric
 import { ModelSimpleDto } from "src/app/shared/generated/model/models";
 import { GroupByPipe } from "src/app/shared/pipes/group-by.pipe";
 import { CustomRichTextComponent } from "../../../shared/components/custom-rich-text/custom-rich-text.component";
-import { NgIf, NgFor, AsyncPipe, KeyValuePipe } from "@angular/common";
+import { AsyncPipe, KeyValuePipe } from "@angular/common";
 import { RouterOutlet } from "@angular/router";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { ModelIndexCardComponent } from "src/app/shared/components/scenario-planner/model-index-card/model-index-card.component";
@@ -15,8 +15,7 @@ import { ModelService } from "src/app/shared/generated/api/model.service";
     selector: "scenario-planner-index",
     templateUrl: "./scenario-planner-index.component.html",
     styleUrls: ["./scenario-planner-index.component.scss"],
-    standalone: true,
-    imports: [RouterOutlet, PageHeaderComponent, NgIf, NgFor, ModelIndexCardComponent, CustomRichTextComponent, AsyncPipe, KeyValuePipe],
+    imports: [RouterOutlet, PageHeaderComponent, ModelIndexCardComponent, CustomRichTextComponent, AsyncPipe, KeyValuePipe]
 })
 export class ScenarioPlannerIndexComponent implements OnInit {
     public scenarioPlannerRichTextTypeID = CustomRichTextTypeEnum.ScenarioPlanner;
@@ -29,7 +28,7 @@ export class ScenarioPlannerIndexComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        this.modelGroups$ = this.modelService.modelsGet().pipe(
+        this.modelGroups$ = this.modelService.listModelsModel().pipe(
             map((x) => {
                 return this.groupByPipe.transform<ModelSimpleDto>(x, "ModelSubbasin");
             })

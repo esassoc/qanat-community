@@ -11,7 +11,7 @@ import { Alert } from "src/app/shared/models/alert";
 import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { QanatGridComponent } from "src/app/shared/components/qanat-grid/qanat-grid.component";
-import { NgIf, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { AlertDisplayComponent } from "../../../shared/components/alert-display/alert-display.component";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { RouterLink } from "@angular/router";
@@ -22,8 +22,7 @@ import { GeographyMinimalDto } from "src/app/shared/generated/model/models";
     selector: "review-submitted-wells",
     templateUrl: "./review-submitted-wells.component.html",
     styleUrls: ["./review-submitted-wells.component.scss"],
-    standalone: true,
-    imports: [PageHeaderComponent, AlertDisplayComponent, NgIf, QanatGridComponent, AsyncPipe, RouterLink],
+    imports: [PageHeaderComponent, AlertDisplayComponent, QanatGridComponent, AsyncPipe, RouterLink]
 })
 export class ReviewSubmittedWellsComponent implements OnInit {
     public customRichTextId: number = CustomRichTextTypeEnum.ManageReviewSubmittedWells;
@@ -49,7 +48,7 @@ export class ReviewSubmittedWellsComponent implements OnInit {
         this.wellsToReview$ = this.geography$.pipe(
             switchMap((geography) => {
                 this.geography = geography;
-                return this.wellRegistrationService.geographiesGeographyIDWellRegistrationsSubmittedGet(geography.GeographyID);
+                return this.wellRegistrationService.listSubmittedWellRegistrationsWellRegistration(geography.GeographyID);
             }),
             tap((x) => this.setupColDefs())
         );
@@ -91,7 +90,7 @@ export class ReviewSubmittedWellsComponent implements OnInit {
         };
         this.confirmService.confirm(confirmOptions).then((confirmed) => {
             if (confirmed) {
-                this.wellRegistrationService.wellRegistrationsWellRegistrationIDDelete(params.data.WellRegistrationID).subscribe(() => {
+                this.wellRegistrationService.deleteWellRegistrationWellRegistration(params.data.WellRegistrationID).subscribe(() => {
                     this.alertService.pushAlert(new Alert("Successfully Deleted Well Registration", AlertContext.Success));
                     params.api.applyTransaction({ remove: [params.data] });
                 });

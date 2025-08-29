@@ -18,61 +18,75 @@
                 autocapitalize="none"
                 spellcheck="false" />
             <div class="search-append">
-                <button class="clear" (click)="clearSearch()" *ngIf="searchString.value">
-                    <i class="fa fa-times-circle"></i>
-                </button>
-                <button class="clear" (click)="toggleDropdown()" *ngIf="isPartOfForm">
-                    <icon icon="AngleDown"></icon>
-                </button>
+                @if (searchString.value) {
+                    <button class="clear" (click)="clearSearch()">
+                        <i class="fa fa-times-circle"></i>
+                    </button>
+                }
+                @if (isPartOfForm) {
+                    <button class="clear" (click)="toggleDropdown()">
+                        <icon icon="AngleDown"></icon>
+                    </button>
+                }
             </div>
         </div>
-        <div class="search-results" *ngIf="searchResults$ | async as searchResults">
-            <div class="refine-search p-3" *ngIf="searchResults?.TotalResults > 10 && !isSearching && !val">Displaying 10 of {{ searchResults?.TotalResults }} results.</div>
-            <ul *ngIf="val == null && !isSearching">
-                <li
-                    *ngFor="let result of searchResults.ParcelSearchResults"
-                    [id]="'Parcel_' + result.Parcel.ParcelID"
-                    [class.highlighted-search-result]="result == highlightedSearchResult">
-                    <button (click)="selectParcel(result)">
-                        <div class="button-head">
-                            <icon [icon]="'Parcels'"></icon>
-                            <strong class="wa-name" [innerHTML]="'#' + result.Parcel.ParcelNumber" [highlight]="searchString.value"></strong>
-                        </div>
-
-                        <div class="button-metadata mt-1" *ngIf="result.Parcel.WaterAccountNumber">
-                            <small class="wa-apns wa-meta">
-                                <strong>Water Account Number:</strong>
-                                <span [highlight]="searchString.value" [innerHTML]="result.Parcel.WaterAccountNumber"></span>
-                            </small>
-                        </div>
-
-                        <ng-container *ngIf="searchString.value && searchString.value.length > 0">
-                            <div class="button-metadata mt-1" *ngIf="result.MatchedFields.WaterAccountName">
-                                <small class="wa-apns wa-meta">
-                                    <strong>Water Account Name:</strong>
-                                    <span [highlight]="searchString.value" [innerHTML]="result.Parcel.WaterAccountName"></span>
-                                </small>
-                            </div>
-
-                            <div class="button-metadata mt-1" *ngIf="result.MatchedFields.ContactName">
-                                <small class="wa-contact-name wa-meta">
-                                    <strong>Contact Name:</strong>
-                                    <span [highlight]="searchString.value" [innerHTML]="result.Parcel.ContactName"></span>
-                                </small>
-                            </div>
-
-                            <div class="button-metadata mt-1" *ngIf="result.MatchedFields.ContactAddress">
-                                <small class="wa-contact-address wa-meta">
-                                    <strong>Contact Address:</strong>
-                                    <span [highlight]="searchString.value" [innerHTML]="result.Parcel.ContactAddress"></span>
-                                </small>
-                            </div>
-                        </ng-container>
-                    </button>
-                </li>
-
-                <li *ngIf="searchResults?.ParcelSearchResults?.length == 0 && searchString.value && searchString.value.length > 1" class="p-3">No results</li>
-            </ul>
-        </div>
+        @if (searchResults$ | async; as searchResults) {
+            <div class="search-results">
+                @if (searchResults?.TotalResults > 10 && !isSearching && !val) {
+                    <div class="refine-search p-3">Displaying 10 of {{ searchResults?.TotalResults }} results.</div>
+                }
+                @if (val == null && !isSearching) {
+                    <ul>
+                        @for (result of searchResults.ParcelSearchResults; track result) {
+                            <li [id]="'Parcel_' + result.Parcel.ParcelID" [class.highlighted-search-result]="result == highlightedSearchResult">
+                                <button (click)="selectParcel(result)">
+                                    <div class="button-head">
+                                        <icon [icon]="'Parcels'"></icon>
+                                        <strong class="wa-name" [innerHTML]="'#' + result.Parcel.ParcelNumber" [highlight]="searchString.value"></strong>
+                                    </div>
+                                    @if (result.Parcel.WaterAccountNumber) {
+                                        <div class="button-metadata mt-1">
+                                            <small class="wa-apns wa-meta">
+                                                <strong>Water Account Number:</strong>
+                                                <span [highlight]="searchString.value" [innerHTML]="result.Parcel.WaterAccountNumber"></span>
+                                            </small>
+                                        </div>
+                                    }
+                                    @if (searchString.value && searchString.value.length > 0) {
+                                        @if (result.MatchedFields.WaterAccountName) {
+                                            <div class="button-metadata mt-1">
+                                                <small class="wa-apns wa-meta">
+                                                    <strong>Water Account Name:</strong>
+                                                    <span [highlight]="searchString.value" [innerHTML]="result.Parcel.WaterAccountName"></span>
+                                                </small>
+                                            </div>
+                                        }
+                                        @if (result.MatchedFields.ContactName) {
+                                            <div class="button-metadata mt-1">
+                                                <small class="wa-contact-name wa-meta">
+                                                    <strong>Contact Name:</strong>
+                                                    <span [highlight]="searchString.value" [innerHTML]="result.Parcel.ContactName"></span>
+                                                </small>
+                                            </div>
+                                        }
+                                        @if (result.MatchedFields.ContactAddress) {
+                                            <div class="button-metadata mt-1">
+                                                <small class="wa-contact-address wa-meta">
+                                                    <strong>Contact Address:</strong>
+                                                    <span [highlight]="searchString.value" [innerHTML]="result.Parcel.ContactAddress"></span>
+                                                </small>
+                                            </div>
+                                        }
+                                    }
+                                </button>
+                            </li>
+                        }
+                        @if (searchResults?.ParcelSearchResults?.length == 0 && searchString.value && searchString.value.length > 1) {
+                            <li class="p-3">No results</li>
+                        }
+                    </ul>
+                }
+            </div>
+        }
     </div>
 </div>

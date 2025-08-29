@@ -1,4 +1,3 @@
-import { CommonModule } from "@angular/common";
 import { AfterViewInit, Component, Input, OnChanges, SimpleChange } from "@angular/core";
 import * as L from "leaflet";
 
@@ -6,8 +5,6 @@ import { MapLayerBase } from "../map-layer-base.component";
 import { WfsService } from "src/app/shared/services/wfs.service";
 @Component({
     selector: "water-account-parcels-layer",
-    standalone: true,
-    imports: [CommonModule, MapLayerBase],
     templateUrl: "./water-account-parcels-layer.component.html",
     styleUrls: ["./water-account-parcels-layer.component.scss"],
 })
@@ -20,8 +17,22 @@ export class WaterAccountParcelsLayerComponent extends MapLayerBase implements O
 
     @Input() highlightedParcelIDs: number[];
 
-    public parcelStyle = { color: "#3388FF", dashArray: "4 8", opacity: 0.5, fillOpacity: 0.1 };
-    public parcelHighlightedStyle = { color: "#fcfc12" };
+    private defaultStyle = {
+        color: "#3388ff",
+        weight: 2,
+        opacity: 0.65,
+        fillOpacity: 0.1,
+        zIndex: 9999,
+    };
+
+    private highlightStyle = {
+        color: "#fcfc12",
+        weight: 2,
+        opacity: 0.65,
+        fillOpacity: 0.1,
+        zIndex: 9999,
+    };
+
     public layer;
 
     constructor(private wfsService: WfsService) {
@@ -42,18 +53,20 @@ export class WaterAccountParcelsLayerComponent extends MapLayerBase implements O
     updateLayer() {
         this.layer.clearLayers();
 
-        const cql_filter = !this.parcelID //MK 11/21/2024: If we pass in a parcelID we can assume it does not have a water account, we still want the parcel to show up on the map in this case.
+        let cql_filter = !this.parcelID //MK 11/21/2024: If we pass in a parcelID we can assume it does not have a water account, we still want the parcel to show up on the map in this case.
             ? `GeographyID = ${this.geographyID} and WaterAccountID = ${this.waterAccountID}`
             : `GeographyID = ${this.geographyID} and ParcelID = ${this.parcelID}`;
+
+        cql_filter += ` and IsCurrent = 1`;
 
         this.wfsService.getGeoserverWFSLayer(null, "Qanat:AllParcels", cql_filter).subscribe((response) => {
             if (response.length > 0) {
                 const geoJson = L.geoJSON(response, {
                     style: (feature) => {
                         if (this.highlightedParcelIDs?.includes(feature.properties.ParcelID)) {
-                            return this.parcelHighlightedStyle;
+                            return this.highlightStyle;
                         }
-                        return this.parcelStyle;
+                        return this.defaultStyle;
                     },
                 }).bindPopup((layer) => {
                     if (this.highlightedParcelIDs?.includes(layer.feature.properties.ParcelID)) {

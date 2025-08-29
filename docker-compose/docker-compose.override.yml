@@ -17,6 +17,7 @@ services:
       - Kestrel__Certificates__Default__Password=password#1
       - SITKA_EMAIL_REDIRECT=${SITKA_EMAIL_REDIRECT}
       - WEB_URL=${WEB_URL}
+      - SitkaCaptureServiceUrl=${SitkaCaptureServiceUrl}
       - SECRET_PATH=${SECRET_PATH}
       - PlatformLongName=${PlatformLongName}
       - SupportEmail=${SupportEmail}
@@ -33,6 +34,7 @@ services:
       - RecaptchaSecretKey=${RecaptchaSecretKey}
       - RecaptchaVerifyUrl=${RecaptchaVerifyUrl}
       - RecaptchaScoreThreshold=${RecaptchaScoreThreshold}
+      - MapboxApiBaseUrl=${MapboxApiBaseUrl}
     volumes:
       - ~/.aspnet/https:/https:ro
 
@@ -84,3 +86,11 @@ services:
     volumes:
       - c:/git/sitkatech/qanat/Qanat.GeoServer/data_dir:/opt/geoserver/data_dir
       - c:/sitka/Qanat/GeoServer/geoserver-environment.properties:/opt/geoserver/geoserver-environment.properties
+
+  sitkacapture:
+    container_name: qanat_sitkacapture
+    image: containersesaqa.azurecr.io/sitkacapture:latest
+    environment:
+      - PORT=7616
+    ports:
+      - 127.0.0.1:7616:7616

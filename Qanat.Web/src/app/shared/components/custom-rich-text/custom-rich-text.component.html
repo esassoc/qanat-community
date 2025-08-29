@@ -1,43 +1,49 @@
 <div [loadingSpinner]="{ isLoading, loadingHeight: 100 }">
-    <ng-container *ngIf="!isEditing; else isEditingTemplate">
+    @if (!isEditing) {
         <div class="customRichTextContent" [class.editable]="showEditButton()" style="position: relative; min-height: 0">
-            <div class="hoverEditButton" *ngIf="showEditButton()">
-                <div style="transform: translate3d(-10px, 20px, 0)">
-                    <button type="button" class="btn btn-secondary" (click)="enterEdit()">
-                        Edit
-                        <ng-container *ngIf="geographyID">
-                            <icon icon="Geography" [title]="'RTE for Geography: ' + GeographyEnum[geographyID]" [enableFontSize]="true"></icon>
-                        </ng-container>
-                    </button>
+            @if (showEditButton()) {
+                <div class="hoverEditButton">
+                    <div style="transform: translate3d(-10px, 20px, 0)">
+                        <button type="button" class="btn btn-secondary" (click)="enterEdit()">
+                            Edit
+                            @if (geographyID) {
+                                <icon icon="Geography" [title]="'RTE for Geography: ' + GeographyEnum[geographyID]" [enableFontSize]="true"></icon>
+                            }
+                        </button>
+                    </div>
                 </div>
-            </div>
-
-            <div *ngIf="showTitle" class="headline mb-2">
-                <h3>
-                    <i *ngIf="showInfoIcon" class="fa fa-info-circle"></i>
-                    {{ customRichTextTitle }}
-                </h3>
-            </div>
-
-            <div *ngIf="!isEmptyContent" [innerHtml]="customRichTextContent"></div>
-            <div *ngIf="isEmptyContent" class="hoverEmptySpace"></div>
+            }
+            @if (showTitle) {
+                <div class="headline mb-2">
+                    <h3>
+                        @if (showInfoIcon) {
+                            <i class="fa fa-info-circle"></i>
+                        }
+                        {{ customRichTextTitle }}
+                    </h3>
+                </div>
+            }
+            @if (!isEmptyContent) {
+                <div #displayContent [innerHtml]="customRichTextContent"></div>
+            }
+            @if (isEmptyContent) {
+                <div class="hoverEmptySpace"></div>
+            }
         </div>
-    </ng-container>
-
-    <ng-template #isEditingTemplate>
+    } @else {
         <div>
-            <div *ngIf="showTitle" class="field mb-3">
-                <input type="text" [(ngModel)]="editedTitle" />
-            </div>
-
+            @if (showTitle) {
+                <div class="field mb-3">
+                    <input type="text" [(ngModel)]="editedTitle" />
+                </div>
+            }
             <div class="tinyMCEFontColor">
                 <editor #tinyMceEditor [init]="tinyMceConfig" [(ngModel)]="editedContent"></editor>
             </div>
-
             <div class="flex-end">
                 <button type="button" class="btn btn-secondary mt-1 mr-2" (click)="saveEdit()">Save</button>
                 <button type="button" class="btn btn-secondary-outline mt-1" (click)="cancelEdit()">Cancel</button>
             </div>
         </div>
-    </ng-template>
+    }
 </div>

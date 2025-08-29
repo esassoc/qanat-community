@@ -36,4 +36,26 @@ public class OpenETSyncs
             .Include(x => x.Geography)
             .Include(x => x.OpenETSyncHistories).ThenInclude(x => x.RasterFileResource);
     }
+
+    public static async Task<List<string>> DeleteHistoriesAndFileResourcesAsync(QanatDbContext dbContext, OpenETSync openETSync, int? waterMeasurementTypeID)
+    {
+        var fileResources = openETSync.OpenETSyncHistories.Where(x => x.RasterFileResource != null).Select(x => x.RasterFileResource).ToList();
+        var fileResourceCanonicalNames = fileResources.Select(x => x.FileResourceCanonicalName).ToList();
+
+        dbContext.FileResources.RemoveRange(fileResources);       
+        dbContext.OpenETSyncHistories.RemoveRange(openETSync.OpenETSyncHistories);
+
+        openETSync.FinalizeDate = null;
+
+        await dbContext.SaveChangesAsync();
+
+        if (waterMeasurementTypeID.HasValue)
+        {
+            var reportedDate = openETSync.ReportedDate.AddMonths(1).AddDays(-1);
+            await dbContext.WaterMeasurements.Where(x => x.GeographyID == openETSync.GeographyID && x.ReportedDate.Date == reportedDate && x.WaterMeasurementTypeID == waterMeasurementTypeID.Value)
+                .ExecuteDeleteAsync();
+        }
+
+        return fileResourceCanonicalNames;
+    }
 }

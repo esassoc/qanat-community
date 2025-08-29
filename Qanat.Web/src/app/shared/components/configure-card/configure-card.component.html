@@ -1,17 +1,22 @@
 <div class="option">
     <div class="option-header flex-between">
         <h3 class="option-title">
-            <a *ngIf="routerLinkValue; else noLinkTitle" [routerLink]="[routerLinkValue]" [class.disabled]="linkDisabled">
+            @if (routerLinkValue) {
+                <a [routerLink]="[routerLinkValue]" [class.disabled]="linkDisabled">
+                    {{ title }}
+                </a>
+            } @else {
                 {{ title }}
-            </a>
-            <ng-template #noLinkTitle>
-                {{ title }}
-            </ng-template>
+            }
         </h3>
-        <ng-container *ngIf="!hideToggle">
-            <name-tag *ngIf="toggleChecked" name="enabled" color="#ffa62b"></name-tag>
-            <name-tag *ngIf="!toggleChecked" name="Disabled" color="#fafafa" textColor="#8a8a8a"> </name-tag>
-        </ng-container>
+        @if (!hideToggle) {
+            @if (toggleChecked) {
+                <name-tag name="enabled" color="#ffa62b"></name-tag>
+            }
+            @if (!toggleChecked) {
+                <name-tag name="Disabled" color="#fafafa" textColor="#8a8a8a"> </name-tag>
+            }
+        }
     </div>
 
     <div class="option-body">
@@ -20,7 +25,9 @@
         </div>
     </div>
 
-    <div class="option-footer flex-end" [class.disabled]="linkDisabled" *ngIf="routerLinkValue">
-        <a [routerLink]="[routerLinkValue]" class="btn btn-primary-outline btn-sm">Options</a>
-    </div>
+    @if (routerLinkValue) {
+        <div class="option-footer flex-end" [class.disabled]="linkDisabled">
+            <a [routerLink]="[routerLinkValue]" class="btn btn-primary-outline btn-sm">Options</a>
+        </div>
+    }
 </div>

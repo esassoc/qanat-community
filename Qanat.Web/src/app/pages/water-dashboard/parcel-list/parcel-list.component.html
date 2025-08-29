@@ -1,123 +1,108 @@
-<ng-container *ngIf="geography$ | async as geography">
-    <ng-container *ngIf="currentUser$ | async">
+@if (geography$ | async; as geography) {
+    @if (currentUser$ | async) {
         <water-dashboard-nav [geography]="geography"></water-dashboard-nav>
         <div class="full-width-page">
             <page-header [customRichTextTypeID]="richTextID" icon="Parcels" pageTitle="Parcels" preTitle="Water Dashboard"></page-header>
-
-            <div class="page-body" *ngIf="currentUserGeographies$ | async as currentUserGeographies" [loadingSpinner]="{ isLoading: isLoading && firstLoad, loadingHeight: 700 }">
-                <app-alert-display></app-alert-display>
-
-                <ng-container *ngIf="!currentUserHasNoGeographies; else noWaterAccountsMessage">
-                    <ng-container *ngIf="parcels$ | async as parcels">
-                        <qanat-grid-header
-                            *ngIf="gridRef"
-                            [grid]="gridRef"
-                            [rowDataCount]="parcels?.length"
-                            [leftAlignClearFiltersButton]="true"
-                            [disableGlobalFilter]="selectedPanel === 'Map'">
-                            <div customGridActionsCenter>
-                                <div class="button-group tab-nav">
-                                    <button class="button-group__item btn-sm" [class.active]="selectedPanel === 'Grid'" (click)="toggleSelectedPanel('Grid')">
-                                        <icon icon="BulletedList"></icon>
-                                        Grid
-                                    </button>
-                                    <button class="button-group__item btn-sm" [class.active]="selectedPanel === 'Hybrid'" (click)="toggleSelectedPanel('Hybrid')">
-                                        <icon icon="Layout"></icon>
-                                        Hybrid
-                                    </button>
-                                    <button class="button-group__item btn-sm" [class.active]="selectedPanel === 'Map'" (click)="toggleSelectedPanel('Map')">
-                                        <icon icon="VerticalMap"></icon>
-                                        Map
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div customGridActionsRight>
-                                <div class="form-field" class="geography-selector">
-                                    <div class="field">
-                                        <select name="Geography" [(ngModel)]="currentGeography" (ngModelChange)="onGeographySelected($event)" [compareWith]="compareGeography">
-                                            <option *ngFor="let geography of currentUserGeographies" [ngValue]="geography">
-                                                {{ geography.GeographyName }}
-                                            </option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </qanat-grid-header>
-
-                        <div
-                            class="grid-12 mt-3"
-                            [loadingSpinner]="{
-                                isLoading: isLoading && !firstLoad,
-                                loadingHeight: 500,
-                            }">
-                            <div
-                                class="tab-nav-panel"
-                                [class.g-col-6]="selectedPanel === 'Hybrid'"
-                                [class.g-col-12]="selectedPanel === 'Grid'"
-                                [class.hidden]="selectedPanel === 'Map'">
-                                <qanat-grid
-                                    height="675px"
+            @if (currentUserGeographies$ | async; as currentUserGeographies) {
+                <div class="page-body" [loadingSpinner]="{ isLoading: isLoading && firstLoad, loadingHeight: 700 }">
+                    <app-alert-display></app-alert-display>
+                    @if (!currentUserHasNoGeographies) {
+                        @if (reportingPeriods$ | async; as reportingPeriods) {
+                            @if (parcels$ | async; as parcels) {
+                                <hybrid-map-grid
                                     [rowData]="parcels"
                                     [columnDefs]="columnDefs$ | async"
-                                    [overrideDefaultGridHeader]="true"
-                                    rowSelection="single"
-                                    (selectionChanged)="onGridSelectionChanged()"
+                                    downloadFileName="parcels"
+                                    entityIDField="ParcelID"
                                     (gridReady)="onGridReady($event)"
-                                    (gridRefReady)="onGridRefReady($event)"
-                                    downloadFileName="{{ geography.GeographyName.toLowerCase() }}-parcels"></qanat-grid>
-                            </div>
-
-                            <div
-                                class="tab-nav-panel"
-                                [class.g-col-6]="selectedPanel === 'Hybrid'"
-                                [class.g-col-12]="selectedPanel === 'Map'"
-                                [class.hidden]="selectedPanel === 'Grid'">
-                                <qanat-map class="location-card" mapHeight="720px" (onMapLoad)="handleMapReady($event)">
-                                    <ng-container *ngIf="mapIsReady">
-                                        <parcel-layer
-                                            [geographyID]="geography.GeographyID"
-                                            [parcelIDs]="parcelIDs$ | async"
-                                            [selectedParcelID]="selectedParcelID"
-                                            [map]="map"
-                                            [layerControl]="layerControl"
-                                            [displayOnLoad]="true"
-                                            (parcelSelected)="onMapSelectionChanged($event)"></parcel-layer>
-
-                                        <gsa-boundaries [displayOnLoad]="false" [map]="map" [geographyID]="geography.GeographyID" [layerControl]="layerControl"></gsa-boundaries>
-
-                                        <zone-group-layer
-                                            *ngFor="let zoneGroup of zoneGroups$ | async"
-                                            [displayOnLoad]="false"
-                                            [zoneGroupID]="zoneGroup.ZoneGroupID"
-                                            [zoneGroupName]="zoneGroup.ZoneGroupName"
-                                            [map]="map"
-                                            [layerControl]="layerControl">
-                                        </zone-group-layer>
-
-                                        <geography-external-map-layer
-                                            *ngFor="let externalMapLayer of externalMapLayers$ | async"
-                                            [map]="map"
-                                            [layerControl]="layerControl"
-                                            [externalMapLayer]="externalMapLayer">
-                                        </geography-external-map-layer>
-                                    </ng-container>
-                                </qanat-map>
+                                    (onMapLoad)="handleMapReady($event)"
+                                    [selectedValue]="selectedParcelID"
+                                    (selectedValueChange)="onSelectedParcelIDChanged($event)">
+                                    <div headerActions>
+                                        <div class="navigation-selector-container">
+                                            @if (currentUserGeographies.length > 1) {
+                                                <div class="form-field navigation-selector mr-1">
+                                                    <div class="field">
+                                                        <ng-select
+                                                            name="Geography"
+                                                            [(ngModel)]="currentGeography"
+                                                            (ngModelChange)="onGeographySelected($event)"
+                                                            [compareWith]="compareGeography"
+                                                            [items]="currentUserGeographies"
+                                                            [clearable]="false"
+                                                            [searchable]="false"
+                                                            bindLabel="GeographyName"
+                                                            class="custom small">
+                                                        </ng-select>
+                                                    </div>
+                                                </div>
+                                            }
+                                            <div class="form-field navigation-selector">
+                                                <div class="field">
+                                                    <ng-select
+                                                        name="ReportingPeriod"
+                                                        [(ngModel)]="currentReportingPeriodID"
+                                                        (ngModelChange)="onReportingPeriodSelected($event)"
+                                                        [items]="reportingPeriods"
+                                                        [clearable]="false"
+                                                        [searchable]="false"
+                                                        bindLabel="Name"
+                                                        bindValue="ReportingPeriodID"
+                                                        class="custom small">
+                                                    </ng-select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @if (mapIsReady) {
+                                        <div mapLayers [loadingSpinner]="{ isLoading: layerLoading, opacity: 0.33 }">
+                                            @if (parcelIDs$ | async; as parcelIDs) {
+                                                <parcel-layer
+                                                    [geographyID]="geography.GeographyID"
+                                                    [reportingPeriodID]="currentReportingPeriodID"
+                                                    [map]="map"
+                                                    [layerControl]="layerControl"
+                                                    [displayOnLoad]="true"
+                                                    [selectedParcelID]="selectedParcelID"
+                                                    [parcelIDs]="currentUserHasOverallPermission ? null : parcelIDs"
+                                                    (parcelSelected)="onSelectedParcelIDChanged($event)"
+                                                    (layerStartedLoading)="onLayerLoadStarted()"
+                                                    (layerFinishedLoading)="onLayerLoadFinished()"></parcel-layer>
+                                            }
+                                            <gsa-boundaries
+                                                [displayOnLoad]="false"
+                                                [map]="map"
+                                                [geographyID]="geography.GeographyID"
+                                                [layerControl]="layerControl"></gsa-boundaries>
+                                            @for (zoneGroup of zoneGroups$ | async; track zoneGroup) {
+                                                <zone-group-layer
+                                                    [displayOnLoad]="false"
+                                                    [zoneGroupID]="zoneGroup.ZoneGroupID"
+                                                    [zoneGroupName]="zoneGroup.ZoneGroupName"
+                                                    [map]="map"
+                                                    [layerControl]="layerControl">
+                                                </zone-group-layer>
+                                            }
+                                            @for (externalMapLayer of externalMapLayers$ | async; track externalMapLayer) {
+                                                <geography-external-map-layer [map]="map" [layerControl]="layerControl" [externalMapLayer]="externalMapLayer">
+                                                </geography-external-map-layer>
+                                            }
+                                        </div>
+                                    }
+                                </hybrid-map-grid>
+                            }
+                        }
+                    } @else {
+                        <div class="alert alert-info">
+                            <div class="alert-content">
+                                <i class="fa fa-info"></i>
+                                Your user profile does not currently have access to any Parcels. Claim Water Accounts to get started or contact a water manager for your geography
+                                for assistance.
                             </div>
                         </div>
-                    </ng-container>
-                </ng-container>
-
-                <ng-template #noWaterAccountsMessage>
-                    <div class="alert alert-info">
-                        <div class="alert-content">
-                            <i class="fa fa-info"></i>
-                            Your user profile does not currently have access to any Parcels. Claim Water Accounts to get started or contact a water manager for your geography for
-                            assistance.
-                        </div>
-                    </div>
-                </ng-template>
-            </div>
+                    }
+                </div>
+            }
         </div>
-    </ng-container>
-</ng-container>
+    }
+}

@@ -9,7 +9,7 @@ import { ScenarioEnum, Scenarios, ScenariosAsSelectDropdownOptions } from "src/a
 import { ModelSimpleDto, ScenarioRunDto, ScenarioSimpleDto } from "src/app/shared/generated/model/models";
 import { LoadingDirective } from "../../../shared/directives/loading.directive";
 import { IconComponent } from "src/app/shared/components/icon/icon.component";
-import { NgIf, NgFor, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { ModelService } from "src/app/shared/generated/api/model.service";
 import { ScenarioService } from "src/app/shared/generated/api/scenario.service";
 import { LookupTableEntry } from "src/app/shared/models/lookup-table-entry";
@@ -18,8 +18,7 @@ import { LookupTableEntry } from "src/app/shared/models/lookup-table-entry";
     selector: "scenario-planner-layout-menu",
     templateUrl: "./scenario-planner-layout-menu.component.html",
     styleUrls: ["./scenario-planner-layout-menu.component.scss"],
-    standalone: true,
-    imports: [NgIf, IconComponent, RouterLinkActive, RouterLink, NgFor, RouterOutlet, LoadingDirective, AsyncPipe],
+    imports: [IconComponent, RouterLinkActive, RouterLink, RouterOutlet, LoadingDirective, AsyncPipe]
 })
 export class DashboardScenarioPlannerComponent implements OnInit {
     readonly ScenarioEnum = ScenarioEnum;
@@ -39,7 +38,7 @@ export class DashboardScenarioPlannerComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        this.models$ = this.modelService.modelsGet();
+        this.models$ = this.modelService.listModelsModel();
         this.scenarios = Scenarios;
         this.scenarioRun$ = this.currentScenarioRunService.currentScenarioRunObservable;
 

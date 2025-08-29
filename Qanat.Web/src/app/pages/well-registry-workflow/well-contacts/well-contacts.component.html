@@ -5,123 +5,117 @@
     <div class="mb-4">
         <custom-rich-text [customRichTextTypeID]="formAsteriskExplanationID"></custom-rich-text>
     </div>
-    <form class="form mb-3 g-col-8" #wellRegistrationContactsForms="ngForm" *ngIf="model">
-        <div class="landowner-info grid-9">
-            <h2 class="section-title underline text-primary">Landowner Information</h2>
-            <div class="field">
-                <label class="required field-label">Contact Name</label>
-                <div class="well-contacts-input-wrapper">
-                    <input type="text" class="form-control" name="LandownerContactName" required [(ngModel)]="model.LandownerContactName" />
-                </div>
-            </div>
-
-            <div class="field">
-                <label class="field-label">Business Name</label>
-                <div class="well-contacts-input-wrapper">
-                    <input type="text" class="form-control" name="LandownerBusinessName" [(ngModel)]="model.LandownerBusinessName" />
-                </div>
-            </div>
-
-            <div class="field">
-                <label class="required field-label">Street Address</label>
-                <div class="well-contacts-input-wrapper">
-                    <input type="text" class="form-control" name="LandownerStreetAddress" required [(ngModel)]="model.LandownerStreetAddress" />
-                </div>
-            </div>
-
-            <div class="field g-col-3">
-                <label class="required field-label">City</label>
-                <input type="text" class="form-control" name="LandownerCity" required [(ngModel)]="model.LandownerCity" />
-            </div>
-
-            <div class="field g-col-3">
-                <label class="required field-label">State</label>
-                <select name="LandownerStateID" class="form-control" [(ngModel)]="model.LandownerStateID" required>
-                    <option selected disabled [value]="">Choose One</option>
-                    <option *ngFor="let state of states" [value]="state.StateID">
-                        {{ state.StatePostalCode }}
-                    </option>
-                </select>
-            </div>
-
-            <div class="field g-col-3">
-                <label class="required field-label">Zip Code</label>
-                <input type="text" class="form-control" name="LandownerZipCode" required [(ngModel)]="model.LandownerZipCode" mask="00000||00000-0000" />
-            </div>
-
-            <div class="field g-col-half">
-                <label class="required field-label">Phone</label>
-                <input type="tel" class="form-control" name="LandownerPhone" required [(ngModel)]="model.LandownerPhone" mask="(000) 000-0000" />
-            </div>
-
-            <div class="field g-col-half">
-                <label class="required field-label">Email</label>
-                <input type="email" class="form-control" name="LandownerEmail" required [(ngModel)]="model.LandownerEmail" />
-            </div>
-        </div>
-
-        <div class="operator-info">
-            <h2 class="section-title underline text-primary">Operator Information</h2>
-            <div class="owner-operator-bar flex-between mb-4">
-                <div class="copy copy-3">
-                    <p>Is the Operator information different than the Landowner information?</p>
-                </div>
-
-                <label class="switch">
-                    <input type="checkbox" [checked]="getLandownerSameAsOwnerOperator() ? true : false" (click)="updateLandownerSameAsOwnerOperator()" id="owner" />
-                    <span class="slider round" for="owner">
-                        <p>{{ getLandownerSameAsOwnerOperator() ? "YES" : "NO" }}</p>
-                    </span>
-                </label>
-            </div>
-            <div class="hideContainer grid-9" *ngIf="getLandownerSameAsOwnerOperator()">
+    @if (model) {
+        <form class="form mb-3 g-col-8" #wellRegistrationContactsForms="ngForm">
+            <div class="landowner-info grid-9">
+                <h2 class="section-title underline text-primary">Landowner Information</h2>
                 <div class="field">
                     <label class="required field-label">Contact Name</label>
-                    <input type="text" class="form-control" name="OwnerOperatorContactName" required [(ngModel)]="model.OwnerOperatorContactName" />
+                    <div class="well-contacts-input-wrapper">
+                        <input type="text" class="form-control" name="LandownerContactName" required [(ngModel)]="model.LandownerContactName" />
+                    </div>
                 </div>
-
                 <div class="field">
                     <label class="field-label">Business Name</label>
-                    <input type="text" class="form-control" name="OwnerOperatorBusinessName" [(ngModel)]="model.OwnerOperatorBusinessName" />
+                    <div class="well-contacts-input-wrapper">
+                        <input type="text" class="form-control" name="LandownerBusinessName" [(ngModel)]="model.LandownerBusinessName" />
+                    </div>
                 </div>
-
                 <div class="field">
                     <label class="required field-label">Street Address</label>
-                    <input type="text" class="form-control" name="OwnerOperatorStreetAddress" required [(ngModel)]="model.OwnerOperatorStreetAddress" />
+                    <div class="well-contacts-input-wrapper">
+                        <input type="text" class="form-control" name="LandownerStreetAddress" required [(ngModel)]="model.LandownerStreetAddress" />
+                    </div>
                 </div>
-
                 <div class="field g-col-3">
                     <label class="required field-label">City</label>
-                    <input type="text" class="form-control" name="OwnerOperatorCity" required [(ngModel)]="model.OwnerOperatorCity" />
+                    <input type="text" class="form-control" name="LandownerCity" required [(ngModel)]="model.LandownerCity" />
                 </div>
-
                 <div class="field g-col-3">
                     <label class="required field-label">State</label>
-                    <select name="OwnerOperatorStateID" class="form-control" [(ngModel)]="model.OwnerOperatorStateID" required>
-                        <option selected disabled [value]="">Choose One</option>
-                        <option *ngFor="let state of states" [value]="state.StateID">
-                            {{ state.StatePostalCode }}
-                        </option>
-                    </select>
+                    <ng-select
+                        name="LandownerStateID"
+                        class="form-control"
+                        [(ngModel)]="model.LandownerStateID"
+                        [items]="states"
+                        bindLabel="StatePostalCode"
+                        bindValue="StateID"
+                        class="custom">
+                    </ng-select>
                 </div>
-
                 <div class="field g-col-3">
                     <label class="required field-label">Zip Code</label>
-                    <input type="text" class="form-control" name="OwnerOperatorZipCode" required [(ngModel)]="model.OwnerOperatorZipCode" mask="00000-0000" />
+                    <input type="text" class="form-control" name="LandownerZipCode" required [(ngModel)]="model.LandownerZipCode" mask="00000||00000-0000" />
                 </div>
-
                 <div class="field g-col-half">
                     <label class="required field-label">Phone</label>
-                    <input type="tel" class="form-control" name="OwnerOperatorPhone" required [(ngModel)]="model.OwnerOperatorPhone" mask="(000) 000-0000" />
+                    <input type="tel" class="form-control" name="LandownerPhone" required [(ngModel)]="model.LandownerPhone" mask="(000) 000-0000" />
                 </div>
-
                 <div class="field g-col-half">
                     <label class="required field-label">Email</label>
-                    <input type="email" class="form-control" name="OwnerOperatorEmail" required [(ngModel)]="model.OwnerOperatorEmail" />
+                    <input type="email" class="form-control" name="LandownerEmail" required [(ngModel)]="model.LandownerEmail" />
                 </div>
             </div>
-        </div>
-    </form>
+            <div class="operator-info">
+                <h2 class="section-title underline text-primary">Operator Information</h2>
+                <div class="owner-operator-bar flex-between mb-4">
+                    <div class="copy copy-3">
+                        <p>Is the Operator information different than the Landowner information?</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" [checked]="getLandownerSameAsOwnerOperator() ? true : false" (click)="updateLandownerSameAsOwnerOperator()" id="owner" />
+                        <span class="slider round" for="owner">
+                            <p>{{ getLandownerSameAsOwnerOperator() ? "YES" : "NO" }}</p>
+                        </span>
+                    </label>
+                </div>
+                @if (getLandownerSameAsOwnerOperator()) {
+                    <div class="hideContainer grid-9">
+                        <div class="field">
+                            <label class="required field-label">Contact Name</label>
+                            <input type="text" class="form-control" name="OwnerOperatorContactName" required [(ngModel)]="model.OwnerOperatorContactName" />
+                        </div>
+                        <div class="field">
+                            <label class="field-label">Business Name</label>
+                            <input type="text" class="form-control" name="OwnerOperatorBusinessName" [(ngModel)]="model.OwnerOperatorBusinessName" />
+                        </div>
+                        <div class="field">
+                            <label class="required field-label">Street Address</label>
+                            <input type="text" class="form-control" name="OwnerOperatorStreetAddress" required [(ngModel)]="model.OwnerOperatorStreetAddress" />
+                        </div>
+                        <div class="field g-col-3">
+                            <label class="required field-label">City</label>
+                            <input type="text" class="form-control" name="OwnerOperatorCity" required [(ngModel)]="model.OwnerOperatorCity" />
+                        </div>
+                        <div class="field g-col-3">
+                            <label class="required field-label">State</label>
+                            <ng-select
+                                name="OwnerOperatorStateID"
+                                class="form-control"
+                                [(ngModel)]="model.OwnerOperatorStateID"
+                                [items]="states"
+                                bindLabel="StatePostalCode"
+                                bindValue="StateID"
+                                class="custom">
+                            </ng-select>
+                        </div>
+                        <div class="field g-col-3">
+                            <label class="required field-label">Zip Code</label>
+                            <input type="text" class="form-control" name="OwnerOperatorZipCode" required [(ngModel)]="model.OwnerOperatorZipCode" mask="00000||00000-0000" />
+                        </div>
+                        <div class="field g-col-half">
+                            <label class="required field-label">Phone</label>
+                            <input type="tel" class="form-control" name="OwnerOperatorPhone" required [(ngModel)]="model.OwnerOperatorPhone" mask="(000) 000-0000" />
+                        </div>
+                        <div class="field g-col-half">
+                            <label class="required field-label">Email</label>
+                            <input type="email" class="form-control" name="OwnerOperatorEmail" required [(ngModel)]="model.OwnerOperatorEmail" />
+                        </div>
+                    </div>
+                }
+            </div>
+        </form>
+    }
 </workflow-body>
 
 <div class="page-footer">

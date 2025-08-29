@@ -19,18 +19,18 @@ import { AlertDisplayComponent } from "../../../shared/components/alert-display/
 import { LoadingDirective } from "../../../shared/directives/loading.directive";
 import { FormsModule } from "@angular/forms";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
-import { NgIf, NgFor, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { WaterTypeByGeographyService } from "src/app/shared/generated/api/water-type-by-geography.service";
 import { CurrentGeographyService } from "src/app/shared/services/current-geography.service";
 import { routeParams } from "src/app/app.routes";
 import { GeographyService } from "src/app/shared/generated/api/geography.service";
+import { NgSelectModule } from "@ng-select/ng-select";
 
 @Component({
     selector: "allocation-plans-configure",
     templateUrl: "./allocation-plans-configure.component.html",
     styleUrls: ["./allocation-plans-configure.component.scss"],
-    standalone: true,
-    imports: [NgIf, PageHeaderComponent, FormsModule, LoadingDirective, AlertDisplayComponent, NgFor, NgxMaskDirective, EditorComponent, RouterLink, AsyncPipe],
+    imports: [PageHeaderComponent, FormsModule, LoadingDirective, AlertDisplayComponent, NgxMaskDirective, EditorComponent, RouterLink, AsyncPipe, NgSelectModule],
     providers: [{ provide: TINYMCE_SCRIPT_SRC, useValue: "tinymce/tinymce.min.js" }, provideNgxMask()],
 })
 export class AllocationPlansConfigureComponent implements OnInit, AfterViewChecked {
@@ -73,7 +73,7 @@ export class AllocationPlansConfigureComponent implements OnInit, AfterViewCheck
                 this.zoneGroups = null;
                 this.waterTypes = null;
                 this.waterTypeSelected = {};
-                return this.geographyService.geographiesGeographyNameGeographyNameMinimalGet(geographyName);
+                return this.geographyService.getByNameAsMinimalDtoGeography(geographyName);
             }),
             tap((geography) => {
                 this.currentGeographyService.setCurrentGeography(geography);
@@ -81,9 +81,9 @@ export class AllocationPlansConfigureComponent implements OnInit, AfterViewCheck
             }),
             switchMap((geography) => {
                 return combineLatest({
-                    allocationPlan: this.allocationPlanService.geographiesGeographyIDAllocationPlanConfigurationGet(geography.GeographyID),
-                    zoneGroups: this.zoneGroupService.geographiesGeographyIDZoneGroupsGet(geography.GeographyID),
-                    waterTypes: this.waterTypeByGeographyService.geographiesGeographyIDWaterTypesActiveGet(geography.GeographyID),
+                    allocationPlan: this.allocationPlanService.getAllocationPlanConfigurationByGeographyIDAllocationPlan(geography.GeographyID),
+                    zoneGroups: this.zoneGroupService.listZoneGroup(geography.GeographyID),
+                    waterTypes: this.waterTypeByGeographyService.getActiveWaterTypesWaterTypeByGeography(geography.GeographyID),
                 });
             }),
             tap(({ allocationPlan, zoneGroups, waterTypes }) => {
@@ -135,7 +135,7 @@ export class AllocationPlansConfigureComponent implements OnInit, AfterViewCheck
     }
 
     public getConfigurationChangesPreview() {
-        this.allocationPlanService.geographiesGeographyIDAllocationPlanConfigurationPreviewPut(this.geographyID, this.model).subscribe((previewChangesDtos) => {
+        this.allocationPlanService.previewGeographyAllocationPlanConfigurationUpdateAllocationPlan(this.geographyID, this.model).subscribe((previewChangesDtos) => {
             if (previewChangesDtos.length == 0) {
                 this.saveConfiguration();
             } else {
@@ -187,8 +187,8 @@ export class AllocationPlansConfigureComponent implements OnInit, AfterViewCheck
     public saveConfiguration() {
         const request =
             this.model.GeographyAllocationPlanConfigurationID > 0
-                ? this.allocationPlanService.geographiesGeographyIDAllocationPlanConfigurationPut(this.geographyID, this.model)
-                : this.allocationPlanService.geographiesGeographyIDAllocationPlanConfigurationPost(this.geographyID, this.model);
+                ? this.allocationPlanService.updateAllocationPlanConfigurationAllocationPlan(this.geographyID, this.model)
+                : this.allocationPlanService.createGeographyAllocationPlanConfigurationAllocationPlan(this.geographyID, this.model);
 
         request.subscribe({
             next: () => {
@@ -224,7 +224,7 @@ export class AllocationPlansConfigureComponent implements OnInit, AfterViewCheck
         this.confirmService.confirm(options).then((confirmed) => {
             if (confirmed) {
                 this.model.IsActive = false;
-                this.allocationPlanService.geographiesGeographyIDAllocationPlanConfigurationPut(this.geographyID, this.model).subscribe((response) => {
+                this.allocationPlanService.updateAllocationPlanConfigurationAllocationPlan(this.geographyID, this.model).subscribe((response) => {
                     this.alertService.pushAlert(
                         new Alert(
                             "This feature is currently disabled. You can configure this feature, but changes will not take effect until the feature is enabled.",
@@ -251,7 +251,7 @@ export class AllocationPlansConfigureComponent implements OnInit, AfterViewCheck
         this.confirmService.confirm(options).then((confirmed) => {
             if (confirmed) {
                 this.model.IsActive = true;
-                this.allocationPlanService.geographiesGeographyIDAllocationPlanConfigurationPut(this.geographyID, this.model).subscribe((response) => {
+                this.allocationPlanService.updateAllocationPlanConfigurationAllocationPlan(this.geographyID, this.model).subscribe((response) => {
                     this.alertService.clearAlerts();
                     this.alertService.pushAlert(new Alert("Enabled Allocation Plans.", AlertContext.Success));
                 });

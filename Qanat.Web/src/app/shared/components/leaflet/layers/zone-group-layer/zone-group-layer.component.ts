@@ -1,4 +1,3 @@
-import { CommonModule } from "@angular/common";
 import { AfterViewInit, Component, Input, OnChanges, SimpleChange, SimpleChanges } from "@angular/core";
 import { environment } from "src/environments/environment";
 import * as L from "leaflet";
@@ -6,8 +5,6 @@ import { MapLayerBase } from "../map-layer-base.component";
 import { WfsService } from "src/app/shared/services/wfs.service";
 @Component({
     selector: "zone-group-layer",
-    standalone: true,
-    imports: [CommonModule, MapLayerBase],
     templateUrl: "./zone-group-layer.component.html",
     styleUrls: ["./zone-group-layer.component.scss"],
 })

@@ -6,3 +6,4 @@ obj
 Properties
 src/assets/**
 src/app/shared/generated/**
+wwwroot/*

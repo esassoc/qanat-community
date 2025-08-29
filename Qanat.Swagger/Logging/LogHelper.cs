@@ -1,8 +1,6 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Azure.Core;
 using Microsoft.AspNetCore.Http;
 using Qanat.Models.Helpers;
 using Serilog;
@@ -11,20 +9,13 @@ using Serilog.Events;
 
 namespace Qanat.Swagger.Logging
 {
-    public class LogHelper
+    public class LogHelper(RequestDelegate next)
     {
-        private readonly RequestDelegate _next;
-
-        public LogHelper(RequestDelegate next)
-        {
-            _next = next;
-        }
-
         public async Task InvokeAsync(HttpContext httpContext)
         {
             EnrichLogContext(httpContext);
 
-            await _next(httpContext);
+            await next(httpContext);
         }
 
         public static LogEventLevel CustomGetLevel(HttpContext ctx, double _, Exception ex)

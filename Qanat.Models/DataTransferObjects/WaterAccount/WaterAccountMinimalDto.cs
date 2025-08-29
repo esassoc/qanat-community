@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Qanat.Models.DataTransferObjects;
+﻿namespace Qanat.Models.DataTransferObjects;
 
 public class WaterAccountMinimalDto
 {
@@ -12,8 +10,6 @@ public class WaterAccountMinimalDto
     public DateTime? UpdateDate { get; set; }
     public string WaterAccountPIN { get; set; }
     public DateTime CreateDate { get; set; }
-    public string ContactName { get; set; }
-    public string ContactAddress { get; set; }
 
     public string WaterAccountNameAndNumber { get; set; }
     public GeographySimpleDto Geography { get; set; }

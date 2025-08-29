@@ -144,6 +144,15 @@
     gap: $spacing-600;
 }
 
+.video-thumbnail {
+    a {
+        display: block;
+    }
+    img {
+        border-radius: $spacing-100;
+    }
+}
+
 .rich-link {
     display: grid;
     gap: $spacing-400;
@@ -174,6 +183,12 @@
         strong {
             color: $gray-1000;
         }
+    }
+
+    .two-col {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     }
 }
 

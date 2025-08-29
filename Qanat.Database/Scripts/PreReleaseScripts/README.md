@@ -1,4 +1,4 @@
-# DWRBDO Release Scripts
+# Release Scripts
 
 __For each release script:__
   * Add a line in Script.PreDeployment.ReleaseScripts.sql that calls your release script.

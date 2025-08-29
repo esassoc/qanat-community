@@ -6,8 +6,7 @@ import { PageHeaderComponent } from "src/app/shared/components/page-header/page-
     selector: "not-found",
     templateUrl: "./not-found.component.html",
     styleUrls: ["./not-found.component.scss"],
-    standalone: true,
-    imports: [PageHeaderComponent, AlertDisplayComponent],
+    imports: [PageHeaderComponent, AlertDisplayComponent]
 })
 export class NotFoundComponent implements OnInit {
     constructor() {}

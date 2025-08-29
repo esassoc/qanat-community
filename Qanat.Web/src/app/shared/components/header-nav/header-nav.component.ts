@@ -14,7 +14,7 @@ import { DropdownToggleDirective } from "../../directives/dropdown-toggle.direct
 import { WithFlagDirective } from "../../directives/with-flag.directive";
 import { RouterLink, RouterLinkActive } from "@angular/router";
 import { DropdownToggleCloseDirective } from "../../directives/dropdown-toggle-close.directive";
-import { NgIf, NgFor, AsyncPipe, DecimalPipe } from "@angular/common";
+import { AsyncPipe, DecimalPipe } from "@angular/common";
 import { IconComponent } from "../icon/icon.component";
 import { AuthorizationHelper } from "../../helpers/authorization-helper";
 import { WithScenarioPlannerRolePermissionDirective } from "../../directives/with-scenario-planner-role-permission.directive";
@@ -25,16 +25,13 @@ import { PermissionEnum } from "../../generated/enum/permission-enum";
     selector: "header-nav",
     templateUrl: "./header-nav.component.html",
     styleUrls: ["./header-nav.component.scss"],
-    standalone: true,
     imports: [
-        NgIf,
         DropdownToggleCloseDirective,
         RouterLink,
         RouterLinkActive,
         IconComponent,
         WithFlagDirective,
         DropdownToggleDirective,
-        NgFor,
         WithScenarioPlannerRolePermissionDirective,
         AsyncPipe,
         DecimalPipe,
@@ -75,7 +72,7 @@ export class HeaderNavComponent implements OnInit, OnDestroy {
             );
         });
 
-        this.geographySummaries$ = this.userService.userGeographySummaryGet().pipe(
+        this.geographySummaries$ = this.userService.getGeographySummaryUser().pipe(
             tap((geographySummaries) => {
                 this.waterAccounts = geographySummaries.flatMap((x) => x.WaterAccounts).sort((x) => x.Area);
                 this.numberOfWaterAccounts = geographySummaries.reduce((x, { WaterAccounts }) => x + WaterAccounts.length, 0);

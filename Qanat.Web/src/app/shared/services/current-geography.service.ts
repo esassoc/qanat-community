@@ -8,7 +8,7 @@ import { GeographyMinimalDto } from "../generated/model/geography-minimal-dto";
 })
 export class CurrentGeographyService {
     private geography$ = new BehaviorSubject<GeographyMinimalDto>(null);
-    private currentGeography: GeographyMinimalDto = null;
+    public currentGeography: GeographyMinimalDto = null;
 
     constructor(private geographyService: GeographyService) {}
 
@@ -24,7 +24,7 @@ export class CurrentGeographyService {
 
     public getCurrentGeography(): Observable<GeographyMinimalDto> {
         if (!this.currentGeography) {
-            this.geographyService.geographiesCurrentUserGet().subscribe((geographies) => {
+            this.geographyService.listForCurrentUserGeography().subscribe((geographies) => {
                 this.setCurrentGeography(geographies[0]);
             });
         }

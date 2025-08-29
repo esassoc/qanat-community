@@ -2,28 +2,38 @@
     <ng-template #popTitle>
         <div class="field-definition-title flex-between">
             <div class="mt-1">{{ waterType.WaterTypeName }}</div>
-            <button *ngIf="editable" type="button" class="btn btn-link" [hidden]="isEditing" (click)="enterEdit($event, waterType)">
-                <i class="fa fa-pencil-square-o" attr.aria-label="Edit the definition for {{ waterType.WaterTypeName }}"></i>
-            </button>
+            @if (editable) {
+                <button type="button" class="btn btn-link" [hidden]="isEditing" (click)="enterEdit($event, waterType)">
+                    <i class="fa fa-pencil-square-o" attr.aria-label="Edit the definition for {{ waterType.WaterTypeName }}"></i>
+                </button>
+            }
         </div>
     </ng-template>
 
     <ng-template #popContent>
-        <ng-container *ngIf="!isEditing">
-            <div *ngIf="waterType.WaterTypeDefinition" [innerHtml]="waterType.WaterTypeDefinition"></div>
-            <div *ngIf="!waterType.WaterTypeDefinition" class="hoverEmptySpace"></div>
-        </ng-container>
+        @if (!isEditing) {
+            @if (waterType.WaterTypeDefinition) {
+                <div [innerHtml]="waterType.WaterTypeDefinition"></div>
+            }
+            @if (!waterType.WaterTypeDefinition) {
+                <div class="hoverEmptySpace"></div>
+            }
+        }
 
-        <div *ngIf="isEditing">
-            <editor #tinyMceEditor [init]="tinyMceConfig" [(ngModel)]="editedContent"></editor>
-            <div class="editor-buttons">
-                <button type="button" class="btn btn-sm btn-primary mt-1 mr-1 mb-1" (click)="saveEdit(waterType)">Save</button>
-                <button type="button" class="btn btn-sm btn-secondary mt-1 mb-1" (click)="cancelEdit()">Cancel</button>
+        @if (isEditing) {
+            <div>
+                <editor #tinyMceEditor [init]="tinyMceConfig" [(ngModel)]="editedContent"></editor>
+                <div class="editor-buttons">
+                    <button type="button" class="btn btn-sm btn-primary mt-1 mr-1 mb-1" (click)="saveEdit(waterType)">Save</button>
+                    <button type="button" class="btn btn-sm btn-secondary mt-1 mb-1" (click)="cancelEdit()">Cancel</button>
+                </div>
             </div>
-        </div>
+        }
     </ng-template>
-    <span *ngIf="true" style="overflow: hidden; text-overflow: ellipsis">
-        {{ labelOverride ?? waterType.WaterTypeName }}
-        <i class="fas fa-question-circle small" [class.white]="white" [popper]="popContent" [useBodyContainer]="true" [popperTitle]="popTitle"></i>
-    </span>
+    @if (true) {
+        <span style="overflow: hidden; text-overflow: ellipsis">
+            {{ labelOverride ?? waterType.WaterTypeName }}
+            <i class="fas fa-question-circle small" [class.white]="white" [popper]="popContent" [useBodyContainer]="true" [popperTitle]="popTitle"></i>
+        </span>
+    }
 </div>

@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from "@angular/core";
 import { MonitoringWellService } from "src/app/shared/generated/api/monitoring-well.service";
 import { MonitoringWellMeasurementDataDto } from "src/app/shared/generated/model/models";
 import { default as vegaEmbed, VisualizationSpec } from "vega-embed";
-import { NgIf, DatePipe } from "@angular/common";
+import { DatePipe } from "@angular/common";
 import { LoadingDirective } from "../../../directives/loading.directive";
 import { PublicService } from "src/app/shared/generated/api/public.service";
 
@@ -10,8 +10,7 @@ import { PublicService } from "src/app/shared/generated/api/public.service";
     selector: "vega-monitoring-wells-measurement-chart",
     templateUrl: "./vega-monitoring-wells-measurement-chart.component.html",
     styleUrls: ["./vega-monitoring-wells-measurement-chart.component.scss"],
-    standalone: true,
-    imports: [LoadingDirective, NgIf, DatePipe],
+    imports: [LoadingDirective, DatePipe]
 })
 export class VegaMonitoringWellsMeasurementChartComponent implements OnInit {
     @Input() geographyID: number;
@@ -32,7 +31,7 @@ export class VegaMonitoringWellsMeasurementChartComponent implements OnInit {
     }
 
     private getChartData() {
-        this.publicService.publicGeographiesGeographyIDMonitoringWellSiteCodeGet(this.geographyID, this.siteCode).subscribe((monitoringWellMeasurements) => {
+        this.publicService.getMonitoringWellByGeographyAndSiteCodePublic(this.geographyID, this.siteCode).subscribe((monitoringWellMeasurements) => {
             this.chartData = monitoringWellMeasurements;
 
             if (monitoringWellMeasurements.length == 0) {
@@ -86,7 +85,7 @@ export class VegaMonitoringWellsMeasurementChartComponent implements OnInit {
                             },
                             scale: { domain: { param: "brush" } },
                         },
-                        y: { field: "Measurement", type: "quantitative", axis: { title: "Measurement (depth)", labelFontSize: 12 }, scale: { zero: false } },
+                        y: { field: "Measurement", type: "quantitative", axis: { title: "Elevation (ft)", labelFontSize: 12 }, scale: { zero: false } },
                         tooltip: [
                             { field: "MeasurementDate", type: "quantitative", title: "Date", timeUnit: "utcyearmonthdate", scale: { type: "utc" } },
                             { field: "Measurement", type: "nominal", title: "Measurement (depth)" },

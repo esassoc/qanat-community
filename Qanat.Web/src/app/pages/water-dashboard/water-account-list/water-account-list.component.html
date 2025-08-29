@@ -1,7 +1,6 @@
-<ng-container *ngIf="currentUser$ | async">
-    <ng-container *ngIf="geography$ | async as geography">
+@if (currentUser$ | async) {
+    @if (geography$ | async; as geography) {
         <water-dashboard-nav [geography]="geography" (waterAccountCreated)="onWaterAccountCreated()"> </water-dashboard-nav>
-
         <div class="full-width-page">
             <page-header
                 preTitle="Water Dashboard"
@@ -9,135 +8,92 @@
                 [customRichTextTypeID]="richTextID"
                 icon="WaterAccounts"
                 [templateBottomRight]="templateBottomRight"></page-header>
-
             <ng-template #templateBottomRight>
                 <button routerLink="/water-accounts/request-changes" class="btn btn-orange request-changes-button" [disabled]="isLoading || currentUserHasNoGeographies">
                     Request Water Account Changes
                 </button>
             </ng-template>
-
-            <div class="page-body" *ngIf="currentUserGeographies$ | async as currentUserGeographies" [loadingSpinner]="{ isLoading: isLoading && firstLoad, loadingHeight: 700 }">
-                <app-alert-display></app-alert-display>
-
-                <ng-container *ngIf="!currentUserHasNoGeographies; else noWaterAccountsMessage">
-                    <ng-container *ngIf="waterAccounts$ | async as waterAccounts">
-                        <qanat-grid-header
-                            *ngIf="gridRef"
-                            [grid]="gridRef"
-                            [rowDataCount]="waterAccounts?.length"
-                            [leftAlignClearFiltersButton]="true"
-                            [disableGlobalFilter]="selectedPanel === 'Map'">
-                            <div customGridActionsCenter>
-                                <div class="button-group tab-nav">
-                                    <button class="button-group__item btn-sm" [class.active]="selectedPanel === 'Grid'" (click)="toggleSelectedPanel('Grid')">
-                                        <icon icon="BulletedList"></icon>
-                                        Grid
-                                    </button>
-                                    <button class="button-group__item btn-sm" [class.active]="selectedPanel === 'Hybrid'" (click)="toggleSelectedPanel('Hybrid')">
-                                        <icon icon="Layout"></icon>
-                                        Hybrid
-                                    </button>
-                                    <button class="button-group__item btn-sm" [class.active]="selectedPanel === 'Map'" (click)="toggleSelectedPanel('Map')">
-                                        <icon icon="VerticalMap"></icon>
-                                        Map
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div customGridActionsRight>
-                                <div class="form-field" class="geography-selector">
-                                    <div class="field">
-                                        <select name="Geography" [(ngModel)]="currentGeography" (ngModelChange)="onGeographySelected($event)" [compareWith]="compareGeography">
-                                            <option *ngFor="let geography of currentUserGeographies" [ngValue]="geography">
-                                                {{ geography.GeographyName }}
-                                            </option>
-                                        </select>
+            @if (currentUserGeographies$ | async; as currentUserGeographies) {
+                <div class="page-body" [loadingSpinner]="{ isLoading: isLoading && firstLoad, loadingHeight: 700 }">
+                    <app-alert-display></app-alert-display>
+                    @if (!currentUserHasNoGeographies) {
+                        @if (waterAccounts$ | async; as waterAccounts) {
+                            <hybrid-map-grid
+                                [rowData]="waterAccounts"
+                                [columnDefs]="columnDefs$ | async"
+                                downloadFileName="water-accounts"
+                                entityIDField="WaterAccountID"
+                                (gridReady)="onGridReady($event)"
+                                (onMapLoad)="handleMapReady($event)"
+                                [selectedValue]="selectedWaterAccountID"
+                                (selectedValueChange)="onSelectedWaterAccountIDChanged($event)">
+                                <div headerActions>
+                                    <div class="form-field" class="geography-selector">
+                                        <div class="field">
+                                            <ng-select
+                                                name="Geography"
+                                                [(ngModel)]="currentGeography"
+                                                (ngModelChange)="onGeographySelected($event)"
+                                                [compareWith]="compareGeography"
+                                                [items]="currentUserGeographies"
+                                                [clearable]="false"
+                                                [searchable]="false"
+                                                bindLabel="GeographyName"
+                                                class="custom small">
+                                            </ng-select>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </qanat-grid-header>
-
-                        <div
-                            class="grid-12 mt-3"
-                            [loadingSpinner]="{
-                                isLoading: isLoading && !firstLoad,
-                                loadingHeight: 500,
-                            }">
-                            <div
-                                class="tab-nav-panel"
-                                [class.g-col-6]="selectedPanel === 'Hybrid'"
-                                [class.g-col-12]="selectedPanel === 'Grid'"
-                                [class.hidden]="selectedPanel === 'Map'">
-                                <qanat-grid
-                                    height="675px"
-                                    [rowData]="waterAccounts"
-                                    [columnDefs]="columnDefs$ | async"
-                                    [overrideDefaultGridHeader]="true"
-                                    rowSelection="single"
-                                    (gridReady)="onGridReady($event)"
-                                    (gridRefReady)="onGridRefReady($event)"
-                                    (selectionChanged)="onGridSelectionChanged()"
-                                    downloadFileName="{{ geography.GeographyName.toLowerCase() }}-water-accounts"
-                                    [colIDsToExclude]="currentUserHasManagerPermissionsForSelectedGeography ? ['0'] : []"></qanat-grid>
-                            </div>
-
-                            <div
-                                class="tab-nav-panel"
-                                [class.g-col-6]="selectedPanel === 'Hybrid'"
-                                [class.g-col-12]="selectedPanel === 'Map'"
-                                [class.hidden]="selectedPanel === 'Grid'">
-                                <qanat-map class="location-card" mapHeight="720px" (onMapLoad)="handleMapReady($event)">
-                                    <ng-container *ngIf="mapIsReady">
-                                        <ng-container *ngIf="waterAccountIDs$ | async as waterAccountIDs">
-                                            <ng-container *ngIf="wells$ | async as wells">
+                                @if (mapIsReady) {
+                                    <div mapLayers [loadingSpinner]="{ isLoading: layerLoading, opacity: 0.33 }">
+                                        @if (waterAccountIDs$ | async; as waterAccountIDs) {
+                                            @if (wells$ | async; as wells) {
                                                 <water-accounts-layer
                                                     [geographyID]="geography.GeographyID"
-                                                    [waterAccountIDs]="waterAccountIDs"
                                                     [selectedWaterAccountID]="selectedWaterAccountID"
+                                                    [waterAccountIDs]="currentUserHasOverallPermission ? null : waterAccountIDs"
                                                     [wells]="wells"
                                                     [map]="map"
                                                     [layerControl]="layerControl"
                                                     (layerBoundsCalculated)="handleLayerBoundsCalculated($event)"
-                                                    (waterAccountSelected)="onMapSelectionChanged($event)">
+                                                    (waterAccountSelected)="onSelectedWaterAccountIDChanged($event)"
+                                                    (layerStartedLoading)="onLayerLoadStarted()"
+                                                    (layerFinishedLoading)="onLayerLoadFinished()">
                                                 </water-accounts-layer>
-                                            </ng-container>
-                                        </ng-container>
-
-                                        <gsa-boundaries *ngIf="geography" [displayOnLoad]="false" [map]="map" [geographyID]="geography.GeographyID" [layerControl]="layerControl">
-                                        </gsa-boundaries>
-
-                                        <zone-group-layer
-                                            *ngFor="let zoneGroup of zoneGroups$ | async"
-                                            [displayOnLoad]="false"
-                                            [zoneGroupID]="zoneGroup.ZoneGroupID"
-                                            [zoneGroupName]="zoneGroup.ZoneGroupName"
-                                            [map]="map"
-                                            [layerControl]="layerControl">
-                                        </zone-group-layer>
-
-                                        <geography-external-map-layer
-                                            *ngFor="let externalMapLayer of externalMapLayers$ | async"
-                                            [map]="map"
-                                            [layerControl]="layerControl"
-                                            [externalMapLayer]="externalMapLayer">
-                                        </geography-external-map-layer>
-                                    </ng-container>
-                                </qanat-map>
+                                            }
+                                        }
+                                        @if (geography) {
+                                            <gsa-boundaries [displayOnLoad]="false" [map]="map" [geographyID]="geography.GeographyID" [layerControl]="layerControl">
+                                            </gsa-boundaries>
+                                        }
+                                        @for (zoneGroup of zoneGroups$ | async; track zoneGroup) {
+                                            <zone-group-layer
+                                                [displayOnLoad]="false"
+                                                [zoneGroupID]="zoneGroup.ZoneGroupID"
+                                                [zoneGroupName]="zoneGroup.ZoneGroupName"
+                                                [map]="map"
+                                                [layerControl]="layerControl">
+                                            </zone-group-layer>
+                                        }
+                                        @for (externalMapLayer of externalMapLayers$ | async; track externalMapLayer) {
+                                            <geography-external-map-layer [map]="map" [layerControl]="layerControl" [externalMapLayer]="externalMapLayer">
+                                            </geography-external-map-layer>
+                                        }
+                                    </div>
+                                }
+                            </hybrid-map-grid>
+                        }
+                    } @else {
+                        <div class="alert alert-info">
+                            <div class="alert-content">
+                                <i class="fa fa-info"></i>
+                                Your user profile does not currently have access to any Water Accounts. Claim Water Accounts to get started or contact a water manager for your
+                                geography for assistance.
                             </div>
                         </div>
-                    </ng-container>
-                </ng-container>
-
-                <ng-template #noWaterAccountsMessage>
-                    <div class="alert alert-info">
-                        <div class="alert-content">
-                            <i class="fa fa-info"></i>
-                            Your user profile does not currently have access to any Water Accounts. Claim Water Accounts to get started or contact a water manager for your
-                            geography for assistance.
-                        </div>
-                    </div>
-                </ng-template>
-            </div>
+                    }
+                </div>
+            }
         </div>
-    </ng-container>
-</ng-container>
+    }
+}

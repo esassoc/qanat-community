@@ -15,8 +15,8 @@ public class OpenETSyncJob : ScheduledBackgroundJobBase<OpenETSyncJob>
 {
     private readonly OpenETSyncService _openETSyncService;
 
-    public OpenETSyncJob(ILogger<OpenETSyncJob> logger, IWebHostEnvironment webHostEnvironment, QanatDbContext qanatDbContext, IOptions<QanatConfiguration> qanatConfiguration, OpenETSyncService openETSyncService, SitkaSmtpClientService sitkaSmtpClientService)
-        : base(JobName, logger, webHostEnvironment, qanatDbContext, qanatConfiguration, sitkaSmtpClientService)
+    public OpenETSyncJob(ILogger<OpenETSyncJob> logger, IWebHostEnvironment webHostEnvironment, IOptions<QanatConfiguration> qanatConfiguration, OpenETSyncService openETSyncService, SitkaSmtpClientService sitkaSmtpClientService)
+        : base(JobName, logger, webHostEnvironment, qanatConfiguration, sitkaSmtpClientService)
     {
         _openETSyncService = openETSyncService;
     }
@@ -24,21 +24,23 @@ public class OpenETSyncJob : ScheduledBackgroundJobBase<OpenETSyncJob>
     public override List<RunEnvironment> RunEnvironments => new()
     {
         //RunEnvironment.Development, 
+        RunEnvironment.Staging,
         RunEnvironment.Production
     };
 
     public const string JobName = "OpenET Sync";
 
-    protected override async void RunJobImplementation()
+    protected override void RunJobImplementation()
     {
+        using var dbContext = new QanatDbContext(QanatConfiguration.DB_CONNECTION_STRING);
         // we need to create any missing OpenETSync year month combos for each geography, if they have OpenETSync turned on
         var today = DateTime.Today;
         var currentYear = today.Year;
-        var geographies = DbContext.Geographies.Include(x => x.OpenETSyncs).ToList().Where(x => x.IsOpenETActive).ToList();
+        var geographies = dbContext.Geographies.Include(x => x.OpenETSyncs).ToList().Where(x => x.IsOpenETActive).ToList();
         var newOpenETSyncs = new List<OpenETSync>();
         foreach (var geography in geographies)
         {
-            var geographyReportingPeriods = DbContext.ReportingPeriods.AsNoTracking().Where(x => x.GeographyID == geography.GeographyID);
+            var geographyReportingPeriods = dbContext.ReportingPeriods.AsNoTracking().Where(x => x.GeographyID == geography.GeographyID).ToList();
             var geographyStartingReportingPeriod = geographyReportingPeriods.MinBy(x => x.StartDate);
             var geographyStartYear = geographyStartingReportingPeriod.StartDate.Year;
 
@@ -69,8 +71,8 @@ public class OpenETSyncJob : ScheduledBackgroundJobBase<OpenETSyncJob>
 
         if (newOpenETSyncs.Any())
         {
-            await DbContext.OpenETSyncs.AddRangeAsync(newOpenETSyncs);
-            await DbContext.SaveChangesAsync();
+            dbContext.OpenETSyncs.AddRange(newOpenETSyncs);
+            dbContext.SaveChanges();
         }
 
         // 12/11/23 SMG - Commented out the part that actually runs the OpenET Sync. We still want the months and years to be populated automatically

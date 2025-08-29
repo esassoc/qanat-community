@@ -104,11 +104,11 @@ public class GETService
 
         scenarioRun.LastUpdateDate = DateTime.UtcNow;
         scenarioRun.GETRunID = getRunResponseModel.RunID;
-        scenarioRun.ScenarioRunStatusID = ConvertGETRunStatusIDToGETActionStatusID(getRunResponseModel).ScenarioRunStatusID;
+        scenarioRun.ScenarioRunStatusID = ConvertGETRunStatusIDToScenarioRunStatusID(getRunResponseModel).ScenarioRunStatusID;
         await _dbContext.SaveChangesAsync();
     }
 
-    private ScenarioRunStatus ConvertGETRunStatusIDToGETActionStatusID(GETRunResponseModel getRunResponseModel)
+    private ScenarioRunStatus ConvertGETRunStatusIDToScenarioRunStatusID(GETRunResponseModel getRunResponseModel)
     {
         var scenarioRunStatus = ScenarioRunStatus.All.SingleOrDefault(x => x.GETRunStatusID == getRunResponseModel.RunStatus.RunStatusID);
         if (scenarioRunStatus == null)
@@ -125,7 +125,7 @@ public class GETService
         var scenarioRun = ScenarioRuns.GetByID(_dbContext, scenarioRunID);
         if (scenarioRun == null)
         {
-            _logger.LogError($"getAction with {scenarioRunID} was not found.");
+            _logger.LogError($"ScenarioRun with {scenarioRunID} was not found.");
             return;
         }
 
@@ -153,9 +153,9 @@ public class GETService
         _logger.LogInformation($"Retrieved getRunResponseModel with {runResponseString}");
 
         scenarioRun.LastUpdateDate = DateTime.UtcNow;
-        scenarioRun.ScenarioRunStatusID = ConvertGETRunStatusIDToGETActionStatusID(getRunResponseModel).ScenarioRunStatusID;
+        scenarioRun.ScenarioRunStatusID = ConvertGETRunStatusIDToScenarioRunStatusID(getRunResponseModel).ScenarioRunStatusID;
 
-        if (getRunResponseModel.RunStatus.RunStatusID == GETActionStatus.Complete.GETRunStatusID)
+        if (getRunResponseModel.RunStatus.RunStatusID == ScenarioRunStatus.Complete.GETRunStatusID)
         {
             foreach (var outputFileType in ScenarioRunOutputFileType.All)
             {

@@ -3,7 +3,7 @@
 //  Source Table: [dbo].[OpenETDataType]
 
 import { LookupTableEntry } from "src/app/shared/models/lookup-table-entry";
-import { SelectDropdownOption } from "src/app/shared/components/inputs/select-dropdown/select-dropdown.component"
+import { SelectDropdownOption } from "src/app/shared/components/forms/form-field/form-field.component"
 
 export enum OpenETDataTypeEnum {
   Evapotranspiration = 1,
@@ -14,4 +14,4 @@ export const OpenETDataTypes: LookupTableEntry[]  = [
   { Name: "Evapotranspiration", DisplayName: "Evapotranspiration", Value: 1 },
   { Name: "Precipitation", DisplayName: "Precipitation", Value: 2 }
 ];
-export const OpenETDataTypesAsSelectDropdownOptions = [{ Value: null, Label: "- Select -", Disabled: true }, ...OpenETDataTypes.map((x) => ({ Value: x.Value, Label: x.DisplayName } as SelectDropdownOption))];
+export const OpenETDataTypesAsSelectDropdownOptions = OpenETDataTypes.map((x) => ({ Value: x.Value, Label: x.DisplayName } as SelectDropdownOption));

@@ -18,15 +18,14 @@ import { AlertDisplayComponent } from "../../../../shared/components/alert-displ
 import { FieldDefinitionComponent } from "../../../../shared/components/field-definition/field-definition.component";
 import { ButtonComponent } from "../../../../shared/components/button/button.component";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
-import { NgIf, NgFor, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { PublicService } from "src/app/shared/generated/api/public.service";
 
 @Component({
     selector: "onboard-water-account-pins",
     templateUrl: "./onboard-water-account-pins.component.html",
     styleUrls: ["./onboard-water-account-pins.component.scss"],
-    standalone: true,
-    imports: [NgIf, PageHeaderComponent, FormsModule, ButtonComponent, FieldDefinitionComponent, AlertDisplayComponent, NgFor, CustomRichTextComponent, RouterLink, AsyncPipe],
+    imports: [PageHeaderComponent, FormsModule, ButtonComponent, FieldDefinitionComponent, AlertDisplayComponent, CustomRichTextComponent, RouterLink, AsyncPipe]
 })
 export class OnboardWaterAccountPINsComponent implements OnInit {
     public currentUser$: Observable<UserDto>;
@@ -50,10 +49,10 @@ export class OnboardWaterAccountPINsComponent implements OnInit {
         this.currentUser$ = this.authenticationService.getCurrentUser();
 
         const geographyName = this.route.snapshot.paramMap.get(routeParams.geographyName);
-        this.geography$ = this.publicService.publicGeographiesNameGeographyNameGet(geographyName).pipe(
+        this.geography$ = this.publicService.getGeographyByNamePublic(geographyName).pipe(
             tap((geography) => {
                 this.geographyID = geography.GeographyID;
-                this.claimedWaterAccountPINs$ = this.waterAccountUserService.geographiesGeographyIDWaterAccountPINsGet(this.geographyID);
+                this.claimedWaterAccountPINs$ = this.waterAccountUserService.getUserWaterAccountPINsForGeographyWaterAccountUser(this.geographyID);
             })
         );
     }
@@ -63,8 +62,8 @@ export class OnboardWaterAccountPINsComponent implements OnInit {
     }
 
     onSubmit(form: NgForm): void {
-        this.waterAccountUserService.geographiesGeographyIDWaterAccountWaterAccountPINWaterAccountPINPost(this.geographyID, this.waterAccountPINToClaim).subscribe((response) => {
-            this.claimedWaterAccountPINs$ = this.waterAccountUserService.geographiesGeographyIDWaterAccountPINsGet(this.geographyID);
+        this.waterAccountUserService.setAccountToUserStagingWaterAccountUser(this.geographyID, this.waterAccountPINToClaim).subscribe((response) => {
+            this.claimedWaterAccountPINs$ = this.waterAccountUserService.getUserWaterAccountPINsForGeographyWaterAccountUser(this.geographyID);
             this.waterAccountPINToClaim = "";
             this.alertService.clearAlerts();
             this.alertService.pushAlert(new Alert("Water Acount PIN successfully saved.", AlertContext.Success, true));

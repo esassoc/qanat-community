@@ -10,4 +10,5 @@ public class ZoneGroupDto
     public int SortOrder { get; set; }
     public List<ZoneDetailedDto> ZoneList { get; set; }
     public bool HasAllocationPlan { get; set; }
+    public bool DisplayToAccountHolders { get; set; }
 }

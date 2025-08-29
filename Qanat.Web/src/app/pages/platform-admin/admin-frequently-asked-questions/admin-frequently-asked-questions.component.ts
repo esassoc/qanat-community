@@ -1,35 +1,32 @@
-import { Component, OnInit, ViewContainerRef } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { ColDef } from "ag-grid-community";
-import { Observable, forkJoin, map, tap } from "rxjs";
+import { Observable } from "rxjs";
 import { ConfirmService } from "src/app/shared/services/confirm/confirm.service";
 import { UtilityFunctionsService } from "src/app/shared/services/utility-functions.service";
 import { CreateFaqModalComponent } from "src/app/shared/components/faqs/create-faq-modal/create-faq-modal.component";
-import { EditFaqModalComponent, FAQContext } from "src/app/shared/components/faqs/edit-faq-modal/edit-faq-modal.component";
+import { EditFaqModalComponent } from "src/app/shared/components/faqs/edit-faq-modal/edit-faq-modal.component";
 import { FrequentlyAskedQuestionService } from "src/app/shared/generated/api/frequently-asked-question.service";
 import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
-import { FaqDisplayLocationTypeSimpleDto } from "src/app/shared/generated/model/faq-display-location-type-simple-dto";
 import { FrequentlyAskedQuestionGridDto } from "src/app/shared/generated/model/frequently-asked-question-grid-dto";
 import { Alert } from "src/app/shared/models/alert";
 import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
 import { AlertService } from "src/app/shared/services/alert.service";
-import { ModalService, ModalSizeEnum, ModalThemeEnum } from "src/app/shared/services/modal/modal.service";
 import { QanatGridComponent } from "src/app/shared/components/qanat-grid/qanat-grid.component";
-import { NgIf, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { AlertDisplayComponent } from "src/app/shared/components/alert-display/alert-display.component";
 import { PublicService } from "src/app/shared/generated/api/public.service";
+import { FaqDisplayLocationTypes } from "src/app/shared/generated/enum/faq-display-location-type-enum";
+import { DialogService } from "@ngneat/dialog";
 
 @Component({
     selector: "admin-frequently-asked-questions",
     templateUrl: "./admin-frequently-asked-questions.component.html",
     styleUrl: "./admin-frequently-asked-questions.component.scss",
-    standalone: true,
-    imports: [PageHeaderComponent, AlertDisplayComponent, NgIf, QanatGridComponent, AsyncPipe],
+    imports: [PageHeaderComponent, AlertDisplayComponent, QanatGridComponent, AsyncPipe],
 })
 export class AdminFrequentlyAskedQuestionsComponent implements OnInit {
     frequentlyAskedQuestions$: Observable<FrequentlyAskedQuestionGridDto[]>;
-    faqDisplayLocationTypes$: Observable<FaqDisplayLocationTypeSimpleDto[]>;
-    faqDisplayLocationTypes: FaqDisplayLocationTypeSimpleDto[];
     colDefs: ColDef[];
     private gridApi;
     customRichTextID = CustomRichTextTypeEnum.AdminFAQ;
@@ -38,10 +35,9 @@ export class AdminFrequentlyAskedQuestionsComponent implements OnInit {
         private frequentlyAskedQuestionsService: FrequentlyAskedQuestionService,
         private publicService: PublicService,
         private utilityFunctionsService: UtilityFunctionsService,
-        private modalService: ModalService,
-        private viewContainerRef: ViewContainerRef,
         private confirmService: ConfirmService,
-        private alertService: AlertService
+        private alertService: AlertService,
+        private dialogService: DialogService
     ) {}
 
     ngOnInit(): void {
@@ -50,14 +46,7 @@ export class AdminFrequentlyAskedQuestionsComponent implements OnInit {
     }
 
     loadFAQs() {
-        this.frequentlyAskedQuestions$ = forkJoin([this.publicService.publicFaqGet(), this.frequentlyAskedQuestionsService.faqDisplayLocationsGet()]).pipe(
-            tap((x) => {
-                this.faqDisplayLocationTypes = x[1];
-            }),
-            map((x) => {
-                return x[0];
-            })
-        );
+        this.frequentlyAskedQuestions$ = this.publicService.listFrequentlyAskedQuestionsPublic();
     }
 
     loadColDefs() {
@@ -84,11 +73,9 @@ export class AdminFrequentlyAskedQuestionsComponent implements OnInit {
                 ValueGetter: (params) => {
                     const ids = params.data.FaqDisplayLocations.map((x) => x.FaqDisplayLocationTypeID);
                     if (ids.length > 0) {
-                        let temp = "";
-                        ids.forEach((id) => {
-                            temp += this.faqDisplayLocationTypes.find((x) => x.FaqDisplayLocationTypeID == id).FaqDisplayLocationTypeDisplayName + ", ";
-                        });
-                        return temp;
+                        return FaqDisplayLocationTypes.filter((x) => ids.includes(x.Value))
+                            .map((x) => x.DisplayName)
+                            .join(", ");
                     }
                 },
             }),
@@ -100,25 +87,35 @@ export class AdminFrequentlyAskedQuestionsComponent implements OnInit {
     };
 
     public openCreateNewModal() {
-        this.modalService
-            .open(CreateFaqModalComponent, null, { CloseOnClickOut: false, TopLayer: false, ModalSize: ModalSizeEnum.Large, ModalTheme: ModalThemeEnum.Light })
-            .instance.result.then((result) => {
-                if (result) {
-                    this.loadFAQs();
-                }
-            });
+        const dialogRef = this.dialogService.open(CreateFaqModalComponent, {
+            data: {
+                FrequentlyAskedQuestionID: null,
+                FaqDisplayLocationTypeID: null,
+            },
+            size: "lg",
+        });
+
+        dialogRef.afterClosed$.subscribe((result) => {
+            if (result) {
+                this.loadFAQs();
+            }
+        });
     }
 
     public openEditModal(faqID: number) {
-        this.modalService
-            .open(EditFaqModalComponent, null, { CloseOnClickOut: false, TopLayer: false, ModalSize: ModalSizeEnum.Large, ModalTheme: ModalThemeEnum.Light }, {
+        const dialogRef = this.dialogService.open(EditFaqModalComponent, {
+            data: {
                 FrequentlyAskedQuestionID: faqID,
-            } as FAQContext)
-            .instance.result.then((result) => {
-                if (result) {
-                    this.loadFAQs();
-                }
-            });
+                FaqDisplayLocationTypeID: null,
+            },
+            size: "lg",
+        });
+
+        dialogRef.afterClosed$.subscribe((result) => {
+            if (result) {
+                this.loadFAQs();
+            }
+        });
     }
 
     public openDeleteModal(faqID: number) {
@@ -132,7 +129,7 @@ export class AdminFrequentlyAskedQuestionsComponent implements OnInit {
             })
             .then((confirmed) => {
                 if (confirmed) {
-                    this.frequentlyAskedQuestionsService.faqFrequentlyAskedQuestionIDDelete(faqID).subscribe((response) => {
+                    this.frequentlyAskedQuestionsService.deleteFrequentlyAskedQuestion(faqID).subscribe((response) => {
                         this.loadFAQs();
                         this.alertService.clearAlerts();
                         this.alertService.pushAlert(new Alert("Frequently Asked Question Successfully Deleted.", AlertContext.Success));

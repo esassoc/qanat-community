@@ -1,3 +1,4 @@
+@use "sass:color";
 @use "/src/scss/abstracts" as *;
 
 .parcel-list {
@@ -10,6 +11,9 @@
         border: 0;
         border-bottom: 1px solid rgba($black, 0.1) !important;
         border-radius: 0;
+        .ng-placeholder {
+            top: 5px !important;
+        }
     }
 
     .search input {
@@ -37,7 +41,7 @@
         }
 
         &.recently-active {
-            background-color: lighten($primary, 40%);
+            background-color: color.adjust($primary, $lightness: 40%);
         }
 
         &:hover {

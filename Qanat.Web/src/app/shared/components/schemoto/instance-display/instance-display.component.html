@@ -1,0 +1,10 @@
+@for (recordSetSchemaWithRecordSet of recordSetSchemataWithRecordSets; track recordSetSchemaWithRecordSet) {
+    <div class="card" [class]="[gridCol]">
+        <div class="card-header">
+            <h3 class="card-title">{{ recordSetSchemaWithRecordSet.RecordSetSchema.Name }}</h3>
+        </div>
+        <div class="card-body grid-12">
+            <record-set-grid-display [recordSetSchemaWithRecordSet]="recordSetSchemaWithRecordSet"></record-set-grid-display>
+        </div>
+    </div>
+}

@@ -12,3 +12,13 @@ CREATE TABLE [dbo].[ParcelSupply](
 	constraint [FK_ParcelSupply_Parcel_ParcelID_GeographyID] foreign key ([ParcelID], [GeographyID]) references dbo.[Parcel]([ParcelID], [GeographyID]),
 	constraint [FK_ParcelSupply_WaterType_WaterTypeID_GeographyID] foreign key ([WaterTypeID], [GeographyID]) references dbo.[WaterType]([WaterTypeID], [GeographyID])
 )
+GO
+
+CREATE INDEX IX_ParcelSupply_GeographyID_ParcelID_EffectiveDate ON dbo.ParcelSupply(GeographyID, ParcelID, EffectiveDate);
+GO
+
+CREATE INDEX IX_ParcelSupply_WaterTypeID on dbo.ParcelSupply(WaterTypeID);
+GO
+
+CREATE INDEX IX_ParcelSupply_UserID on dbo.ParcelSupply(UserID);
+GO

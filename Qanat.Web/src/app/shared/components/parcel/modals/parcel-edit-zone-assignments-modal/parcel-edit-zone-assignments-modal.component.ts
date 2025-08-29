@@ -1,16 +1,13 @@
-import { Component, ComponentRef } from "@angular/core";
-import { CommonModule } from "@angular/common";
+import { Component, ComponentRef, inject } from "@angular/core";
 import { FormArray, FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { Observable, tap, map } from "rxjs";
 import { FormFieldComponent, FormFieldType, FormInputOption } from "src/app/shared/components/forms/form-field/form-field.component";
-import { ModalComponent } from "src/app/shared/components/modal/modal.component";
 import { ParcelContext } from "src/app/shared/components/water-account/modals/add-parcel-to-water-account/add-parcel-to-water-account.component";
 import { ParcelService } from "src/app/shared/generated/api/parcel.service";
 import { ParcelMinimalDto } from "src/app/shared/generated/model/parcel-minimal-dto";
 import { Alert } from "src/app/shared/models/alert";
 import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
 import { AlertService } from "src/app/shared/services/alert.service";
-import { IModal, ModalService } from "src/app/shared/services/modal/modal.service";
 import {
     ParcelDetailDto,
     ParcelZoneAssignmentDto,
@@ -20,20 +17,19 @@ import {
 } from "src/app/shared/generated/model/models";
 import { ZoneGroupService } from "src/app/shared/generated/api/zone-group.service";
 import { NoteComponent } from "src/app/shared/components/note/note.component";
-import { IconComponent } from "../../../icon/icon.component";
+import { AsyncPipe } from "@angular/common";
+import { DialogRef } from "@ngneat/dialog";
 
 @Component({
     selector: "parcel-edit-zone-assignments-modal",
     standalone: true,
-    imports: [CommonModule, IconComponent, FormsModule, ReactiveFormsModule, FormFieldComponent, NoteComponent],
+    imports: [FormsModule, ReactiveFormsModule, FormFieldComponent, NoteComponent, AsyncPipe],
     templateUrl: "./parcel-edit-zone-assignments-modal.component.html",
     styleUrls: ["./parcel-edit-zone-assignments-modal.component.scss"],
 })
-export class ParcelEditZoneAssignmentsModalComponent implements IModal {
-    modalComponentRef: ComponentRef<ModalComponent>;
+export class ParcelEditZoneAssignmentsModalComponent {
+    public ref: DialogRef<ParcelContext, boolean> = inject(DialogRef);
     public FormFieldType = FormFieldType;
-
-    public modalContext: ParcelContext;
 
     public parcel$: Observable<ParcelMinimalDto>;
 
@@ -46,7 +42,6 @@ export class ParcelEditZoneAssignmentsModalComponent implements IModal {
     });
 
     constructor(
-        private modalService: ModalService,
         private parcelService: ParcelService,
         private zoneGroupService: ZoneGroupService,
         private alertService: AlertService,
@@ -54,10 +49,10 @@ export class ParcelEditZoneAssignmentsModalComponent implements IModal {
     ) {}
 
     ngOnInit(): void {
-        this.parcel$ = this.parcelService.parcelsParcelIDZonesGet(this.modalContext.ParcelID).pipe(
+        this.parcel$ = this.parcelService.getParcelWithZonesDtoByIDParcel(this.ref.data.ParcelID).pipe(
             tap((parcel) => {
                 this.formGroup.controls.ParcelID.patchValue(parcel.ParcelID);
-                this.zoneGroups$ = this.zoneGroupService.geographiesGeographyIDZoneGroupsGet(this.modalContext.GeographyID).pipe(
+                this.zoneGroups$ = this.zoneGroupService.listZoneGroup(this.ref.data.GeographyID).pipe(
                     tap((x) => {
                         const zoneGroups = x.map((zoneGroup) => this.createZoneGroupType(zoneGroup, parcel));
                         this.formGroup.setControl("ParcelZoneAssignments", this.formBuilder.array(zoneGroups));
@@ -85,16 +80,16 @@ export class ParcelEditZoneAssignmentsModalComponent implements IModal {
     }
 
     close() {
-        this.modalService.close(this.modalComponentRef, false);
+        this.ref.close(false);
     }
 
     save() {
         this.isLoadingSubmit = true;
-        this.parcelService.parcelsParcelIDEditZoneAssignmentsPost(this.modalContext.ParcelID, this.formGroup.value).subscribe(
+        this.parcelService.editParcelZoneAssignmentsParcel(this.ref.data.ParcelID, this.formGroup.value).subscribe(
             () => {
                 this.alertService.clearAlerts();
                 this.alertService.pushAlert(new Alert("Successfully updated parcel Zone Assignments", AlertContext.Success));
-                this.modalService.close(this.modalComponentRef, true);
+                this.ref.close(true);
             },
             (error: any) => {
                 this.isLoadingSubmit = false;

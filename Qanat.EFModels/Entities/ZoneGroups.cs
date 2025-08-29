@@ -8,72 +8,109 @@ namespace Qanat.EFModels.Entities;
 
 public class ZoneGroups
 {
-    private static IQueryable<ZoneGroup> GetImplWithTracking(QanatDbContext dbContext)
+    public static List<ZoneGroupMinimalDto> GetZoneGroupsByGeography(QanatDbContext dbContext, int geographyID, bool callingUserIsAdminOrWaterManager)
     {
-        return dbContext.ZoneGroups.Include(x => x.Geography)
-                                   .Include(x => x.Zones)
-                                        .ThenInclude(x => x.ParcelZones)
-                                        .ThenInclude(x => x.Parcel)
-                                   .Include(x => x.GeographyAllocationPlanConfigurations)
-                                   .AsSplitQuery();
-    }
-
-    public static List<ZoneGroupMinimalDto> GetZoneGroupsByGeography(QanatDbContext dbContext, int geographyID)
-    {
-        return dbContext.ZoneGroups.Include(x => x.Geography)
+        var zoneGroupMinimalDtos = dbContext.ZoneGroups.AsNoTracking()
+            .Include(x => x.Geography)
             .Include(x => x.Zones)
             .Include(x => x.GeographyAllocationPlanConfigurations)
             .AsSplitQuery()
-            .AsNoTracking().Where(x => x.GeographyID == geographyID)
+            .Where(x => x.GeographyID == geographyID)
             .OrderBy(x => x.SortOrder)
             .Select(x => x.AsZoneGroupMinimalDto()).ToList();
+
+        if (!callingUserIsAdminOrWaterManager)
+        {
+            zoneGroupMinimalDtos = zoneGroupMinimalDtos.Where(x => x.DisplayToAccountHolders).ToList();
+        }
+
+        return zoneGroupMinimalDtos;
     }
 
-    public static List<ZoneGroupDto> ListByGeographyAsDto(QanatDbContext dbContext, int geographyID)
+    public static List<ZoneGroupDto> ListByGeographyAsDto(QanatDbContext dbContext, int geographyID, bool callingUserIsAdminOrWaterManager)
     {
-        return GetImplWithTracking(dbContext)
-            .AsNoTracking().Where(x => x.GeographyID == geographyID)
+        var zoneGroups = dbContext.ZoneGroups.AsNoTracking()
+            .Include(x => x.Geography)
+            .Include(x => x.Zones).ThenInclude(x => x.ParcelZones).ThenInclude(x => x.Parcel)
+            .Include(x => x.GeographyAllocationPlanConfigurations)
+            .AsSplitQuery()
+            .Where(x => x.GeographyID == geographyID)
             .OrderBy(x => x.SortOrder)
             .Select(x => x.AsDto()).ToList();
+
+        if (!callingUserIsAdminOrWaterManager)
+        {
+            zoneGroups = zoneGroups.Where(x => x.DisplayToAccountHolders).ToList();
+        }
+
+        return zoneGroups;
     }
 
-    public static ZoneGroup GetByZoneGroupSlug(QanatDbContext dbContext, string zoneGroupSlug, int geographyID)
+    public static ZoneGroup GetByZoneGroupSlug(QanatDbContext dbContext, int geographyID, string zoneGroupSlug, bool isAdminOrWaterManager)
     {
-        return GetImplWithTracking(dbContext).AsNoTracking()
-            .SingleOrDefault(x => x.ZoneGroupSlug == zoneGroupSlug && x.GeographyID == geographyID);
+        var zoneGroup = dbContext.ZoneGroups.AsNoTracking()
+            .Include(x => x.Geography)
+            .Include(x => x.Zones).ThenInclude(x => x.ParcelZones).ThenInclude(x => x.Parcel)
+            .Include(x => x.GeographyAllocationPlanConfigurations)
+            .AsSplitQuery()
+            .SingleOrDefault(x => x.GeographyID == geographyID && x.ZoneGroupSlug == zoneGroupSlug);
+
+        if (zoneGroup is { DisplayToAccountHolders: false } && !isAdminOrWaterManager)
+        {
+            return null;
+        }
+
+        return zoneGroup;
     }
 
-    public static ZoneGroupMinimalDto GetByZoneGroupSlugAsMinimalDto(QanatDbContext dbContext, string zoneGroupSlug, int geographyID)
+    public static ZoneGroupMinimalDto GetByZoneGroupSlugAsMinimalDto(QanatDbContext dbContext, int geographyID, string zoneGroupSlug, bool isAdminOrWaterManager)
     {
-        return GetByZoneGroupSlug(dbContext, zoneGroupSlug, geographyID)?.AsZoneGroupMinimalDto();
+        var zoneGroup = GetByZoneGroupSlug(dbContext, geographyID, zoneGroupSlug, isAdminOrWaterManager);
+        var zoneGroupAsMinimalDto = zoneGroup?.AsZoneGroupMinimalDto();
+        return zoneGroupAsMinimalDto;
     }
 
     public static ZoneGroup GetByID(QanatDbContext dbContext, int zoneGroupID)
     {
-        return GetImplWithTracking(dbContext).SingleOrDefault(x => x.ZoneGroupID == zoneGroupID);
+        var zoneGroup = dbContext.ZoneGroups.AsNoTracking()
+            .Include(x => x.Geography)
+            .Include(x => x.Zones).ThenInclude(x => x.ParcelZones).ThenInclude(x => x.Parcel)
+            .Include(x => x.GeographyAllocationPlanConfigurations)
+            .AsSplitQuery()
+            .SingleOrDefault(x => x.ZoneGroupID == zoneGroupID);
+
+        return zoneGroup;
     }
 
     public static ZoneGroupMinimalDto CreateZoneGroup(QanatDbContext dbContext, ZoneGroupMinimalDto zoneGroupMinimalDto)
     {
-        var zoneGroup = new ZoneGroup();
-        zoneGroup.GeographyID = zoneGroupMinimalDto.GeographyID;
-        zoneGroup.ZoneGroupName = zoneGroupMinimalDto.ZoneGroupName;
-        zoneGroup.ZoneGroupDescription = zoneGroupMinimalDto.ZoneGroupDescription;
-        zoneGroup.SortOrder = zoneGroupMinimalDto.SortOrder;
-        zoneGroup.ZoneGroupSlug = StringUtilities.SlugifyString(zoneGroupMinimalDto.ZoneGroupName);
-
+        var zoneGroup = new ZoneGroup
+        {
+            GeographyID = zoneGroupMinimalDto.GeographyID,
+            ZoneGroupName = zoneGroupMinimalDto.ZoneGroupName,
+            ZoneGroupDescription = zoneGroupMinimalDto.ZoneGroupDescription,
+            SortOrder = zoneGroupMinimalDto.SortOrder,
+            ZoneGroupSlug = StringUtilities.SlugifyString(zoneGroupMinimalDto.ZoneGroupName),
+            DisplayToAccountHolders = zoneGroupMinimalDto.DisplayToAccountHolders
+        };
 
         dbContext.ZoneGroups.Add(zoneGroup);
+
         dbContext.SaveChanges();
         dbContext.Entry(zoneGroup).Reload();
+
         Zones.UpdateListOfZones(dbContext, zoneGroup.ZoneGroupID, zoneGroupMinimalDto.ZoneList);
+
         return zoneGroup.AsZoneGroupMinimalDto();
     }
 
     public static BoundingBoxDto GetBoundingBoxForZoneGroup(QanatDbContext dbContext, List<int> zoneGroupIDs)
     {
-        var geographyBoundaries = dbContext.ZoneGroups.Include(x => x.Geography).ThenInclude(x => x.GeographyBoundary).AsNoTracking().Where(x => zoneGroupIDs.Contains(x.ZoneGroupID)).Where(x => x.Geography.GeographyBoundary != null)
+        var geographyBoundaries = dbContext.ZoneGroups.AsNoTracking()
+            .Include(x => x.Geography).ThenInclude(x => x.GeographyBoundary)
+            .Where(x => x.Geography.GeographyBoundary != null && zoneGroupIDs.Contains(x.ZoneGroupID))
             .Select(x => x.Geography.GeographyBoundary).ToList();
+
         return new BoundingBoxDto(geographyBoundaries.Select(x => x.BoundingBox));
     }
 
@@ -122,28 +159,40 @@ public class ZoneGroups
 
     public static void CreateOrUpdateZoneGroup(QanatDbContext dbContext, ZoneGroupMinimalDto zoneGroupMinimalDto)
     {
-        var zoneGroup = GetImplWithTracking(dbContext).SingleOrDefault(x => x.ZoneGroupID == zoneGroupMinimalDto.ZoneGroupID);
+        var zoneGroup = dbContext.ZoneGroups
+            .Include(x => x.Geography)
+            .Include(x => x.Zones).ThenInclude(x => x.ParcelZones).ThenInclude(x => x.Parcel)
+            .Include(x => x.GeographyAllocationPlanConfigurations)
+            .AsSplitQuery()
+            .SingleOrDefault(x => x.ZoneGroupID == zoneGroupMinimalDto.ZoneGroupID);
+
         if (zoneGroup == null)
         {
             CreateZoneGroup(dbContext, zoneGroupMinimalDto);
             return;
         }
+
         zoneGroup.ZoneGroupName = zoneGroupMinimalDto.ZoneGroupName;
         zoneGroup.ZoneGroupSlug = StringUtilities.SlugifyString(zoneGroupMinimalDto.ZoneGroupName);
         zoneGroup.ZoneGroupDescription = zoneGroupMinimalDto.ZoneGroupDescription;
+        zoneGroup.DisplayToAccountHolders = zoneGroupMinimalDto.DisplayToAccountHolders;
+
         Zones.UpdateListOfZones(dbContext, zoneGroupMinimalDto.ZoneGroupID, zoneGroupMinimalDto.ZoneList);
+
         dbContext.SaveChanges();
     }
 
     public static void DeleteZoneGroup(QanatDbContext dbContext, int zoneGroupID)
     {
-        var zoneGroup = GetImplWithTracking(dbContext).SingleOrDefault(x => x.ZoneGroupID == zoneGroupID);
+        var zoneGroup = dbContext.ZoneGroups.Include(x => x.Zones).SingleOrDefault(x => x.ZoneGroupID == zoneGroupID);
         if (zoneGroup != null)
         {
             var zones = dbContext.Zones.Where(x => x.ZoneGroupID == zoneGroupID).ToList();
+            ClearZoneGroupData(dbContext, zoneGroupID);
+
             dbContext.Zones.RemoveRange(zones);
             dbContext.ZoneGroups.Remove(zoneGroup);
-            ClearZoneGroupData(dbContext, zoneGroupID);
+
             dbContext.SaveChanges();
         }
     }
@@ -153,7 +202,9 @@ public class ZoneGroups
         var zones = dbContext.Zones.Where(x => x.ZoneGroupID == zoneGroupID).Select(x => x.ZoneID).ToList();
         var parcelZones = dbContext.ParcelZones;
         var parcelZonesToRemove = parcelZones.Where(parcelZone => zones.Contains(parcelZone.ZoneID)).ToList();
+
         dbContext.ParcelZones.RemoveRange(parcelZonesToRemove);
+
         dbContext.SaveChanges();
     }
 
@@ -171,25 +222,27 @@ public class ZoneGroups
         }).ToList();
 
         var allInDatabase = dbContext.ZoneGroups;
-
         existingZoneGroups.Merge(updatedZoneGroups, allInDatabase,
             (x, y) => x.ZoneGroupID == y.ZoneGroupID,
             (x, y) =>
             {
                 x.SortOrder = y.SortOrder;
             });
+
         dbContext.SaveChanges();
     }
 
-    public static Dictionary<string, int> CreateFromCSV(QanatDbContext dbContext, List<ZoneGroupCSV> records,
-        int geographyID, int zoneGroupID)
+    public static Dictionary<string, int> CreateFromCSV(QanatDbContext dbContext, List<ZoneGroupCSV> records, int geographyID, int zoneGroupID)
     {
         var unassigned = "unassigned";
         var parcelZones = new List<ParcelZone>();
 
-        var parcelsDictionary = dbContext.Parcels.AsNoTracking().Where(x => x.GeographyID == geographyID)
+        var parcelsDictionary = dbContext.Parcels.AsNoTracking()
+            .Where(x => x.GeographyID == geographyID)
             .ToDictionary(x => x.ParcelNumber, y => y.ParcelID);
-        var zonesDictionary = dbContext.Zones.AsNoTracking().Where(x => x.ZoneGroupID == zoneGroupID)
+
+        var zonesDictionary = dbContext.Zones.AsNoTracking()
+            .Where(x => x.ZoneGroupID == zoneGroupID)
             .ToDictionary(x => x.ZoneName, y => y.ZoneID);
 
         var zoneGroupResponse = zonesDictionary.ToDictionary(zone => zone.Key, zone => 0);
@@ -197,7 +250,6 @@ public class ZoneGroups
 
         foreach (var record in records)
         {
-
             if (!string.IsNullOrEmpty(record.Zone))
             {
                 var parcelZone = new ParcelZone()
@@ -216,8 +268,7 @@ public class ZoneGroups
 
         var allParcelZones = dbContext.ParcelZones;
         var zones = dbContext.Zones.Where(x => x.ZoneGroupID == zoneGroupID).Select(x => x.ZoneID).ToList();
-        var existingParcelZones =
-            allParcelZones.ToList().Where(parcelZone => zones.Contains(parcelZone.ZoneID)).ToList();
+        var existingParcelZones = allParcelZones.ToList().Where(parcelZone => zones.Contains(parcelZone.ZoneID)).ToList();
 
         existingParcelZones.Merge(parcelZones, allParcelZones,
             (x, y) => x.ZoneID == y.ZoneID && x.ParcelID == y.ParcelID,
@@ -227,13 +278,13 @@ public class ZoneGroups
                 x.ParcelID = y.ParcelID;
             }
         );
+
         dbContext.SaveChanges();
 
         return zoneGroupResponse;
     }
 
-    public static List<ErrorMessage> ValidateCsv(QanatDbContext dbContext, List<ZoneGroupCSV> records, int geographyID,
-        int zoneGroupID)
+    public static List<ErrorMessage> ValidateCsv(QanatDbContext dbContext, List<ZoneGroupCSV> records, int geographyID, int zoneGroupID)
     {
         var zoneGroupName = dbContext.ZoneGroups.Single(x => x.ZoneGroupID == zoneGroupID).ZoneGroupName;
         var results = new List<ErrorMessage>();
@@ -254,7 +305,7 @@ public class ZoneGroups
             }
             else if (!parcelsInGeography.Contains(parcelsDictionary[record.APN]))
             {
-                results.Add( new ErrorMessage()
+                results.Add(new ErrorMessage()
                 {
                     Type = "Parcel",
                     Message = $"{record.APN} is not in the current geography. Please enter a valid APN."
@@ -283,17 +334,18 @@ public class ZoneGroups
     public static List<ParcelZone> GetAllZoneGroupData(QanatDbContext dbContext, int zoneGroupID)
     {
         var zoneIDs = dbContext.Zones.Where(x => x.ZoneGroupID == zoneGroupID).Select(x => x.ZoneID);
-        //var allParcelZones = dbContext.ParcelZones.Where(parcelZone => zoneIDs.Contains(parcelZone.ZoneID)).ToList();
         var parcelZones = dbContext.ParcelZones.Where(parcelZone => zoneIDs.Contains(parcelZone.ZoneID)).ToList();
         return parcelZones;
     }
 
     private static byte[] ListParcelZones(QanatDbContext dbContext, List<ParcelZone> parcelZones, int geographyID, int zoneGroupID)
     {
-
-        var parcelsDictionary = dbContext.Parcels.AsNoTracking().Where(x => x.GeographyID == geographyID)
+        var parcelsDictionary = dbContext.Parcels.AsNoTracking()
+            .Where(x => x.GeographyID == geographyID)
             .ToDictionary(x => x.ParcelID, y => y.ParcelNumber);
-        var zonesDictionary = dbContext.Zones.AsNoTracking().Where(x => x.ZoneGroupID == zoneGroupID)
+
+        var zonesDictionary = dbContext.Zones.AsNoTracking()
+            .Where(x => x.ZoneGroupID == zoneGroupID)
             .ToDictionary(x => x.ZoneID, y => y.ZoneName);
 
         using var memoryStream = new MemoryStream();
@@ -316,5 +368,4 @@ public class ZoneGroups
         streamWriter.Flush();
         return memoryStream.ToArray();
     }
-
 }

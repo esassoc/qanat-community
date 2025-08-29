@@ -28,6 +28,24 @@ public partial class ReportingPeriod
 
     public bool ReadyForAccountHolders { get; set; }
 
+    public bool IsDefault { get; set; }
+
+    [Column(TypeName = "datetime")]
+    public DateTime? CoverCropSelfReportStartDate { get; set; }
+
+    [Column(TypeName = "datetime")]
+    public DateTime? CoverCropSelfReportEndDate { get; set; }
+
+    public bool CoverCropSelfReportReadyForAccountHolders { get; set; }
+
+    [Column(TypeName = "datetime")]
+    public DateTime? FallowSelfReportStartDate { get; set; }
+
+    [Column(TypeName = "datetime")]
+    public DateTime? FallowSelfReportEndDate { get; set; }
+
+    public bool FallowSelfReportReadyForAccountHolders { get; set; }
+
     [Column(TypeName = "datetime")]
     public DateTime CreateDate { get; set; }
 
@@ -42,14 +60,35 @@ public partial class ReportingPeriod
     [InverseProperty("ReportingPeriodCreateUsers")]
     public virtual User CreateUser { get; set; }
 
-    [InverseProperty("DefaultReportingPeriod")]
-    public virtual ICollection<Geography> Geographies { get; set; } = new List<Geography>();
-
     [ForeignKey("GeographyID")]
     [InverseProperty("ReportingPeriods")]
     public virtual Geography Geography { get; set; }
 
+    [InverseProperty("ReportingPeriod")]
+    public virtual ICollection<ParcelWaterAccountHistory> ParcelWaterAccountHistories { get; set; } = new List<ParcelWaterAccountHistory>();
+
+    [InverseProperty("ReportingPeriod")]
+    public virtual ICollection<StatementBatch> StatementBatches { get; set; } = new List<StatementBatch>();
+
     [ForeignKey("UpdateUserID")]
     [InverseProperty("ReportingPeriodUpdateUsers")]
     public virtual User UpdateUser { get; set; }
+
+    [InverseProperty("ReportingPeriod")]
+    public virtual ICollection<UsageLocationParcelHistory> UsageLocationParcelHistories { get; set; } = new List<UsageLocationParcelHistory>();
+
+    [InverseProperty("ReportingPeriod")]
+    public virtual ICollection<UsageLocation> UsageLocations { get; set; } = new List<UsageLocation>();
+
+    [InverseProperty("ReportingPeriod")]
+    public virtual ICollection<WaterAccountCoverCropStatus> WaterAccountCoverCropStatuses { get; set; } = new List<WaterAccountCoverCropStatus>();
+
+    [InverseProperty("ReportingPeriod")]
+    public virtual ICollection<WaterAccountFallowStatus> WaterAccountFallowStatuses { get; set; } = new List<WaterAccountFallowStatus>();
+
+    [InverseProperty("ReportingPeriod")]
+    public virtual ICollection<WaterAccountParcel> WaterAccountParcels { get; set; } = new List<WaterAccountParcel>();
+
+    [InverseProperty("ReportingPeriod")]
+    public virtual ICollection<WaterMeasurementSelfReport> WaterMeasurementSelfReports { get; set; } = new List<WaterMeasurementSelfReport>();
 }

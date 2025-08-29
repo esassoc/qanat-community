@@ -8,7 +8,7 @@ import { UtilityFunctionsService } from "src/app/shared/services/utility-functio
 import { RoleEnum } from "src/app/shared/generated/enum/role-enum";
 import { forkJoin } from "rxjs";
 import { AgGridHelper } from "src/app/shared/helpers/ag-grid-helper";
-import { NgIf } from "@angular/common";
+
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { QanatGridComponent } from "src/app/shared/components/qanat-grid/qanat-grid.component";
 import { AuthorizationHelper } from "src/app/shared/helpers/authorization-helper";
@@ -20,8 +20,7 @@ declare let $: any;
     selector: "qanat-user-list",
     templateUrl: "./user-list.component.html",
     styleUrls: ["./user-list.component.scss"],
-    standalone: true,
-    imports: [NgIf, PageHeaderComponent, QanatGridComponent],
+    imports: [PageHeaderComponent, QanatGridComponent],
 })
 export class UserListComponent implements OnInit, OnDestroy {
     @ViewChild("usersGrid") usersGrid: AgGridAngular;
@@ -50,8 +49,8 @@ export class UserListComponent implements OnInit, OnDestroy {
             this.currentUser = currentUser;
 
             forkJoin({
-                users: this.userService.usersGet(),
-                pendingUsers: this.userService.pendingUsersGet(),
+                users: this.userService.listUser(),
+                pendingUsers: this.userService.listPendingUser(),
             }).subscribe(({ users, pendingUsers }) => {
                 this.users = users;
                 this.pendingUsers = pendingUsers;
@@ -73,7 +72,10 @@ export class UserListComponent implements OnInit, OnDestroy {
             this.utilityFunctionsService.createLinkColumnDef("Name", "FullName", "UserID"),
             { headerName: "Email", field: "Email" },
             this.utilityFunctionsService.createBasicColumnDef("System Role", "RoleDisplayName", { CustomDropdownFilterField: "RoleDisplayName" }),
-            this.utilityFunctionsService.createDecimalColumnDef("# of Associated Water Accounts", "NumberOfWaterAccounts", { DecimalPlacesToDisplay: 0 }),
+            this.utilityFunctionsService.createBasicColumnDef("Scenario Planner Role", "ScenarioPlannerRoleDisplayName", {
+                CustomDropdownFilterField: "ScenarioPlannerRoleDisplayName",
+            }),
+            this.utilityFunctionsService.createDecimalColumnDef("# of Associated Water Accounts", "NumberOfWaterAccounts", { MaxDecimalPlacesToDisplay: 0 }),
             this.utilityFunctionsService.createDecimalColumnDef("# of Associated Geography Roles", "", {
                 ValueGetter: (params) => this.utilityFunctionsService.customDecimalValueGetter(this.getNumberOfGeographiesManaged(params.data.GeographyFlags), 0),
             }),
@@ -88,7 +90,7 @@ export class UserListComponent implements OnInit, OnDestroy {
 
         this.columnDefsPending = [
             { headerName: "Email", field: "Email" },
-            this.utilityFunctionsService.createDecimalColumnDef("# of Associated Water Accounts", "NumberOfWaterAccounts", { DecimalPlacesToDisplay: 0 }),
+            this.utilityFunctionsService.createDecimalColumnDef("# of Associated Water Accounts", "NumberOfWaterAccounts", { MaxDecimalPlacesToDisplay: 0 }),
             this.utilityFunctionsService.createDateColumnDef("Last Email Sent", "CreateDate", "M/d/yyyy"),
         ];
     }

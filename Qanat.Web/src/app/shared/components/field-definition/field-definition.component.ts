@@ -14,15 +14,14 @@ import { CustomRichTextTypeEnum } from "../../generated/enum/custom-rich-text-ty
 import { CustomRichTextSimpleDto } from "../../generated/model/models";
 import { PopperDirective } from "../../directives/popper.directive";
 import { FormsModule } from "@angular/forms";
-import { NgIf } from "@angular/common";
+
 import { PublicService } from "../../generated/api/public.service";
 
 @Component({
     selector: "field-definition",
     templateUrl: "./field-definition.component.html",
     styleUrls: ["./field-definition.component.scss"],
-    standalone: true,
-    imports: [NgIf, EditorComponent, FormsModule, PopperDirective],
+    imports: [EditorComponent, FormsModule, PopperDirective],
     providers: [{ provide: TINYMCE_SCRIPT_SRC, useValue: "tinymce/tinymce.min.js" }],
 })
 export class FieldDefinitionComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -30,7 +29,7 @@ export class FieldDefinitionComponent implements OnInit, AfterViewInit, OnDestro
     @Input() fieldDefinitionType: string;
     @Input() labelOverride: string;
     @Input() inline: boolean = true;
-    @Input() useBodyContainer: boolean = false;
+    @Input() useBodyContainer: boolean = true;
 
     @ViewChild("tinyMceEditor") tinyMceEditor: EditorComponent;
     public tinyMceConfig: object;
@@ -62,7 +61,7 @@ export class FieldDefinitionComponent implements OnInit, AfterViewInit, OnDestro
         this.authenticationService.getCurrentUser().subscribe((currentUser) => {
             this.currentUser = currentUser;
         });
-        this.publicService.publicCustomRichTextsCustomRichTextTypeIDGet(CustomRichTextTypeEnum[this.fieldDefinitionType]).subscribe((x) => this.loadFieldDefinition(x));
+        this.publicService.getCustomRichTextPublic(CustomRichTextTypeEnum[this.fieldDefinitionType]).subscribe((x) => this.loadFieldDefinition(x));
     }
 
     ngOnDestroy() {
@@ -108,7 +107,7 @@ export class FieldDefinitionComponent implements OnInit, AfterViewInit, OnDestro
             GeographyID: this.fieldDefinition.Geography?.GeographyID,
         });
         this.fieldDefinition.CustomRichTextContent = this.editedContent;
-        this.customRichTextService.customRichTextCustomRichTextTypeIDPut(this.fieldDefinition.CustomRichTextType.CustomRichTextTypeID, updateDto).subscribe(
+        this.customRichTextService.updateCustomRichTextCustomRichText(this.fieldDefinition.CustomRichTextType.CustomRichTextTypeID, updateDto).subscribe(
             (x) => this.loadFieldDefinition(x),
             (error) => {
                 this.isLoading = false;

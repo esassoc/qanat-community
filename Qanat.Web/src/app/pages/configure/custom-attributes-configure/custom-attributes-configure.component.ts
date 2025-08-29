@@ -13,7 +13,7 @@ import { LoadingDirective } from "../../../shared/directives/loading.directive";
 import { CustomAttributesEditComponent } from "../../../shared/components/custom-attributes-edit/custom-attributes-edit.component";
 import { AlertDisplayComponent } from "../../../shared/components/alert-display/alert-display.component";
 import { FormFieldComponent } from "../../../shared/components/forms/form-field/form-field.component";
-import { NgIf, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { UserDto } from "src/app/shared/generated/model/user-dto";
 import { AuthenticationService } from "src/app/shared/services/authentication.service";
@@ -29,19 +29,17 @@ import { CustomAttributeTypesAsSelectDropdownOptions } from "src/app/shared/gene
     selector: "custom-attributes-configure",
     templateUrl: "./custom-attributes-configure.component.html",
     styleUrl: "./custom-attributes-configure.component.scss",
-    standalone: true,
     imports: [
         PageHeaderComponent,
         FormsModule,
         ReactiveFormsModule,
-        NgIf,
         FormFieldComponent,
         AlertDisplayComponent,
         CustomAttributesEditComponent,
         LoadingDirective,
         ButtonLoadingDirective,
         AsyncPipe,
-    ],
+    ]
 })
 export class CustomAttributesConfigureComponent implements OnInit, OnDestroy {
     public initialData$: Observable<CustomAttributeConfigureInitialData>;
@@ -82,7 +80,7 @@ export class CustomAttributesConfigureComponent implements OnInit, OnDestroy {
                 const geographyName = params[routeParams.geographyName];
                 return combineLatest({
                     currentUser: this.authenticationService.getCurrentUser(),
-                    geography: this.geographyService.geographiesGeographyNameGeographyNameMinimalGet(geographyName),
+                    geography: this.geographyService.getByNameAsMinimalDtoGeography(geographyName),
                 });
             }),
             tap(({ currentUser, geography }) => {
@@ -105,7 +103,7 @@ export class CustomAttributesConfigureComponent implements OnInit, OnDestroy {
             }),
             switchMap(([{ geography }, queryParams]) => {
                 const customAttributeTypeID = queryParams.CustomAttributeTypeID as number;
-                return this.customAttributeService.geographiesGeographyIDCustomAttributesCustomAttributeTypeIDGet(geography.GeographyID, customAttributeTypeID);
+                return this.customAttributeService.listCustomAttributesForGeographyCustomAttribute(geography.GeographyID, customAttributeTypeID);
             }),
             tap((customAttributes) => {
                 this.customAttributes = customAttributes;
@@ -134,7 +132,7 @@ export class CustomAttributesConfigureComponent implements OnInit, OnDestroy {
         this.alertService.clearAlerts();
         this.isLoadingSubmit = true;
         const customAttributeTypeID = this.formGroup.controls.CustomAttributeTypeID.value;
-        this.customAttributeService.geographiesGeographyIDCustomAttributesCustomAttributeTypeIDPut(this.geographyID, customAttributeTypeID, this.customAttributes).subscribe({
+        this.customAttributeService.mergeCustomAttributesCustomAttribute(this.geographyID, customAttributeTypeID, this.customAttributes).subscribe({
             next: () => {
                 this.isLoadingSubmit = false;
                 this.customAttributesOnLoad = JSON.stringify(this.customAttributes);

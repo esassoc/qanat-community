@@ -39,8 +39,8 @@ public class FeeCalculatorController(QanatDbContext dbContext, ILogger<FeeCalcul
             return BadRequest($"You have no water accounts in {geography.GeographyDisplayName}.");
         }
 
-        //TODO: turn this into user entered configuration, either a Bit on Reporting Period or a list of Reporting PeriodIDs for a geography.
-        var reportingPeriodYears = FeeCalculatorYearDtos.ETSGSA_ReportingPeriods;
+        var reportingPeriods = await ReportingPeriods.ListByGeographyIDAsync(_dbContext, geography.GeographyID, callingUser);
+        var defaultReportingPeriod = reportingPeriods.FirstOrDefault(x => x.IsDefault) ?? reportingPeriods.First();
 
         //MK 10/23/2024 -- Only supporting ETSGSA for now. We can generalize this later.
         var feeStructures = FeeStructuresDtos.ETSGSA_FeeStructures; 
@@ -48,20 +48,22 @@ public class FeeCalculatorController(QanatDbContext dbContext, ILogger<FeeCalcul
 
         var initialInputs = new FeeCalculatorInputDto()
         {
-            ReportingYear = reportingPeriodYears.First(x => x.Year == 2023).Year, //TODO: This should be the default reporting period on the geography.
             WaterAccountID = geographyWaterAccounts.First().WaterAccountID,
+            ReportingPeriodID = defaultReportingPeriod.ReportingPeriodID,
             FeeStructureID = feeStructures.First().FeeStructureID,
             SurfaceWaterDelivered = null,
             SurfaceWaterIrrigationEfficiency = null,
             MLRPIncentives = mlrpIncentives
         };
 
+        reportingPeriods.ForEach(x => x.Name = $"{x.Name} ({x.StartDate:MMM d, yyyy} - {x.EndDate:MMM d, yyyy})");
+
         var initialOutput = await FeeCalculatorHelper.CalculateFee(_dbContext, geography, initialInputs);
         var inputOptions = new FeeCalculatorInputOptionsDto()
         {
             Geography = geography,
             WaterAccounts = geographyWaterAccounts,
-            Years = reportingPeriodYears,
+            ReportingPeriods = reportingPeriods,
             FeeStructures = feeStructures,
             MLRPIncentives = mlrpIncentives,
 

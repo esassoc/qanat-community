@@ -1,92 +1,94 @@
-<div class="modal-header">
-    <div>
-        <h3 class="section-title">{{ modalContext.Update === true ? "Update" : "Create" }} Allocation Period</h3>
-        <p>Setup the base allocation, carry-over, and borrow-forward parameters of this Allocation Period.</p>
+<div class="modal">
+    <div class="modal-header">
+        <div>
+            <h3 class="section-title">{{ ref.data.Update === true ? "Update" : "Create" }} Allocation Period</h3>
+            <p>Setup the base allocation, carry-over, and borrow-forward parameters of this Allocation Period.</p>
+        </div>
     </div>
 
-    <button type="button" class="close" (click)="close()">
-        <i class="fa fa-times-circle"></i>
-    </button>
-</div>
+    <div class="modal-body">
+        <app-alert-display [clearAlertsOnDestroy]="false"></app-alert-display>
+        <div class="copy copy-3 p-2">
+            <form action="" class="form" [formGroup]="formGroup">
+                <form-field
+                    [formControl]="formGroup.controls.AllocationPeriodName"
+                    fieldLabel="Allocation Period Name"
+                    placeholder="Allocation Period Name"
+                    [type]="FormFieldType.Text"></form-field>
 
-<div class="modal-body">
-    <app-alert-display [clearAlertsOnDestroy]="false"></app-alert-display>
-    <div class="copy copy-3 p-2">
-        <form action="" class="form" [formGroup]="formGroup">
-            <form-field
-                [formControl]="formGroup.controls.AllocationPeriodName"
-                fieldLabel="Allocation Period Name"
-                placeholder="Allocation Period Name"
-                [type]="FormFieldType.Text"></form-field>
-
-            <div class="grid-12 mt-4">
-                <div class="g-col-4 grid-12">
-                    <h3>Base Allocation</h3>
-                    <form-field
-                        [formControl]="formGroup.controls.AllocationAcreFeetPerAcre"
-                        fieldLabel="Allocation"
-                        placeholder="Allocation (e.g.: 2.17)"
-                        [units]="'ac-ft/ac'"
-                        [type]="FormFieldType.Number"></form-field>
-                    <form-field
-                        [formControl]="formGroup.controls.NumberOfYears"
-                        fieldLabel="Number of Years"
-                        placeholder="Number of Years"
-                        [type]="FormFieldType.Number"></form-field>
-                    <form-field
-                        [formControl]="formGroup.controls.StartYear"
-                        fieldLabel="Start Year"
-                        placeholder="Start Year"
-                        [type]="FormFieldType.Select"
-                        [formInputOptions]="yearOptions"></form-field>
-                </div>
-                <div class="g-col-4 grid-12">
-                    <h3>Carry-Over</h3>
-                    <form-field
-                        [formControl]="formGroup.controls.EnableCarryOver"
-                        fieldLabel="Enable Carry-Over"
-                        [toggleTrue]="'Yes'"
-                        [toggleFalse]="'No'"
-                        toggleHeight="3rem"
-                        [type]="FormFieldType.Toggle"></form-field>
-                    <form-field
-                        *ngIf="carryOverValue$ | async"
-                        [@inOutAnimation]
-                        [formControl]="formGroup.controls.CarryOverNumberOfYears"
-                        fieldLabel="Number of Years"
-                        placeholder="Number of Years"
-                        [type]="FormFieldType.Number"></form-field>
-                    <form-field
-                        *ngIf="carryOverValue$ | async"
-                        [@inOutAnimation]
-                        [formControl]="formGroup.controls.CarryOverDepreciationRate"
-                        fieldLabel="Depreciation Rate"
-                        placeholder="Depreciation Rate (e.g.: 0.95)"
-                        [type]="FormFieldType.Number"></form-field>
-                </div>
-                <div class="g-col-4 grid-12">
-                    <h3>Borrow-Forward</h3>
-                    <form-field
-                        [formControl]="formGroup.controls.EnableBorrowForward"
-                        fieldLabel="Enable Borrow-Forward"
-                        [toggleTrue]="'Yes'"
-                        [toggleFalse]="'No'"
-                        toggleHeight="3rem"
-                        [type]="FormFieldType.Toggle"></form-field>
-                    <div *ngIf="borrowForwardValue$ | async" [@inOutAnimation]>
+                <div class="grid-12 mt-4">
+                    <div class="g-col-4 grid-12">
+                        <h3>Base Allocation</h3>
                         <form-field
-                            [formControl]="formGroup.controls.BorrowForwardNumberOfYears"
+                            [formControl]="formGroup.controls.AllocationAcreFeetPerAcre"
+                            fieldLabel="Allocation"
+                            placeholder="Allocation (e.g.: 2.17)"
+                            [units]="'ac-ft/ac'"
+                            [type]="FormFieldType.Number"></form-field>
+                        <form-field
+                            [formControl]="formGroup.controls.NumberOfYears"
                             fieldLabel="Number of Years"
                             placeholder="Number of Years"
                             [type]="FormFieldType.Number"></form-field>
+                        <form-field
+                            [formControl]="formGroup.controls.StartYear"
+                            fieldLabel="Start Year"
+                            placeholder="Start Year"
+                            [type]="FormFieldType.Select"
+                            [formInputOptions]="yearOptions"></form-field>
+                    </div>
+                    <div class="g-col-4 grid-12">
+                        <h3>Carry-Over</h3>
+                        <form-field
+                            [formControl]="formGroup.controls.EnableCarryOver"
+                            fieldLabel="Enable Carry-Over"
+                            [toggleTrue]="'Yes'"
+                            [toggleFalse]="'No'"
+                            toggleHeight="3rem"
+                            [type]="FormFieldType.Toggle"></form-field>
+                        @if (carryOverValue$ | async) {
+                            <form-field
+                                [@inOutAnimation]
+                                [formControl]="formGroup.controls.CarryOverNumberOfYears"
+                                fieldLabel="Number of Years"
+                                placeholder="Number of Years"
+                                [type]="FormFieldType.Number"></form-field>
+                        }
+                        @if (carryOverValue$ | async) {
+                            <form-field
+                                [@inOutAnimation]
+                                [formControl]="formGroup.controls.CarryOverDepreciationRate"
+                                fieldLabel="Depreciation Rate"
+                                placeholder="Depreciation Rate (e.g.: 0.95)"
+                                [type]="FormFieldType.Number"></form-field>
+                        }
+                    </div>
+                    <div class="g-col-4 grid-12">
+                        <h3>Borrow-Forward</h3>
+                        <form-field
+                            [formControl]="formGroup.controls.EnableBorrowForward"
+                            fieldLabel="Enable Borrow-Forward"
+                            [toggleTrue]="'Yes'"
+                            [toggleFalse]="'No'"
+                            toggleHeight="3rem"
+                            [type]="FormFieldType.Toggle"></form-field>
+                        @if (borrowForwardValue$ | async) {
+                            <div [@inOutAnimation]>
+                                <form-field
+                                    [formControl]="formGroup.controls.BorrowForwardNumberOfYears"
+                                    fieldLabel="Number of Years"
+                                    placeholder="Number of Years"
+                                    [type]="FormFieldType.Number"></form-field>
+                            </div>
+                        }
                     </div>
                 </div>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
-</div>
 
-<div class="modal-footer">
-    <button class="btn btn-primary" (click)="save()" [disabled]="!formGroup.valid">Save Period</button>
-    <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+    <div class="modal-footer">
+        <button class="btn btn-primary" (click)="save()" [disabled]="!formGroup.valid">Save Period</button>
+        <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+    </div>
 </div>

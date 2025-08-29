@@ -4,18 +4,16 @@ import { CustomRichTextTypeEnum } from "../generated/enum/custom-rich-text-type-
 import { UserDto } from "../generated/model/user-dto";
 import { SystemInfoDto } from "../generated/model/system-info-dto";
 import { Observable } from "rxjs";
-import { NgIf, AsyncPipe, DatePipe } from "@angular/common";
-import { CustomRichTextComponent } from "../components/custom-rich-text/custom-rich-text.component";
-import { PublicService } from "../generated/api/public.service";
+import { AsyncPipe, DatePipe } from "@angular/common";
 import { IconComponent } from "../components/icon/icon.component";
 import { RouterLink } from "@angular/router";
+import { PublicService } from "../generated/api/public.service";
 
 @Component({
     selector: "footer-nav",
     templateUrl: "./footer-nav.component.html",
     styleUrls: ["./footer-nav.component.scss"],
-    standalone: true,
-    imports: [CustomRichTextComponent, NgIf, AsyncPipe, DatePipe, IconComponent, RouterLink],
+    imports: [AsyncPipe, DatePipe, IconComponent, RouterLink]
 })
 export class FooterNavComponent implements OnInit {
     public currentYear: number = new Date().getFullYear();
@@ -28,7 +26,7 @@ export class FooterNavComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        this.systemInfo$ = this.publicService.publicSystemInfoGet();
+        this.systemInfo$ = this.publicService.getSystemInfoPublic();
 
         this.authenticationService.getCurrentUser().subscribe((currentUser) => {
             this.currentUser = currentUser;

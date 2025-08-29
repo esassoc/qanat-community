@@ -1,70 +1,78 @@
-<div class="full-height-wrapper" *ngIf="geography$ | async as geography">
-    <page-header pageTitle="Enter Water Account PIN"></page-header>
-
-    <div class="page-body grid-12" *ngIf="currentUser$ | async as currentUser">
-        <div class="g-col-8">
-            <form class="form grid-12 mb-3" (ngSubmit)="onSubmit(waterAccountPINForm)" #waterAccountPINForm="ngForm">
-                <div class="field g-col-12">
-                    <label class="required field-label">Water Account PIN</label>
-                    <div class="water-account-pin-input-wrapper">
-                        <input type="text" class="form-control" name="waterAccountPINToClaim" placeholder="(e.g. VGA-123)" required [(ngModel)]="waterAccountPINToClaim" />
-                        <fresca-button class="ml-auto" type="submit">Submit PIN</fresca-button>
-                    </div>
-
-                    <div class="copy copy-3 water-account-pin__definition">
-                        <field-definition fieldDefinitionType="WaterAccountPIN"></field-definition>
+@if (geography$ | async; as geography) {
+    <div class="full-height-wrapper">
+        <page-header pageTitle="Enter Water Account PIN"></page-header>
+        @if (currentUser$ | async; as currentUser) {
+            <div class="page-body grid-12">
+                <div class="g-col-8">
+                    <form class="form grid-12 mb-3" (ngSubmit)="onSubmit(waterAccountPINForm)" #waterAccountPINForm="ngForm">
+                        <div class="field g-col-12">
+                            <label class="required field-label">Water Account PIN</label>
+                            <div class="water-account-pin-input-wrapper">
+                                <input type="text" class="form-control" name="waterAccountPINToClaim" placeholder="(e.g. VGA-123)" required [(ngModel)]="waterAccountPINToClaim" />
+                                <fresca-button class="ml-auto" type="submit">Submit PIN</fresca-button>
+                            </div>
+                            <div class="copy copy-3 water-account-pin__definition">
+                                <field-definition fieldDefinitionType="WaterAccountPIN"></field-definition>
+                            </div>
+                        </div>
+                    </form>
+                    <app-alert-display></app-alert-display>
+                    @if (claimedWaterAccountPINs$ | async; as claimedWaterAccountPINs) {
+                        @if (claimedWaterAccountPINs.length > 0) {
+                            <div class="module water-account-pins">
+                                <div class="module-header">
+                                    <h3 class="section-title">Verified PINs</h3>
+                                </div>
+                                <table class="water-account-pin__table | table">
+                                    <thead>
+                                        <tr>
+                                            <th class="water-account-pin__key">PIN</th>
+                                            <th class="water-account-pin__name">Water Account Number</th>
+                                            <th class="water-account-pin__apns">Parcels</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (waterAccountPIN of claimedWaterAccountPINs; track waterAccountPIN) {
+                                            <tr class="water-account-pin__row">
+                                                <td class="water-account-pin__key">
+                                                    <i class="fa fa-check-circle" aria-hidden="true" style="color: green"></i>
+                                                    {{ waterAccountPIN.WaterAccountPIN }}
+                                                </td>
+                                                <td class="water-account-pin__name">#{{ waterAccountPIN.WaterAccountNumber }}</td>
+                                                <td class="water-account-pin__apns">
+                                                    <strong>
+                                                        @if (waterAccountPIN.Parcels.length !== 1) {
+                                                            <span> {{ waterAccountPIN.Parcels.length }} Parcels: </span>
+                                                        }
+                                                        @if (waterAccountPIN.Parcels.length == 1) {
+                                                            <span> {{ waterAccountPIN.Parcels.length }} Parcel: </span>
+                                                        }
+                                                    </strong>
+                                                    <ul>
+                                                        @for (parcel of waterAccountPIN.Parcels; track parcel) {
+                                                            <li>
+                                                                {{ parcel.ParcelNumber }}
+                                                            </li>
+                                                        }
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    }
+                </div>
+                <div class="sidebar-help g-col-4">
+                    <div class="copy copy-3">
+                        <custom-rich-text [customRichTextTypeID]="customRichTextID" [geographyID]="geography.GeographyID"></custom-rich-text>
                     </div>
                 </div>
-            </form>
-
-            <app-alert-display></app-alert-display>
-
-            <ng-container *ngIf="claimedWaterAccountPINs$ | async as claimedWaterAccountPINs">
-                <div class="module water-account-pins" *ngIf="claimedWaterAccountPINs.length > 0">
-                    <div class="module-header">
-                        <h3 class="section-title">Verified PINs</h3>
-                    </div>
-                    <table class="water-account-pin__table | table">
-                        <thead>
-                            <tr>
-                                <th class="water-account-pin__key">PIN</th>
-                                <th class="water-account-pin__name">Water Account Number</th>
-                                <th class="water-account-pin__apns">Parcels</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="water-account-pin__row" *ngFor="let waterAccountPIN of claimedWaterAccountPINs">
-                                <td class="water-account-pin__key">
-                                    <i class="fa fa-check-circle" aria-hidden="true" style="color: green"></i>
-                                    {{ waterAccountPIN.WaterAccountPIN }}
-                                </td>
-                                <td class="water-account-pin__name">#{{ waterAccountPIN.WaterAccountNumber }}</td>
-                                <td class="water-account-pin__apns">
-                                    <strong>
-                                        <span *ngIf="waterAccountPIN.Parcels.length !== 1"> {{ waterAccountPIN.Parcels.length }} Parcels: </span>
-                                        <span *ngIf="waterAccountPIN.Parcels.length == 1"> {{ waterAccountPIN.Parcels.length }} Parcel: </span>
-                                    </strong>
-                                    <ul>
-                                        <li *ngFor="let parcel of waterAccountPIN.Parcels">
-                                            {{ parcel.ParcelNumber }}
-                                        </li>
-                                    </ul>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </ng-container>
-        </div>
-
-        <div class="sidebar-help g-col-4">
-            <div class="copy copy-3">
-                <custom-rich-text [customRichTextTypeID]="customRichTextID" [geographyID]="geography.GeographyID"></custom-rich-text>
             </div>
+        }
+        <div class="page-footer">
+            <fresca-button class="ml-auto" [routerLink]="['../review']" [disabled]="!isAuthenticated()"> Continue </fresca-button>
         </div>
     </div>
-
-    <div class="page-footer">
-        <fresca-button class="ml-auto" [routerLink]="['../review']" [disabled]="!isAuthenticated()"> Continue </fresca-button>
-    </div>
-</div>
+}

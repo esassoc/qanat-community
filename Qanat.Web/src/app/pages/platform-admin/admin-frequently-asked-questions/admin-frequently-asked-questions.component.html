@@ -6,11 +6,7 @@
 <div class="page-body grid-12">
     <app-alert-display></app-alert-display>
 
-    <qanat-grid
-        *ngIf="frequentlyAskedQuestions$ | async as faqs"
-        height="450px"
-        [rowData]="faqs"
-        [columnDefs]="colDefs"
-        downloadFileName="faqs"
-        (gridReady)="onGridReady($event)"></qanat-grid>
+    @if (frequentlyAskedQuestions$ | async; as faqs) {
+        <qanat-grid height="450px" [rowData]="faqs" [columnDefs]="colDefs" downloadFileName="faqs" (gridReady)="onGridReady($event)"></qanat-grid>
+    }
 </div>

@@ -13,7 +13,7 @@ namespace Qanat.EFModels.Entities
         {
             public const int ZoneName = 100;
             public const int ZoneSlug = 100;
-            public const int ZoneDescription = 200;
+            public const int ZoneDescription = 500;
             public const int ZoneColor = 7;
             public const int ZoneAccentColor = 7;
         }

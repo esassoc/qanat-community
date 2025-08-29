@@ -7,7 +7,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Qanat.API.Services;
-using Qanat.EFModels.Entities;
 
 namespace Qanat.API.Hangfire;
 
@@ -21,7 +20,6 @@ public abstract class ScheduledBackgroundJobBase<T>
     private readonly string _jobName;
     protected readonly ILogger<T> Logger;
     private readonly IWebHostEnvironment _webHostEnvironment;
-    protected readonly QanatDbContext DbContext;
     protected readonly QanatConfiguration QanatConfiguration;
     private readonly SitkaSmtpClientService _sitkaSmtpClient;
 
@@ -30,12 +28,11 @@ public abstract class ScheduledBackgroundJobBase<T>
     /// </summary>
     public abstract List<RunEnvironment> RunEnvironments { get; }
 
-    protected ScheduledBackgroundJobBase(string jobName, ILogger<T> logger, IWebHostEnvironment webHostEnvironment, QanatDbContext dbContext, IOptions<QanatConfiguration> qanatConfiguration, SitkaSmtpClientService sitkaSmtpClient)
+    protected ScheduledBackgroundJobBase(string jobName, ILogger<T> logger, IWebHostEnvironment webHostEnvironment, IOptions<QanatConfiguration> qanatConfiguration, SitkaSmtpClientService sitkaSmtpClient)
     {
         _jobName = jobName;
         Logger = logger;
         _webHostEnvironment = webHostEnvironment;
-        DbContext = dbContext;
         QanatConfiguration = qanatConfiguration.Value;
         _sitkaSmtpClient = sitkaSmtpClient;
     }

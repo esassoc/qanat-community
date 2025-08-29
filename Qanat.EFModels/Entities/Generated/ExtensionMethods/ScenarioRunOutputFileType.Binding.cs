@@ -18,9 +18,7 @@ namespace Qanat.EFModels.Entities
         public static readonly ScenarioRunOutputFileTypePointsofInterest PointsofInterest = ScenarioRunOutputFileTypePointsofInterest.Instance;
 
         public static readonly List<ScenarioRunOutputFileType> All;
-        public static readonly List<ScenarioRunOutputFileTypeSimpleDto> AllAsSimpleDto;
         public static readonly ReadOnlyDictionary<int, ScenarioRunOutputFileType> AllLookupDictionary;
-        public static readonly ReadOnlyDictionary<int, ScenarioRunOutputFileTypeSimpleDto> AllAsSimpleDtoLookupDictionary;
 
         /// <summary>
         /// Static type constructor to coordinate static initialization order
@@ -28,9 +26,7 @@ namespace Qanat.EFModels.Entities
         static ScenarioRunOutputFileType()
         {
             All = new List<ScenarioRunOutputFileType> { GroundWaterBudget, TimeSeriesData, WaterBudget, PointsofInterest };
-            AllAsSimpleDto = new List<ScenarioRunOutputFileTypeSimpleDto> { GroundWaterBudget.AsSimpleDto(), TimeSeriesData.AsSimpleDto(), WaterBudget.AsSimpleDto(), PointsofInterest.AsSimpleDto() };
             AllLookupDictionary = new ReadOnlyDictionary<int, ScenarioRunOutputFileType>(All.ToDictionary(x => x.ScenarioRunOutputFileTypeID));
-            AllAsSimpleDtoLookupDictionary = new ReadOnlyDictionary<int, ScenarioRunOutputFileTypeSimpleDto>(AllAsSimpleDto.ToDictionary(x => x.ScenarioRunOutputFileTypeID));
         }
 
         /// <summary>

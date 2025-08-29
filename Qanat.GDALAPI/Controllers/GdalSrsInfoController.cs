@@ -1,9 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using Qanat.Common.GeoSpatial;
-using Qanat.Common.Services.GDAL;
-using Qanat.Common;
 using Qanat.GDALAPI.Services;
-using System.Text.RegularExpressions;
 
 namespace Qanat.GDALAPI.Controllers;
 

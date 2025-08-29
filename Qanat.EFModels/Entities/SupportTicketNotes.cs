@@ -1,6 +1,4 @@
-﻿using System.Net.Mail;
-using System.Security.Cryptography.X509Certificates;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Qanat.Models.DataTransferObjects;
 using Qanat.Models.DataTransferObjects.SupportTicket;
 
@@ -43,33 +41,4 @@ public class SupportTicketNotes
         dbContext.SupportTicketNotes.Add(supportTicketNote);
         await dbContext.SaveChangesAsync();
     }
-
-    public static MailMessage SendResponseForSupportTicket(QanatDbContext dbContext, SupportTicketNoteSimpleDto supportTicketNoteSimpleDto)
-    {
-        var supportTicket = dbContext.SupportTickets.Include(x => x.AssignedUser)
-            .Single(x => x.SupportTicketID == supportTicketNoteSimpleDto.SupportTicketID);
-        
-
-        var mailMessage = new MailMessage
-        {
-            Subject = $"Ticket #{supportTicket.SupportTicketID} Response from Administrator",
-            Body = $"{supportTicketNoteSimpleDto.Message}" +
-                   $"<br /><br /><i>Sent from the Groundwater Accounting Platform</i>",
-            IsBodyHtml = true
-        };
-
-        mailMessage.To.Add(new MailAddress(supportTicket.ContactEmail));
-        if (supportTicket.AssignedUserID != null)
-        {
-            mailMessage.CC.Add(new MailAddress(supportTicket.AssignedUser.Email));
-
-        }
-        if (supportTicket.AssignedUserID != supportTicketNoteSimpleDto.CreateUserID)
-        {
-            var createUserEmail = dbContext.Users.Single(x => x.UserID == supportTicketNoteSimpleDto.CreateUserID).Email;
-            mailMessage.CC.Add(new MailAddress(createUserEmail));
-        }
-        return mailMessage;
-    }
-
 }

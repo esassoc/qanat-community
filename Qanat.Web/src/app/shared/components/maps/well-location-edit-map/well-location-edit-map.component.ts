@@ -4,14 +4,13 @@ import { GestureHandling } from "leaflet-gesture-handling";
 import { BoundingBoxDto } from "src/app/shared/generated/model/bounding-box-dto";
 import { LeafletHelperService } from "src/app/shared/services/leaflet-helper.service";
 import { environment } from "src/environments/environment";
-import { NgIf, DecimalPipe } from "@angular/common";
+import { DecimalPipe } from "@angular/common";
 
 @Component({
     selector: "well-location-edit-map",
     templateUrl: "./well-location-edit-map.component.html",
     styleUrl: "./well-location-edit-map.component.scss",
-    standalone: true,
-    imports: [NgIf, DecimalPipe],
+    imports: [DecimalPipe]
 })
 export class WellLocationEditMapComponent implements AfterViewInit {
     @Input() wellLatLng: L.latLng;

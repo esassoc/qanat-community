@@ -9,6 +9,8 @@ namespace Qanat.EFModels.Entities;
 
 [Table("ParcelGeometry")]
 [Index("ParcelID", Name = "AK_ParcelGeometry_ParcelID", IsUnique = true)]
+[Index("GeographyID", Name = "IX_ParcelGeometry_GeographyID")]
+[Index("ParcelID", Name = "IX_ParcelGeometry_ParcelID")]
 [Index("Geometry4326", Name = "SPATIAL_ParcelGeometry_Geometry4326")]
 public partial class ParcelGeometry
 {

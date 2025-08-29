@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
 import { NG_VALUE_ACCESSOR } from "@angular/forms";
-import { NgFor } from "@angular/common";
+
 @Component({
     selector: "btn-group-radio-input",
     templateUrl: "./btn-group-radio-input.component.html",
@@ -12,8 +12,7 @@ import { NgFor } from "@angular/common";
             multi: true,
         },
     ],
-    standalone: true,
-    imports: [NgFor],
+    imports: []
 })
 export class BtnGroupRadioInputComponent implements OnInit {
     public uniqueName: string = crypto.randomUUID();
@@ -58,7 +57,8 @@ export class BtnGroupRadioInputComponent implements OnInit {
     ngOnInit(): void {}
 }
 
-export interface IBtnGroupRadioInputOption {
+export class IBtnGroupRadioInputOption {
     label: string;
     value: any;
+    red?: boolean;
 }

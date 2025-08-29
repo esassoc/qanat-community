@@ -1,0 +1,41 @@
+<div class="modal">
+    <div class="modal-header">
+        <h3 class="section-title">Update Support Ticket Status</h3>
+    </div>
+
+    <div class="modal-body grid-12">
+        <form action="" class="form grid-12 support-ticket-update-form" [formGroup]="formGroup" [loadingSpinner]="{ isLoading: isLoading }">
+            @if (users$ | async) {
+                <form-field
+                    class="g-col-12"
+                    [formInputOptions]="userOptions"
+                    [formControl]="formGroup.controls.AssignedUserID"
+                    fieldLabel="Assigned User"
+                    [type]="FormFieldType.Select">
+                </form-field>
+            }
+            <form-field
+                class="g-col-12"
+                [formInputOptions]="supportTicketStatusSelectDropdownOptions"
+                [formControl]="formGroup.controls.SupportTicketStatusID"
+                fieldLabel="Status"
+                [required]="true"
+                [type]="FormFieldType.Select">
+            </form-field>
+
+            <form-field
+                class="g-col-12"
+                [formInputOptions]="supportTicketPrioritiesSelectDropdownOptions"
+                [formControl]="formGroup.controls.SupportTicketPriorityID"
+                fieldLabel="Priority"
+                [required]="true"
+                [type]="FormFieldType.Select">
+            </form-field>
+        </form>
+    </div>
+
+    <div class="modal-footer sticky-footer">
+        <button class="btn btn-primary mr-1" (click)="save()" [disabled]="formGroup.invalid">Update</button>
+        <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+    </div>
+</div>

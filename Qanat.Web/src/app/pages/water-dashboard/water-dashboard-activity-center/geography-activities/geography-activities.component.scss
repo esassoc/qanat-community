@@ -1,0 +1,184 @@
+@use "/src/scss/abstracts/" as *;
+
+a.disabled {
+    color: $gray-500;
+    pointer-events: none;
+}
+
+.geography-card {
+    padding: $spacing-500;
+
+    .card-header {
+        display: flex;
+        align-items: center;
+        gap: $spacing-200;
+
+        .geography-name {
+            h2 {
+                font-size: 20px;
+                line-height: 28px;
+                font-weight: 700;
+                color: $blue-700;
+            }
+
+            p {
+                font-size: 14px;
+                color: $gray-500;
+            }
+        }
+
+        geography-logo::ng-deep img {
+            height: 35px;
+        }
+
+        .toggle {
+            position: absolute;
+            right: 5px;
+            top: 12px;
+            font-size: $type-size-400;
+            color: $gray-600;
+            transform: rotate(90deg);
+
+            &:hover {
+                cursor: pointer;
+            }
+        }
+
+        &.open {
+            .toggle {
+                transform: rotate(180deg);
+            }
+        }
+    }
+
+    .card-body {
+        display: none;
+
+        &.open {
+            display: grid;
+            gap: $spacing-400;
+        }
+
+        @include desktop-small {
+            grid-template-columns: 3fr 2fr;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: $spacing-400;
+        }
+
+        .table-container {
+            max-height: 340px;
+            overflow-y: auto;
+            border-bottom: 1px solid $gray-200;
+
+            .table thead th {
+                position: sticky;
+                top: 0;
+                z-index: 2;
+            }
+        }
+
+        .table {
+            font-size: 14px;
+
+            tbody td {
+                font-weight: 400;
+
+                icon {
+                    color: $blue-700;
+                    padding-right: $spacing-100;
+
+                    ::ng-deep svg {
+                        height: 14px;
+                        width: 14px;
+                        transform: translateY(2px);
+                    }
+                }
+
+                &.gray {
+                    color: $gray-700;
+
+                    icon {
+                        color: $gray-700;
+                    }
+                }
+
+                &.no-table-content-message {
+                    margin: auto;
+                    font-style: italic;
+                    color: $gray-500;
+                    text-align: center;
+                }
+
+                &.water-account-link {
+                    a {
+                        color: $blue-700;
+                        font-weight: 700;
+                    }
+
+                    .zone {
+                        vertical-align: middle;
+                        font-size: 9px;
+                        font-weight: 800;
+                        padding: $spacing-100;
+                        border-radius: $spacing-050;
+                        margin-left: $spacing-200;
+                    }
+                }
+
+                .summary-details {
+                    display: inline-block;
+                    .summary-item {
+                        display: inline-block;
+                        .summary-circle {
+                            width: 10px;
+                            height: 10px;
+                            border-radius: 50%;
+                            border: 1px solid;
+                            display: inline-block;
+                            margin-right: $spacing-100;
+                            position: relative;
+                            top: 1px;
+
+                            &.approved {
+                                background-color: $green-400;
+                                border-color: $green-500;
+                            }
+
+                            &.returned {
+                                background-color: $red-default;
+                                border-color: $red-dark;
+                            }
+
+                            &.submitted {
+                                background-color: $blue-200;
+                                border-color: $blue-300;
+                            }
+
+                            &.in-progress {
+                                background-color: $yellow-200;
+                                border-color: $yellow-300;
+                            }
+
+                            &.not-started {
+                                background-color: $gray-200;
+                                border-color: $gray-300;
+                            }
+                        }
+
+                        .summary-text {
+                            color: $gray-500;
+                            font-size: 12px;
+                            margin-top: $spacing-100;
+                            display: inline-block;
+                            margin-right: $spacing-400;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

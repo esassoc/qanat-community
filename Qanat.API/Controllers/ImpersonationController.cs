@@ -5,6 +5,7 @@ using Qanat.Models.DataTransferObjects;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Qanat.API.Services.Attributes;
 
 namespace Qanat.API.Controllers
 {
@@ -22,16 +23,11 @@ namespace Qanat.API.Controllers
         }
 
         [HttpPost("/impersonate/{userID}")]
+        [EntityNotFound(typeof(User), "userID")]
         [WithRoleFlag(FlagEnum.CanImpersonateUsers)]
         public ActionResult<UserDto> ImpersonateUser([FromRoute] int userID)
         {
             var userToImpersonate = Users.GetByUserID(_dbContext, userID);
-
-            if (userToImpersonate == null)
-            {
-                return NotFound($"There is no user with ID: {userID}");
-            }
-
             return Ok(_impersonationService.ImpersonateUser(HttpContext, userToImpersonate));
         }
 

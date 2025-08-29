@@ -10,7 +10,7 @@ import { CurrentScenarioRunService } from "src/app/shared/services/viewing-get-a
 import { ButtonComponent } from "../../../shared/components/button/button.component";
 import { AlertDisplayComponent } from "../../../shared/components/alert-display/alert-display.component";
 import { ModelNameTagComponent } from "../../../shared/components/name-tag/name-tag.component";
-import { NgIf, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { LoadingDirective } from "../../../shared/directives/loading.directive";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { ScenarioRunStatusBarComponent } from "src/app/shared/components/scenario-run-status-bar/scenario-run-status-bar.component";
@@ -24,10 +24,8 @@ import { ScenarioRunStatusEnum } from "src/app/shared/generated/enum/scenario-ru
     selector: "scenario-run-detail",
     templateUrl: "./scenario-run-detail.component.html",
     styleUrls: ["./scenario-run-detail.component.scss"],
-    standalone: true,
     imports: [
         LoadingDirective,
-        NgIf,
         PageHeaderComponent,
         ModelNameTagComponent,
         AlertDisplayComponent,
@@ -36,7 +34,7 @@ import { ScenarioRunStatusEnum } from "src/app/shared/generated/enum/scenario-ru
         TimeSeriesOutputComponent,
         ButtonComponent,
         AsyncPipe,
-    ],
+    ]
 })
 export class ScenarioRunDetailComponent implements OnInit, OnDestroy {
     public readonly FlagEnum = FlagEnum;
@@ -71,7 +69,7 @@ export class ScenarioRunDetailComponent implements OnInit, OnDestroy {
                 this.scenarioRunID = parseInt(params[routeParams.scenarioRunID]);
             }),
             switchMap(() =>
-                this.scenarioRunService.scenarioRunsScenarioRunIDGet(this.scenarioRunID).pipe(
+                this.scenarioRunService.getScenarioRunByIDScenarioRun(this.scenarioRunID).pipe(
                     tap((x) => {
                         this.currentScenarioRunService.loaded(x);
                     })
@@ -81,7 +79,7 @@ export class ScenarioRunDetailComponent implements OnInit, OnDestroy {
 
         this.scenarioRunResult$ = this.scenarioRun$.pipe(
             switchMap((scenarioRun) => {
-                return this.scenarioRunService.scenarioRunsScenarioRunIDResultsGet(scenarioRun.ScenarioRunID);
+                return this.scenarioRunService.getBudgetGroundwaterOutputScenarioRun(scenarioRun.ScenarioRunID);
             })
         );
 
@@ -94,7 +92,7 @@ export class ScenarioRunDetailComponent implements OnInit, OnDestroy {
 
     checkStatus(): void {
         this.isLoadingSubmit = true;
-        this.scenarioRun$ = this.scenarioRunService.scenarioRunsScenarioRunIDCheckStatusPost(this.scenarioRunID).pipe(
+        this.scenarioRun$ = this.scenarioRunService.checkScenarioRunStatusScenarioRun(this.scenarioRunID).pipe(
             tap((x) => {
                 this.isLoadingSubmit = false;
             })
@@ -105,7 +103,7 @@ export class ScenarioRunDetailComponent implements OnInit, OnDestroy {
         this.downloadError = false;
         this.downloadErrorMessage = null;
         this.isDownloading = true;
-        this.scenarioRunService.scenarioRunsScenarioRunIDDownloadOutputJsonGet(this.scenarioRunID).subscribe(
+        this.scenarioRunService.downloadOutputJsonScenarioRun(this.scenarioRunID).subscribe(
             (result) => this.handleDownloadSuccess(result, `ScenarioRun_${this.scenarioRunID}_Output.zip`, "application/zip"),
             (error) => this.handleDownloadError(error)
         );

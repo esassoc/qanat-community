@@ -16,7 +16,6 @@ public class ParcelHistories
     public static List<ParcelChangesGridItemDto> ListParcelChangesGridItemDtosByGeographyID(QanatDbContext dbContext, int geographyID)
     {
         var parcelOwnershipHistoriesDict = dbContext.ParcelHistories.AsNoTracking()
-            .Include(x => x.WaterAccount)
             .Where(x => x.GeographyID == geographyID)
             .GroupBy(x => x.ParcelID)
             .ToDictionary(x => x.Key, x => x.OrderByDescending(y => y.UpdateDate).Take(2).ToList());
@@ -75,13 +74,14 @@ public class ParcelHistories
                             ? Math.Round(previousParcelHistory.ParcelArea, 4, MidpointRounding.ToEven).ToString(CultureInfo.CurrentCulture)
                             : null
                     },
-                    new()
-                    {
-                        FieldName = "Water Account",
-                        FieldShortName = "Water Account",
-                        CurrentFieldValue = currentParcelHistory.WaterAccount?.WaterAccountNumberAndName(),
-                        PreviousFieldValue = previousParcelHistory?.WaterAccount?.WaterAccountNumberAndName()
-                    }
+                    //MK 2/21/2025 TODO: Think about how to use the new WaterAccountParcelHistory table to show the water account changes. For now just comment it out.
+                    //new() 
+                    //{
+                    //    FieldName = "Water Account",
+                    //    FieldShortName = "Water Account",
+                    //    CurrentFieldValue = currentParcelHistory.WaterAccount?.WaterAccountNumberAndName(),
+                    //    PreviousFieldValue = previousParcelHistory?.WaterAccount?.WaterAccountNumberAndName()
+                    //}
                 }
             });
         }
@@ -89,7 +89,7 @@ public class ParcelHistories
         return parcelChangesGridItemDtos;
     }
 
-    public static async Task MarkAsReviewedByParcelIDs(QanatDbContext dbContext, List<int> parcelIDs)
+    public static async Task MarkAsReviewedByParcelIDsAsync(QanatDbContext dbContext, List<int> parcelIDs)
     {
         await dbContext.ParcelHistories
             .Where(x => parcelIDs.Contains(x.ParcelID)).ExecuteUpdateAsync(x => x
@@ -97,13 +97,12 @@ public class ParcelHistories
                 .SetProperty(y => y.ReviewDate, y => DateTime.UtcNow));
     }
 
-    public static ParcelHistory CreateNew(Parcel parcel, int userID, int effectiveYear)
+    public static ParcelHistory CreateNew(Parcel parcel, int userID)
     {
         var parcelHistory = new ParcelHistory()
         {
             GeographyID = parcel.GeographyID,
             ParcelID = parcel.ParcelID,
-            EffectiveYear = effectiveYear,
             UpdateDate = DateTime.UtcNow,
             UpdateUserID = userID,
             ParcelArea = (decimal)parcel.ParcelArea,
@@ -112,8 +111,7 @@ public class ParcelHistories
             ParcelStatusID = parcel.ParcelStatusID,
             IsManualOverride = true,
             IsReviewed = true,
-            ReviewDate = DateTime.UtcNow,
-            WaterAccountID = parcel.WaterAccountID
+            ReviewDate = DateTime.UtcNow
         };
         return parcelHistory;
     }

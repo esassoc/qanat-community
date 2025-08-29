@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using CsvHelper;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -236,7 +235,7 @@ namespace Qanat.API.Controllers
             var isValid = true;
 
             // no null APNs
-            var nullAPNsCount = records.Count(x => x.UsageEntityName == "");
+            var nullAPNsCount = records.Count(x => x.UsageLocationName == "");
             if (nullAPNsCount > 0)
             {
                 ModelState.AddModelError("UploadedFile",
@@ -249,29 +248,29 @@ namespace Qanat.API.Controllers
             if (nullQuantities.Any())
             {
                 ModelState.AddModelError("UploadedFile",
-                    $"The following {(nullQuantities.Count > 1 ? "APN/Usage Entity Names" : "APN/Usage Entity Name")} had no {waterTypeDisplayName} Quantity entered: {string.Join(", ", nullQuantities.Select(x => x.UsageEntityName))}");
+                    $"The following {(nullQuantities.Count > 1 ? "APN/Usage Location Names" : "APN/Usage Location Name")} had no {waterTypeDisplayName} Quantity entered: {string.Join(", ", nullQuantities.Select(x => x.UsageLocationName))}");
                 isValid = false;
             }
 
             // no duplicate APNs
-            var duplicateAPNs = records.GroupBy(x => x.UsageEntityName).Where(x => x.Count() > 1)
+            var duplicateAPNs = records.GroupBy(x => x.UsageLocationName).Where(x => x.Count() > 1)
                 .Select(x => x.Key).ToList();
 
             if (duplicateAPNs.Any())
             {
                 ModelState.AddModelError("UploadedFile",
-                    $"The uploaded file contains multiples rows with {(duplicateAPNs.Count > 1 ? "these APN/Usage Entity Names" : "this APN/Usage Entity Name")}: {string.Join(", ", duplicateAPNs)}");
+                    $"The uploaded file contains multiples rows with {(duplicateAPNs.Count > 1 ? "these APN/Usage Location Names" : "this APN/Usage Location Name")}: {string.Join(", ", duplicateAPNs)}");
                 isValid = false;
             }
 
             // all valid APNs
             var allParcelNumbers = _dbContext.Parcels.AsNoTracking().Where(x => x.GeographyID == geographyID).Select(y => y.ParcelNumber);
-            var unmatchedRecords = records.Where(x => !allParcelNumbers.Contains(x.UsageEntityName)).ToList();
+            var unmatchedRecords = records.Where(x => !allParcelNumbers.Contains(x.UsageLocationName)).ToList();
 
             if (unmatchedRecords.Any())
             {
                 ModelState.AddModelError("UploadedFile",
-                    $"The uploaded file contains {(unmatchedRecords.Count > 1 ? "these APN/Usage Entity Names which do" : "this APN/Usage Entity Name which does")} not match any record in the system for this geography: {string.Join(", ", unmatchedRecords.Select(x => x.UsageEntityName))}");
+                    $"The uploaded file contains {(unmatchedRecords.Count > 1 ? "these APN/Usage Location Names which do" : "this APN/Usage Location Name which does")} not match any record in the system for this geography: {string.Join(", ", unmatchedRecords.Select(x => x.UsageLocationName))}");
                 isValid = false;
             }
 

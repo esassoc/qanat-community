@@ -16,7 +16,7 @@ namespace Qanat.EFModels.Entities
             public const int ContactFirstName = 50;
             public const int ContactLastName = 50;
             public const int ContactEmail = 50;
-            public const int ContactPhoneNumber = 10;
+            public const int ContactPhoneNumber = 30;
         }
     }
 }

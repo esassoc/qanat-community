@@ -1,4 +1,3 @@
-import { CommonModule } from "@angular/common";
 import { AfterViewInit, Component, EventEmitter, Input, OnChanges, Output, SimpleChange } from "@angular/core";
 import * as L from "leaflet";
 
@@ -7,10 +6,9 @@ import { WfsService } from "src/app/shared/services/wfs.service";
 import { GroupByPipe } from "src/app/shared/pipes/group-by.pipe";
 import { WellMinimalDto } from "src/app/shared/generated/model/well-minimal-dto";
 import { LeafletHelperService } from "src/app/shared/services/leaflet-helper.service";
+import { auto } from "@popperjs/core";
 @Component({
     selector: "water-accounts-layer",
-    standalone: true,
-    imports: [CommonModule, MapLayerBase],
     templateUrl: "./water-accounts-layer.component.html",
     styleUrls: ["./water-accounts-layer.component.scss"],
 })
@@ -24,6 +22,11 @@ export class WaterAccountsLayerComponent extends MapLayerBase implements OnChang
 
     @Output() layerBoundsCalculated = new EventEmitter();
     @Output() waterAccountSelected = new EventEmitter<number>();
+
+    @Output() layerStartedLoading = new EventEmitter();
+    @Output() layerFinishedLoading = new EventEmitter();
+
+    private selectedFromMap: boolean = false;
 
     public isLoading: boolean = false;
 
@@ -46,15 +49,27 @@ export class WaterAccountsLayerComponent extends MapLayerBase implements OnChang
 
     private wellIcon = this.leafletHelperService.blueIconLarge;
 
-    constructor(private wfsService: WfsService, private groupByPipe: GroupByPipe, private leafletHelperService: LeafletHelperService) {
+    constructor(
+        private wfsService: WfsService,
+        private groupByPipe: GroupByPipe,
+        private leafletHelperService: LeafletHelperService
+    ) {
         super();
     }
 
     ngOnChanges(changes: any): void {
         if (changes.selectedWaterAccountID) {
-            if (changes.selectedWaterAccountID.previousValue == changes.selectedWaterAccountID.currentValue) return;
+            if (this.selectedFromMap) {
+                this.selectedFromMap = false;
+                return;
+            }
+
+            if (changes.selectedWaterAccountID.previousValue == changes.selectedWaterAccountID.currentValue) {
+                return;
+            }
+
             this.selectedWaterAccountID = changes.selectedWaterAccountID.currentValue;
-            this.highlightSelectedtWaterAccount();
+            this.highlightSelectedtWaterAccount(true);
         } else if (Object.values(changes).some((x: SimpleChange) => x.firstChange === false)) {
             this.updateLayer();
         }
@@ -65,15 +80,18 @@ export class WaterAccountsLayerComponent extends MapLayerBase implements OnChang
         this.updateLayer();
     }
 
+    private setupLayer() {
+        this.layer = L.geoJSON();
+        this.wellLayer = L.featureGroup();
+        this.initLayer();
+    }
+
     private updateLayer() {
         this.isLoading = true;
         this.layer.clearLayers();
+        this.layerStartedLoading.emit();
 
         this.addWaterAccountParcelsToLayer();
-        this.addWellsToLayer();
-
-        this.layer.addTo(this.map);
-        this.isLoading = false;
     }
 
     private addWaterAccountParcelsToLayer() {
@@ -83,9 +101,15 @@ export class WaterAccountsLayerComponent extends MapLayerBase implements OnChang
         }
 
         this.wfsService.getGeoserverWFSLayer(null, "Qanat:AllParcels", cql_filter).subscribe((response) => {
-            if (response.length == 0) return;
+            if (response.length == 0) {
+                this.isLoading = false;
+                this.layerFinishedLoading.emit();
+                return;
+            }
 
-            const featuresGroupedByWaterAccountID = this.groupByPipe.transform(response, "properties.WaterAccountID");
+            let currentParcels = response.filter((x) => (x as any).properties.WaterAccountID && (x as any).properties.IsCurrent == 1);
+
+            const featuresGroupedByWaterAccountID = this.groupByPipe.transform(currentParcels, "properties.WaterAccountID");
 
             Object.keys(featuresGroupedByWaterAccountID).forEach((waterAccountID) => {
                 const geoJson = L.geoJSON(featuresGroupedByWaterAccountID[waterAccountID], {
@@ -95,7 +119,8 @@ export class WaterAccountsLayerComponent extends MapLayerBase implements OnChang
                 // IMPORTANT: THIS ONLY WORKS BECAUSE I'VE INSTALLED @angular/elements AND CONFIGURED THIS IN THE app.module.ts bootstrapping
                 geoJson.bindPopup(`<water-account-popup-custom-element water-account-id="${waterAccountID}"></water-account-popup-custom-element>`, {
                     maxWidth: 475,
-                    keepInView: true,
+                    keepInView: false,
+                    autoPan: false,
                 });
 
                 geoJson.on("mouseover", (e) => {
@@ -106,20 +131,27 @@ export class WaterAccountsLayerComponent extends MapLayerBase implements OnChang
                 });
 
                 geoJson.on("click", (e) => {
+                    this.selectedFromMap = true;
                     this.onWaterAccountSelected(Number(waterAccountID));
                 });
 
                 geoJson.addTo(this.layer);
             });
 
+            this.addWellsToLayer();
+
+            this.layer.addTo(this.map);
             const bounds = this.layer.getBounds();
             this.map.fitBounds(bounds);
+
             this.layerBoundsCalculated.emit(bounds);
+            this.isLoading = false;
+            this.layerFinishedLoading.emit();
         });
     }
 
     private addWellsToLayer() {
-        if (this.wells?.length == 0) return;
+        if ((this.wells?.length ?? 0) == 0) return;
 
         const markers = this.wells.map((well) => {
             const latLng = L.latLng(well.Latitude, well.Longitude);
@@ -147,7 +179,7 @@ export class WaterAccountsLayerComponent extends MapLayerBase implements OnChang
         this.onWaterAccountSelected(selectedWell.WaterAccountID);
     }
 
-    private highlightSelectedtWaterAccount() {
+    private highlightSelectedtWaterAccount(zoomToFeature: boolean = false) {
         // clear styles
         this.layer.setStyle(this.defaultStyle);
         this.map.closePopup();
@@ -160,15 +192,10 @@ export class WaterAccountsLayerComponent extends MapLayerBase implements OnChang
             if (geoJsonLayers[0].feature.properties.WaterAccountID == this.selectedWaterAccountID) {
                 layer.setStyle(this.highlightStyle);
                 layer.openPopup();
-                this.map.fitBounds(layer.getBounds());
+                if (zoomToFeature) {
+                    this.map.fitBounds(layer.getBounds());
+                }
             }
         });
-    }
-
-    private setupLayer() {
-        this.layer = L.geoJSON();
-        // this.waterAccountParcelLayer = L.featureGroup();
-        this.wellLayer = L.featureGroup();
-        this.initLayer();
     }
 }

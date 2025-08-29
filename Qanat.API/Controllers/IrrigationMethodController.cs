@@ -15,12 +15,12 @@ namespace Qanat.API.Controllers;
 [ApiController]
 [RightsChecker]
 [Route("geographies/{geographyID}/irrigation-methods")]
-public class IrrigationMethodController : SitkaController<IrrigationMethodController>
+public class IrrigationMethodController(
+    QanatDbContext dbContext,
+    ILogger<IrrigationMethodController> logger,
+    IOptions<QanatConfiguration> qanatConfiguration)
+    : SitkaController<IrrigationMethodController>(dbContext, logger, qanatConfiguration)
 {
-    public IrrigationMethodController(QanatDbContext dbContext, ILogger<IrrigationMethodController> logger, IOptions<QanatConfiguration> qanatConfiguration) : base(dbContext, logger, qanatConfiguration)
-    {
-    }
-
     [HttpGet]
     [EntityNotFound(typeof(Geography), "geographyID")]
     [WithGeographyRolePermission(PermissionEnum.WaterTypeRights, RightsEnum.Read)]

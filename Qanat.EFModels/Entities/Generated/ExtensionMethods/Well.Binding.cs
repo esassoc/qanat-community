@@ -15,6 +15,7 @@ namespace Qanat.EFModels.Entities
             public const int StateWCRNumber = 100;
             public const int CountyWellPermitNumber = 100;
             public const int Notes = 500;
+            public const int ElectricMeterNumber = 100;
         }
     }
 }

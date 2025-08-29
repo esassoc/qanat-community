@@ -17,6 +17,6 @@ export interface ConfirmOptions {
     buttonClassYes: string;
     buttonTextYes: string;
     buttonTextNo: string;
-    icon?: typeof IconInterface;
+    icon?: IconInterface;
     iconColor?: string;
 }

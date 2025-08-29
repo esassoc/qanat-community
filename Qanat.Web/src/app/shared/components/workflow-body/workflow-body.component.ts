@@ -5,10 +5,9 @@ import { LoadingDirective } from "src/app/shared/directives/loading.directive";
 
 @Component({
     selector: "workflow-body",
-    standalone: true,
     imports: [CommonModule, WorkflowHelpComponent, LoadingDirective],
     templateUrl: "./workflow-body.component.html",
-    styleUrls: ["./workflow-body.component.scss"],
+    styleUrls: ["./workflow-body.component.scss"]
 })
 export class WorkflowBodyComponent {
     @Input() showLoadingSpinner: boolean = false;

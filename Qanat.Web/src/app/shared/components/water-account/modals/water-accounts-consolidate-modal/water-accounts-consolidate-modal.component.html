@@ -1,0 +1,41 @@
+<div class="modal">
+    <div class="modal-header">
+        <h2>Confirm: Consolidate Accounts</h2>
+    </div>
+
+    <div class="modal-body">
+        <note noteType="warning">
+            Confirm your request to consolidate all of your parcels into a single water account per allocation zone. Review a summary of the changes below.
+        </note>
+
+        <div class="account-modifications">
+            @for (waterAccount of ref.data.WaterAccounts; track waterAccount) {
+                <div class="account-name">
+                    <icon icon="WaterAccounts"></icon>
+                    #{{ waterAccount.WaterAccountNumber }}
+                    <span class="text-muted">{{ waterAccount.WaterAccountName }}</span>
+                </div>
+                <div class="account-parcels">
+                    {{ waterAccount.ParcelsCount }} parcel{{ waterAccount.ParcelsCount === 1 ? "" : "s" }}
+                    @if (waterAccount.AddedParcelsCount > 0) {
+                        <span class="parcel-changes added">
+                            <i class="fa fa-plus-circle"></i>
+                            {{ waterAccount.AddedParcelsCount }}
+                        </span>
+                    }
+                    @if (waterAccount.RemovedParcelsCount > 0) {
+                        <span class="parcel-changes removed">
+                            <i class="fa fa-minus-circle"></i>
+                            {{ waterAccount.RemovedParcelsCount }}
+                        </span>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-primary" (click)="confirm()">Consolidate Accounts</button>
+            <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+        </div>
+    </div>
+</div>

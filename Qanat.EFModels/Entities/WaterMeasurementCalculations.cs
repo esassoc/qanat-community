@@ -1,12 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json.Linq;
-using Qanat.Common.Util;
+using System.Text.Json;
 
 namespace Qanat.EFModels.Entities;
 
 public static class WaterMeasurementCalculations
 {
-    public static async Task RunAllMeasurementTypesForGeography(QanatDbContext dbContext, int geographyID, DateTime effectiveDate)
+    public static async Task RunAllMeasurementTypesForGeographyAsync(QanatDbContext dbContext, int geographyID, DateTime effectiveDate, List<int> usageLocationIDs = null)
     {
         var allWaterMeasurementTypes = await dbContext.WaterMeasurementTypes
             .Include(x => x.WaterMeasurementTypeDependencyWaterMeasurementTypes).ThenInclude(x => x.DependsOnWaterMeasurementType)
@@ -23,11 +22,11 @@ public static class WaterMeasurementCalculations
         var sortedWaterMeasurementTypesWithCalculations = sortedTypesBasedOnDependencies.Where(x => x.WaterMeasurementCalculationTypeID.HasValue && x.IsActive);
         foreach (var waterMeasurementType in sortedWaterMeasurementTypesWithCalculations)
         {
-            await RunCalculation(dbContext, geographyID, effectiveDate, waterMeasurementType);
+            await RunCalculationAsync(dbContext, geographyID, effectiveDate, waterMeasurementType, usageLocationIDs);
         }
     }
 
-    public static async Task RunMeasurementTypeForGeography(QanatDbContext dbContext, int geographyID, int waterMeasurementTypeID, DateTime effectiveDate)
+    public static async Task RunMeasurementTypeForGeographyAsync(QanatDbContext dbContext, int geographyID, int waterMeasurementTypeID, DateTime effectiveDate, List<int> usageLocationIDs = null)
     {
         var waterMeasurementType = await dbContext.WaterMeasurementTypes
             .Include(x => x.WaterMeasurementTypeDependencyWaterMeasurementTypes).ThenInclude(x => x.DependsOnWaterMeasurementType) //MK 8/15/2024 -- Need dependencies to run calculations.
@@ -38,7 +37,7 @@ public static class WaterMeasurementCalculations
         //MK 8/15/2024 -- If the water measurement type has a calculation, run the calculation and then recalculate the dependants. Otherwise, skip it and just recalculate the dependants.
         if (waterMeasurementType.WaterMeasurementCalculationTypeID.HasValue)
         {
-            await RunCalculation(dbContext, geographyID, effectiveDate, waterMeasurementType);
+            await RunCalculationAsync(dbContext, geographyID, effectiveDate, waterMeasurementType);
         }
 
         var dependantTypes = await WaterMeasurementTypes.GetDependencyChainForWaterMeasurementType(dbContext, geographyID, waterMeasurementType.WaterMeasurementTypeID);
@@ -52,11 +51,11 @@ public static class WaterMeasurementCalculations
 
         foreach (var dependantType in dependantTypesSorted)
         {
-            await RunCalculation(dbContext, geographyID, effectiveDate, dependantType);
+            await RunCalculationAsync(dbContext, geographyID, effectiveDate, dependantType, usageLocationIDs);
         }
     }
 
-    private static async Task RunCalculation(QanatDbContext dbContext, int geographyID, DateTime effectiveDate, WaterMeasurementType waterMeasurementType)
+    private static async Task RunCalculationAsync(QanatDbContext dbContext, int geographyID, DateTime effectiveDate, WaterMeasurementType waterMeasurementType, List<int> usageLocationIDs = null)
     {
         if (waterMeasurementType.WaterMeasurementCalculationType == null)
         {
@@ -65,19 +64,51 @@ public static class WaterMeasurementCalculations
 
         switch (waterMeasurementType.WaterMeasurementCalculationType!.ToEnum)
         {
-            case WaterMeasurementCalculationTypeEnum.CalculateEffectivePrecip:
-                //CalculateEffectivePrecip assumes one dependency that is of Precip category.
+            case WaterMeasurementCalculationTypeEnum.CalculateEffectivePrecipByZone:
+                //CalculateEffectivePrecipByZone assumes one dependency that is of Precip category.
                 var precipDependency = waterMeasurementType.WaterMeasurementTypeDependencyWaterMeasurementTypes
                     .FirstOrDefault(x => x.DependsOnWaterMeasurementType.WaterMeasurementCategoryTypeID == WaterMeasurementCategoryType.Precip.WaterMeasurementCategoryTypeID);
 
                 var precipMeasurementType = precipDependency?.DependsOnWaterMeasurementType;
                 if (precipMeasurementType != null)
                 {
-                    await CalculateEffectivePrecip(dbContext, geographyID, waterMeasurementType, precipMeasurementType, effectiveDate);
+                    await CalculateEffectivePrecipByZone(dbContext, geographyID, waterMeasurementType, precipMeasurementType, effectiveDate, usageLocationIDs);
                 }
                 else
                 {
-                    throw new ArgumentException("Missing dependency for CalculateEffectivePrecip.");
+                    throw new ArgumentException("Missing dependency for CalculateEffectivePrecipByZone.");
+                }
+                break;
+
+            case WaterMeasurementCalculationTypeEnum.CalculateEffectivePrecipByScalarValue:
+                //CalculateEffectivePrecipByScalarValue assumes one dependency that is of Precip category.
+                precipDependency = waterMeasurementType.WaterMeasurementTypeDependencyWaterMeasurementTypes
+                    .FirstOrDefault(x => x.DependsOnWaterMeasurementType.WaterMeasurementCategoryTypeID == WaterMeasurementCategoryType.Precip.WaterMeasurementCategoryTypeID);
+
+                precipMeasurementType = precipDependency?.DependsOnWaterMeasurementType;
+                if (precipMeasurementType != null)
+                {
+                    await CalculateEffectivePrecipByScalarValue(dbContext, geographyID, waterMeasurementType, precipMeasurementType, effectiveDate, usageLocationIDs);
+                }
+                else
+                {
+                    throw new ArgumentException("Missing dependency for CalculateEffectivePrecipByScalarValue.");
+                }
+                break;
+
+            case WaterMeasurementCalculationTypeEnum.CoverCropAdjustment:
+                //CalculateCoverCropAdjustment assumes one dependency that is of Precip category.
+                precipDependency = waterMeasurementType.WaterMeasurementTypeDependencyWaterMeasurementTypes
+                    .FirstOrDefault(x => x.DependsOnWaterMeasurementType.WaterMeasurementCategoryTypeID == WaterMeasurementCategoryType.Precip.WaterMeasurementCategoryTypeID);
+
+                precipMeasurementType = precipDependency?.DependsOnWaterMeasurementType;
+                if (precipMeasurementType != null)
+                {
+                    await CalculateCoverCropAdjustment(dbContext, geographyID, waterMeasurementType, precipMeasurementType, effectiveDate, usageLocationIDs);
+                }
+                else
+                {
+                    throw new ArgumentException("Missing dependency for CalculateEffectivePrecipByScalarValue.");
                 }
                 break;
 
@@ -89,7 +120,7 @@ public static class WaterMeasurementCalculations
                 var surfaceWaterMeasurementType = surfaceWaterDependency?.DependsOnWaterMeasurementType;
                 if (surfaceWaterMeasurementType != null)
                 {
-                    await CalculateSurfaceWaterConsumption(dbContext, geographyID, waterMeasurementType, surfaceWaterMeasurementType, effectiveDate);
+                    await CalculateSurfaceWaterConsumption(dbContext, geographyID, waterMeasurementType, surfaceWaterMeasurementType, effectiveDate, usageLocationIDs);
                 }
                 else
                 {
@@ -98,11 +129,15 @@ public static class WaterMeasurementCalculations
                 break;
 
             case WaterMeasurementCalculationTypeEnum.ETMinusPrecipMinusTotalSurfaceWater:
-                //ETMinusPrecipMinusTotalSurfaceWater assumes one dependency that has a CalculateEffectivePrecip and 1 to N that are of category SurfaceWater or have a CalculationName of CalculateSurfaceWaterConsumption.
+                //ETMinusPrecipMinusTotalSurfaceWater assumes one dependency that has a CalculateEffectivePrecipByZone or CalculateEffectivePrecipByScalarValue and 1 to N that are of category SurfaceWater or have a CalculationName of CalculateSurfaceWaterConsumption.
                 var precipitationDependency = waterMeasurementType.WaterMeasurementTypeDependencyWaterMeasurementTypes
-                    .FirstOrDefault(x => x.DependsOnWaterMeasurementType.WaterMeasurementCalculationTypeID == WaterMeasurementCalculationType.CalculateEffectivePrecip.WaterMeasurementCalculationTypeID);
+                    .FirstOrDefault(x => x.DependsOnWaterMeasurementType.WaterMeasurementCalculationTypeID == WaterMeasurementCalculationType.CalculateEffectivePrecipByZone.WaterMeasurementCalculationTypeID
+                                      || x.DependsOnWaterMeasurementType.WaterMeasurementCalculationTypeID == WaterMeasurementCalculationType.CalculateEffectivePrecipByScalarValue.WaterMeasurementCalculationTypeID);
 
                 var precipitationMeasurementType = precipitationDependency?.DependsOnWaterMeasurementType;
+
+                var coverCroppedAdjustmentMeasurementType = await dbContext.WaterMeasurementTypes.AsNoTracking()
+                    .FirstOrDefaultAsync(x => x.GeographyID == geographyID && x.WaterMeasurementCalculationTypeID == WaterMeasurementCalculationType.CoverCropAdjustment.WaterMeasurementCalculationTypeID);
 
                 var surfaceWaterMeasurementTypes = waterMeasurementType.WaterMeasurementTypeDependencyWaterMeasurementTypes
                     .Where(x => x.DependsOnWaterMeasurementType.WaterMeasurementCategoryTypeID == WaterMeasurementCategoryType.SurfaceWater.WaterMeasurementCategoryTypeID || x.DependsOnWaterMeasurementType.WaterMeasurementCalculationTypeID == WaterMeasurementCalculationType.CalculateSurfaceWaterConsumption.WaterMeasurementCalculationTypeID)
@@ -112,7 +147,7 @@ public static class WaterMeasurementCalculations
                 var surfaceWaterMeasurementTypeNames = surfaceWaterMeasurementTypes.Select(x => x.WaterMeasurementTypeName).ToList();
                 if (precipitationMeasurementType != null && surfaceWaterMeasurementTypeNames.Any())
                 {
-                    await ETMinusPrecipMinusTotalSurfaceWater(dbContext, geographyID, effectiveDate, waterMeasurementType, precipitationMeasurementType.WaterMeasurementTypeName, surfaceWaterMeasurementTypeNames);
+                    await ETMinusPrecipMinusTotalSurfaceWater(dbContext, geographyID, effectiveDate, waterMeasurementType, precipitationMeasurementType, coverCroppedAdjustmentMeasurementType, surfaceWaterMeasurementTypeNames, usageLocationIDs);
                 }
                 else
                 {
@@ -126,10 +161,10 @@ public static class WaterMeasurementCalculations
                     .FirstOrDefault(x => x.DependsOnWaterMeasurementType.WaterMeasurementCalculationTypeID == WaterMeasurementCalculationType.ETMinusPrecipMinusTotalSurfaceWater.WaterMeasurementCalculationTypeID);
 
                 var etMinusPrecipMinusTotalSurfaceWaterMeasurementTypeForCredit = etMinusPrecipMinusTotalSurfaceWaterDependencyForCredit?.DependsOnWaterMeasurementType;
-                
+
                 if (etMinusPrecipMinusTotalSurfaceWaterMeasurementTypeForCredit != null)
                 {
-                    await CalculatePrecipitationCreditOffset(dbContext, geographyID, waterMeasurementType, etMinusPrecipMinusTotalSurfaceWaterMeasurementTypeForCredit, effectiveDate);
+                    await CalculatePrecipitationCreditOffset(dbContext, geographyID, waterMeasurementType, etMinusPrecipMinusTotalSurfaceWaterMeasurementTypeForCredit, effectiveDate, usageLocationIDs);
                 }
                 else
                 {
@@ -146,7 +181,7 @@ public static class WaterMeasurementCalculations
 
                 if (etMinusPrecipMinusTotalSurfaceWaterMeasurementType != null)
                 {
-                    await CalculatePositiveConsumedGroundwater(dbContext, geographyID, waterMeasurementType, etMinusPrecipMinusTotalSurfaceWaterMeasurementType, effectiveDate);
+                    await CalculatePositiveConsumedGroundwater(dbContext, geographyID, waterMeasurementType, etMinusPrecipMinusTotalSurfaceWaterMeasurementType, effectiveDate, usageLocationIDs);
                 }
                 else
                 {
@@ -163,7 +198,7 @@ public static class WaterMeasurementCalculations
 
                 if (consumedGroundwaterWithCreditMeasurementTypeUnadjusted != null)
                 {
-                    await CalculateUnadjustedExtractedGroundwater(dbContext, geographyID, waterMeasurementType, consumedGroundwaterWithCreditMeasurementTypeUnadjusted, effectiveDate);
+                    await CalculateUnadjustedExtractedGroundwater(dbContext, geographyID, waterMeasurementType, consumedGroundwaterWithCreditMeasurementTypeUnadjusted, effectiveDate, usageLocationIDs);
                 }
                 else
                 {
@@ -184,7 +219,7 @@ public static class WaterMeasurementCalculations
 
                 if (consumedGroundwaterWithCreditMeasurementType != null && extractedGroundwaterAdjustmentType != null)
                 {
-                    await CalculateExtractedGroundwater(dbContext, geographyID, waterMeasurementType, consumedGroundwaterWithCreditMeasurementType, extractedGroundwaterAdjustmentType, effectiveDate);
+                    await CalculateExtractedGroundwater(dbContext, geographyID, waterMeasurementType, consumedGroundwaterWithCreditMeasurementType, extractedGroundwaterAdjustmentType, effectiveDate, usageLocationIDs);
                 }
                 else
                 {
@@ -201,7 +236,7 @@ public static class WaterMeasurementCalculations
                 var extractedGroundwaterMeasurementType = extractedGroundwaterDependency?.DependsOnWaterMeasurementType;
                 if (extractedGroundwaterMeasurementType != null)
                 {
-                    await CalculateExtractedAgainstSupply(dbContext, geographyID, waterMeasurementType, extractedGroundwaterMeasurementType, effectiveDate);
+                    await CalculateExtractedAgainstSupply(dbContext, geographyID, waterMeasurementType, extractedGroundwaterMeasurementType, effectiveDate, usageLocationIDs);
                 }
                 else
                 {
@@ -220,7 +255,6 @@ public static class WaterMeasurementCalculations
 
                 var openETPrecipMeasurementType = openETPrecipDependency?.DependsOnWaterMeasurementType;
 
-
                 var consumedSurfaceWaterDependency = waterMeasurementType.WaterMeasurementTypeDependencyWaterMeasurementTypes
                     .FirstOrDefault(x => x.DependsOnWaterMeasurementType.WaterMeasurementCalculationType?.ToEnum == WaterMeasurementCalculationTypeEnum.CalculateSurfaceWaterConsumption);
 
@@ -228,11 +262,38 @@ public static class WaterMeasurementCalculations
 
                 if (openETEvapoMeasurementType != null && openETPrecipMeasurementType != null)
                 {
-                    await CalculateOpenETConsumptiveUse(dbContext, geographyID, waterMeasurementType, openETEvapoMeasurementType, openETPrecipMeasurementType, consumedSurfaceWaterMeasurementType, effectiveDate);
+                    await CalculateOpenETConsumptiveUse(dbContext, geographyID, waterMeasurementType, openETEvapoMeasurementType, openETPrecipMeasurementType, consumedSurfaceWaterMeasurementType, effectiveDate, usageLocationIDs);
                 }
                 else
                 {
                     throw new ArgumentException("Missing dependency for CalculateOpenETConsumptiveUse.");
+                }
+                break;
+            case WaterMeasurementCalculationTypeEnum.CalculateConsumedGroundwater:
+
+                //CalculateOpenETConsumptiveUse assumes one dependency that is of category ET and one that is of category Precip Credit.
+                openETEvapoDependency = waterMeasurementType.WaterMeasurementTypeDependencyWaterMeasurementTypes
+                    .FirstOrDefault(x => x.DependsOnWaterMeasurementType.WaterMeasurementCategoryType.ToEnum == WaterMeasurementCategoryTypeEnum.ET);
+
+                openETEvapoMeasurementType = openETEvapoDependency?.DependsOnWaterMeasurementType;
+
+                var precipCredit = waterMeasurementType.WaterMeasurementTypeDependencyWaterMeasurementTypes
+                    .FirstOrDefault(x => x.DependsOnWaterMeasurementType.WaterMeasurementCategoryType.ToEnum == WaterMeasurementCategoryTypeEnum.PrecipitationCredit);
+
+                var precipCreditMeasurementType = precipCredit?.DependsOnWaterMeasurementType;
+
+                var surfaceWaterDependencies = waterMeasurementType.WaterMeasurementTypeDependencyWaterMeasurementTypes
+                    .Where(x => x.DependsOnWaterMeasurementType.WaterMeasurementCategoryType?.ToEnum == WaterMeasurementCategoryTypeEnum.SurfaceWater);
+
+                surfaceWaterMeasurementTypes = surfaceWaterDependencies.Select(x => x.DependsOnWaterMeasurementType).ToList();
+
+                if (openETEvapoMeasurementType != null && precipCreditMeasurementType != null)
+                {
+                    await CalculateConsumedGroundwater(dbContext, geographyID, waterMeasurementType, openETEvapoMeasurementType, precipCreditMeasurementType, surfaceWaterMeasurementTypes, effectiveDate, usageLocationIDs);
+                }
+                else
+                {
+                    throw new ArgumentException("Missing dependency for CalculateConsumedGroundwater.");
                 }
                 break;
             default:
@@ -254,7 +315,7 @@ public static class WaterMeasurementCalculations
     /// <exception cref="Exception">
     /// Thrown when the geography lacks the required allocation zone group configuration or when any allocation zone is missing a precipitation multiplier.
     /// </exception>
-    private static async Task CalculateEffectivePrecip(QanatDbContext dbContext, int geographyID, WaterMeasurementType effectivePrecipMeasurementType, WaterMeasurementType precipWaterMeasurementType, DateTime reportedDate)
+    private static async Task CalculateEffectivePrecipByZone(QanatDbContext dbContext, int geographyID, WaterMeasurementType effectivePrecipMeasurementType, WaterMeasurementType precipWaterMeasurementType, DateTime reportedDate, List<int> usageLocationIDs = null)
     {
         var geographyAllocationPlanConfiguration = await dbContext.GeographyAllocationPlanConfigurations
             .AsNoTracking()
@@ -271,16 +332,14 @@ public static class WaterMeasurementCalculations
             .Where(x => x.Zone.ZoneGroupID == geographyAllocationPlanConfiguration.ZoneGroupID)
             .ToDictionaryAsync(x => x.ParcelID, x => x.ZoneID);
 
-        var zoneIDsByUsageEntityNames = dbContext.UsageEntities.AsNoTracking()
+        var zoneIDsByUsageLocationNames = dbContext.UsageLocations.AsNoTracking()
             .Include(x => x.Parcel)
             .Where(x => x.GeographyID == geographyID)
             .AsEnumerable()
             .Where(x => zoneIDByParcelIDs.ContainsKey(x.ParcelID))
-            .ToLookup(x => x.UsageEntityName, x => zoneIDByParcelIDs[x.ParcelID]);
+            .ToLookup(x => x.Name, x => zoneIDByParcelIDs[x.ParcelID]);
 
-        var precipWaterMeasurements = await dbContext.WaterMeasurements.AsNoTracking()
-            .Where(x => x.GeographyID == geographyID && x.WaterMeasurementTypeID == precipWaterMeasurementType.WaterMeasurementTypeID && x.ReportedDate.Date == reportedDate.Date)
-            .ToListAsync();
+        var precipWaterMeasurements = await WaterMeasurements.ListByGeographyIDAndReportedDateAndOptionalWaterMeasurementTypeIDAndOptionalUsageLocationIDs(dbContext, geographyID, reportedDate, precipWaterMeasurementType.WaterMeasurementTypeID, usageLocationIDs);
 
         var precipMultiplierByZoneID = await dbContext.Zones.AsNoTracking()
             .Where(x => x.ZoneGroupID == geographyAllocationPlanConfiguration.ZoneGroupID)
@@ -289,35 +348,128 @@ public static class WaterMeasurementCalculations
         var effectivePrecipWaterMeasurements = new List<WaterMeasurement>();
         foreach (var precipWaterMeasurement in precipWaterMeasurements)
         {
-            if (!zoneIDsByUsageEntityNames[precipWaterMeasurement.UsageEntityName].Any())
+            if (!zoneIDsByUsageLocationNames[precipWaterMeasurement.UsageLocation.Name].Any())
             {
                 continue;
             }
 
-            var zoneID = zoneIDsByUsageEntityNames[precipWaterMeasurement.UsageEntityName].First();
+            var zoneID = zoneIDsByUsageLocationNames[precipWaterMeasurement.UsageLocation.Name].First();
             if (!precipMultiplierByZoneID.ContainsKey(zoneID) || !precipMultiplierByZoneID[zoneID].HasValue)
             {
                 throw new Exception("Could not calculate Effective Precip because at least one Allocation Zone does not have a precipitation multiplier configured.");
             }
 
             var effectivePrecipMultiplier = precipMultiplierByZoneID[zoneID].Value;
+            var volume = precipWaterMeasurement.ReportedValueInAcreFeet * effectivePrecipMultiplier;
+            var depth = volume / (decimal)precipWaterMeasurement.UsageLocation.Area;
             effectivePrecipWaterMeasurements.Add(new WaterMeasurement()
             {
                 WaterMeasurementTypeID = effectivePrecipMeasurementType.WaterMeasurementTypeID,
                 GeographyID = geographyID,
-                UnitTypeID = precipWaterMeasurement.UnitTypeID,
-                UsageEntityName = precipWaterMeasurement.UsageEntityName,
+                UsageLocationID = precipWaterMeasurement.UsageLocationID,
                 ReportedDate = reportedDate,
-                ReportedValue = precipWaterMeasurement.ReportedValue * effectivePrecipMultiplier,
-                ReportedValueInAcreFeet = precipWaterMeasurement.ReportedValueInAcreFeet * effectivePrecipMultiplier,
-                UsageEntityArea = precipWaterMeasurement.UsageEntityArea,
+                ReportedValueInAcreFeet = volume,
+                ReportedValueInFeet = depth,
                 LastUpdateDate = DateTime.UtcNow,
                 FromManualUpload = false,
                 Comment = $"{precipWaterMeasurementType.WaterMeasurementTypeName} Value: {precipWaterMeasurement.ReportedValueInAcreFeet} ac-ft, Effective Precipitation Factor: {effectivePrecipMultiplier}"
             });
         }
 
-        await SaveWaterMeasurements(dbContext, geographyID, reportedDate, effectivePrecipWaterMeasurements, effectivePrecipMeasurementType.WaterMeasurementTypeID);
+        await SaveWaterMeasurements(dbContext, geographyID, reportedDate, effectivePrecipWaterMeasurements, effectivePrecipMeasurementType.WaterMeasurementTypeID, usageLocationIDs);
+    }
+
+    public class EffectivePrecipitationCalculationDto
+    {
+        public decimal EffectivePrecipitationMultiplier { get; set; }
+        public decimal CoverCropEffectivePrecipitationMultiplier { get; set; }
+    }
+
+    private static async Task CalculateEffectivePrecipByScalarValue(QanatDbContext dbContext, int geographyID, WaterMeasurementType effectivePrecipMeasurementType, WaterMeasurementType precipWaterMeasurementType, DateTime reportedDate, List<int> usageLocationIDs = null)
+    {
+        //Extracted groundwater consumption requires a Groundwater Water Efficiency Factor to be set in the calculation JSON.
+        var calculationJSON = JsonSerializer.Deserialize<EffectivePrecipitationCalculationDto>(effectivePrecipMeasurementType.CalculationJSON);
+        var precipitationMultiplier =  calculationJSON.EffectivePrecipitationMultiplier;
+
+        var openETPrecipitationMeasurements = await WaterMeasurements.ListByGeographyIDAndReportedDateAndOptionalWaterMeasurementTypeIDAndOptionalUsageLocationIDs(dbContext, geographyID, reportedDate, precipWaterMeasurementType.WaterMeasurementTypeID, usageLocationIDs);
+
+        var newWaterMeasurements = new List<WaterMeasurement>();
+        foreach (var precipitationMeasurement in openETPrecipitationMeasurements)
+        {
+            var volume = precipitationMeasurement.ReportedValueInAcreFeet * precipitationMultiplier;
+            var depth = volume / (decimal)precipitationMeasurement.UsageLocation.Area;
+            var newUnadjustedGroundwaterMeasurement = new WaterMeasurement()
+            {
+                WaterMeasurementTypeID = effectivePrecipMeasurementType.WaterMeasurementTypeID,
+                GeographyID = geographyID,
+                UsageLocationID = precipitationMeasurement.UsageLocationID,
+                ReportedDate = reportedDate,
+                ReportedValueInAcreFeet = volume,
+                ReportedValueInFeet = depth,
+                FromManualUpload = false,
+                Comment = $"{effectivePrecipMeasurementType.WaterMeasurementTypeName} Value: {volume} ac-ft, Effective Precipitation Multiplier: {precipitationMultiplier}",
+                LastUpdateDate = DateTime.UtcNow
+            };
+
+            newWaterMeasurements.Add(newUnadjustedGroundwaterMeasurement);
+        }
+
+        await SaveWaterMeasurements(dbContext, geographyID, reportedDate, newWaterMeasurements, effectivePrecipMeasurementType.WaterMeasurementTypeID, usageLocationIDs);
+    }
+
+    private static async Task CalculateCoverCropAdjustment(QanatDbContext dbContext, int geographyID, WaterMeasurementType coverCropAdjustmentMeasurementType, WaterMeasurementType precipWaterMeasurementType, DateTime reportedDate, List<int> usageLocationIDs = null)
+    {
+        var calculationJSON = JsonSerializer.Deserialize<EffectivePrecipitationCalculationDto>(coverCropAdjustmentMeasurementType.CalculationJSON);
+
+        var openETPrecipitationMeasurements = await WaterMeasurements.ListByGeographyIDAndReportedDateAndOptionalWaterMeasurementTypeIDAndOptionalUsageLocationIDs(dbContext, geographyID, reportedDate, precipWaterMeasurementType.WaterMeasurementTypeID, usageLocationIDs);
+
+        var newWaterMeasurements = new List<WaterMeasurement>();
+        var waterMeasurementIDsToDelete = new List<int>();
+
+        foreach (var precipitationMeasurement in openETPrecipitationMeasurements)
+        {
+            var isCoverCropped = precipitationMeasurement.UsageLocation.UsageLocationType.WaterMeasurementType != null;
+            if (isCoverCropped)
+            {
+                var precipitationMultiplier = calculationJSON.EffectivePrecipitationMultiplier - calculationJSON.CoverCropEffectivePrecipitationMultiplier;
+
+                var volume = precipitationMeasurement.ReportedValueInAcreFeet * precipitationMultiplier;
+                var depth = volume / (decimal)precipitationMeasurement.UsageLocation.Area;
+                var coverCropAdjustment = new WaterMeasurement()
+                {
+                    WaterMeasurementTypeID = coverCropAdjustmentMeasurementType.WaterMeasurementTypeID,
+                    GeographyID = geographyID,
+                    UsageLocationID = precipitationMeasurement.UsageLocationID,
+                    ReportedDate = reportedDate,
+                    ReportedValueInAcreFeet = volume,
+                    ReportedValueInFeet = depth,
+                    FromManualUpload = false,
+                    Comment = $"{coverCropAdjustmentMeasurementType.WaterMeasurementTypeName} Value: {volume} ac-ft, Cover Crop Adjustment Multiplier: {precipitationMultiplier}",
+                    LastUpdateDate = DateTime.UtcNow
+                };
+
+                newWaterMeasurements.Add(coverCropAdjustment);
+            }
+            else
+            {
+                var waterMeasurementToDelete = await dbContext.WaterMeasurements.AsNoTracking()
+                    .SingleOrDefaultAsync(x => x.GeographyID == geographyID && x.WaterMeasurementTypeID == coverCropAdjustmentMeasurementType.WaterMeasurementTypeID && x.UsageLocationID == precipitationMeasurement.UsageLocationID && x.ReportedDate == reportedDate);
+
+                if (waterMeasurementToDelete != null)
+                {
+                    waterMeasurementIDsToDelete.Add(waterMeasurementToDelete.WaterMeasurementID);
+                }
+            }
+        }
+
+        await dbContext.WaterMeasurements.Where(x => waterMeasurementIDsToDelete.Contains(x.WaterMeasurementID)).ExecuteDeleteAsync();
+
+        await SaveWaterMeasurements(dbContext, geographyID, reportedDate, newWaterMeasurements, coverCropAdjustmentMeasurementType.WaterMeasurementTypeID, usageLocationIDs);
+    }
+
+    public class SurfaceWaterConsumptionCalculationDto
+    {
+        public decimal SurfaceWaterEfficiencyFactor { get; set; }
     }
 
     /// <summary>
@@ -335,33 +487,27 @@ public static class WaterMeasurementCalculations
     /// <exception cref="Exception">
     /// Thrown when the Surface Water Efficiency Factor is not set in the CalculationJSON of the consumedSurfaceWaterMeasurementType.
     /// </exception>
-    private static async Task CalculateSurfaceWaterConsumption(QanatDbContext dbContext, int geographyID, WaterMeasurementType consumedSurfaceWaterMeasurementType, WaterMeasurementType surfaceWaterMeasurementType, DateTime reportedDate)
+    private static async Task CalculateSurfaceWaterConsumption(QanatDbContext dbContext, int geographyID, WaterMeasurementType consumedSurfaceWaterMeasurementType, WaterMeasurementType surfaceWaterMeasurementType, DateTime reportedDate, List<int> usageLocationIDs = null)
     {
         //Surface water consumption requires a Surface Water Efficiency Factor to be set in the calculation JSON.
-        var parsed = consumedSurfaceWaterMeasurementType.CalculationJSON.TryParseJObject(out var calculationJSON);
-        if (!parsed || !calculationJSON.ContainsKey("SurfaceWaterEfficiencyFactor") || calculationJSON["SurfaceWaterEfficiencyFactor"] == null)
-        {
-            throw new Exception("Could not calculate Consumed Surface Water because the Surface Water Efficiency Factor is missing from the CalculationJSON.");
-        }
+        var calculationJSON = System.Text.Json.JsonSerializer.Deserialize<SurfaceWaterConsumptionCalculationDto>(consumedSurfaceWaterMeasurementType.CalculationJSON);
 
-        var surfaceWaterEfficiencyFactor = calculationJSON["SurfaceWaterEfficiencyFactor"]!.Value<decimal>();
-        var surfaceWaterMeasurements = await dbContext.WaterMeasurements.AsNoTracking()
-            .Where(x => x.GeographyID == geographyID && x.WaterMeasurementTypeID == surfaceWaterMeasurementType.WaterMeasurementTypeID && x.ReportedDate.Date == reportedDate.Date)
-            .ToListAsync();
+        var surfaceWaterEfficiencyFactor = calculationJSON.SurfaceWaterEfficiencyFactor;
+        var surfaceWaterMeasurements = await WaterMeasurements.ListByGeographyIDAndReportedDateAndOptionalWaterMeasurementTypeIDAndOptionalUsageLocationIDs(dbContext, geographyID, reportedDate, surfaceWaterMeasurementType.WaterMeasurementTypeID, usageLocationIDs);
 
         var consumedSurfaceWaterMeasurements = new List<WaterMeasurement>();
         foreach (var surfaceWaterDelivery in surfaceWaterMeasurements)
         {
+            var volume = surfaceWaterDelivery.ReportedValueInAcreFeet * surfaceWaterEfficiencyFactor;
+            var depth = volume / (decimal)surfaceWaterDelivery.UsageLocation.Area;
             var newSurfaceWaterConsumption = new WaterMeasurement()
             {
                 WaterMeasurementTypeID = consumedSurfaceWaterMeasurementType.WaterMeasurementTypeID,
                 GeographyID = geographyID,
-                UnitTypeID = surfaceWaterDelivery.UnitTypeID,
-                UsageEntityName = surfaceWaterDelivery.UsageEntityName,
+                UsageLocationID = surfaceWaterDelivery.UsageLocationID,
                 ReportedDate = reportedDate,
-                ReportedValue = surfaceWaterDelivery.ReportedValue * surfaceWaterEfficiencyFactor,
-                ReportedValueInAcreFeet = surfaceWaterDelivery.ReportedValueInAcreFeet * surfaceWaterEfficiencyFactor,
-                UsageEntityArea = surfaceWaterDelivery.UsageEntityArea,
+                ReportedValueInAcreFeet = volume,
+                ReportedValueInFeet = depth,
                 LastUpdateDate = DateTime.UtcNow,
                 FromManualUpload = false,
                 Comment = $"{consumedSurfaceWaterMeasurementType.WaterMeasurementTypeName} Value: {surfaceWaterDelivery.ReportedValueInAcreFeet} ac-ft, Surface Water Efficiency Factor: {surfaceWaterEfficiencyFactor}"
@@ -370,7 +516,7 @@ public static class WaterMeasurementCalculations
             consumedSurfaceWaterMeasurements.Add(newSurfaceWaterConsumption);
         }
 
-        await SaveWaterMeasurements(dbContext, geographyID, reportedDate, consumedSurfaceWaterMeasurements, consumedSurfaceWaterMeasurementType.WaterMeasurementTypeID);
+        await SaveWaterMeasurements(dbContext, geographyID, reportedDate, consumedSurfaceWaterMeasurements, consumedSurfaceWaterMeasurementType.WaterMeasurementTypeID, usageLocationIDs);
     }
 
     /// <summary>
@@ -388,63 +534,59 @@ public static class WaterMeasurementCalculations
     /// <exception cref="ArgumentOutOfRangeException">
     /// Thrown when the unit type is missing or unrecognized during groundwater consumption calculation.
     /// </exception>
-    private static async Task ETMinusPrecipMinusTotalSurfaceWater(QanatDbContext dbContext, int geographyID, DateTime reportedDate, WaterMeasurementType consumedGroundWaterMeasurementType, string effectivePrecipWaterMeasurementTypeName, List<string> surfaceWaterTypeNames)
+    private static async Task ETMinusPrecipMinusTotalSurfaceWater(QanatDbContext dbContext, int geographyID, DateTime reportedDate, WaterMeasurementType consumedGroundWaterMeasurementType, WaterMeasurementType effectivePrecipWaterMeasurementType, WaterMeasurementType coverCropMeasurementType, List<string> surfaceWaterTypeNames, List<int> usageLocationIDs = null)
     {
-        var allWaterMeasurementsForGeographyAndDate = await dbContext.WaterMeasurements.AsNoTracking()
-            .Include(x => x.WaterMeasurementType)
-            .Where(x => x.GeographyID == geographyID && x.ReportedDate.Date == reportedDate.Date)
-            .ToListAsync();
+        var allWaterMeasurementsForGeographyAndDate = await WaterMeasurements.ListByGeographyIDAndReportedDateAndOptionalWaterMeasurementTypeIDAndOptionalUsageLocationIDs(dbContext, geographyID, reportedDate, null, usageLocationIDs);
 
         var evapotranspirationWaterMeasurements = allWaterMeasurementsForGeographyAndDate
             .Where(x => x.WaterMeasurementType.WaterMeasurementCategoryType?.ToEnum == WaterMeasurementCategoryTypeEnum.ET)
             .ToList();
 
         var precipitationWaterMeasurements = allWaterMeasurementsForGeographyAndDate
-            .Where(x => x.WaterMeasurementType.WaterMeasurementTypeName == effectivePrecipWaterMeasurementTypeName)
-            .DistinctBy(x => new { x.UsageEntityName, x.UsageEntityArea, x.ReportedValueInAcreFeet })
-            .ToDictionary(x => new { x.UsageEntityName, x.UsageEntityArea });
+            .Where(x => x.WaterMeasurementType.WaterMeasurementTypeID == effectivePrecipWaterMeasurementType.WaterMeasurementTypeID)
+            .ToList();
+
+        var coverCropWaterMeasurements = allWaterMeasurementsForGeographyAndDate
+            .Where(x => x.WaterMeasurementTypeID == coverCropMeasurementType?.WaterMeasurementTypeID)
+            .ToList();
 
         var surfaceWaterMeasurements = allWaterMeasurementsForGeographyAndDate
             .Where(x => surfaceWaterTypeNames.Contains(x.WaterMeasurementType.WaterMeasurementTypeName))
-            .ToLookup(x => x.UsageEntityName);
+            .ToList();
 
         var newWaterMeasurements = new List<WaterMeasurement>();
         foreach (var evapoWaterMeasurement in evapotranspirationWaterMeasurements)
         {
-            if (!precipitationWaterMeasurements.ContainsKey(new { evapoWaterMeasurement.UsageEntityName, evapoWaterMeasurement.UsageEntityArea }))
-            {
-                continue;
-            }
+            var precipWaterMeasurement = precipitationWaterMeasurements.FirstOrDefault(x => x.UsageLocationID == evapoWaterMeasurement.UsageLocationID);
+            var coverCropAdjustmentMeasurement = coverCropWaterMeasurements.FirstOrDefault(x => x.UsageLocationID == evapoWaterMeasurement.UsageLocationID);
+            var surfaceWaterMeasurementsForUsageLocation = surfaceWaterMeasurements.Where(x => x.UsageLocationID == evapoWaterMeasurement.UsageLocationID).ToList();
 
-            var precipWaterMeasurement = precipitationWaterMeasurements[new { evapoWaterMeasurement.UsageEntityName, evapoWaterMeasurement.UsageEntityArea }];
-            var surfaceWaterMeasurementSumInAcreFeet = surfaceWaterMeasurements[evapoWaterMeasurement.UsageEntityName].Any()
-                ? surfaceWaterMeasurements[evapoWaterMeasurement.UsageEntityName].Sum(x => x.ReportedValueInAcreFeet)
+            var surfaceWaterMeasurementSumInAcreFeet = surfaceWaterMeasurementsForUsageLocation.Any()
+                ? surfaceWaterMeasurementsForUsageLocation.Sum(x => x.ReportedValueInAcreFeet)
                 : 0;
 
-            var reportedValueInAcreFeet = evapoWaterMeasurement.ReportedValueInAcreFeet - precipWaterMeasurement.ReportedValueInAcreFeet - surfaceWaterMeasurementSumInAcreFeet;
+            var volume = evapoWaterMeasurement.ReportedValueInAcreFeet - (precipWaterMeasurement?.ReportedValueInAcreFeet ?? 0 ) - (coverCropAdjustmentMeasurement?.ReportedValueInAcreFeet ?? 0) - surfaceWaterMeasurementSumInAcreFeet;
+            var depth = volume / (decimal)evapoWaterMeasurement.UsageLocation.Area;
+
+            var coverCropComment = coverCropMeasurementType != null && coverCropAdjustmentMeasurement != null
+                ? $" {coverCropMeasurementType.WaterMeasurementTypeName} Value: {coverCropAdjustmentMeasurement.ReportedValueInAcreFeet} ac-ft,"
+                : string.Empty;
 
             newWaterMeasurements.Add(new WaterMeasurement()
             {
                 WaterMeasurementTypeID = consumedGroundWaterMeasurementType.WaterMeasurementTypeID,
                 GeographyID = geographyID,
-                UnitTypeID = evapoWaterMeasurement.UnitTypeID,
-                UsageEntityName = evapoWaterMeasurement.UsageEntityName,
+                UsageLocationID = evapoWaterMeasurement.UsageLocationID,
                 ReportedDate = reportedDate,
-                ReportedValueInAcreFeet = reportedValueInAcreFeet,
-                ReportedValue = evapoWaterMeasurement.UnitTypeID switch
-                {
-                    (int)UnitTypeEnum.Inches => UnitConversionHelper.ConvertAcreFeetToInches(reportedValueInAcreFeet.Value, evapoWaterMeasurement.UsageEntityArea.Value),
-                    (int)UnitTypeEnum.Millimeters => UnitConversionHelper.ConvertAcreFeetToMillimeters(reportedValueInAcreFeet.Value, evapoWaterMeasurement.UsageEntityArea.Value),
-                    _ => throw new ArgumentOutOfRangeException("Unit Type", "Groundwater Consumption cannot be calculated because unit type is missing.")
-                },
-                UsageEntityArea = evapoWaterMeasurement.UsageEntityArea,
+                ReportedValueInAcreFeet = volume,
+                ReportedValueInFeet = depth,
                 LastUpdateDate = DateTime.UtcNow,
                 FromManualUpload = false,
-                Comment = $"{evapoWaterMeasurement.WaterMeasurementType.WaterMeasurementTypeName} Value: {evapoWaterMeasurement.ReportedValueInAcreFeet} ac-ft, {effectivePrecipWaterMeasurementTypeName} Value: {precipWaterMeasurement.ReportedValueInAcreFeet} ac-ft, Total Surface Water Value: {surfaceWaterMeasurementSumInAcreFeet} ac-ft"
+                Comment = $"{evapoWaterMeasurement.WaterMeasurementType.WaterMeasurementTypeName} Value: {evapoWaterMeasurement.ReportedValueInAcreFeet} ac-ft, {effectivePrecipWaterMeasurementType.WaterMeasurementTypeName} Value: {precipWaterMeasurement?.ReportedValueInAcreFeet} ac-ft,{coverCropComment} Total Surface Water Value: {surfaceWaterMeasurementSumInAcreFeet} ac-ft"
             });
         }
 
-        await SaveWaterMeasurements(dbContext, geographyID, reportedDate, newWaterMeasurements, consumedGroundWaterMeasurementType.WaterMeasurementTypeID);
+        await SaveWaterMeasurements(dbContext, geographyID, reportedDate, newWaterMeasurements, consumedGroundWaterMeasurementType.WaterMeasurementTypeID, usageLocationIDs);
     }
 
     /// <summary>
@@ -459,33 +601,34 @@ public static class WaterMeasurementCalculations
     /// <returns>
     /// A task that represents the asynchronous operation. The task result contains no object, as the method saves the calculated positive consumed groundwater and precipitation credit measurements directly to the database.
     /// </returns>
-    private static async Task CalculatePositiveConsumedGroundwater(QanatDbContext dbContext, int geographyID, WaterMeasurementType positiveConsumedGroundwaterMeasurementType, WaterMeasurementType consumedGroundwaterMeasurementType, DateTime reportedDate)
+    private static async Task CalculatePositiveConsumedGroundwater(QanatDbContext dbContext, int geographyID, WaterMeasurementType positiveConsumedGroundwaterMeasurementType, WaterMeasurementType consumedGroundwaterMeasurementType, DateTime reportedDate, List<int> usageLocationIDs = null)
     {
-        var consumedGroundwaterMeasurements = await dbContext.WaterMeasurements.AsNoTracking()
-            .Where(x => x.WaterMeasurementTypeID == consumedGroundwaterMeasurementType.WaterMeasurementTypeID && x.ReportedDate.Date == reportedDate)
-            .ToListAsync();
+        var consumedGroundwaterMeasurements = await WaterMeasurements.ListByGeographyIDAndReportedDateAndOptionalWaterMeasurementTypeIDAndOptionalUsageLocationIDs(dbContext, geographyID, reportedDate, consumedGroundwaterMeasurementType.WaterMeasurementTypeID, usageLocationIDs);
 
         var newPositiveConsumedGroundwaterMeasurements = new List<WaterMeasurement>();
         foreach (var waterMeasurement in consumedGroundwaterMeasurements)
         {
+            var volume = waterMeasurement.ReportedValueInAcreFeet > 0
+                ? waterMeasurement.ReportedValueInAcreFeet
+                : 0;
+            var depth = volume / (decimal)waterMeasurement.UsageLocation.Area;
+
             // positive consumed groundwater
             newPositiveConsumedGroundwaterMeasurements.Add(new WaterMeasurement()
             {
                 WaterMeasurementTypeID = positiveConsumedGroundwaterMeasurementType.WaterMeasurementTypeID,
                 GeographyID = geographyID,
-                UnitTypeID = waterMeasurement.UnitTypeID,
-                UsageEntityName = waterMeasurement.UsageEntityName,
+                UsageLocationID = waterMeasurement.UsageLocationID,
                 ReportedDate = reportedDate,
-                ReportedValueInAcreFeet = waterMeasurement.ReportedValueInAcreFeet > 0 ? waterMeasurement.ReportedValueInAcreFeet : 0,
-                ReportedValue = waterMeasurement.ReportedValue > 0 ? waterMeasurement.ReportedValue : 0,
-                UsageEntityArea = waterMeasurement.UsageEntityArea,
+                ReportedValueInAcreFeet = volume,
+                ReportedValueInFeet = depth,
                 LastUpdateDate = DateTime.UtcNow,
                 FromManualUpload = false,
                 Comment = $"{consumedGroundwaterMeasurementType} Value: {waterMeasurement.ReportedValueInAcreFeet} ac-ft"
             });
         }
 
-        await SaveWaterMeasurements(dbContext, geographyID, reportedDate, newPositiveConsumedGroundwaterMeasurements, positiveConsumedGroundwaterMeasurementType.WaterMeasurementTypeID);
+        await SaveWaterMeasurements(dbContext, geographyID, reportedDate, newPositiveConsumedGroundwaterMeasurements, positiveConsumedGroundwaterMeasurementType.WaterMeasurementTypeID, usageLocationIDs);
     }
 
     /// <summary>
@@ -500,34 +643,46 @@ public static class WaterMeasurementCalculations
     /// <returns>
     /// A task that represents the asynchronous operation. The task result contains no object, as the method saves the calculated positive consumed groundwater and precipitation credit measurements directly to the database.
     /// </returns>
-    private static async Task CalculatePrecipitationCreditOffset(QanatDbContext dbContext, int geographyID, WaterMeasurementType precipitationCreditMeasurementType, WaterMeasurementType consumedGroundwaterMeasurementType, DateTime reportedDate)
+    private static async Task CalculatePrecipitationCreditOffset(QanatDbContext dbContext, int geographyID, WaterMeasurementType precipitationCreditMeasurementType, WaterMeasurementType consumedGroundwaterMeasurementType, DateTime reportedDate, List<int> usageLocationIDs = null)
     {
         var consumedGroundwaterMeasurements = await dbContext.WaterMeasurements.AsNoTracking()
-            .Where(x => x.WaterMeasurementTypeID == consumedGroundwaterMeasurementType.WaterMeasurementTypeID && x.ReportedDate.Date == reportedDate)
+            .Include(x => x.UsageLocation)
+            .Where(x => x.WaterMeasurementTypeID == consumedGroundwaterMeasurementType.WaterMeasurementTypeID && x.ReportedDate.Date == reportedDate && (usageLocationIDs == null || usageLocationIDs.Contains(x.UsageLocationID)))
             .ToListAsync();
 
         var newPrecipitationCreditMeasurements = new List<WaterMeasurement>();
         foreach (var waterMeasurement in consumedGroundwaterMeasurements)
         {
+            var volume = waterMeasurement.ReportedValueInAcreFeet < 0
+                ? waterMeasurement.ReportedValueInAcreFeet
+                : 0;
+
+            var depth = volume / (decimal)waterMeasurement.UsageLocation.Area;
+
             // precipitation credit offset
             newPrecipitationCreditMeasurements.Add(new WaterMeasurement()
             {
                 WaterMeasurementTypeID = precipitationCreditMeasurementType.WaterMeasurementTypeID,
                 GeographyID = geographyID,
-                UnitTypeID = waterMeasurement.UnitTypeID,
-                UsageEntityName = waterMeasurement.UsageEntityName,
+                UsageLocationID = waterMeasurement.UsageLocationID,
                 ReportedDate = reportedDate,
-                ReportedValueInAcreFeet = waterMeasurement.ReportedValueInAcreFeet < 0 ? waterMeasurement.ReportedValueInAcreFeet : 0,
-                ReportedValue = waterMeasurement.ReportedValue < 0 ? waterMeasurement.ReportedValue : 0,
-                UsageEntityArea = waterMeasurement.UsageEntityArea,
+                ReportedValueInAcreFeet = volume,
+                ReportedValueInFeet = depth,
                 LastUpdateDate = DateTime.UtcNow,
                 FromManualUpload = false,
                 Comment = $"{consumedGroundwaterMeasurementType} Value: {waterMeasurement.ReportedValueInAcreFeet} ac-ft"
             });
         }
 
-        await SaveWaterMeasurements(dbContext, geographyID, reportedDate, newPrecipitationCreditMeasurements, precipitationCreditMeasurementType.WaterMeasurementTypeID);
+        await SaveWaterMeasurements(dbContext, geographyID, reportedDate, newPrecipitationCreditMeasurements, precipitationCreditMeasurementType.WaterMeasurementTypeID, usageLocationIDs);
     }
+
+
+    public class GroundwaterCalculationDto
+    {
+        public decimal GroundwaterEfficiencyFactor { get; set; }
+    }
+
 
     /// <summary>
     /// Calculates and stores extracted groundwater values for a given geography based on consumed groundwater multiplied by a groundwater efficiency factor WITHOUT the adjustment.
@@ -545,44 +700,41 @@ public static class WaterMeasurementCalculations
     /// <exception cref="Exception">
     /// Thrown when the Groundwater Efficiency Factor is missing from the CalculationJSON of the extractedGroundwaterMeasurementType.
     /// </exception>
-    private static async Task CalculateUnadjustedExtractedGroundwater(QanatDbContext dbContext, int geographyID, WaterMeasurementType unadjustedGroundwaterMeasurementType, WaterMeasurementType consumedGroundwaterMeasurementType, DateTime reportedDate)
+    private static async Task CalculateUnadjustedExtractedGroundwater(QanatDbContext dbContext, int geographyID, WaterMeasurementType unadjustedGroundwaterMeasurementType, WaterMeasurementType consumedGroundwaterMeasurementType, DateTime reportedDate, List<int> usageLocationIDs = null)
     {
         //Extracted groundwater consumption requires a Groundwater Water Efficiency Factor to be set in the calculation JSON.
-        var parsed = unadjustedGroundwaterMeasurementType.CalculationJSON.TryParseJObject(out var calculationJSON);
-        if (!parsed || !calculationJSON.ContainsKey("GroundwaterEfficiencyFactor") || calculationJSON["GroundwaterEfficiencyFactor"] == null)
-        {
-            throw new Exception("Could not calculate Extracted Groundwater because the Groundwater Efficiency Factor is missing from the CalculationJSON.");
-        }
-
-        var groundwaterEfficiencyFactor = calculationJSON["GroundwaterEfficiencyFactor"]!.Value<decimal>();
-        var consumedGroundWaterMeasurements = await dbContext.WaterMeasurements.Include(x => x.WaterMeasurementType)
-            .AsNoTracking()
-            .Where(x => x.GeographyID == geographyID && x.WaterMeasurementType.WaterMeasurementTypeID == consumedGroundwaterMeasurementType.WaterMeasurementTypeID && x.ReportedDate.Date == reportedDate.Date)
+        var calculationJSON = System.Text.Json.JsonSerializer.Deserialize<GroundwaterCalculationDto>(unadjustedGroundwaterMeasurementType.CalculationJSON);
+        var groundwaterEfficiencyFactor = calculationJSON.GroundwaterEfficiencyFactor;
+        var consumedGroundWaterMeasurements = await dbContext.WaterMeasurements.AsNoTracking()
+            .Include(x => x.WaterMeasurementType)
+            .Include(x => x.UsageLocation)
+            .Where(x => x.GeographyID == geographyID && x.WaterMeasurementType.WaterMeasurementTypeID == consumedGroundwaterMeasurementType.WaterMeasurementTypeID && x.ReportedDate.Date == reportedDate.Date && (usageLocationIDs == null || usageLocationIDs.Contains(x.UsageLocationID)))
             .ToListAsync();
 
         var newWaterMeasurements = new List<WaterMeasurement>();
         foreach (var consumedGroundWaterMeasurement in consumedGroundWaterMeasurements)
         {
+            var volume = consumedGroundWaterMeasurement.ReportedValueInAcreFeet / groundwaterEfficiencyFactor;
+            var depth = volume / (decimal)consumedGroundWaterMeasurement.UsageLocation.Area;
             var newUnadjustedGroundwaterMeasurement = new WaterMeasurement()
             {
                 WaterMeasurementTypeID = unadjustedGroundwaterMeasurementType.WaterMeasurementTypeID,
                 GeographyID = geographyID,
-                UnitTypeID = consumedGroundWaterMeasurement.UnitTypeID,
-                UsageEntityName = consumedGroundWaterMeasurement.UsageEntityName,
+                UsageLocationID = consumedGroundWaterMeasurement.UsageLocationID,
                 ReportedDate = reportedDate,
-                ReportedValue = consumedGroundWaterMeasurement.ReportedValue / groundwaterEfficiencyFactor,
-                ReportedValueInAcreFeet = consumedGroundWaterMeasurement.ReportedValueInAcreFeet / groundwaterEfficiencyFactor,
-                UsageEntityArea = consumedGroundWaterMeasurement.UsageEntityArea,
-                LastUpdateDate = DateTime.UtcNow,
+                ReportedValueInAcreFeet = volume,
+                ReportedValueInFeet = depth,
                 FromManualUpload = false,
-                Comment = $"{consumedGroundwaterMeasurementType.WaterMeasurementTypeName} Value: {consumedGroundWaterMeasurement.ReportedValue} {consumedGroundWaterMeasurement.UnitType?.UnitTypeAbbreviation}, Groundwater Efficiency Factor: {groundwaterEfficiencyFactor}"
+                Comment = $"{consumedGroundwaterMeasurementType.WaterMeasurementTypeName} Value: {consumedGroundWaterMeasurement.ReportedValueInAcreFeet} ac-ft, Groundwater Efficiency Factor: {groundwaterEfficiencyFactor}",
+                LastUpdateDate = DateTime.UtcNow
             };
 
             newWaterMeasurements.Add(newUnadjustedGroundwaterMeasurement);
         }
 
-        await SaveWaterMeasurements(dbContext, geographyID, reportedDate, newWaterMeasurements, unadjustedGroundwaterMeasurementType.WaterMeasurementTypeID);
+        await SaveWaterMeasurements(dbContext, geographyID, reportedDate, newWaterMeasurements, unadjustedGroundwaterMeasurementType.WaterMeasurementTypeID, usageLocationIDs);
     }
+
 
     /// <summary>
     /// Calculates and stores extracted groundwater values for a given geography based on consumed groundwater multiplied by a groundwater efficiency factor and an optional adjustment value.
@@ -600,56 +752,43 @@ public static class WaterMeasurementCalculations
     /// <exception cref="Exception">
     /// Thrown when the Groundwater Efficiency Factor is missing from the CalculationJSON of the extractedGroundwaterMeasurementType.
     /// </exception>
-    private static async Task CalculateExtractedGroundwater(QanatDbContext dbContext, int geographyID, WaterMeasurementType extractedGroundwaterMeasurementType, WaterMeasurementType consumedGroundwaterMeasurementType, WaterMeasurementType extractedGroundwaterAdjustmentMeasurementType, DateTime reportedDate)
+    private static async Task CalculateExtractedGroundwater(QanatDbContext dbContext, int geographyID, WaterMeasurementType extractedGroundwaterMeasurementType, WaterMeasurementType consumedGroundwaterMeasurementType, WaterMeasurementType extractedGroundwaterAdjustmentMeasurementType, DateTime reportedDate, List<int> usageLocationIDs = null)
     {
         //Extracted groundwater consumption requires a Groundwater Water Efficiency Factor to be set in the calculation JSON.
-        var parsed = extractedGroundwaterMeasurementType.CalculationJSON.TryParseJObject(out var calculationJSON);
-        if (!parsed || !calculationJSON.ContainsKey("GroundwaterEfficiencyFactor") || calculationJSON["GroundwaterEfficiencyFactor"] == null)
-        {
-            throw new Exception("Could not calculate Extracted Groundwater because the Groundwater Efficiency Factor is missing from the CalculationJSON.");
-        }
-
-        var groundwaterEfficiencyFactor = calculationJSON["GroundwaterEfficiencyFactor"]!.Value<decimal>();
-        var consumedGroundWaterMeasurements = await dbContext.WaterMeasurements.Include(x => x.WaterMeasurementType)
-            .AsNoTracking()
-            .Where(x => x.GeographyID == geographyID && x.WaterMeasurementType.WaterMeasurementTypeID == consumedGroundwaterMeasurementType.WaterMeasurementTypeID && x.ReportedDate.Date == reportedDate.Date)
-            .ToListAsync();
-
-        var extractedGroundwaterAdjustments = await dbContext.WaterMeasurements.Include(x => x.WaterMeasurementType)
-            .AsNoTracking()
-            .Where(x => x.GeographyID == geographyID && x.WaterMeasurementType.WaterMeasurementTypeID == extractedGroundwaterAdjustmentMeasurementType.WaterMeasurementTypeID && x.ReportedDate.Date == reportedDate.Date)
-            .ToListAsync();
+        var calculationJSON = System.Text.Json.JsonSerializer.Deserialize<GroundwaterCalculationDto>(extractedGroundwaterMeasurementType.CalculationJSON);
+        var groundwaterEfficiencyFactor = calculationJSON.GroundwaterEfficiencyFactor;
+        var consumedGroundWaterMeasurements = await WaterMeasurements.ListByGeographyIDAndReportedDateAndOptionalWaterMeasurementTypeIDAndOptionalUsageLocationIDs(dbContext, geographyID, reportedDate, consumedGroundwaterMeasurementType.WaterMeasurementTypeID, usageLocationIDs);
+        var extractedGroundwaterAdjustments = await WaterMeasurements.ListByGeographyIDAndReportedDateAndOptionalWaterMeasurementTypeIDAndOptionalUsageLocationIDs(dbContext, geographyID, reportedDate, extractedGroundwaterAdjustmentMeasurementType.WaterMeasurementTypeID, usageLocationIDs);
 
         var newWaterMeasurements = new List<WaterMeasurement>();
         foreach (var consumedGroundWaterMeasurement in consumedGroundWaterMeasurements)
         {
-            var extractedGroundwaterAdjustment = extractedGroundwaterAdjustments.FirstOrDefault(x => x.GeographyID == consumedGroundWaterMeasurement.GeographyID && x.ReportedDate.Date == reportedDate.Date && x.UsageEntityName == consumedGroundWaterMeasurement.UsageEntityName); //MK 8/14/2024 -- It should also probably check the UsageEntityArea and be a SingleOrDefault, but for my test case the area differed between the two measurements by a small fraction.
+            var extractedGroundwaterAdjustment = extractedGroundwaterAdjustments.FirstOrDefault(x => x.GeographyID == consumedGroundWaterMeasurement.GeographyID && x.ReportedDate.Date == reportedDate.Date && x.UsageLocationID == consumedGroundWaterMeasurement.UsageLocationID);
 
-            var adjustmentValue = extractedGroundwaterAdjustment?.ReportedValue ?? 0;
             var adjustmentValueInAcreFeet = extractedGroundwaterAdjustment?.ReportedValueInAcreFeet ?? 0;
+            var volume = (consumedGroundWaterMeasurement.ReportedValueInAcreFeet / groundwaterEfficiencyFactor) + adjustmentValueInAcreFeet;
+            var depth = volume / (decimal)consumedGroundWaterMeasurement.UsageLocation.Area;
 
             var newExtractedGroundwaterMeasurement = new WaterMeasurement()
             {
                 WaterMeasurementTypeID = extractedGroundwaterMeasurementType.WaterMeasurementTypeID,
                 GeographyID = geographyID,
-                UnitTypeID = consumedGroundWaterMeasurement.UnitTypeID,
-                UsageEntityName = consumedGroundWaterMeasurement.UsageEntityName,
+                UsageLocationID = consumedGroundWaterMeasurement.UsageLocationID,
                 ReportedDate = reportedDate,
-                ReportedValue = (consumedGroundWaterMeasurement.ReportedValue / groundwaterEfficiencyFactor) + adjustmentValue,
-                ReportedValueInAcreFeet = (consumedGroundWaterMeasurement.ReportedValueInAcreFeet / groundwaterEfficiencyFactor) + adjustmentValueInAcreFeet,
-                UsageEntityArea = consumedGroundWaterMeasurement.UsageEntityArea,
+                ReportedValueInAcreFeet = volume,
+                ReportedValueInFeet = depth,
                 LastUpdateDate = DateTime.UtcNow,
                 FromManualUpload = false,
-                Comment = $"{consumedGroundwaterMeasurementType.WaterMeasurementTypeName} Value: {consumedGroundWaterMeasurement.ReportedValue} {consumedGroundWaterMeasurement.UnitType?.UnitTypeAbbreviation}, Groundwater Efficiency Factor: {groundwaterEfficiencyFactor}, Adjustment={adjustmentValue}"
+                Comment = $"{consumedGroundwaterMeasurementType.WaterMeasurementTypeName} Value: {consumedGroundWaterMeasurement.ReportedValueInAcreFeet} acre-ft, Groundwater Efficiency Factor: {groundwaterEfficiencyFactor}, Adjustment={adjustmentValueInAcreFeet}"
             };
 
             newWaterMeasurements.Add(newExtractedGroundwaterMeasurement);
         }
 
-        await SaveWaterMeasurements(dbContext, geographyID, reportedDate, newWaterMeasurements, extractedGroundwaterMeasurementType.WaterMeasurementTypeID);
+        await SaveWaterMeasurements(dbContext, geographyID, reportedDate, newWaterMeasurements, extractedGroundwaterMeasurementType.WaterMeasurementTypeID, usageLocationIDs);
     }
 
-    private static async Task CalculateExtractedAgainstSupply(QanatDbContext dbContext, int geographyID, WaterMeasurementType extractedAgainstSupplyMeasurementType, WaterMeasurementType extractedGroundwaterMeasurementType, DateTime reportedDate)
+    private static async Task CalculateExtractedAgainstSupply(QanatDbContext dbContext, int geographyID, WaterMeasurementType extractedAgainstSupplyMeasurementType, WaterMeasurementType extractedGroundwaterMeasurementType, DateTime reportedDate, List<int> usageLocationIDs = null)
     {
         var extractedAgainstSupplyMeasurementTypeByDate = new Dictionary<DateTime, List<WaterMeasurement>>();
 
@@ -659,7 +798,8 @@ public static class WaterMeasurementCalculations
         var reportingPeriodEnd = reportingPeriodDto.EndDate;
 
         var extractedGroundwaterMeasurements = await dbContext.WaterMeasurements.AsNoTracking()
-            .Where(x => x.GeographyID == geographyID && x.WaterMeasurementTypeID == extractedGroundwaterMeasurementType.WaterMeasurementTypeID && x.ReportedDate >= reportingPeriodStart && x.ReportedDate <= reportingPeriodEnd)
+            .Include(x => x.UsageLocation)
+            .Where(x => x.GeographyID == geographyID && x.WaterMeasurementTypeID == extractedGroundwaterMeasurementType.WaterMeasurementTypeID && x.ReportedDate >= reportingPeriodStart && x.ReportedDate <= reportingPeriodEnd && (usageLocationIDs == null || usageLocationIDs.Contains(x.UsageLocationID)))
             .ToListAsync();
 
         var waterAccounts = await dbContext.fWaterAccountParcelByGeographyAndYear(geographyID, reportedYear).AsNoTracking()
@@ -668,8 +808,8 @@ public static class WaterMeasurementCalculations
         foreach (var waterAccount in waterAccounts.GroupBy(x => x.WaterAccountID))
         {
             var activeParcelsNumbersInEffect = waterAccount.Select(x => x.ParcelNumber).ToList();
-            var waterAccountGroundwaterMeasurements = extractedGroundwaterMeasurements.Where(x => activeParcelsNumbersInEffect.Contains(x.UsageEntityName)).ToList();
-            var cumulativeValueInAcreFeet = waterAccountGroundwaterMeasurements.Sum(x => x.ReportedValueInAcreFeet.GetValueOrDefault(0));
+            var waterAccountGroundwaterMeasurements = extractedGroundwaterMeasurements.Where(x => activeParcelsNumbersInEffect.Contains(x.UsageLocation.Name)).ToList(); //MK 2/20/2025: Not sure this will work well 
+            var cumulativeValueInAcreFeet = waterAccountGroundwaterMeasurements.Sum(x => x.ReportedValueInAcreFeet);
 
             //MK 12/20/2024 -- If a negative cumulative value, set the EAS to 0 for all months in the period. Updated business logic as of QAN-924.
             if (cumulativeValueInAcreFeet <= 0)
@@ -680,15 +820,14 @@ public static class WaterMeasurementCalculations
                     {
                         WaterMeasurementTypeID = extractedAgainstSupplyMeasurementType.WaterMeasurementTypeID,
                         GeographyID = geographyID,
+                        UsageLocationID = extractedGroundwaterMeasurement.UsageLocationID,
                         UnitTypeID = extractedGroundwaterMeasurement.UnitTypeID,
-                        UsageEntityName = extractedGroundwaterMeasurement.UsageEntityName,
                         ReportedDate = extractedGroundwaterMeasurement.ReportedDate,
-                        ReportedValue = 0,
                         ReportedValueInAcreFeet = 0,
-                        UsageEntityArea = extractedGroundwaterMeasurement.UsageEntityArea,
+                        ReportedValueInFeet = 0,
                         LastUpdateDate = DateTime.UtcNow,
                         FromManualUpload = false,
-                        Comment = $"Set to 0 because cumulative value for the reporting period for the WATER ACCOUNT was less than or equal to 0: WaterAccount ({waterAccount.Key}) = {cumulativeValueInAcreFeet} acreft."
+                        Comment = $"Set to 0 because cumulative value for the reporting period for the WATER ACCOUNT was less than or equal to 0: WaterAccount ({waterAccount.Key}) = {cumulativeValueInAcreFeet} ac-ft."
                     };
 
                     if (!extractedAgainstSupplyMeasurementTypeByDate.ContainsKey(extractedGroundwaterMeasurement.ReportedDate))
@@ -706,19 +845,20 @@ public static class WaterMeasurementCalculations
                 // If cumulative is positive, EAS = EG for all months in the period
                 foreach (var extractedGroundwaterMeasurement in waterAccountGroundwaterMeasurements)
                 {
+                    var volume = extractedGroundwaterMeasurement.ReportedValueInAcreFeet;
+                    var depth = volume / (decimal)extractedGroundwaterMeasurement.UsageLocation.Area;
                     var extractedAgainstSupplyMeasurement = new WaterMeasurement()
                     {
                         WaterMeasurementTypeID = extractedAgainstSupplyMeasurementType.WaterMeasurementTypeID,
                         GeographyID = geographyID,
+                        UsageLocationID = extractedGroundwaterMeasurement.UsageLocationID,
                         UnitTypeID = extractedGroundwaterMeasurement.UnitTypeID,
-                        UsageEntityName = extractedGroundwaterMeasurement.UsageEntityName,
                         ReportedDate = extractedGroundwaterMeasurement.ReportedDate,
-                        ReportedValue = extractedGroundwaterMeasurement.ReportedValue,
-                        ReportedValueInAcreFeet = extractedGroundwaterMeasurement.ReportedValueInAcreFeet,
-                        UsageEntityArea = extractedGroundwaterMeasurement.UsageEntityArea,
+                        ReportedValueInAcreFeet = volume,
+                        ReportedValueInFeet = depth,
                         LastUpdateDate = DateTime.UtcNow,
                         FromManualUpload = false,
-                        Comment = $"Set to {extractedGroundwaterMeasurementType.WaterMeasurementTypeName} because cumulative value for the reporting period for the WATER ACCOUNT was greater than 0: WaterAccount ({waterAccount.Key}) = {cumulativeValueInAcreFeet} acreft."
+                        Comment = $"Set to {extractedGroundwaterMeasurementType.WaterMeasurementTypeName} because cumulative value for the reporting period for the WATER ACCOUNT was greater than 0: WaterAccount ({waterAccount.Key}) = {cumulativeValueInAcreFeet} ac-ft."
                     };
 
                     if (!extractedAgainstSupplyMeasurementTypeByDate.ContainsKey(extractedGroundwaterMeasurement.ReportedDate))
@@ -736,7 +876,7 @@ public static class WaterMeasurementCalculations
         foreach (var reportedDateKey in extractedAgainstSupplyMeasurementTypeByDate.Keys)
         {
             var waterMeasurements = extractedAgainstSupplyMeasurementTypeByDate[reportedDateKey];
-            await SaveWaterMeasurements(dbContext, geographyID, reportedDateKey, waterMeasurements, extractedAgainstSupplyMeasurementType.WaterMeasurementTypeID);
+            await SaveWaterMeasurements(dbContext, geographyID, reportedDateKey, waterMeasurements, extractedAgainstSupplyMeasurementType.WaterMeasurementTypeID, usageLocationIDs);
         }
     }
 
@@ -753,13 +893,9 @@ public static class WaterMeasurementCalculations
     /// <returns>
     /// A task that represents the asynchronous operation. The task result contains no object, as the method saves the calculated Consumptive Use measurements directly to the database.
     /// </returns>
-    private static async Task CalculateOpenETConsumptiveUse(QanatDbContext dbContext, int geographyID, WaterMeasurementType openETConsumptiveUseWaterMeasurementType, WaterMeasurementType evapoWaterMeasurementType, WaterMeasurementType precipWaterMeasurementType, WaterMeasurementType consumedSurfaceWaterMeasurementType, DateTime reportedDate)
+    private static async Task CalculateOpenETConsumptiveUse(QanatDbContext dbContext, int geographyID, WaterMeasurementType openETConsumptiveUseWaterMeasurementType, WaterMeasurementType evapoWaterMeasurementType, WaterMeasurementType precipWaterMeasurementType, WaterMeasurementType consumedSurfaceWaterMeasurementType, DateTime reportedDate, List<int> usageLocationIDs = null)
     {
-        var allWaterMeasurementsForGeographyAndDate = dbContext.WaterMeasurements.Include(x => x.WaterMeasurementType)
-            .AsNoTracking()
-            .Where(x => x.GeographyID == geographyID && x.ReportedDate.Date == reportedDate.Date && x.FromManualUpload == false)
-            .ToList();
-
+        var allWaterMeasurementsForGeographyAndDate = await WaterMeasurements.ListByGeographyIDAndReportedDateAndOptionalWaterMeasurementTypeIDAndOptionalUsageLocationIDs(dbContext, geographyID, reportedDate, null, usageLocationIDs);
         var evapotranspirationWaterMeasurements = allWaterMeasurementsForGeographyAndDate
             .Where(x => x.WaterMeasurementType.WaterMeasurementTypeID == evapoWaterMeasurementType.WaterMeasurementTypeID)
             .ToList();
@@ -785,7 +921,7 @@ public static class WaterMeasurementCalculations
         foreach (var evapotranspirationWaterMeasurement in evapotranspirationWaterMeasurements)
         {
             var precipitationWaterMeasurement = precipitationWaterMeasurements
-                .SingleOrDefault(x => x.UsageEntityName == evapotranspirationWaterMeasurement.UsageEntityName);
+                .SingleOrDefault(x => x.UsageLocationID == evapotranspirationWaterMeasurement.UsageLocationID);
 
             if (precipitationWaterMeasurement == null)
             {
@@ -793,40 +929,123 @@ public static class WaterMeasurementCalculations
             }
 
             var consumedSurfaceWaterMeasurement = consumedSurfaceWaterMeasurements
-                .SingleOrDefault(x => x.UsageEntityName == evapotranspirationWaterMeasurement.UsageEntityName);
+                .SingleOrDefault(x => x.UsageLocationID == evapotranspirationWaterMeasurement.UsageLocationID);
 
-            var reportedValue = evapotranspirationWaterMeasurement.ReportedValue - precipitationWaterMeasurement.ReportedValue - (consumedSurfaceWaterMeasurement?.ReportedValue ?? 0);
-            var reportedValueInAcreFeet = (evapotranspirationWaterMeasurement.ReportedValueInAcreFeet ?? 0) - (precipitationWaterMeasurement.ReportedValueInAcreFeet ?? 0) - (consumedSurfaceWaterMeasurement?.ReportedValueInAcreFeet ?? 0);
+            var reportedValueInAcreFeet = (evapotranspirationWaterMeasurement.ReportedValueInAcreFeet) - (precipitationWaterMeasurement.ReportedValueInAcreFeet) - (consumedSurfaceWaterMeasurement?.ReportedValueInAcreFeet ?? 0);
+            var volume = reportedValueInAcreFeet > 0
+                ? reportedValueInAcreFeet
+                : 0;
+
+            var depth = volume / (decimal)evapotranspirationWaterMeasurement.UsageLocation.Area;
 
             var consumptiveUseRecord = new WaterMeasurement()
             {
                 WaterMeasurementTypeID = openETConsumptiveUseWaterMeasurementType.WaterMeasurementTypeID,
                 GeographyID = geographyID,
-                UnitTypeID = evapotranspirationWaterMeasurement.UnitTypeID,
-                UsageEntityName = evapotranspirationWaterMeasurement.UsageEntityName,
+                UsageLocationID = evapotranspirationWaterMeasurement.UsageLocationID,
                 ReportedDate = reportedDate,
-                UsageEntityArea = evapotranspirationWaterMeasurement.UsageEntityArea,
                 LastUpdateDate = DateTime.UtcNow,
                 FromManualUpload = false,
                 Comment = $"{evapoWaterMeasurementType.WaterMeasurementTypeName} Value: {evapotranspirationWaterMeasurement.ReportedValueInAcreFeet} ac-ft, {precipWaterMeasurementType.WaterMeasurementTypeName} Value: {precipitationWaterMeasurement.ReportedValueInAcreFeet} ac-ft",
 
                 // months with heavy rain can lead to negative Consumptive Use calculations, so ensuring Reported Values cannot be < 0
                 // also months with lots of surface water delivery can lead to negative Consumed Groundwater 
-                ReportedValue = reportedValue > 0 ? reportedValue : 0,
-                ReportedValueInAcreFeet = reportedValueInAcreFeet > 0 ? reportedValueInAcreFeet : 0,
+                ReportedValueInAcreFeet = volume,
+                ReportedValueInFeet = depth
             };
 
             consumptiveUseRecords.Add(consumptiveUseRecord);
         }
 
-        await SaveWaterMeasurements(dbContext, geographyID, reportedDate, consumptiveUseRecords, openETConsumptiveUseWaterMeasurementType.WaterMeasurementTypeID);
+        await SaveWaterMeasurements(dbContext, geographyID, reportedDate, consumptiveUseRecords, openETConsumptiveUseWaterMeasurementType.WaterMeasurementTypeID, usageLocationIDs);
     }
 
-    private static async Task SaveWaterMeasurements(QanatDbContext dbContext, int geographyID, DateTime reportedDate, List<WaterMeasurement> newWaterMeasurements, int waterMeasurementTypeID)
+    /// <summary>
+    /// Calculates and stores Consumed Groundwater for a given geography.
+    /// </summary>
+    /// <param name="dbContext">The database context to interact with the Qanat database.</param>
+    /// <param name="geographyID">The unique identifier for the geography in which the calculation is performed.</param>
+    /// <param name="consumedGroundwaterMeasurementType">The WaterMeasurementType representing the calculated Consumed Groundwater.</param>
+    /// <param name="evapoWaterMeasurementType">The WaterMeasurementType representing the evapotranspiration values.</param>
+    /// <param name="precipCreditWaterMeasurementType">The WaterMeasurementType representing the precipitation credit values.</param>
+    /// <param name="surfaceWaterMeasurementTypes">The WaterMeasurementTypes representing the surface water values.</param>
+    /// <param name="reportedDate">The date of the recorded water measurements.</param>
+    /// <returns></returns>
+    private static async Task CalculateConsumedGroundwater(QanatDbContext dbContext, int geographyID, WaterMeasurementType consumedGroundwaterMeasurementType, WaterMeasurementType evapoWaterMeasurementType, WaterMeasurementType precipCreditWaterMeasurementType, List<WaterMeasurementType> surfaceWaterMeasurementTypes, DateTime reportedDate, List<int> usageLocationIDs = null)
     {
-        await dbContext.WaterMeasurements.Where(x =>
-                                                    x.GeographyID == geographyID && x.ReportedDate == reportedDate &&
-                                                    x.WaterMeasurementTypeID == waterMeasurementTypeID && x.FromManualUpload == false)
+        var allWaterMeasurementsForGeographyAndDate = await WaterMeasurements.ListByGeographyIDAndReportedDateAndOptionalWaterMeasurementTypeIDAndOptionalUsageLocationIDs(dbContext, geographyID, reportedDate, null, usageLocationIDs);
+
+        var evapotranspirationWaterMeasurements = allWaterMeasurementsForGeographyAndDate
+            .Where(x => x.WaterMeasurementType.WaterMeasurementTypeID == evapoWaterMeasurementType.WaterMeasurementTypeID)
+            .ToList();
+
+        var precipitationCreditWaterMeasurements = allWaterMeasurementsForGeographyAndDate
+            .Where(x => x.WaterMeasurementType.WaterMeasurementTypeID == precipCreditWaterMeasurementType.WaterMeasurementTypeID)
+            .ToList();
+
+        var surfaceWaterMeasurementTypeIDs = surfaceWaterMeasurementTypes.Select(x => x.WaterMeasurementTypeID).ToList();
+        var allSurfaceWaterMeasurements = allWaterMeasurementsForGeographyAndDate
+            .Where(x => surfaceWaterMeasurementTypeIDs.Contains(x.WaterMeasurementTypeID!.Value))
+            .ToList();
+
+        if (!evapotranspirationWaterMeasurements.Any())
+        {
+            return;
+        }
+
+        var consumedGroundwaterRecords = new List<WaterMeasurement>();
+
+        foreach (var evapotranspirationWaterMeasurement in evapotranspirationWaterMeasurements)
+        {
+            var precipitationCreditsWaterMeasurement = precipitationCreditWaterMeasurements
+                .SingleOrDefault(x => x.UsageLocationID == evapotranspirationWaterMeasurement.UsageLocationID);
+
+            var surfaceWaterMeasurements = allSurfaceWaterMeasurements
+                .Where(x => x.UsageLocationID == evapotranspirationWaterMeasurement.UsageLocationID)
+                .ToList();
+
+            var surfaceWaterMeasurementReportedValueInAcreFeet = surfaceWaterMeasurements.Sum(x => x.ReportedValueInAcreFeet);
+
+            var surfaceWaterMeasurementComment = "";
+            var index = 0;
+            foreach (var surfaceWaterMeasurementType in surfaceWaterMeasurementTypes)
+            {
+                var reportedValueInAcreFeetForSurfaceWater = surfaceWaterMeasurements.FirstOrDefault(x => x.WaterMeasurementTypeID == surfaceWaterMeasurementType.WaterMeasurementTypeID)?.ReportedValueInAcreFeet ?? 0;
+                surfaceWaterMeasurementComment += $"{surfaceWaterMeasurementType.WaterMeasurementTypeName} Value: {reportedValueInAcreFeetForSurfaceWater} ac-ft, ";
+                if (index == surfaceWaterMeasurementTypes.Count - 1)
+                {
+                    surfaceWaterMeasurementComment = surfaceWaterMeasurementComment.TrimEnd(',', ' ');
+                }
+
+                index++;
+            }
+
+            var volume = (evapotranspirationWaterMeasurement.ReportedValueInAcreFeet) - (precipitationCreditsWaterMeasurement?.ReportedValueInAcreFeet ?? 0) - surfaceWaterMeasurementReportedValueInAcreFeet;
+            var depth = volume / (decimal)evapotranspirationWaterMeasurement.UsageLocation.Area;
+
+            var consumptiveUseRecord = new WaterMeasurement()
+            {
+                GeographyID = geographyID,
+                WaterMeasurementTypeID = consumedGroundwaterMeasurementType.WaterMeasurementTypeID,
+                UsageLocationID = evapotranspirationWaterMeasurement.UsageLocationID,
+                ReportedDate = reportedDate,
+                ReportedValueInAcreFeet = volume,
+                ReportedValueInFeet = depth,
+                LastUpdateDate = DateTime.UtcNow,
+                FromManualUpload = false,
+                Comment = $"{evapoWaterMeasurementType.WaterMeasurementTypeName} Value: {evapotranspirationWaterMeasurement.ReportedValueInAcreFeet} ac-ft, {precipCreditWaterMeasurementType.WaterMeasurementTypeName} Value: {precipitationCreditsWaterMeasurement?.ReportedValueInAcreFeet ?? 0} ac-ft, {surfaceWaterMeasurementComment}",
+
+            };
+
+            consumedGroundwaterRecords.Add(consumptiveUseRecord);
+        }
+
+        await SaveWaterMeasurements(dbContext, geographyID, reportedDate, consumedGroundwaterRecords, consumedGroundwaterMeasurementType.WaterMeasurementTypeID, usageLocationIDs);
+    }
+
+    private static async Task SaveWaterMeasurements(QanatDbContext dbContext, int geographyID, DateTime reportedDate, List<WaterMeasurement> newWaterMeasurements, int waterMeasurementTypeID, List<int> usageLocationIDs = null)
+    {
+        await dbContext.WaterMeasurements.Where(x => x.GeographyID == geographyID && x.ReportedDate == reportedDate && x.WaterMeasurementTypeID == waterMeasurementTypeID && x.FromManualUpload == false && (usageLocationIDs == null || usageLocationIDs.Contains(x.UsageLocationID)))
             .ExecuteDeleteAsync();
 
         await dbContext.WaterMeasurements.AddRangeAsync(newWaterMeasurements);

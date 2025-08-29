@@ -8,11 +8,7 @@ import { FormFieldType, FormInputOption } from "src/app/shared/components/forms/
 import { WellRegistrationService } from "src/app/shared/generated/api/well-registration.service";
 import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
 import { FuelTypeEnum, FuelTypesAsSelectDropdownOptions } from "src/app/shared/generated/enum/fuel-type-enum";
-import {
-    WellRegistrySupportingInfoDto,
-    WellRegistrySupportingInfoDtoForm,
-    WellRegistrySupportingInfoDtoFormControls,
-} from "src/app/shared/generated/model/models";
+import { WellRegistrySupportingInfoDto, WellRegistrySupportingInfoDtoForm, WellRegistrySupportingInfoDtoFormControls } from "src/app/shared/generated/model/models";
 import { IDeactivateComponent } from "src/app/guards/unsaved-changes-guard";
 import { Alert } from "src/app/shared/models/alert";
 import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
@@ -20,7 +16,7 @@ import { AlertService } from "src/app/shared/services/alert.service";
 import { WellRegistryWorkflowProgressService } from "src/app/shared/services/well-registry-workflow-progress.service";
 import { ButtonComponent } from "../../../shared/components/button/button.component";
 import { FormFieldComponent } from "../../../shared/components/forms/form-field/form-field.component";
-import { NgIf, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { CustomRichTextComponent } from "../../../shared/components/custom-rich-text/custom-rich-text.component";
 import { AlertDisplayComponent } from "../../../shared/components/alert-display/alert-display.component";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
@@ -31,13 +27,11 @@ import { WorkflowBodyComponent } from "src/app/shared/components/workflow-body/w
     templateUrl: "./supporting-well-info.component.html",
     styleUrls: ["./supporting-well-info.component.scss"],
     animations: [inOutAnimation],
-    standalone: true,
     imports: [
         PageHeaderComponent,
         WorkflowBodyComponent,
         AlertDisplayComponent,
         CustomRichTextComponent,
-        NgIf,
         FormsModule,
         ReactiveFormsModule,
         FormFieldComponent,
@@ -86,8 +80,8 @@ export class SupportingWellInfoComponent implements OnInit, OnDestroy, IDeactiva
     public fuelTypeOptions: FormInputOption[] = [];
 
     public isEstimatedOptions: FormInputOption[] = [
-        { Value: false, Label: "Measured", Disabled: false },
-        { Value: true, Label: "Estimated", Disabled: false },
+        { Value: false, Label: "Measured", disabled: false },
+        { Value: true, Label: "Estimated", disabled: false },
     ];
 
     constructor(
@@ -113,7 +107,7 @@ export class SupportingWellInfoComponent implements OnInit, OnDestroy, IDeactiva
                 this.formGroup.controls.FuelOther.enable();
             }
         });
-        this.supportingWellInfo$ = this.wellRegistrationService.wellRegistrationsWellRegistrationIDSupportingInfoGet(this.wellID).pipe(
+        this.supportingWellInfo$ = this.wellRegistrationService.getSupportingInfoWellRegistration(this.wellID).pipe(
             tap((x) => {
                 this.formGroup.patchValue(x);
             })
@@ -126,7 +120,7 @@ export class SupportingWellInfoComponent implements OnInit, OnDestroy, IDeactiva
 
     public save(andContinue: boolean = false) {
         this.isLoadingSubmit = true;
-        this.wellRegistrationService.wellRegistrationsWellRegistrationIDSupportingInfoPut(this.wellID, this.formGroup.value).subscribe((response) => {
+        this.wellRegistrationService.updateSupportingInfoWellRegistration(this.wellID, this.formGroup.value).subscribe((response) => {
             this.isLoadingSubmit = false;
             this.alertService.clearAlerts();
             this.alertService.pushAlert(new Alert("Successfully saved supporting information", AlertContext.Success));

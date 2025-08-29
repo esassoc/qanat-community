@@ -24,18 +24,25 @@ public class FeeCalculatorTests
         _dbContext = new QanatDbContext(dbCS);
     }
 
-    [DataTestMethod]
-    [DataRow("etsgsa", 7214, 2024)]
-    public async Task CanCalculateFeeWithoutIncentives(string geographyName, int waterAccountID, int year)
+    [TestMethod]
+    [DataRow("etsgsa", 7214, 46)] //46 = ETSGSA 2024
+    public async Task CanCalculateFeeWithoutIncentives(string geographyName, int waterAccountID, int reportingPeriodID)
     {
         var geography = Geographies.GetByNameAsPublicDto(_dbContext, geographyName);
         var feeStructures = FeeStructuresDtos.ETSGSA_FeeStructures;
         var selectedFeeStructure = feeStructures.First();
 
+        var callingUser = new UserDto()
+        {
+            Flags = new Dictionary<string, bool>() { { Flag.IsSystemAdmin.FlagName, true } }
+        };
+
+        var reportingPeriods = await ReportingPeriods.ListByGeographyIDAsync(_dbContext, geography.GeographyID, callingUser);
+        var reportingPeriod = reportingPeriods.First(x => x.ReportingPeriodID == reportingPeriodID);
         var input = new FeeCalculatorInputDto()
         {
             WaterAccountID = waterAccountID,
-            ReportingYear = year,
+            ReportingPeriodID = reportingPeriod.ReportingPeriodID,
             FeeStructureID = selectedFeeStructure.FeeStructureID,
             SurfaceWaterDelivered = 3,
             SurfaceWaterIrrigationEfficiency = 90, //Entered as a percentage
@@ -51,7 +58,7 @@ public class FeeCalculatorTests
 
         Console.WriteLine(prettyPrintedResultJSON);
 
-        var waterAccount = WaterAccounts.GetByIDAsDto(_dbContext, waterAccountID);
+        var waterAccount = WaterAccounts.GetByIDAsDto(_dbContext, waterAccountID, reportingPeriodID);
         CheckScenario(waterAccount, selectedFeeStructure, output.BaselineScenario, new List<MLRPIncentiveDto>());
         CheckScenario(waterAccount, selectedFeeStructure, output.LandUseChangeScenario, new List<MLRPIncentiveDto>());
 
@@ -65,9 +72,9 @@ public class FeeCalculatorTests
         Assert.AreEqual(0, output.SavingsAndIncentives.MLRPIncentiveBreakdown.Count);
     }
 
-    [DataTestMethod]
-    [DataRow("etsgsa", 7214, 2024)]
-    public async Task CanCalculateFeeWithIncentives(string geographyName, int waterAccountID, int year)
+    [TestMethod]
+    [DataRow("etsgsa", 7214, 46)] //46 = ETSGSA 2024
+    public async Task CanCalculateFeeWithIncentives(string geographyName, int waterAccountID, int reportingPeriodID)
     {
         var geography = Geographies.GetByNameAsPublicDto(_dbContext, geographyName);
         var feeStructures = FeeStructuresDtos.ETSGSA_FeeStructures;
@@ -76,10 +83,10 @@ public class FeeCalculatorTests
         var coverCropIncentive = MLRPIncentiveDtos.ETSGSA_MLRPIncentives.First(x => x.Name == "Cover Cropping (Self-Directed)");
         coverCropIncentive.Acres = 100;
 
-        var orchardIncentive = MLRPIncentiveDtos.ETSGSA_MLRPIncentives.First(x => x.Name == "Orchard Swale Rewilding (MLRP)");
+        var orchardIncentive = MLRPIncentiveDtos.ETSGSA_MLRPIncentives.First(x => x.Name == "MLRP Orchard Swale Rewilding");
         orchardIncentive.Acres = 100;
 
-        var floodFlowIncentive = MLRPIncentiveDtos.ETSGSA_MLRPIncentives.First(x => x.Name == "Floodflow Spreading on Non-Floodplain Lands (MLRP)");
+        var floodFlowIncentive = MLRPIncentiveDtos.ETSGSA_MLRPIncentives.First(x => x.Name == "MLRP Flood Flow Spreading");
         floodFlowIncentive.Acres = 100;
 
         var incentives = new List<MLRPIncentiveDto>()
@@ -89,10 +96,18 @@ public class FeeCalculatorTests
             floodFlowIncentive
         };
 
+        var callingUser = new UserDto()
+        {
+            Flags = new Dictionary<string, bool>() { { Flag.IsSystemAdmin.FlagName, true } }
+        };
+
+        var reportingPeriods = await ReportingPeriods.ListByGeographyIDAsync(_dbContext, geography.GeographyID, callingUser);
+        var reportingPeriod = reportingPeriods.First(x => x.ReportingPeriodID == reportingPeriodID);
+
         var input = new FeeCalculatorInputDto()
         {
             WaterAccountID = waterAccountID,
-            ReportingYear = year,
+            ReportingPeriodID = reportingPeriod.ReportingPeriodID,
             FeeStructureID = selectedFeeStructure.FeeStructureID,
             SurfaceWaterDelivered = 3,
             SurfaceWaterIrrigationEfficiency = 90, //Entered as a percentage
@@ -108,7 +123,7 @@ public class FeeCalculatorTests
 
         Console.WriteLine(prettyPrintedResultJSON);
 
-        var waterAccount = WaterAccounts.GetByIDAsDto(_dbContext, waterAccountID);
+        var waterAccount = WaterAccounts.GetByIDAsDto(_dbContext, waterAccountID, reportingPeriodID);
         CheckScenario(waterAccount, selectedFeeStructure, output.BaselineScenario, new List<MLRPIncentiveDto>());
         CheckScenario(waterAccount, selectedFeeStructure, output.LandUseChangeScenario, incentives);
 
@@ -130,10 +145,10 @@ public class FeeCalculatorTests
         }
         else
         {
-            var parcelAcres = ((decimal) waterAccount.Acres).Round(4);
+            var parcelAcres = ((decimal)waterAccount.Acres).Round(4);
             Assert.AreEqual(parcelAcres, scenario.Acres);
 
-            var irrigatedAcres  = ((decimal)waterAccount.IrrigatedAcres).Round(4);
+            var irrigatedAcres = ((decimal)waterAccount.IrrigatedAcres).Round(4);
             Assert.AreEqual(irrigatedAcres, scenario.IrrigatedAcres);
         }
 
@@ -161,7 +176,7 @@ public class FeeCalculatorTests
         var tolerance = .0001m;
         var categoryTotal = scenario.CategoryBreakdown.Sum(c => c.TotalAllocationInAcreFeet.GetValueOrDefault(0));
         var diff = scenario.TotalAllocationInAcreFeet.GetValueOrDefault(0) - categoryTotal;
-        Assert.IsTrue(Math.Abs(diff) <= tolerance, $"Total allocation should match the sum of all category allocations. Diff: {diff}"); 
+        Assert.IsTrue(Math.Abs(diff) <= tolerance, $"Total allocation should match the sum of all category allocations. Diff: {diff}");
     }
 
     private void AssertScenariosAreEquivalent(FeeCalculatorOutputScenarioDto scenarioA, FeeCalculatorOutputScenarioDto scenarioB)
@@ -179,7 +194,7 @@ public class FeeCalculatorTests
         }
 
         var categoryOutputProperties = typeof(FeeCategoryOutputDto).GetProperties();
-        foreach(var property in categoryOutputProperties)
+        foreach (var property in categoryOutputProperties)
         {
             foreach (var categoryBreakdownA in scenarioA.CategoryBreakdown)
             {

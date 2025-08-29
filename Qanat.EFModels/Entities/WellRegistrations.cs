@@ -149,7 +149,7 @@ public static class WellRegistrations
             CountyWellPermit = wellRegistration.CountyWellPermitNumber,
             DateDrilled = wellRegistration.DateDrilled,
             ReferenceWell = wellRegistration.ReferenceWell?.AsSimpleDto(),
-            WaterUseTypes = WellRegistrationWaterUseType.AllAsSimpleDto.Select(x =>
+            WaterUseTypes = WellRegistrationWaterUseType.All.Select(x =>
             {
                 var wellWaterUseType = wellRegistration.WellRegistrationWaterUses
                         .SingleOrDefault(y => y.WellRegistrationWaterUseTypeID == x.WellRegistrationWaterUseTypeID);
@@ -284,7 +284,7 @@ public static class WellRegistrations
             WellStatusRegistrationID = wellRegistration.WellRegistrationStatusID,
             WellRegistrationStatus = wellRegistration.WellRegistrationStatus.AsSimpleDto(),
             ParcelID = wellRegistration.ParcelID,
-            Parcel = wellRegistration.Parcel.AsDisplayDto(),
+            Parcel = wellRegistration.Parcel?.AsDisplayDto(),
             StateWCRNumber = wellRegistration.StateWCRNumber,
             CountyWellPermitNumber = wellRegistration.CountyWellPermitNumber,
             DateDrilled = wellRegistration.DateDrilled,

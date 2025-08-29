@@ -4,9 +4,8 @@ import { RouterLink } from "@angular/router";
 
 @Component({
     selector: "contact",
-    standalone: true,
     imports: [IconComponent, RouterLink],
     templateUrl: "./contact.component.html",
-    styleUrl: "./contact.component.scss",
+    styleUrl: "./contact.component.scss"
 })
 export class ContactComponent {}

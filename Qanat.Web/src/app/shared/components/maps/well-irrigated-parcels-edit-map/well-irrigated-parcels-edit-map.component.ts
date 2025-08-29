@@ -13,7 +13,7 @@ import { FormsModule } from "@angular/forms";
 import { NgSelectModule } from "@ng-select/ng-select";
 import { HighlightedParcelsLayerComponent } from "src/app/shared/components/leaflet/layers/highlighted-parcels-layer/highlighted-parcels-layer.component";
 import { GeographyParcelsLayerComponent } from "src/app/shared/components/leaflet/layers/geography-parcels-layer/geography-parcels-layer.component";
-import { NgIf, NgFor, NgClass, AsyncPipe, JsonPipe } from "@angular/common";
+import { NgClass, AsyncPipe, JsonPipe } from "@angular/common";
 import { QanatMapComponent } from "src/app/shared/components/leaflet/qanat-map/qanat-map.component";
 import { ParcelByGeographyService } from "src/app/shared/generated/api/parcel-by-geography.service";
 
@@ -21,8 +21,7 @@ import { ParcelByGeographyService } from "src/app/shared/generated/api/parcel-by
     selector: "well-irrigated-parcels-edit-map",
     templateUrl: "./well-irrigated-parcels-edit-map.component.html",
     styleUrl: "./well-irrigated-parcels-edit-map.component.scss",
-    standalone: true,
-    imports: [QanatMapComponent, NgIf, GeographyParcelsLayerComponent, HighlightedParcelsLayerComponent, NgSelectModule, FormsModule, NgFor, NgClass, AsyncPipe],
+    imports: [QanatMapComponent, GeographyParcelsLayerComponent, HighlightedParcelsLayerComponent, NgSelectModule, FormsModule, NgClass, AsyncPipe]
 })
 export class WellIrrigatedParcelsEditMapComponent implements OnInit {
     @Input() geographyID: number;
@@ -59,7 +58,11 @@ export class WellIrrigatedParcelsEditMapComponent implements OnInit {
     public mapIsReady = false;
     public layerControl: L.layerControl;
 
-    constructor(private parcelByGeographyService: ParcelByGeographyService, private leafletHelperService: LeafletHelperService, private cdr: ChangeDetectorRef) {}
+    constructor(
+        private parcelByGeographyService: ParcelByGeographyService,
+        private leafletHelperService: LeafletHelperService,
+        private cdr: ChangeDetectorRef
+    ) {}
 
     public ngOnInit(): void {
         this._wellIrrigatedParcels.forEach((parcel) => {
@@ -77,7 +80,7 @@ export class WellIrrigatedParcelsEditMapComponent implements OnInit {
             tap(() => (this.searchLoading = true)),
             debounceTime(800),
             switchMap((searchTerm) =>
-                this.parcelByGeographyService.geographiesGeographyIDParcelsSearchSearchStringGet(this.geographyID, searchTerm).pipe(
+                this.parcelByGeographyService.searchParcelsByGeographyIDParcelByGeography(this.geographyID, searchTerm).pipe(
                     catchError(() => of([])),
                     tap(() => (this.searchLoading = false))
                 )

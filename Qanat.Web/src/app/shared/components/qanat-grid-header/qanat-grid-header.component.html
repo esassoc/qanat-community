@@ -1,46 +1,57 @@
 <div class="grid-header flex-between">
-    <div class="grid-actions flex">
+    <div class="grid-actions flex" [style]="unsetHeaderGridActionWidth ? 'width: unset;' : ''">
         <div class="global-filter">
-            <div class="field" *ngIf="!hideGlobalFilter">
-                <input
-                    type="text"
-                    name="quickFilterText"
-                    [(ngModel)]="quickFilterText"
-                    (ngModelChange)="onQuickFilterTextChanged()"
-                    placeholder="Search grid..."
-                    [disabled]="disableGlobalFilter" />
-            </div>
+            @if (!hideGlobalFilter) {
+                <div class="field">
+                    <input
+                        type="text"
+                        name="quickFilterText"
+                        [(ngModel)]="quickFilterText"
+                        (ngModelChange)="onQuickFilterTextChanged()"
+                        placeholder="Search grid..."
+                        [disabled]="disableGlobalFilter" />
+                </div>
+            }
         </div>
 
-        <div class="clear-filters-button" *ngIf="leftAlignClearFiltersButton">
-            <qanat-clear-grid-filters-button [grid]="grid" (filtersCleared)="onFiltersCleared()"></qanat-clear-grid-filters-button>
-        </div>
+        @if (leftAlignClearFiltersButton) {
+            <div class="clear-filters-button">
+                <qanat-clear-grid-filters-button [grid]="grid" (filtersCleared)="onFiltersCleared()"></qanat-clear-grid-filters-button>
+            </div>
+        }
 
         <ng-content select="[customGridActionsLeft]"></ng-content>
     </div>
 
-    <div class="grid-actions flex-center">
+    <div class="grid-actions flex-center" [style]="unsetHeaderGridActionWidth ? 'width: unset;' : ''">
         <ng-content select="[customGridActionsCenter]"></ng-content>
     </div>
 
-    <div class="grid-actions flex-end">
-        <ng-container *ngIf="multiSelectEnabled">
-            <span class="selection-info" *ngIf="selectedRowsCount > 0"> {{ selectedRowsCount }} of {{ rowDataCount }} Selected </span>
-
+    <div class="grid-actions flex-end" [style]="unsetHeaderGridActionWidth ? 'width: unset;' : ''">
+        @if (multiSelectEnabled) {
+            @if (selectedRowsCount > 0) {
+                <span class="selection-info"> {{ selectedRowsCount }} of {{ rowDataCount }} Selected </span>
+            }
             <button class="btn btn-sm btn-secondary" (click)="onSelectAll()" [class.disabled]="allRowsSelected">
                 Select All
-                <span *ngIf="anyFilterPresent">(filtered)</span>
+                @if (anyFilterPresent) {
+                    <span>(filtered)</span>
+                }
             </button>
             <button class="btn btn-sm btn-secondary" (click)="onDeselectAll()" [class.disabled]="selectedRowsCount < 1">
                 Deselect All
-                <span *ngIf="anyFilterPresent">(filtered)</span>
+                @if (anyFilterPresent) {
+                    <span>(filtered)</span>
+                }
             </button>
-        </ng-container>
+        }
 
         <ng-content select="[customGridActionsRight]"></ng-content>
 
-        <div class="clear-filters-button" *ngIf="!leftAlignClearFiltersButton">
-            <qanat-clear-grid-filters-button [grid]="grid" (filtersCleared)="onFiltersCleared()"></qanat-clear-grid-filters-button>
-        </div>
+        @if (!leftAlignClearFiltersButton) {
+            <div class="clear-filters-button">
+                <qanat-clear-grid-filters-button [grid]="grid" (filtersCleared)="onFiltersCleared()"></qanat-clear-grid-filters-button>
+            </div>
+        }
     </div>
 </div>

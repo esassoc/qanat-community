@@ -5,17 +5,17 @@
 
     <div class="period-body">
         <!-- borrow forward -->
-        <div
-            *ngIf="allocationPlanPeriod.EnableBorrowForward"
-            class="allocation borrow-forward-allocation"
-            [style.grid-column-start]="borrowForwardStart"
-            [style.grid-column-end]="borrowForwardEnd"
-            [style.background-color]="zoneColor"
-            [style.border-color]="zoneColor">
-            <div class="borrow-forward-allocation-content">Borrow-forward</div>
-
-            <div class="borrow-forward-allocation-overlay"></div>
-        </div>
+        @if (allocationPlanPeriod.EnableBorrowForward) {
+            <div
+                class="allocation borrow-forward-allocation"
+                [style.grid-column-start]="borrowForwardStart"
+                [style.grid-column-end]="borrowForwardEnd"
+                [style.background-color]="zoneColor"
+                [style.border-color]="zoneColor">
+                <div class="borrow-forward-allocation-content">Borrow-forward</div>
+                <div class="borrow-forward-allocation-overlay"></div>
+            </div>
+        }
 
         <!-- primary allocation -->
         <div
@@ -31,16 +31,16 @@
         </div>
 
         <!-- carry over -->
-        <div
-            *ngIf="allocationPlanPeriod.EnableCarryOver"
-            class="allocation carry-over-allocation"
-            [style.grid-column-start]="carryOverStart"
-            [style.grid-column-end]="carryOverEnd"
-            [style.background-color]="zoneColor"
-            [style.border-color]="zoneColor">
-            <div class="carry-over-allocation-content">{{ allocationPlanPeriod.CarryOverDepreciationRate | percent }} of Remaining Carry-Over</div>
-
-            <div class="carry-over-allocation-overlay"></div>
-        </div>
+        @if (allocationPlanPeriod.EnableCarryOver) {
+            <div
+                class="allocation carry-over-allocation"
+                [style.grid-column-start]="carryOverStart"
+                [style.grid-column-end]="carryOverEnd"
+                [style.background-color]="zoneColor"
+                [style.border-color]="zoneColor">
+                <div class="carry-over-allocation-content">{{ allocationPlanPeriod.CarryOverDepreciationRate | percent }} of Remaining Carry-Over</div>
+                <div class="carry-over-allocation-overlay"></div>
+            </div>
+        }
     </div>
 </div>

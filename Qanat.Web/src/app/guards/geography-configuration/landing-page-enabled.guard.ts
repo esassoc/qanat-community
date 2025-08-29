@@ -15,7 +15,7 @@ export const landingPageEnabledGuard: CanActivateFn = (route, state): Observable
 
     return authService.guardInitObservable().pipe(
         switchMap((x) => {
-            return forkJoin([publicService.publicGeographiesNameGeographyNameGet(geographyName), authService.isAuthenticated() ? authService.getCurrentUser() : of(null)]);
+            return forkJoin([publicService.getGeographyByNamePublic(geographyName), authService.isAuthenticated() ? authService.getCurrentUser() : of(null)]);
         }),
         map(([geography, userDto]) => {
             const landingPageEnabled = geography?.LandingPageEnabled ?? false;

@@ -8,7 +8,7 @@ public class FeeCalculatorInputDto
     public int WaterAccountID { get; set; }
 
     [Required]
-    public int ReportingYear { get; set; }
+    public int ReportingPeriodID { get; set; }
 
     [Required]
     public int FeeStructureID { get; set; }

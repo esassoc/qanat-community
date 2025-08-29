@@ -57,13 +57,6 @@ water-measurement-self-report-editor {
     }
 
     .document-upload-container {
-        background-color: $blue-200;
-        border: 2px dotted $blue-400;
-        color: $gray-950;
-        padding: $spacing-400;
-        text-align: center;
-        align-content: center;
-        min-height: 10rem;
     }
 
     .save-button-container {
@@ -75,6 +68,7 @@ water-measurement-self-report-editor {
     }
 
     //Overrides
+
     .page-wrapper {
         padding: $spacing-600;
         .page-header {
@@ -87,6 +81,9 @@ water-measurement-self-report-editor {
             justify-items: flex-end;
             gap: 0.5rem;
             margin-bottom: 0.75rem;
+        }
+        .form {
+            gap: 1rem;
         }
     }
 
@@ -162,5 +159,13 @@ water-measurement-self-report-editor {
     th,
     td {
         white-space: nowrap;
+    }
+
+    .attachment-data {
+        overflow-wrap: break-word;
+    }
+
+    .attachment-actions {
+        margin-left: auto;
     }
 }

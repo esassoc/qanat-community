@@ -1,14 +1,24 @@
 @use "/src/scss/abstracts" as *;
 
 .parcel-popup .water-account-title.small {
-    color: $primary;
-    &:hover {
-        text-decoration: underline;
-    }
+    color: $black;
 }
 .parcel-popup parcel-title .apn {
-    color: $primary;
-    &:hover {
-        text-decoration: underline;
-    }
+    color: $black;
+}
+
+#vg-tooltip-element table tr td {
+    padding-top: $spacing-100;
+    padding-bottom: $spacing-100;
+}
+
+#vg-tooltip-element table tr td.key {
+    max-width: fit-content;
+    color: $black;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+#vg-tooltip-element table tr td.value {
+    font-size: 12px;
 }

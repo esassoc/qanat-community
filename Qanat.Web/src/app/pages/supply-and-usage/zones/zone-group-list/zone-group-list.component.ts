@@ -7,7 +7,7 @@ import { GeographyDto, ZoneGroupDto } from "src/app/shared/generated/model/model
 import { QanatMapComponent, QanatMapInitEvent } from "src/app/shared/components/leaflet/qanat-map/qanat-map.component";
 import { RouterLink } from "@angular/router";
 import { AlertDisplayComponent } from "../../../../shared/components/alert-display/alert-display.component";
-import { NgIf, NgFor, AsyncPipe, DecimalPipe } from "@angular/common";
+import { AsyncPipe, DecimalPipe } from "@angular/common";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { IconComponent } from "src/app/shared/components/icon/icon.component";
 import { ZoneGroupLayerComponent } from "src/app/shared/components/leaflet/layers/zone-group-layer/zone-group-layer.component";
@@ -18,20 +18,7 @@ import { LoadingDirective } from "src/app/shared/directives/loading.directive";
     selector: "zone-group-list",
     templateUrl: "./zone-group-list.component.html",
     styleUrls: ["./zone-group-list.component.scss"],
-    standalone: true,
-    imports: [
-        PageHeaderComponent,
-        LoadingDirective,
-        NgIf,
-        AlertDisplayComponent,
-        NgFor,
-        IconComponent,
-        RouterLink,
-        QanatMapComponent,
-        ZoneGroupLayerComponent,
-        AsyncPipe,
-        DecimalPipe,
-    ],
+    imports: [PageHeaderComponent, LoadingDirective, AlertDisplayComponent, IconComponent, RouterLink, QanatMapComponent, ZoneGroupLayerComponent, AsyncPipe, DecimalPipe],
 })
 export class ZoneGroupListComponent implements OnInit {
     public geography$: Observable<GeographyDto>;
@@ -50,7 +37,7 @@ export class ZoneGroupListComponent implements OnInit {
 
         this.zoneGroups$ = this.geography$.pipe(
             switchMap((geography) => {
-                return this.zoneGroupService.geographiesGeographyIDZoneGroupsDetailedGet(geography.GeographyID);
+                return this.zoneGroupService.listDetailedZoneGroup(geography.GeographyID);
             }),
             tap(() => {
                 this.isLoading = false;

@@ -8,7 +8,7 @@ import { GeographyDto, UserDto } from "src/app/shared/generated/model/models";
 import { ButtonComponent } from "../../../../shared/components/button/button.component";
 import { CustomRichTextComponent } from "../../../../shared/components/custom-rich-text/custom-rich-text.component";
 import { AlertDisplayComponent } from "../../../../shared/components/alert-display/alert-display.component";
-import { NgIf, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { PublicService } from "src/app/shared/generated/api/public.service";
 
@@ -16,8 +16,7 @@ import { PublicService } from "src/app/shared/generated/api/public.service";
     selector: "onboard-overview",
     templateUrl: "./onboard-overview.component.html",
     styleUrls: ["./onboard-overview.component.scss"],
-    standalone: true,
-    imports: [PageHeaderComponent, NgIf, AlertDisplayComponent, CustomRichTextComponent, ButtonComponent, RouterLink, AsyncPipe],
+    imports: [PageHeaderComponent, AlertDisplayComponent, CustomRichTextComponent, ButtonComponent, RouterLink, AsyncPipe]
 })
 export class OnboardOverviewComponent implements OnInit, OnDestroy {
     private currentUserSubscription: Subscription;
@@ -28,7 +27,11 @@ export class OnboardOverviewComponent implements OnInit, OnDestroy {
     public mainCustomRichTextID: CustomRichTextTypeEnum = CustomRichTextTypeEnum.OnboardOverviewContent;
     public sidebarCustomRichTextID: CustomRichTextTypeEnum = CustomRichTextTypeEnum.OnboardOverview;
 
-    constructor(private authenticationService: AuthenticationService, private route: ActivatedRoute, private publicService: PublicService) {}
+    constructor(
+        private authenticationService: AuthenticationService,
+        private route: ActivatedRoute,
+        private publicService: PublicService
+    ) {}
 
     ngOnInit(): void {
         this.currentUserSubscription = this.authenticationService.currentUserSetObservable.subscribe((user) => {
@@ -36,7 +39,7 @@ export class OnboardOverviewComponent implements OnInit, OnDestroy {
         });
 
         const geographyName = this.route.snapshot.paramMap.get(routeParams.geographyName);
-        this.geography$ = this.publicService.publicGeographiesNameGeographyNameGet(geographyName);
+        this.geography$ = this.publicService.getGeographyByNamePublic(geographyName);
     }
 
     ngOnDestroy(): void {

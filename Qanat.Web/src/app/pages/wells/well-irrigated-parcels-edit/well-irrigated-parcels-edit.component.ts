@@ -11,7 +11,7 @@ import { Alert } from "src/app/shared/models/alert";
 import { IDeactivateComponent } from "src/app/guards/unsaved-changes-guard";
 import { WellService } from "src/app/shared/generated/api/well.service";
 import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
-import { NgIf, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { AlertDisplayComponent } from "src/app/shared/components/alert-display/alert-display.component";
 import { WellIrrigatedParcelsEditMapComponent } from "src/app/shared/components/maps/well-irrigated-parcels-edit-map/well-irrigated-parcels-edit-map.component";
@@ -20,8 +20,7 @@ import { WellIrrigatedParcelsEditMapComponent } from "src/app/shared/components/
     selector: "well-irrigated-parcels-edit",
     templateUrl: "./well-irrigated-parcels-edit.component.html",
     styleUrls: ["./well-irrigated-parcels-edit.component.scss"],
-    standalone: true,
-    imports: [PageHeaderComponent, AlertDisplayComponent, NgIf, WellIrrigatedParcelsEditMapComponent, RouterLink, AsyncPipe],
+    imports: [PageHeaderComponent, AlertDisplayComponent, WellIrrigatedParcelsEditMapComponent, RouterLink, AsyncPipe]
 })
 export class WellIrrigatedParcelsEditComponent implements OnInit, IDeactivateComponent {
     public wellID: number;
@@ -50,7 +49,7 @@ export class WellIrrigatedParcelsEditComponent implements OnInit, IDeactivateCom
         this.wellIrrigatedParcels$ = this.route.paramMap.pipe(
             switchMap((paramMap) => {
                 this.wellID = parseInt(paramMap.get(routeParams.wellID));
-                return this.wellService.wellsWellIDIrrigatedParcelsGet(this.wellID);
+                return this.wellService.getWellRegistrationIrrigatedParcelsWell(this.wellID);
             }),
             tap((wellIrrigatedParcelsDto) => {
                 this.geographyID = wellIrrigatedParcelsDto.GeographyID;
@@ -75,7 +74,7 @@ export class WellIrrigatedParcelsEditComponent implements OnInit, IDeactivateCom
         this.isLoadingSubmit = true;
 
         const requestDto = new WellIrrigatedParcelsRequestDto({ IrrigatedParcelIDs: this.irrigatedParcelIDs });
-        this.wellService.wellsWellIDIrrigatedParcelsPut(this.wellID, requestDto).subscribe({
+        this.wellService.updateWellIrrigatedParcelsWell(this.wellID, requestDto).subscribe({
             next: () => {
                 this.router.navigate([".."], { relativeTo: this.route }).then(() => {
                     this.isLoadingSubmit = false;

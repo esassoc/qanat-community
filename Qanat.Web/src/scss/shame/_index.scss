@@ -1,1 +1,11 @@
 @forward "svg";
+
+.geography-groundwater-levels {
+    dialog {
+        z-index: 1000;
+    }
+
+    .dashboard .sidebar {
+        z-index: 1;
+    }
+}

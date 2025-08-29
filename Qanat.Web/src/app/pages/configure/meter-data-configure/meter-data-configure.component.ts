@@ -11,7 +11,7 @@ import { AlertService } from "src/app/shared/services/alert.service";
 import { AlertDisplayComponent } from "../../../shared/components/alert-display/alert-display.component";
 import { FormsModule } from "@angular/forms";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
-import { NgIf, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { CurrentGeographyService } from "src/app/shared/services/current-geography.service";
 import { ActivatedRoute } from "@angular/router";
 import { GeographyService } from "src/app/shared/generated/api/geography.service";
@@ -20,8 +20,7 @@ import { GeographyService } from "src/app/shared/generated/api/geography.service
     selector: "meter-data-configure",
     templateUrl: "./meter-data-configure.component.html",
     styleUrl: "./meter-data-configure.component.scss",
-    standalone: true,
-    imports: [NgIf, PageHeaderComponent, FormsModule, AlertDisplayComponent, AsyncPipe],
+    imports: [PageHeaderComponent, FormsModule, AlertDisplayComponent, AsyncPipe]
 })
 export class MeterDataConfigureComponent implements OnInit {
     public customRichTextTypeID = CustomRichTextTypeEnum.MeterDataConfigure;
@@ -43,7 +42,7 @@ export class MeterDataConfigureComponent implements OnInit {
         this.geography$ = this.route.params.pipe(
             switchMap((params) => {
                 const geographyName = params["geographyName"];
-                return this.geographyService.geographiesGeographyNameGeographyNameMinimalGet(geographyName);
+                return this.geographyService.getByNameAsMinimalDtoGeography(geographyName);
             }),
             tap((geography) => {
                 this.alertService.clearAlerts();
@@ -81,7 +80,7 @@ export class MeterDataConfigureComponent implements OnInit {
         } as ConfirmOptions;
         this.confirmService.confirm(options).then((confirmed) => {
             if (confirmed) {
-                this.geographyConfigurationService.geographiesGeographyIDConfigurationMeterConfigurationPut(this.geographyID, false).subscribe((response) => {
+                this.geographyConfigurationService.toggleMeterConfigurationGeographyConfiguration(this.geographyID, false).subscribe((response) => {
                     this.alertService.pushAlert(
                         new Alert(
                             "This feature is currently disabled. You can configure this feature, but changes will not take effect until the feature is enabled.",
@@ -107,7 +106,7 @@ export class MeterDataConfigureComponent implements OnInit {
         } as ConfirmOptions;
         this.confirmService.confirm(options).then((confirmed) => {
             if (confirmed) {
-                this.geographyConfigurationService.geographiesGeographyIDConfigurationMeterConfigurationPut(this.geographyID, true).subscribe((response) => {
+                this.geographyConfigurationService.toggleMeterConfigurationGeographyConfiguration(this.geographyID, true).subscribe((response) => {
                     this.alertService.clearAlerts();
                     this.alertService.pushAlert(new Alert("Enabled Meter Data.", AlertContext.Success));
                 });

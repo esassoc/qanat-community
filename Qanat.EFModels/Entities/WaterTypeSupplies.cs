@@ -16,11 +16,12 @@ public static class WaterTypeSupplies
         {
             WaterTypeID = x.WaterTypeID,
             WaterTypeName = x.WaterTypeName,
+            SortOrder = x.SortOrder,
+            WaterTypeColor = x.WaterTypeColor,
             TotalSupply = x.TotalSupply,
+            TotalSupplyDepth = x.TotalSupplyDepth,
         });
 
         return parcelWaterSupplyAndUsageDtos;
     }
-
-    
 }

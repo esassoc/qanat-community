@@ -2,7 +2,7 @@ using Qanat.Models.DataTransferObjects;
 
 namespace Qanat.EFModels.Entities;
 
-public static partial class ParcelSupplyExtensionMethods
+public static class ParcelSupplyExtensionMethods
 {
     public static ParcelSupplyDetailDto AsDetailDto(this ParcelSupply parcelSupply)
     {

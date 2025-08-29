@@ -1,34 +1,34 @@
-<div class="dashboard" *ngIf="geography$ | async as currentSelectedGeography">
-    <aside class="sidebar">
-        <div class="sidebar-header">
-            <a [routerLink]="['/supply-and-usage', currentSelectedGeography.GeographyName.toLowerCase()]">
-                <geography-logo [geographyID]="currentSelectedGeography.GeographyID"></geography-logo>
-            </a>
-        </div>
-        <div class="sidebar-body sticky-nav">
-            <div class="sidebar-body__wrapper">
-                <h3 class="sidebar-body__title">
-                    <icon icon="Manage"></icon>
-                    Supply and Usage
-                </h3>
-
-                <div class="sidebar-body__switcher">
-                    <geography-switcher></geography-switcher>
-                </div>
+@if (geography$ | async; as currentSelectedGeography) {
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a [routerLink]="['/supply-and-usage', currentSelectedGeography.GeographyName.toLowerCase()]">
+                    <geography-logo [geographyID]="currentSelectedGeography.GeographyID"></geography-logo>
+                </a>
             </div>
-
-            <ng-container *ngIf="supplyAndUsageMenu$ | async as menu">
-                <dashboard-menu [dashboardMenu]="menu" [viewingDetailPage]="false"></dashboard-menu>
-            </ng-container>
-        </div>
-    </aside>
-
-    <main class="main">
-        <router-outlet #manageOutlet="outlet"></router-outlet>
-        <div *ngIf="!manageOutlet.isActivated">
-            <page-header pageTitle="Dashboard"></page-header>
-
-            <div class="page-body grid-12"></div>
-        </div>
-    </main>
-</div>
+            <div class="sidebar-body sticky-nav">
+                <div class="sidebar-body__wrapper">
+                    <h3 class="sidebar-body__title">
+                        <icon icon="Manage"></icon>
+                        Supply and Usage
+                    </h3>
+                    <div class="sidebar-body__switcher">
+                        <geography-switcher></geography-switcher>
+                    </div>
+                </div>
+                @if (supplyAndUsageMenu$ | async; as menu) {
+                    <dashboard-menu [dashboardMenu]="menu" [viewingDetailPage]="false"></dashboard-menu>
+                }
+            </div>
+        </aside>
+        <main class="main">
+            <router-outlet #manageOutlet="outlet"></router-outlet>
+            @if (!manageOutlet.isActivated) {
+                <div>
+                    <page-header pageTitle="Dashboard"></page-header>
+                    <div class="page-body grid-12"></div>
+                </div>
+            }
+        </main>
+    </div>
+}

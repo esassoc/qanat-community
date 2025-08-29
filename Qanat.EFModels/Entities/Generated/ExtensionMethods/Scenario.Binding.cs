@@ -16,9 +16,7 @@ namespace Qanat.EFModels.Entities
         public static readonly ScenarioRecharge Recharge = ScenarioRecharge.Instance;
 
         public static readonly List<Scenario> All;
-        public static readonly List<ScenarioSimpleDto> AllAsSimpleDto;
         public static readonly ReadOnlyDictionary<int, Scenario> AllLookupDictionary;
-        public static readonly ReadOnlyDictionary<int, ScenarioSimpleDto> AllAsSimpleDtoLookupDictionary;
 
         /// <summary>
         /// Static type constructor to coordinate static initialization order
@@ -26,9 +24,7 @@ namespace Qanat.EFModels.Entities
         static Scenario()
         {
             All = new List<Scenario> { AddaWell, Recharge };
-            AllAsSimpleDto = new List<ScenarioSimpleDto> { AddaWell.AsSimpleDto(), Recharge.AsSimpleDto() };
             AllLookupDictionary = new ReadOnlyDictionary<int, Scenario>(All.ToDictionary(x => x.ScenarioID));
-            AllAsSimpleDtoLookupDictionary = new ReadOnlyDictionary<int, ScenarioSimpleDto>(AllAsSimpleDto.ToDictionary(x => x.ScenarioID));
         }
 
         /// <summary>

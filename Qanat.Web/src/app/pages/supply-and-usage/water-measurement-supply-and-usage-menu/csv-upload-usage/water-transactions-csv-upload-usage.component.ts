@@ -1,36 +1,35 @@
 import { Component, OnInit, ChangeDetectorRef } from "@angular/core";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
-import { forkJoin, Observable, switchMap, tap } from "rxjs";
-import { AuthenticationService } from "src/app/shared/services/authentication.service";
+import { Observable, switchMap, tap } from "rxjs";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
 import { Alert } from "src/app/shared/models/alert";
 import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
 import { UtilityFunctionsService } from "src/app/shared/services/utility-functions.service";
 import { WaterMeasurementService } from "src/app/shared/generated/api/water-measurement.service";
-import { UnitTypeSimpleDto, UserDto, GeographyMinimalDto, WaterMeasurementTypeSimpleDto } from "src/app/shared/generated/model/models";
-import { UnitTypeService } from "src/app/shared/generated/api/unit-type.service";
+import { GeographyMinimalDto, WaterMeasurementTypeSimpleDto } from "src/app/shared/generated/model/models";
 import { WaterMeasurementTypeService } from "src/app/shared/generated/api/water-measurement-type.service";
 import { NgSelectModule } from "@ng-select/ng-select";
-import { NgIf, NgFor, DatePipe, AsyncPipe } from "@angular/common";
+import { DatePipe, AsyncPipe } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { AlertDisplayComponent } from "src/app/shared/components/alert-display/alert-display.component";
 import { ButtonComponent } from "src/app/shared/components/button/button.component";
 import { FieldDefinitionComponent } from "src/app/shared/components/field-definition/field-definition.component";
 import { CurrentGeographyService } from "src/app/shared/services/current-geography.service";
+import { SelectDropdownOption } from "src/app/shared/components/forms/form-field/form-field.component";
+import { UnitTypesAsSelectDropdownOptions } from "src/app/shared/generated/enum/unit-type-enum";
 
 @Component({
     selector: "water-transactions-csv-upload-usage",
     templateUrl: "./water-transactions-csv-upload-usage.component.html",
     styleUrls: ["./water-transactions-csv-upload-usage.component.scss"],
-    standalone: true,
-    imports: [AsyncPipe, PageHeaderComponent, RouterLink, AlertDisplayComponent, FormsModule, ButtonComponent, NgIf, NgSelectModule, FieldDefinitionComponent, NgFor, DatePipe],
+    imports: [AsyncPipe, PageHeaderComponent, RouterLink, AlertDisplayComponent, FormsModule, ButtonComponent, NgSelectModule, FieldDefinitionComponent, DatePipe]
 })
 export class WaterTransactionsCsvUploadUsageComponent implements OnInit {
     public geography$: Observable<GeographyMinimalDto>;
     public waterMeasurementTypes$: Observable<WaterMeasurementTypeSimpleDto[]>;
-    public unitTypes$: Observable<UnitTypeSimpleDto[]>;
+    public unitTypeSelectDropdownOptions: SelectDropdownOption[] = UnitTypesAsSelectDropdownOptions;
 
     public fileUpload: File;
     public fileUploadHeaders: string[];
@@ -54,13 +53,11 @@ export class WaterTransactionsCsvUploadUsageComponent implements OnInit {
     public richTextTypeID = CustomRichTextTypeEnum.WaterTransactionCsvUploadUsage;
 
     constructor(
-        private authenticationService: AuthenticationService,
         private router: Router,
         private route: ActivatedRoute,
         private cdr: ChangeDetectorRef,
         private waterMeasurementService: WaterMeasurementService,
         private waterMeasurementTypeService: WaterMeasurementTypeService,
-        private unitTypeService: UnitTypeService,
         private alertService: AlertService,
         private utilityFunctionsService: UtilityFunctionsService,
         private currentGeographyService: CurrentGeographyService
@@ -74,6 +71,7 @@ export class WaterTransactionsCsvUploadUsageComponent implements OnInit {
                 this.effectiveDateYear = currentDate.getFullYear();
                 this.updateEffectiveDate();
 
+                this.years = [];
                 for (let year = this.effectiveDateYear; year >= 2016; year--) {
                     this.years.push(year);
                 }
@@ -82,41 +80,9 @@ export class WaterTransactionsCsvUploadUsageComponent implements OnInit {
 
         this.waterMeasurementTypes$ = this.geography$.pipe(
             switchMap((geography) => {
-                return this.waterMeasurementTypeService.geographiesGeographyIDWaterMeasurementTypesActiveGet(geography.GeographyID);
+                return this.waterMeasurementTypeService.getActiveAndEditableWaterMeasurementTypesWaterMeasurementType(geography.GeographyID);
             })
         );
-
-        this.unitTypes$ = this.geography$.pipe(
-            switchMap((geography) => {
-                return this.unitTypeService.geographiesGeographyIDUnitTypesGet(geography.GeographyID);
-            })
-        );
-    }
-
-    private getDataForGeographyID(geographyID: number): void {
-        this.authenticationService.getCurrentUser().subscribe((currentUser) => {
-            //this.currentUser = currentUser;
-
-            forkJoin({
-                waterUseTypes: this.waterMeasurementTypeService.geographiesGeographyIDWaterMeasurementTypesActiveGet(geographyID),
-                unitTypes: this.unitTypeService.geographiesGeographyIDUnitTypesGet(geographyID),
-            }).subscribe(({ waterUseTypes, unitTypes }) => {
-                // this.waterMeasurementTypes = waterUseTypes;
-                // this.unitTypes = unitTypes;
-            });
-
-            const currentDate = new Date();
-
-            this.effectiveDateMonth = currentDate.getMonth();
-            this.effectiveDateYear = currentDate.getFullYear();
-            this.updateEffectiveDate();
-
-            for (let year = this.effectiveDateYear; year >= 2016; year--) {
-                this.years.push(year);
-            }
-
-            this.cdr.detectChanges();
-        });
     }
 
     ngOnDestroy() {
@@ -149,7 +115,7 @@ export class WaterTransactionsCsvUploadUsageComponent implements OnInit {
         this.isLoadingSubmit = true;
         this.alertService.clearAlerts();
 
-        this.waterMeasurementService.geographiesGeographyIDWaterMeasurementsCsvHeadersPost(geographyID, this.fileUpload).subscribe(
+        this.waterMeasurementService.listCSVHeadersWaterMeasurement(geographyID, this.fileUpload).subscribe(
             (fileUploadHeaders) => {
                 this.isLoadingSubmit = false;
                 this.fileUploadHeaders = fileUploadHeaders;
@@ -206,7 +172,7 @@ export class WaterTransactionsCsvUploadUsageComponent implements OnInit {
 
         const effectiveDate = this.utilityFunctionsService.formatDate(this.effectiveDate, "yyyy-MM-dd");
         this.waterMeasurementService
-            .geographiesGeographyIDWaterMeasurementsCsvPost(
+            .newCSVUploadWaterMeasurement(
                 geographyID,
                 this.fileUpload,
                 effectiveDate,

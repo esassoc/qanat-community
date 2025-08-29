@@ -1,20 +1,22 @@
-<workflow-nav *ngIf="progress$ | async as progressDto">
-    <workflow-nav-item [required]="false" [complete]="progressDto.Steps.SelectAParcel" [navRouterLink]="['select-parcel']"> Select A Parcel </workflow-nav-item>
-    <workflow-nav-item [complete]="progressDto.Steps.MapYourWell" [navRouterLink]="['location']" [disabled]="isCreating"> Map Your Well </workflow-nav-item>
-    <workflow-nav-item [complete]="progressDto.Steps.ConfirmLocation" [navRouterLink]="['confirm-location']" [disabled]="isCreating || !progressDto.Steps.MapYourWell">
-        Confirm Well Location
-    </workflow-nav-item>
-    <workflow-nav-item
-        [complete]="progressDto.Steps.IrrigatedParcels"
-        [navRouterLink]="['irrigated-parcels']"
-        [disabled]="isCreating || !progressDto.Steps.MapYourWell || !progressDto.Steps.ConfirmLocation">
-        Irrigated Parcels
-    </workflow-nav-item>
-    <workflow-nav-item [navRouterLink]="['contacts']" [complete]="progressDto.Steps.Contacts" [disabled]="isCreating"> Contacts </workflow-nav-item>
-    <workflow-nav-item [navRouterLink]="['basic-information']" [complete]="progressDto.Steps.BasicInformation" [disabled]="isCreating"> Basic Information </workflow-nav-item>
-    <workflow-nav-item [navRouterLink]="['supporting-information']" [complete]="progressDto.Steps.SupportingInformation" [disabled]="isCreating">
-        Supporting Information
-    </workflow-nav-item>
-    <workflow-nav-item [required]="false" [navRouterLink]="['attachments']" [complete]="progressDto.Steps.Attachments" [disabled]="isCreating"> Attachments </workflow-nav-item>
-    <workflow-nav-item [navRouterLink]="['submit']" [complete]="submitted" [disabled]="isCreating"> Submit </workflow-nav-item>
-</workflow-nav>
+@if (progress$ | async; as progressDto) {
+    <workflow-nav>
+        <workflow-nav-item [required]="false" [complete]="progressDto.Steps.SelectAParcel" [navRouterLink]="['select-parcel']"> Select A Parcel </workflow-nav-item>
+        <workflow-nav-item [complete]="progressDto.Steps.MapYourWell" [navRouterLink]="['location']" [disabled]="isCreating"> Map Your Well </workflow-nav-item>
+        <workflow-nav-item [complete]="progressDto.Steps.ConfirmLocation" [navRouterLink]="['confirm-location']" [disabled]="isCreating || !progressDto.Steps.MapYourWell">
+            Confirm Well Location
+        </workflow-nav-item>
+        <workflow-nav-item
+            [complete]="progressDto.Steps.IrrigatedParcels"
+            [navRouterLink]="['irrigated-parcels']"
+            [disabled]="isCreating || !progressDto.Steps.MapYourWell || !progressDto.Steps.ConfirmLocation">
+            Irrigated Parcels
+        </workflow-nav-item>
+        <workflow-nav-item [navRouterLink]="['contacts']" [complete]="progressDto.Steps.Contacts" [disabled]="isCreating"> Contacts </workflow-nav-item>
+        <workflow-nav-item [navRouterLink]="['basic-information']" [complete]="progressDto.Steps.BasicInformation" [disabled]="isCreating"> Basic Information </workflow-nav-item>
+        <workflow-nav-item [navRouterLink]="['supporting-information']" [complete]="progressDto.Steps.SupportingInformation" [disabled]="isCreating">
+            Supporting Information
+        </workflow-nav-item>
+        <workflow-nav-item [required]="false" [navRouterLink]="['attachments']" [complete]="progressDto.Steps.Attachments" [disabled]="isCreating"> Attachments </workflow-nav-item>
+        <workflow-nav-item [navRouterLink]="['submit']" [complete]="submitted" [disabled]="isCreating"> Submit </workflow-nav-item>
+    </workflow-nav>
+}

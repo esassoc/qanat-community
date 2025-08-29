@@ -12,13 +12,15 @@
 </workflow-body>
 
 <ng-template #sidebarTemplateAppend>
-    <ng-container *ngIf="registryProgress$ | async as progressDto">
-        <note noteType="danger" *ngIf="showIncompleteNote">
-            <div class="p-2">
-                <custom-rich-text [customRichTextTypeID]="incompleteCustomRichTextTypeID"></custom-rich-text>
-            </div>
-        </note>
-    </ng-container>
+    @if (registryProgress$ | async; as progressDto) {
+        @if (showIncompleteNote) {
+            <note noteType="danger">
+                <div class="p-2">
+                    <custom-rich-text [customRichTextTypeID]="incompleteCustomRichTextTypeID"></custom-rich-text>
+                </div>
+            </note>
+        }
+    }
 </ng-template>
 
 <div class="page-footer">

@@ -3,7 +3,7 @@ CREATE TABLE [dbo].[Zone](
 	[ZoneGroupID] int not null constraint [FK_Zone_ZoneGroup_ZoneGroupID] foreign key references dbo.[ZoneGroup]([ZoneGroupID]),
 	[ZoneName] varchar(100) not null,
 	[ZoneSlug] varchar(100) not null,
-	[ZoneDescription] varchar(200) null,
+	[ZoneDescription] varchar(500) null,
 	[ZoneColor] varchar(7) not null,
 	[ZoneAccentColor] varchar(7) not null,
 	[PrecipMultiplier] [decimal](4, 2) null,

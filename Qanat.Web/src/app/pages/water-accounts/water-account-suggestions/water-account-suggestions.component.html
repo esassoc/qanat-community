@@ -7,28 +7,26 @@
         </div>
     </ng-template>
 
-    <ng-container *ngIf="geography$ | async">
+    @if (geography$ | async) {
         <div class="page-body" [loadingSpinner]="{ isLoading: isLoadingSuggestions }">
             <app-alert-display></app-alert-display>
-
             <section class="suggested-water-accounts">
-                <ng-container *ngIf="waterAccountSuggestions">
+                @if (waterAccountSuggestions) {
                     <h2 class="section-title suggested-water-accounts__title">
                         Suggested New Water Accounts
                         <span class="badge">{{ waterAccountSuggestions.length | number }}</span>
                     </h2>
-
                     <qanat-grid
                         [rowData]="waterAccountSuggestions"
                         [columnDefs]="columnDefs"
                         downloadFileName="suggested-water-accounts"
                         [colIDsToExclude]="colIDsToExclude"
-                        rowSelection="multiple"
-                        [suppressRowClickSelection]="true"
+                        [rowSelection]="rowSelection"
                         [pagination]="true"
                         [sizeColumnsToFitGrid]="true"
                         (gridReady)="onGridReady($event)"
-                        (selectionChanged)="getSelectedRows($event)">
+                        (selectionChanged)="getSelectedRows($event)"
+                        class="clear-action-widths">
                         <div customGridActionsRight class="custom-grid-actions">
                             <button
                                 (click)="bulkApprove()"
@@ -37,7 +35,6 @@
                                 [disabled]="isLoadingSubmit || selectedRows.length === 0">
                                 Approve
                             </button>
-
                             <button
                                 (click)="bulkReject()"
                                 [buttonLoading]="isLoadingSubmit"
@@ -47,8 +44,8 @@
                             </button>
                         </div>
                     </qanat-grid>
-                </ng-container>
+                }
             </section>
         </div>
-    </ng-container>
+    }
 </div>

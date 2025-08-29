@@ -1,0 +1,57 @@
+<div class="modal">
+    <div class="modal-header">
+        <h2>
+            <icon icon="Warning"></icon>
+            Confirm Request
+        </h2>
+    </div>
+
+    @if (!ref.data.HasInvalidZones) {
+        <div class="modal-body">
+            <note noteType="warning"> Confirm your request to update your water accounts. Review the summary of the changes below and accept the certification to proceed. </note>
+            <div class="account-modifications">
+                @for (waterAccount of ref.data.WaterAccounts; track waterAccount) {
+                    <div class="account-name">
+                        <icon icon="WaterAccounts"></icon>
+                        {{ waterAccount.WaterAccountName }}
+                        <span class="text-muted">#{{ waterAccount.WaterAccountNumber }}</span>
+                    </div>
+                    <div class="account-parcels">
+                        {{ waterAccount.ParcelsCount }} parcel{{ waterAccount.ParcelsCount === 1 ? "" : "s" }}
+                        @if (waterAccount.AddedParcelsCount > 0) {
+                            <span class="parcel-changes added">
+                                <i class="fa fa-plus-circle"></i>
+                                {{ waterAccount.AddedParcelsCount }}
+                            </span>
+                        }
+                        @if (waterAccount.RemovedParcelsCount > 0) {
+                            <span class="parcel-changes removed">
+                                <i class="fa fa-minus-circle"></i>
+                                {{ waterAccount.RemovedParcelsCount }}
+                            </span>
+                        }
+                    </div>
+                }
+            </div>
+            <div class="certification">
+                <h3>Certification</h3>
+                <div class="content-wrapper">
+                    <custom-rich-text [customRichTextTypeID]="customRichTextTypeID" [geographyID]="ref.data.GeographyID"></custom-rich-text>
+                </div>
+                <div class="accept-certification">
+                    <label class="checkbox-label">
+                        <input type="checkbox" class="form-control" name="checkbox-name" [(ngModel)]="certificationAccepted" />
+                        I have reviewed and accept the above certification.
+                    </label>
+                </div>
+            </div>
+        </div>
+    } @else {
+        <note noteType="danger"> Your requested changes contain invalid zones. Please ensure all water accounts contain parcels in only one zone to proceed. </note>
+    }
+
+    <div class="modal-footer">
+        <button class="btn btn-primary" (click)="confirm()" [disabled]="!certificationAccepted || ref.data.HasInvalidZones">Submit Request</button>
+        <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+    </div>
+</div>

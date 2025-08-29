@@ -11,7 +11,7 @@ namespace Qanat.EFModels.Entities
 
         public static class FieldLengths
         {
-            public const int ParcelNumber = 20;
+            public const int ParcelNumber = 64;
             public const int OwnerName = 200;
             public const int OwnerAddress = 200;
         }

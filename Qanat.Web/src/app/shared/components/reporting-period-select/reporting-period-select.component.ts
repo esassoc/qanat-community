@@ -1,24 +1,26 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from "@angular/core";
 import { ReportingPeriodService } from "../../generated/api/reporting-period.service";
-import { Observable, of, switchMap } from "rxjs";
+import { Observable, tap } from "rxjs";
 import { FormsModule } from "@angular/forms";
-import { NgIf, NgFor, AsyncPipe } from "@angular/common";
+import { AsyncPipe, CommonModule } from "@angular/common";
+import { ReportingPeriodDto } from "../../generated/model/models";
+import { NgSelectModule } from "@ng-select/ng-select";
 
 @Component({
     selector: "reporting-period-select",
     templateUrl: "./reporting-period-select.component.html",
     styleUrl: "./reporting-period-select.component.scss",
-    standalone: true,
-    imports: [NgIf, FormsModule, NgFor, AsyncPipe],
+    imports: [FormsModule, AsyncPipe, NgSelectModule, CommonModule],
 })
 export class ReportingPeriodSelectComponent implements OnInit, OnChanges {
     @Input() geographyID: number;
-    @Input() defaultDisplayYear?: number;
+    @Input({ required: false }) initialReportingPeriodID: number | null = null;
+    @Input({ required: false }) compact: boolean = false;
 
-    @Output() selectionChanged = new EventEmitter<number>();
+    @Output() selectionChanged = new EventEmitter<ReportingPeriodDto>();
 
-    public selectedYear: number;
-    public $reportingPeriodYears: Observable<number[]>;
+    public selectedReportingPeriod: ReportingPeriodDto;
+    public reportingPeriods$: Observable<ReportingPeriodDto[]>;
 
     constructor(private reportingPeriodService: ReportingPeriodService) {}
 
@@ -28,26 +30,35 @@ export class ReportingPeriodSelectComponent implements OnInit, OnChanges {
             return;
         }
 
-        this.selectedYear = this.defaultDisplayYear ?? new Date().getUTCFullYear();
-        this.refreshReportingPeriod();
-    }
-
-    private refreshReportingPeriod() {
-        this.$reportingPeriodYears = this.reportingPeriodService.geographiesGeographyIDReportingPeriodsGet(this.geographyID).pipe(
-            switchMap((reportingPeriods) => {
-                return of(reportingPeriods.map((x) => new Date(x.StartDate).getUTCFullYear()));
-            })
-        );
+        this.refreshReportingPeriod(this.initialReportingPeriodID);
     }
 
     ngOnChanges(changes: SimpleChanges): void {
         if (Object.keys(changes).includes("geographyID")) {
             this.refreshReportingPeriod();
-            this.selectedYear = this.defaultDisplayYear ?? new Date().getUTCFullYear();
         }
     }
 
     public onSelectionChanged() {
-        this.selectionChanged.emit(this.selectedYear);
+        this.selectionChanged.emit(this.selectedReportingPeriod);
+    }
+
+    private refreshReportingPeriod(selectedReportingPeriodID?: number | null) {
+        this.reportingPeriods$ = this.reportingPeriodService.listByGeographyIDReportingPeriod(this.geographyID).pipe(
+            tap((reportingPeriods) => {
+                if (selectedReportingPeriodID) {
+                    this.selectedReportingPeriod = reportingPeriods.find((rp) => rp.ReportingPeriodID === selectedReportingPeriodID);
+                } else {
+                    let defaultReportingPeriod = reportingPeriods.find((rp) => rp.IsDefault);
+                    if (!defaultReportingPeriod) {
+                        defaultReportingPeriod = reportingPeriods[0];
+                    }
+
+                    this.selectedReportingPeriod = defaultReportingPeriod;
+                }
+
+                this.onSelectionChanged();
+            })
+        );
     }
 }

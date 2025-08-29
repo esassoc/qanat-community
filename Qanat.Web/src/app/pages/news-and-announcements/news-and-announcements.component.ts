@@ -5,10 +5,9 @@ import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-ric
 
 @Component({
     selector: "news-and-announcements",
-    standalone: true,
     imports: [PageHeaderComponent, CustomRichTextComponent],
     templateUrl: "./news-and-announcements.component.html",
-    styleUrl: "./news-and-announcements.component.scss",
+    styleUrl: "./news-and-announcements.component.scss"
 })
 export class NewsAndAnnouncementsComponent {
     public customRichTextID: number = CustomRichTextTypeEnum.NewsAndAnnouncements;

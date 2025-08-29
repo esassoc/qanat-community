@@ -7,7 +7,8 @@ using Microsoft.EntityFrameworkCore;
 namespace Qanat.EFModels.Entities;
 
 [Table("WaterMeasurementType")]
-[Index("WaterMeasurementTypeName", "GeographyID", Name = "AK_WaterMeasurementType_WaterMeasurementTypeName_GeographyID", IsUnique = true)]
+[Index("GeographyID", "ShortName", Name = "AK_WaterMeasurementType_GeographyID_ShortName", IsUnique = true)]
+[Index("GeographyID", "WaterMeasurementTypeName", Name = "AK_WaterMeasurementType_GeographyID_WaterMeasurementTypeName", IsUnique = true)]
 public partial class WaterMeasurementType
 {
     [Key]
@@ -23,6 +24,11 @@ public partial class WaterMeasurementType
     [StringLength(50)]
     [Unicode(false)]
     public string WaterMeasurementTypeName { get; set; }
+
+    [Required]
+    [StringLength(31)]
+    [Unicode(false)]
+    public string ShortName { get; set; }
 
     public int SortOrder { get; set; }
 
@@ -52,6 +58,9 @@ public partial class WaterMeasurementType
 
     [InverseProperty("WaterBudgetSlotCWaterMeasurementType")]
     public virtual ICollection<Geography> GeographyWaterBudgetSlotCWaterMeasurementTypes { get; set; } = new List<Geography>();
+
+    [InverseProperty("WaterMeasurementType")]
+    public virtual ICollection<UsageLocationType> UsageLocationTypes { get; set; } = new List<UsageLocationType>();
 
     [InverseProperty("WaterMeasurementType")]
     public virtual ICollection<WaterMeasurementSelfReport> WaterMeasurementSelfReports { get; set; } = new List<WaterMeasurementSelfReport>();

@@ -9,65 +9,59 @@ import { UtilityFunctionsService } from "src/app/shared/services/utility-functio
 import { ParcelService } from "src/app/shared/generated/api/parcel.service";
 import {
     AllocationPlanManageDto,
-    ExternalMapLayerDto,
+    ExternalMapLayerSimpleDto,
     GeographyDto,
     ParcelDetailDto,
     ParcelSupplyDetailDto,
-    UsageEntityListItemDto,
+    UsageLocationDto,
     UserDto,
 } from "src/app/shared/generated/model/models";
 import { QanatMapComponent, QanatMapInitEvent } from "src/app/shared/components/leaflet/qanat-map/qanat-map.component";
 import * as L from "leaflet";
 import { ExternalMapLayerService } from "src/app/shared/generated/api/external-map-layer.service";
 import { GeographyService } from "src/app/shared/generated/api/geography.service";
-import { UsageEntityService } from "src/app/shared/generated/api/usage-entity.service";
 import { CustomDropdownFilterComponent } from "src/app/shared/components/custom-dropdown-filter/custom-dropdown-filter.component";
 import { QanatGridComponent } from "src/app/shared/components/qanat-grid/qanat-grid.component";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { IconComponent } from "src/app/shared/components/icon/icon.component";
-import { NgIf, NgFor, AsyncPipe, DecimalPipe } from "@angular/common";
-import { DashboardMenu, DashboardMenuComponent } from "src/app/shared/components/dashboard-menu/dashboard-menu.component";
+import { AsyncPipe, DecimalPipe } from "@angular/common";
+import { DashboardMenu } from "src/app/shared/components/dashboard-menu/dashboard-menu.component";
 import { WaterAccountTitleComponent } from "src/app/shared/components/water-account/water-account-title/water-account-title.component";
 import { WaterAccountParcelsLayerComponent } from "src/app/shared/components/leaflet/layers/water-account-parcels-layer/water-account-parcels-layer.component";
 import { GsaBoundariesComponent } from "src/app/shared/components/leaflet/layers/gsa-boundaries/gsa-boundaries.component";
 import { ZoneGroupLayerComponent } from "src/app/shared/components/leaflet/layers/zone-group-layer/zone-group-layer.component";
 import { GeographyExternalMapLayerComponent } from "src/app/shared/components/leaflet/layers/geography-external-map-layer/geography-external-map-layer.component";
-import { UsageEntitiesLayerComponent } from "src/app/shared/components/leaflet/layers/usage-entities-layer/usage-entities-layer.component";
+import { UsageLocationLayerComponent } from "src/app/shared/components/leaflet/layers/usage-location-layer/usage-location-layer.component";
 import { AllocationPlanTableComponent } from "src/app/shared/components/allocation-plan-table/allocation-plan-table.component";
 import { ButtonGroupComponent } from "src/app/shared/components/button-group/button-group.component";
-import { GeographyLogoComponent } from "src/app/shared/components/geography-logo/geography-logo.component";
 import { NoteComponent } from "src/app/shared/components/note/note.component";
 import { VegaParcelUsageChartComponent } from "src/app/shared/components/vega/vega-parcel-usage-chart/vega-parcel-usage-chart.component";
 import { LoadingDirective } from "src/app/shared/directives/loading.directive";
 import { ParcelEditZoneAssignmentsModalComponent } from "src/app/shared/components/parcel/modals/parcel-edit-zone-assignments-modal/parcel-edit-zone-assignments-modal.component";
-import { ModalService, ModalSizeEnum, ModalThemeEnum } from "src/app/shared/services/modal/modal.service";
 import { ParcelUpdateOwnershipInfoModalComponent } from "src/app/shared/components/parcel/modals/parcel-update-ownership-info-modal/parcel-update-ownership-info-modal.component";
 import { ParcelByGeographyService } from "src/app/shared/generated/api/parcel-by-geography.service";
 import { ParcelAcreOverrideModalComponent } from "src/app/shared/components/parcel/modals/parcel-acre-override-modal/parcel-acre-override-modal.component";
-import { UserService } from "src/app/shared/generated/api/user.service";
 import { AuthenticationService } from "src/app/shared/services/authentication.service";
 import { AuthorizationHelper } from "src/app/shared/helpers/authorization-helper";
+import { UsageLocationService } from "src/app/shared/generated/api/usage-location.service";
+import { ParcelModifyParcelStatusModalComponent } from "src/app/shared/components/parcel/modals/parcel-modify-parcel-status-modal/parcel-modify-parcel-status-modal.component";
+import { DialogService } from "@ngneat/dialog";
 
 @Component({
     selector: "parcel-detail",
     templateUrl: "./parcel-detail.component.html",
     styleUrls: ["./parcel-detail.component.scss"],
-    standalone: true,
     imports: [
-        NgIf,
         RouterLink,
-        GeographyLogoComponent,
         IconComponent,
-        DashboardMenuComponent,
         PageHeaderComponent,
         WaterAccountTitleComponent,
         QanatMapComponent,
         WaterAccountParcelsLayerComponent,
         GsaBoundariesComponent,
-        NgFor,
         ZoneGroupLayerComponent,
         GeographyExternalMapLayerComponent,
-        UsageEntitiesLayerComponent,
+        UsageLocationLayerComponent,
         QanatGridComponent,
         VegaParcelUsageChartComponent,
         ButtonGroupComponent,
@@ -83,7 +77,7 @@ export class ParcelDetailComponent implements OnInit, OnDestroy {
 
     private parcelIDSubscription: Subscription = Subscription.EMPTY;
     public parcelSupplyGridColumnDefs: ColDef[];
-    public usageEntityColumnDefs: ColDef<UsageEntityListItemDto>[];
+    public usageLocationColumnDefs: ColDef<UsageLocationDto>[];
     public supplyTypeColDefInsertIndex = 3;
     public parcelID: number;
     public geographyID: number;
@@ -91,7 +85,7 @@ export class ParcelDetailComponent implements OnInit, OnDestroy {
     public parcel$: Observable<ParcelDetailDto>;
     public parcelSupplies$: Observable<ParcelSupplyDetailDto[]>;
     public geography$: Observable<GeographyDto>;
-    public fields$: Observable<UsageEntityListItemDto[]>;
+    public usageLocations$: Observable<UsageLocationDto[]>;
 
     public currentUser$: Observable<UserDto>;
     public currentUserIsAdminOrWaterManager: boolean = false;
@@ -102,7 +96,7 @@ export class ParcelDetailComponent implements OnInit, OnDestroy {
     public selectedAllocationPlan: AllocationPlanManageDto;
     public showAllocationPlan: boolean;
     public dashboardMenu: DashboardMenu;
-    public externalMapLayers$: Observable<ExternalMapLayerDto[]>;
+    public externalMapLayers$: Observable<ExternalMapLayerSimpleDto[]>;
 
     constructor(
         private route: ActivatedRoute,
@@ -113,8 +107,8 @@ export class ParcelDetailComponent implements OnInit, OnDestroy {
         private geographyService: GeographyService,
         private authenticationService: AuthenticationService,
         private cdr: ChangeDetectorRef,
-        private usageEntityService: UsageEntityService,
-        private modalService: ModalService
+        private usageLocationService: UsageLocationService,
+        private dialogService: DialogService
     ) {}
 
     ngOnDestroy() {
@@ -128,20 +122,31 @@ export class ParcelDetailComponent implements OnInit, OnDestroy {
                 this.parcelIDSubscription = this.route.paramMap.subscribe((paramMap) => {
                     this.mapIsReady = false;
                     this.parcelID = parseInt(paramMap.get(routeParams.parcelID));
-                    this.parcelSupplies$ = this.parcelService.parcelsParcelIDGetSupplyEntriesGet(this.parcelID);
-                    this.parcel$ = this.parcelService.parcelsParcelIDZonesGet(this.parcelID).pipe(
+                    this.parcelSupplies$ = this.parcelService.getAllSupplyEntriesByParcelIDParcel(this.parcelID);
+                    this.parcel$ = this.parcelService.getParcelWithZonesDtoByIDParcel(this.parcelID).pipe(
                         tap((parcel) => {
                             this.geographyID = parcel.GeographyID;
-                            this.fields$ = this.usageEntityService.parcelsParcelIDUsageEntitiesGet(parcel.ParcelID).pipe(
+
+                            this.geography$ = this.geographyService.getGeographyByIDGeography(parcel.GeographyID).pipe(
+                                tap((geography) => {
+                                    this.currentUserIsAdminOrWaterManager = AuthorizationHelper.isSystemAdministratorOrGeographyManager(currentUser, geography.GeographyID);
+                                })
+                            );
+
+                            this.usageLocations$ = this.usageLocationService.listUsageLocation(parcel.GeographyID, parcel.ParcelID).pipe(
                                 tap((x) => {
-                                    this.usageEntityColumnDefs = [
-                                        this.utilityFunctionsService.createBasicColumnDef("Field Name", "UsageEntityName"),
+                                    this.usageLocationColumnDefs = [
+                                        this.utilityFunctionsService.createBasicColumnDef("Name", "Name"),
+                                        this.utilityFunctionsService.createBasicColumnDef("Reporting Period", "ReportingPeriod.Name"),
                                         this.utilityFunctionsService.createDecimalColumnDef("Area (acres)", "Area"),
+                                        this.utilityFunctionsService.createBasicColumnDef("Usage Location Type", "UsageLocationType.Name", {
+                                            CustomDropdownFilterField: "UsageLocationType.Name",
+                                        }),
                                         {
                                             headerName: "Crops",
-                                            field: "CropNames",
+                                            field: "Crops",
                                             valueGetter: (params) => {
-                                                return params.data.CropNames;
+                                                return params.data.Crops.map((x) => x.Name);
                                             },
                                             valueFormatter: (params) => {
                                                 return params.value.join(", ");
@@ -156,20 +161,14 @@ export class ParcelDetailComponent implements OnInit, OnDestroy {
                                 })
                             );
 
-                            this.geography$ = this.geographyService.geographiesGeographyIDGet(parcel.GeographyID).pipe(
-                                tap((geography) => {
-                                    this.currentUserIsAdminOrWaterManager = AuthorizationHelper.isSystemAdministratorOrGeographyManager(currentUser, geography.GeographyID);
-                                })
-                            );
-
-                            this.allocationPlans$ = this.parcelByGeographyService.geographiesGeographyIDParcelsParcelIDAllocationPlansGet(parcel.GeographyID, parcel.ParcelID).pipe(
+                            this.allocationPlans$ = this.parcelByGeographyService.getParcelAllocationPlansByParcelIDParcelByGeography(parcel.GeographyID, parcel.ParcelID).pipe(
                                 tap((x) => {
                                     this.selectedAllocationPlan = x[0];
 
                                     this.showAllocationPlan = x[0]?.GeographyAllocationPlanConfiguration.IsVisibleToLandowners ?? false;
                                 })
                             );
-                            this.externalMapLayers$ = this.externalMapLayerService.geographiesGeographyIDExternalMapLayersActiveGet(parcel.GeographyID);
+                            this.externalMapLayers$ = this.externalMapLayerService.getActiveExternalMapLayersExternalMapLayer(parcel.GeographyID);
                             this.initializeSupplyGrid();
 
                             //MK 12/2/2024 -- Without this timeout, the map will not render correctly when swapping between parcels.
@@ -210,48 +209,55 @@ export class ParcelDetailComponent implements OnInit, OnDestroy {
     }
 
     editZoneAssignments(): void {
-        this.modalService
-            .open(
-                ParcelEditZoneAssignmentsModalComponent,
-                null,
-                { ModalSize: ModalSizeEnum.Medium, ModalTheme: ModalThemeEnum.Light, OverflowVisible: true },
-                { ParcelID: this.parcelID, GeographyID: this.geographyID }
-            )
-            .instance.result.then((succeeded) => {
-                if (succeeded) {
-                    this.parcel$ = this.parcelService.parcelsParcelIDZonesGet(this.parcelID);
-                }
-            });
+        const dialogRef = this.dialogService.open(ParcelEditZoneAssignmentsModalComponent, {
+            data: { ParcelID: this.parcelID, GeographyID: this.geographyID },
+            size: "sm",
+        });
+
+        dialogRef.afterClosed$.subscribe((result) => {
+            if (result) {
+                this.parcel$ = this.parcelService.getParcelWithZonesDtoByIDParcel(this.parcelID);
+            }
+        });
     }
 
     updateOwnershipInfo(): void {
-        this.modalService
-            .open(
-                ParcelUpdateOwnershipInfoModalComponent,
-                null,
-                { ModalSize: ModalSizeEnum.Medium, ModalTheme: ModalThemeEnum.Light, OverflowVisible: true },
-                { ParcelID: this.parcelID }
-            )
-            .instance.result.then((succeeded) => {
-                if (succeeded) {
-                    this.parcel$ = this.parcelService.parcelsParcelIDZonesGet(this.parcelID);
-                }
-            });
+        const dialogRef = this.dialogService.open(ParcelUpdateOwnershipInfoModalComponent, {
+            data: { ParcelID: this.parcelID, GeographyID: this.geographyID },
+            size: "sm",
+        });
+
+        dialogRef.afterClosed$.subscribe((result) => {
+            if (result) {
+                this.parcel$ = this.parcelService.getParcelWithZonesDtoByIDParcel(this.parcelID);
+            }
+        });
     }
 
     editAcres(): void {
-        this.modalService
-            .open(
-                ParcelAcreOverrideModalComponent,
-                null,
-                { ModalSize: ModalSizeEnum.Medium, ModalTheme: ModalThemeEnum.Light, OverflowVisible: true },
-                { ParcelID: this.parcelID, GeographyID: this.geographyID }
-            )
-            .instance.result.then((succeeded) => {
-                if (succeeded) {
-                    this.parcel$ = this.parcelService.parcelsParcelIDZonesGet(this.parcelID);
-                }
-            });
+        const dialogRef = this.dialogService.open(ParcelAcreOverrideModalComponent, {
+            data: { ParcelID: this.parcelID, GeographyID: this.geographyID },
+            size: "sm",
+        });
+
+        dialogRef.afterClosed$.subscribe((result) => {
+            if (result) {
+                this.parcel$ = this.parcelService.getParcelWithZonesDtoByIDParcel(this.parcelID);
+            }
+        });
+    }
+
+    modifyParcelStatus(): void {
+        const dialogRef = this.dialogService.open(ParcelModifyParcelStatusModalComponent, {
+            data: { ParcelID: this.parcelID, GeographyID: this.geographyID },
+            size: "sm",
+        });
+
+        dialogRef.afterClosed$.subscribe((result) => {
+            if (result) {
+                this.parcel$ = this.parcelService.getParcelWithZonesDtoByIDParcel(this.parcelID);
+            }
+        });
     }
 
     // the map stuff

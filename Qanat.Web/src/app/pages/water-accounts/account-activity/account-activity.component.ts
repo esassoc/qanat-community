@@ -2,14 +2,13 @@ import { Component, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute, RouterLink } from "@angular/router";
 import { forkJoin, Subscription } from "rxjs";
 import { routeParams } from "src/app/app.routes";
-import { DatePipe, DecimalPipe, NgIf, NgClass, NgFor } from "@angular/common";
+import { DatePipe, DecimalPipe, NgClass } from "@angular/common";
 import { UtilityFunctionsService } from "src/app/shared/services/utility-functions.service";
 import { ColDef } from "ag-grid-community";
 import { ParcelActivityDto } from "src/app/shared/generated/model/parcel-activity-dto";
 import { ParcelSupplyDetailDto } from "src/app/shared/generated/model/parcel-supply-detail-dto";
-import { AllocationPlanMinimalDto, ParcelMinimalDto, WaterAccountDto, WaterMeasurementTypeSimpleDto } from "src/app/shared/generated/model/models";
+import { AllocationPlanMinimalDto, ParcelMinimalDto, ReportingPeriodDto, WaterAccountDto, WaterMeasurementTypeSimpleDto } from "src/app/shared/generated/model/models";
 import { WaterAccountService } from "src/app/shared/generated/api/water-account.service";
-import { WaterMeasurementService } from "src/app/shared/generated/api/water-measurement.service";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
 import { QanatGridComponent } from "src/app/shared/components/qanat-grid/qanat-grid.component";
 import { ButtonGroupComponent } from "src/app/shared/components/button-group/button-group.component";
@@ -19,27 +18,25 @@ import { ExpandCollapseDirective } from "src/app/shared/directives/expand-collap
 import { ParcelSupplyByGeographyService } from "src/app/shared/generated/api/parcel-supply-by-geography.service";
 import { LoadingDirective } from "src/app/shared/directives/loading.directive";
 import { WaterAccountByGeographyService } from "src/app/shared/generated/api/water-account-by-geography.service";
+import { WaterMeasurementTypeService } from "src/app/shared/generated/api/water-measurement-type.service";
 
 @Component({
     selector: "account-activity",
     templateUrl: "./account-activity.component.html",
     styleUrls: ["./account-activity.component.scss"],
-    standalone: true,
     imports: [
-        NgIf,
         PageHeaderComponent,
         ModelNameTagComponent,
         RouterLink,
         ReportingPeriodSelectComponent,
         ButtonGroupComponent,
         NgClass,
-        NgFor,
         ExpandCollapseDirective,
         QanatGridComponent,
         DecimalPipe,
         DatePipe,
         LoadingDirective,
-    ],
+    ]
 })
 export class AccountActivityComponent implements OnInit, OnDestroy {
     private waterAccountID: number;
@@ -73,7 +70,7 @@ export class AccountActivityComponent implements OnInit, OnDestroy {
         private decimalPipe: DecimalPipe,
         private datePipe: DatePipe,
         private route: ActivatedRoute,
-        private waterMeasurementService: WaterMeasurementService
+        private waterMeasurementTypeService: WaterMeasurementTypeService
     ) {}
 
     ngOnDestroy() {
@@ -84,39 +81,38 @@ export class AccountActivityComponent implements OnInit, OnDestroy {
         this.waterAccountIDSubscription = this.route.paramMap.subscribe((paramMap) => {
             this.isLoading = true;
             this.waterAccountID = parseInt(paramMap.get(routeParams.waterAccountID));
-            this.waterAccountService.waterAccountsWaterAccountIDGet(this.waterAccountID).subscribe((waterAccount) => {
+            this.waterAccountService.getByIDWaterAccount(this.waterAccountID).subscribe((waterAccount) => {
                 this.waterAccount = waterAccount;
                 this.geographyID = waterAccount.Geography.GeographyID;
-                this.selectedYear = waterAccount.Geography.DefaultDisplayYear;
                 forkJoin({
-                    sourceOfRecordWaterMeasurementType: this.waterMeasurementService.geographiesGeographyIDWaterMeasurementsSourceOfRecordGet(this.geographyID),
-                    allocationPlans: this.waterAccountService.waterAccountsWaterAccountIDAllocationPlansGet(this.waterAccountID),
+                    sourceOfRecordWaterMeasurementType: this.waterMeasurementTypeService.getSourceOfRecordWaterMeasurementTypeWaterMeasurementType(this.geographyID),
+                    allocationPlans: this.waterAccountService.getAccountAllocationPlansByAccountIDWaterAccount(this.waterAccountID),
                 }).subscribe(({ sourceOfRecordWaterMeasurementType, allocationPlans }) => {
                     this.allocationPlans = allocationPlans;
                     this.sourceOfRecordWaterMeasurementType = sourceOfRecordWaterMeasurementType;
-
-                    forkJoin({
-                        parcels: this.waterAccountByGeographyService.geographiesGeographyIDWaterAccountsWaterAccountIDParcelsYearsYearGet(
-                            this.geographyID,
-                            this.waterAccount.WaterAccountID,
-                            this.selectedYear
-                        ),
-                        transactions: this.parcelSupplyByGeographyService.geographiesGeographyIDParcelSuppliesWaterAccountsWaterAccountIDTransactionsYearYearGet(
-                            this.geographyID,
-                            this.waterAccountID,
-                            this.selectedYear
-                        ),
-                    }).subscribe(({ parcels, transactions }) => {
-                        this.transactions = transactions;
-                        this.setCurrentBalance();
-                        this.setTotalAcreage(parcels);
-                        this.parcels = parcels;
-                        this.setMostRecentTransaction();
-                        this.createTransactionHistoryGridColumnDefs();
-                        this.parcelSuppliesBalance = this.createParcelSuppliesBalance();
-                        this.setParcelSupplies(transactions);
-                        this.isLoading = false;
-                    });
+                    this.isLoading = false;
+                    // forkJoin({
+                    //     parcels: this.waterAccountByGeographyService.geographiesGeographyIDWaterAccountsWaterAccountIDParcelsYearsYearGet(
+                    //         this.geographyID,
+                    //         this.waterAccount.WaterAccountID,
+                    //         this.selectedYear
+                    //     ),
+                    //     transactions: this.parcelSupplyByGeographyService.geographiesGeographyIDParcelSuppliesWaterAccountsWaterAccountIDTransactionsYearYearGet(
+                    //         this.geographyID,
+                    //         this.waterAccountID,
+                    //         this.selectedYear
+                    //     ),
+                    // }).subscribe(({ parcels, transactions }) => {
+                    //     this.transactions = transactions;
+                    //     this.setCurrentBalance();
+                    //     this.setTotalAcreage(parcels);
+                    //     this.parcels = parcels;
+                    //     this.setMostRecentTransaction();
+                    //     this.createTransactionHistoryGridColumnDefs();
+                    //     this.parcelSuppliesBalance = this.createParcelSuppliesBalance();
+                    //     this.setParcelSupplies(transactions);
+                    //     this.isLoading = false;
+                    // });
                 });
             });
         });
@@ -191,26 +187,20 @@ export class AccountActivityComponent implements OnInit, OnDestroy {
         ];
     }
 
-    updateDashboardForSelectedYear(selectedYear: number) {
-        this.selectedYear = selectedYear;
-
+    onSelectedReportingPeriodChange(selectedReportingPeriod: ReportingPeriodDto) {
+        let endDate = new Date(selectedReportingPeriod.EndDate);
+        this.selectedYear = endDate.getUTCFullYear();
         forkJoin({
-            parcels: this.waterAccountByGeographyService.geographiesGeographyIDWaterAccountsWaterAccountIDParcelsYearsYearGet(
-                this.geographyID,
-                this.waterAccount.WaterAccountID,
-                this.selectedYear
-            ),
-            transactions: this.parcelSupplyByGeographyService.geographiesGeographyIDParcelSuppliesWaterAccountsWaterAccountIDTransactionsYearYearGet(
-                this.geographyID,
-                this.waterAccountID,
-                this.selectedYear
-            ),
+            parcels: this.waterAccountByGeographyService.listParcelsByWaterAccountIDWaterAccountByGeography(this.geographyID, this.waterAccount.WaterAccountID, this.selectedYear),
+            transactions: this.parcelSupplyByGeographyService.getTransactionsFromAccountIDParcelSupplyByGeography(this.geographyID, this.waterAccountID, this.selectedYear),
         }).subscribe(({ parcels, transactions }) => {
             this.transactions = transactions;
             this.setCurrentBalance();
-            this.parcelSuppliesBalance = this.createParcelSuppliesBalance();
             this.setTotalAcreage(parcels);
+            this.parcels = parcels;
             this.setMostRecentTransaction();
+            this.createTransactionHistoryGridColumnDefs();
+            this.parcelSuppliesBalance = this.createParcelSuppliesBalance();
             this.setParcelSupplies(transactions);
         });
     }

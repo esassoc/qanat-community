@@ -1,0 +1,145 @@
+@use "/src/scss/abstracts" as *;
+
+.page-wrapper {
+    padding: $spacing-600;
+
+    ::ng-deep .page-header {
+        margin-bottom: $spacing-400;
+
+        svg {
+            top: 2px;
+            position: relative;
+        }
+    }
+
+    .page-content {
+        gap: $spacing-400;
+        .rich-text-container {
+            background-color: $blue-50;
+            border: 1px solid $blue-200;
+            border-radius: $spacing-200;
+            padding: $spacing-200;
+            display: flex;
+            align-items: center;
+
+            .info-icon {
+                margin-right: $spacing-200;
+                ::ng-deep svg path {
+                    fill: $blue-700;
+                }
+            }
+        }
+
+        .filter-container {
+            background-color: $gray-50;
+            border: 1px solid $gray-200;
+            border-radius: $spacing-200;
+            padding: $spacing-400;
+        }
+
+        .self-reports-container {
+            gap: 0;
+            .self-reports-table-header {
+                background: $blue-700;
+                font-weight: bold;
+                font-size: $type-size-100;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                color: $white;
+                padding: 1rem 1.5rem;
+                border-radius: 0.5rem;
+            }
+
+            .self-reports-table-row {
+                gap: 0.5rem;
+                padding: $spacing-200 $spacing-400;
+                background-color: $white;
+                color: $black;
+                border-bottom: 1px solid $gray-200;
+                align-items: center;
+                min-height: 4.5rem;
+            }
+
+            .self-reports-table-body {
+                .self-reports-table-row:nth-child(even) {
+                    background-color: $gray-50;
+                }
+            }
+        }
+    }
+}
+
+.status-circle-wrapper {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    top: 1px;
+    margin-right: $spacing-100;
+
+    background-color: $gray-300;
+    .status-circle-inner {
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        background-color: $gray-200;
+    }
+
+    &.draft {
+        background-color: $yellow-300;
+        .status-circle-inner {
+            background-color: $yellow-200;
+        }
+    }
+
+    &.submitted {
+        background-color: $blue-500;
+        .status-circle-inner {
+            background-color: $blue-400;
+        }
+    }
+
+    &.returned {
+        background-color: $red-darker;
+        .status-circle-inner {
+            background-color: $red-default;
+        }
+    }
+
+    &.approved {
+        background-color: $green-500;
+        .status-circle-inner {
+            background-color: $green-400;
+        }
+    }
+}
+
+.toggle {
+    position: absolute;
+    right: 0;
+    top: 5px;
+    font-size: $type-size-500;
+    transform: rotate(90deg);
+
+    &.open {
+        transform: rotate(180deg);
+    }
+
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+.line-item-table-container {
+    padding-top: $spacing-100;
+    margin-top: $spacing-200;
+    margin-bottom: $spacing-200;
+    display: none;
+
+    &.open {
+        display: block;
+    }
+}

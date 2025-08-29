@@ -3,7 +3,7 @@
 //  Source Table: [dbo].[OpenETSyncResultType]
 
 import { LookupTableEntry } from "src/app/shared/models/lookup-table-entry";
-import { SelectDropdownOption } from "src/app/shared/components/inputs/select-dropdown/select-dropdown.component"
+import { SelectDropdownOption } from "src/app/shared/components/forms/form-field/form-field.component"
 
 export enum OpenETSyncResultTypeEnum {
   InProgress = 1,
@@ -22,4 +22,4 @@ export const OpenETSyncResultTypes: LookupTableEntry[]  = [
   { Name: "DataNotAvailable", DisplayName: "Data Not Available", Value: 5 },
   { Name: "Created", DisplayName: "Created", Value: 6 }
 ];
-export const OpenETSyncResultTypesAsSelectDropdownOptions = [{ Value: null, Label: "- Select -", Disabled: true }, ...OpenETSyncResultTypes.map((x) => ({ Value: x.Value, Label: x.DisplayName } as SelectDropdownOption))];
+export const OpenETSyncResultTypesAsSelectDropdownOptions = OpenETSyncResultTypes.map((x) => ({ Value: x.Value, Label: x.DisplayName } as SelectDropdownOption));

@@ -7,11 +7,7 @@ import { inOutAnimation } from "src/app/shared/animations/in-out.animation";
 import { FormFieldType } from "src/app/shared/components/forms/form-field/form-field.component";
 import { WellRegistrationService } from "src/app/shared/generated/api/well-registration.service";
 import { CustomRichTextTypeEnum } from "src/app/shared/generated/enum/custom-rich-text-type-enum";
-import {
-    WaterUseTypesUsed,
-    WellRegistrationBasicInfoFormDto,
-    WellRegistrationBasicInfoFormDtoFormControls,
-} from "src/app/shared/generated/model/models";
+import { WaterUseTypesUsed, WellRegistrationBasicInfoFormDto, WellRegistrationBasicInfoFormDtoFormControls } from "src/app/shared/generated/model/models";
 import { IDeactivateComponent } from "src/app/guards/unsaved-changes-guard";
 import { Alert } from "src/app/shared/models/alert";
 import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
@@ -19,7 +15,7 @@ import { AlertService } from "src/app/shared/services/alert.service";
 import { WellRegistryWorkflowProgressService } from "src/app/shared/services/well-registry-workflow-progress.service";
 import { ButtonComponent } from "../../../shared/components/button/button.component";
 import { FormFieldComponent } from "../../../shared/components/forms/form-field/form-field.component";
-import { NgIf, NgFor, AsyncPipe } from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import { CustomRichTextComponent } from "../../../shared/components/custom-rich-text/custom-rich-text.component";
 import { AlertDisplayComponent } from "../../../shared/components/alert-display/alert-display.component";
 import { PageHeaderComponent } from "src/app/shared/components/page-header/page-header.component";
@@ -31,20 +27,17 @@ import { WellRegistrationWaterUseTypes } from "src/app/shared/generated/enum/wel
     templateUrl: "./basic-well-info.component.html",
     styleUrls: ["./basic-well-info.component.scss"],
     animations: [inOutAnimation],
-    standalone: true,
     imports: [
         PageHeaderComponent,
         WorkflowBodyComponent,
         AlertDisplayComponent,
         CustomRichTextComponent,
-        NgIf,
         FormsModule,
         ReactiveFormsModule,
         FormFieldComponent,
-        NgFor,
         ButtonComponent,
         AsyncPipe,
-    ],
+    ]
 })
 export class BasicWellInfoComponent implements OnInit, OnDestroy, IDeactivateComponent {
     public customRichTextTypeID = CustomRichTextTypeEnum.WellRegistryBasicInformation;
@@ -62,7 +55,7 @@ export class BasicWellInfoComponent implements OnInit, OnDestroy, IDeactivateCom
         StateWellNumber: FormControl<string>;
         StateWellCompletionNumber: FormControl<string>;
         CountyWellPermit: FormControl<string>;
-        DateDrilled: FormControl<Date>;
+        DateDrilled: FormControl<string>;
         WaterUseTypes: FormArray<FormGroup<{ Checked: FormControl<boolean>; Description: FormControl }>>; // Replace `any` with the specific type if available
     }> = new FormGroup<any>({
         WellName: WellRegistrationBasicInfoFormDtoFormControls.WellName(),
@@ -91,7 +84,7 @@ export class BasicWellInfoComponent implements OnInit, OnDestroy, IDeactivateCom
         this.wellRegistrationID = this.route.snapshot.paramMap.get(routeParams.wellRegistrationID)
             ? parseInt(this.route.snapshot.paramMap.get(routeParams.wellRegistrationID))
             : null;
-        this.basicWellInfo$ = this.wellRegistrationService.wellRegistrationsWellRegistrationIDBasicInfoGet(this.wellRegistrationID).pipe(
+        this.basicWellInfo$ = this.wellRegistrationService.getBasicInfoWellRegistration(this.wellRegistrationID).pipe(
             tap((x) => {
                 this.formGroup.patchValue(x as any);
 
@@ -133,9 +126,9 @@ export class BasicWellInfoComponent implements OnInit, OnDestroy, IDeactivateCom
         formDto.StateWellNumber = this.formGroup.controls.StateWellNumber.value;
         formDto.StateWellCompletionNumber = this.formGroup.controls.StateWellCompletionNumber.value;
         formDto.CountyWellPermit = this.formGroup.controls.CountyWellPermit.value;
-        formDto.DateDrilled = this.formGroup.controls.DateDrilled.value.toDateString();
+        formDto.DateDrilled = this.formGroup.controls.DateDrilled.value;
         formDto.WaterUseTypes = this.formGroup.controls.WaterUseTypes.value;
-        this.wellRegistrationService.wellRegistrationsWellRegistrationIDBasicInfoPut(this.wellRegistrationID, formDto).subscribe((response) => {
+        this.wellRegistrationService.updateBasicInfoWellRegistration(this.wellRegistrationID, formDto).subscribe((response) => {
             this.isLoadingSubmit = false;
             this.alertService.clearAlerts();
             this.alertService.pushAlert(new Alert("Successfully saved basic information", AlertContext.Success));

@@ -1,18 +1,19 @@
 <div class="full-height-wrapper">
     <page-header pageTitle="Overview"></page-header>
 
-    <div class="page-body grid-12" *ngIf="geography$ | async as geography">
-        <app-alert-display></app-alert-display>
-        <div class="g-col-8 copy copy-2">
-            <custom-rich-text [customRichTextTypeID]="mainCustomRichTextID" [geographyID]="geography.GeographyID"></custom-rich-text>
-        </div>
-
-        <div class="sidebar-help g-col-4">
-            <div class="copy copy-3">
-                <custom-rich-text [customRichTextTypeID]="sidebarCustomRichTextID" [geographyID]="geography.GeographyID"></custom-rich-text>
+    @if (geography$ | async; as geography) {
+        <div class="page-body grid-12">
+            <app-alert-display></app-alert-display>
+            <div class="g-col-8 copy copy-2">
+                <custom-rich-text [customRichTextTypeID]="mainCustomRichTextID" [geographyID]="geography.GeographyID"></custom-rich-text>
+            </div>
+            <div class="sidebar-help g-col-4">
+                <div class="copy copy-3">
+                    <custom-rich-text [customRichTextTypeID]="sidebarCustomRichTextID" [geographyID]="geography.GeographyID"></custom-rich-text>
+                </div>
             </div>
         </div>
-    </div>
+    }
 
     <div class="page-footer">
         <fresca-button class="ml-auto" [routerLink]="['../enter-pin']">Continue</fresca-button>

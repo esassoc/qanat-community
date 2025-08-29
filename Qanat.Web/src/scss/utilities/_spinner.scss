@@ -80,7 +80,8 @@
 
 // generic spin class
 
-.spin-animation {
+.spin-animation,
+.loading-spinner {
     animation: spinAnimation 2s linear infinite;
 }
 @keyframes spinAnimation {

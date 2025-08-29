@@ -32,6 +32,9 @@ public partial class SupportTicket
     [Column(TypeName = "datetime")]
     public DateTime? DateUpdated { get; set; }
 
+    [Column(TypeName = "datetime")]
+    public DateTime? DateClosed { get; set; }
+
     public int? CreateUserID { get; set; }
 
     public int? AssignedUserID { get; set; }
@@ -49,7 +52,7 @@ public partial class SupportTicket
     [Unicode(false)]
     public string ContactEmail { get; set; }
 
-    [StringLength(10)]
+    [StringLength(30)]
     [Unicode(false)]
     public string ContactPhoneNumber { get; set; }
 

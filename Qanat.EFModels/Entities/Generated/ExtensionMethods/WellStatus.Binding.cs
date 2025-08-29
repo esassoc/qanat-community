@@ -14,21 +14,18 @@ namespace Qanat.EFModels.Entities
     {
         public static readonly WellStatusOperational Operational = WellStatusOperational.Instance;
         public static readonly WellStatusNonOperational NonOperational = WellStatusNonOperational.Instance;
+        public static readonly WellStatusDuplicate Duplicate = WellStatusDuplicate.Instance;
 
         public static readonly List<WellStatus> All;
-        public static readonly List<WellStatusSimpleDto> AllAsSimpleDto;
         public static readonly ReadOnlyDictionary<int, WellStatus> AllLookupDictionary;
-        public static readonly ReadOnlyDictionary<int, WellStatusSimpleDto> AllAsSimpleDtoLookupDictionary;
 
         /// <summary>
         /// Static type constructor to coordinate static initialization order
         /// </summary>
         static WellStatus()
         {
-            All = new List<WellStatus> { Operational, NonOperational };
-            AllAsSimpleDto = new List<WellStatusSimpleDto> { Operational.AsSimpleDto(), NonOperational.AsSimpleDto() };
+            All = new List<WellStatus> { Operational, NonOperational, Duplicate };
             AllLookupDictionary = new ReadOnlyDictionary<int, WellStatus>(All.ToDictionary(x => x.WellStatusID));
-            AllAsSimpleDtoLookupDictionary = new ReadOnlyDictionary<int, WellStatusSimpleDto>(AllAsSimpleDto.ToDictionary(x => x.WellStatusID));
         }
 
         /// <summary>
@@ -97,6 +94,8 @@ namespace Qanat.EFModels.Entities
         {
             switch (enumValue)
             {
+                case WellStatusEnum.Duplicate:
+                    return Duplicate;
                 case WellStatusEnum.NonOperational:
                     return NonOperational;
                 case WellStatusEnum.Operational:
@@ -110,7 +109,8 @@ namespace Qanat.EFModels.Entities
     public enum WellStatusEnum
     {
         Operational = 1,
-        NonOperational = 2
+        NonOperational = 2,
+        Duplicate = 3
     }
 
     public partial class WellStatusOperational : WellStatus
@@ -123,5 +123,11 @@ namespace Qanat.EFModels.Entities
     {
         private WellStatusNonOperational(int wellStatusID, string wellStatusName, string wellStatusDisplayName) : base(wellStatusID, wellStatusName, wellStatusDisplayName) {}
         public static readonly WellStatusNonOperational Instance = new WellStatusNonOperational(2, @"NonOperational", @"Non-Operational");
+    }
+
+    public partial class WellStatusDuplicate : WellStatus
+    {
+        private WellStatusDuplicate(int wellStatusID, string wellStatusName, string wellStatusDisplayName) : base(wellStatusID, wellStatusName, wellStatusDisplayName) {}
+        public static readonly WellStatusDuplicate Instance = new WellStatusDuplicate(3, @"Duplicate", @"Duplicate");
     }
 }

@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Qanat.Models.DataTransferObjects;
 
 namespace Qanat.EFModels.Entities
 {
@@ -22,6 +21,6 @@ namespace Qanat.EFModels.Entities
         public string WaterAccountPIN { get; set; }
         public int GeographyID { get; set; }
         public string GeographyName { get; set; }
-        //public List<ZoneMinimalDto> Zones { get; set; }
+        //public ListByParcelAsync<ZoneMinimalDto> Zones { get; set; }
     }
 }

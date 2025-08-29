@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Qanat.API.Services;
+using Qanat.API.Services.Attributes;
 using Qanat.API.Services.Authorization;
 using Qanat.EFModels.Entities;
 using Qanat.Models.DataTransferObjects;
@@ -12,14 +13,14 @@ namespace Qanat.API.Controllers;
 
 [ApiController]
 [RightsChecker]
-public class FrequentlyAskedQuestionController : SitkaController<FrequentlyAskedQuestionController>
+[Route("faqs")]
+public class FrequentlyAskedQuestionController(
+    QanatDbContext dbContext,
+    ILogger<FrequentlyAskedQuestionController> logger,
+    IOptions<QanatConfiguration> qanatConfiguration)
+    : SitkaController<FrequentlyAskedQuestionController>(dbContext, logger, qanatConfiguration)
 {
-    public FrequentlyAskedQuestionController(QanatDbContext dbContext, ILogger<FrequentlyAskedQuestionController> logger, IOptions<QanatConfiguration> qanatConfiguration)
-        : base(dbContext, logger, qanatConfiguration)
-    {
-    }
-
-    [HttpPost("faq")]
+    [HttpPost()]
     [WithRolePermission(PermissionEnum.FrequentlyAskedQuestionRights, RightsEnum.Create)]
     public ActionResult<FrequentlyAskedQuestionSimpleDto> Create([FromBody] FrequentlyAskedQuestionAdminFormDto faq)
     {
@@ -27,7 +28,7 @@ public class FrequentlyAskedQuestionController : SitkaController<FrequentlyAsked
         return Ok(frequentlyAskedQuestionSimpleDto);
     }
 
-    [HttpPut("faq")]
+    [HttpPut]
     [WithRolePermission(PermissionEnum.FrequentlyAskedQuestionRights, RightsEnum.Update)]
     public ActionResult<FrequentlyAskedQuestionSimpleDto> Update([FromBody] FrequentlyAskedQuestionAdminFormDto faq)
     {
@@ -35,7 +36,7 @@ public class FrequentlyAskedQuestionController : SitkaController<FrequentlyAsked
         return Ok(frequentlyAskedQuestionSimpleDto);
     }
 
-    [HttpPost("faqs/{faqDisplayLocationTypeID}")]
+    [HttpPost("{faqDisplayLocationTypeID}")]
     [WithRolePermission(PermissionEnum.FrequentlyAskedQuestionRights, RightsEnum.Update)]
     public ActionResult<List<FrequentlyAskedQuestionLocationDisplayDto>> UpdateFaqDisplayLocationType([FromRoute] int faqDisplayLocationTypeID, [FromBody] List<FrequentlyAskedQuestionGridDto> faqSimpleDtos)
     {
@@ -43,19 +44,12 @@ public class FrequentlyAskedQuestionController : SitkaController<FrequentlyAsked
         return Ok(frequentlyAskedQuestionLocationDisplayDtos);
     }
 
-    [HttpDelete("faq/{frequentlyAskedQuestionID}")]
+    [HttpDelete("{frequentlyAskedQuestionID}")]
+    [EntityNotFound(typeof(FrequentlyAskedQuestion), "frequentlyAskedQuestionID")]
     [WithRolePermission(PermissionEnum.FrequentlyAskedQuestionRights, RightsEnum.Delete)]
     public ActionResult Delete([FromRoute] int frequentlyAskedQuestionID)
     {
         FrequentlyAskedQuestions.DeleteFaq(_dbContext, frequentlyAskedQuestionID);
         return Ok();
-    }
-
-    [HttpGet("faq/display-locations")]
-    [WithRolePermission(PermissionEnum.FrequentlyAskedQuestionRights, RightsEnum.Create)]
-    public ActionResult<List<FaqDisplayLocationTypeSimpleDto>> GetDisplayLocationTypeEnum()
-    {
-        var faqDisplayLocationTypeSimpleDtos = FaqDisplayLocationType.AllAsSimpleDto;
-        return Ok(faqDisplayLocationTypeSimpleDtos);
     }
 }

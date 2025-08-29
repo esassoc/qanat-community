@@ -7,7 +7,11 @@ using Microsoft.EntityFrameworkCore;
 namespace Qanat.EFModels.Entities;
 
 [Table("WaterAccountParcel")]
-[Index("WaterAccountID", "ParcelID", "EffectiveYear", Name = "AK_WaterAccountParcel_WaterAccountID_ParcelID_EffectiveYear", IsUnique = true)]
+[Index("GeographyID", "ParcelID", "ReportingPeriodID", Name = "AK_WaterAccountParcel_GeographyID_ParcelID_ReportingPeriodID", IsUnique = true)]
+[Index("GeographyID", Name = "IX_WaterAccountParcel_GeographyID")]
+[Index("ParcelID", Name = "IX_WaterAccountParcel_ParcelID")]
+[Index("ReportingPeriodID", Name = "IX_WaterAccountParcel_ReportingPeriodID")]
+[Index("WaterAccountID", Name = "IX_WaterAccountParcel_WaterAccountID")]
 public partial class WaterAccountParcel
 {
     [Key]
@@ -19,27 +23,21 @@ public partial class WaterAccountParcel
 
     public int ParcelID { get; set; }
 
-    public int EffectiveYear { get; set; }
-
-    public int? EndYear { get; set; }
+    public int ReportingPeriodID { get; set; }
 
     [ForeignKey("GeographyID")]
     [InverseProperty("WaterAccountParcels")]
     public virtual Geography Geography { get; set; }
 
     [ForeignKey("ParcelID")]
-    [InverseProperty("WaterAccountParcelParcels")]
+    [InverseProperty("WaterAccountParcels")]
     public virtual Parcel Parcel { get; set; }
 
-    [ForeignKey("ParcelID, GeographyID")]
-    [InverseProperty("WaterAccountParcelParcelNavigations")]
-    public virtual Parcel ParcelNavigation { get; set; }
+    [ForeignKey("ReportingPeriodID")]
+    [InverseProperty("WaterAccountParcels")]
+    public virtual ReportingPeriod ReportingPeriod { get; set; }
 
     [ForeignKey("WaterAccountID")]
-    [InverseProperty("WaterAccountParcelWaterAccounts")]
+    [InverseProperty("WaterAccountParcels")]
     public virtual WaterAccount WaterAccount { get; set; }
-
-    [ForeignKey("WaterAccountID, GeographyID")]
-    [InverseProperty("WaterAccountParcelWaterAccountNavigations")]
-    public virtual WaterAccount WaterAccountNavigation { get; set; }
 }

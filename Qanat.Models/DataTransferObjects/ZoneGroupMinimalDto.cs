@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Qanat.Models.DataTransferObjects;
 
 public class ZoneGroupMinimalDto
@@ -6,8 +8,10 @@ public class ZoneGroupMinimalDto
     public int GeographyID { get; set; }
     public string ZoneGroupName { get; set; }
     public string ZoneGroupSlug { get; set; }
+    [MaxLength(500)]
     public string ZoneGroupDescription { get; set; }
     public int SortOrder { get; set; }
     public List<ZoneMinimalDto> ZoneList { get; set; }
     public bool HasAllocationPlan { get; set; }
+    public bool DisplayToAccountHolders { get; set; }
 }

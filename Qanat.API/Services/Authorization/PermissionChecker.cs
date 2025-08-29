@@ -40,7 +40,7 @@ namespace Qanat.API.Services.Authorization
             if (!string.IsNullOrEmpty(flagName) && userDto.Flags.ContainsKey(flagName))
             {
                 // for specific geography
-                var geographyID = hierarchyContext.GeographyDto?.GeographyID;
+                var geographyID = hierarchyContext.GeographyDisplayDto?.GeographyID;
                 if (geographyID.HasValue && userDto.GeographyFlags.ContainsKey(geographyID.Value)
                                          && userDto.GeographyFlags[geographyID.Value]
                                              .TryGetValue(flagName, out var geographyFlag))
@@ -94,7 +94,7 @@ namespace Qanat.API.Services.Authorization
 
             if (!string.IsNullOrEmpty(permissionName))
             {
-                var geographyID = hierarchyContext.GeographyDto?.GeographyID;
+                var geographyID = hierarchyContext.GeographyDisplayDto?.GeographyID;
                 if (geographyID.HasValue && userDto.GeographyRights.ContainsKey(geographyID.Value)
                     && userDto.GeographyRights[geographyID.Value]
                         .TryGetValue(permissionName, out var geographyRight))
@@ -123,7 +123,7 @@ namespace Qanat.API.Services.Authorization
 
             if (!string.IsNullOrEmpty(permissionName))
             {
-                var waterAccountID = hierarchyContext.WaterAccountDto?.WaterAccountID;
+                var waterAccountID = hierarchyContext.WaterAccountDisplayDto?.WaterAccountID;
                 if (waterAccountID.HasValue && userDto.WaterAccountRights.ContainsKey(waterAccountID.Value)
                     && userDto.WaterAccountRights[waterAccountID.Value]
                         .TryGetValue(permissionName, out var waterAccountRight))

@@ -1,31 +1,30 @@
 <ul cdkDropList class="reorderable" (cdkDropListDropped)="drop($event)">
-    <li class="reorderable__item" *ngFor="let waterType of waterTypes" cdkDrag>
-        <div class="reorderable__order">
-            <span></span>
-        </div>
-
-        <div class="reorderable__label">
-            <div class="reorderable__title">
-                <input type="text" [name]="waterType.WaterTypeName" [(ngModel)]="waterType.WaterTypeName" />
-
-                <water-type-field-definition [waterType]="waterType" [labelOverride]="" [editable]="true"></water-type-field-definition>
-
-                <div class="reorderable__status">
-                    <label class="switch">
-                        <input type="checkbox" id="project-water" [checked]="waterType.IsActive" (click)="toggleIsActive(waterType)" />
-                        <span class="toggle" for="project-water"></span>
-                    </label>
-                </div>
-
-                <div class="reorderable__color" *ngIf="!isUsageConfiguration">
-                    <label class="field-label small required" style="display: flex">Color</label>
-                    <input [ngModelOptions]="{ standalone: true }" type="color" [(ngModel)]="waterType.WaterTypeColor" />
+    @for (waterType of waterTypes; track waterType) {
+        <li class="reorderable__item" cdkDrag>
+            <div class="reorderable__order">
+                <span></span>
+            </div>
+            <div class="reorderable__label">
+                <div class="reorderable__title">
+                    <input type="text" [name]="waterType.WaterTypeName" [(ngModel)]="waterType.WaterTypeName" />
+                    <water-type-field-definition [waterType]="waterType" [labelOverride]="" [editable]="true"></water-type-field-definition>
+                    <div class="reorderable__status">
+                        <label class="switch">
+                            <input type="checkbox" id="project-water" [checked]="waterType.IsActive" (click)="toggleIsActive(waterType)" />
+                            <span class="toggle" for="project-water"></span>
+                        </label>
+                    </div>
+                    @if (!isUsageConfiguration) {
+                        <div class="reorderable__color">
+                            <label class="field-label small required" style="display: flex">Color</label>
+                            <input [ngModelOptions]="{ standalone: true }" type="color" [(ngModel)]="waterType.WaterTypeColor" />
+                        </div>
+                    }
                 </div>
             </div>
-        </div>
-
-        <div class="reorderable__handle" cdkDragHandle><i class="fas fa-bars"></i></div>
-    </li>
+            <div class="reorderable__handle" cdkDragHandle><i class="fas fa-bars"></i></div>
+        </li>
+    }
 </ul>
 
 <form class="form add-new mt-4 flex-between ai-fe">

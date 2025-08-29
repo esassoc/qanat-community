@@ -7,7 +7,7 @@ public static class ScenarioRuns
 {
     public static async Task<ScenarioRun> CreateNew(QanatDbContext dbContext, int userID, int modelID, int scenarioID, string scenarioRunName = null)
     {
-        var getAction = new ScenarioRun()
+        var scenarioRun = new ScenarioRun()
         {
             ModelID = modelID,
             ScenarioID = scenarioID,
@@ -18,12 +18,12 @@ public static class ScenarioRuns
             ActionName = scenarioRunName
         };
 
-        dbContext.ScenarioRuns.Add(getAction);
+        dbContext.ScenarioRuns.Add(scenarioRun);
 
         await dbContext.SaveChangesAsync();
-        await dbContext.Entry(getAction).ReloadAsync();
+        await dbContext.Entry(scenarioRun).ReloadAsync();
 
-        return getAction;
+        return scenarioRun;
     }
 
     public static List<ScenarioRunDto> ListByModelID(QanatDbContext dbContext, int modelID)
@@ -100,9 +100,9 @@ public static class ScenarioRuns
 
     public static async Task AddFileResource(QanatDbContext dbContext, int scenarioRunID, FileResource fileResource)
     {
-        var getAction = dbContext.ScenarioRuns.Single(x => x.ScenarioRunID == scenarioRunID);
+        var scenarioRun = dbContext.ScenarioRuns.Single(x => x.ScenarioRunID == scenarioRunID);
 
-        getAction.ScenarioRunFileResources.Add(new ScenarioRunFileResource()
+        scenarioRun.ScenarioRunFileResources.Add(new ScenarioRunFileResource()
         {
             FileResourceID = fileResource.FileResourceID
         });

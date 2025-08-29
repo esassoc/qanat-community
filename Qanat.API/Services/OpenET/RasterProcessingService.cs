@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text.Json;
-using System.Threading.Tasks;
-using Hangfire;
+﻿using Hangfire;
 using MaxRev.Gdal.Core;
 using Microsoft.EntityFrameworkCore;
 using NetTopologySuite.Geometries;
@@ -13,7 +6,13 @@ using OSGeo.GDAL;
 using Qanat.Common.GeoSpatial;
 using Qanat.EFModels.Entities;
 using Qanat.Models.DataTransferObjects;
-using Qanat.Models.DataTransferObjects.Geography;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace Qanat.API.Services.OpenET;
 
@@ -21,6 +20,9 @@ public class RasterProcessingService
 {
     private readonly QanatDbContext _dbContext;
     private readonly FileService _fileService;
+
+    public static readonly string UsageLocationNoValidGeometryErrorMessage = "No valid geometry found for Usage Location.";
+    public static readonly string UsageLocationOutsideGSABoundaryErrorMessage = "Usage Location is outside of the buffered GSA boundary.";
 
     public RasterProcessingService(QanatDbContext dbContext, FileService fileService)
     {
@@ -35,7 +37,7 @@ public class RasterProcessingService
 
     //MK 9/19/2024 -- The nullable openETSyncHistoryID is a bit of a code smell. It'd be better to try and find a way to separate the concerns more, but this works for now.
     [AutomaticRetry(Attempts = 3)]
-    public async Task<List<RasterProcessingResult>> ProcessRasterByFileCanonicalNameForAllUsageEntities(GeographyDto geography, int? openETSyncHistoryID, int waterMeasurementTypeID, int unitTypeID, DateTime reportedDate, string fileCanonicalName, bool fromManualUpload = false, bool dryRun = true)
+    public async Task<List<RasterProcessingResult>> ProcessRasterByFileCanonicalNameForUsageLocations(GeographyDto geography, int? openETSyncHistoryID, int waterMeasurementTypeID, int unitTypeID, DateTime reportedDate, string fileCanonicalName, List<int> usageLocationIDs = null, bool fromManualUpload = false, bool dryRun = true)
     {
         if (_fileService == null)
         {
@@ -65,7 +67,7 @@ public class RasterProcessingService
         List<RasterProcessingResult> results;
         try
         {
-            results = await ProcessRasterBytesForAllUsageEntities(geography, rasterBytes);
+            results = await ProcessRasterBytesForUsageLocations(geography, rasterBytes, reportedDate, usageLocationIDs);
             if (dryRun)
             {
                 return results;
@@ -80,22 +82,29 @@ public class RasterProcessingService
             throw;
         }
 
-        await WaterMeasurements.DeleteWaterMeasurements(_dbContext, geography.GeographyID, waterMeasurementTypeID, reportedDate);
+        await WaterMeasurements.DeleteWaterMeasurements(_dbContext, geography.GeographyID, waterMeasurementTypeID, reportedDate, usageLocationIDs);
 
         var newWaterMeasurements = new List<WaterMeasurement>();
         foreach (var rasterProcessingResult in results)
         {
             var unitTypeEnum = (UnitTypeEnum)unitTypeID;
+            var usageArea = (decimal)rasterProcessingResult.UsageLocationArea;
+            var volume = usageArea != 0
+                ? WaterMeasurements.ConvertReportedValueToAcreFeet(unitTypeEnum, (decimal)rasterProcessingResult.RasterValue.GetValueOrDefault(0), usageArea)
+                : 0;
+            var depth = usageArea != 0
+                ? volume / usageArea
+                : 0;
             var newWaterMeasurement = new WaterMeasurement
             {
                 GeographyID = geography.GeographyID,
+                UsageLocationID = rasterProcessingResult.UsageLocationID,
                 WaterMeasurementTypeID = waterMeasurementTypeID,
                 UnitTypeID = unitTypeID,
                 ReportedDate = reportedDate,
-                UsageEntityName = rasterProcessingResult.UsageEntityName,
-                UsageEntityArea = (decimal)rasterProcessingResult.UsageEntityArea,
-                ReportedValue = (decimal) rasterProcessingResult.RasterValue.GetValueOrDefault(0),
-                ReportedValueInAcreFeet = WaterMeasurements.ConvertReportedValueToAcreFeet(unitTypeEnum, (decimal) rasterProcessingResult.RasterValue.GetValueOrDefault(0), (decimal) rasterProcessingResult.UsageEntityArea),
+                ReportedValueInNativeUnits = (decimal)rasterProcessingResult.RasterValue.GetValueOrDefault(0),
+                ReportedValueInAcreFeet = volume,
+                ReportedValueInFeet = depth,
                 LastUpdateDate = DateTime.UtcNow,
                 FromManualUpload = fromManualUpload,
                 Comment = !string.IsNullOrEmpty(rasterProcessingResult.ErrorMessage)
@@ -126,24 +135,27 @@ public class RasterProcessingService
         return results;
     }
 
-    public async Task<List<RasterProcessingResult>> ProcessRasterBytesForAllUsageEntities(GeographyDto geography, byte[] rasterBytes)
+    public async Task<List<RasterProcessingResult>> ProcessRasterBytesForUsageLocations(GeographyDto geography, byte[] rasterBytes, DateTime reportedDate, List<int> usageLocationIDs = null)
     {
-        var usageEntities = await _dbContext.UsageEntities.AsNoTracking()
-            .Where(x => x.GeographyID == geography.GeographyID)
-            .ToListAsync();
+        var usageLocations = await UsageLocations.ListByGeographyAndReportedDate(_dbContext, geography.GeographyID, reportedDate, true);
 
-        var usageEntityDtos = usageEntities.Select(x => new UsageEntitySimpleDto()
+        if (usageLocationIDs != null)
         {
-            UsageEntityID = x.UsageEntityID,
-            UsageEntityName = x.UsageEntityName,
-            UsageEntityArea = x.UsageEntityArea
+            usageLocations = usageLocations.Where(x => usageLocationIDs.Contains(x.UsageLocationID)).ToList();
+        }
+
+        var usageLocationDtos = usageLocations.Select(x => new UsageLocationSimpleDto()
+        {
+            UsageLocationID = x.UsageLocationID,
+            Name = x.Name,
+            Area = x.Area
         }).ToList();
 
-        var results = await ProcessRasterBytesForUsageEntities(geography, usageEntityDtos, rasterBytes);
+        var results = await ProcessRasterBytesForUsageLocations(geography, usageLocationDtos, rasterBytes);
         return results;
     }
 
-    public async Task<List<RasterProcessingResult>> ProcessRasterBytesForUsageEntities(GeographyDto geographyDto, List<UsageEntitySimpleDto> usageEntityDto, byte[] rasterBytes, bool cleanupFiles = true)
+    public async Task<List<RasterProcessingResult>> ProcessRasterBytesForUsageLocations(GeographyDto geographyDto, List<UsageLocationSimpleDto> usageLocationDtos, byte[] rasterBytes, bool cleanupFiles = true)
     {
         var runID = Guid.NewGuid();
         var tempDirectoryPath = $"{Path.GetTempPath()}raster-file-processing/runs/{runID}";
@@ -164,12 +176,12 @@ public class RasterProcessingService
 
         var bufferedGSABoundary = geographyBoundary.GSABoundary.Buffer(Geographies.GSABoundaryBuffer).Envelope;
 
-        foreach (var chunk in usageEntityDto.Chunk(100))
+        foreach (var chunkedUsageLocations in usageLocationDtos.Chunk(100))
         {
             using var rasterDataset = Gdal.Open(rasterFilePath, Access.GA_ReadOnly);
-            foreach (var usageEntity in chunk)
+            foreach (var usageLocation in chunkedUsageLocations)
             {
-                var result = await GetRasterValueForUsageEntity(geographyDto, bufferedGSABoundary, rasterDataset, usageEntity, tempDirectoryPath);
+                var result = await GetRasterValueForUsageLocation(geographyDto, bufferedGSABoundary, rasterDataset, usageLocation, tempDirectoryPath);
                 results.Add(result);
             }
         }
@@ -183,7 +195,7 @@ public class RasterProcessingService
         return results;
     }
 
-    public async Task<RasterProcessingResult> GetRasterValueForUsageEntity(GeographyDto geography, Geometry geographyBoundaryGSABoundary, Dataset rasterDataset, UsageEntitySimpleDto usageEntity, string tempDirectoryPath = null)
+    public async Task<RasterProcessingResult> GetRasterValueForUsageLocation(GeographyDto geography, Geometry geographyBoundaryGSABoundary, Dataset rasterDataset, UsageLocationSimpleDto usageLocation, string tempDirectoryPath = null)
     {
         if (string.IsNullOrEmpty(tempDirectoryPath))
         {
@@ -207,36 +219,36 @@ public class RasterProcessingService
         }
 
         var stopwatch = Stopwatch.StartNew();
-        var usageEntityGeometry = await _dbContext.UsageEntityGeometries.AsNoTracking()
-            .FirstOrDefaultAsync(x => x.UsageEntityID == usageEntity.UsageEntityID);
+        var usageLocationGeometry = await _dbContext.UsageLocationGeometries.AsNoTracking()
+            .FirstOrDefaultAsync(x => x.UsageLocationID == usageLocation.UsageLocationID);
 
         RasterProcessingResult processingResult;
-        if (usageEntityGeometry == null || !usageEntityGeometry.GeometryNative.IsValid)
+        if (usageLocationGeometry == null || !usageLocationGeometry.GeometryNative.IsValid)
         {
             stopwatch.Stop();
-            processingResult = new RasterProcessingResult(usageEntity.UsageEntityName, usageEntity.UsageEntityArea, null, stopwatch.ElapsedMilliseconds, "No valid geometry found for usage entity.");
+            processingResult = new RasterProcessingResult(usageLocation.UsageLocationID, usageLocation.Name, usageLocation.Area, null, stopwatch.ElapsedMilliseconds, UsageLocationNoValidGeometryErrorMessage);
 
             return processingResult;
         }
 
-        var coveredByGSABoundary = usageEntityGeometry.Geometry4326.CoveredBy(geographyBoundaryGSABoundary);
+        var coveredByGSABoundary = usageLocationGeometry.Geometry4326.CoveredBy(geographyBoundaryGSABoundary);
         if (!coveredByGSABoundary)
         {
             stopwatch.Stop();
-            processingResult = new RasterProcessingResult(usageEntity.UsageEntityName, usageEntity.UsageEntityArea, null, stopwatch.ElapsedMilliseconds, "Usage entity is outside of the buffered GSA boundary.");
+            processingResult = new RasterProcessingResult(usageLocation.UsageLocationID, usageLocation.Name, usageLocation.Area, null, stopwatch.ElapsedMilliseconds, UsageLocationOutsideGSABoundaryErrorMessage);
 
             return processingResult;
         }
 
-        var tempUsageEntityDirectory = $"{tempDirectoryPath}/{usageEntity.UsageEntityName}";
-        var outputRasterPath = $"{tempUsageEntityDirectory}/ClippedRaster.tif";
-        var outputGeoJSONPath = $"{tempUsageEntityDirectory}/UsageEntityGeometry.geojson";
+        var tempUsageLocationDirectory = $"{tempDirectoryPath}/{usageLocation.Name}";
+        var outputRasterPath = $"{tempUsageLocationDirectory}/ClippedRaster.tif";
+        var outputGeoJSONPath = $"{tempUsageLocationDirectory}/UsageLocationGeometry.geojson";
 
-        if (!Directory.Exists(tempUsageEntityDirectory))
+        if (!Directory.Exists(tempUsageLocationDirectory))
         {
-            Directory.CreateDirectory(tempUsageEntityDirectory);
+            Directory.CreateDirectory(tempUsageLocationDirectory);
         }
-        await GeoJsonSerializer.SerializeToFileAsync(usageEntityGeometry.GeometryNative.Buffer(0), outputGeoJSONPath, GeoJsonSerializer.DefaultSerializerOptions);
+        await GeoJsonSerializer.SerializeToFileAsync(usageLocationGeometry.GeometryNative.Buffer(0), outputGeoJSONPath, GeoJsonSerializer.DefaultSerializerOptions);
 
         // Set up the warp options to clip the raster to the geometry
         using var warpOptions = new GDALWarpAppOptions([
@@ -265,18 +277,17 @@ public class RasterProcessingService
         catch (Exception ex)
         {
             stopwatch.Stop();
-            processingResult = new RasterProcessingResult(usageEntity.UsageEntityName, usageEntity.UsageEntityArea, null, stopwatch.ElapsedMilliseconds,
-                ex.Message);
+            processingResult = new RasterProcessingResult(usageLocation.UsageLocationID, usageLocation.Name, usageLocation.Area, null, stopwatch.ElapsedMilliseconds, ex.Message);
 
             return processingResult;
         }
         finally
         {
-            CleanupUsageEntityRun(tempUsageEntityDirectory);
+            CleanupUsageLocationRun(tempUsageLocationDirectory);
         }
 
         stopwatch.Stop();
-        processingResult = new RasterProcessingResult(usageEntity.UsageEntityName, usageEntity.UsageEntityArea, geometryRasterMeanValueRounded, stopwatch.ElapsedMilliseconds,null);
+        processingResult = new RasterProcessingResult(usageLocation.UsageLocationID, usageLocation.Name, usageLocation.Area, geometryRasterMeanValueRounded, stopwatch.ElapsedMilliseconds, null);
 
         return processingResult;
     }
@@ -298,24 +309,25 @@ public class RasterProcessingService
         return geometryRasterMeanValueRounded;
     }
 
-    private static void CleanupUsageEntityRun(string tempUsageEntityDirectory)
+    private static void CleanupUsageLocationRun(string tempUsageLocationDirectory)
     {
-        if (!string.IsNullOrEmpty(tempUsageEntityDirectory) && Directory.Exists(tempUsageEntityDirectory))
+        if (!string.IsNullOrEmpty(tempUsageLocationDirectory) && Directory.Exists(tempUsageLocationDirectory))
         {
-            Directory.Delete(tempUsageEntityDirectory, true);
+            Directory.Delete(tempUsageLocationDirectory, true);
         }
     }
 
-    public async Task RunCalculations(int geographyID, int waterMeasurementTypeID, DateTime reportedDate)
+    public async Task RunCalculations(int geographyID, int waterMeasurementTypeID, DateTime reportedDate, List<int> usageLocationIDs = null)
     {
-        await WaterMeasurementCalculations.RunMeasurementTypeForGeography(_dbContext, geographyID, waterMeasurementTypeID, reportedDate);
+        await WaterMeasurementCalculations.RunMeasurementTypeForGeographyAsync(_dbContext, geographyID, waterMeasurementTypeID, reportedDate, usageLocationIDs);
     }
 }
 
 public record RasterProcessingResult
 {
-    public string UsageEntityName { get; set; }
-    public double UsageEntityArea { get; set; }
+    public int UsageLocationID { get; set; }
+    public string UsageLocationName { get; set; }
+    public double UsageLocationArea { get; set; }
     public double? RasterValue { get; set; }
     public double? OldValue { get; set; }
     public double? Difference => RasterValue.GetValueOrDefault(0) - OldValue.GetValueOrDefault(0);
@@ -329,14 +341,13 @@ public record RasterProcessingResult
     {
     }
 
-    public RasterProcessingResult(string usageEntityName, double usageEntityArea, double? rasterValue, long executionTime, string errorMessage)
+    public RasterProcessingResult(int usageLocationID, string usageLocationName, double usageLocationArea, double? rasterValue, long executionTime, string errorMessage)
     {
-        UsageEntityName = usageEntityName;
-        UsageEntityArea = Math.Round(usageEntityArea, 3, MidpointRounding.ToEven);
+        UsageLocationID = usageLocationID;
+        UsageLocationName = usageLocationName;
+        UsageLocationArea = Math.Round(usageLocationArea, 3, MidpointRounding.ToEven);
         RasterValue = rasterValue;
         ExecutionTime = executionTime;
         ErrorMessage = errorMessage;
     }
-
-
 }

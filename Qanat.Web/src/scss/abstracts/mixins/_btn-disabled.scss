@@ -8,9 +8,9 @@
         border: 1px solid $gray-default;
         text-shadow: unset;
         color: $gray-dark;
+        cursor: not-allowed;
 
         &:hover {
-            cursor: not-allowed;
             background: $gray-light;
             pointer-events: none;
             color: $gray-dark;

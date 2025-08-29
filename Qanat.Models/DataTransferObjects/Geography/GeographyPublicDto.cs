@@ -14,10 +14,9 @@ public class GeographyPublicDto
     public bool AllocationPlansVisibleToPublic { get; set; }
     public string ContactEmail { get; set; }
     public string ContactPhoneNumber { get; set; }
-    public int DefaultDisplayYear { get; set; }
     public bool LandingPageEnabled { get; set; }
     public bool MeterDataEnabled { get; set; }
+    public bool WellRegistryEnabled { get; set; }
     public bool FeeCalculatorEnabled { get; set; }
     public bool AllowWaterMeasurementSelfReporting { get; set; }
-    public bool DisplayUsageGeometriesAsField { get; set; }
 }

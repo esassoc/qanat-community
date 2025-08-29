@@ -1,16 +1,12 @@
 import * as L from "leaflet";
 import { MapLayerBase } from "../map-layer-base.component";
 import { WfsService } from "src/app/shared/services/wfs.service";
-import { ModalService, ModalSizeEnum, ModalThemeEnum } from "src/app/shared/services/modal/modal.service";
-import {
-    MonitoringWellContext,
-    MonitoringWellMeasurementChartComponent,
-} from "src/app/shared/components/monitoring-wells/modal/monitoring-well-measurement-chart/monitoring-well-measurement-chart.component";
+import { MonitoringWellMeasurementChartComponent } from "src/app/shared/components/monitoring-wells/modal/monitoring-well-measurement-chart/monitoring-well-measurement-chart.component";
 import { AfterViewInit, Component, Input, OnChanges } from "@angular/core";
+import { DialogService } from "@ngneat/dialog";
 
 @Component({
     selector: "monitoring-wells-layer",
-    standalone: true,
     imports: [],
     templateUrl: "./monitoring-wells-layer.component.html",
     styleUrl: "./monitoring-wells-layer.component.scss",
@@ -22,7 +18,10 @@ export class MonitoringWellsLayerComponent extends MapLayerBase implements After
 
     public layer: L.Layer;
 
-    constructor(private wfsService: WfsService, private modalService: ModalService) {
+    constructor(
+        private wfsService: WfsService,
+        private dialogService: DialogService
+    ) {
         super();
     }
 
@@ -61,13 +60,19 @@ export class MonitoringWellsLayerComponent extends MapLayerBase implements After
 
             geoJson.on("click", (e) => {
                 if (this.editingMap) return;
-                this.modalService
-                    .open(MonitoringWellMeasurementChartComponent, null, { ModalSize: ModalSizeEnum.ExtraLarge, ModalTheme: ModalThemeEnum.Light, TopLayer: false }, {
+                const dialogRef = this.dialogService.open(MonitoringWellMeasurementChartComponent, {
+                    data: {
                         GeographyID: e.layer.feature.properties.GeographyID,
                         SiteCode: e.layer.feature.properties.SiteCode,
                         MonitoringWellName: e.layer.feature.properties.MonitoringWellName,
-                    } as MonitoringWellContext)
-                    .instance.result.then((result) => {});
+                    },
+                    size: "lg",
+                });
+
+                dialogRef.afterClosed$.subscribe((result) => {
+                    if (result) {
+                    }
+                });
             });
 
             geoJson.addTo(this.layer);
