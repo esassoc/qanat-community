@@ -325,7 +325,7 @@
         ]
       }
     },
-    "/geographies/{geographyID}/reporting-periods/{reportingPeriodID}/usage-locations": {
+    "/geographies/{geographyID}/years/{year}/usage-locations": {
       "get": {
         "tags": [
           "Usage Locations"
@@ -343,7 +343,7 @@
             }
           },
           {
-            "name": "reportingPeriodID",
+            "name": "year",
             "in": "path",
             "required": true,
             "schema": {
@@ -394,7 +394,7 @@
         ]
       }
     },
-    "/geographies/{geographyID}/reporting-periods/{reportingPeriodID}/usage-locations/feature-collection": {
+    "/geographies/{geographyID}/years/{year}/usage-locations/feature-collection": {
       "get": {
         "tags": [
           "Usage Locations"
@@ -412,7 +412,7 @@
             }
           },
           {
-            "name": "reportingPeriodID",
+            "name": "year",
             "in": "path",
             "required": true,
             "schema": {
@@ -463,13 +463,13 @@
         ]
       }
     },
-    "/geographies/{geographyID}/reporting-periods/{reportingPeriodID}/water-measurement-types/{waterMeasurementTypeID}/water-measurements": {
+    "/geographies/{geographyID}/years/{year}/water-measurement-types/{waterMeasurementTypeID}/water-measurements": {
       "get": {
         "tags": [
           "Water Measurements"
         ],
         "summary": "List by Geography",
-        "description": "List all water measurements a specified geography, reporting period, and water measurement type",
+        "description": "List all water measurements a specified geography, year, and water measurement type",
         "parameters": [
           {
             "name": "geographyID",
@@ -481,7 +481,7 @@
             }
           },
           {
-            "name": "reportingPeriodID",
+            "name": "year",
             "in": "path",
             "required": true,
             "schema": {
@@ -507,7 +507,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/WaterMeasurementConsumerDto2"
+                    "$ref": "#/components/schemas/WaterMeasurementConsumerDto"
                   }
                 }
               }
@@ -627,7 +627,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/WellConsumerDto2"
+                    "$ref": "#/components/schemas/WellConsumerDto"
                   }
                 }
               }
@@ -756,7 +756,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/WellConsumerDto2"
+                    "$ref": "#/components/schemas/WellConsumerDto"
                   }
                 }
               }
@@ -1531,7 +1531,7 @@
           }
         }
       },
-      "WaterMeasurementConsumerDto2": {
+      "WaterMeasurementConsumerDto": {
         "type": "object",
         "properties": {
           "waterMeasurementID": {
@@ -1546,17 +1546,27 @@
             "type": "integer",
             "format": "int32"
           },
+          "usageLocationName": {
+            "type": "string",
+            "nullable": true
+          },
+          "parcelNumber": {
+            "type": "string",
+            "nullable": true
+          },
           "reportingDate": {
             "type": "string",
             "format": "date-time"
           },
           "reportedValueInFeet": {
             "type": "number",
-            "format": "double"
+            "format": "double",
+            "nullable": true
           },
           "reportedValueInAcreFeet": {
             "type": "number",
-            "format": "double"
+            "format": "double",
+            "nullable": true
           }
         }
       },
@@ -1584,7 +1594,7 @@
           }
         }
       },
-      "WellConsumerDto2": {
+      "WellConsumerDto": {
         "type": "object",
         "properties": {
           "wellID": {
