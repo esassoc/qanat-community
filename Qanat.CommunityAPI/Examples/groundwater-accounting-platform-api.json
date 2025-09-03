@@ -65,7 +65,7 @@
           "Parcels"
         ],
         "summary": "List by Geography",
-        "description": "List all parcel numbers for a specified geography",
+        "description": "List all parcels for a specified geography",
         "parameters": [
           {
             "name": "geographyID",
@@ -146,6 +146,75 @@
                   "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/IFeature"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyScheme": []
+          }
+        ]
+      }
+    },
+    "/geographies/{geographyID}/water-accounts/{waterAccountID}/parcels": {
+      "get": {
+        "tags": [
+          "Parcels"
+        ],
+        "summary": "List by Geography and Water Account ID",
+        "description": "List all parcels for a specified geography and water account",
+        "parameters": [
+          {
+            "name": "geographyID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "waterAccountID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ParcelConsumerDto"
                   }
                 }
               }
@@ -463,13 +532,73 @@
         ]
       }
     },
+    "/geographies/{geographyID}/water-accounts": {
+      "get": {
+        "tags": [
+          "Water Accounts"
+        ],
+        "summary": "List by Geography",
+        "description": "List all water accounts for a specified geography",
+        "parameters": [
+          {
+            "name": "geographyID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ParcelConsumerDto"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyScheme": []
+          }
+        ]
+      }
+    },
     "/geographies/{geographyID}/years/{year}/water-measurement-types/{waterMeasurementTypeID}/water-measurements": {
       "get": {
         "tags": [
           "Water Measurements"
         ],
-        "summary": "List by Geography",
-        "description": "List all water measurements a specified geography, year, and water measurement type",
+        "summary": "List by Geography, Year, and Type",
+        "description": "List all water measurements for a specified geography, year, and water measurement type",
         "parameters": [
           {
             "name": "geographyID",
@@ -541,13 +670,82 @@
         ]
       }
     },
+    "/geographies/{geographyID}/parcels/{parcelID}/water-measurements": {
+      "get": {
+        "tags": [
+          "Water Measurements"
+        ],
+        "summary": "List by Geography and Parcel",
+        "description": "List all water measurements for a specified geography and parcel",
+        "parameters": [
+          {
+            "name": "geographyID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "parcelID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WaterMeasurementConsumerDto"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyScheme": []
+          }
+        ]
+      }
+    },
     "/geographies/{geographyID}/water-measurement-types": {
       "get": {
         "tags": [
           "Water Measurement Types"
         ],
         "summary": "List by Geography",
-        "description": "List all water measurements a specified geography",
+        "description": "List all water measurement types for a specified geography",
         "parameters": [
           {
             "name": "geographyID",
@@ -1195,6 +1393,13 @@
             "format": "int32",
             "nullable": true
           },
+          "zones": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ZoneConsumerDto"
+            },
+            "nullable": true
+          },
           "geographyID": {
             "type": "integer",
             "format": "int32"
@@ -1514,6 +1719,10 @@
             "type": "integer",
             "format": "int32"
           },
+          "parcelNumber": {
+            "type": "string",
+            "nullable": true
+          },
           "parcelZones": {
             "type": "array",
             "items": {
@@ -1524,6 +1733,10 @@
           "reportingPeriodID": {
             "type": "integer",
             "format": "int32"
+          },
+          "reportingPeriodName": {
+            "type": "string",
+            "nullable": true
           },
           "geographyID": {
             "type": "integer",
@@ -1542,6 +1755,10 @@
             "type": "integer",
             "format": "int32"
           },
+          "waterMeasurementTypeName": {
+            "type": "string",
+            "nullable": true
+          },
           "usageLocationID": {
             "type": "integer",
             "format": "int32"
@@ -1549,6 +1766,14 @@
           "usageLocationName": {
             "type": "string",
             "nullable": true
+          },
+          "usageLocationType": {
+            "type": "string",
+            "nullable": true
+          },
+          "parcelID": {
+            "type": "integer",
+            "format": "int32"
           },
           "parcelNumber": {
             "type": "string",
@@ -1567,6 +1792,10 @@
             "type": "number",
             "format": "double",
             "nullable": true
+          },
+          "geographyID": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -1632,6 +1861,10 @@
             "format": "int32",
             "nullable": true
           },
+          "parcelNumber": {
+            "type": "string",
+            "nullable": true
+          },
           "irrigatedParcelIDs": {
             "type": "array",
             "items": {
@@ -1692,6 +1925,9 @@
     },
     {
       "name": "Usage Locations"
+    },
+    {
+      "name": "Water Accounts"
     },
     {
       "name": "Water Measurements"
