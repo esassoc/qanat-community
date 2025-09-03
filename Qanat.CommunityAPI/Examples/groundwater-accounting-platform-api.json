@@ -558,7 +558,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/ParcelConsumerDto"
+                    "$ref": "#/components/schemas/WaterAccountConsumerDto"
                   }
                 }
               }
@@ -954,7 +954,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/WellConsumerDto"
+                    "$ref": "#/components/schemas/MeterReadingConsumerDto"
                   }
                 }
               }
@@ -1334,6 +1334,56 @@
           },
           "attributes": {
             "$ref": "#/components/schemas/IAttributesTable"
+          }
+        }
+      },
+      "MeterReadingConsumerDto": {
+        "type": "object",
+        "properties": {
+          "meterReadingID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "meterSerialNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "wellID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "parcelID": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "readingDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "previousReading": {
+            "type": "number",
+            "format": "double"
+          },
+          "currentReading": {
+            "type": "number",
+            "format": "double"
+          },
+          "volumeInAcreFeet": {
+            "type": "number",
+            "format": "double"
+          },
+          "readerInitials": {
+            "type": "string",
+            "nullable": true
+          },
+          "comment": {
+            "type": "string",
+            "nullable": true
+          },
+          "geographyID": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -1735,6 +1785,56 @@
             "format": "int32"
           },
           "reportingPeriodName": {
+            "type": "string",
+            "nullable": true
+          },
+          "geographyID": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "WaterAccountConsumerDto": {
+        "type": "object",
+        "properties": {
+          "waterAccountID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "waterAccountNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "waterAccountName": {
+            "type": "string",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          },
+          "waterAccountPIN": {
+            "type": "string",
+            "nullable": true
+          },
+          "waterAccountPINLastUsed": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "waterAccountContactName": {
+            "type": "string",
+            "nullable": true
+          },
+          "contactEmail": {
+            "type": "string",
+            "nullable": true
+          },
+          "contactPhoneNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "fullAddress": {
             "type": "string",
             "nullable": true
           },
