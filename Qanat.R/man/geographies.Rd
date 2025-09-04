@@ -4,14 +4,12 @@
 \alias{geographies}
 \title{Geographies list}
 \usage{
-geographies(simplify = TRUE, user_key = get_user_key(), use_qa = TRUE)
+geographies(simplify = TRUE, user_key = get_user_key())
 }
 \arguments{
 \item{simplify}{Coerce to vector, data frame, or matrix}
 
 \item{user_key}{Qanat user key}
-
-\item{use_qa}{Boolean flag to use QA version of Qanat}
 }
 \description{
 List of all available geographies
