@@ -49,3 +49,9 @@ Qanat.Web/srs/environments/environment.*
 /Qanat.Web/src/environments/environment.ts
 /Qanat.Web/src/environments/environment.qa.ts
 /Qanat.Web/src/environments/environment.prod.ts
+
+Qanat.R/.Rproj.user
+Qanat.R/.Rhistory
+Qanat.R/.RData
+Qanat.R/.Ruserdata
+Qanat.R/.Renviron

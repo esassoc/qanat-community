@@ -1,0 +1,22 @@
+Package: Qanat.R
+Type: Package
+Title: R Interface to Groundwater Accounting Platform API
+Version: 0.1.0
+Authors@R: c(
+    person(
+      "Travis", "Hinkelman",
+      email = "thinkelman@esassoc.com",
+      role = c("aut", "cre")
+    )
+  )
+Description: R Interface to the REST API for the Groundwater Accounting Platform (codename "Qanat").
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports: 
+    askpass,
+    glue,
+    httr2
+RoxygenNote: 7.3.2
+Suggests: 
+    sf
