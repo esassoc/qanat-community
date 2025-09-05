@@ -25,7 +25,7 @@ wells <- function(geography_id, simplify = TRUE, user_key = get_user_key()) {
 #' @export
 
 wells_features <- function(geography_id, sf = TRUE, simplify = TRUE, user_key = get_user_key()) {
-  req = glue::glue("{api_url()}/geographies/{geography_id}/wells/feature-collection") |>
+  glue::glue("{api_url()}/geographies/{geography_id}/wells/feature-collection") |>
     get_qanat(simplify, user_key, sf)
 }
 

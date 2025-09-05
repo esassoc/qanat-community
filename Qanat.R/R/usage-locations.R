@@ -29,7 +29,7 @@ usage_locations <- function(geography_id, year, simplify = TRUE, user_key = get_
 
 usage_locations_features <- function(geography_id, year, sf = TRUE, simplify = TRUE,
                                      user_key = get_user_key()) {
-  req = glue::glue("{api_url()}/geographies/{geography_id}/years/{year}/\\
-                   usage-locations/feature-collection") |>
+  glue::glue("{api_url()}/geographies/{geography_id}/years/{year}/\\
+             usage-locations/feature-collection") |>
     get_qanat(simplify, user_key, sf)
 }
