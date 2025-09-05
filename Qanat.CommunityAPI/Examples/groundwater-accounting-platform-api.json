@@ -16,7 +16,7 @@
   },
   "servers": [
     {
-      "url": "http://api-qa.groundwateraccounting.org/"
+      "url": "http://api.groundwateraccounting.org/"
     }
   ],
   "paths": {
