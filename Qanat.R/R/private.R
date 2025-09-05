@@ -2,7 +2,7 @@
 
 # Private Functions -------------------------------------------------------
 
-api_url <- function(use_qa = TRUE){
+api_url <- function(use_qa = FALSE){
   # returns base url
   qa = if (use_qa) "-qa" else ""
   glue::glue("https://api{qa}.groundwateraccounting.org")
@@ -16,7 +16,7 @@ get_qanat <- function(url, simplify, user_key, sf = FALSE,
     httr2::req_perform()
 
   if (sf) {
-    sf::st_read(httr2::resp_body_string(req))
+    sf::st_read(httr2::resp_body_string(req), quiet = TRUE)
   } else {
     httr2::resp_body_json(req, simplifyVector = simplify)
   }
