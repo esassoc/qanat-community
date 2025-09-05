@@ -4,15 +4,22 @@
 \alias{parcels}
 \title{Parcels list}
 \usage{
-parcels(geography_id, simplify = TRUE, user_key = get_user_key())
+parcels(
+  geography_id,
+  water_account_id = NULL,
+  simplify = TRUE,
+  user_key = get_user_key()
+)
 }
 \arguments{
 \item{geography_id}{Geography ID}
+
+\item{water_account_id}{Water account ID (optional)}
 
 \item{simplify}{Coerce to vector, data frame, or matrix}
 
 \item{user_key}{Qanat user key}
 }
 \description{
-List all parcel numbers for a specified geography
+List all parcel numbers for a specified geography and, optionally, water account
 }

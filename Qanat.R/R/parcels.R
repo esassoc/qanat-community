@@ -1,16 +1,22 @@
 
 #' Parcels list
 #'
-#' List all parcel numbers for a specified geography
+#' List all parcel numbers for a specified geography and, optionally, water account
 #'
 #' @md
-#' @param geography_id  Geography ID
-#' @param simplify      Coerce to vector, data frame, or matrix
-#' @param user_key      Qanat user key
+#' @param geography_id       Geography ID
+#' @param water_account_id   Water account ID (optional)
+#' @param simplify           Coerce to vector, data frame, or matrix
+#' @param user_key           Qanat user key
 #' @export
 
-parcels <- function(geography_id, simplify = TRUE, user_key = get_user_key()) {
-  get_by_geo(geography_id, simplify, user_key, "parcels")
+parcels <- function(geography_id, water_account_id = NULL, simplify = TRUE, user_key = get_user_key()) {
+  if (is.null(water_account_id)){
+    get_by_geo(geography_id, simplify, user_key, "parcels")
+  } else {
+    glue::glue("{api_url()}/geographies/{geography_id}/water-accounts/{water_account_id}/parcels") |>
+      get_qanat(simplify, user_key)
+  }
 }
 
 #' Parcels feature collection
@@ -25,7 +31,7 @@ parcels <- function(geography_id, simplify = TRUE, user_key = get_user_key()) {
 #' @export
 
 parcels_features <- function(geography_id, sf = TRUE, simplify = TRUE, user_key = get_user_key()) {
-  req = glue::glue("{api_url()}/geographies/{geography_id}/parcels/feature-collection") |>
+  glue::glue("{api_url()}/geographies/{geography_id}/parcels/feature-collection") |>
     get_qanat(simplify, user_key, sf)
 }
 
