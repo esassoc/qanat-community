@@ -10,9 +10,8 @@ Authors@R: c(
     )
   )
 Description: R Interface to the REST API for the Groundwater Accounting Platform (codename "Qanat").
-License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: true
+Depends: R (>= 4.1.0)
 Imports: 
     askpass,
     glue,
