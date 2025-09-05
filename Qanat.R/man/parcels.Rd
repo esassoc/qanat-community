@@ -23,3 +23,8 @@ parcels(
 \description{
 List all parcel numbers for a specified geography and, optionally, water account
 }
+\examples{
+by_geo <- parcels(geography_id = 5)
+by_geo_acct <- parcels(geography_id = 5, water_account_id = 30)
+
+}

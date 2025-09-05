@@ -27,6 +27,9 @@ water_measurement_types <- function(geography_id, simplify = TRUE, user_key = ge
 #' @param simplify                      Coerce to vector, data frame, or matrix
 #' @param user_key                      Qanat user key
 #' @export
+#' @examples
+#' by_parcel <- water_measurements(geography_id = 5, parcel_id = 52475)
+#' by_type_year <- water_measurements(geography_id = 5, water_measurement_type_id = 5, year = 2016)
 
 water_measurements <- function(geography_id, parcel_id = NULL, water_measurement_type_id = NULL,
                                year = NULL, simplify = TRUE, user_key = get_user_key()) {

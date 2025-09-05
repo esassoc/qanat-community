@@ -23,3 +23,7 @@ parcels_search(
 \description{
 Search all available parcel numbers for a specified geography and (partial) parcel number
 }
+\examples{
+parcels_search(geography_id = 5, parcel_number = "555-05")
+
+}

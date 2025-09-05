@@ -9,6 +9,10 @@
 #' @param simplify           Coerce to vector, data frame, or matrix
 #' @param user_key           Qanat user key
 #' @export
+#' @examples
+#' by_geo <- parcels(geography_id = 5)
+#' by_geo_acct <- parcels(geography_id = 5, water_account_id = 30)
+#'
 
 parcels <- function(geography_id, water_account_id = NULL, simplify = TRUE, user_key = get_user_key()) {
   if (is.null(water_account_id)){
@@ -45,6 +49,9 @@ parcels_features <- function(geography_id, sf = TRUE, simplify = TRUE, user_key 
 #' @param simplify      Coerce to vector, data frame, or matrix
 #' @param user_key      Qanat user key
 #' @export
+#' @examples
+#' parcels_search(geography_id = 5, parcel_number = "555-05")
+#'
 
 parcels_search <- function(geography_id, parcel_number, simplify = TRUE,
                            user_key = get_user_key()) {

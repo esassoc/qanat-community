@@ -31,3 +31,7 @@ List all water measurements for a specified geography and parcel or
 specified geography, water measurement type, and year.
 If parcel_id is not specified, water measurement type and year must be specified.
 }
+\examples{
+by_parcel <- water_measurements(geography_id = 5, parcel_id = 52475)
+by_type_year <- water_measurements(geography_id = 5, water_measurement_type_id = 5, year = 2016)
+}

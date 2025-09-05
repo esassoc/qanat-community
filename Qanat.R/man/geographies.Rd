@@ -14,3 +14,8 @@ geographies(simplify = TRUE, user_key = get_user_key())
 \description{
 List of all available geographies
 }
+\examples{
+geographies(simplify = TRUE)
+geographies(simplify = FALSE)
+
+}
