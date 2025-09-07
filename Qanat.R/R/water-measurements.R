@@ -39,13 +39,13 @@ water_measurements <- function(geography_id, parcel_id = NULL, water_measurement
   }
 
   if (!is.null(parcel_id)){
-    message("Listing measurements by geography and parcel.")
+    message("Fetching water measurements by geography and parcel.")
     url = glue::glue("{api_url()}/geographies/{geography_id}/parcels/{parcel_id}/water-measurements")
   } else {
     if (is.null(water_measurement_type_id) || is.null(year)){
       stop("Need to specify water_measurement_type_id and year")
     }
-    message("Listing measurements by geography, water measurement type, and year.")
+    message("Fetching water measurements by geography, water measurement type, and year.")
     url = glue::glue("{api_url()}/geographies/{geography_id}/years/{year}/\\
                      water-measurement-types/{water_measurement_type_id}/water-measurements")
   }
