@@ -27,7 +27,7 @@ Note, this vignette loosely follows the [example provided for Python](https://gi
 
 ## Task
 
-Create a histogram of month by monthly OpenET Evapotranspiration measurements in the Demo geography for the year 2024 using the geographies data and the water measurements API.
+Create a bar plot of month by monthly OpenET Evapotranspiration measurements in the Demo geography for the year 2024 using the geographies data and the water measurements API.
 
 ### Identify demo geography ID
 
