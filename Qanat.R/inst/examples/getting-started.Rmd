@@ -1,18 +1,10 @@
 ---
 title: "Getting Started"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Getting Started}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+output: html_document
 ---
 
 ```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  error = TRUE
-)
+knitr::opts_chunk$set(error = TRUE)
 ```
 
 ## Requirements

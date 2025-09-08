@@ -1,18 +1,7 @@
 ---
 title: "Percentage Parcels Claimed"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Percentage Parcels Claimed}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+output: html_document
 ---
-
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
-```
 
 ```{r setup, message=FALSE}
 library(Qanat.R)

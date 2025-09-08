@@ -1,19 +1,7 @@
 ---
 title: "Feature Collections"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Feature Collections}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+output: html_document
 ---
-  
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  fig.width = 7
-)
-```
 
 ```{r setup, message=FALSE}
 library(Qanat.R)
