@@ -13,7 +13,7 @@ library(mapview)
 
 ## Fetch feature collections
 
-The `Qanat.R` package provides access to three spatial datasets. These datasets are provided through the API as GeoJSON, but, by default, are converted to sf objects in R. The wells feature collection in the Demo geography has mismatching coordinates and reference system so requires extra processing.
+The `Qanat.R` package provides access to three spatial datasets. These datasets are provided through the API as GeoJSON objects, but, by default, are converted to sf objects in R. The wells feature collection in the Demo geography has mismatching coordinates and reference system so requires extra processing.
 
 ```{r}
 parcels_sf = parcels_features(geography_id = 5)
