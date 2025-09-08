@@ -19,10 +19,6 @@ knitr::opts_chunk$set(
 
 The `Qanat.R` package requires R version 4.1 or newer. The package is only available on GitHub, but can be installed with the [`remotes` package](https://remotes.r-lib.org/). The [`sf` package](https://r-spatial.github.io/sf/) is suggested if you are working with the spatial data provided by the API. `remotes` and `sf` can be installed with this line.
 
-```{r eval=FALSE}
-if (!require("remotes", "sf")) install.packages("remotes", "sf")
-```
-
 ## Installation
 
 The next line installs the `Qanat.R` package. 
