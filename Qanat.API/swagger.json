@@ -11869,7 +11869,24 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MapboxBulkResponseDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MapboxBulkResponseDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MapboxBulkResponseDto"
+                }
+              }
+            }
           }
         }
       }
@@ -21412,6 +21429,20 @@
         },
         "additionalProperties": false
       },
+      "MapboxBulkResponseDto": {
+        "type": "object",
+        "properties": {
+          "ValidatedAddressesCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "UnchangedAddressesCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "MapboxResponseDto": {
         "type": "object",
         "properties": {
@@ -26576,6 +26607,11 @@
           "SearchString": {
             "type": "string",
             "nullable": true
+          },
+          "WaterAccountContactID": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -27658,67 +27694,17 @@
       },
       "WaterAccountUpsertDto": {
         "required": [
-          "Address",
-          "City",
-          "State",
-          "ZipCode"
+          "WaterAccountName"
         ],
         "type": "object",
         "properties": {
           "WaterAccountName": {
             "maxLength": 255,
-            "type": "string",
-            "default": "",
-            "nullable": true
-          },
-          "ContactName": {
-            "maxLength": 255,
-            "type": "string",
-            "default": "",
-            "nullable": true
-          },
-          "ContactEmail": {
-            "maxLength": 100,
-            "type": "string",
-            "nullable": true
-          },
-          "ContactPhoneNumber": {
-            "maxLength": 30,
-            "type": "string",
-            "nullable": true
-          },
-          "Address": {
-            "maxLength": 500,
-            "minLength": 1,
-            "type": "string",
-            "default": ""
-          },
-          "SecondaryAddress": {
-            "maxLength": 100,
-            "type": "string",
-            "nullable": true
-          },
-          "City": {
-            "maxLength": 100,
-            "minLength": 1,
-            "type": "string"
-          },
-          "State": {
-            "maxLength": 20,
-            "minLength": 1,
-            "type": "string"
-          },
-          "ZipCode": {
-            "maxLength": 20,
             "minLength": 1,
             "type": "string"
           },
           "Notes": {
             "type": "string",
-            "nullable": true
-          },
-          "PrefersPhysicalCommunication": {
-            "type": "boolean",
             "nullable": true
           }
         },

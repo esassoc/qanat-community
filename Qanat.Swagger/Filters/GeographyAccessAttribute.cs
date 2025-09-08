@@ -8,13 +8,15 @@ using System.Threading.Tasks;
 namespace Qanat.Swagger.Filters
 {
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
-    public class GeographyAccessAttribute(string geographyIDParamName = "geographyID") : Attribute, IAsyncActionFilter, IOrderedFilter
+    public class GeographyAccessAttribute(string geographyIDParamName = "geographyID") : Attribute, IAsyncActionFilter,
+        IOrderedFilter
     {
         public int Order { get; set; } = 1; // Runs after NoAccessBlock
 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            if (!context.ActionArguments.TryGetValue(geographyIDParamName, out var geographyIDObj) || geographyIDObj is not int geographyID)
+            if (!context.ActionArguments.TryGetValue(geographyIDParamName, out var geographyIDObj) ||
+                geographyIDObj is not int geographyID)
             {
                 context.Result = new BadRequestObjectResult($"Missing or invalid '{geographyIDParamName}' parameter.");
                 return;
@@ -27,6 +29,7 @@ namespace Qanat.Swagger.Filters
                 context.Result = new NotFoundResult();
                 return;
             }
+
             var user = await dbContext.Users.FindAsync(userID);
             if (user == null)
             {
@@ -35,7 +38,8 @@ namespace Qanat.Swagger.Filters
             }
 
             // Permissions check first
-            if (user.RoleID == (int)RoleEnum.SystemAdmin || dbContext.GeographyUsers.Any(x => x.UserID == user.UserID && x.GeographyID == geographyID))
+            if (user.RoleID == (int)RoleEnum.SystemAdmin ||
+                dbContext.GeographyUsers.Any(x => x.UserID == user.UserID && x.GeographyID == geographyID))
             {
                 // Geography existence check only for authorized users
                 var geographyExists = await dbContext.Geographies.FindAsync(geographyID) != null;
@@ -44,9 +48,11 @@ namespace Qanat.Swagger.Filters
                     context.Result = new NotFoundResult();
                     return;
                 }
+
                 await next();
                 return;
             }
+
             context.Result = new NotFoundResult();
         }
     }

@@ -12,6 +12,7 @@ using Qanat.EFModels.Entities;
 using Qanat.Models.DataTransferObjects;
 using Qanat.Swagger.Entities;
 using Qanat.Swagger.Filters;
+using Qanat.Swagger.Filters.Qanat.Swagger.Filters;
 using Qanat.Swagger.Models;
 using FeatureCollection = NetTopologySuite.Features.FeatureCollection;
 
@@ -24,7 +25,7 @@ public class ParcelController(QanatDbContext dbContext, ILogger<ParcelController
 {
 
     [EndpointSummary("List by Geography")]
-    [EndpointDescription("List all parcel numbers for a specified geography")]
+    [EndpointDescription("List all parcels for a specified geography")]
     [NoAccessBlock]
     [GeographyAccess]
     [HttpGet("geographies/{geographyID}/parcels")]
@@ -37,7 +38,8 @@ public class ParcelController(QanatDbContext dbContext, ILogger<ParcelController
         var userID = HttpContext.User.GetUserID()!;
         var callingUser = Users.GetByUserID(dbContext, userID.Value);
 
-        var parcelConsumerDtos = ListParcelsByGeographyIDAndCallingUserAsConsumerDtos(geographyID, callingUser);
+        var parcelIDs = ListParcelIDsByGeographyIDAndCallingUser(geographyID, callingUser);
+        var parcelConsumerDtos = ListParcelsByIDsGeographyIDAndCallingUserAsConsumerDtos(geographyID, parcelIDs, callingUser);
 
         return Ok(parcelConsumerDtos);
     }
@@ -78,15 +80,16 @@ public class ParcelController(QanatDbContext dbContext, ILogger<ParcelController
             {
                 var attributesTable = new AttributesTable
                 {
-                    { "APN", parcel.ParcelNumber },
-                    { "Area (ac)", parcel.ParcelArea },
-                    { "Account #", parcel.WaterAccount?.WaterAccountNumber },
-                    { "Water Account Name", parcel.WaterAccount?.WaterAccountName },
-                    { "Wells on Parcel", string.Join(", ", parcel.Wells.Select(x => x.WellName)) },
-                    { "Irrigated By", string.Join(", ", parcel.WellIrrigatedParcels.Select(x => x.Well.WellName)) },
-                    { "Owner Name", parcel.OwnerName },
-                    { "Owner Address", parcel.OwnerAddress },
-                    { "Parcel Status", parcel.ParcelStatus.ParcelStatusDisplayName },
+                    { "ParcelID", parcel.ParcelID },
+                    { "ParcelNumber", parcel.ParcelNumber },
+                    { "ParcelArea", parcel.ParcelArea },
+                    { "WaterAccountNumber", parcel.WaterAccount?.WaterAccountNumber },
+                    { "WaterAccountName", parcel.WaterAccount?.WaterAccountName },
+                    { "WellsOnParcel", string.Join(", ", parcel.Wells.Select(x => x.WellName)) },
+                    { "IrrigatedBy", string.Join(", ", parcel.WellIrrigatedParcels.Select(x => x.Well.WellName)) },
+                    { "OwnerName", parcel.OwnerName },
+                    { "OwnerAddress", parcel.OwnerAddress },
+                    { "ParcelStatus", parcel.ParcelStatus.ParcelStatusDisplayName },
                 };
 
                 var parcelZoneGroupDict = parcel.ParcelZones.ToDictionary(x => x.Zone.ZoneGroupID, x => x.Zone.ZoneName);
@@ -113,6 +116,30 @@ public class ParcelController(QanatDbContext dbContext, ILogger<ParcelController
         return Ok(featureCollection);
     }
 
+    [EndpointSummary("List by Geography and Water Account ID")]
+    [EndpointDescription("List all parcels for a specified geography and water account")]
+    [NoAccessBlock]
+    [GeographyAccess]
+    [WaterAccountAccess]
+    [HttpGet("geographies/{geographyID}/water-accounts/{waterAccountID}/parcels")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [Produces("application/json")]
+    public ActionResult<List<ParcelConsumerDto>> ListParcelsByWaterAccountID([FromRoute] int geographyID, [FromRoute] int waterAccountID)
+    {
+        var userID = HttpContext.User.GetUserID()!;
+        var callingUser = Users.GetByUserID(dbContext, userID.Value);
+
+        var parcelIDs = dbContext.Parcels.AsNoTracking()
+            .Where(x => x.GeographyID == geographyID && x.WaterAccountID == waterAccountID)
+            .Select(x => x.ParcelID).ToList();
+
+        var parcelConsumerDtos = ListParcelsByIDsGeographyIDAndCallingUserAsConsumerDtos(geographyID, parcelIDs, callingUser);
+
+        return Ok(parcelConsumerDtos);
+    }
+
     [EndpointSummary("Search by APN")]
     [EndpointDescription("Search for Parcels by APN within a given {geographyID}.  Returns Parcels that have parcel numbers that start with the {parcelNumber} field (minimum 3 characters to search), including geometry")]
     [NoAccessBlock]
@@ -132,17 +159,35 @@ public class ParcelController(QanatDbContext dbContext, ILogger<ParcelController
         var userID = HttpContext.User.GetUserID()!;
         var callingUser = Users.GetByUserID(dbContext, userID.Value);
 
-        var parcelConsumerDtos = ListParcelsByGeographyIDAndCallingUserAsConsumerDtos(geographyID, callingUser);
+        List<int> parcelIDs;
+        if (UserPermissions.UserIsSystemAdmin(callingUser) || UserPermissions.UserIsGeographyManager(callingUser, geographyID))
+        {
+            parcelIDs = dbContext.Parcels.AsNoTracking().Where(x => x.GeographyID == geographyID && x.ParcelNumber.StartsWith(parcelNumber)).Select(x => x.ParcelID).ToList();
+        }
+        else
+        {
+            var associatedWaterAccountIDs = UserPermissions.ListAssociatedWaterAccountsByGeographyIDAndUser(dbContext, geographyID, callingUser);
+
+            parcelIDs = dbContext.Parcels.AsNoTracking()
+                .Where(x => x.GeographyID == geographyID && x.WaterAccountID.HasValue && associatedWaterAccountIDs.Contains(x.WaterAccountID.Value) && x.ParcelNumber.StartsWith(parcelNumber))
+                .Select(x => x.ParcelID)
+                .ToList();
+        }
+
+        var parcelConsumerDtos = ListParcelsByIDsGeographyIDAndCallingUserAsConsumerDtos(geographyID, parcelIDs, callingUser);
 
         return Ok(parcelConsumerDtos);
     }
 
-    private List<ParcelConsumerDto> ListParcelsByGeographyIDAndCallingUserAsConsumerDtos(int geographyID, UserDto callingUser)
+    private List<ParcelConsumerDto> ListParcelsByIDsGeographyIDAndCallingUserAsConsumerDtos(int geographyID, List<int> parcelIDs, UserDto callingUser)
     {
-       var parcelIDs = ListParcelIDsByGeographyIDAndCallingUser(geographyID, callingUser);
-
+        var userCanViewManagerData = UserPermissions.UserIsSystemAdmin(callingUser) 
+                                 || UserPermissions.UserIsGeographyManager(callingUser, geographyID);
+        
         var parcelConsumerDtos = dbContext.Parcels.AsNoTracking()
-            .Where(x => parcelIDs.Contains(x.ParcelID))
+            .Include(x => x.ParcelZones).ThenInclude(x => x.Zone).ThenInclude(x => x.ZoneGroup)
+            .Include(x => x.ParcelCustomAttribute)
+            .Where(x => x.GeographyID == geographyID && parcelIDs.Contains(x.ParcelID))
             .Select(x => new ParcelConsumerDto()
             {
                 ParcelID = x.ParcelID,
@@ -151,7 +196,15 @@ public class ParcelController(QanatDbContext dbContext, ILogger<ParcelController
                 OwnerName = x.OwnerName,
                 OwnerAddress = x.OwnerAddress,
                 GeographyID = x.GeographyID,
-                WaterAccountID = x.WaterAccountID
+                WaterAccountID = x.WaterAccountID,
+                Zones = x.ParcelZones.Where(x => userCanViewManagerData || x.Zone.ZoneGroup.DisplayToAccountHolders)
+                    .Select(z => new ZoneConsumerDto()
+                    {
+                        ZoneID = z.ZoneID,
+                        ZoneName = z.Zone.ZoneName,
+                        ZoneGroupID = z.Zone.ZoneGroupID,
+                        ZoneGroupName = z.Zone.ZoneGroup.ZoneGroupName
+                    }).ToList(),
             }).ToList();
 
         return parcelConsumerDtos;
@@ -161,17 +214,16 @@ public class ParcelController(QanatDbContext dbContext, ILogger<ParcelController
     {
         List<int> parcelIDs;
 
-        if (UserPermissions.UserIsSystemAdmin(callingUser))
+        if (UserPermissions.UserIsSystemAdmin(callingUser) || UserPermissions.UserIsGeographyManager(callingUser, geographyID))
         {
             parcelIDs = dbContext.Parcels.AsNoTracking().Where(x => x.GeographyID == geographyID).Select(x => x.ParcelID).ToList();
         }
         else
         {
-            var managedGeographyIDs = UserPermissions.ListManagedGeographyIDsByUser(callingUser);
             var associatedWaterAccountIDs = UserPermissions.ListAssociatedWaterAccountsByGeographyIDAndUser(dbContext, geographyID, callingUser);
 
             parcelIDs = dbContext.Parcels.AsNoTracking()
-                .Where(x => managedGeographyIDs.Contains(x.GeographyID) || (x.WaterAccountID.HasValue && associatedWaterAccountIDs.Contains(x.WaterAccountID.Value)))
+                .Where(x => x.GeographyID == geographyID && x.WaterAccountID.HasValue && associatedWaterAccountIDs.Contains(x.WaterAccountID.Value))
                 .Select(x => x.ParcelID)
                 .ToList();
         }

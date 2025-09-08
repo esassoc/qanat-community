@@ -18,7 +18,7 @@ export class WaterAccountContactAddressReviewComponent implements OnInit {
 
     public waterAccountContactUpsertDto: WaterAccountContactUpsertDto;
 
-    public isUsingValidatedAddressFormControl: FormControl<boolean> = new FormControl<boolean>(true);
+    public isUsingValidatedAddressFormControl: FormControl<boolean> = new FormControl<boolean>(null);
     public showUnvalidatedWarning: boolean = false;
     public confidenceDescriptor: string;
 
@@ -31,6 +31,9 @@ export class WaterAccountContactAddressReviewComponent implements OnInit {
 
     ngOnInit(): void {
         this.waterAccountContactUpsertDto = this.formGroup.getRawValue();
+
+        this.registerFormGroupChanges();
+        this.isUsingValidatedAddressFormControl.setValue(true);
 
         if (!this.mapboxResponseDto) {
             this.noAddressMatch = true;
@@ -54,8 +57,6 @@ export class WaterAccountContactAddressReviewComponent implements OnInit {
             default:
                 this.confidenceDescriptor = null;
         }
-
-        this.registerFormGroupChanges();
     }
 
     private registerFormGroupChanges() {

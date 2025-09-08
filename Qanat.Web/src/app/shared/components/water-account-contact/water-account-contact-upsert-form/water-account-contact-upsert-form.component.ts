@@ -17,7 +17,6 @@ export class WaterAccountContactUpsertFormComponent {
     @Input() formGroup: FormGroup<WaterAccountContactUpsertDtoForm>;
 
     public stateDropdownOptions$: Observable<SelectDropdownOption[]>;
-    public showCommunicationPreferenceDropdown: boolean = false;
     public communicationPreferenceDropdownOptions: SelectDropdownOption[] = [
         { Label: "Email", Value: false, disabled: false },
         { Label: "Physical Mail", Value: true, disabled: false },
@@ -42,10 +41,8 @@ export class WaterAccountContactUpsertFormComponent {
 
         this.formGroup.controls.ContactEmail.valueChanges.subscribe((contactEmail) => {
             if (contactEmail) {
-                this.showCommunicationPreferenceDropdown = true;
                 this.formGroup.controls.PrefersPhysicalCommunication.patchValue(false);
             } else {
-                this.showCommunicationPreferenceDropdown = false;
                 this.formGroup.controls.PrefersPhysicalCommunication.patchValue(true);
             }
         });

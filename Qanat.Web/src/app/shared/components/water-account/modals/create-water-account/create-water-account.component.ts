@@ -11,7 +11,6 @@ import { WaterAccountByGeographyService } from "src/app/shared/generated/api/wat
 import { Observable, map } from "rxjs";
 import { SelectDropdownOption } from "src/app/shared/components/forms/form-field/form-field.component";
 import { PublicService } from "src/app/shared/generated/api/public.service";
-import { AsyncPipe } from "@angular/common";
 import { WaterAccountUpsertDtoForm, WaterAccountUpsertDtoFormControls } from "src/app/shared/generated/model/water-account-upsert-dto";
 import { DialogRef } from "@ngneat/dialog";
 import { WaterAccountSimpleDto } from "src/app/shared/generated/model/models";
@@ -20,7 +19,7 @@ import { WaterAccountSimpleDto } from "src/app/shared/generated/model/models";
     selector: "create-water-account",
     templateUrl: "./create-water-account.component.html",
     styleUrls: ["./create-water-account.component.scss"],
-    imports: [CustomRichTextComponent, FormsModule, ReactiveFormsModule, FormFieldComponent, AsyncPipe],
+    imports: [CustomRichTextComponent, FormsModule, ReactiveFormsModule, FormFieldComponent],
 })
 export class CreateWaterAccountComponent implements OnInit {
     public ref: DialogRef<GeographyContext, WaterAccountSimpleDto> = inject(DialogRef);
@@ -39,15 +38,16 @@ export class CreateWaterAccountComponent implements OnInit {
 
     public formGroup = new FormGroup<WaterAccountUpsertDtoForm>({
         WaterAccountName: WaterAccountUpsertDtoFormControls.WaterAccountName(),
-        ContactName: WaterAccountUpsertDtoFormControls.ContactName(),
-        ContactEmail: WaterAccountUpsertDtoFormControls.ContactEmail(),
-        ContactPhoneNumber: WaterAccountUpsertDtoFormControls.ContactPhoneNumber(),
-        Address: WaterAccountUpsertDtoFormControls.Address(),
-        SecondaryAddress: WaterAccountUpsertDtoFormControls.SecondaryAddress(),
-        City: WaterAccountUpsertDtoFormControls.City(),
-        State: WaterAccountUpsertDtoFormControls.State(),
-        ZipCode: WaterAccountUpsertDtoFormControls.ZipCode(),
-        PrefersPhysicalCommunication: WaterAccountUpsertDtoFormControls.PrefersPhysicalCommunication(),
+        Notes: WaterAccountUpsertDtoFormControls.Notes(),
+        // ContactName: WaterAccountUpsertDtoFormControls.ContactName(),
+        // ContactEmail: WaterAccountUpsertDtoFormControls.ContactEmail(),
+        // ContactPhoneNumber: WaterAccountUpsertDtoFormControls.ContactPhoneNumber(),
+        // Address: WaterAccountUpsertDtoFormControls.Address(),
+        // SecondaryAddress: WaterAccountUpsertDtoFormControls.SecondaryAddress(),
+        // City: WaterAccountUpsertDtoFormControls.City(),
+        // State: WaterAccountUpsertDtoFormControls.State(),
+        // ZipCode: WaterAccountUpsertDtoFormControls.ZipCode(),
+        // PrefersPhysicalCommunication: WaterAccountUpsertDtoFormControls.PrefersPhysicalCommunication(),
     });
 
     public customRichTextID: CustomRichTextTypeEnum = CustomRichTextTypeEnum.ModalCreateNewWaterAccount;
@@ -60,24 +60,27 @@ export class CreateWaterAccountComponent implements OnInit {
 
     ngOnInit(): void {
         this.geographyID = this.ref.data.GeographyID;
-        this.statesDropdownOptions$ = this.publicService.statesListPublic().pipe(
-            map((states) => {
-                return states.map((x) => (({
-                    Value: x.StatePostalCode,
-                    Label: x.StatePostalCode
-                }) as SelectDropdownOption));
-            })
-        );
+        // this.statesDropdownOptions$ = this.publicService.statesListPublic().pipe(
+        //     map((states) => {
+        //         return states.map(
+        //             (x) =>
+        //                 ({
+        //                     Value: x.StatePostalCode,
+        //                     Label: x.StatePostalCode,
+        //                 }) as SelectDropdownOption
+        //         );
+        //     })
+        // );
 
-        this.formGroup.controls.ContactEmail.valueChanges.subscribe((contactEmail) => {
-            if (contactEmail) {
-                this.showCommunicationPreferenceDropdown = true;
-                this.formGroup.controls.PrefersPhysicalCommunication.patchValue(false);
-            } else {
-                this.showCommunicationPreferenceDropdown = false;
-                this.formGroup.controls.PrefersPhysicalCommunication.patchValue(true);
-            }
-        });
+        // this.formGroup.controls.ContactEmail.valueChanges.subscribe((contactEmail) => {
+        //     if (contactEmail) {
+        //         this.showCommunicationPreferenceDropdown = true;
+        //         this.formGroup.controls.PrefersPhysicalCommunication.patchValue(false);
+        //     } else {
+        //         this.showCommunicationPreferenceDropdown = false;
+        //         this.formGroup.controls.PrefersPhysicalCommunication.patchValue(true);
+        //     }
+        // });
     }
 
     close() {

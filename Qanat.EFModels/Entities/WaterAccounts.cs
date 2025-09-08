@@ -572,18 +572,18 @@ public class WaterAccounts
 
     public static async Task<WaterAccount> CreateWaterAccount(QanatDbContext dbContext, int geographyID, WaterAccountUpsertDto waterAccountUpsertDto)
     {
-        return await CreateImpl(dbContext, geographyID, waterAccountUpsertDto.WaterAccountName, waterAccountUpsertDto.ContactName, waterAccountUpsertDto.ContactEmail, waterAccountUpsertDto.ContactPhoneNumber, waterAccountUpsertDto.Address, waterAccountUpsertDto.SecondaryAddress, waterAccountUpsertDto.City, waterAccountUpsertDto.State, waterAccountUpsertDto.ZipCode, waterAccountUpsertDto.PrefersPhysicalCommunication);
+        return await CreateImpl(dbContext, geographyID, waterAccountUpsertDto.WaterAccountName, null, null, null, null, null, null, null, null, null, waterAccountUpsertDto.Notes);
     }
 
     public static async Task<WaterAccountMinimalDto> CreateWaterAccountFromSuggestion(QanatDbContext dbContext, int geographyID, CreateWaterAccountFromSuggestionDto dto, UserDto callingUser)
     {
         // todo: need to call geocoding api to split address from parcel to individual address fields
-        var waterAccount = await CreateImpl(dbContext, geographyID, dto.WaterAccountName, dto.ContactName, null, null, dto.ContactAddress, null, null, null, null, null);
+        var waterAccount = await CreateImpl(dbContext, geographyID, dto.WaterAccountName, dto.ContactName, null, null, dto.ContactAddress, null, null, null, null, null, null);
         await WaterAccountParcels.UpdateWaterAccountParcelByWaterAccountAndReportingPeriodAsync(dbContext, waterAccount.WaterAccountID, dto.ReportingPeriodID, dto.ParcelIDList, callingUser);
         return GetByIDAsMinimalDto(dbContext, waterAccount.WaterAccountID);
     }
 
-    private static async Task<WaterAccount> CreateImpl(QanatDbContext dbContext, int geographyID, string waterAccountName, string contactName, string contactEmail, string contactPhoneNumber, string address, string secondaryAddress, string city, string state, string zipCode, bool? prefersPhysicalCommunication)
+    private static async Task<WaterAccount> CreateImpl(QanatDbContext dbContext, int geographyID, string waterAccountName, string contactName, string contactEmail, string contactPhoneNumber, string address, string secondaryAddress, string city, string state, string zipCode, bool? prefersPhysicalCommunication, string notes)
     {
         var waterAccountPIN = GenerateAndVerifyWaterAccountPIN("ABCDEFGHIJKLMNOPQRSTUVWXYZ,0123456789", GetCurrentWaterAccountPINs(dbContext));
         var waterAccount = new WaterAccount
@@ -591,40 +591,47 @@ public class WaterAccounts
             GeographyID = geographyID,
             CreateDate = DateTime.UtcNow,
             WaterAccountPIN = waterAccountPIN,
-            WaterAccountName = waterAccountName
+            WaterAccountName = waterAccountName,
+            Notes = notes
         };
 
-        var waterAccountContacts = await dbContext.WaterAccountContacts.AsNoTracking()
-            .Where(x => x.GeographyID == geographyID && x.ContactName == contactName 
-                                                     && ((x.Address == address && x.SecondaryAddress == secondaryAddress && x.City == city && x.State == state && x.ZipCode == zipCode) 
-                                                         || x.FullAddress == address))
-            .ToListAsync();
+        if (address != null)
+        {
+            var waterAccountContacts = await dbContext.WaterAccountContacts.AsNoTracking()
+                .Where(x => x.GeographyID == geographyID && x.ContactName == contactName
+                                                         && ((x.Address == address &&
+                                                              x.SecondaryAddress == secondaryAddress &&
+                                                              x.City == city && x.State == state &&
+                                                              x.ZipCode == zipCode)
+                                                             || x.FullAddress == address))
+                .ToListAsync();
 
-        if (waterAccountContacts.Any())
-        {
-            waterAccount.WaterAccountContactID = waterAccountContacts.First().WaterAccountContactID;
-        }
-        else
-        {
-            var waterAccountContact = new WaterAccountContact()
+            if (waterAccountContacts.Any())
             {
-                GeographyID = geographyID,
-                ContactName = contactName,
-                ContactEmail = contactEmail,
-                ContactPhoneNumber = contactPhoneNumber,
-                Address = address,
-                SecondaryAddress = secondaryAddress,
-                City = city,
-                State = state,
-                ZipCode = zipCode,
-                PrefersPhysicalCommunication = prefersPhysicalCommunication ?? false
-            };
+                waterAccount.WaterAccountContactID = waterAccountContacts.First().WaterAccountContactID;
+            }
+            else
+            {
+                var waterAccountContact = new WaterAccountContact()
+                {
+                    GeographyID = geographyID,
+                    ContactName = contactName,
+                    ContactEmail = contactEmail,
+                    ContactPhoneNumber = contactPhoneNumber,
+                    Address = address,
+                    SecondaryAddress = secondaryAddress,
+                    City = city,
+                    State = state,
+                    ZipCode = zipCode,
+                    PrefersPhysicalCommunication = prefersPhysicalCommunication ?? false
+                };
 
-            dbContext.WaterAccountContacts.Add(waterAccountContact);
-            await dbContext.SaveChangesAsync();
-            await dbContext.Entry(waterAccountContact).ReloadAsync();
+                dbContext.WaterAccountContacts.Add(waterAccountContact);
+                await dbContext.SaveChangesAsync();
+                await dbContext.Entry(waterAccountContact).ReloadAsync();
 
-            waterAccount.WaterAccountContactID = waterAccountContact.WaterAccountContactID;
+                waterAccount.WaterAccountContactID = waterAccountContact.WaterAccountContactID;
+            }
         }
 
         await dbContext.WaterAccounts.AddAsync(waterAccount);

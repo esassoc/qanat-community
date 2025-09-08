@@ -11,155 +11,33 @@
 
 import { FormControl, FormControlOptions, FormControlState, Validators } from "@angular/forms";
 export class WaterAccountUpsertDto { 
-    WaterAccountName?: string | null;
-    ContactName?: string | null;
-    ContactEmail?: string | null;
-    ContactPhoneNumber?: string | null;
-    Address: string;
-    SecondaryAddress?: string | null;
-    City: string;
-    State: string;
-    ZipCode: string;
+    WaterAccountName: string;
     Notes?: string | null;
-    PrefersPhysicalCommunication?: boolean | null;
     constructor(obj?: any) {
         Object.assign(this, obj);
     }
 }
 
 export interface WaterAccountUpsertDtoForm { 
-    WaterAccountName?: FormControl<string>;
-    ContactName?: FormControl<string>;
-    ContactEmail?: FormControl<string>;
-    ContactPhoneNumber?: FormControl<string>;
-    Address: FormControl<string>;
-    SecondaryAddress?: FormControl<string>;
-    City: FormControl<string>;
-    State: FormControl<string>;
-    ZipCode: FormControl<string>;
+    WaterAccountName: FormControl<string>;
     Notes?: FormControl<string>;
-    PrefersPhysicalCommunication?: FormControl<boolean>;
 }
 
 export class WaterAccountUpsertDtoFormControls { 
-    public static WaterAccountName = (value: FormControlState<string> | string = '', formControlOptions?: FormControlOptions | null) => new FormControl<string>(
+    public static WaterAccountName = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
         value,
         formControlOptions ?? 
         {
-            nonNullable: false,
+            nonNullable: true,
             validators: 
             [
+                Validators.required,
+                Validators.minLength(1),
                 Validators.maxLength(255),
-            ],
-        }
-    );
-    public static ContactName = (value: FormControlState<string> | string = '', formControlOptions?: FormControlOptions | null) => new FormControl<string>(
-        value,
-        formControlOptions ?? 
-        {
-            nonNullable: false,
-            validators: 
-            [
-                Validators.maxLength(255),
-            ],
-        }
-    );
-    public static ContactEmail = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
-        value,
-        formControlOptions ?? 
-        {
-            nonNullable: false,
-            validators: 
-            [
-                Validators.maxLength(100),
-            ],
-        }
-    );
-    public static ContactPhoneNumber = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
-        value,
-        formControlOptions ?? 
-        {
-            nonNullable: false,
-            validators: 
-            [
-                Validators.maxLength(30),
-            ],
-        }
-    );
-    public static Address = (value: FormControlState<string> | string = '', formControlOptions?: FormControlOptions | null) => new FormControl<string>(
-        value,
-        formControlOptions ?? 
-        {
-            nonNullable: true,
-            validators: 
-            [
-                Validators.required,
-                Validators.minLength(1),
-                Validators.maxLength(500),
-            ],
-        }
-    );
-    public static SecondaryAddress = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
-        value,
-        formControlOptions ?? 
-        {
-            nonNullable: false,
-            validators: 
-            [
-                Validators.maxLength(100),
-            ],
-        }
-    );
-    public static City = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
-        value,
-        formControlOptions ?? 
-        {
-            nonNullable: true,
-            validators: 
-            [
-                Validators.required,
-                Validators.minLength(1),
-                Validators.maxLength(100),
-            ],
-        }
-    );
-    public static State = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
-        value,
-        formControlOptions ?? 
-        {
-            nonNullable: true,
-            validators: 
-            [
-                Validators.required,
-                Validators.minLength(1),
-                Validators.maxLength(20),
-            ],
-        }
-    );
-    public static ZipCode = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
-        value,
-        formControlOptions ?? 
-        {
-            nonNullable: true,
-            validators: 
-            [
-                Validators.required,
-                Validators.minLength(1),
-                Validators.maxLength(20),
             ],
         }
     );
     public static Notes = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
-        value,
-        formControlOptions ?? 
-        {
-            nonNullable: false,
-            validators: 
-            [
-            ],
-        }
-    );
-    public static PrefersPhysicalCommunication = (value: FormControlState<boolean> | boolean = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<boolean>(
         value,
         formControlOptions ?? 
         {

@@ -53,7 +53,10 @@ public class GeographyController : ControllerBase
         }
         else
         {
-            var managedGeographyIDs = UserPermissions.ListManagedGeographyIDsByUser(callingUser);
+            var managedGeographyIDs = callingUser.GeographyFlags
+                .Where(x => x.Value[Flag.HasManagerDashboard.FlagName])
+                .Select(x => x.Key).ToList();
+
             var associatedWaterAccountGeographyIDs = dbContext.WaterAccounts.AsNoTracking()
                 .Include(x => x.WaterAccountUsers)
                 .Where(x => x.WaterAccountUsers.Any(y => y.UserID == callingUser.UserID))

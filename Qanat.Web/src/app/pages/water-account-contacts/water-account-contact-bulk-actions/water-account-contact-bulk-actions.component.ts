@@ -16,13 +16,15 @@ import { Alert } from "src/app/shared/models/alert";
 import { BatchValidateWaterAccountContactAddressRequestDto } from "src/app/shared/generated/model/batch-validate-water-account-contact-address-request-dto";
 import { AlertContext } from "src/app/shared/models/enums/alert-context.enum";
 import { AsyncPipe } from "@angular/common";
+import { RouterLink } from "@angular/router";
+import { MapboxBulkResponseDto } from "src/app/shared/generated/model/mapbox-bulk-response-dto";
 
 @Component({
     selector: "water-account-contact-bulk-actions",
     templateUrl: "./water-account-contact-bulk-actions.component.html",
     styleUrls: ["./water-account-contact-bulk-actions.component.scss"],
     standalone: true,
-    imports: [PageHeaderComponent, AlertDisplayComponent, QanatGridComponent, AsyncPipe],
+    imports: [PageHeaderComponent, AlertDisplayComponent, QanatGridComponent, AsyncPipe, RouterLink],
 })
 export class WaterAccountContactBulkActionsComponent implements OnInit {
     public currentGeography$: Observable<GeographyMinimalDto>;
@@ -103,11 +105,11 @@ export class WaterAccountContactBulkActionsComponent implements OnInit {
                     requestDto.WaterAccountContactIDs = this.selectedWaterAccountContactIDs;
 
                     this.waterAccountContactByGeographyService.batchValidateAddressesWaterAccountContactByGeography(this.currentGeographyID, requestDto).subscribe({
-                        next: () => {
+                        next: (responseDto: MapboxBulkResponseDto) => {
                             this.isLoadingSubmit = false;
                             this.alertService.pushAlert(
                                 new Alert(
-                                    "Address validation completed successfully. All addresses with an exact or high-confidence match have been updated.",
+                                    `Address validation completed:  ${responseDto.ValidatedAddressesCount} addresses were validated with an exact or high-confidence match, ${responseDto.UnchangedAddressesCount} addresses remain unchanged.`,
                                     AlertContext.Success
                                 )
                             );
@@ -129,8 +131,12 @@ export class WaterAccountContactBulkActionsComponent implements OnInit {
             }),
             this.utilityFunctionsService.createBasicColumnDef("Contact Name", "ContactName"),
             this.utilityFunctionsService.createBasicColumnDef("Email", "ContactEmail"),
-            this.utilityFunctionsService.createBasicColumnDef("Phone Number", "ContactPhoneNumber"),
-            this.utilityFunctionsService.createBasicColumnDef("Address", "FullAddress"),
+            this.utilityFunctionsService.createPhoneNumberColumnDef("Phone Number", "ContactPhoneNumber"),
+            this.utilityFunctionsService.createBasicColumnDef("Address", "Address"),
+            this.utilityFunctionsService.createBasicColumnDef("Secondary Address", "SecondaryAddress"),
+            this.utilityFunctionsService.createBasicColumnDef("City", "City"),
+            this.utilityFunctionsService.createBasicColumnDef("State", "State"),
+            this.utilityFunctionsService.createBasicColumnDef("Zip Code", "ZipCode"),
             this.utilityFunctionsService.createBasicColumnDef("Address Validated?", "", {
                 ValueGetter: (params) => (params.data.AddressValidated ? "Yes" : "No"),
                 UseCustomDropdownFilter: true,

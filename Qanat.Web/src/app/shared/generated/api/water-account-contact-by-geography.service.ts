@@ -17,6 +17,8 @@ import { Observable }                                        from 'rxjs';
 // @ts-ignore
 import { BatchValidateWaterAccountContactAddressRequestDto } from '../model/batch-validate-water-account-contact-address-request-dto';
 // @ts-ignore
+import { MapboxBulkResponseDto } from '../model/mapbox-bulk-response-dto';
+// @ts-ignore
 import { MapboxResponseDto } from '../model/mapbox-response-dto';
 // @ts-ignore
 import { WaterAccountContactDto } from '../model/water-account-contact-dto';
@@ -45,10 +47,10 @@ export class WaterAccountContactByGeographyService extends BaseService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public batchValidateAddressesWaterAccountContactByGeography(geographyID: number, batchValidateWaterAccountContactAddressRequestDto?: BatchValidateWaterAccountContactAddressRequestDto, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<any>;
-    public batchValidateAddressesWaterAccountContactByGeography(geographyID: number, batchValidateWaterAccountContactAddressRequestDto?: BatchValidateWaterAccountContactAddressRequestDto, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
-    public batchValidateAddressesWaterAccountContactByGeography(geographyID: number, batchValidateWaterAccountContactAddressRequestDto?: BatchValidateWaterAccountContactAddressRequestDto, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
-    public batchValidateAddressesWaterAccountContactByGeography(geographyID: number, batchValidateWaterAccountContactAddressRequestDto?: BatchValidateWaterAccountContactAddressRequestDto, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public batchValidateAddressesWaterAccountContactByGeography(geographyID: number, batchValidateWaterAccountContactAddressRequestDto?: BatchValidateWaterAccountContactAddressRequestDto, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'text/plain' | 'application/json' | 'text/json', context?: HttpContext, transferCache?: boolean}): Observable<MapboxBulkResponseDto>;
+    public batchValidateAddressesWaterAccountContactByGeography(geographyID: number, batchValidateWaterAccountContactAddressRequestDto?: BatchValidateWaterAccountContactAddressRequestDto, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'text/plain' | 'application/json' | 'text/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<MapboxBulkResponseDto>>;
+    public batchValidateAddressesWaterAccountContactByGeography(geographyID: number, batchValidateWaterAccountContactAddressRequestDto?: BatchValidateWaterAccountContactAddressRequestDto, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'text/plain' | 'application/json' | 'text/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<MapboxBulkResponseDto>>;
+    public batchValidateAddressesWaterAccountContactByGeography(geographyID: number, batchValidateWaterAccountContactAddressRequestDto?: BatchValidateWaterAccountContactAddressRequestDto, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'text/plain' | 'application/json' | 'text/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         if (geographyID === null || geographyID === undefined) {
             throw new Error('Required parameter geographyID was null or undefined when calling batchValidateAddressesWaterAccountContactByGeography.');
         }
@@ -56,6 +58,9 @@ export class WaterAccountContactByGeographyService extends BaseService {
         let localVarHeaders = this.defaultHeaders;
 
         const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'text/plain',
+            'application/json',
+            'text/json'
         ]);
         if (localVarHttpHeaderAcceptSelected !== undefined) {
             localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
@@ -90,7 +95,7 @@ export class WaterAccountContactByGeographyService extends BaseService {
 
         let localVarPath = `/geographies/${this.configuration.encodeParam({name: "geographyID", value: geographyID, in: "path", style: "simple", explode: false, dataType: "number", dataFormat: "int32"})}/water-account-contacts/validate-addresses`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<any>('put', `${basePath}${localVarPath}`,
+        return this.httpClient.request<MapboxBulkResponseDto>('put', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 body: batchValidateWaterAccountContactAddressRequestDto,

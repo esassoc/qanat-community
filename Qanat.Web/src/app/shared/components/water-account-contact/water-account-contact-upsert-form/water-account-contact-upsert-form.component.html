@@ -8,14 +8,12 @@
         placeholder="e.g. (123) 456-7890"
         [type]="FormFieldType.Text"></form-field>
     <form-field class="g-col-4" [formControl]="formGroup.controls.ContactEmail" fieldLabel="Email" placeholder="e.g. user@example.com" [type]="FormFieldType.Text"></form-field>
-    @if (showCommunicationPreferenceDropdown) {
-        <form-field
-            class="g-col-4"
-            [formControl]="formGroup.controls.PrefersPhysicalCommunication"
-            fieldLabel="Communication Preference"
-            [formInputOptions]="communicationPreferenceDropdownOptions"
-            [type]="FormFieldType.Select"></form-field>
-    }
+    <form-field
+        class="g-col-4"
+        [formControl]="formGroup.controls.PrefersPhysicalCommunication"
+        fieldLabel="Communication Preference"
+        [formInputOptions]="communicationPreferenceDropdownOptions"
+        [type]="FormFieldType.Select"></form-field>
 
     <form-field [formControl]="formGroup.controls.Address" fieldLabel="Address" placeholder="Address" [type]="FormFieldType.Text"></form-field>
     <form-field [formControl]="formGroup.controls.SecondaryAddress" fieldLabel="Secondary Address" placeholder="Secondary Address" [type]="FormFieldType.Text"></form-field>

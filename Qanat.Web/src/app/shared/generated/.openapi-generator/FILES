@@ -147,6 +147,7 @@ model/integer-type.ts
 model/irrigation-method-simple-dto.ts
 model/layout-type.ts
 model/manager-well-update-request-dto.ts
+model/mapbox-bulk-response-dto.ts
 model/mapbox-response-dto.ts
 model/merge-water-accounts-dto.ts
 model/message-severity.ts

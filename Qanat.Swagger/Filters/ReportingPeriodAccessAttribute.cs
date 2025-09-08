@@ -1,16 +1,16 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.EntityFrameworkCore;
 using Qanat.EFModels.Entities;
 using System;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 
 namespace Qanat.Swagger.Filters
 {
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
     public class ReportingPeriodAccessAttribute(
         string geographyIDParamName = "geographyID",
-        string reportingPeriodIDParamName = "reportingPeriodID")
+        string yearParamName = "year")
         : Attribute, IAsyncActionFilter, IOrderedFilter
     {
         public int Order { get; set; } = 2; // Should run after GeographyAccess
@@ -22,9 +22,9 @@ namespace Qanat.Swagger.Filters
                 context.Result = new BadRequestObjectResult($"Missing or invalid '{geographyIDParamName}' parameter.");
                 return;
             }
-            if (!context.ActionArguments.TryGetValue(reportingPeriodIDParamName, out var reportingPeriodIDObj) || reportingPeriodIDObj is not int reportingPeriodID)
+            if (!context.ActionArguments.TryGetValue(yearParamName, out var yearObj) || yearObj is not int year)
             {
-                context.Result = new BadRequestObjectResult($"Missing or invalid '{reportingPeriodIDParamName}' parameter.");
+                context.Result = new BadRequestObjectResult($"Missing or invalid '{yearParamName}' parameter.");
                 return;
             }
 
@@ -35,10 +35,10 @@ namespace Qanat.Swagger.Filters
                 return;
             }
 
-            var reportingPeriodExists = await dbContext.ReportingPeriods
+            var reportingPeriod = await dbContext.ReportingPeriods
                 .AsNoTracking()
-                .AnyAsync(x => x.ReportingPeriodID == reportingPeriodID && x.GeographyID == geographyID);
-            if (!reportingPeriodExists)
+                .FirstOrDefaultAsync(x => x.GeographyID == geographyID && x.EndDate.Year == year);
+            if (reportingPeriod == null)
             {
                 context.Result = new NotFoundResult();
                 return;

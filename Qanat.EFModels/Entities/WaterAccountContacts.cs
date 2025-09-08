@@ -62,22 +62,38 @@ public class WaterAccountContacts
         return waterAccountContactDto;
     }
 
-    public static WaterAccountContactSearchSummaryDto GetBySearchString(QanatDbContext dbContext, int geographyID, string searchString, UserDto user)
+    public static WaterAccountContactSearchSummaryDto GetBySearchString(QanatDbContext dbContext, WaterAccountContactSearchDto searchDto, UserDto user)
     {
+        if (string.IsNullOrEmpty(searchDto.SearchString))
+        {
+            return new WaterAccountContactSearchSummaryDto() { TotalResults = 0, SearchResults = new List<WaterAccountContactSearchResultWithMatchedFieldsDto>() };
+        }
+
         const int searchResultLimit = 10;
 
         var waterAccountContacts = dbContext.WaterAccountContacts.AsNoTracking()
-            .Where(x => x.GeographyID == geographyID);
+            .Where(x => x.GeographyID == searchDto.GeographyID);
         
         var matchedWaterAccountContacts = waterAccountContacts
                 .Where(x =>
-                    (x.ContactName.ToUpper().Contains(searchString.ToUpper())) ||
-                    x.ContactEmail.ToUpper().Contains(searchString) ||
-                    x.ContactPhoneNumber.Contains(searchString) ||
-                    x.FullAddress.ToUpper().Contains(searchString.ToUpper()))
+                    (x.ContactName.ToUpper().Contains(searchDto.SearchString.ToUpper())) ||
+                    x.ContactEmail.ToUpper().Contains(searchDto.SearchString) ||
+                    x.ContactPhoneNumber.Contains(searchDto.SearchString) ||
+                    x.FullAddress.ToUpper().Contains(searchDto.SearchString.ToUpper()))
                 .ToList()
-                .Select(x => x.AsSearchResultWithMatchedFieldsDto(searchString))
+                .Select(x => x.AsSearchResultWithMatchedFieldsDto(searchDto.SearchString))
                 .ToList();
+
+        if (searchDto.WaterAccountContactID.HasValue && matchedWaterAccountContacts.All(x => x.WaterAccountContact.WaterAccountContactID != searchDto.WaterAccountContactID))
+        {
+            var selectedWaterAccountContact = waterAccountContacts.SingleOrDefault(x => x.WaterAccountContactID == searchDto.WaterAccountContactID);
+
+            if (selectedWaterAccountContact != null)
+            {
+                var selectedWaterAccountContactDto = selectedWaterAccountContact.AsSearchResultWithMatchedFieldsDto(searchDto.SearchString);
+                matchedWaterAccountContacts.Insert(0, selectedWaterAccountContactDto);
+            }
+        }
 
         return new WaterAccountContactSearchSummaryDto()
         {

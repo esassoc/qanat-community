@@ -1,52 +1,67 @@
-<div class="modal-header">
-    <custom-rich-text [customRichTextTypeID]="customRichTextID" [showLoading]="false" [showInfoIcon]="false"></custom-rich-text>
-    <button type="button" class="close" (click)="close()">
-        <i class="fa fa-times-circle"></i>
-    </button>
-</div>
+<div class="modal">
+    <div class="modal-header">
+        <custom-rich-text [customRichTextTypeID]="customRichTextID" [showLoading]="false" [showInfoIcon]="false"></custom-rich-text>
+    </div>
 
-<div class="modal-body">
-    <form action="" class="form" [formGroup]="formGroup" class="grid-12">
-        <form-field [formControl]="formGroup.controls.WaterAccountName" fieldLabel="Water Account Name" placeholder="Water Account Name" [type]="FormFieldType.Text"></form-field>
+    <div class="modal-body">
+        <form action="" class="form" [formGroup]="formGroup" class="grid-12">
+            <form-field
+                [formControl]="formGroup.controls.WaterAccountName"
+                fieldLabel="Water Account Name"
+                placeholder="Water Account Name"
+                [type]="FormFieldType.Text"></form-field>
 
-        <form-field class="g-col-6" [formControl]="formGroup.controls.ContactName" fieldLabel="Contact Name" placeholder="Contact Name" [type]="FormFieldType.Text"></form-field>
-        <form-field
-            class="g-col-6"
-            [formControl]="formGroup.controls.ContactPhoneNumber"
-            fieldLabel="Phone Number"
-            mask="(000) 000-0000"
-            placeholder="e.g. (123) 456-7890"
-            [type]="FormFieldType.Text"></form-field>
-        <form-field class="g-col-6" [formControl]="formGroup.controls.ContactEmail" fieldLabel="Email" placeholder="e.g. user@example.com" [type]="FormFieldType.Text"></form-field>
+            <form-field [formControl]="formGroup.controls.Notes" fieldLabel="Notes" placeholder="Notes..." [type]="FormFieldType.Textarea"></form-field>
 
-        @if (showCommunicationPreferenceDropdown) {
+            <!-- <form-field
+                class="g-col-6"
+                [formControl]="formGroup.controls.ContactName"
+                fieldLabel="Contact Name"
+                placeholder="Contact Name"
+                [type]="FormFieldType.Text"></form-field>
             <form-field
                 class="g-col-6"
-                [formControl]="formGroup.controls.PrefersPhysicalCommunication"
-                fieldLabel="Communication Preference"
-                [formInputOptions]="communicationPreferenceDropdownOptions"
-                [type]="FormFieldType.Select"></form-field>
-        }
-
-        <form-field [formControl]="formGroup.controls.Address" fieldLabel="Address" placeholder="Address" [type]="FormFieldType.Text"></form-field>
-        <form-field [formControl]="formGroup.controls.SecondaryAddress" fieldLabel="Secondary Address" placeholder="Secondary Address" [type]="FormFieldType.Text"></form-field>
-        <form-field [formControl]="formGroup.controls.City" fieldLabel="City" placeholder="City" [type]="FormFieldType.Text" class="g-col-6"></form-field>
-        @if (statesDropdownOptions$ | async; as statesDropdownOptions) {
+                [formControl]="formGroup.controls.ContactPhoneNumber"
+                fieldLabel="Phone Number"
+                mask="(000) 000-0000"
+                placeholder="e.g. (123) 456-7890"
+                [type]="FormFieldType.Text"></form-field>
             <form-field
-                [formControl]="formGroup.controls.State"
-                fieldLabel="State"
-                placeholder="State"
-                [type]="FormFieldType.Select"
-                [formInputOptions]="statesDropdownOptions"
-                class="g-col-3"></form-field>
-        }
-        <form-field [formControl]="formGroup.controls.ZipCode" fieldLabel="Zip Code" placeholder="Zip Code" [type]="FormFieldType.Text" class="g-col-3"></form-field>
-    </form>
-</div>
+                class="g-col-6"
+                [formControl]="formGroup.controls.ContactEmail"
+                fieldLabel="Email"
+                placeholder="e.g. user@example.com"
+                [type]="FormFieldType.Text"></form-field>
 
-<div class="modal-footer sticky-footer">
-    <div class="sticky-footer-content">
-        <button class="btn btn-primary" (click)="save()" [disabled]="formGroup.invalid">Save</button>
-        <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+            @if (showCommunicationPreferenceDropdown) {
+                <form-field
+                    class="g-col-6"
+                    [formControl]="formGroup.controls.PrefersPhysicalCommunication"
+                    fieldLabel="Communication Preference"
+                    [formInputOptions]="communicationPreferenceDropdownOptions"
+                    [type]="FormFieldType.Select"></form-field>
+            }
+
+            <form-field [formControl]="formGroup.controls.Address" fieldLabel="Address" placeholder="Address" [type]="FormFieldType.Text"></form-field>
+            <form-field [formControl]="formGroup.controls.SecondaryAddress" fieldLabel="Secondary Address" placeholder="Secondary Address" [type]="FormFieldType.Text"></form-field>
+            <form-field [formControl]="formGroup.controls.City" fieldLabel="City" placeholder="City" [type]="FormFieldType.Text" class="g-col-6"></form-field>
+            @if (statesDropdownOptions$ | async; as statesDropdownOptions) {
+                <form-field
+                    [formControl]="formGroup.controls.State"
+                    fieldLabel="State"
+                    placeholder="State"
+                    [type]="FormFieldType.Select"
+                    [formInputOptions]="statesDropdownOptions"
+                    class="g-col-3"></form-field>
+            }
+            <form-field [formControl]="formGroup.controls.ZipCode" fieldLabel="Zip Code" placeholder="Zip Code" [type]="FormFieldType.Text" class="g-col-3"></form-field> -->
+        </form>
+    </div>
+
+    <div class="modal-footer sticky-footer">
+        <div class="sticky-footer-content">
+            <button class="btn btn-primary mr-2" (click)="save()" [disabled]="formGroup.invalid">Save</button>
+            <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+        </div>
     </div>
 </div>

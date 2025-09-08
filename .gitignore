@@ -27,6 +27,7 @@ Qanat.GeoServer/data_dir/logs/geoserver.log.1
 /Qanat.GeoServer/data_dir/gwc-layers
 /Qanat.GeoServer/data_dir/logs
 /Qanat.Swagger/appsecrets.json
+.prettierrc.json
 /Qanat.GeoServer/data_dir/gwc
 
 

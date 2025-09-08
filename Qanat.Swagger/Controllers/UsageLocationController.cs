@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -20,30 +21,31 @@ namespace Qanat.Swagger.Controllers;
 public class UsageLocationController(QanatDbContext dbContext, ILogger<UsageLocationController> logger) : ControllerBase
 {
 
-    [EndpointSummary("List by Geography and Reporting Period")]
-    [EndpointDescription("List all usage locations for a specified geography and reporting period")]
+    [EndpointSummary("List by Geography and Year")]
+    [EndpointDescription("List all usage locations for a specified geography and year")]
     [NoAccessBlock]
     [GeographyAccess]
     [ReportingPeriodAccess]
-    [HttpGet("geographies/{geographyID}/reporting-periods/{reportingPeriodID}/usage-locations")]
+    [HttpGet("geographies/{geographyID}/years/{year}/usage-locations")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [Produces("application/json")]
-    public ActionResult<List<UsageLocationConsumerDto>> ListUsageLocations([FromRoute] int geographyID, [FromRoute] int reportingPeriodID)
+    public async Task<ActionResult<List<UsageLocationConsumerDto>>> ListUsageLocations([FromRoute] int geographyID, [FromRoute] int year)
     {
         var userID = HttpContext.User.GetUserID()!;
         var callingUser = Users.GetByUserID(dbContext, userID.Value);
 
-        var usageLocationIDs = ListUsageLocationIDsByReportingPeriodAndCallingUser(geographyID, reportingPeriodID, callingUser);
+        // ReportingPeriodAccess guarantees existence
+        var reportingPeriod = await ReportingPeriods.GetByGeographyIDAndYearAsync(dbContext, geographyID, year);
+
+        var usageLocationIDs = ListUsageLocationIDsByReportingPeriodAndCallingUser(geographyID, reportingPeriod.ReportingPeriodID, callingUser);
+        var userCanViewManagerData = UserPermissions.UserIsSystemAdmin(callingUser) ||
+                               UserPermissions.UserIsGeographyManager(callingUser, geographyID);
 
         var usageLocationConsumerDtos = dbContext.UsageLocations.AsNoTracking()
-            .Include(x => x.Parcel)
-            .ThenInclude(x => x.WaterAccount)
-            .Include(x => x.Parcel)
-            .ThenInclude(x => x.ParcelZones)
-            .ThenInclude(x => x.Zone)
-            .ThenInclude(x => x.ZoneGroup)
+            .Include(x => x.Parcel).ThenInclude(x => x.WaterAccount)
+            .Include(x => x.Parcel).ThenInclude(x => x.ParcelZones).ThenInclude(x => x.Zone).ThenInclude(x => x.ZoneGroup)
             .Select(x => new UsageLocationConsumerDto()
             {
                 UsageLocationID = x.UsageLocationID,
@@ -53,46 +55,53 @@ public class UsageLocationController(QanatDbContext dbContext, ILogger<UsageLoca
                 WaterAccountID = x.Parcel.WaterAccountID,
                 WaterAccountNumber = x.Parcel.WaterAccount.WaterAccountNumber,
                 ParcelID = x.ParcelID,
-                ParcelZones = x.Parcel.ParcelZones.Select(z => new ZoneConsumerDto()
-                {
-                    ZoneID = z.ZoneID,
-                    ZoneName = z.Zone.ZoneName,
-                    ZoneGroupID = z.Zone.ZoneGroupID,
-                    ZoneGroupName = z.Zone.ZoneGroup.ZoneGroupName
-                }).ToList(),
+                ParcelNumber = x.Parcel.ParcelNumber,
+                ParcelZones = x.Parcel.ParcelZones
+                    .Where(x => userCanViewManagerData || x.Zone.ZoneGroup.DisplayToAccountHolders)
+                    .Select(z => new ZoneConsumerDto()
+                    {
+                        ZoneID = z.ZoneID,
+                        ZoneName = z.Zone.ZoneName,
+                        ZoneGroupID = z.Zone.ZoneGroupID,
+                        ZoneGroupName = z.Zone.ZoneGroup.ZoneGroupName
+                    }).ToList(),
                 ReportingPeriodID = x.ReportingPeriodID,
+                ReportingPeriodName = x.ReportingPeriod.Name,
                 GeographyID = x.GeographyID,
-            }).Where(x => usageLocationIDs.Contains(x.UsageLocationID) && x.ReportingPeriodID == reportingPeriodID).ToList();
+            }).Where(x => usageLocationIDs.Contains(x.UsageLocationID) && x.ReportingPeriodID == reportingPeriod.ReportingPeriodID).ToList();
 
         return Ok(usageLocationConsumerDtos);
     }
 
-    [EndpointSummary("List by Geography (GeoJSON)")]
-    [EndpointDescription("List all usage locations as a feature collection (GeoJSON) for a specified geography and reporting period")]
+    [EndpointSummary("List by Geography and Year (GeoJSON)")]
+    [EndpointDescription("List all usage locations as a feature collection (GeoJSON) for a specified geography and year")]
     [NoAccessBlock]
     [GeographyAccess]
     [ReportingPeriodAccess]
-    [HttpGet("geographies/{geographyID}/reporting-periods/{reportingPeriodID}/usage-locations/feature-collection")]
+    [HttpGet("geographies/{geographyID}/years/{year}/usage-locations/feature-collection")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [Produces("application/json")]
-    public ActionResult<FeatureCollection> ListUsageLocationsAsFeatureCollection([FromRoute] int geographyID, [FromRoute] int reportingPeriodID)
+    public async Task<ActionResult<FeatureCollection>> ListUsageLocationsAsFeatureCollection([FromRoute] int geographyID, [FromRoute] int year)
     {
         var userID = HttpContext.User.GetUserID()!;
         var callingUser = Users.GetByUserID(dbContext, userID.Value);
 
-        var usageLocationIDs = ListUsageLocationIDsByReportingPeriodAndCallingUser(geographyID, reportingPeriodID, callingUser);
+        var userCanViewManagerData = UserPermissions.UserIsSystemAdmin(callingUser) ||
+                                     UserPermissions.UserIsGeographyManager(callingUser, geographyID);
+
+        // ReportingPeriodAccess guarantees existence
+        var reportingPeriod = await ReportingPeriods.GetByGeographyIDAndYearAsync(dbContext, geographyID, year);
+
+        var usageLocationIDs = ListUsageLocationIDsByReportingPeriodAndCallingUser(geographyID, reportingPeriod.ReportingPeriodID, callingUser);
 
         var usageLocations = dbContext.UsageLocations.AsNoTracking()
             .Include(x => x.UsageLocationGeometry)
-            .Include(x => x.Parcel)
-            .ThenInclude(x => x.WaterAccount)
-            .Include( x => x.Parcel)
-            .ThenInclude( x => x.ParcelZones)
-            .ThenInclude(x => x.Zone)
-            .ThenInclude(x => x.ZoneGroup)
+            .Include(x => x.Parcel).ThenInclude(x => x.WaterAccount)
+            .Include( x => x.Parcel).ThenInclude( x => x.ParcelZones).ThenInclude(x => x.Zone).ThenInclude(x => x.ZoneGroup)
             .Include(x => x.UsageLocationType)
+            .Include(x => x.ReportingPeriod)
             .AsNoTracking()
             .Where(x => usageLocationIDs.Contains(x.UsageLocationID)).ToList();
 
@@ -104,15 +113,20 @@ public class UsageLocationController(QanatDbContext dbContext, ILogger<UsageLoca
             {
                 var attributesTable = new AttributesTable
                 {
+                    { "UsageLocationID", usageLocation.UsageLocationID },
                     { "Name", usageLocation.Name },
                     { "Area", usageLocation.Area },
-                    { "Usage Location Type", usageLocation.UsageLocationType.Name },
-                    { "Water Account ID", usageLocation.Parcel.WaterAccountID },
-                    { "Water Account Number" , usageLocation.Parcel.WaterAccount?.WaterAccountNumber },
+                    { "UsageLocationType", usageLocation.UsageLocationType.Name },
+                    { "WaterAccountID", usageLocation.Parcel.WaterAccountID },
+                    { "WaterAccountNumber" , usageLocation.Parcel.WaterAccount?.WaterAccountNumber },
                     { "ParcelID" , usageLocation.ParcelID},
-                    { "Parcel Zones", string.Join(", ", usageLocation.Parcel.ParcelZones.Select(z => $"{z.Zone.ZoneGroup.ZoneGroupName} : {z.Zone.ZoneName}"))},
-                    { "Reporting Period ID", usageLocation.ReportingPeriodID },
-                    { "Geography ID", usageLocation.GeographyID },
+                    { "ParcelNumber", usageLocation.Parcel.ParcelNumber },
+                    { "ParcelZones", string.Join(", ", usageLocation.Parcel.ParcelZones
+                        .Where(x => userCanViewManagerData || x.Zone.ZoneGroup.DisplayToAccountHolders)
+                        .Select(z => $"{z.Zone.ZoneGroup.ZoneGroupName} : {z.Zone.ZoneName}"))},
+                    { "ReportingPeriodID", usageLocation.ReportingPeriodID },
+                    { "ReportingPeriodName", usageLocation.ReportingPeriod.Name },
+                    { "GeographyID", usageLocation.GeographyID },
                 };
 
                 var feature = new Feature(usageLocation.UsageLocationGeometry.Geometry4326, attributesTable);
@@ -127,21 +141,19 @@ public class UsageLocationController(QanatDbContext dbContext, ILogger<UsageLoca
     {
         List<int> usageLocationIDs;
 
-        if (UserPermissions.UserIsSystemAdmin(callingUser))
+        if (UserPermissions.UserIsSystemAdmin(callingUser) || UserPermissions.UserIsGeographyManager(callingUser, geographyID))
         {
             usageLocationIDs = dbContext.UsageLocations.AsNoTracking().Where(x => x.ReportingPeriodID == reportingPeriodID)
                 .Select(x => x.UsageLocationID).ToList();
         }
         else
         {
-            var managedGeographyIDs = callingUser.GeographyFlags
-                .Where(x => x.Value[Flag.HasManagerDashboard.FlagName]).Select(x => x.Key);
             var associatedWaterAccountIDs = UserPermissions.ListAssociatedWaterAccountsByGeographyIDAndUser(dbContext, geographyID, callingUser);
 
             usageLocationIDs = dbContext.UsageLocations.AsNoTracking()
                 .Include(x => x.Parcel)
-                .Where(x => managedGeographyIDs.Contains(x.GeographyID) ||
-                            (x.Parcel.WaterAccountID.HasValue && associatedWaterAccountIDs.Contains(x.Parcel.WaterAccountID.Value)))
+                .Where(x => x.ReportingPeriodID == reportingPeriodID && 
+                            x.Parcel.WaterAccountID.HasValue && associatedWaterAccountIDs.Contains(x.Parcel.WaterAccountID.Value))
                 .Select(x => x.UsageLocationID)
                 .ToList();
         }

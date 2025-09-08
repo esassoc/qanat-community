@@ -46,6 +46,7 @@ public class WellController(QanatDbContext dbContext, ILogger<WellController> lo
                 WellDepth = x.WellDepth,
                 DateDrilled = x.DateDrilled,
                 ParcelID = x.ParcelID,
+                ParcelNumber = x.Parcel?.ParcelNumber,
                 IrrigatedParcelIDs = x.WellIrrigatedParcels.Select(y => y.ParcelID).ToList(),
                 GeographyID = x.GeographyID,
             }).ToList();
@@ -77,15 +78,15 @@ public class WellController(QanatDbContext dbContext, ILogger<WellController> lo
             {
                 var attributesTable = new AttributesTable
                 {
-                    { "Well ID", well.WellID},
-                    { "Well Name", well.WellName},
-                    { "Default APN", well.Parcel?.ParcelNumber },
-                    { "Irrigates", string.Join(", ", well.WellIrrigatedParcels.Select(x => x.Parcel.ParcelNumber))},
-                    { "County Permit #", well.CountyWellPermitNumber },
-                    { "State WCR #", well.StateWCRNumber },
-                    { "Date Drilled", well.DateDrilled},
-                    { "Well Depth", well.WellDepth},
-                    { "Well Status", well.WellStatus.WellStatusDisplayName },
+                    { "WellID", well.WellID},
+                    { "WellName", well.WellName},
+                    { "ParcelNumber", well.Parcel?.ParcelNumber },
+                    { "IrrigatedParcels", string.Join(", ", well.WellIrrigatedParcels.Select(x => x.Parcel.ParcelNumber))},
+                    { "CountyPermitNumber", well.CountyWellPermitNumber },
+                    { "StateWCRNumber", well.StateWCRNumber },
+                    { "DateDrilled", well.DateDrilled},
+                    { "WellDepth", well.WellDepth},
+                    { "WellStatus", well.WellStatus.WellStatusDisplayName },
                     { "Latitude", well.LocationPoint4326.Coordinate.Y },
                     { "Longitude", well.LocationPoint4326.Coordinate.X },
                 };
@@ -107,7 +108,7 @@ public class WellController(QanatDbContext dbContext, ILogger<WellController> lo
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [Produces("application/json")]
-    public ActionResult<List<WellConsumerDto>> ListWellMeterReadings([FromRoute] int geographyID, [FromRoute] int wellID)
+    public ActionResult<List<MeterReadingConsumerDto>> ListWellMeterReadings([FromRoute] int geographyID, [FromRoute] int wellID)
     {
         var userID = HttpContext.User.GetUserID()!;
         var callingUser = Users.GetByUserID(dbContext, userID.Value);
@@ -120,18 +121,21 @@ public class WellController(QanatDbContext dbContext, ILogger<WellController> lo
 
         var meterReadingConsumerDtos = dbContext.MeterReadings.AsNoTracking()
             .Include(x => x.Meter)
+            .Include(x => x.Well)
             .Where(x => x.WellID == wellID && x.GeographyID == geographyID)
             .Select(x => new MeterReadingConsumerDto
             {
                 MeterReadingID = x.MeterReadingID,
                 MeterSerialNumber = x.Meter.SerialNumber,
                 WellID = x.WellID,
+                ParcelID = x.Well.ParcelID,
                 ReadingDate = x.ReadingDate,
                 PreviousReading = x.PreviousReading,
                 CurrentReading = x.CurrentReading,
                 VolumeInAcreFeet = x.VolumeInAcreFeet,
                 ReaderInitials = x.ReaderInitials,
-                Comment = x.Comment
+                Comment = x.Comment,
+                GeographyID = x.GeographyID
             }).ToList();
 
 

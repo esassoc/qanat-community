@@ -13,6 +13,7 @@ import { FormControl, FormControlOptions, FormControlState, Validators } from "@
 export class WaterAccountContactSearchDto { 
     GeographyID?: number;
     SearchString?: string | null;
+    WaterAccountContactID?: number | null;
     constructor(obj?: any) {
         Object.assign(this, obj);
     }
@@ -21,6 +22,7 @@ export class WaterAccountContactSearchDto {
 export interface WaterAccountContactSearchDtoForm { 
     GeographyID?: FormControl<number>;
     SearchString?: FormControl<string>;
+    WaterAccountContactID?: FormControl<number>;
 }
 
 export class WaterAccountContactSearchDtoFormControls { 
@@ -35,6 +37,16 @@ export class WaterAccountContactSearchDtoFormControls {
         }
     );
     public static SearchString = (value: FormControlState<string> | string = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<string>(
+        value,
+        formControlOptions ?? 
+        {
+            nonNullable: false,
+            validators: 
+            [
+            ],
+        }
+    );
+    public static WaterAccountContactID = (value: FormControlState<number> | number = undefined, formControlOptions?: FormControlOptions | null) => new FormControl<number>(
         value,
         formControlOptions ?? 
         {

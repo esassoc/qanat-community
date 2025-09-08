@@ -77,6 +77,7 @@ export * from './layout-type';
 export * from './mlrp-incentive-breakdown-dto';
 export * from './mlrp-incentive-dto';
 export * from './manager-well-update-request-dto';
+export * from './mapbox-bulk-response-dto';
 export * from './mapbox-response-dto';
 export * from './merge-water-accounts-dto';
 export * from './message-severity';

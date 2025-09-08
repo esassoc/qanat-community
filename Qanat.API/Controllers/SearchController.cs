@@ -41,7 +41,7 @@ public class SearchController : SitkaController<SearchController>
     public ActionResult<WaterAccountContactSearchSummaryDto> SearchWaterAccountContacts([FromBody] WaterAccountContactSearchDto searchDto)
     {
         var user = UserContext.GetUserFromHttpContext(_dbContext, HttpContext);
-        var results = WaterAccountContacts.GetBySearchString(_dbContext, searchDto.GeographyID, searchDto.SearchString, user);
+        var results = WaterAccountContacts.GetBySearchString(_dbContext, searchDto, user);
         return Ok(results);
     }
 }

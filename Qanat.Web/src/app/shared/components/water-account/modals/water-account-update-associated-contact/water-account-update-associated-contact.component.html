@@ -17,7 +17,7 @@
                             <div class="field-label">Water Account Contact</div>
                             <search-water-account-contacts
                                 [geographyID]="ref.data.GeographyID"
-                                [excludedWaterAccountContactIDs]="[ref.data.WaterAccountContactID]"
+                                [initialWaterAccountContactID]="ref.data.WaterAccountContactID"
                                 (change)="updateSelectedContact($event)"
                                 class="g-col-6">
                             </search-water-account-contacts>
@@ -30,22 +30,20 @@
                             </div>
                         </note>
                     </form>
+
+                    <note noteType="warning" class="g-col-3 mt-4">
+                        <div class="note-content">
+                            <icon icon="Warning" class="warning"></icon>
+                            <p>
+                                If you would like to update the information for existing contact <b>{{ ref.data.WaterAccountContactName }}</b
+                                >, visit the <a href="/contacts/{{ ref.data.WaterAccountContactID }}">contact detail page</a>.
+                            </p>
+                        </div>
+                    </note>
                 } @else {
                     <water-account-contact-upsert-form [formGroup]="newContactFormGroup"></water-account-contact-upsert-form>
                 }
             </div>
-
-            @if (ref.data.WaterAccountContactID) {
-                <note class="warning-note">
-                    <div class="note-content">
-                        <icon icon="Warning" class="warning"></icon>
-                        <p>
-                            Are you sure you want to replace current contact <b>{{ ref.data.WaterAccountContactName }}</b
-                            >?
-                        </p>
-                    </div>
-                </note>
-            }
         </div>
     } @else {
         <div class="modal-body">

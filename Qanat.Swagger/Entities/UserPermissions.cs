@@ -9,7 +9,7 @@ namespace Qanat.Swagger.Entities;
 public class UserPermissions
 {
     /// <summary>
-    /// Returns true if user role has IsSystemAdmin flag set to true
+    /// Returns true if user's role has IsSystemAdmin flag set to true
     /// </summary>
     /// <param name="callingUser"></param>
     public static bool UserIsSystemAdmin(UserDto callingUser)
@@ -19,16 +19,16 @@ public class UserPermissions
     }
 
     /// <summary>
-    /// Returns a list of IDs for all geographies where user is a water manager
+    /// Returns true if user's geography role has HasManagerDashboard flag set to true within the given geography
     /// </summary>
     /// <param name="callingUser"></param>
-    public static List<int> ListManagedGeographyIDsByUser(UserDto callingUser)
+    public static bool UserIsGeographyManager(UserDto callingUser, int geographyID)
     {
-        var geographyIDsWhereUserIsManager = callingUser.GeographyFlags
-            .Where(x => x.Value[Flag.HasManagerDashboard.FlagName])
-            .Select(x => x.Key).ToList();
+        callingUser.GeographyFlags.TryGetValue(geographyID, out var geographyFlags);
+        if (geographyFlags == null) return false;
 
-        return geographyIDsWhereUserIsManager;
+        geographyFlags.TryGetValue(Flag.HasManagerDashboard.FlagName, out var isGeographyManager);
+        return isGeographyManager;
     }
 
     // list associated water accounts

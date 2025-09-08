@@ -52,18 +52,19 @@ public class WaterAccountContactByGeographyController(QanatDbContext dbContext, 
 
     [HttpPut("validate-addresses")]
     [WithGeographyRolePermission(PermissionEnum.WaterAccountRights, RightsEnum.Delete)]
-    public async Task<ActionResult> BatchValidateAddresses([FromRoute] int geographyID, [FromBody] BatchValidateWaterAccountContactAddressRequestDto requestDto)
+    public async Task<ActionResult<MapboxBulkResponseDto>> BatchValidateAddresses([FromRoute] int geographyID, [FromBody] BatchValidateWaterAccountContactAddressRequestDto requestDto)
     {
+        MapboxBulkResponseDto mapboxBulkResponseDto;
         try
         {
-            await mapboxService.BatchValidateWaterAccountContactAddresses(geographyID, requestDto.WaterAccountContactIDs);
+            mapboxBulkResponseDto = await mapboxService.BatchValidateWaterAccountContactAddresses(geographyID, requestDto.WaterAccountContactIDs);
         }
         catch (Exception ex)
         {
             return BadRequest(new { Message = "An error occurred while validating addresses." });
         }
 
-        return Ok();
+        return Ok(mapboxBulkResponseDto);
     }
 
     [HttpPut("validate-address")]

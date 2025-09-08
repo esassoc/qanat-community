@@ -80,8 +80,14 @@ public class MapboxService
     {
         var mapboxResponseDtosByEntityID = new Dictionary<int, MapboxResponseDto>();
 
-        var maxBatchSize = 1000; // Mapbox batch geocoding API allows a maximum of 1000 requests per batch
+        const int maxBatchSize = 1000; // Mapbox batch geocoding API allows a maximum of 1000 requests per batch
         var requestObjectOffset = 0;
+
+        var query = new Dictionary<string, string>
+        {
+            ["access_token"] = _qanatConfiguration.MapboxApiToken
+        };
+        var queryString = QueryHelpers.AddQueryString("batch", query);
 
         while (requestDtos.Count > requestObjectOffset)
         {
@@ -90,25 +96,24 @@ public class MapboxService
                 var requestBatch = requestDtos.Skip(requestObjectOffset).Take(maxBatchSize).ToList();
                 var requestObjects = requestBatch.Select(x => new BatchGeocodingRequestJson
                 {
-                    AccessToken = _qanatConfiguration.MapboxApiToken,
                     AddressString = x.FullAddress,
-                    ResultTypes = new List<string>() { "address", "secondary_address" },
+                    ResultTypes = ["address", "secondary_address"],
                     ResultLimit = 1
                 }).ToList();
 
                 var requestJson = JsonSerializer.Serialize(requestObjects);
                 var requestContent = new StringContent(requestJson);
 
-                var mapboxResponse = await _httpClient.PostAsync("batch", requestContent);
+                var mapboxResponse = await _httpClient.PostAsync(queryString, requestContent);
                 if (!mapboxResponse.IsSuccessStatusCode)
                 {
                     throw new Exception($"Call to Mapbox's batch geocoding endpoint failed. Status Code: {mapboxResponse.StatusCode} Message: {mapboxResponse}");
                 }
 
-                string responseJson = await mapboxResponse.Content.ReadAsStringAsync();
+                var responseJson = await mapboxResponse.Content.ReadAsStringAsync();
 
-                using JsonDocument document = JsonDocument.Parse(responseJson);
-                JsonElement root = document.RootElement;
+                using var document = JsonDocument.Parse(responseJson);
+                var root = document.RootElement;
 
                 if (!root.TryGetProperty("batch", out JsonElement batchArray) ||
                     batchArray.ValueKind != JsonValueKind.Array)
@@ -181,7 +186,7 @@ public class MapboxService
     }
 
     // JQ 8/15/25: Putting this here for now, but could be moved to its own service if/when MapboxService gets more users
-    public async Task BatchValidateWaterAccountContactAddresses(int geographyID, List<int> waterAccountContactIDs)
+    public async Task<MapboxBulkResponseDto> BatchValidateWaterAccountContactAddresses(int geographyID, List<int> waterAccountContactIDs)
     {
         // batching to avoid SQL Server's parameter limit (2100 parameters per query) and to keep queries performant
         const int batchSize = 1000;
@@ -234,13 +239,18 @@ public class MapboxService
         }
 
         await _dbContext.SaveChangesAsync();
+
+        var responseDto = new MapboxBulkResponseDto()
+        {
+            ValidatedAddressesCount = waterAccountContactsWithAddressValidationUpdates.Count,
+            UnchangedAddressesCount = waterAccountContactIDs.Count - waterAccountContactsWithAddressValidationUpdates.Count
+        };
+
+        return responseDto;
     }
 
     private class BatchGeocodingRequestJson
     {
-        [JsonPropertyName("access_token")]
-        public string AccessToken { get; set; }
-
         [JsonPropertyName("q")]
         public string AddressString { get; set; }
         
@@ -326,6 +336,12 @@ public class MapboxResponseDto
     public string ZipCode { get; set; }
     public ConfidenceEnum? Confidence { get; set; }
     public string ResponseJsonString { get; set; }
+}
+
+public class MapboxBulkResponseDto
+{
+    public int ValidatedAddressesCount { get; set; }
+    public int UnchangedAddressesCount { get; set; }
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
