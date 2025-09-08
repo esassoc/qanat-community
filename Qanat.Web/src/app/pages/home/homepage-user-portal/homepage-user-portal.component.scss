@@ -1,0 +1,126 @@
+@use "/src/scss/abstracts" as *;
+
+.page-body {
+    padding: 1.5rem;
+}
+
+.section-title {
+    color: $primary;
+    padding-bottom: 0.75rem;
+}
+
+.accounts-col {
+    grid-row: 1;
+
+    @include desktop-medium {
+        grid-row: unset;
+        padding-top: $spacing-300;
+    }
+}
+
+.hero {
+    display: grid;
+
+    &__photo {
+        z-index: 0;
+        grid-column: 1;
+        grid-row: 1;
+        aspect-ratio: 4 / 3;
+
+        @include tablet {
+            aspect-ratio: 16 / 9;
+        }
+
+        @include desktop-medium {
+            aspect-ratio: unset;
+            max-height: clamp(20rem, 70vh, 48rem);
+        }
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-position: top center;
+            object-fit: cover;
+        }
+    }
+
+    &__actions {
+        background: $white;
+        box-shadow: $shadow-200;
+        padding: $spacing-600;
+        border-radius: $spacing-100;
+        border: 1px solid $gray-200;
+        margin-top: $spacing-600;
+
+        @include desktop-small {
+            z-index: 3;
+            width: 100%;
+            max-width: 30rem;
+            margin: 0 $spacing-600;
+
+            align-self: end;
+            justify-self: start;
+            transform: translateY(-25%);
+        }
+
+        .welcome-card-header {
+            color: $primary;
+            border-bottom: 1px solid rgba($black, 0.1);
+            padding-bottom: $spacing-300;
+            margin-bottom: $spacing-500;
+        }
+
+        .section-title {
+            padding: 0;
+        }
+    }
+}
+
+.sign-out-link {
+    cursor: pointer;
+}
+
+.quick-links {
+    .quick-links-grid {
+        align-items: stretch;
+        gap: $spacing-400;
+    }
+
+    rich-link ::ng-deep .rich-link {
+        padding: $spacing-500;
+    }
+}
+
+.geography-cards {
+    /*
+    max-height: 560px;
+    min-height: 50px;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+*/
+    gap: $spacing-400;
+}
+
+.claim-water-accounts {
+    margin-top: 1.5rem;
+    padding: 2rem;
+    border: 2px dashed $gray-light;
+    border-radius: 0.5rem;
+    text-align: center;
+}
+
+.claim-water-accounts-selector {
+    position: relative;
+
+    .geography-selector-wrapper {
+        position: absolute;
+        z-index: 100;
+        left: calc(50% - 200px);
+        top: 65px;
+        display: none;
+        &.active {
+            display: block;
+        }
+    }
+}

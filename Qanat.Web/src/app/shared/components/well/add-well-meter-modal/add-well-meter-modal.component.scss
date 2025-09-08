@@ -1,0 +1,12 @@
+@use "/src/scss/abstracts" as *;
+
+.meter-dropdown {
+    width: 100%;
+    font-size: $type-size-300;
+    padding-bottom: $spacing-200;
+
+    .ngx-dropdown-container {
+        height: 3rem;
+        padding: 0.5rem 0.75rem;
+    }
+}

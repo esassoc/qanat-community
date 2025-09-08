@@ -1,0 +1,61 @@
+@use "/src/scss/abstracts" as *;
+
+:host {
+    margin: -13px -24px -13px -20px;
+    display: flex;
+}
+
+.popup-wrapper {
+    width: fit-content;
+    min-width: $spacing-1000;
+    display: grid;
+    gap: 0.5rem;
+    padding: 1.5rem;
+
+    & > * {
+        font-family: $overpass;
+    }
+}
+
+.popup-header {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+
+    .pill {
+        padding: 0.4rem 0.75rem 0.25rem 0.75rem;
+        font-size: $type-size-100;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        text-align: center;
+        font-weight: bold;
+        color: $white;
+        border-radius: 50px;
+        white-space: nowrap;
+        background: $secondary;
+    }
+
+    .parcels {
+        color: $primary;
+        font-weight: 900;
+        text-transform: uppercase;
+    }
+}
+
+.popup-body {
+    a {
+        font-size: $type-size-200;
+        color: $white;
+    }
+}
+
+.acres {
+    font-family: $gray-default;
+    font-size: $type-size-150;
+}
+
+water-account-title {
+    display: block;
+    padding-top: 1rem;
+}

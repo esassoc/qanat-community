@@ -1,0 +1,31 @@
+<div [loadingSpinner]="{ isLoading, loadingHeight: 500 }">
+    <ng-container>
+        <page-header [customRichTextTypeID]="customRichTextTypeID" pageTitle="Scenario Runs"></page-header>
+
+        <div class="page-body">
+            @if (allModelRuns$ | async; as allModelRuns) {
+                <div class="latest-runs">
+                    <h2 class="section-title primary">Latest Scenario Runs</h2>
+                    @if (latestModelRuns.length > 0) {
+                        <div class="grid-12">
+                            @for (latestModelRun of latestModelRuns; track latestModelRun) {
+                                <model-run-card [scenarioRun]="latestModelRun">
+                                    {{ latestModelRun.RunName }}
+                                </model-run-card>
+                            }
+                        </div>
+                    } @else {
+                        <div class="no-runs copy copy-2">
+                            <p>
+                                <em> There are no Scenario runs. Use the buttons above to create a Scenario run. </em>
+                            </p>
+                        </div>
+                    }
+                </div>
+                <div class="all-runs">
+                    <qanat-grid [rowData]="allModelRuns" [columnDefs]="columnDefs" downloadFileName="scenario-runs" [sizeColumnsToFitGrid]="true"></qanat-grid>
+                </div>
+            }
+        </div>
+    </ng-container>
+</div>

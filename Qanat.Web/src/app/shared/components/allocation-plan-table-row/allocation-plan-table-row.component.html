@@ -1,0 +1,17 @@
+<div class="period">
+    <ng-container *ngTemplateOutlet="period"></ng-container>
+</div>
+
+@if (items) {
+    @for (year of years; track year) {
+        <div class="year">
+            <ng-container *ngTemplateOutlet="items; context: { $implicit: year }"></ng-container>
+        </div>
+    }
+}
+
+@if (slot) {
+    <div class="slot" [style.grid-column-start]="gridColumnStart" [style.grid-column-end]="gridColumnEnd">
+        <ng-container *ngTemplateOutlet="slot"></ng-container>
+    </div>
+}

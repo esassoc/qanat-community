@@ -1,0 +1,8 @@
+@if (params.value.ActionHandler) {
+    <button (click)="params.value.ActionHandler()" [className]="params.value.CssClasses">
+        @if (params.value.ActionIcon) {
+            <span [class]="params.value.ActionIcon"></span>
+        }
+        {{ params.value.ActionName }}
+    </button>
+}

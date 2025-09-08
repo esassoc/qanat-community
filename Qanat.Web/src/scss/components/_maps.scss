@@ -1,0 +1,30 @@
+@use "/src/scss/abstracts" as *;
+
+.map-wrapper {
+    margin: 2rem 0 2rem 0;
+}
+
+.qanat-cluster {
+    color: #fff;
+    background-color: rgba($primary, 0.6);
+    div {
+        background-color: rgba($primary, 0.6);
+    }
+}
+
+#UpdateParcelsMap {
+    cursor: pointer;
+}
+
+.hover-feature {
+    transition: all 0.1s;
+    &:hover {
+        opacity: 0.8;
+    }
+}
+
+.qanat-div-icon {
+    svg {
+        transform: rotate(180deg);
+    }
+}

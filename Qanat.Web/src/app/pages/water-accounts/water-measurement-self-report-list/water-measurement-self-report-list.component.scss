@@ -1,0 +1,85 @@
+@use "/src/scss/abstracts" as *;
+
+::ng-deep {
+    .page-header {
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+    }
+}
+
+.self-reports-table-header {
+    background: $secondary;
+    font-weight: bold;
+    font-size: $type-size-100;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: $white;
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem;
+}
+
+.self-reports-table-item {
+    margin-top: $spacing-300;
+    padding: $spacing-500;
+    background: $white;
+    color: $black;
+    border: 1px solid $gray-200;
+    box-shadow: $shadow-100;
+    border-radius: $border-radius-200;
+    align-items: center;
+}
+
+.actions-container {
+    min-height: $spacing-600;
+    .circle {
+        height: 35px;
+        width: 35px;
+    }
+}
+
+.toggle {
+    position: absolute;
+    right: 0;
+    top: 0;
+    font-size: $type-size-500;
+    transform: rotate(90deg);
+
+    &.open {
+        transform: rotate(180deg);
+    }
+
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+.line-item-table-container {
+    padding-top: 0.5rem;
+    margin-top: 1rem;
+    display: none;
+
+    &.open {
+        display: block;
+    }
+}
+
+.right-aligned {
+    text-align: right;
+}
+// base table overrides due to how large the table is
+.table tbody td {
+    padding: 0.75rem 0.5rem;
+}
+
+.table thead th {
+    text-align: center;
+}
+
+tfoot tr {
+    border-top: 1px solid $gray-800;
+    td {
+        padding: $spacing-400 $spacing-200;
+        font-weight: bold;
+        font-size: $type-size-200;
+    }
+}

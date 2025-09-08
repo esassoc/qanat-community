@@ -1,0 +1,130 @@
+<div class="scenario-section">
+    <div class="content">
+        <div class="content-row grid-12">
+            <div class="g-col-8 emphasis copy copy-3">Fee Total</div>
+            <div class="g-col-1 emphasis copy copy-3">$</div>
+            <div class="emphasis g-col-3 copy copy-2 right-aligned">{{ scenario.EstimatedFeeTotal | number }}</div>
+        </div>
+
+        <div class="content-row grid-12">
+            <div class="g-col-8 copy copy-3 ml-4">$/Acre-Foot</div>
+            <div class="g-col-1 copy copy-3">$</div>
+            <div class="g-col-3 copy copy-2 right-aligned">{{ scenario.EstimatedFeePerAcreFoot | number }}</div>
+        </div>
+
+        <div class="content-row grid-12">
+            <div class="g-col-8 copy copy-3 ml-4">$/Parcel Acre</div>
+            <div class="g-col-1 copy copy-3">$</div>
+            <div class="g-col-3 copy copy-2 right-aligned">{{ scenario.EstimatedFeePerParcelAcre | number }}</div>
+        </div>
+
+        <div class="content-row grid-12">
+            <div class="g-col-8 copy copy-3 ml-4">$/Irrigated Acre</div>
+            <div class="g-col-1 copy copy-3">$</div>
+            <div class="g-col-3 copy copy-2 right-aligned">{{ scenario.EstimatedFeePerIrrigatedAcre | number }}</div>
+        </div>
+    </div>
+</div>
+<div class="scenario-section">
+    <div class="copy copy-3 emphasis">Area</div>
+    <div class="content">
+        <div class="content-row grid-12">
+            <div class="g-col-9 copy copy-3">Total Parcel Acres for Allocation</div>
+            <div class="g-col-3 copy copy-2 right-aligned">
+                {{ scenario.Acres | number: "1.0-0" }}
+            </div>
+        </div>
+        <div class="content-row grid-12" [ngClass]="{ 'no-bottom-border-important': !scenario.TransitionedAcres }">
+            <div class="g-col-9 copy copy-3">Total Irrigated Acres</div>
+            <div class="g-col-3 copy copy-2 right-aligned">
+                {{ scenario.IrrigatedAcres | number: "1.0-0" }}
+            </div>
+        </div>
+        <div class="content-row grid-12">
+            @if (scenario.TransitionedAcres) {
+                <div class="g-col-9 copy copy-3">Acres Transitioned</div>
+            }
+            @if (!scenario.TransitionedAcres) {
+                <div class="g-col-9 copy copy-3">
+                    <!-- empty for spacing-->
+                </div>
+            }
+            <div class="g-col-3 copy copy-2 right-aligned">
+                @if (scenario.TransitionedAcres) {
+                    {{ scenario.TransitionedAcres | number: "1.0-0" }}
+                }
+                @if (!scenario.TransitionedAcres) {
+                    <div>
+                        <!-- empty for spacing-->
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="scenario-section">
+    <div class="copy copy-3 emphasis">Average Consumed Groundwater</div>
+    <div class="content">
+        <div class="content-row grid-12">
+            <div class="g-col-9">Acre-Feet/Parcel Acre</div>
+            <div class="g-col-3 copy copy-2 right-aligned">
+                {{ scenario.EstimatedConsumedGroundwaterInAcreFeetByParcelAcres | number: "1.2-2" }}
+            </div>
+        </div>
+
+        <div class="content-row grid-12">
+            <div class="g-col-9">Acre-Feet/Irrigated Acre</div>
+            <div class="g-col-3 copy copy-2 right-aligned">
+                {{ scenario.EstimatedConsumedGroundwaterInAcreFeetByIrrigatedAcres | number: "1.2-2" }}
+            </div>
+            <div class="g-col-3 copy copy-3"></div>
+        </div>
+    </div>
+</div>
+<div class="scenario-section">
+    <div class="copy copy-3 emphasis">Total Allocation</div>
+    <div class="content">
+        <div class="content-row grid-12">
+            <div class="g-col-9">Acre-Feet</div>
+            <div class="g-col-3 copy copy-2 right-aligned">
+                {{ scenario.TotalAllocationInAcreFeet | number: "1.0-0" }}
+            </div>
+        </div>
+        <div class="content-row grid-12">
+            <div class="g-col-9">Acre-Feet/Acre</div>
+            <div class="g-col-3 copy copy-2 right-aligned">
+                {{ scenario.TotalAllocationInAcreFeetByAcre | number: "1.1-1" }}
+            </div>
+        </div>
+    </div>
+</div>
+<div class="scenario-section">
+    <div class="copy copy-3 emphasis">Usage</div>
+    <div class="content">
+        <div class="content-row grid-12 force-top-border-important">
+            <div class="g-col-9 copy copy-3">Total ET (Acre-Feet)</div>
+            <div class="g-col-3 copy copy-2 right-aligned">
+                {{ scenario.TotalETInAcreFeet | number: "1.0-0" }}
+            </div>
+        </div>
+        <div class="content-row grid-12">
+            <div class="g-col-9 copy copy-3">Total Precip (Acre-Feet)</div>
+            <div class="g-col-3 copy copy-2 right-aligned">
+                {{ scenario.TotalPrecipInAcreFeet | number: "1.0-0" }}
+            </div>
+        </div>
+        <div class="content-row grid-12">
+            <div class="g-col-9 copy copy-3">Surface Water Consumed (Acre-Feet)</div>
+            <div class="g-col-3 copy copy-2 right-aligned">
+                {{ scenario.SurfaceWaterConsumedInAcreFeet | number: "1.0-0" }}
+            </div>
+        </div>
+        <div class="content-row grid-12">
+            <div class="g-col-9 copy copy-3">Total Annual Consumed Groundwater (Acre-Feet)</div>
+            <div class="g-col-3 copy copy-2 right-aligned">
+                {{ scenario.TotalAnnualConsumedGroundwaterInAcreFeet | number: "1.0-0" }}
+            </div>
+        </div>
+    </div>
+</div>

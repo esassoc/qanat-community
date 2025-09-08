@@ -1,0 +1,114 @@
+@use "/src/scss/abstracts" as *;
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-weight: bold;
+}
+
+.page-title {
+    font-weight: 400;
+    font-size: $type-size-600;
+    padding-bottom: 0.5rem;
+    color: $primary;
+
+    @include desktop-small {
+        font-size: $type-size-700;
+    }
+
+    .water-account-name {
+        display: inline-block;
+        max-width: 16rem;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        padding: $spacing-100 $spacing-200;
+        padding-top: 9px;
+        background: rgba($blue-50, 0.5);
+        color: $blue-700;
+        border: 1px solid $blue-200;
+        border-radius: $border-radius-200;
+        font-size: 1rem;
+        line-height: 1em;
+    }
+
+    .zone-tag,
+    .geo-tag {
+        display: inline-block;
+        margin-left: $spacing-200;
+        transform: translateY(-10px);
+    }
+
+    .module-title svg {
+        width: 24px;
+        height: 24px;
+
+        path {
+            fill: $primary;
+        }
+
+        &.svg-stroke {
+            path {
+                stroke: $primary;
+            }
+
+            &.fill-none {
+                path {
+                    fill: none;
+                }
+            }
+        }
+    }
+    small {
+        font-size: $type-size-300;
+    }
+}
+
+.section-title {
+    font-weight: 700;
+    font-size: $type-size-400;
+    padding-bottom: 0.5rem;
+
+    @include desktop-small {
+        font-size: $type-size-500;
+    }
+
+    &.small {
+        font-size: $type-size-300;
+
+        @include desktop-small {
+            font-size: $type-size-400;
+        }
+    }
+
+    &.primary {
+        color: $primary;
+    }
+    &.underline {
+        border-bottom: 2px solid $tan;
+        margin-bottom: 1rem;
+    }
+}
+
+.module-title {
+    font-size: $type-size-200;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: bold;
+    padding-bottom: 0.5rem;
+    color: $primary;
+
+    &.underline {
+        border-bottom: 2px solid $primary;
+        margin-bottom: 1rem;
+    }
+}
+
+.parcels__title {
+    svg path {
+        fill: $primary;
+    }
+}

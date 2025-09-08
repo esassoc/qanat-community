@@ -1,0 +1,4 @@
+<div class="progress-wrapper">
+    <span class="percentage">{{ progressPercent$ | async | percent }} Complete</span>
+    <progress max="100" [value]="(progressPercent$ | async) * 100"></progress>
+</div>

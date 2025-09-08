@@ -1,0 +1,26 @@
+@use "/src/scss/abstracts" as *;
+
+.search-container {
+    position: relative;
+
+    @include desktop-small {
+        grid-column: 1 / span 8;
+    }
+
+    .clear {
+        background: none;
+        border: none;
+        position: absolute;
+        right: 15px;
+        bottom: 12px;
+    }
+}
+
+.faqs-list {
+    display: grid;
+    gap: $spacing-500;
+
+    @include desktop-small {
+        grid-column: 1 / span 8;
+    }
+}

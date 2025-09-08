@@ -1,0 +1,30 @@
+<div class="model-run-card">
+    <div class="thumbnail">
+        <scenario-image [scenario]="scenarioRun.Scenario"></scenario-image>
+    </div>
+
+    <div class="details">
+        <div class="icon">
+            <icon icon="ScenarioRun"></icon>
+        </div>
+
+        <div class="info">
+            <h4>{{ scenarioRun.Scenario.ScenarioName }}</h4>
+            <h3>
+                {{ scenarioRun.RunName }}
+                <name-tag [name]="scenarioRun.Model.ModelName"></name-tag>
+            </h3>
+            <scenario-run-status-bar [scenarioRun]="scenarioRun"></scenario-run-status-bar>
+        </div>
+    </div>
+
+    <div class="cta">
+        <div class="mr-3">
+            <a
+                [routerLink]="['/scenario-planner', 'models', scenarioRun.Model.ModelShortName, scenarioRun.Scenario.ScenarioShortName, scenarioRun.ScenarioRunID]"
+                class="btn btn-primary-outline">
+                View Scenario Run
+            </a>
+        </div>
+    </div>
+</div>

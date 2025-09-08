@@ -1,0 +1,30 @@
+@use "/src/scss/abstracts" as *;
+
+::ng-deep {
+    .page-header {
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+    }
+}
+
+.module-title {
+    color: $black;
+    border-color: $black;
+}
+
+.parcels {
+    height: 100%;
+    max-height: 500px;
+    overflow-y: auto;
+    parcel-small-card {
+        transition: all 200ms ease;
+        box-shadow: $shadow-100;
+        display: block;
+
+        &:hover,
+        &.selected {
+            background: rgba($primary, 0.1);
+            cursor: pointer;
+        }
+    }
+}

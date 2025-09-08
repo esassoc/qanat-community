@@ -1,0 +1,96 @@
+version: '3.7'
+
+services:
+  qanat.api:
+    image: qanat/api
+    build:
+      args:
+        source: .
+    ports:
+      - "7611:8080"
+      - "7612:8081"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+      - Kestrel__Certificates__Default__Path=/https/host.docker.internal.pfx
+      - Kestrel__Certificates__Default__Password=password#1
+      - SITKA_EMAIL_REDIRECT=${SITKA_EMAIL_REDIRECT}
+      - WEB_URL=${WEB_URL}
+      - SitkaCaptureServiceUrl=${SitkaCaptureServiceUrl}
+      - SECRET_PATH=${SECRET_PATH}
+      - PlatformLongName=${PlatformLongName}
+      - SupportEmail=${SupportEmail}
+      - AzureADClientFlowClientID=${AzureADClientFlowClientID}
+      - AdminClientFlowClientID=${AdminClientFlowClientID}
+      - InactiveClientFlowClientID=${InactiveClientFlowClientID}
+      - GETAPIBaseURL=${GETAPIBaseURL}
+      - GETRunCustomerID=${GETRunCustomerID}
+      - GETRunUserID=${GETRunUserID}
+      - CNRAFeatureServerBaseUrl=${CNRAFeatureServerBaseUrl}
+      - HOSTNAME=${HOSTNAME}
+      - YoloWRIDAPIBaseUrl=${YoloWRIDAPIBaseUrl}
+      - GDALAPIBaseUrl=${GDALAPIBaseUrl}
+      - RecaptchaSecretKey=${RecaptchaSecretKey}
+      - RecaptchaVerifyUrl=${RecaptchaVerifyUrl}
+      - RecaptchaScoreThreshold=${RecaptchaScoreThreshold}
+      - MapboxApiBaseUrl=${MapboxApiBaseUrl}
+    volumes:
+      - ~/.aspnet/https:/https:ro
+
+  qanat.swagger:
+    image: qanat/swagger
+    build:
+      args:
+        source: .
+    ports:
+      - "7609:8080"
+      - "7610:8081"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+      - Kestrel__Certificates__Default__Path=/https/host.docker.internal.pfx
+      - Kestrel__Certificates__Default__Password=password#1
+      - SECRET_PATH=${SWAGGER_SECRET_PATH}
+    volumes:
+      - ~/.aspnet/https:/https:ro
+
+  qanat.gdalapi:
+    build:
+      args:
+        source: .
+    hostname: gdalapi
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - AzureBlobStorageConnectionString=${AzureBlobStorageConnectionString}
+    ports:
+      - "7631:8080"
+
+  geoserver:
+    container_name: qanat_geoserver
+    image: kartoza/geoserver:2.25.2
+    environment:
+      - ENABLE_JSONP=true
+      - CATALINA_OPTS=-DALLOW_ENV_PARAMETRIZATION=true
+      - ENV_PROPERTIES=/opt/geoserver/geoserver-environment.properties
+      - STABLE_EXTENSIONS=sqlserver-plugin
+      - TOMCAT_EXTRAS=false
+      - ROOT_WEBAPP_REDIRECT=true
+      - SAMPLE_DATA=false
+      - GEOSERVER_ADMIN_USER=admin
+      - GEOSERVER_ADMIN_PASSWORD=${GeoserverAdminPassword}
+    ports:
+      - 127.0.0.1:7615:8080
+    volumes:
+      - c:/git/sitkatech/qanat/Qanat.GeoServer/data_dir:/opt/geoserver/data_dir
+      - c:/sitka/Qanat/GeoServer/geoserver-environment.properties:/opt/geoserver/geoserver-environment.properties
+
+  sitkacapture:
+    container_name: qanat_sitkacapture
+    image: containersesaqa.azurecr.io/sitkacapture:latest
+    environment:
+      - PORT=7616
+    ports:
+      - 127.0.0.1:7616:7616

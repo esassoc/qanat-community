@@ -1,0 +1,11 @@
+<ng-template #layerName>
+    <span class="legend">
+        <!-- the 36 below is for adding opacity to a hex string -->
+        <span class="legend-icon" [style.background-color]="fieldLayerStyle.color + '36'" [style.border-color]="fieldLayerStyle.color"></span>
+        @if (parcelIDs) {
+            Parcel Fields
+        } @else {
+            Fields
+        }
+    </span>
+</ng-template>

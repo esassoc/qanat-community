@@ -1,0 +1,75 @@
+@use "/src/scss/abstracts" as *;
+
+.flex {
+    display: flex;
+    align-items: center;
+    gap: 1rem 0.5rem;
+
+    &-start {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 1rem 0.5rem;
+        &.inline {
+            display: inline-flex;
+        }
+    }
+
+    &-between {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem 0.5rem;
+    }
+
+    &-end {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem 0.5rem;
+    }
+
+    &-center {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem 0.5rem;
+    }
+
+    &-between.form,
+    &-start.form {
+        @include desktop-small-max {
+            gap: 2rem;
+        }
+        .field {
+            @include desktop-small-max {
+                width: 100%;
+            }
+
+            input,
+            select {
+                @include desktop-small-max {
+                    width: 100% !important;
+                }
+            }
+        }
+    }
+}
+
+.ai-fs {
+    align-items: flex-start;
+}
+.ai-fe {
+    align-items: flex-end;
+}
+
+.no-wrap {
+    flex-wrap: nowrap;
+}
+
+.fill {
+    flex: 1;
+}

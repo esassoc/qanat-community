@@ -1,0 +1,18 @@
+<div class="faq-display">
+    <div class="title">
+        <icon icon="ChatBubble"></icon>
+        <h3 class="section-title">Frequently Asked Questions</h3>
+    </div>
+
+    <div class="faq-display__list">
+        @for (faq of faqs$ | async; track faq) {
+            <frequently-asked-question-display [faq]="faq"></frequently-asked-question-display>
+        }
+    </div>
+
+    <button *withRolePermission="rolePermissionCheck$ | async" class="btn btn-primary edit-button" (click)="openEditModal()">Edit</button>
+
+    <div class="faq-display__all">
+        <a href="./frequently-asked-questions">View all FAQs</a>
+    </div>
+</div>

@@ -1,0 +1,142 @@
+@use "/src/scss/abstracts" as *;
+
+.support-sidebar {
+    &__header {
+        display: grid;
+        gap: $spacing-400;
+        padding: $spacing-700 $spacing-600;
+        text-align: center;
+    }
+
+    &__title {
+        font-size: 16px;
+        color: $blue-700;
+    }
+
+    .support-logo {
+        ::ng-deep svg path {
+            fill: $blue-700;
+        }
+    }
+}
+
+.support-ticket-date,
+.not-available {
+    color: $gray-500;
+    font-style: italic;
+}
+
+.counter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: $blue-500;
+    color: $white;
+    height: 20px;
+    width: 20px;
+    border-radius: 160px;
+    font-size: 10px;
+    font-weight: 700;
+    padding-top: 2px;
+}
+
+.support-ticket-notes-wrapper {
+    display: grid;
+    gap: $spacing-300;
+
+    .no-responses {
+        font-style: italic;
+        text-align: center;
+    }
+}
+
+.support-ticket-note {
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+    font-size: 16px;
+    line-height: 20px;
+
+    &__metadata {
+        grid-column: 1 / -1;
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-300;
+        margin-top: $spacing-100;
+
+        .date {
+            font-weight: bold;
+        }
+
+        .user {
+            font-style: italic;
+        }
+    }
+
+    &__body {
+        grid-column: 1 / -1;
+        margin-bottom: $spacing-200;
+
+        .header {
+            padding: $spacing-200 $spacing-400;
+            background-color: $blue-100;
+            text-transform: uppercase;
+            font-weight: bold;
+            font-size: 12px;
+            transform: translateY(3px);
+
+            &.internal-note {
+                background-color: $yellow-default;
+            }
+        }
+
+        .content {
+            display: grid;
+            gap: $spacing-400;
+            padding: $spacing-400;
+            background-color: $blue-50;
+            border: 1px solid $blue-100;
+
+            &.internal-note {
+                background-color: $yellow-light;
+                border-color: $yellow-default;
+            }
+        }
+    }
+
+    @include desktop-medium {
+        &__metadata {
+            grid-column: 1;
+        }
+
+        &__body {
+            grid-column: 2;
+        }
+    }
+}
+
+.card-footer {
+    display: flex;
+    gap: $spacing-500;
+    align-items: center;
+
+    a {
+        color: $black;
+        letter-spacing: 0;
+        cursor: pointer;
+        text-decoration: underline;
+    }
+
+    icon {
+        display: inline-block;
+        @include svg-100-deep;
+        color: $primary;
+        width: 20px;
+        height: 20px;
+        margin-right: $spacing-200;
+        transform: translateY(4px);
+
+        &.red {
+            color: $red-default;
+        }
+    }
+}

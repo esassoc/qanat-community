@@ -1,0 +1,12 @@
+<div class="rich-link">
+    <div class="rich-link-header">
+        <icon [icon]="icon"></icon>
+        <h3>{{ cardTitle }}</h3>
+    </div>
+    <div class="rich-link-body copy copy-3">
+        <custom-rich-text [customRichTextTypeID]="customRichTextTypeID"></custom-rich-text>
+    </div>
+    <div class="promo-card-footer">
+        <ng-content></ng-content>
+    </div>
+</div>

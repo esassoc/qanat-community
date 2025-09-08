@@ -1,0 +1,19 @@
+@use "/src/scss/abstracts" as *;
+.scenario-icon {
+    display: grid;
+    align-items: center;
+    justify-content: center;
+    icon {
+        display: grid;
+        justify-content: center;
+        transform: scale(2);
+        ::ng-deep svg path {
+            fill: $white;
+        }
+    }
+    icon,
+    img {
+        grid-row: 1;
+        grid-column: 1;
+    }
+}

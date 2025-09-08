@@ -1,0 +1,26 @@
+@use "/src/scss/abstracts" as *;
+
+.stat {
+    box-shadow: $shadow-200;
+    padding: 2rem;
+    border-radius: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    .title {
+        font-size: $type-size-150;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+    .value {
+        font-size: $type-size-500;
+        font-weight: 700;
+    }
+    .units,
+    .description {
+        color: $gray-default;
+    }
+    .description {
+        font-size: $type-size-100;
+    }
+}

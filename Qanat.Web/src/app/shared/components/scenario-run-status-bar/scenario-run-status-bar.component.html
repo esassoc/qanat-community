@@ -1,0 +1,8 @@
+<div class="flex meta">
+    <span [style.color]="statusColor" class="status-color">
+        <span class="bullet mr-1">&#x25CF;</span>
+        <span>{{ scenarioRun.ScenarioRunStatus.ScenarioRunStatusDisplayName }}</span>
+    </span>
+
+    <span class="date">{{ scenarioRun.LastUpdateDate | date: "medium" }}</span>
+</div>

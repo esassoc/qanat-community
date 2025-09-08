@@ -1,0 +1,7 @@
+@for (error of errors$ | async; track error) {
+    @if (validateFormControl.touched) {
+        <note [noteType]="'danger'" class="mt-2">
+            {{ error }}
+        </note>
+    }
+}

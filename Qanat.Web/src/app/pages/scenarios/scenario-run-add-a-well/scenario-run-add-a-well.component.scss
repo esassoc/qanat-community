@@ -1,0 +1,11 @@
+@use "/src/scss/abstracts" as *;
+
+.field-instructions {
+    font-style: italic;
+}
+
+.field-label.large {
+    text-transform: unset;
+    letter-spacing: unset;
+    font-size: $type-size-400;
+}

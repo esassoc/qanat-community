@@ -1,0 +1,9 @@
+version: '3.7'
+
+services:
+  qanat.web:
+    environment:
+      - DOTNET_USE_POLLING_FILE_WATCHER=1    
+    image: qanat/web
+    labels:
+      - "com.microsoft.visualstudio.targetoperatingsystem=linux"

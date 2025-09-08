@@ -1,0 +1,13 @@
+<div class="modal">
+    <div class="modal-header">
+        <h3>Download {{ ref.data.GeographyName }} Water Measurements</h3>
+    </div>
+    <div class="modal-body grid-12">
+        <reporting-period-select [geographyID]="ref.data.GeographyID" (selectionChanged)="onSelectedReportingPeriodChange($event)"></reporting-period-select>
+    </div>
+
+    <div class="modal-footer">
+        <button class="btn btn-primary" (click)="download()" [disabled]="!reportingYear">Download</button>
+        <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+    </div>
+</div>

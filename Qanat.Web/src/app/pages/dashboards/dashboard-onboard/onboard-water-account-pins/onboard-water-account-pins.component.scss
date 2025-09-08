@@ -1,0 +1,81 @@
+@use "/src/scss/abstracts" as *;
+
+.water-account-pin-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.water-account-pins {
+    padding: 4rem 0 4rem 0;
+
+    .section-title {
+        color: $blue-700;
+    }
+}
+
+.water-account-pin-list {
+    padding: 1rem;
+}
+
+.water-account-pin-list-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    & + .water-account-pin-list-item {
+        margin-top: 0.5rem;
+    }
+
+    button {
+        padding: 0;
+        background: none;
+        border: none;
+    }
+
+    .water-account-pin-text {
+        width: 4.75rem;
+    }
+}
+
+.water-account-pin {
+    &__definition {
+        padding-top: 0.5rem;
+        max-width: 42rem;
+    }
+
+    &__table {
+        width: 100%;
+
+        td.water-account-pin__key {
+            font-family: $overpass-mono;
+        }
+    }
+
+    &__key {
+        width: 20%;
+    }
+
+    &__apns {
+        width: 40%;
+        ul {
+            list-style-type: disc;
+            padding-left: 0;
+            margin-left: 1.25rem;
+            margin-top: 0.5rem;
+        }
+
+        li + li {
+            margin-top: 0.25rem;
+        }
+    }
+}
+
+.remove-water-account-pin {
+    opacity: 0.5;
+    transition: opacity 300ms ease;
+
+    &:hover {
+        opacity: 1;
+    }
+}

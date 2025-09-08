@@ -1,0 +1,10 @@
+@use "/src/scss/abstracts" as *;
+
+.page-title {
+    span {
+        display: block;
+        padding-top: 0.5rem;
+        font-size: $type-size-400;
+        color: $secondary;
+    }
+}

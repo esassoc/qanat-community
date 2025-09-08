@@ -1,0 +1,15 @@
+export const environment = {
+    production: false,
+    staging: false,
+    dev: true,
+    mainAppApiUrl: "https://host.docker.internal:7612",
+    geoserverMapServiceUrl: "http://localhost:7615/geoserver/Qanat",
+    platformLongName: "Groundwater Accounting Platform",
+    getDashboardUrl: "https://getqa.azurewebsites.net",
+    parcelBoundingBoxLeft: -120.841518219986,
+    parcelBoundingBoxRight: -120.216218621317,
+    parcelBoundingBoxTop: 37.4718525078379,
+    parcelBoundingBoxBottom: 37.0983621505508,
+    datadogClientToken: null,
+    recaptchaV3SiteKey: null,
+};

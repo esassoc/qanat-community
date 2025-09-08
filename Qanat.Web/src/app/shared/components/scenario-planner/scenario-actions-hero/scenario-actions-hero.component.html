@@ -1,0 +1,19 @@
+@if (scenarios$ | async; as scenarios) {
+    <div class="scenario-actions-hero p-5">
+        <h2 class="mb-4">Actions</h2>
+        <div class="grid-12">
+            @for (scenario of scenarios; track scenario) {
+                <div class="g-col-6 scenario">
+                    <h3 class="module-title pb-2">{{ scenario.ScenarioName }}</h3>
+                    <div class="copy copy-3 pb-3">
+                        <p>{{ scenario.ScenarioDescription }}</p>
+                    </div>
+                    <a [routerLink]="[scenario.ScenarioShortName, 'new']" class="btn btn-primary">
+                        <icon [icon]="scenario.ScenarioID === ScenarioEnum.AddaWell ? 'Wells' : 'WaterDropFilled'"></icon>
+                        <span class="btn__label">{{ scenario.ScenarioName }}</span>
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+}

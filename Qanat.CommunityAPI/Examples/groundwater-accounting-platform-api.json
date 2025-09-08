@@ -1,0 +1,2042 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Groundwater Accounting Platform API",
+    "description": "Before you start using the Groundwater Accounting Platform API, you will need to obtain an API key from the project team. The Groundwater Accounting Platform REST API provides resource-oriented urls to fetch data as JSON.",
+    "termsOfService": "https://groundwateraccounting.org/terms-of-service",
+    "contact": {
+      "name": "Contact Us",
+      "email": "info@groundwateraccounting.org"
+    },
+    "license": {
+      "name": "License",
+      "url": "https://groundwateraccounting.org/license"
+    },
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "http://api.groundwateraccounting.org/"
+    }
+  ],
+  "paths": {
+    "/geographies": {
+      "get": {
+        "tags": [
+          "Geographies"
+        ],
+        "summary": "List",
+        "description": "List all available geographies",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GeographyConsumerDto"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyScheme": []
+          }
+        ]
+      }
+    },
+    "/geographies/{geographyID}/parcels": {
+      "get": {
+        "tags": [
+          "Parcels"
+        ],
+        "summary": "List by Geography",
+        "description": "List all parcels for a specified geography",
+        "parameters": [
+          {
+            "name": "geographyID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ParcelConsumerDto"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyScheme": []
+          }
+        ]
+      }
+    },
+    "/geographies/{geographyID}/parcels/feature-collection": {
+      "get": {
+        "tags": [
+          "Parcels"
+        ],
+        "summary": "List by Geography (GeoJSON)",
+        "description": "List all parcels as a feature collection (GeoJSON) for a specified geography",
+        "parameters": [
+          {
+            "name": "geographyID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/IFeature"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyScheme": []
+          }
+        ]
+      }
+    },
+    "/geographies/{geographyID}/water-accounts/{waterAccountID}/parcels": {
+      "get": {
+        "tags": [
+          "Parcels"
+        ],
+        "summary": "List by Geography and Water Account ID",
+        "description": "List all parcels for a specified geography and water account",
+        "parameters": [
+          {
+            "name": "geographyID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "waterAccountID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ParcelConsumerDto"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyScheme": []
+          }
+        ]
+      }
+    },
+    "/geographies/{geographyID}/parcels/{parcelNumber}": {
+      "get": {
+        "tags": [
+          "Parcels"
+        ],
+        "summary": "Search by APN",
+        "description": "Search for Parcels by APN within a given {geographyID}.  Returns Parcels that have parcel numbers that start with the {parcelNumber} field (minimum 3 characters to search), including geometry",
+        "parameters": [
+          {
+            "name": "geographyID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "parcelNumber",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ParcelConsumerDto"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyScheme": []
+          }
+        ]
+      }
+    },
+    "/geographies/{geographyID}/reporting-periods": {
+      "get": {
+        "tags": [
+          "Reporting Periods"
+        ],
+        "summary": "List by Geography",
+        "description": "List all reporting periods for a specified geography",
+        "parameters": [
+          {
+            "name": "geographyID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReportingPeriodConsumerDto"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyScheme": []
+          }
+        ]
+      }
+    },
+    "/": {
+      "get": {
+        "tags": [
+          "SystemInfo"
+        ],
+        "operationId": "GetSystemInfo",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyScheme": []
+          }
+        ]
+      }
+    },
+    "/geographies/{geographyID}/years/{year}/usage-locations": {
+      "get": {
+        "tags": [
+          "Usage Locations"
+        ],
+        "summary": "List by Geography and Reporting Period",
+        "description": "List all usage locations for a specified geography and reporting period",
+        "parameters": [
+          {
+            "name": "geographyID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "year",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UsageLocationConsumerDto"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyScheme": []
+          }
+        ]
+      }
+    },
+    "/geographies/{geographyID}/years/{year}/usage-locations/feature-collection": {
+      "get": {
+        "tags": [
+          "Usage Locations"
+        ],
+        "summary": "List by Geography (GeoJSON)",
+        "description": "List all usage locations as a feature collection (GeoJSON) for a specified geography and reporting period",
+        "parameters": [
+          {
+            "name": "geographyID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "year",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/IFeature"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyScheme": []
+          }
+        ]
+      }
+    },
+    "/geographies/{geographyID}/water-accounts": {
+      "get": {
+        "tags": [
+          "Water Accounts"
+        ],
+        "summary": "List by Geography",
+        "description": "List all water accounts for a specified geography",
+        "parameters": [
+          {
+            "name": "geographyID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WaterAccountConsumerDto"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyScheme": []
+          }
+        ]
+      }
+    },
+    "/geographies/{geographyID}/years/{year}/water-measurement-types/{waterMeasurementTypeID}/water-measurements": {
+      "get": {
+        "tags": [
+          "Water Measurements"
+        ],
+        "summary": "List by Geography, Year, and Type",
+        "description": "List all water measurements for a specified geography, year, and water measurement type",
+        "parameters": [
+          {
+            "name": "geographyID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "year",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "waterMeasurementTypeID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WaterMeasurementConsumerDto"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyScheme": []
+          }
+        ]
+      }
+    },
+    "/geographies/{geographyID}/parcels/{parcelID}/water-measurements": {
+      "get": {
+        "tags": [
+          "Water Measurements"
+        ],
+        "summary": "List by Geography and Parcel",
+        "description": "List all water measurements for a specified geography and parcel",
+        "parameters": [
+          {
+            "name": "geographyID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "parcelID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WaterMeasurementConsumerDto"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyScheme": []
+          }
+        ]
+      }
+    },
+    "/geographies/{geographyID}/water-measurement-types": {
+      "get": {
+        "tags": [
+          "Water Measurement Types"
+        ],
+        "summary": "List by Geography",
+        "description": "List all water measurement types for a specified geography",
+        "parameters": [
+          {
+            "name": "geographyID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WaterMeasurementTypeConsumerDto"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyScheme": []
+          }
+        ]
+      }
+    },
+    "/geographies/{geographyID}/wells": {
+      "get": {
+        "tags": [
+          "Wells"
+        ],
+        "summary": "List by Geography",
+        "description": "List all wells for a specified geography",
+        "parameters": [
+          {
+            "name": "geographyID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WellConsumerDto"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyScheme": []
+          }
+        ]
+      }
+    },
+    "/geographies/{geographyID}/wells/feature-collection": {
+      "get": {
+        "tags": [
+          "Wells"
+        ],
+        "summary": "List by Geography (GeoJSON)",
+        "description": "List all wells as a feature collection (GeoJSON) for a specified geography",
+        "parameters": [
+          {
+            "name": "geographyID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/IFeature"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyScheme": []
+          }
+        ]
+      }
+    },
+    "/geographies/{geographyID}/wells/{wellID}/meter-readings": {
+      "get": {
+        "tags": [
+          "Wells"
+        ],
+        "summary": "List Meter Readings by Geography",
+        "description": "List all meter readings for a specified well",
+        "parameters": [
+          {
+            "name": "geographyID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "wellID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MeterReadingConsumerDto"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyScheme": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Coordinate": {
+        "type": "object",
+        "properties": {
+          "x": {
+            "type": "number",
+            "format": "double"
+          },
+          "y": {
+            "type": "number",
+            "format": "double"
+          },
+          "z": {
+            "type": "number",
+            "format": "double"
+          },
+          "m": {
+            "type": "number",
+            "format": "double"
+          },
+          "coordinateValue": {
+            "$ref": "#/components/schemas/Coordinate"
+          },
+          "isValid": {
+            "type": "boolean"
+          }
+        },
+        "nullable": true
+      },
+      "Coordinate2": {
+        "type": "object",
+        "properties": {
+          "x": {
+            "type": "number",
+            "format": "double"
+          },
+          "y": {
+            "type": "number",
+            "format": "double"
+          },
+          "z": {
+            "type": "number",
+            "format": "double"
+          },
+          "m": {
+            "type": "number",
+            "format": "double"
+          },
+          "coordinateValue": {
+            "$ref": "#/components/schemas/Coordinate"
+          },
+          "isValid": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Coordinate3": {
+        "type": "object",
+        "properties": {
+          "x": {
+            "type": "number",
+            "format": "double"
+          },
+          "y": {
+            "type": "number",
+            "format": "double"
+          },
+          "z": {
+            "type": "number",
+            "format": "double"
+          },
+          "m": {
+            "type": "number",
+            "format": "double"
+          },
+          "coordinateValue": {
+            "$ref": "#/components/schemas/Coordinate"
+          },
+          "isValid": {
+            "type": "boolean"
+          }
+        },
+        "nullable": true
+      },
+      "CoordinateEqualityComparer": {
+        "type": "object",
+        "nullable": true
+      },
+      "CoordinateSequence": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "measures": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "spatial": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ordinates": {
+            "$ref": "#/components/schemas/Ordinates"
+          },
+          "hasZ": {
+            "type": "boolean"
+          },
+          "hasM": {
+            "type": "boolean"
+          },
+          "zOrdinateIndex": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "mOrdinateIndex": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "first": {
+            "$ref": "#/components/schemas/Coordinate3"
+          },
+          "last": {
+            "$ref": "#/components/schemas/Coordinate3"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "nullable": true
+      },
+      "CoordinateSequenceFactory": {
+        "type": "object",
+        "properties": {
+          "ordinates": {
+            "$ref": "#/components/schemas/Ordinates"
+          }
+        },
+        "nullable": true
+      },
+      "Dimension": {
+        "type": "integer"
+      },
+      "Envelope": {
+        "type": "object",
+        "properties": {
+          "isNull": {
+            "type": "boolean"
+          },
+          "width": {
+            "type": "number",
+            "format": "double"
+          },
+          "height": {
+            "type": "number",
+            "format": "double"
+          },
+          "diameter": {
+            "type": "number",
+            "format": "double"
+          },
+          "minX": {
+            "type": "number",
+            "format": "double"
+          },
+          "maxX": {
+            "type": "number",
+            "format": "double"
+          },
+          "minY": {
+            "type": "number",
+            "format": "double"
+          },
+          "maxY": {
+            "type": "number",
+            "format": "double"
+          },
+          "area": {
+            "type": "number",
+            "format": "double"
+          },
+          "minExtent": {
+            "type": "number",
+            "format": "double"
+          },
+          "maxExtent": {
+            "type": "number",
+            "format": "double"
+          },
+          "centre": {
+            "$ref": "#/components/schemas/Coordinate3"
+          }
+        },
+        "nullable": true
+      },
+      "GeographyConsumerDto": {
+        "type": "object",
+        "properties": {
+          "geographyID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "geographyName": {
+            "type": "string",
+            "nullable": true
+          },
+          "geographyDisplayName": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "Geometry": {
+        "type": "object",
+        "properties": {
+          "factory": {
+            "$ref": "#/components/schemas/GeometryFactory"
+          },
+          "userData": {},
+          "srid": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "geometryType": {
+            "type": "string",
+            "nullable": true
+          },
+          "ogcGeometryType": {
+            "$ref": "#/components/schemas/OgcGeometryType"
+          },
+          "precisionModel": {
+            "$ref": "#/components/schemas/PrecisionModel"
+          },
+          "coordinate": {
+            "$ref": "#/components/schemas/Coordinate"
+          },
+          "coordinates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Coordinate2"
+            },
+            "nullable": true
+          },
+          "numPoints": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "numGeometries": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isSimple": {
+            "type": "boolean"
+          },
+          "isValid": {
+            "type": "boolean"
+          },
+          "isEmpty": {
+            "type": "boolean"
+          },
+          "area": {
+            "type": "number",
+            "format": "double"
+          },
+          "length": {
+            "type": "number",
+            "format": "double"
+          },
+          "centroid": {
+            "$ref": "#/components/schemas/Point"
+          },
+          "interiorPoint": {
+            "nullable": true
+          },
+          "pointOnSurface": {
+            "nullable": true
+          },
+          "dimension": {
+            "$ref": "#/components/schemas/Dimension"
+          },
+          "boundary": {
+            "$ref": "#/components/schemas/Geometry"
+          },
+          "boundaryDimension": {
+            "$ref": "#/components/schemas/Dimension"
+          },
+          "envelope": {
+            "$ref": "#/components/schemas/Geometry"
+          },
+          "envelopeInternal": {
+            "nullable": true
+          },
+          "isRectangle": {
+            "type": "boolean"
+          }
+        },
+        "nullable": true
+      },
+      "GeometryFactory": {
+        "type": "object",
+        "properties": {
+          "precisionModel": {
+            "$ref": "#/components/schemas/PrecisionModel"
+          },
+          "coordinateSequenceFactory": {
+            "$ref": "#/components/schemas/CoordinateSequenceFactory"
+          },
+          "srid": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "geometryServices": {
+            "$ref": "#/components/schemas/NtsGeometryServices"
+          }
+        },
+        "nullable": true
+      },
+      "GeometryOverlay": {
+        "type": "object",
+        "nullable": true
+      },
+      "IAttributesTable": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "nullable": true
+      },
+      "IFeature": {
+        "type": "object",
+        "properties": {
+          "geometry": {
+            "$ref": "#/components/schemas/Geometry"
+          },
+          "boundingBox": {
+            "$ref": "#/components/schemas/Envelope"
+          },
+          "attributes": {
+            "$ref": "#/components/schemas/IAttributesTable"
+          }
+        }
+      },
+      "MeterReadingConsumerDto": {
+        "type": "object",
+        "properties": {
+          "meterReadingID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "meterSerialNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "wellID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "parcelID": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "readingDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "previousReading": {
+            "type": "number",
+            "format": "double"
+          },
+          "currentReading": {
+            "type": "number",
+            "format": "double"
+          },
+          "volumeInAcreFeet": {
+            "type": "number",
+            "format": "double"
+          },
+          "readerInitials": {
+            "type": "string",
+            "nullable": true
+          },
+          "comment": {
+            "type": "string",
+            "nullable": true
+          },
+          "geographyID": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "NtsGeometryServices": {
+        "type": "object",
+        "properties": {
+          "geometryOverlay": {
+            "$ref": "#/components/schemas/GeometryOverlay"
+          },
+          "coordinateEqualityComparer": {
+            "$ref": "#/components/schemas/CoordinateEqualityComparer"
+          },
+          "defaultSRID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "defaultCoordinateSequenceFactory": {
+            "$ref": "#/components/schemas/CoordinateSequenceFactory"
+          },
+          "defaultPrecisionModel": {
+            "$ref": "#/components/schemas/PrecisionModel"
+          }
+        },
+        "nullable": true
+      },
+      "OgcGeometryType": {
+        "type": "integer"
+      },
+      "Ordinates": {
+        "type": "integer"
+      },
+      "ParcelConsumerDto": {
+        "type": "object",
+        "properties": {
+          "parcelID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "parcelNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "parcelArea": {
+            "type": "number",
+            "format": "double"
+          },
+          "ownerName": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerAddress": {
+            "type": "string",
+            "nullable": true
+          },
+          "waterAccountID": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "zones": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ZoneConsumerDto"
+            },
+            "nullable": true
+          },
+          "geographyID": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "Point": {
+        "type": "object",
+        "properties": {
+          "coordinateSequence": {
+            "$ref": "#/components/schemas/CoordinateSequence"
+          },
+          "coordinates": {
+            "type": "array",
+            "items": {},
+            "nullable": true
+          },
+          "numPoints": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isEmpty": {
+            "type": "boolean"
+          },
+          "dimension": {
+            "$ref": "#/components/schemas/Dimension"
+          },
+          "boundaryDimension": {
+            "$ref": "#/components/schemas/Dimension"
+          },
+          "x": {
+            "type": "number",
+            "format": "double"
+          },
+          "y": {
+            "type": "number",
+            "format": "double"
+          },
+          "coordinate": {
+            "$ref": "#/components/schemas/Coordinate3"
+          },
+          "geometryType": {
+            "type": "string",
+            "nullable": true
+          },
+          "ogcGeometryType": {
+            "$ref": "#/components/schemas/OgcGeometryType"
+          },
+          "boundary": {
+            "$ref": "#/components/schemas/Geometry"
+          },
+          "z": {
+            "type": "number",
+            "format": "double"
+          },
+          "m": {
+            "type": "number",
+            "format": "double"
+          },
+          "factory": {
+            "nullable": true
+          },
+          "userData": {},
+          "srid": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "precisionModel": {
+            "nullable": true
+          },
+          "numGeometries": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isSimple": {
+            "type": "boolean"
+          },
+          "isValid": {
+            "type": "boolean"
+          },
+          "area": {
+            "type": "number",
+            "format": "double"
+          },
+          "length": {
+            "type": "number",
+            "format": "double"
+          },
+          "centroid": {
+            "nullable": true
+          },
+          "interiorPoint": {
+            "nullable": true
+          },
+          "pointOnSurface": {
+            "nullable": true
+          },
+          "envelope": {
+            "$ref": "#/components/schemas/Geometry"
+          },
+          "envelopeInternal": {
+            "nullable": true
+          },
+          "isRectangle": {
+            "type": "boolean"
+          }
+        },
+        "nullable": true
+      },
+      "Point2": {
+        "type": "object",
+        "properties": {
+          "coordinateSequence": {
+            "nullable": true
+          },
+          "coordinates": {
+            "type": "array",
+            "items": {},
+            "nullable": true
+          },
+          "numPoints": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isEmpty": {
+            "type": "boolean"
+          },
+          "dimension": {
+            "$ref": "#/components/schemas/Dimension"
+          },
+          "boundaryDimension": {
+            "$ref": "#/components/schemas/Dimension"
+          },
+          "x": {
+            "type": "number",
+            "format": "double"
+          },
+          "y": {
+            "type": "number",
+            "format": "double"
+          },
+          "coordinate": {
+            "nullable": true
+          },
+          "geometryType": {
+            "type": "string",
+            "nullable": true
+          },
+          "ogcGeometryType": {
+            "$ref": "#/components/schemas/OgcGeometryType"
+          },
+          "boundary": {
+            "nullable": true
+          },
+          "z": {
+            "type": "number",
+            "format": "double"
+          },
+          "m": {
+            "type": "number",
+            "format": "double"
+          },
+          "factory": {
+            "nullable": true
+          },
+          "userData": {},
+          "srid": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "precisionModel": {
+            "nullable": true
+          },
+          "numGeometries": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isSimple": {
+            "type": "boolean"
+          },
+          "isValid": {
+            "type": "boolean"
+          },
+          "area": {
+            "type": "number",
+            "format": "double"
+          },
+          "length": {
+            "type": "number",
+            "format": "double"
+          },
+          "centroid": {
+            "nullable": true
+          },
+          "interiorPoint": {
+            "nullable": true
+          },
+          "pointOnSurface": {
+            "nullable": true
+          },
+          "envelope": {
+            "$ref": "#/components/schemas/Geometry"
+          },
+          "envelopeInternal": {
+            "nullable": true
+          },
+          "isRectangle": {
+            "type": "boolean"
+          }
+        },
+        "nullable": true
+      },
+      "PrecisionModel": {
+        "type": "object",
+        "properties": {
+          "isFloating": {
+            "type": "boolean"
+          },
+          "maximumSignificantDigits": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "scale": {
+            "type": "number",
+            "format": "double"
+          },
+          "gridSize": {
+            "type": "number",
+            "format": "double"
+          },
+          "precisionModelType": {
+            "$ref": "#/components/schemas/PrecisionModels"
+          }
+        },
+        "nullable": true
+      },
+      "PrecisionModels": {
+        "type": "integer"
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string",
+            "nullable": true
+          },
+          "instance": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ReportingPeriodConsumerDto": {
+        "type": "object",
+        "properties": {
+          "reportingPeriodID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "UsageLocationConsumerDto": {
+        "type": "object",
+        "properties": {
+          "usageLocationID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "area": {
+            "type": "number",
+            "format": "double"
+          },
+          "usageLocationType": {
+            "type": "string",
+            "nullable": true
+          },
+          "waterAccountID": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "waterAccountNumber": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "parcelID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "parcelNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "parcelZones": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ZoneConsumerDto"
+            },
+            "nullable": true
+          },
+          "reportingPeriodID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reportingPeriodName": {
+            "type": "string",
+            "nullable": true
+          },
+          "geographyID": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "WaterAccountConsumerDto": {
+        "type": "object",
+        "properties": {
+          "waterAccountID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "waterAccountNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "waterAccountName": {
+            "type": "string",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          },
+          "waterAccountPIN": {
+            "type": "string",
+            "nullable": true
+          },
+          "waterAccountPINLastUsed": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "waterAccountContactName": {
+            "type": "string",
+            "nullable": true
+          },
+          "contactEmail": {
+            "type": "string",
+            "nullable": true
+          },
+          "contactPhoneNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "fullAddress": {
+            "type": "string",
+            "nullable": true
+          },
+          "geographyID": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "WaterMeasurementConsumerDto": {
+        "type": "object",
+        "properties": {
+          "waterMeasurementID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "waterMeasurementTypeID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "waterMeasurementTypeName": {
+            "type": "string",
+            "nullable": true
+          },
+          "usageLocationID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "usageLocationName": {
+            "type": "string",
+            "nullable": true
+          },
+          "usageLocationType": {
+            "type": "string",
+            "nullable": true
+          },
+          "parcelID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "parcelNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "reportingDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reportedValueInFeet": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "reportedValueInAcreFeet": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "geographyID": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "WaterMeasurementTypeConsumerDto": {
+        "type": "object",
+        "properties": {
+          "waterMeasurementTypeID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "waterMeasurementTypeName": {
+            "type": "string",
+            "nullable": true
+          },
+          "waterMeasurementCategoryType": {
+            "type": "string",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "geographyID": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "WellConsumerDto": {
+        "type": "object",
+        "properties": {
+          "wellID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "wellName": {
+            "type": "string",
+            "nullable": true
+          },
+          "wellStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "stateWCRNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "countyPermitNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "wellDepth": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "dateDrilled": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "parcelID": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "parcelNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "irrigatedParcelIDs": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "geographyID": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ZoneConsumerDto": {
+        "type": "object",
+        "properties": {
+          "zoneID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "zoneName": {
+            "type": "string",
+            "nullable": true
+          },
+          "zoneGroupID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "zoneGroupName": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "ApiKeyScheme": {
+        "type": "apiKey",
+        "name": "X-API-KEY",
+        "in": "header"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Geographies"
+    },
+    {
+      "name": "Parcels"
+    },
+    {
+      "name": "Reporting Periods"
+    },
+    {
+      "name": "SystemInfo",
+      "x-scalar-ignore": true
+    },
+    {
+      "name": "Usage Locations"
+    },
+    {
+      "name": "Water Accounts"
+    },
+    {
+      "name": "Water Measurements"
+    },
+    {
+      "name": "Water Measurement Types"
+    },
+    {
+      "name": "Wells"
+    }
+  ]
+}

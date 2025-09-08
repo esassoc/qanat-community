@@ -1,0 +1,91 @@
+<page-header icon="ActivityCenter" [customRichTextTypeID]="customRichTextTypeID"></page-header>
+
+<div class="page-body">
+    <app-alert-display></app-alert-display>
+
+    <div class="grid-12 activity-options">
+        @if (geography$ | async; as geography) {
+            <div class="g-col-6 account-suggestions border-right no-border-top">
+                <div class="grid-12">
+                    <h2 class="section-title g-col-9">Water Account Budgets</h2>
+                    <a class="btn btn-primary g-col-3" [routerLink]="['..', 'water-account-budgets-report']">View</a>
+                </div>
+                <div class="copy copy-3 pt-1 pb-2">
+                    <p>View detailed reports of water use for each water account.</p>
+                </div>
+            </div>
+            <div class="g-col-6 update-parcels no-border-top">
+                <div class="grid-12">
+                    <h2 class="section-title g-col-9">Geography Statistics</h2>
+                    <a class="btn btn-primary g-col-3" [routerLink]="['..', 'statistics']">View</a>
+                </div>
+                <div class="copy copy-3 pt-1 pb-2">
+                    <p>View high level summary statistics.</p>
+                </div>
+            </div>
+            <div class="g-col-6 border-right">
+                <div class="grid-12">
+                    <h2 class="section-title g-col-9">Review Well Registrations</h2>
+
+                    @if (geography.GeographyConfiguration.WellRegistryEnabled) {
+                        <a class="btn btn-primary g-col-3" [routerLink]="['/wells', geography.GeographyName.toLowerCase(), 'review-submitted-wells']">Review</a>
+                    } @else {
+                        <a class="btn btn-primary disabled g-col-3" href="javascript:void(0)">Review</a>
+                    }
+                </div>
+                <div class="copy copy-3 pt-1 pb-2">
+                    <p>Review and approve submitted well registrations.</p>
+                </div>
+            </div>
+            <div class="g-col-6">
+                <div class="grid-12">
+                    <h2 class="section-title g-col-9">Review Water Measurement Self Reports</h2>
+                    @if (geography.AllowWaterMeasurementSelfReporting) {
+                        <a class="btn btn-primary g-col-3" [routerLink]="['/review-self-reports', geography.GeographyName.toLowerCase()]">Review</a>
+                    } @else {
+                        <a class="btn btn-primary disabled g-col-3" href="javascript:void(0)">Review</a>
+                    }
+                </div>
+                <div class="copy copy-3 pt-1 pb-2">
+                    <p>Review and approve water measurement self reports.</p>
+                </div>
+            </div>
+            <div class="g-col-6 border-right">
+                <div class="grid-12">
+                    <h2 class="section-title g-col-9">Review Cover Crop Self Reports</h2>
+                    @if (geography.AllowCoverCropSelfReporting) {
+                        <a class="btn btn-primary g-col-3" [routerLink]="['/review-cover-crop-self-reports', geography.GeographyName.toLowerCase()]">Review</a>
+                    } @else {
+                        <a class="btn btn-primary disabled g-col-3" href="javascript:void(0)">Review</a>
+                    }
+                </div>
+                <div class="copy copy-3 pt-1 pb-2">
+                    <p>Review and approve cover crop self reports.</p>
+                </div>
+            </div>
+            <div class="g-col-6">
+                <div class="grid-12">
+                    <h2 class="section-title g-col-9">Review Fallow Self Reports</h2>
+                    @if (geography.AllowFallowSelfReporting) {
+                        <a class="btn btn-primary g-col-3" [routerLink]="['/review-fallow-self-reports', geography.GeographyName.toLowerCase()]">Review</a>
+                    } @else {
+                        <a class="btn btn-primary disabled g-col-3" href="javascript:void(0)">Review</a>
+                    }
+                </div>
+                <div class="copy copy-3 pt-1 pb-2">
+                    <p>Review and approve fallow self reports.</p>
+                </div>
+            </div>
+
+            <div class="g-col-6 border-right no-border-bottom">
+                <div class="grid-12">
+                    <h2 class="section-title g-col-9">Usage Location Bulk Actions</h2>
+                    <a class="btn btn-primary g-col-3" [routerLink]="['/usage-location-bulk-actions', geography.GeographyName.toLowerCase()]">View</a>
+                </div>
+                <div class="copy copy-3 pt-1 pb-2">
+                    <p>Review and take bulk actions on usage locations.</p>
+                </div>
+            </div>
+        }
+    </div>
+</div>

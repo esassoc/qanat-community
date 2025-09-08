@@ -1,0 +1,21 @@
+<div class="modal">
+    <div class="modal-header">
+        @if (ref.data.title) {
+            <h2>{{ ref.data.title }}</h2>
+        }
+    </div>
+    <div class="modal-body">
+        @if (ref.data.explanationHtml) {
+            <note noteType="info">
+                <div class="note-content">
+                    <icon icon="Info" class="info"></icon>
+                    <div [innerHTML]="ref.data.explanationHtml"></div>
+                </div>
+            </note>
+        }
+        <pre class="json-display">{{ json | json }}</pre>
+    </div>
+    <div class="modal-footer">
+        <button type="button" (click)="close()">Close</button>
+    </div>
+</div>

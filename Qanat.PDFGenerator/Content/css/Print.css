@@ -1,0 +1,183 @@
+﻿@import 'https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css';
+@import url("https://fonts.googleapis.com/css2?family=Saira:wght@400;500;700&display=swap");
+@page {
+  /* this affects the margin in the printer settings */
+  /* margin: 5mm 5mm 5mm 5mm;   */
+  size: letter portrait !important;
+  margin: 10mm !important;
+}
+@media print {
+    * {
+        -webkit-print-color-adjust: exact !important;
+        box-sizing: border-box;
+        font-family: "Arial", sans-serif;
+        font-size: 14px;
+        line-height: 1.2;
+    }
+
+    section {
+        page-break-before: always;
+        page-break-inside: avoid;
+    }
+
+    .template-page {
+        height: 1386px;
+        width: 1050px;
+    }
+
+    h2 {
+        font-size: 20px;
+        font-weight: 700;
+    }
+
+    .section-divider.solid {
+        border-top: 4px solid #000;
+    }
+    .section-divider.dashed {
+        border-top: 1px dashed #000;
+    }
+
+    .panel { padding: 16px; }
+    .panel.shaded {
+        border: 1px solid #dcdcdc;
+        background-color: #fafafa;
+    }
+    .panel.dashed-border {
+        border: 1px dashed #000;
+    }
+
+    table {
+        width: 100%;
+        max-width: 100%;
+        font-size: 14px;
+    }
+    table th {
+        border: 1px solid #000;
+        font-weight: 700;
+        text-align: center;
+    }
+    table td {
+        padding: 16px 0 8px 0;
+        text-align: center;
+    }
+
+    .address {
+        max-width: 275px;
+    }
+
+    .mailing-area {
+        height: 100%;
+        font-size: 18px;
+        display: grid;
+        grid-template-columns: 50% 50%;
+        gap: 0;
+    }
+    .mailing-area .left-column .return-address-area {
+        position: absolute;
+        left: 10px;
+        bottom: 250px;
+        height: 100px;
+        display: flex;
+        gap: 16px;
+    }
+    .mailing-area .left-column .return-address-area .logo {
+        width: 145px;
+        height: 70px;
+    }
+    .mailing-area .left-column .return-address-area .logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+    .mailing-area .left-column .mailing-address-area {
+        position: absolute;
+        left: 78px;
+        bottom: 0;
+        height: 116px;
+        display: flex;
+        flex-direction: column;
+        text-transform: uppercase;
+    }
+    .mailing-area .right-column {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        width: 325px;
+        gap: 15px;
+        margin-left: 120px;
+    }
+
+    .grid-row {
+        min-height: 0;
+        min-width: 0;
+        overflow: hidden;
+    }
+
+    .usage-statement-page-1 {
+        display: grid;
+        gap: 12px;
+        grid-template-rows: 7fr 8fr 6fr;
+    }
+    .usage-statement-page-1 .grid-row {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .usage-statement-page-1 .info-panels {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 12px;
+    }
+
+    .usage-statement-page-2 {
+        display: grid;
+        gap: 32px;
+        grid-template-columns: 1fr 2fr;
+    }
+    .usage-statement-page-2 .left-column {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 0;
+        min-width: 0;
+    }
+    .usage-statement-page-2 .left-column .column-section {
+        display: grid;
+        gap: 16px;
+    }
+
+    .usage-statement-page-2 .right-column {
+        display: grid;
+        gap: 16px;
+        grid-template-rows: 3fr 4fr 2fr;
+        min-height: 0;
+        min-width: 0;
+    }
+    .usage-statement-page-2 .right-column .grid-row {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .usage-statement-page-2 .right-column .map-area {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: 3fr 2fr;
+    }
+    .usage-statement-page-2 .right-column .map-area .map-info {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        font-size: 16px;
+    }
+    .usage-statement-page-2 .right-column .map-area .map-info .label {
+        font-weight: 700;
+        border-bottom: 1px dashed #000;
+        padding-bottom: 2px;
+        margin-bottom: 8px;
+    }
+    .usage-statement-page-2 .right-column .map-area .map-info .parcels-wrapper {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+}

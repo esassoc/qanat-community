@@ -1,0 +1,46 @@
+@use "/src/scss/abstracts/" as *;
+
+.faq-display {
+    position: relative;
+
+    &:hover .edit-button {
+        display: block;
+    }
+
+    .edit-button {
+        display: none;
+        position: absolute;
+        top: -12px;
+        right: -12px;
+    }
+
+    .section-title {
+        padding: 0;
+    }
+
+    .title {
+        text-align: center;
+        color: $blue-default;
+        padding-bottom: $spacing-400;
+
+        icon {
+            display: block;
+            margin-bottom: $spacing-300;
+        }
+    }
+
+    &__list {
+        display: grid;
+        gap: $spacing-500;
+    }
+
+    &__all {
+        padding-top: $spacing-500;
+
+        a {
+            display: block;
+            text-align: center;
+            text-decoration: underline;
+        }
+    }
+}

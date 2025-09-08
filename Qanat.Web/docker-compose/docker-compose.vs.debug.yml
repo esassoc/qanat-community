@@ -1,0 +1,11 @@
+version: '3.7'
+
+services:
+  qanat.web:
+    build:
+      args:
+        source: ${DOCKER_BUILD_SOURCE}
+    image: qanat/web
+    ports:
+      - "8113:80"
+      - "8114:443"

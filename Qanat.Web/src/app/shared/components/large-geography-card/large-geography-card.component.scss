@@ -1,0 +1,127 @@
+@use "/src/scss/abstracts" as *;
+
+icon {
+    margin-right: 0.5rem;
+
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.geography-card {
+    box-shadow: $shadow-100;
+    border: 1px solid rgba($black, 0.1);
+    padding: $spacing-500 $spacing-600;
+    border-radius: $spacing-200;
+}
+
+.geography-card-header {
+    border-bottom: 1px solid rgba($black, 0.1);
+    padding-bottom: $spacing-300;
+    align-items: flex-end;
+
+    .geography-card-title {
+        color: $primary;
+        font-size: $type-size-400;
+        align-items: flex-start;
+
+        .geography-card-long-name {
+            font-size: $type-size-200;
+            color: $gray-default;
+            font-weight: normal;
+            line-height: 1;
+            max-width: 20rem;
+        }
+    }
+}
+
+.geography-card-header,
+.geography-card-footer {
+    icon {
+        ::ng-deep svg path {
+            fill: $primary;
+        }
+    }
+}
+
+.geography-card-link {
+    margin-right: 2rem;
+
+    a {
+        color: $black;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+    }
+}
+
+.geography-card-footer {
+    border-top: 1px solid rgba($black, 0.1);
+    border-bottom: 1px solid rgba($black, 0.1);
+    padding: $spacing-400 0;
+
+    .geography-card-link {
+        display: inline-block;
+        font-size: $type-size-150;
+    }
+}
+
+.geography-card-body {
+    padding: $spacing-400 0;
+
+    .geography-card-link:not(:last-child) {
+        margin-bottom: 0.75rem;
+    }
+}
+
+.water-account {
+    display: grid;
+    grid-template-columns: 2fr minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+    padding: $spacing-300 0 $spacing-200 0;
+
+    & + .water-account {
+        border-top: 1px solid $gray-100;
+    }
+
+    &__number {
+        display: flex;
+        align-items: center;
+        gap: $spacing-100;
+
+        &-label {
+            display: block;
+            font-weight: bold;
+            text-decoration: underline;
+            font-size: 1.125rem;
+        }
+
+        .zone {
+            background: #7f3c8d;
+            color: $white;
+            font-size: 0.75rem;
+            font-weight: bold;
+            line-height: 1em;
+            display: block;
+            padding: 7px 8px 4px 8px;
+            border-radius: 1rem;
+            transform: translateY(-1px);
+            max-width: 6rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    }
+
+    &__parcels {
+        font-weight: 600;
+        &::ng-deep {
+            svg {
+                color: $blue-700;
+            }
+        }
+    }
+
+    &__acres {
+        text-align: right;
+        color: $gray-400;
+    }
+}

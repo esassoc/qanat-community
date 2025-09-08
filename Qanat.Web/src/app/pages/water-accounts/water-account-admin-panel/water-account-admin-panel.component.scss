@@ -1,0 +1,52 @@
+@use "/src/scss/abstracts" as *;
+
+.no-custom-attributes {
+    margin: auto;
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    font-style: italic;
+}
+
+.management-actions {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: $spacing-500;
+
+    icon ::ng-deep svg,
+    svg,
+    i.fa {
+        height: 20px;
+        width: 20px;
+        transform: translateY(4px);
+        margin-right: $spacing-100;
+    }
+
+    icon.red {
+        color: $red-default;
+    }
+}
+
+.parcels {
+    &__list {
+        .headline {
+            padding-bottom: 0.25rem;
+        }
+
+        a {
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+    }
+}
+
+.card {
+    margin-bottom: $spacing-600;
+}
+
+.name-tag-nudge {
+    position: relative;
+    top: -5px;
+}

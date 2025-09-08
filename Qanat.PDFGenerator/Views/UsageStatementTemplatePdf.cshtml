@@ -1,0 +1,300 @@
+﻿@using Microsoft.AspNetCore.Html
+@using Qanat.PDFGenerator.Pdfs
+@model Qanat.Models.DataTransferObjects.UsageStatementWaterAccountDto
+
+@functions {
+    public HtmlString GetCustomFieldContentAsHtmlString(string customFieldName)
+    {
+        if (!Model.CustomFields.ContainsKey(customFieldName)) return new HtmlString("");
+        return new HtmlString(Model.CustomFields[customFieldName]);
+    }
+
+    public string GetPlatformLogoPath()
+    {
+        return "Content/images/gap-logo-blue.jpg";
+    }
+
+    public string GetGeographyLogoPath(int geographyID)
+    {
+        switch(geographyID)
+        {
+            case 1: 
+                return "Content/images/MIUGSA-logo.png";
+            case 2:
+                return "Content/images/pajaro-logo.jfif";
+            case 3:
+                return "Content/images/rrb-logo.jfif";
+            case 4:
+                return "Content/images/yolo-logo.jfif";
+            case 6:
+                return "Content/images/MSGSA-logo.png";
+            case 7:
+                return "Content/images/east-turlock-logo.png";
+            case 8:
+                return "Content/images/sc-ny-wg.png";
+            default:
+                return "Content/images/gap-logo-blue.jpg";
+        }
+    }
+}
+
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css" rel="stylesheet">
+    
+    @* <script src="https://cdn.jsdelivr.net/npm/vega@6.0.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@6.1.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.29.0"></script> *@
+</head>
+<body>
+    <section class="template-page usage-statement-page-1">
+        <div class="grid-row">
+            <div class="section-divider solid"></div>
+
+            <div class="section-header">
+                <h2>@Model.StatementTitle</h2>
+                <div style="font-style: italic; font-size: 16px">@Model.ReportingPeriodStartDate.ToString("MMMM dd, yyyy") - @Model.ReportingPeriodEndDate.ToString("MMMM dd, yyyy")</div>
+                <div style="font-weight: bold; padding-top: 6px">Statement date: @Model.StatementDate.ToString("MMMM dd, yyyy")</div>
+            </div>
+
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th rowspan="2">Water Account #</th>
+                    <th rowspan="2">Zone</th>
+                    <th rowspan="2">Supply (AC-FT/AC)</th>
+                    <th colspan="2">Usage</th>
+                    <th colspan="2">@Model.CustomLabels["Balance"]</th>
+                </tr>
+                <tr>
+                    <th>(AC-FT)</th>
+                    <th>(AC-FT/AC)</th>
+
+                    <th>(AC-FT)</th>
+                    <th>(AC-FT/AC)</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>@Model.WaterAccountNumber</td>
+                    <td>@Model.ZoneName</td>
+                    <td>@Model.SupplyDepthFormatted</td>
+
+                    <td>@Model.UsageVolumeFormatted</td>
+                    <td>@Model.UsageDepthFormatted</td>
+
+                    <td>@Model.BalanceVolumeFormatted</td>
+                    <td>@Model.BalanceDepthFormatted</td>
+                </tr>
+                </tbody>
+            </table>
+
+            <div class="info-panels">
+                <div>
+                    <div class="panel shaded">
+                        @GetCustomFieldContentAsHtmlString("Page 1: Additional Information")
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="panel dashed-border">
+                        <div style="margin-bottom: 16px">
+                            <img src="@PdfGeneratorBase.ImageAtPathToByteSrcString(GetPlatformLogoPath())" alt="Platform Logo" style="width: 200px; height: 45px;" />
+                        </div>
+                        <div>
+                            For more information about your Water Accounts, log into the Groundwater Accounting Platform:
+                            <p style="margin-top: 4px; text-decoration: underline">https://groundwateraccountingplatform.org/@Model.GeographyDisplayName</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-row">
+            <div class="section-divider dashed"></div>
+            <h2>About this Usage Statement</h2>
+
+            <div class="custom-content" id="page-1-about-statement">
+                @GetCustomFieldContentAsHtmlString("Page 1: About This Usage Statement")
+            </div>
+        </div>
+
+        <div class="grid-row">
+            <div class="section-divider dashed"></div>
+
+            <div class="mailing-area">
+                <div class="left-column">
+                    <div class="return-address-area">
+                        <div class="logo">
+                            <img src="@PdfGeneratorBase.ImageAtPathToByteSrcString(GetGeographyLogoPath(Model.GeographyID))" alt="Geography Logo" />
+                        </div>
+                        <div class="address" style="font-size: 16px">
+                            @Model.GeographyDisplayName<br />
+                            @Model.GeographyAddressLine1<br />
+                            @Model.GeographyAddressLine2
+                        </div>
+                    </div>
+                    <div class="mailing-address-area">
+                        <div>@Model.ContactName</div>
+                        <div class="address">
+                            @Model.ContactAddress<br />
+                            @if (Model.ContactSecondaryAddress != null)
+                            {
+                                @Model.ContactSecondaryAddress<br />
+                            }
+                            @Model.ContactCity, @Model.ContactState @Model.ContactZipCode
+                        </div>
+                    </div>
+                </div>
+                <div class="right-column">
+                    <div style="font-size: 20px; font-weight: 700">This is not a bill.</div>
+                    <div>This is a record of your groundwater usage for your water accounts within the @Model.GeographyDisplayName boundaries.</div>
+                    <div><span style="font-weight: 700">Water Account Number</span>: @Model.WaterAccountNumber</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+<section class="template-page usage-statement-page-2">
+<div class="left-column">
+    <div class="column-section">
+        <div>
+            <div class="logo">
+                <img src="@PdfGeneratorBase.ImageAtPathToByteSrcString(GetGeographyLogoPath(Model.GeographyID))" alt="Geography Logo" style="height: 60px" />
+            </div>
+            <div style="margin-top: 8px">@Model.GeographyDisplayName</div>
+        </div>
+        <div style="font-weight: 700">
+            <span style="font-size: 16px">Water Account Number:</span>
+            <div style="font-size: 32px">@Model.WaterAccountNumber</div>
+        </div>
+        <div style="font-size: 16px">
+            <div style="font-weight: 700">Account Contact</div>
+            <div>@Model.ContactName</div>
+            <div class="address">@Model.ContactAddress</div>
+        </div>
+    </div>
+    <div class="column-section">
+        <div class="section-divider dashed"></div>
+        <div class="logo">
+                    <img src="@PdfGeneratorBase.ImageAtPathToByteSrcString(GetPlatformLogoPath())" alt="Platform Logo" style="height: 45px; width: 200px;" />
+        </div>
+        <div>
+            For more information about your Water Accounts, log into the Groundwater Accounting Platform:
+            <p style="margin-top: 4px; text-decoration: underline">https://groundwateraccountingplatform.org/@Model.GeographyDisplayName</p>
+        </div>
+        <div>
+            Your pin to claim access to Water Account @Model.WaterAccountNumber is:
+            <div style="font-weight: 700; font-size: 18px; padding-top: 8px">@Model.WaterAccountPIN</div>
+        </div>
+    </div>
+</div>
+<div class="right-column">
+    <div class="grid-row">
+        <div class="section-divider solid"></div>
+        <h2>Location Information</h2>
+        <div class="map-area">
+
+            <div class="map" id="parcelMap" style="height: 335px; width: 460px"></div>
+            <script>
+                var map = L.map("parcelMap", { attributionControl: false, zoomControl: false }).setView([51.505, -0.09], 13);;
+                L.tileLayer("https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}").addTo(map);
+                var geoJSON = @Html.Raw(Model.ParcelGeoJSON);
+
+                var layer = L.geoJSON(geoJSON, {
+                    style: {
+                        color: "#3388ff",
+                        weight: 3,
+                        opacity: 0.65,
+                        fillOpacity: 0.4
+                    }
+                }).addTo(map);
+
+                map.fitBounds(layer.getBounds());
+                map.addLayer(layer);
+            </script>
+
+            <div class="map-info">
+                <div style="grid-column: 1/3">
+                    <div class="label">Zone</div>
+                    @Model.ZoneName
+                </div>
+
+                <div>
+                    <div class="label">Parcel Area</div>
+                    @Model.ParcelAreaFormatted acres
+                </div>
+
+                <div>
+                    <div class="label">Usage Area</div>
+                    @Model.UsageAreaFormatted acres
+                </div>
+
+                <div style="grid-column: 1/3">
+                    <div class="label">Parcels (@Model.ParcelNumbers.Count)</div>
+
+                    <div class="parcels-wrapper">
+                        @foreach (var parcelNumber in Model.ParcelNumbers.Take(21))
+                        {
+                            <div>@parcelNumber</div>
+                        }
+                        @if (Model.ParcelNumbers.Count > 21)
+                        {
+                            <div style="grid-column: 2; font-style: italic; margin-top: 8px">(and @(Model.ParcelNumbers.Count - 21) more)</div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="grid-row">
+        <div class="section-divider dashed"></div>
+        <h2>Groundwater Supply</h2>
+
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th style="width: 40%">Supply Type</th>
+                    <th style="width: 20%">Starting Allocation<br />(AC-FT/AC)</th>
+                        <th style="width: 20%">Usage<br />(AC-FT/AC)</th>
+                        <th style="width: 20%">Remaining Balance<br />(AC-FT/AC)</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var supplyTableRowDto in Model.SupplyTableRowDtos)
+            {
+                <tr>
+                    <td>@supplyTableRowDto.SupplyType</td>
+                    <td>@supplyTableRowDto.StartingAllocationFormatted</td>
+                    <td>@supplyTableRowDto.UsageValueFormatted</td>
+                    <td>@supplyTableRowDto.RemainingBalanceFormatted</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+
+        <div class="panel shaded">
+            @GetCustomFieldContentAsHtmlString("Page 2: Additional Information")
+        </div>
+    </div>
+    @* <div class="grid-row">
+        <div class="section-divider dashed"></div>
+        <h2>Usage Trend</h2>
+
+        <div id="usageChart" style="width: 720px; height: 280px; background-color: #fafafa"></div>
+        <script type="text/javascript">
+            var vegaSpec = @Html.Raw(Model.VegaSpec);
+            vegaEmbed('#usageChart', vegaSpec);
+        </script>
+    </div> *@
+    <div class="grid-row">
+        <div class="section-divider dashed"></div>
+        <h2>Have Questions?</h2>
+
+        <div class="panel shaded">
+            @GetCustomFieldContentAsHtmlString("Page 2: Have Questions?")
+        </div>
+    </div>
+</div>
+</section>
+</body>

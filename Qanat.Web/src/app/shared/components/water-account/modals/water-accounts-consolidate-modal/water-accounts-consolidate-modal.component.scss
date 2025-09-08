@@ -1,0 +1,87 @@
+@use "/src/scss/abstracts" as *;
+
+.modal-header {
+    icon {
+        color: $yellow-dark;
+    }
+}
+
+.modal-body {
+    note {
+        font-size: 14px;
+        line-height: 1.25em;
+        margin-bottom: $spacing-300;
+    }
+
+    .account-modifications {
+        background-color: $gray-50;
+        border: 1px solid $gray-200;
+        border-radius: $spacing-100;
+        padding: $spacing-100 $spacing-400;
+        max-height: 20rem;
+        overflow: auto;
+        margin-bottom: $spacing-300;
+
+        .account-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: $primary;
+            margin-top: $spacing-200;
+            margin-bottom: $spacing-300;
+
+            .text-muted {
+                font-size: 12px;
+                font-weight: normal;
+            }
+        }
+
+        .account-parcels {
+            display: list-item;
+            margin-left: $spacing-600;
+            margin-bottom: $spacing-400;
+            font-size: 16px;
+
+            .parcel-changes {
+                height: 21px;
+                width: 40px;
+                padding: $spacing-100 $spacing-200;
+                margin-left: $spacing-100;
+                font-size: 12px;
+                font-weight: bold;
+                border-radius: $spacing-500;
+
+                &.added {
+                    background-color: $green-lighter;
+                    color: $green-default;
+                    border: 1px solid $green-default;
+                }
+
+                &.removed {
+                    background-color: $red-lighter;
+                    color: $red-default;
+                    border: 1px solid $red-default;
+                }
+
+                icon ::ng-deep svg {
+                    height: 12px;
+                    width: 12px;
+                }
+            }
+        }
+    }
+
+    .disclaimer {
+        h3 {
+            font-size: 18px;
+            padding-bottom: $spacing-100;
+        }
+
+        .content-wrapper {
+            font-size: 14px;
+            line-height: 18px;
+            max-height: 12rem;
+            overflow: auto;
+            margin: $spacing-200 0;
+        }
+    }
+}

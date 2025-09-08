@@ -1,0 +1,47 @@
+@use "/src/scss/abstracts" as *;
+
+.grid-header {
+    align-items: center;
+    border: 1px solid $gray-light;
+    border-radius: $spacing-100;
+    padding: $spacing-200;
+    margin-bottom: $spacing-200;
+    background-color: $gray-lighter;
+    gap: unset;
+
+    .global-filter {
+        justify-self: flex-start;
+        width: 15rem;
+
+        input {
+            font-size: $type-size-200;
+            padding: $spacing-200;
+            height: 2rem;
+        }
+    }
+
+    .selection-info {
+        font-style: italic;
+        font-size: $type-size-200;
+        padding-right: $spacing-100;
+    }
+
+    .clear-filters-button {
+        border-left: 1px solid $gray-light;
+        padding-left: $spacing-200;
+
+        &:first-child {
+            border: none;
+        }
+    }
+}
+
+.grid-actions {
+    width: 33.333%;
+}
+
+::ng-deep {
+    .clear-action-widths .grid-header .grid-actions {
+        width: unset;
+    }
+}

@@ -1,0 +1,23 @@
+@use "/src/scss/abstracts" as *;
+.switch {
+    width: 7rem;
+    .toggle {
+        &:after {
+            content: "Disabled";
+            font-size: $type-size-100;
+            top: 0.6875rem;
+        }
+    }
+
+    input:checked {
+        & + .toggle {
+            &:before {
+                transform: translateX(5rem);
+            }
+
+            &:after {
+                content: "Enabled";
+            }
+        }
+    }
+}

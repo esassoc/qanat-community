@@ -1,0 +1,20 @@
+<page-header pageTitle="Statement Templates" icon="Statement" [customRichTextTypeID]="customRichTextTypeID" [templateRight]="templateRight"> </page-header>
+<ng-template #templateRight>
+  <a class="btn btn-primary" routerLink="new">+ New Statement Template</a>
+</ng-template>
+
+<app-alert-display></app-alert-display>
+
+@if (currentGeography$ | async) {
+  <div [loadingSpinner]="{ isLoading: isLoading }">
+    @if (statementTemplateDtos$ | async; as statementTemplateDtos) {
+      <qanat-grid
+        [rowData]="statementTemplateDtos"
+        [columnDefs]="columnDefs"
+        [sizeColumnsToFitGrid]="true"
+        downloadFileName="statement-templates"
+        (gridReady)="onGridReady($event)">
+      </qanat-grid>
+    }
+  </div>
+}

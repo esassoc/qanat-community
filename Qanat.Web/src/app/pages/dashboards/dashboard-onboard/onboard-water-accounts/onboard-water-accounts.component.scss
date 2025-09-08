@@ -1,0 +1,182 @@
+@use "/src/scss/abstracts" as *;
+
+.water-account-list {
+    display: grid;
+    gap: $spacing-600;
+}
+
+.water-account-list-item {
+    width: 100%;
+    border: 1px solid $gray-200;
+    border-radius: $spacing-200;
+    padding: $spacing-600;
+    box-shadow: $shadow-300;
+
+    .module-header {
+        border-bottom: 1px solid $gray-100;
+        margin-bottom: $spacing-500;
+
+        .section-title {
+            color: $blue-default;
+            display: flex;
+            align-items: center;
+            gap: $spacing-200;
+            padding-bottom: $spacing-300;
+
+            .water-account-name {
+                display: inline-block;
+                max-width: 12rem;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                padding: $spacing-100 $spacing-200;
+                padding-top: 7px;
+                background: rgba($blue-50, 0.5);
+                color: $blue-700;
+                border: 1px solid $blue-200;
+                border-radius: $border-radius-200;
+                font-size: 0.875rem;
+                line-height: 1em;
+                transform: translateY(-3px);
+            }
+        }
+
+        .status-icon {
+            .fa-check-circle {
+                color: $green-default;
+            }
+
+            .fa-times-circle {
+                color: $red-default;
+            }
+        }
+    }
+
+    &__info {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    &__parcels {
+        strong {
+            color: $blue-700;
+            display: flex;
+            align-items: center;
+            gap: $spacing-200;
+            width: 100%;
+            font-size: $type-size-300;
+
+            icon {
+                width: 0.875rem;
+                height: 0.875rem;
+                display: block;
+                transform: translateY(-2px);
+
+                ::ng-deep {
+                    span {
+                        display: block;
+                        width: 0.875rem;
+                        height: 0.875rem;
+                    }
+                    svg {
+                        width: 0.875rem;
+                        height: 0.875rem;
+                    }
+                }
+            }
+        }
+
+        ul {
+            margin-top: $spacing-400;
+        }
+    }
+
+    &__footer {
+        display: flex;
+        align-items: flex-end;
+        border-top: 1px solid rgba($black, 10%);
+        margin-top: $spacing-500;
+        padding-top: $spacing-500;
+        gap: $spacing-600;
+
+        .meta:last-child {
+            margin-left: auto;
+            padding: 0;
+        }
+    }
+}
+
+.meta {
+    color: $gray-default;
+    letter-spacing: 0;
+    font-style: italic;
+    font-weight: normal;
+    display: flex;
+    gap: $spacing-200;
+
+    icon {
+        width: 0.875rem;
+        height: 0.875rem;
+
+        ::ng-deep {
+            span {
+                display: block;
+                width: 0.875rem;
+                height: 0.875rem;
+            }
+            svg {
+                width: 0.875rem;
+                height: 0.875rem;
+            }
+        }
+    }
+}
+
+.claim-account-bar {
+    margin: $spacing-400 0 0 0;
+
+    .claim-account-text {
+        font-size: $type-size-300;
+        font-weight: bold;
+    }
+
+    .btn {
+        margin-right: $spacing-200;
+    }
+}
+
+.metadata-table {
+    margin-bottom: 1rem;
+    border-bottom: 1px solid rgba($black, 0.1);
+    width: 100%;
+
+    .key {
+        width: 12rem;
+    }
+
+    .value {
+        overflow-wrap: anywhere;
+    }
+
+    .header {
+        background: $primary;
+        color: $white;
+    }
+
+    td {
+        padding: 1rem 1rem 0.75rem 1rem;
+        vertical-align: middle;
+        line-height: 1em;
+    }
+    tr + tr {
+        td {
+            border-top: 1px solid rgba($black, 0.1);
+        }
+    }
+}
+
+.sidebar-help {
+    margin: 0;
+}

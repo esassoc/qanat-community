@@ -1,0 +1,55 @@
+<div class="dashboard">
+    @if (currentWaterAccount$ | async; as currentWaterAccount) {
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a routerLink="/water-dashboard/water-accounts">
+                    <geography-logo [geographyID]="currentWaterAccount.Geography.GeographyID"></geography-logo>
+                </a>
+            </div>
+            <div class="sidebar-body sticky-nav">
+                <div class="sidebar-body__wrapper">
+                    <h3 class="sidebar-body__title">
+                        <icon icon="WaterAccounts"></icon>
+                        Water Account
+                    </h3>
+                    <div class="sidebar-body__switcher">
+                        <div class="sidebar-body__switcher">
+                            <span class="dropdown sidebar-body__current">
+                                <a
+                                    href="javascript:void(0);"
+                                    [dropdownToggle]="waterAccountToggle"
+                                    [title]="currentWaterAccount.WaterAccountNameAndNumber"
+                                    class="dropdown-toggle"
+                                    role="button"
+                                    data-toggle="dropdown"
+                                    aria-haspopup="true"
+                                    aria-expanded="false">
+                                    <span class="label">{{ currentWaterAccount.WaterAccountNameAndNumber }}</span>
+                                    <icon icon="AngleDown"></icon>
+                                </a>
+                                <div #waterAccountToggle class="dropdown-menu">
+                                    <search-water-accounts
+                                        #waterAccountSwitcher
+                                        [isPartOfForm]="false"
+                                        [initialWaterAccountID]="currentWaterAccount.WaterAccountID"
+                                        [excludedWaterAccountIDs]="[currentWaterAccount.WaterAccountID]"
+                                        [isOpen]="true"
+                                        (change)="changedWaterAccount($event, currentWaterAccount)"></search-water-accounts>
+                                </div>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                @if (pageMenu$ | async; as pageMenu) {
+                    <dashboard-menu [dashboardMenu]="pageMenu" [viewingDetailPage]="true"></dashboard-menu>
+                }
+            </div>
+        </aside>
+        <main class="main">
+            <router-outlet #manageOutlet="outlet"></router-outlet>
+        </main>
+    } @else {
+        <aside class="sidebar" [loadingSpinner]="{ isLoading: true }"></aside>
+        <main class="main" [loadingSpinner]="{ isLoading: true }"></main>
+    }
+</div>

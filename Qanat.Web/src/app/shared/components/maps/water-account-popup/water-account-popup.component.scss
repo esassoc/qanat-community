@@ -1,0 +1,82 @@
+@use "/src/scss/abstracts" as *;
+:host {
+    margin: -13px -24px -13px -20px;
+    display: flex;
+}
+
+.popup-wrapper {
+    width: 320px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 24px;
+    & > * {
+        font-family: $overpass;
+    }
+}
+
+.popup-meta {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    .pill {
+        padding: 4px 8px;
+        font-weight: 900;
+        border-radius: 24px;
+        background: $secondary;
+        color: $white;
+    }
+    .parcels {
+        color: $primary;
+        font-weight: 900;
+        text-transform: uppercase;
+    }
+}
+
+water-account-title {
+    border-bottom: 1px solid rgba($black, 0.05);
+    padding-bottom: 1rem;
+}
+
+.contact-info {
+    padding-bottom: $spacing-100;
+
+    .contact-header {
+        text-transform: uppercase;
+        font-weight: 800;
+        padding-bottom: $spacing-100;
+    }
+}
+
+.popup-body {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    a {
+        color: #fff;
+    }
+    .balance {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        .balance-label {
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+        .balance-number {
+            font-size: 14px;
+            color: #00000080;
+            .balance-value {
+                font-weight: 800;
+                font-size: 20px;
+                color: #000;
+                &.text-green {
+                    color: $green-default;
+                }
+            }
+        }
+        .balance-date {
+            color: #00000080;
+        }
+    }
+}

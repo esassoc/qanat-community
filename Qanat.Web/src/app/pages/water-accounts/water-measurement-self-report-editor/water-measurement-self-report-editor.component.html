@@ -1,0 +1,241 @@
+<div class="page-wrapper">
+    <app-alert-display></app-alert-display>
+
+    @if (currentUser$ | async) {
+        @if (waterAccount) {
+            <page-header
+                pageTitle="Self Reporting"
+                icon="WaterAccounts"
+                [customRichTextTypeID]="customRichTextTypeID"
+                [customRichTextTypeGeographyID]="waterAccount.Geography.GeographyID"
+                [templateAbove]="templateAbove"
+                [templateRight]="templateRight">
+                <ng-template #templateAbove>
+                    <div class="back">
+                        <a
+                            [routerLink]="['/water-accounts', waterAccount.WaterAccountID, 'water-measurement-self-reports']"
+                            [queryParams]="{ reportingPeriodID: selfReport.ReportingPeriod.ReportingPeriodID }"
+                            class="back__link">
+                            Back to Self Reports
+                        </a>
+                    </div>
+                </ng-template>
+                <ng-template #templateRight>
+                    <div class="extra-info">
+                        <div class="field mr-4">
+                            <div class="field-label">Water Account</div>
+                            <div>
+                                #{{ waterAccount.WaterAccountNumber }}
+                                @if (waterAccount.WaterAccountName?.length > 0 && waterAccount.WaterAccountName != "" + waterAccount.WaterAccountNumber) {
+                                    <span class="water-account-name">
+                                        {{ waterAccount.WaterAccountName }}
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                        <div class="field mr-4">
+                            <div class="field-label">Water Source</div>
+                            @if (waterMeasurementType$ | async; as waterMeasurementType) {
+                                <div>
+                                    {{ waterMeasurementType?.WaterMeasurementTypeName }}
+                                </div>
+                            }
+                        </div>
+                        <div class="field">
+                            <div class="field-label">Reporting Period</div>
+                            <div>
+                                {{ selfReport.ReportingPeriod.Name }}
+                            </div>
+                        </div>
+                    </div>
+                </ng-template>
+            </page-header>
+        }
+        @if (lineItemViewModels$ | async) {
+            <div class="page-body grid-12" [loadingSpinner]="{ isLoading: isPageLoading, loadingHeight: 700 }">
+                <div class="table-container g-col-12">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th class="left-aligned">APN</th>
+                                <th>Area (ac)</th>
+                                <th class="left-aligned">Irrigation Method</th>
+                                <th>Total (ac-ft)</th>
+                                <th class="month-input-column">NOV</th>
+                                <th class="month-input-column">DEC</th>
+                                <th class="month-input-column">JAN</th>
+                                <th class="month-input-column">FEB</th>
+                                <th class="month-input-column">MAR</th>
+                                <th class="month-input-column">APR</th>
+                                <th class="month-input-column">MAY</th>
+                                <th class="month-input-column">JUN</th>
+                                <th class="month-input-column">JUL</th>
+                                <th class="month-input-column">AUG</th>
+                                <th class="month-input-column">SEP</th>
+                                <th class="month-input-column">OCT</th>
+                            </tr>
+                        </thead>
+                        @if (selfReport$ | async) {
+                            <tbody>
+                                @for (viewModel of lineItemViewModels; track viewModel) {
+                                    <tr>
+                                        <td class="pl-2">{{ viewModel.Parcel.ParcelNumber }}</td>
+                                        <td class="right-aligned">{{ viewModel.Parcel.ParcelArea | number: "1.2-2" }}</td>
+                                        <td>
+                                            @if (irrigationMethodOptions$ | async; as irrigationMethodOptions) {
+                                                <form-field
+                                                    [formControl]="irrigationMethodControlByAPN[viewModel.Parcel.ParcelNumber]"
+                                                    [formInputOptions]="irrigationMethodOptions"
+                                                    [type]="FormFieldType.Select">
+                                                </form-field>
+                                            }
+                                        </td>
+                                        <td [ngClass]="{ 'right-aligned': viewModel.LineItemTotal, 'center-aligned': !viewModel.LineItemTotal }">
+                                            @if (!viewModel.LineItemTotal) {
+                                                <span> - </span>
+                                            }
+                                            @if (viewModel.LineItemTotal) {
+                                                <span>
+                                                    {{ viewModel.LineItemTotal | number: "1.0-2" }}
+                                                </span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <form-field [formControl]="viewModel.MonthFormControls['November']" [type]="FormFieldType.Number"></form-field>
+                                        </td>
+                                        <td>
+                                            <form-field [formControl]="viewModel.MonthFormControls['December']" [type]="FormFieldType.Number"></form-field>
+                                        </td>
+                                        <td>
+                                            <form-field [formControl]="viewModel.MonthFormControls['January']" [type]="FormFieldType.Number"></form-field>
+                                        </td>
+                                        <td>
+                                            <form-field [formControl]="viewModel.MonthFormControls['February']" [type]="FormFieldType.Number"></form-field>
+                                        </td>
+                                        <td>
+                                            <form-field [formControl]="viewModel.MonthFormControls['March']" [type]="FormFieldType.Number"></form-field>
+                                        </td>
+                                        <td>
+                                            <form-field [formControl]="viewModel.MonthFormControls['April']" [type]="FormFieldType.Number"></form-field>
+                                        </td>
+                                        <td>
+                                            <form-field [formControl]="viewModel.MonthFormControls['May']" [type]="FormFieldType.Number"></form-field>
+                                        </td>
+                                        <td>
+                                            <form-field [formControl]="viewModel.MonthFormControls['June']" [type]="FormFieldType.Number"></form-field>
+                                        </td>
+                                        <td>
+                                            <form-field [formControl]="viewModel.MonthFormControls['July']" [type]="FormFieldType.Number"></form-field>
+                                        </td>
+                                        <td>
+                                            <form-field [formControl]="viewModel.MonthFormControls['August']" [type]="FormFieldType.Number"></form-field>
+                                        </td>
+                                        <td>
+                                            <form-field [formControl]="viewModel.MonthFormControls['September']" [type]="FormFieldType.Number"></form-field>
+                                        </td>
+                                        <td>
+                                            <form-field [formControl]="viewModel.MonthFormControls['October']" [type]="FormFieldType.Number"></form-field>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        }
+                        <tfoot>
+                            <tr>
+                                <td>Account Total</td>
+                                <td class="right-aligned">{{ parcels | sum: "ParcelArea" | number: "1.2-2" }}</td>
+                                <td><!-- Blank column for spacing --></td>
+                                <td class="right-aligned">
+                                    @if (lineItemTotalsSum != "-") {
+                                        {{ lineItemTotalsSum | number: "1.0-2" }}
+                                    }
+                                    @if (lineItemTotalsSum == "-") {
+                                        {{ lineItemTotalsSum }}
+                                    }
+                                </td>
+                                <td class="right-aligned">{{ monthTotals["November"] | number: "1.0-2" }}</td>
+                                <td class="right-aligned">{{ monthTotals["December"] | number: "1.0-2" }}</td>
+                                <td class="right-aligned">{{ monthTotals["January"] | number: "1.0-2" }}</td>
+                                <td class="right-aligned">{{ monthTotals["February"] | number: "1.0-2" }}</td>
+                                <td class="right-aligned">{{ monthTotals["March"] | number: "1.0-2" }}</td>
+                                <td class="right-aligned">{{ monthTotals["April"] | number: "1.0-2" }}</td>
+                                <td class="right-aligned">{{ monthTotals["May"] | number: "1.0-2" }}</td>
+                                <td class="right-aligned">{{ monthTotals["June"] | number: "1.0-2" }}</td>
+                                <td class="right-aligned">{{ monthTotals["July"] | number: "1.0-2" }}</td>
+                                <td class="right-aligned">{{ monthTotals["August"] | number: "1.0-2" }}</td>
+                                <td class="right-aligned">{{ monthTotals["September"] | number: "1.0-2" }}</td>
+                                <td class="right-aligned">{{ monthTotals["October"] | number: "1.0-2" }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <div class="g-col-6">
+                    <!-- Blank for Spacing-->
+                </div>
+                <div class="g-col-6 grid-12 save-button-container">
+                    @if (selfReport) {
+                        <div [ngClass]="[selfReport.WaterMeasurementSelfReportStatus.SelfReportStatusName]" class="status-container g-col-8">
+                            {{ selfReport.WaterMeasurementSelfReportStatus.SelfReportStatusDisplayName }}
+                            @if (selfReport.WaterMeasurementSelfReportStatus.SelfReportStatusName == "Draft") {
+                                <span> created on {{ selfReport.CreateDate | date: "medium" }} </span>
+                            }
+                            @if (selfReport.WaterMeasurementSelfReportStatus.SelfReportStatusName == "Submitted") {
+                                <span> on {{ selfReport.SubmittedDate | date: "medium" }} </span>
+                            }
+                            @if (selfReport.WaterMeasurementSelfReportStatus.SelfReportStatusName == "Approved") {
+                                <span> on {{ selfReport.ApprovedDate | date: "medium" }} </span>
+                            }
+                            @if (selfReport.WaterMeasurementSelfReportStatus.SelfReportStatusName == "Returned") {
+                                <span> on {{ selfReport.ReturnedDate | date: "medium" }} </span>
+                            }
+                        </div>
+                    }
+                    @if (selfReport.WaterMeasurementSelfReportStatus.SelfReportStatusName != "Approved") {
+                        <div class="g-col-4">
+                            <!-- Only show the save and submit buttons if the report is not approved -->
+                            <button class="btn btn-primary mr-3" (click)="save()" [buttonLoading]="isLoadingSubmit" [disabled]="isLoadingSubmit || !canSave">Save</button>
+                            @if (waterAccount) {
+                                <button
+                                    class="btn btn-primary-outline"
+                                    [routerLink]="['/water-accounts', waterAccount.WaterAccountID, 'water-measurement-self-reports']"
+                                    [disabled]="isLoadingSubmit">
+                                    Cancel
+                                </button>
+                            }
+                        </div>
+                    }
+                </div>
+                <div class="g-col-12">
+                    @if (!isPageLoading) {
+                        <file-resource-list
+                            [fileResources]="fileResources$ | async"
+                            [allowEditing]="canEditFiles"
+                            (fileResourceUploaded)="onFileResourceUploaded($event)"
+                            (fileResourceUpdated)="onFileResourceUpdated($event)"
+                            (fileResourceDeleted)="deleteFileResource($event)"></file-resource-list>
+                    }
+                </div>
+                @if (showSubmitButton) {
+                    <div class="submit-button-container g-col-12">
+                        <button class="btn btn-primary" (click)="openSubmitModal()" [buttonLoading]="isLoadingSubmit" [disabled]="isLoadingSubmit || !canSubmit">
+                            Submit for Review
+                        </button>
+                    </div>
+                }
+            </div>
+        }
+    } @else {
+        <div [loadingSpinner]="{ isLoading: true }" style="margin-top: 10rem"></div>
+    }
+</div>
+
+@if (showApproveButton || showReturnButton) {
+    <div class="admin-banner flex-end">
+        @if (showApproveButton) {
+            <button class="btn btn-primary mr-3" (click)="approve()" [buttonLoading]="isLoadingSubmit" [disabled]="isLoadingSubmit || !canApprove">Approve</button>
+        }
+        @if (showReturnButton) {
+            <button class="btn btn-danger mr-3" (click)="return()" [buttonLoading]="isLoadingSubmit" [disabled]="isLoadingSubmit || !canReturn">Return</button>
+        }
+    </div>
+}

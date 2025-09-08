@@ -1,0 +1,477 @@
+@use "/src/scss/abstracts" as *;
+
+.dashboard {
+    display: grid;
+    gap: 1rem 2rem;
+
+    @include desktop-small {
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+    }
+
+    & > * {
+        min-width: 0px;
+    }
+
+    .sidebar {
+        position: relative;
+        background: #fff;
+        z-index: 2;
+
+        @include desktop-small {
+            grid-column: 1 / span 4;
+            border-top-left-radius: 8px;
+            border-bottom-left-radius: 8px;
+            border-right: 1px solid rgba(black, 0.06);
+        }
+
+        @include desktop-medium {
+            grid-column: 1 / span 3;
+        }
+
+        &-header {
+            padding: 2rem 2rem 1rem 2rem;
+
+            img {
+                aspect-ratio: 16 / 9;
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                max-width: 8rem;
+                max-height: 8rem;
+                margin: 0 auto 1rem 0;
+
+                @include desktop-medium {
+                    max-width: 16rem;
+                    max-height: 16rem;
+                    margin: 0 auto 2rem auto;
+                }
+            }
+        }
+
+        &-body {
+            container-type: inline-size;
+
+            &.sticky-nav {
+                position: sticky;
+                top: 2rem;
+                z-index: 1;
+            }
+
+            &__wrapper {
+                display: grid;
+                gap: $spacing-300 0;
+                padding: $spacing-400 $spacing-600;
+                align-items: center;
+                justify-items: end;
+                background: $gray-lighter;
+                border-top: 1px solid $gray-light;
+                position: relative;
+                z-index: 2;
+
+                @container (min-width: 375px) {
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                }
+            }
+
+            //1663px seems like a good breakpoint for the switcher to move to the left after manual testing.
+            @media (max-aspect-ratio: 4/3), (max-width: 1663px) {
+                &__wrapper {
+                    justify-items: start;
+                }
+            }
+
+            &__title {
+                color: $blue-default;
+                display: flex;
+                gap: $spacing-200;
+                width: 100%;
+                font-size: $type-size-300;
+                padding-top: $spacing-100;
+
+                icon {
+                    width: 1rem;
+                    height: 1rem;
+                    @include svg-100;
+                }
+            }
+
+            &__switcher {
+                display: grid;
+                gap: $spacing-100;
+                transform: translateY(1px);
+            }
+
+            &__current {
+                color: $teal-default;
+                display: flex;
+                gap: $spacing-200;
+                align-items: center;
+                width: 100%;
+                font-size: $type-size-200;
+                padding-bottom: 0;
+
+                icon {
+                    width: 1rem;
+                    height: 1rem;
+                    @include svg-100;
+                    transform: translateY(-1px);
+                }
+            }
+
+            dashboard-manage-nav {
+                position: relative;
+                z-index: 1;
+            }
+        }
+
+        &-title {
+            padding: 0 2rem 0.5rem 2rem;
+            font-size: $type-size-100;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 700;
+            color: $primary;
+
+            a {
+                color: $secondary;
+            }
+
+            &__icon {
+                & > * {
+                    display: grid;
+                    align-items: center;
+                }
+            }
+
+            &.has-icon {
+                display: flex;
+                align-items: center;
+                gap: 0 0.25rem;
+
+                svg {
+                    width: 0.75rem;
+                    height: 0.75rem;
+                }
+
+                svg path {
+                    fill: $primary;
+                }
+            }
+        }
+
+        &-nav {
+            padding: 0;
+            margin: 0;
+            list-style-type: none;
+        }
+
+        &-item {
+            border-bottom: 1px solid rgba(black, 0.06);
+
+            &:first-of-type {
+                border-top: 1px solid rgba(black, 0.06);
+            }
+
+            &.has-sub-nav.active {
+                color: $secondary;
+                background: rgba($secondary, 0.05);
+                font-weight: bold;
+                padding-bottom: 0.5rem;
+
+                &:before {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    display: block;
+                    content: "";
+                    width: 0.25rem;
+                    height: 100%;
+                    transition: all 200ms ease;
+                    background: linear-gradient(180deg, #43869b 0%, #c8d9c5 118.75%);
+                }
+
+                & > a {
+                    color: $primary;
+                    font-weight: bold;
+
+                    .fa,
+                    .fas,
+                    .far {
+                        color: $primary;
+                    }
+                }
+            }
+
+            &.active .sidebar-dropdown-button {
+                color: $white;
+                background: $secondary;
+                font-weight: bold;
+                flex-wrap: nowrap;
+
+                .fa,
+                .fas,
+                .far {
+                    color: $white;
+                }
+
+                svg path {
+                    fill: $white;
+                }
+
+                .svg-stroke {
+                    path {
+                        stroke: $white;
+                    }
+                }
+
+                .no-fill path {
+                    stroke: $white;
+                }
+            }
+        }
+
+        &-sub-item {
+            & + .sidebar-sub-item {
+                border-top: 1px solid rgba($black, 0.05);
+            }
+        }
+
+        &-dropdown-button {
+            background: none;
+            border: none;
+            width: 100%;
+        }
+
+        &-link,
+        &-dropdown-button {
+            font-size: $type-size-200;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            transition: all 200ms ease;
+            color: $gray-darker;
+
+            &__label {
+                display: block;
+                position: relative;
+                top: 2px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                margin-right: auto;
+            }
+
+            .caret {
+                display: block;
+                width: 12px;
+                height: 7px;
+
+                svg {
+                    width: 100%;
+                    height: 100%;
+                }
+            }
+
+            .fa,
+            .fas,
+            .far,
+            svg {
+                display: block;
+                margin-right: 0.5rem;
+                font-size: $type-size-300;
+                background: transparent;
+                width: 1.5rem;
+            }
+
+            icon {
+                width: 1.5rem;
+                color: $teal-default;
+            }
+
+            &.active {
+                color: $white;
+                background: $secondary;
+                font-weight: bold;
+
+                .fa,
+                .fas,
+                .far {
+                    color: $white;
+                }
+
+                svg path {
+                    fill: $white;
+                }
+
+                .svg-stroke {
+                    path {
+                        stroke: $white;
+                    }
+                }
+
+                .no-fill path {
+                    stroke: $white;
+                }
+            }
+
+            &.disabled {
+                color: #aaa;
+
+                &:hover {
+                    cursor: default;
+                    background: unset;
+                    color: #aaa;
+                }
+            }
+
+            &:hover {
+                text-decoration: none;
+                color: $white;
+                background: $secondary;
+
+                svg path {
+                    fill: $white;
+                }
+
+                .svg-stroke {
+                    path {
+                        stroke: $white;
+                    }
+                }
+
+                .no-fill {
+                    path {
+                        stroke: $white;
+                    }
+                }
+            }
+
+            .svg-wrapper {
+                display: flex;
+                align-items: center;
+
+                .svg-label {
+                    padding-top: 3px;
+                    padding-left: 0.5rem;
+                    display: block;
+                }
+            }
+        }
+
+        &-sub-link {
+            font-size: $type-size-150;
+            padding: 1rem 2rem 1rem 3.5rem;
+            display: block;
+            transition: all 200ms ease;
+            color: black;
+            background-color: #f6f6f6;
+            position: relative;
+
+            .fa,
+            .fas,
+            .far {
+                display: inline-block;
+                margin-right: 0.5rem;
+                font-size: $type-size-200;
+                transition: all 200ms ease;
+                background: transparent;
+            }
+
+            &:hover {
+                text-decoration: none;
+                color: $white;
+                background: $secondary;
+            }
+
+            &.active {
+                font-weight: bold;
+                color: $white;
+                background: $secondary;
+            }
+
+            .sidebar-link-badge {
+                float: right;
+                margin: -1.4em -1.5em 0 0;
+                background-color: $secondary;
+                color: white;
+                padding: 0.4em 0.6em 0.2em 0.6em;
+                border-radius: 10px;
+                font-size: 0.9em;
+                font-weight: bold;
+                letter-spacing: 0.06em;
+            }
+        }
+
+        .separator {
+            border-top: 1px solid rgba($black, 0.25);
+        }
+    }
+
+    &.workflow .main {
+        padding: 0;
+        position: relative;
+
+        .outlet-container {
+            padding: 1rem;
+        }
+
+        @include desktop-small {
+            padding: 0;
+            grid-column: 5 / span 8;
+
+            .outlet-container {
+                padding: 2rem 4rem 4rem 2rem;
+            }
+        }
+
+        @include desktop-medium {
+            grid-column: 4 / span 9;
+        }
+    }
+
+    .main {
+        padding: 1rem;
+        position: relative;
+        z-index: 1;
+
+        @include desktop-small {
+            padding: 2rem 4rem 4rem 2rem;
+            grid-column: 5 / span 8;
+        }
+
+        @include desktop-medium {
+            grid-column: 4 / span 9;
+        }
+    }
+}
+
+.entity-switcher {
+    display: flex;
+    align-items: center;
+    z-index: 10;
+
+    .search-prepend {
+        icon {
+            svg path {
+                color: $blue-700;
+            }
+        }
+    }
+
+    form {
+        width: 100%;
+    }
+
+    .field input[type="text"] {
+        width: 100%;
+        border: none;
+        border-top: 1px solid $gray-200;
+        border-radius: unset;
+    }
+
+    .clear icon {
+        svg {
+            width: 8px;
+        }
+    }
+}

@@ -1,0 +1,33 @@
+@use "/src/scss/abstracts" as *;
+
+.not-available {
+    color: $gray-500;
+    font-style: italic;
+}
+
+.card-footer {
+    display: flex;
+    gap: $spacing-500;
+    align-items: center;
+
+    a {
+        color: $black;
+        letter-spacing: 0;
+        cursor: pointer;
+        text-decoration: underline;
+    }
+
+    icon {
+        display: inline-block;
+        @include svg-100-deep;
+        color: $primary;
+        width: 20px;
+        height: 20px;
+        margin-right: $spacing-200;
+        transform: translateY(4px);
+
+        &.red {
+            color: $red-default;
+        }
+    }
+}

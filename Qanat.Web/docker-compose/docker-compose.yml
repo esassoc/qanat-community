@@ -1,0 +1,10 @@
+version: '3.7'
+
+services:
+  qanat.web:
+    image: qanat/web
+    build:
+      args:
+        env: ${ENVIRONMENT}
+      context: ../..
+      dockerfile: Qanat.Web/Dockerfile

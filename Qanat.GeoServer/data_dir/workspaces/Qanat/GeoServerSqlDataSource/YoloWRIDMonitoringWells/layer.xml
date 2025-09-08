@@ -1,0 +1,20 @@
+<layer>
+  <name>YoloWRIDMonitoringWells</name>
+  <id>LayerInfoImpl-3fba757c:18bcee947a8:-11f7</id>
+  <type>VECTOR</type>
+  <defaultStyle>
+    <id>StyleInfoImpl-3fba757c:18bcee947a8:-e09</id>
+  </defaultStyle>
+  <styles class="linked-hash-set">
+    <style>
+      <id>StyleInfoImpl-3fba757c:18bcee947a8:-e09</id>
+    </style>
+  </styles>
+  <resource class="featureType">
+    <id>FeatureTypeInfoImpl-3fba757c:18bcee947a8:-11f8</id>
+  </resource>
+  <attribution>
+    <logoWidth>0</logoWidth>
+    <logoHeight>0</logoHeight>
+  </attribution>
+</layer>

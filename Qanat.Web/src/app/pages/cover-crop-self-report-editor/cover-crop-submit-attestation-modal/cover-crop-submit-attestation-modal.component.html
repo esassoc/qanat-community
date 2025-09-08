@@ -1,0 +1,21 @@
+<div class="modal-header">
+    <h2 class="modal-title"><icon icon="Warning"></icon>Submit Attestation</h2>
+</div>
+<div class="modal-body">
+    <note class="mb-3">
+        <custom-rich-text [customRichTextTypeID]="customRichTextTypeID" [geographyID]="ref.data.GeographyID"></custom-rich-text>
+    </note>
+    <div class="accept-certification">
+        <form class="form grid-12" #submitSelfReportForm="ngForm">
+            <form-field
+                [formControl]="formControl"
+                fieldLabel="I understand, acknowledge and agree to all the following:"
+                checkLabel="I declare that I am authorized to provide the information requested in this form, and all of the information and statements provided herein are true and correct to the best of my knowledge."
+                [type]="FormFieldType.Check"></form-field>
+        </form>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-primary" (click)="confirm()" [disabled]="!formControl.value">Submit</button>
+    <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+</div>

@@ -1,0 +1,118 @@
+<page-header icon="Wells" pageTitle="Supporting Information"></page-header>
+<workflow-body [helpCustomRichTextTypeID]="customRichTextTypeID">
+    <app-alert-display></app-alert-display>
+    <div class="mb-4">
+        <custom-rich-text [customRichTextTypeID]="formAsteriskExplanationID"></custom-rich-text>
+    </div>
+
+    @if (supportingWellInfo$ | async) {
+        <form class="form" [formGroup]="formGroup">
+            <h3 class="section-title underline text-primary">Well Details</h3>
+            <div class="grid-12">
+                <form-field
+                    class="g-col-6"
+                    [formControl]="formGroup.controls.WellDepth"
+                    [required]="true"
+                    units="ft"
+                    fieldLabel="Well Depth"
+                    [type]="FormFieldType.Number"></form-field>
+                <form-field class="g-col-6" [formControl]="formGroup.controls.CasingDiameter" fieldLabel="Casing Diameter" units="in" [type]="FormFieldType.Number"></form-field>
+                <form-field
+                    class="g-col-6"
+                    [formControl]="formGroup.controls.TopOfPerforations"
+                    [fieldDefinitionName]="'WellRegistryFieldTopOfPerforations'"
+                    fieldLabel="Top of Perforations"
+                    units="ft"
+                    [type]="FormFieldType.Number"></form-field>
+                <form-field
+                    class="g-col-6"
+                    [formControl]="formGroup.controls.BottomOfPerforations"
+                    [fieldDefinitionName]="'WellRegistryFieldBottomOfPerforations'"
+                    fieldLabel="Bottom of Perforations"
+                    units="ft"
+                    [type]="FormFieldType.Number"></form-field>
+                <form-field
+                    class="g-col-6"
+                    [formControl]="formGroup.controls.SerialNumberOfWaterMeter"
+                    fieldLabel="Serial No. of Water Meter"
+                    [type]="FormFieldType.Text"></form-field>
+                <form-field
+                    class="g-col-6"
+                    [formControl]="formGroup.controls.ManufacturerOfWaterMeter"
+                    fieldLabel="Manufacturer of Water Meter"
+                    [type]="FormFieldType.Text"></form-field>
+                <form-field class="g-col-6" [formControl]="formGroup.controls.ElectricMeterNumber" fieldLabel="Electric Meter Number" [type]="FormFieldType.Text"></form-field>
+            </div>
+            <h3 class="section-title underline mt-5 text-primary">Pump Details</h3>
+            <div class="grid-12">
+                <form-field
+                    class="g-col-6"
+                    [formControl]="formGroup.controls.PumpDischargeDiameter"
+                    [required]="true"
+                    units="in"
+                    fieldLabel="Pump Discharge Diameter"
+                    [type]="FormFieldType.Number"></form-field>
+                <form-field class="g-col-6" [formControl]="formGroup.controls.MotorHorsePower" fieldLabel="Motor/Engine" units="hp" [type]="FormFieldType.Number"></form-field>
+                <form-field
+                    class="g-col-6"
+                    [required]="true"
+                    [formControl]="formGroup.controls.FuelTypeID"
+                    [formInputOptions]="FuelTypesSelectDropdownOptions"
+                    fieldLabel="Fuel/Power"
+                    [type]="FormFieldType.Radio"></form-field>
+                <div class="g-col-6">
+                    @if (!formGroup.controls.FuelOther.disabled) {
+                        <form-field
+                            [@inOutAnimation]
+                            class="g-col-6"
+                            [hidden]="formGroup.controls.FuelOther.disabled"
+                            [formControl]="formGroup.controls.FuelOther"
+                            [type]="FormFieldType.Text"></form-field>
+                    }
+                </div>
+                <form-field
+                    class="g-col-6"
+                    [formControl]="formGroup.controls.MaximumFlow"
+                    fieldLabel="Maximum Flow"
+                    [fieldDefinitionName]="'WellRegistryFieldMaximumFlow'"
+                    units="GPM"
+                    [type]="FormFieldType.Number"></form-field>
+                <form-field
+                    class="g-col-6"
+                    [formControl]="formGroup.controls.IsEstimatedMax"
+                    [formInputOptions]="isEstimatedOptions"
+                    fieldLabel="Maximum Flow Type"
+                    name="IsEstimatedMax"
+                    [type]="FormFieldType.Radio"></form-field>
+                <form-field
+                    class="g-col-6"
+                    [formControl]="formGroup.controls.TypicalPumpFlow"
+                    fieldLabel="Typical Pump Flow"
+                    [fieldDefinitionName]="'WellRegistryFieldTypicalFlow'"
+                    units="GPM"
+                    [type]="FormFieldType.Number"></form-field>
+                <form-field
+                    class="g-col-6"
+                    [formControl]="formGroup.controls.IsEstimatedTypical"
+                    [formInputOptions]="isEstimatedOptions"
+                    fieldLabel="Typical Flow Type"
+                    name="IsEstimatedTypical"
+                    [type]="FormFieldType.Radio"></form-field>
+            </div>
+            <h3 class="section-title underline mt-5 text-primary">Pump Test (Most Recent)</h3>
+            <div class="grid-12">
+                <form-field class="g-col-6" [formControl]="formGroup.controls.PumpTestBy" fieldLabel="Conducted By" [type]="FormFieldType.Text"></form-field>
+                <form-field class="g-col-6" [formControl]="formGroup.controls.PumpTestDatePerformed" fieldLabel="Performed Test Date" [type]="FormFieldType.Date"></form-field>
+                <form-field class="g-col-6" [formControl]="formGroup.controls.PumpManufacturer" fieldLabel="Pump Manufacturer" [type]="FormFieldType.Text"></form-field>
+                <form-field class="g-col-6" [formControl]="formGroup.controls.PumpYield" fieldLabel="Yield" units="GPM" [type]="FormFieldType.Number"></form-field>
+                <form-field class="g-col-6" [formControl]="formGroup.controls.PumpStaticLevel" fieldLabel="Static Level" units="Ft." [type]="FormFieldType.Number"></form-field>
+                <form-field class="g-col-6" [formControl]="formGroup.controls.PumpingLevel" fieldLabel="Pumping Level" units="Ft." [type]="FormFieldType.Number"></form-field>
+            </div>
+        </form>
+    }
+</workflow-body>
+
+<div class="page-footer">
+    <fresca-button class="mr-2" (click)="save()" iconClass="" [disabled]="isLoadingSubmit"> Save </fresca-button>
+    <fresca-button class="ml-auto" (click)="save(true)" [disabled]="isLoadingSubmit"> Save & Continue </fresca-button>
+</div>

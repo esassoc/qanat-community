@@ -1,0 +1,13 @@
+@use "/src/scss/abstracts" as *;
+
+.section-header {
+    font-family: Overpass;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 17.72px;
+    letter-spacing: 0.05em;
+    text-align: left;
+    color: $gray-500;
+    border-bottom: 1px solid $gray-500;
+    text-transform: uppercase;
+}

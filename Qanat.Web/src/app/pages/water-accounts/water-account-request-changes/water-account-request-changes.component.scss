@@ -1,0 +1,179 @@
+@use "/src/scss/abstracts" as *;
+
+.page-wrapper {
+    padding: $spacing-600;
+}
+
+.field.user {
+    width: 23rem;
+}
+
+.field.geography {
+    width: 10rem;
+}
+
+.drag-handle {
+    cursor: move;
+}
+
+.account-changes-form {
+    display: flex;
+    align-items: flex-start;
+    gap: $spacing-600;
+
+    .section {
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-400;
+        height: 48rem;
+        overflow: hidden;
+
+        .section-header {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            height: 3rem;
+            color: $primary;
+            font-size: $type-size-300;
+            border-bottom: 2px solid $primary;
+            padding-bottom: $spacing-200;
+
+            button {
+                margin-bottom: $spacing-050;
+            }
+
+            icon {
+                margin-right: $spacing-100;
+            }
+        }
+
+        &.aside {
+            flex: 0 0 auto;
+            width: 19rem;
+        }
+
+        &.main {
+            flex: 1;
+            border-left: 1px solid $gray-light;
+            padding-left: $spacing-600;
+        }
+    }
+}
+
+.water-account-cards {
+    display: flex;
+    overflow: auto;
+    gap: $spacing-400;
+    height: 100%;
+
+    .card {
+        display: flex;
+        flex-direction: column;
+        flex: 0 0 auto;
+        height: 100%;
+        width: 23rem;
+        box-shadow: none;
+        border: 1px solid $gray-200;
+        padding: 0;
+
+        .zone-display {
+            color: $black;
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: $spacing-200;
+            border-top-left-radius: $spacing-100;
+            border-top-right-radius: $spacing-100;
+
+            &.invalid {
+                background-color: $red-dark;
+                color: $white;
+
+                icon ::ng-deep svg {
+                    height: 0.75rem;
+                    width: 0.75rem;
+                    transform: translateY(2px);
+                }
+            }
+        }
+
+        .card-header {
+            padding: $spacing-400;
+            border-bottom: none;
+
+            &-wrapper {
+                border-bottom: 1px solid $gray-200;
+                padding-bottom: $spacing-200;
+                width: 100%;
+                display: flex;
+                justify-content: flex-start;
+                align-items: flex-end;
+                gap: $spacing-100;
+            }
+
+            .water-account-name {
+                color: $primary;
+                font-weight: bold;
+                font-size: $type-size-300;
+            }
+        }
+
+        .card-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: $spacing-400;
+            padding: $spacing-400;
+            padding-top: 0;
+            overflow: hidden;
+            min-height: 0;
+
+            a {
+                text-decoration: underline;
+                cursor: pointer;
+            }
+        }
+    }
+}
+
+.drop-area {
+    flex: 1;
+    overflow: auto;
+    min-height: 0;
+    background-color: $gray-50;
+    border: 3px dashed $gray-200;
+    border-radius: $spacing-100;
+    padding: $spacing-400;
+}
+
+note {
+    icon {
+        margin-right: $spacing-200;
+    }
+
+    icon.info::ng-deep svg path {
+        color: $teal-default !important;
+    }
+
+    icon.warning::ng-deep svg path {
+        color: $yellow-darker;
+    }
+}
+
+.no-water-accounts {
+    text-align: center;
+    font-style: italic;
+}
+
+.page-controls {
+    display: flex;
+    justify-content: end;
+    gap: $spacing-200;
+    margin-bottom: $spacing-300;
+}
+
+.reporting-period-note {
+    text-align: left;
+}

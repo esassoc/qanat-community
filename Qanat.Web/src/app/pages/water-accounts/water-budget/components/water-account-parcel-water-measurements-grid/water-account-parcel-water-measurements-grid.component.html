@@ -1,0 +1,15 @@
+@if (!isLoading) {
+    <div>
+        <qanat-grid
+            height="500px"
+            [rowData]="measurements"
+            [columnDefs]="colDefs"
+            [sizeColumnsToFitGrid]="true"
+            downloadFileName="parcel-water-measurements"
+            [pagination]="true"
+            [paginationPageSize]="100"
+            (gridReady)="onGridReady($event)"></qanat-grid>
+    </div>
+} @else {
+    <div [loadingSpinner]="{ loadingHeight: 500, isLoading: true }"></div>
+}

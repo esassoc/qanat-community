@@ -1,0 +1,30 @@
+{
+  "sqlConnectionString": "#{sqlConnectionString}#",
+  "restoreBuildForTests": true,
+  "bacpacFilePath": "#{Pipeline.Workspace}#/bacpac/#{databaseName}#.bacpac",
+  "dacpacFilePath": "#{Pipeline.Workspace}#/Database/Qanat.Database.dacpac",
+
+  "OpenETApiBaseUrl": "https://openet-api.org",
+  "OpenETApiKey": "#{openETApiKey}#",
+
+  //Google Cloud
+  "googleProjectID": "#{googleProjectID}#",
+  "googleCloudPrivateKeyID": "#{googleCloudPrivateKeyID}#",
+  "googleCloudPrivateKey": "#{googleCloudPrivateKey}#",
+  "googleClientEmail": "#{googleClientEmail}#",
+  "googleClientID": "#{googleClientID}#",
+  "googleClientCertURL": "#{googleClientCertURL}#",
+
+  //Identity Management
+  "IdentityManagement_URL": "#{IdentityManagement_URL}#",
+  "IdentityManagement_Scope": "#{IdentityManagement_Scope}#",
+  "IdentityManagement_GrantType": "#{IdentityManagement_GrantType}#",
+  "IdentityManagement_Authority": "#{IdentityManagement_Authority}#",
+  "IdentityManagement_Audience": "#{IdentityManagement_Audience}#",
+  "IdentityManagement_AdminClientFlowClientID": "#{IdentityManagement_AdminClientFlowClientID}#",
+  "IdentityManagement_AdminClientFlowClientSecret": "#{IdentityManagement_AdminClientFlowClientSecret}#",
+  "IdentityManagement_NormalClientFlowClientID": "#{IdentityManagement_NormalClientFlowClientID}#",
+  "IdentityManagement_NormalClientFlowClientSecret": "#{IdentityManagement_NormalClientFlowClientSecret}#",
+  "IdentityManagement_InactiveClientFlowClientID": "#{IdentityManagement_InactiveClientFlowClientID}#",
+  "IdentityManagement_InactiveClientFlowClientSecret": "#{IdentityManagement_InactiveClientFlowClientSecret}#"
+}

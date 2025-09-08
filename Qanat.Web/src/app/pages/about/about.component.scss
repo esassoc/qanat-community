@@ -1,0 +1,313 @@
+@use "/src/scss/abstracts" as *;
+
+.sub-header {
+    @include desktop-small {
+        grid-column: 1 / span 12;
+    }
+    &__title {
+        display: inline-block;
+        background: $primary;
+        color: $white;
+        font-size: $type-size-200;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        padding: 0.75rem 0.75rem 0.5rem;
+        white-space: nowrap;
+
+        &.secondary {
+            background: $secondary;
+        }
+    }
+}
+
+.section-title {
+    @include desktop-small {
+        font-size: $type-size-600;
+    }
+}
+
+.about {
+    padding: $spacing-700 0;
+    gap: 0 $spacing-600;
+
+    .sub-header {
+        @include desktop-small {
+            grid-column: 2 / span 6;
+        }
+    }
+
+    &__photo {
+        padding-bottom: 1rem;
+        @include desktop-small {
+            grid-column: 2 / span 6;
+            padding-bottom: 0;
+        }
+    }
+
+    &__copy {
+        @include desktop-small {
+            align-self: center;
+            grid-column: 8 / span 4;
+        }
+    }
+}
+
+.problem {
+    padding: $spacing-700 0;
+    gap: 0 $spacing-600;
+
+    @include desktop-small {
+        padding: $spacing-900 0;
+    }
+
+    .sub-header {
+        text-align: center;
+        padding-bottom: $spacing-600;
+        width: 100%;
+    }
+
+    &__feature {
+        background: $white;
+        box-shadow: $shadow-200;
+        border-radius: $border-radius-200;
+        margin-bottom: $spacing-600;
+        border: 1px solid $gray-200;
+
+        @include desktop-small {
+            grid-column: span 4;
+            margin-bottom: 0;
+        }
+    }
+
+    &__photo {
+        aspect-ratio: 16 / 9;
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-position: top center;
+            object-fit: cover;
+            border-top-left-radius: $border-radius-200;
+            border-top-right-radius: $border-radius-200;
+        }
+    }
+
+    &__info {
+        padding: $spacing-600;
+    }
+
+    &__title {
+        font-size: $type-size-300;
+        color: $blue-700;
+    }
+
+    &__copy {
+        padding-block: $spacing-400;
+    }
+}
+
+.solution {
+    padding: $spacing-700 0;
+    gap: 0 $spacing-600;
+
+    @include desktop-small {
+        padding: $spacing-900 0;
+    }
+
+    .sub-header {
+        text-align: center;
+        padding-bottom: $spacing-600;
+
+        @include desktop-small {
+            padding-bottom: $spacing-700;
+        }
+    }
+
+    &__feature {
+        display: grid;
+        gap: $spacing-600 $spacing-800;
+        margin-bottom: $spacing-600;
+
+        @include desktop-small {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            align-items: center;
+            margin-bottom: 0;
+            grid-column: 1 / span 12;
+
+            & + .solution__feature {
+                padding-top: $spacing-900;
+            }
+        }
+
+        &:nth-child(even) {
+            @include desktop-small {
+                .solution__info {
+                    grid-column: 1;
+                    grid-row: 1;
+                    text-align: right;
+                }
+
+                .solution__photo {
+                    grid-column: 2;
+                    grid-row: 1;
+                }
+
+                .solution__copy,
+                .solution__title {
+                    margin-left: auto;
+                }
+            }
+        }
+    }
+
+    &__photo {
+        img {
+            border-radius: $border-radius-200;
+        }
+    }
+
+    &__title {
+        font-weight: 300;
+        color: $blue-700;
+        font-size: $type-size-400;
+        line-height: 1.25em;
+        max-width: 42rem;
+    }
+
+    &__copy {
+        padding: $spacing-600 0;
+        max-width: 38rem;
+    }
+}
+
+.partners {
+    padding: $spacing-700 0;
+    gap: 0 $spacing-600;
+
+    @include desktop-small {
+        padding: $spacing-900 0;
+    }
+
+    .sub-header {
+        text-align: center;
+        padding-bottom: $spacing-600;
+    }
+
+    &__feature {
+        text-align: center;
+
+        @include desktop-small {
+            grid-column: 2 / span 10;
+        }
+    }
+
+    &__photo {
+        aspect-ratio: 3 / 1;
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            margin: 0 auto;
+        }
+    }
+
+    &__title {
+        font-size: $type-size-500;
+        font-weight: bold;
+        color: $primary;
+        line-height: 1.125em;
+    }
+
+    &__copy {
+        padding-top: 1rem;
+        max-width: 64rem;
+        margin: 0 auto;
+    }
+
+    &__group {
+        @include desktop-small {
+            grid-column: 1 / span 12;
+        }
+
+        & + .partners__group {
+            padding-top: $spacing-900;
+        }
+    }
+
+    &__grid {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 2rem 4rem;
+        flex-wrap: wrap;
+
+        & + .partners__grid {
+            padding-top: 2rem;
+        }
+    }
+
+    &__item {
+        width: 100%;
+
+        @include tablet {
+            width: auto;
+        }
+    }
+
+    &__link {
+        display: block;
+        width: 10rem;
+        height: 4rem;
+        margin: 0 auto;
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+    }
+
+    &__list {
+        column-gap: $spacing-700;
+
+        @include tablet {
+            columns: 2;
+        }
+
+        @include desktop-small {
+            columns: 3;
+        }
+
+        @include desktop-medium {
+            columns: 4;
+        }
+
+        li {
+            margin-bottom: $spacing-300;
+        }
+    }
+
+    .divider-header {
+        padding-bottom: $spacing-600;
+    }
+}
+
+.video-walkthrough {
+    text-align: center;
+    padding-bottom: $spacing-700;
+}
+
+.video-thumbnail {
+    width: 100%;
+
+    a {
+        display: block;
+    }
+
+    img {
+        border-radius: $spacing-100;
+    }
+}

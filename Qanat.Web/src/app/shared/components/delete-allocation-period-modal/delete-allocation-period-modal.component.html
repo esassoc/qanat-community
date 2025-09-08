@@ -1,0 +1,22 @@
+<div class="modal">
+    <div class="modal-header">
+        <div>
+            <h3 class="section-title">Delete Allocation Period</h3>
+        </div>
+    </div>
+
+    <div class="modal-body">
+        <div class="copy copy-3">
+            <note>
+                Are you sure you want to delete the
+                <strong>{{ ref.data.AllocationPlanPeriodSimpleDto.AllocationPeriodName }}</strong>
+                period?
+            </note>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button class="btn btn-danger" (click)="save()">Delete Period</button>
+        <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+    </div>
+</div>

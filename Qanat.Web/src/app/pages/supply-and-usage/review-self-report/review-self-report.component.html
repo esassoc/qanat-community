@@ -1,0 +1,30 @@
+@if (geography$ | async; as geography) {
+    <div class="full-width-page">
+        <page-header
+            pageTitle="Review Water Measurement Self Reports"
+            [templateAbove]="templateAbove"
+            [customRichTextTypeID]="customRichTextTypeID"
+            [customRichTextTypeGeographyID]="geography.GeographyID">
+            <ng-template #templateAbove>
+                <div class="back">
+                    <a [routerLink]="['/supply-and-usage', geography.GeographyName.toLowerCase(), 'activity-center']" class="back__link"> Back to Supply & Usage </a>
+                </div>
+            </ng-template>
+        </page-header>
+        <app-alert-display></app-alert-display>
+        @if (selfReports$ | async; as selfReports) {
+            <div class="section-header flex-start">
+                <h2 class="section-title text-primary">Review Self Reports</h2>
+                <div class="review-stats">
+                    <div class="orange">{{ submittedCount | number }} Submitted</div>
+                    <div>{{ approvedCount | number }} Approved</div>
+                </div>
+            </div>
+            <div class="table-responsive mt-2">
+                <qanat-grid height="400px" [rowData]="selfReports" [columnDefs]="columnDefs" [sizeColumnsToFitGrid]="true" (gridReady)="onGridReady($event)"> </qanat-grid>
+            </div>
+        } @else {
+            <div [loadingSpinner]="{ loadingHeight: 700, isLoading: true }"></div>
+        }
+    </div>
+}

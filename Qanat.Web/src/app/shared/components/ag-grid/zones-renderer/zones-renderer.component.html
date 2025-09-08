@@ -1,0 +1,10 @@
+@if (zones.length > 0) {
+    @for (zone of zones; track zone) {
+        <span class="zone">
+            <span class="zone-color" [style.background-color]="zone.ZoneColor"></span>
+            {{ zone.ZoneName }}
+        </span>
+    }
+} @else {
+    N/A
+}

@@ -1,0 +1,46 @@
+@use "/src/scss/abstracts" as *;
+
+body {
+    font-family: $overpass;
+    line-height: 1;
+}
+
+a {
+    color: $primary;
+}
+
+a.no-underline {
+    text-decoration: none !important;
+}
+
+button {
+    font-family: $overpass;
+}
+
+.site-footer a {
+    color: $white;
+    text-decoration: underline;
+}
+
+.divider-header {
+    text-align: center;
+    color: $gray-400;
+    font-size: 0.75rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    gap: $spacing-200;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: -1rem;
+
+    &::before,
+    &::after {
+        display: block;
+        content: "";
+        height: 1px;
+        background: $gray-100;
+        flex: 1;
+    }
+}

@@ -1,0 +1,43 @@
+<div class="modal">
+    <div class="modal-header">
+        <div>
+            <h3 class="section-title">Edit FAQs</h3>
+            <div class="copy copy-2">
+                Add, remove, and sort FAQs on this list. You can add only previously created FAQs. To create new FAQs, visit the
+                <a href="../platform-admin/frequently-asked-questions">Platform Admin</a>
+                .
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-body">
+        <div class="search">
+            <h3 class="module-title">Add New FAQs</h3>
+            @if (frequentlyAskedQuestions$ | async; as faqs) {
+                <div class="search-container">
+                    <ng-select
+                        class="form-control custom"
+                        [items]="faqs"
+                        bindLabel="QuestionText"
+                        name="selectedFaqs"
+                        [(ngModel)]="selectedFaqsModel"
+                        [multiple]="true"
+                        placeholder='(e.g. "What are Water Accounts...")'></ng-select>
+                </div>
+            } @else {
+                <div [loadingSpinner]="{ isLoading: true, loadingHeight: 300 }"></div>
+            }
+        </div>
+
+        <div class="card-body">
+            @if (frequentlyAskedQuestionForPage$ | async; as frequentlyAskedQuestions) {
+                <faq-edit [loadingSpinner]="{ isLoading: isLoadingSubmit }" [frequentlyAskedQuestions]="selectedFaqsModel"></faq-edit>
+            }
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button class="btn btn-primary" (click)="save()">Update and Save</button>
+        <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+    </div>
+</div>

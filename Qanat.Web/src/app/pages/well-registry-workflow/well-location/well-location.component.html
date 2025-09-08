@@ -1,0 +1,94 @@
+<page-header pageTitle="Map Your Well">
+    <workflow-help [customRichTextTypeID]="customRichTextTypeID"></workflow-help>
+</page-header>
+
+<workflow-body>
+    <app-alert-display></app-alert-display>
+
+    <div class="flex-center mb-4">
+        <button-group>
+            <button class="button-group__item" [class.active]="selectByReferenceWell" (click)="toggleSelectType(true)">Find Your Well</button>
+            <button class="button-group__item" [class.active]="!selectByReferenceWell" (click)="toggleSelectType(false)">Plot Your Well</button>
+        </button-group>
+    </div>
+
+    <div [id]="mapID" class="location-card mb-4" [class.crosshair]="!selectByReferenceWell" [style.height]="mapHeight">
+        @if (referenceWells$ | async) {
+            <div></div>
+        }
+        @if (wellRegistrationLocation$ | async) {
+            <div></div>
+        }
+    </div>
+
+    @if (wellRegistrationModel) {
+        <div class="model-information">
+            @if (selectByReferenceWell) {
+                @if (selectedReferenceWell) {
+                    <div>
+                        <div>
+                            <strong>County Permit No:</strong>
+                            {{ selectedReferenceWell.CountyWellPermitNo }}
+                        </div>
+                        <div>
+                            <strong>Latitude:</strong>
+                            {{ selectedReferenceWell.Latitude | number: "0.5-5" }}
+                        </div>
+                        <div>
+                            <strong>Longitude:</strong>
+                            {{ selectedReferenceWell.Longitude | number: "0.5-5" }}
+                        </div>
+                    </div>
+                } @else {
+                    @if (selectByReferenceWell) {
+                        <h3><em>None selected. Please click a marker on the map.</em></h3>
+                        <h3 class="mt-3">
+                            Can't find your well on the map?
+                            <button class="btn btn-secondary btn-sm" (click)="toggleSelectType(false)">Plot your well manually.</button>
+                        </h3>
+                    } @else {
+                        <h3>
+                            <em>No well placed. Please click on the map where your well is located.</em>
+                        </h3>
+                    }
+                }
+            }
+            @if (!selectByReferenceWell) {
+                @if (wellMarker) {
+                    <div>
+                        <strong>Latitude:</strong>
+                        {{ wellMarker?.Latitude | number: "0.5-5" }}
+                    </div>
+                    <div>
+                        <strong>Longitude:</strong>
+                        {{ wellMarker?.Longitude | number: "0.5-5" }}
+                    </div>
+                } @else {
+                    @if (selectByReferenceWell) {
+                        <h3><em>None selected. Please click a marker on the map.</em></h3>
+                        <h3 class="mt-3">
+                            Can't find your well on the map?
+                            <button class="btn btn-secondary btn-sm" (click)="toggleSelectType(false)">Plot your well manually.</button>
+                        </h3>
+                    } @else {
+                        <h3>
+                            <em>No well placed. Please click on the map where your well is located.</em>
+                        </h3>
+                    }
+                }
+            }
+        </div>
+    }
+</workflow-body>
+
+<div class="page-footer">
+    <fresca-button
+        class="ml-auto"
+        (click)="saveAndContinue()"
+        [disabled]="isLoadingSubmit || (selectByReferenceWell && !selectedReferenceWell) || (!selectByReferenceWell && !wellMarker)">
+        @if (isLoadingSubmit) {
+            <span class="fa fa-spinner loading-spinner"></span>
+        }
+        Save & Continue
+    </fresca-button>
+</div>

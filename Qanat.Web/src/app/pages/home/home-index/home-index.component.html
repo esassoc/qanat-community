@@ -1,0 +1,92 @@
+@if (currentUser$ | async; as currentUser) {
+    <homepage-user-portal></homepage-user-portal>
+} @else {
+    <div class="page-body | grid-12">
+        <div class="welcome-col | g-col-8">
+            <section class="hero">
+                <div class="hero__photo">
+                    <img src="../assets/main/home/hero.jpg" alt="Photo of California farmlands" />
+                </div>
+                <div class="hero__info">
+                    <span class="hero__name">Groundwater Accounting Platform</span>
+                    <h1 class="hero__title">
+                        <span class="line line-1">Creating a sustainable future</span>
+                        <br />
+                        <span class="line line-2">for water resources</span>
+                    </h1>
+                </div>
+                <div class="hero__actions welcome-card">
+                    <div class="card-header welcome-card-header">
+                        <h3 class="card-title">Welcome.</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="logged-out">
+                            <div class="hero__btns">
+                                <div class="hero__btns-wrapper">
+                                    <a (click)="login()" class="btn btn-primary">Sign In</a>
+                                </div>
+                                <div class="hero__btns-wrapper">
+                                    <a (click)="signUp()" class="btn btn-primary-outline"> Create an Account </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <div class="about-col | g-col-4">
+            <div class="rich-link">
+                <div class="rich-link-header">
+                    <icon class="page-header-icon" icon="Info"></icon>
+                    <h3>About the Platform</h3>
+                </div>
+                <div class="two-col">
+                    <div class="video-thumbnail">
+                        <a href="https://www.youtube.com/watch?v=Wwwf_R28EPk" target="_blank">
+                            <img src="../assets/main/home/video-walkthrough-thumbnail.jpg" alt="Thumbnail for Video Walkthrough Video" />
+                        </a>
+                    </div>
+                    <div class="rich-link-body copy copy-3">
+                        <p>
+                            The Groundwater Accounting Platform enables water managers, landowners, and water users to track groundwater availability and usage with user-friendly
+                            dashboards and workflows
+                        </p>
+                    </div>
+                </div>
+                <div class="rich-link-footer">
+                    <a [routerLink]="['/help']" class="btn btn-primary-outline btn-sm">Learn more</a>
+                </div>
+            </div>
+            <div class="rich-link">
+                <div class="rich-link-header">
+                    <icon class="page-header-icon" icon="Contact"></icon>
+                    <h3>Bring the Platform to Your GSA</h3>
+                </div>
+                <div class="rich-link-body copy copy-3">
+                    <p>
+                        Interested in bringing the Groundwater Accounting Platform to your community and growers? Want access to a demo instance of the platform, to meet with us
+                        for a 1-on-1 demo, or simply want more information?
+                    </p>
+                </div>
+                <div class="rich-link-footer">
+                    <a [routerLink]="['/contact']" class="btn btn-primary-outline btn-sm">Contact us</a>
+                </div>
+            </div>
+            <div class="rich-link">
+                <div class="rich-link-header">
+                    <icon class="page-header-icon" icon="Question"></icon>
+                    <h3>Frequently Asked Questions</h3>
+                </div>
+                <div class="rich-link-body copy copy-3">
+                    <p>Get the answers to our most common questions about the platform and how to use it.</p>
+                </div>
+                <div class="rich-link-footer">
+                    <a [routerLink]="['/frequently-asked-questions']" class="btn btn-primary-outline btn-sm">View FAQs</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <section class="alert-container grid-12">
+        <app-alert-display></app-alert-display>
+    </section>
+}

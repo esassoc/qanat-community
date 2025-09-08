@@ -1,0 +1,58 @@
+<div class="modal">
+    <div class="modal-header">
+        <div>
+            <h3 class="section-title">Update {{ ref.data.User.FullName }}</h3>
+        </div>
+    </div>
+
+    <div class="modal-body">
+        <form action="" class="form" [formGroup]="formGroup">
+            @if (ref.data.SystemRoleEdit) {
+                <div class="mb-3">
+                    <form-field
+                        [formControl]="formGroup.controls.RoleID"
+                        fieldLabel="System Role"
+                        [formInputOptions]="RolesAsSelectDropdownOptions"
+                        [type]="FormFieldType.Select"></form-field>
+                </div>
+            }
+
+            @if (!ref.data.SystemRoleEdit) {
+                <div class="mb-3">
+                    <form-field
+                        [formControl]="formGroup.controls.ScenarioPlannerRoleID"
+                        fieldLabel="Scenario Planner Role"
+                        [formInputOptions]="ScenarioPlannerRolesAsSelectDropdownOptions"
+                        [type]="FormFieldType.Select"></form-field>
+                </div>
+                <div class="mb-3">
+                    <div class="field">
+                        <label class="field-label">Model Access</label>
+                        <ng-select
+                            #ngSelectComponent
+                            class="search custom multiple"
+                            name="models"
+                            [items]="ModelsAsSelectDropdownOptions"
+                            bindLabel="Label"
+                            [ngModel]="selectedModels"
+                            placeholder="Select Models"
+                            (change)="onSelectedModelsChanged($event)"
+                            [multiple]="true"
+                            [ngModelOptions]="{ standalone: true }"></ng-select>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <form-field [formControl]="formGroup.controls.GETRunCustomerID" fieldLabel="GET Customer ID" [type]="FormFieldType.Number"></form-field>
+                </div>
+                <div class="mb-3">
+                    <form-field [formControl]="formGroup.controls.GETRunUserID" fieldLabel="GET User ID" [type]="FormFieldType.Number"></form-field>
+                </div>
+            }
+        </form>
+    </div>
+
+    <div class="modal-footer">
+        <button class="btn btn-primary" (click)="save()" [disabled]="!formGroup.valid || isLoadingSubmit">Save</button>
+        <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+    </div>
+</div>

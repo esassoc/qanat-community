@@ -1,0 +1,37 @@
+<div class="modal">
+    <div class="modal-header">
+        <div>
+            <h3 class="section-title">Document Upload</h3>
+        </div>
+    </div>
+
+    <div class="modal-body">
+        <form #fileResourceUploadForm="ngForm" class="form grid-12 mb-3">
+            <div class="field g-col-12">
+                <label class="required field-label">Document</label>
+                <div class="file-upload-wrapper pb-2">
+                    <label for="file-upload" class="custom-file-upload">
+                        <input #fileUploadField type="file" class="form-control" name="file-upload" id="fileUpload" (change)="updateFile($event)" required />
+                        <div>{{ file?.name ?? "No file chosen..." }}</div>
+                        <button class="btn btn-primary" (click)="onClickFileUpload($event)"><i class="fas fa-folder-open"></i> Browse</button>
+                    </label>
+                </div>
+                <em>Accepted extensions: PDF, PNG, JPG, DOCX, DOC, XLSX, CSV, TXT</em>
+                <i class="fas fa-file-open"></i>
+            </div>
+            <div class="field g-col-12">
+                <form-field
+                    [type]="FormFieldType.Textarea"
+                    class="m-2 g-col-8"
+                    [formControl]="formGroup.controls.FileDescription"
+                    fieldLabel="File Description"
+                    placeholder="Describe the content of the file."></form-field>
+            </div>
+        </form>
+    </div>
+
+    <div class="modal-footer">
+        <button class="btn btn-primary" type="submit" (click)="submitFileResourceUpload()" [disabled]="!file">Upload</button>
+        <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+    </div>
+</div>

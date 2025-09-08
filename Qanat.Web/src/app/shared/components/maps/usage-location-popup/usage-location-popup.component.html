@@ -1,0 +1,32 @@
+<div class="popup-wrapper" [loadingSpinner]="{ isLoading, loadingHeight: 225 }">
+    @if (usageLocation$ | async; as usageLocation) {
+        <div class="popup-title">
+            <h2>Usage Location: {{ usageLocation.Name }}</h2>
+        </div>
+        <div class="popup-body">
+            <div>
+                <div>Usage Location Type: {{ usageLocation.UsageLocationType.Name }}</div>
+                <div>
+                    Area (Acres):
+                    {{ usageLocation.Area | number: "1.3-3" }}
+                </div>
+                @if (usageLocation && usageLocation.WaterAccount) {
+                    <div>
+                        Water Account:
+                        <a [routerLink]="['/water-accounts', usageLocation.WaterAccount.WaterAccountID]">
+                            {{ usageLocation?.WaterAccount.WaterAccountNumberAndName }}
+                        </a>
+                    </div>
+                }
+                <div>
+                    Parcel:
+                    <a [routerLink]="['/parcels', usageLocation.Parcel.ParcelID]">
+                        {{ usageLocation.Parcel.ParcelNumber }}
+                    </a>
+                </div>
+                <div>{{ usageLocation.SourceOfRecordWaterMeasurementTypeName }} (Acre Feet): {{ usageLocation.SourceOfRecordValueInAcreFeet | number: "1.0-2" }}</div>
+                <div>{{ usageLocation.SourceOfRecordWaterMeasurementTypeName }} (Acre Feet/Acre): {{ usageLocation.SourceOfRecordValueInFeet | number: "1.0-2" }}</div>
+            </div>
+        </div>
+    }
+</div>

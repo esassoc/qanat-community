@@ -1,0 +1,40 @@
+<div class="page-header" [ngClass]="templateBottomRight ? 'page-header-flex no-wrap' : ''">
+    <div>
+        @if (templateAbove) {
+            <ng-container [ngTemplateOutlet]="templateAbove"></ng-container>
+        }
+        @if (preTitle) {
+            <h3 class="page-tab">{{ preTitle }}</h3>
+        }
+        <div [ngClass]="templateRight ? 'flex-between no-wrap' : ''">
+            <h1 class="page-title">
+                <span>
+                    @if (icon) {
+                        <icon class="page-header-icon" [icon]="icon"></icon>
+                    }
+                    {{ pageTitleDisplay }}
+                </span>
+
+                @if (templateTitleAppend) {
+                    <ng-container [ngTemplateOutlet]="templateTitleAppend"></ng-container>
+                }
+            </h1>
+            @if (templateRight) {
+                <div>
+                    <ng-container [ngTemplateOutlet]="templateRight"></ng-container>
+                </div>
+            }
+        </div>
+        @if (customRichTextTypeID) {
+            <div class="copy copy-2">
+                <custom-rich-text [customRichTextTypeID]="customRichTextTypeID" [geographyID]="customRichTextTypeGeographyID"></custom-rich-text>
+            </div>
+        }
+        <ng-content></ng-content>
+    </div>
+    @if (templateBottomRight) {
+        <div>
+            <ng-container [ngTemplateOutlet]="templateBottomRight"></ng-container>
+        </div>
+    }
+</div>

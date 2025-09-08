@@ -1,0 +1,13 @@
+@if (fieldDefinition) {
+    <div class="edit-definition">
+        <page-header [pageTitle]="'Edit Definition for Label: ' + fieldDefinition.CustomRichTextType.CustomRichTextTypeDisplayName"></page-header>
+        <div class="page-body">
+            <app-alert-display></app-alert-display>
+            <editor #tinyMceEditor [init]="tinyMceConfig" [(ngModel)]="fieldDefinition.CustomRichTextContent"></editor>
+        </div>
+        <div class="page-footer flex-end pt-2">
+            <button type="button" class="btn btn-secondary mr-2" (click)="saveDefinition()" [disabled]="isLoadingSubmit">Save</button>
+            <a routerLink="../" class="btn btn-secondary-outline">Cancel</a>
+        </div>
+    </div>
+}

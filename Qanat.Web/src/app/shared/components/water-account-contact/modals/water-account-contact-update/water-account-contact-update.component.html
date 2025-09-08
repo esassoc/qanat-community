@@ -1,0 +1,37 @@
+<div class="modal">
+    <div class="modal-header">
+        <h3 class="section-title">{{ isCreating ? "New" : "Edit" }} Water Account Contact</h3>
+    </div>
+    <div class="modal-body">
+        @if (waterAccountContact$ | async; as waterAccountContact) {
+            @if (!isReviewingAddress) {
+                <water-account-contact-upsert-form [formGroup]="formGroup"></water-account-contact-upsert-form>
+
+                @if (waterAccountContact.WaterAccounts?.length > 0) {
+                    <note class="warning-note">
+                        <div class="note-content">
+                            <icon icon="Warning" class="warning"></icon>
+                            <p>
+                                Are you sure you want to update contact info? Changes will affect {{ waterAccountContact.WaterAccounts?.length }} water account{{
+                                    waterAccountContact.WaterAccounts?.length > 1 ? "s" : ""
+                                }}
+                                associated with this contact.
+                            </p>
+                        </div>
+                    </note>
+                }
+            } @else {
+                <water-account-contact-address-review [formGroup]="formGroup" [mapboxResponseDto]="mapboxResponseDto"></water-account-contact-address-review>
+            }
+        }
+    </div>
+    <div class="modal-footer sticky-footer">
+        @if (isReviewingAddress) {
+            <button class="btn btn-underline back-button" (click)="backToContactForm()"><icon icon="ArrowLeft"></icon> Return to form</button>
+        }
+        <div class="sticky-footer-content">
+            <button class="btn btn-primary mr-2" (click)="save()" [disabled]="!formGroup.valid || isLoadingSubmit">Save</button>
+            <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+        </div>
+    </div>
+</div>

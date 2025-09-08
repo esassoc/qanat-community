@@ -1,0 +1,185 @@
+// @use "ag-grid-community/styles" as ag;
+@use "/src/scss/abstracts" as *;
+
+ag-grid-angular {
+    --ag-spacing: 0.5rem;
+    --ag-cell-horizontal-padding: 0.625rem;
+    --ag-accent-color: #0d5b73;
+    --ag-header-height: 3rem;
+    --ag-header-background-color: #0d5b73;
+    --ag-header-text-color: #ffffff;
+    --ag-header-column-border: 1px solid #004e66;
+    --ag-header-cell-hover-background-color: #15637b;
+    --ag-header-cell-moving-background-color: #15637b;
+    --ag-row-height: 2.75rem;
+    --ag-row-hover-color: rgba(#0d5b73, 0.05);
+    --ag-font-size: 0.75rem;
+
+    .ag-body-viewport.ag-selectable .ag-cell-wrapper {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .ag-root {
+        &-wrapper {
+            border: 1px solid rgba($black, 0.1);
+            border-radius: 4px;
+        }
+    }
+
+    .ag-header {
+        &-cell {
+            &::after {
+                top: 0;
+                height: 100%;
+            }
+        }
+
+        &-icon {
+            color: $white;
+        }
+
+        .flex {
+            &-start,
+            &-between,
+            &-end {
+                flex-wrap: nowrap;
+            }
+        }
+    }
+
+    .ag-row {
+        border-bottom: 1px solid rgba($black, 0.15);
+
+        &-odd {
+            background: $gray-lighter;
+        }
+
+        &:hover {
+            cursor: pointer;
+        }
+
+        &-selected {
+            background: $white;
+            border-bottom: 1px solid rgba($black, 0.15);
+
+            &::before {
+                background: rgba($secondary, 0.15);
+            }
+        }
+    }
+
+    .ag-cell {
+        display: flex;
+        align-items: center;
+
+        &:focus-within {
+            outline: none !important;
+            border: none !important;
+        }
+    }
+
+    .ag-popup {
+        position: initial;
+    }
+
+    .ag-menu {
+        background: $white;
+        border-radius: 0.25rem;
+        padding: 0.25rem;
+    }
+
+    .ag-icon-filter:before {
+        font-size: 0.7rem;
+        color: $white;
+    }
+
+    .ag-filter-active .ag-icon-filter {
+        clip-path: none;
+
+        &:after {
+            content: "*";
+            color: $orange-default;
+            position: relative;
+            left: -10px;
+            top: -14px;
+            font-size: 0.85rem;
+        }
+    }
+
+    .ag-icon-asc:before,
+    .ag-icon-desc:before,
+    .ag-icon-menu:before {
+        color: #fff;
+    }
+
+    .ag-filter {
+        background-color: $white;
+
+        &-condition {
+            padding: 0.5rem 0;
+        }
+
+        &-select {
+            .ag-picker-field-wrapper {
+                min-height: 2rem;
+            }
+        }
+    }
+
+    .btn {
+        display: block;
+        font-family: $overpass;
+        font-size: 0.9375rem;
+        font-weight: 400;
+        line-height: 1em;
+        padding: 0.5rem 1rem 0.3125rem;
+    }
+
+    .ag-cell-value.context-menu-container {
+        overflow: visible;
+    }
+
+    .context-menu-container .ag-cell-value,
+    .ag-body-viewport.ag-selectable .context-menu-container .ag-cell-wrapper {
+        overflow: visible;
+    }
+}
+
+// AG Grids pagination
+.ag-paging-panel .ag-paging-row-summary-panel,
+.ag-paging-panel .ag-paging-page-summary-panel {
+    color: #000;
+}
+
+.ag-row-position-absolute {
+    $target: 0;
+    $index: 100;
+
+    @while $index >0 {
+        &[aria-rowindex="#{$target}"] {
+            z-index: #{$index};
+        }
+
+        $target: $target + 1;
+        $index: $index - 1;
+    }
+}
+
+.ag-popup {
+    z-index: 1000;
+}
+
+.ag-center-cols-container,
+.ag-center-cols-viewport {
+    min-height: 100% !important;
+}
+
+.custom-grid-actions {
+    display: inline-flex;
+    column-gap: $spacing-200;
+}
+
+.red-row {
+    background-color: $red-default !important;
+}

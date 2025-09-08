@@ -1,0 +1,27 @@
+<div class="p-2">
+    <div id="filter-select-buttons" class="mb-2">
+        <input type="radio" name="select-all" id="select" [checked]="state.selectAll" (change)="onSelectAll()" />
+        <label for="select">Select All</label>
+        <input type="radio" name="select-all" id="deselect" [checked]="state.deselectAll" (change)="onDeselectAll()" />
+        <label for="deselect">Deselect All</label>
+    </div>
+    @if (columnContainsMultipleValues) {
+        <div id="filter-select-buttons" class="mb-2">
+            <input type="radio" name="strict-filter" id="strict" [checked]="state.strict" (change)="onSelectStrict()" />
+            <label for="strict">Strict (AND)</label>
+            <input type="radio" name="strict-filter" id="loose" [checked]="!state.strict" (change)="onSelectLoose()" />
+            <label for="loose">Loose (OR)</label>
+        </div>
+    }
+    <div id="filter-options">
+        @for (element of getDropdownValues(); track element) {
+            <label class="filter-option" for="{{ element }}" class="filter-option p-2">
+                <input type="checkbox" name="{{ element }}" id="{{ element }}" class="mr-2" [(ngModel)]="state.filterOptions[element]" (ngModelChange)="updateFilter()" />
+                @if (element === "") {
+                    <span><em>(None)</em></span>
+                }
+                {{ element }}
+            </label>
+        }
+    </div>
+</div>

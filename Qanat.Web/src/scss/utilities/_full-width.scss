@@ -1,0 +1,9 @@
+@use "/src/scss/abstracts" as *;
+
+.full-width-page {
+    padding: 2rem;
+
+    @include desktop-small {
+        padding: 3rem;
+    }
+}

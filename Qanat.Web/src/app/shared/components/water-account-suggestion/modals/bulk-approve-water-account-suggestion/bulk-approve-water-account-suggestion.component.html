@@ -1,0 +1,45 @@
+<div class="modal">
+    <div class="modal-header">
+        <h2 class="section-title">
+            <icon icon="WaterAccounts"></icon>
+            Approve Selected Suggestions
+        </h2>
+    </div>
+
+    <div class="modal-body">
+        <div class="grid-12">
+            <p>
+                Are you sure you want to approve
+                <strong>{{ ref.data.WaterAccountSuggestions.length | number }}</strong>
+                water account{{ ref.data.WaterAccountSuggestions.length == 1 ? "" : "s" }}?
+            </p>
+            <div class="g-col-12">
+                <form action="" class="form" [formGroup]="formGroup">
+                    <div class="field g-col-9">
+                        <div class="form-check">
+                            @if (reportingPeriodSelectOptions$ | async; as selectDropdownOptions) {
+                                <form-field
+                                    [formControl]="formGroup.controls.reportingPeriodID"
+                                    fieldLabel="Reporting Period"
+                                    [type]="FormFieldType.Select"
+                                    [formInputOptions]="selectDropdownOptions"></form-field>
+                            }
+                        </div>
+                        @if (formGroup.touched && formGroup.invalid) {
+                            <div class="alert alert-danger">
+                                @if (formGroup.controls.reportingPeriodID?.errors.required) {
+                                    <div>Please choose a Reporting Period.</div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button class="btn btn-primary" (click)="save()" [disabled]="!formGroup.valid || isLoadingSubmit">Approve Accounts</button>
+        <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+    </div>
+</div>

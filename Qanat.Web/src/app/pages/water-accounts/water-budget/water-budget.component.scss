@@ -1,0 +1,180 @@
+@use "/src/scss/abstracts" as *;
+
+::ng-deep {
+    .page-header {
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+    }
+}
+
+.chart {
+    text-align: center;
+    &__button-group {
+        margin-top: 2rem;
+        justify-content: center;
+        display: inline-flex;
+    }
+}
+
+.last-updated {
+    margin-left: auto;
+    em {
+        color: $gray-700;
+        font-size: 0.875rem;
+    }
+}
+.water-account-title {
+    display: flex;
+    align-items: center;
+    gap: $spacing-200;
+
+    icon {
+        ::ng-deep {
+            color: $blue-700;
+        }
+    }
+}
+
+.water-budget-tag {
+    display: inline-block;
+    padding: $spacing-100 $spacing-200;
+    padding-top: 9px;
+    background: rgba($blue-50, 0.5);
+    color: $blue-700;
+    border: 1px solid $blue-200;
+    border-radius: $border-radius-200;
+    font-size: 1rem;
+    line-height: 1em;
+    transform: translateY(-1px);
+}
+
+.water-budget {
+    display: grid;
+    gap: $spacing-400;
+
+    &__stat {
+        padding: $spacing-500;
+        border: 1px solid $gray-200;
+        background: $gray-50;
+        border-radius: $border-radius-200;
+        display: grid;
+        gap: $spacing-200;
+
+        &-header {
+            text-transform: uppercase;
+            font-size: $type-size-150;
+            letter-spacing: 0.05em;
+        }
+
+        &-value {
+            font-size: 2rem;
+        }
+
+        &-meta {
+            margin-top: -4px;
+            color: $gray-500;
+        }
+
+        &.text-green {
+            background: $green-lighter;
+            border: 1px solid $green-default;
+
+            * {
+                color: $green-darker;
+            }
+
+            .water-budget__stat-value {
+                color: $green-dark;
+            }
+        }
+    }
+}
+
+.statistics {
+    gap: $spacing-400;
+
+    &__module {
+        margin-top: 0;
+    }
+
+    ::ng-deep {
+        dl {
+            display: grid;
+            gap: 2rem;
+            border-bottom: 1px solid $gray-100;
+            padding-bottom: $spacing-400;
+
+            @include desktop-medium {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
+        key-value-pair + key-value-pair {
+            margin-top: unset;
+            padding-top: unset;
+        }
+    }
+
+    &__filters {
+        position: sticky;
+        top: 0;
+        z-index: 9999;
+        gap: $spacing-200;
+        padding: $spacing-200;
+        align-items: center;
+
+        .units {
+            display: flex;
+            align-items: center;
+            gap: $spacing-200;
+            margin-left: $spacing-200;
+            h4 {
+                height: fit-content;
+            }
+        }
+    }
+
+    ::ng-deep &__filter-label {
+        margin-top: $spacing-200;
+    }
+}
+
+.faq-inline {
+    background: $blue-50;
+    border: 1px solid $blue-200;
+    border-radius: $border-radius-200;
+    padding: $spacing-400;
+    display: flex;
+    align-items: center;
+    gap: $spacing-300;
+
+    icon {
+        transform: translateY(-2px);
+        ::ng-deep {
+            svg {
+                display: block;
+                width: 1rem;
+                height: 1rem;
+                color: $blue-500;
+            }
+        }
+    }
+
+    .question {
+        display: flex;
+        align-items: center;
+        gap: $spacing-200;
+
+        h3 {
+            color: $blue-500;
+        }
+    }
+
+    .answer {
+        color: $blue-800;
+
+        p {
+            font-size: 1rem;
+        }
+    }
+}

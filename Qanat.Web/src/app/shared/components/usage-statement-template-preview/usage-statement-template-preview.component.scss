@@ -1,0 +1,163 @@
+@use "/src/scss/abstracts" as *;
+
+.template-preview {
+    .page-count {
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 5%;
+        text-transform: uppercase;
+        text-align: center;
+        color: $gray-700;
+        padding-top: $spacing-400;
+    }
+
+    &-page {
+        height: 618px;
+        max-width: 500px;
+        padding: $spacing-400;
+        border: 1px solid $gray-200;
+        box-shadow:
+            0px 5px 10px 0px #0000001a,
+            0px 18px 18px 0px #00000017,
+            0px 41px 25px 0px #0000000d,
+            0px 73px 29px 0px #00000003,
+            0px 115px 32px 0px #00000000;
+
+        .solid-border {
+            border-top: 2px solid $black;
+        }
+
+        .dashed-border {
+            border-top: 1px dotted $black;
+        }
+
+        .panel {
+            padding: $spacing-200;
+
+            &-shaded {
+                border: 1px solid $gray-200;
+                background-color: $gray-50;
+            }
+
+            &-dashed {
+                border: 1px dashed $gray-500;
+            }
+        }
+
+        icon ::ng-deep svg {
+            height: 20px;
+            width: 80px;
+            color: $blue-500;
+        }
+
+        geography-logo ::ng-deep img {
+            height: 16px;
+        }
+
+        &.page-1 {
+            display: grid;
+            gap: $spacing-200;
+            grid-template-rows: 3fr 5fr 4fr;
+
+            .grid-row {
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                gap: $spacing-100;
+            }
+
+            .info-panels {
+                display: grid;
+                grid-template-columns: 2fr 1fr;
+                gap: $spacing-200;
+            }
+
+            .mailing-area {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+
+                .geography-address {
+                    display: flex;
+                    align-items: flex-start;
+                    margin-top: $spacing-300;
+                    gap: $spacing-200;
+                }
+
+                .mailing-address {
+                    height: 85%;
+                    width: 100%;
+                    margin-left: $spacing-500;
+                }
+
+                .mailing-info {
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    padding: $spacing-400;
+                }
+            }
+        }
+
+        &.page-2 {
+            display: grid;
+            gap: 32px;
+            grid-template-columns: 1fr 3fr;
+
+            .left-column {
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+
+                .account-info {
+                    display: grid;
+                    gap: $spacing-500;
+                }
+            }
+
+            .right-column {
+                display: grid;
+                gap: $spacing-200;
+
+                .grid-row {
+                    display: flex;
+                    flex-direction: column;
+                    gap: $spacing-200;
+                }
+
+                .map-area {
+                    display: grid;
+                    gap: 16px;
+                    grid-template-columns: 3fr 2fr;
+
+                    .map {
+                        height: 120px;
+                        width: 200px;
+                        background-color: #c4e5ad;
+                        border: 1px solid #9fc286;
+                    }
+                }
+            }
+        }
+
+        .editable-area {
+            border: 1px solid transparent;
+
+            .edit-button {
+                position: absolute;
+                z-index: 1;
+                top: 8px;
+                left: 6px;
+            }
+
+            &:hover {
+                background-color: #d3d3d3;
+                background-color: rgba(211, 211, 211, 0.2) !important;
+                border: 1px dashed rgba(#354968, 0.4);
+
+                .hover-edit-button {
+                    display: block;
+                }
+            }
+        }
+    }
+}

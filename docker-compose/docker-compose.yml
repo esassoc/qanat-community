@@ -1,0 +1,27 @@
+version: '3.7'
+
+services:
+  qanat.api:
+    image: qanat/api
+    build:
+      args:
+        pat: ${ESA_NUGET_PAT}
+      context: ..
+      dockerfile: Qanat.API/Dockerfile
+
+  qanat.swagger:
+    image: qanat/swagger
+    build:
+      args:
+        pat: ${ESA_NUGET_PAT}
+      context: ..
+      dockerfile: Qanat.Swagger/Dockerfile
+
+  qanat.gdalapi:
+    image: qanat/gdalapi
+    build:
+      args:
+        pat: ${ESA_NUGET_PAT}
+      context: ..
+      dockerfile: Qanat.GDALAPI/Dockerfile
+    

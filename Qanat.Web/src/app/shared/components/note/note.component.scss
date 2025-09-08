@@ -1,0 +1,36 @@
+@use "sass:color";
+@use "/src/scss/abstracts" as *;
+
+:host {
+    display: flex;
+}
+
+span {
+    background: $yellow-light;
+    padding: 0.5em 1em;
+    border-radius: 8px;
+    display: inline-block;
+    width: 100%;
+
+    &.default {
+        background: $yellow-light;
+    }
+
+    &.danger {
+        background: color.adjust($red-default, $lightness: 20%);
+    }
+
+    &.info {
+        background: $teal-lighter;
+        border: 1px solid $teal-light;
+    }
+
+    &.warning {
+        background: $yellow-light;
+        border: 1px solid $yellow-dark;
+    }
+
+    &.success {
+        background: $green-light;
+    }
+}

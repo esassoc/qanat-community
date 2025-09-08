@@ -1,0 +1,9 @@
+@if (routerLink) {
+    <a [routerLink]="routerLink" [style.background-color]="color" class="name-tag" [style.color]="textColor">
+        {{ name }}
+    </a>
+} @else {
+    <span class="name-tag" [style.background-color]="color" [style.color]="textColor">
+        {{ name }}
+    </span>
+}

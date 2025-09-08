@@ -1,0 +1,73 @@
+<page-header icon="Users" pageTitle="Water Managers" [customRichTextTypeID]="customRichTextTypeID"></page-header>
+<div class="page-body grid-12" [loadingSpinner]="{ isLoading: isLoading }">
+    <app-alert-display></app-alert-display>
+    @if (initialData$ | async) {
+        <div class="g-col-12">
+            <form (ngSubmit)="onSubmit(editGeographyWaterManagersForm)" #editGeographyWaterManagersForm="ngForm" class="form grid-12">
+                <div class="field">
+                    <div class="directions mb-2 copy copy-2">
+                        <p>Select user(s) to add as water managers for this geography:</p>
+                    </div>
+                    <div class="grid-12">
+                        <ng-select class="form-control g-col-8 custom" name="selectedUser" [(ngModel)]="selectedUser" [items]="filteredUsers" bindLabel="UserFullName"> </ng-select>
+                        <button class="btn btn-secondary btn-sm g-col-2" type="button" (click)="addUser()" [disabled]="!selectedUser">Add</button>
+                    </div>
+                </div>
+                <div class="g-col-10">
+                    <p class="copy mb-2">
+                        The following users have been added as water managers. Click the
+                        <span class="fas fa-times-circle text-muted"></span>
+                        icon next to a user to remove them.
+                    </p>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40%">Name</th>
+                                    <th style="width: 50%">Recieves Notifications?</th>
+                                    <th style="flex: 10%"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (user of usersToSave; track user) {
+                                    <tr>
+                                        <td>
+                                            {{ user.UserFullName }}
+                                        </td>
+                                        <td class="notifications-dropdown">
+                                            <ng-select
+                                                class="form-control"
+                                                name="receivesNotifications_{{ user.UserID }}"
+                                                [(ngModel)]="user.ReceivesNotifications"
+                                                bindLabel="label"
+                                                bindValue="value">
+                                                <ng-option [value]="false">No</ng-option>
+                                                <ng-option [value]="true">Yes</ng-option>
+                                            </ng-select>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-underline" (click)="removeUser(user)">
+                                                <i class="fas fa-times-circle"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col-sm-6 text-right">
+                        <button type="submit" class="btn btn-secondary" [disabled]="!editGeographyWaterManagersForm.form.valid || isLoadingSubmit">
+                            @if (isLoadingSubmit) {
+                                <span class="fa fa-spinner loading-spinner"></span>
+                            }
+                            Save
+                        </button>
+                        <a class="btn btn-secondary-outline ml-1" routerLink="..">Cancel</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    }
+</div>

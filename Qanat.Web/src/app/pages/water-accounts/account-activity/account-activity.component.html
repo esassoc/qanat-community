@@ -1,0 +1,195 @@
+@if (waterAccount) {
+    <page-header
+        [pageTitle]="'#' + waterAccount.WaterAccountNumber"
+        [templateTitleAppend]="templateTitleAppend"
+        [templateRight]="templateRight"
+        icon="WaterAccounts"
+        preTitle="Account Activity">
+        <ng-template #templateTitleAppend>
+            @if (waterAccount.WaterAccountName?.length > 0 && waterAccount.WaterAccountName != "" + waterAccount.WaterAccountNumber) {
+                <span class="water-account-name" title="{{ waterAccount.WaterAccountName }}">
+                    {{ waterAccount.WaterAccountName }}
+                </span>
+            }
+            @if (allocationPlans?.length > 0) {
+                <name-tag
+                    [name]="allocationPlans[0].ZoneName"
+                    [color]="allocationPlans[0].ZoneColor"
+                    [routerLink]="[
+                        '/geographies',
+                        waterAccount.Geography.GeographyName.toLowerCase(),
+                        'allocation-plans',
+                        allocationPlans[0].WaterTypeSlug,
+                        allocationPlans[0].ZoneSlug,
+                    ]"
+                    class="zone-tag"
+                    title="Allocation Plan Zone"></name-tag>
+            }
+        </ng-template>
+        <ng-template #templateRight></ng-template>
+    </page-header>
+}
+
+@if (geographyID && !isLoading) {
+    <div class="page-body statistics activity grid-12">
+        <div class="statistics__filters">
+            <reporting-period-select [geographyID]="geographyID" (selectionChanged)="onSelectedReportingPeriodChange($event)"></reporting-period-select>
+            <div class="statistics__filter units">
+                <h5 class="statistics__filter-label">Units</h5>
+                <button-group>
+                    <a class="button-group__item" [ngClass]="{ active: getShowAcresFeet() == false }" (click)="changeUnits(false)"> ac-ft/ac </a>
+                    <a class="button-group__item" [ngClass]="{ active: getShowAcresFeet() == true }" (click)="changeUnits(true)"> ac-ft </a>
+                </button-group>
+            </div>
+        </div>
+        <div class="group group-2">
+            <div class="statistics__module activity__module">
+                <div class="statistics__module-header">
+                    <h3 class="statistics__title-small">Last Transaction</h3>
+                </div>
+                <div class="stat">
+                    <h4 class="stat__value activity__value credit">
+                        {{ (getShowAcresFeet() ? getMostRecentTransactionAmount() : getMostRecentTransactionAmount() / getMostRecentTransactionParcelArea()) | number: "1.2-2" }}
+                        <span class="unit">
+                            {{ getShowAcresFeet() ? acresFeetUnits : acresFeetAcreUnits }}
+                        </span>
+                    </h4>
+                    @if (mostRecentTransaction) {
+                        <p class="stat__meta activity-note">Effective {{ getMostRecentTransactionEffectiveDate() }}</p>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="statistics__filter units flex-center">
+            <button-group>
+                <a class="button-group__item" [ngClass]="{ active: showGrid == false }" (click)="changeShowGrid(false)"> Recent Transactions </a>
+                <a class="button-group__item" [ngClass]="{ active: showGrid == true }" (click)="changeShowGrid(true)"> All Transactions </a>
+            </button-group>
+        </div>
+        @if (!showGrid) {
+            <div class="activity__ledger">
+                <div class="activity__ledger-header">
+                    <div class="effective-date-header">Effective Date</div>
+                    <div class="transaction-header">Transaction</div>
+                    <div class="quantity-header">Quantity</div>
+                </div>
+                @for (transaction of transactions; track transaction) {
+                    <div class="activity__ledger-body">
+                        <div class="activity__ledger-item open-et-rollup">
+                            <div class="effective-date">
+                                {{ transaction.EffectiveDate | date: "MMM d, yyyy" : "+0000" }}
+                            </div>
+                            <div class="transaction">
+                                <div class="icon">
+                                    <div class="icon__fpo debit">
+                                        <i class="fa fa-database"></i>
+                                    </div>
+                                </div>
+                                <div class="info">
+                                    <h4 class="activity__ledger-title large">
+                                        {{ transaction.ParcelSupplies[0].WaterType.WaterTypeName }} Supply
+                                        @if (transaction.ParcelSupplies[0].UserID) {
+                                            <span class="method"> Added by Water Manager </span>
+                                        }
+                                    </h4>
+                                    <div class="activity__ledger-meta">
+                                        @if (transaction.ParcelCount === 1) {
+                                            <span class="parcel">
+                                                <strong>Parcel:</strong>
+                                                {{ transaction.ParcelSupplies[0].Parcel.ParcelNumber }}
+                                            </span>
+                                        }
+                                        @if (transaction.ParcelCount > 1) {
+                                            <span class="parcel">
+                                                <strong> {{ transaction.ParcelCount }} Parcel{{ transaction.ParcelCount > 1 ? "s" : "" }} </strong>
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="quantity">
+                                <div class="amount">
+                                    {{ (getShowAcresFeet() ? transaction.TransactionAmount : transaction.TransactionAmount / totalAcreage) | number: "1.2-2" }}
+                                    <span class="unit">
+                                        {{ getShowAcresFeet() ? acresFeetUnits : acresFeetAcreUnits }}
+                                    </span>
+                                </div>
+                                <div class="balance">
+                                    <strong>Balance:</strong>
+                                    {{
+                                        (getShowAcresFeet()
+                                            ? parcelSuppliesBalance.get(transaction.ParcelActivityKey)
+                                            : parcelSuppliesBalance.get(transaction.ParcelActivityKey) / transaction.ParcelArea
+                                        ) | number: "1.2-2"
+                                    }}
+                                    <span class="unit">
+                                        {{ getShowAcresFeet() ? acresFeetUnits : acresFeetAcreUnits }}
+                                    </span>
+                                </div>
+                                @if (transaction.ParcelSupplies?.length > 1) {
+                                    <div class="toggle" [expandCollapse]="subLedger">
+                                        <i class="fas fa-angle-up"></i>
+                                    </div>
+                                }
+                            </div>
+                            <div class="sub-ledger" #subLedger>
+                                <div class="table-responsive">
+                                    <table class="transactions">
+                                        <thead>
+                                            <tr>
+                                                <th class="transactions__apn">APN</th>
+                                                <th class="transactions__effective">Effective Date</th>
+                                                <th class="transactions__transaction">Transaction Date</th>
+                                                <th class="transactions__description">Transaction</th>
+                                                <th class="transactions__amount">Amount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @for (parcelSupply of transaction.ParcelSupplies; track parcelSupply; let index = $index) {
+                                                <tr class="transactions__item">
+                                                    <td class="transactions__apn">
+                                                        {{ parcelSupply.Parcel.ParcelNumber }}
+                                                    </td>
+                                                    <td class="transactions__effective">
+                                                        {{ parcelSupply.EffectiveDate | date: "M/d/yyyy" : "+0000" }}
+                                                    </td>
+                                                    <td class="transactions__transaction">
+                                                        {{ parcelSupply.TransactionDate | date: "M/d/yyyy" : "+0000" }}
+                                                    </td>
+                                                    <td class="transactions__description">
+                                                        <div>
+                                                            {{ isInitialEstimate(transaction, parcelSupply.Parcel.ParcelID, index) ? "Supply Estimate" : "Correction" }}
+                                                        </div>
+                                                    </td>
+                                                    <td class="transactions__amount">
+                                                        {{ getTransactionAmountToDisplay(parcelSupply) | number: "1.2-2" }}
+                                                        <span class="unit">
+                                                            {{ getShowAcresFeet() ? acresFeetUnits : acresFeetAcreUnits }}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        @if (showGrid) {
+            <div class="transactions-grid">
+                <qanat-grid
+                    height="800px"
+                    [rowData]="parcelSupplyDtos"
+                    [columnDefs]="columnDefs"
+                    downloadFileName="{{ selectedYear }}-transaction-history-{{ waterAccount.WaterAccountNumber }}"
+                    [pagination]="true"
+                    [paginationPageSize]="100"></qanat-grid>
+            </div>
+        }
+    </div>
+} @else {
+    <div [loadingSpinner]="{ isLoading: true }" style="margin-top: 10rem"></div>
+}

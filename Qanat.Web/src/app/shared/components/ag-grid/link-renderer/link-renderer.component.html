@@ -1,0 +1,5 @@
+@if (params.value.LinkDisplay) {
+    <a [className]="params.cssClasses" [routerLink]="[params.inRouterLink + params.value.LinkValue]" [queryParams]="params.value.queryParams">
+        {{ params.value.LinkDisplay }}
+    </a>
+}

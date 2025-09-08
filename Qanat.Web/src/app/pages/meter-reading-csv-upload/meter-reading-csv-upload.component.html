@@ -1,0 +1,47 @@
+@if (geography$ | async; as geography) {
+    <div class="page-wrapper">
+        <page-header [customRichTextTypeID]="richTextTypeID" icon="Allocations" [templateTitleAppend]="templateTitleAppend" pageTitle="Bulk Upload Meter Readings">
+            <ng-template #templateTitleAppend>
+                <name-tag [name]="currentGeography.GeographyName" class="mb-2"></name-tag>
+            </ng-template>
+        </page-header>
+        <div class="page-body meter-reading-page-body grid-12" [loadingSpinner]="{ isLoading: isLoading, loadingHeight: 500 }">
+            <app-alert-display></app-alert-display>
+            @if (meterReadingGridRef) {
+                <qanat-grid-header [grid]="meterReadingGridRef" [leftAlignClearFiltersButton]="true">
+                    <div customGridActionsRight class="custom-grid-actions">
+                        <button class="btn btn-secondary btn-sm" (click)="downloadTemplate(geography)">Download Template</button>
+                        <button class="btn btn-primary btn-sm" (click)="openUploadModal(geography)">Upload</button>
+                        <div class="form-field" class="geography-selector">
+                            @if (currentUserGeographies$ | async; as currentUserGeographies) {
+                                <div class="field">
+                                    <ng-select
+                                        name="Geography"
+                                        [(ngModel)]="currentGeography"
+                                        (ngModelChange)="onGeographySelected($event)"
+                                        [compareWith]="compareGeography"
+                                        [items]="currentUserGeographies"
+                                        [clearable]="false"
+                                        [searchable]="false"
+                                        bindLabel="GeographyName"
+                                        class="custom small">
+                                    </ng-select>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </qanat-grid-header>
+            }
+            @if (meterReadings$ | async; as meterReadings) {
+                <qanat-grid
+                    height="450px"
+                    [rowData]="meterReadings"
+                    [columnDefs]="meterReadingColDefs"
+                    downloadFileName="{{ geography.GeographyName.toLowerCase() }}-meter-readings"
+                    [overrideDefaultGridHeader]="true"
+                    (gridReady)="onGridReady($event)"
+                    (gridRefReady)="onGridRefReady($event)"></qanat-grid>
+            }
+        </div>
+    </div>
+}

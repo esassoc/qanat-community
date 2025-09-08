@@ -1,0 +1,37 @@
+<div class="modal">
+    <div class="modal-header">
+        <div><h2>New Statement Batch</h2></div>
+    </div>
+    <div class="modal-body">
+        <app-alert-display [clearAlertsOnDestroy]="false"></app-alert-display>
+        <form action="" class="form grid-12" [formGroup]="formGroup">
+            <form-field [formControl]="formGroup.controls.StatementBatchName" fieldLabel="Name" placeholder="Name" [type]="FormFieldType.Text"> </form-field>
+
+            @if (statementTemplateSelectOptions$ | async; as statementTemplateSelectOptions) {
+                <form-field
+                    [formControl]="formGroup.controls.StatementTemplateID"
+                    fieldLabel="Template"
+                    [formInputOptions]="statementTemplateSelectOptions"
+                    [type]="FormFieldType.Select">
+                </form-field>
+            }
+
+            @if (selectedReportingPeriodNameAndDateRange) {
+                <note noteType="info" class="flex-between">
+                    <div class="form-note">
+                        <icon icon="Info"></icon>
+                        <p>
+                            You will create <b>{{ ref.data.WaterAccountIDs.length }} Statements</b> for the Water Accounts selected during the
+                            <b>{{ selectedReportingPeriodNameAndDateRange }}</b>
+                        </p>
+                    </div>
+                </note>
+            }
+        </form>
+    </div>
+
+    <div class="modal-footer">
+        <button class="btn btn-primary" (click)="save()" [disabled]="!formGroup.valid">Create New Batch</button>
+        <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+    </div>
+</div>

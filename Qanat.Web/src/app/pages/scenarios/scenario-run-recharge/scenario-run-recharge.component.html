@@ -1,0 +1,108 @@
+@if (getModel$ | async; as model) {
+    <page-header icon="WaterDropFilled" [templateTitleAppend]="templateTitleAppend" [customRichTextTypeID]="richTextTypeID" pageTitle="Recharge">
+        <ng-template #templateTitleAppend>
+            <name-tag class="mb-3" [name]="model.ModelName"></name-tag>
+        </ng-template>
+    </page-header>
+}
+
+<div class="page-body">
+    <form class="form grid-12" #addAWellForm="ngForm">
+        <div class="field">
+            <label class="field-label large required">1. Name your scenario run</label>
+            <input type="text" class="form-control" name="scenarioRunName" [(ngModel)]="model.ScenarioRunName" />
+        </div>
+
+        <scenario-map [modelShortName]="modelShortName" [selecting]="isSelectingMapLocation" (locationSelected)="onMapLocationSelection($event)" (mapReady)="onMapReady($event)">
+            @if (!mapLoading) {
+                <scenario-map-marker-layer
+                    [map]="map"
+                    [markerObjects]="model.ScenarioRechargeSites"
+                    [markerIcon]="rechargeSiteMarkerIcon"
+                    [selectedMarkerObject]="selectedRechargeSite"
+                    [selectedMarkerIcon]="selectedRechargeSiteMarkerIcon"
+                    (markerSelected)="onMapMarkerSelection($event)"></scenario-map-marker-layer>
+                <scenario-map-marker-layer
+                    [map]="map"
+                    [markerObjects]="model.ScenarioObservationPoints"
+                    [markerIcon]="observationPointMarkerIcon"
+                    [selectedMarkerObject]="selectedObservationPoint"
+                    [selectedMarkerIcon]="selectedObservationPointMarker"
+                    (markerSelected)="onMapMarkerSelection($event)"></scenario-map-marker-layer>
+                <monitoring-wells-layer [map]="map" [layerControl]="layerControl" [displayOnLoad]="false" [editingMap]="isSelectingMapLocation"></monitoring-wells-layer>
+            }
+        </scenario-map>
+
+        <div class="field g-col-6">
+            <label class="field-label large required">2. Add one or more recharge sites</label>
+
+            <div class="copy copy-3 mb-2">
+                <p class="field-instructions">
+                    Select "+ Add" and click on the map to place a recharge site. Provide an estimated volume of recharge per month (in ac-ft) in the field below.
+                </p>
+            </div>
+
+            @for (rechargeSite of model.ScenarioRechargeSites; track rechargeSite; let i = $index) {
+                <scenario-map-marker-input-card
+                    [latitude]="rechargeSite.Latitude"
+                    [longitude]="rechargeSite.Longitude"
+                    [selected]="rechargeSiteSelected(rechargeSite)"
+                    (cardSelected)="selectRechargeSite(i)"
+                    (cardDeleted)="deleteRechargeSite(i)"
+                    colorScheme="blue">
+                    <div card-header class="field">
+                        <label class="field-label required">Label</label>
+                        <input type="text" class="form-control" name="rechargeSiteName-{{ i }}" [(ngModel)]="rechargeSite.RechargeSiteName" />
+                    </div>
+                    <div card-input class="field mb-2">
+                        <label class="field-label required">Estimated Volume (ac-ft/month)</label>
+                        <input type="number" class="form-control" name="estimatedVolume-{{ i }}" [(ngModel)]="rechargeSite.EstimatedVolume" />
+                    </div>
+                </scenario-map-marker-input-card>
+            }
+
+            <div class="mt-3">
+                <button class="btn btn-sm btn-primary-outline" (click)="addRechargeSite()">
+                    <i class="fas fa-plus"></i>
+                    Add
+                </button>
+            </div>
+        </div>
+
+        <div class="field g-col-6">
+            <label class="field-label large">3. Add any observation points</label>
+
+            <div class="copy copy-3 mb-2">
+                <p class="field-instructions">Select "+ Add" and click on the map to place an observation point that will gather water level data in the scenario run.</p>
+            </div>
+
+            @for (point of model.ScenarioObservationPoints; track point; let i = $index) {
+                <scenario-map-marker-input-card
+                    [latitude]="point.Latitude"
+                    [longitude]="point.Longitude"
+                    [selected]="observationPointSelected(point)"
+                    (cardSelected)="selectObservationPoint(i)"
+                    (cardDeleted)="deleteObservationPoint(i)"
+                    colorScheme="yellow">
+                    <div card-header class="field">
+                        <label class="field-label required">Label</label>
+                        <input type="text" class="form-control" name="observationPointName-{{ i }}" [(ngModel)]="point.ObservationPointName" />
+                    </div>
+                </scenario-map-marker-input-card>
+            }
+
+            <div class="mt-3">
+                <button class="btn btn-sm btn-primary-outline" (click)="addObservationPoint()">
+                    <i class="fas fa-plus"></i>
+                    Add
+                </button>
+            </div>
+        </div>
+
+        <div class="form__actions">
+            <label class="field-label large required my-2">4. Run your scenario</label>
+
+            <button class="btn btn-primary" (click)="runScenario()" [disabled]="isLoadingSubmit" [buttonLoading]="isLoadingSubmit">Run Scenario</button>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,13 @@
+@if (geography$ | async) {
+    <page-header [customRichTextTypeID]="customRichTextTypeID" pageTitle="Account Sign-up Configuration" icon="Wells" [templateRight]="templateRight">
+        <ng-template #templateRight>
+            <label class="switch">
+                <input type="checkbox" [(ngModel)]="isEnabled" (change)="onToggle()" />
+                <span class="toggle toggle-orange"></span>
+            </label>
+        </ng-template>
+    </page-header>
+}
+<div class="page-body">
+    <app-alert-display></app-alert-display>
+</div>

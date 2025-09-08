@@ -1,0 +1,54 @@
+<div class="nav-container">
+    <div class="dashboard-navbar">
+        <button class="tab" [class.active]="activeTab == 'Inbox'" (click)="changeActiveTab('Inbox')" (keyup)="changeActiveTab('Inbox')">
+            <icon icon="Inbox" class="large"></icon>
+            Inbox
+            @if (inboxSupportTickets) {
+                ({{ inboxSupportTickets.length }})
+            }
+        </button>
+        <button class="tab" [class.active]="activeTab == 'Active'" (click)="changeActiveTab('Active')" (keyup)="changeActiveTab('Active')">
+            <icon icon="CircleCheckmark"></icon>
+            Active
+            @if (activeSupportTickets) {
+                ({{ activeSupportTickets.length }})
+            }
+        </button>
+        <button class="tab" [class.active]="activeTab == 'On Hold'" (click)="changeActiveTab('On Hold')" (keyup)="changeActiveTab('On Hold')">
+            <icon icon="Info"></icon>
+            On Hold
+            @if (onHoldSupportTickets) {
+                ({{ onHoldSupportTickets.length }})
+            }
+        </button>
+        <button class="tab" [class.active]="activeTab == 'Closed'" (click)="changeActiveTab('Closed')" (keyup)="changeActiveTab('Closed')">
+            <icon icon="CircleX"></icon>
+            Closed
+            @if (closedSupportTickets) {
+                ({{ closedSupportTickets.length }})
+            }
+        </button>
+    </div>
+</div>
+
+<div class="full-width-page">
+    <page-header [pageTitle]="activeTab" preTitle="Questions & Support Desk" [icon]="activeTabIcon[activeTab]" [templateRight]="templateRight"> </page-header>
+    <ng-template #templateRight>
+        <button class="btn btn-primary" (click)="openCreateNewModal()">+ Add Support Ticket</button>
+    </ng-template>
+
+    <app-alert-display></app-alert-display>
+
+    <div [loadingSpinner]="{ isLoading: isLoading }">
+        @if (supportTicketDtos$ | async) {
+            <qanat-grid
+                [rowData]="rowData"
+                [columnDefs]="columnDefs"
+                downloadFileName="{{ activeTab.toLowerCase() }}-support-tickets"
+                [pagination]="true"
+                [suppressColumnSizing]="true"
+                (gridReady)="onGridReady($event)">
+            </qanat-grid>
+        }
+    </div>
+</div>

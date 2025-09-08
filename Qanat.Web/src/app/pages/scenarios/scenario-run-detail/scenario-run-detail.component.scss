@@ -1,0 +1,31 @@
+@use "/src/scss/abstracts" as *;
+
+.page-title {
+    padding-bottom: 0;
+}
+
+.info {
+    .copy {
+        h4 {
+            color: $primary;
+
+            & + * {
+                margin-top: 0;
+            }
+        }
+    }
+}
+
+.meta {
+    p {
+        color: #9a9a9a;
+    }
+}
+
+.scenario-name {
+    color: $gray-default;
+}
+
+.translate-y {
+    transform: translateY(6px);
+}

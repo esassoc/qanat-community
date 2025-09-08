@@ -1,0 +1,33 @@
+@use "/src/scss/abstracts" as *;
+
+.page-header {
+    border-bottom: 1px solid $gray-200;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: $spacing-400;
+    .page-header-left {
+        display: flex;
+        align-items: flex-end;
+        gap: $spacing-600;
+        .page-title {
+            padding: 0;
+        }
+        .logo {
+            max-width: 175px;
+        }
+    }
+}
+
+.email {
+    text-decoration: underline;
+    color: $secondary;
+}
+
+.phone {
+    color: $gray-default;
+}
+
+a:hover {
+    cursor: pointer;
+}

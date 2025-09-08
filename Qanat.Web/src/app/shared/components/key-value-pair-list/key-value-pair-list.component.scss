@@ -1,0 +1,13 @@
+@use "/src/scss/abstracts" as *;
+
+dl {
+    display: grid;
+    margin: 0;
+
+    ::ng-deep {
+        key-value-pair + key-value-pair {
+            padding-top: $spacing-400;
+            margin-top: $spacing-400;
+        }
+    }
+}

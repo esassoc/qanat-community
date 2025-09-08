@@ -1,0 +1,34 @@
+@if (waterAccount && zoneGroup && zone) {
+    <div class="card grid-12 zone-card">
+        <div class="card-body g-col-7">
+            <p class="pb-3 copy copy-1">
+                Water Account
+                <b>#{{ waterAccount.WaterAccountNumber }}</b>
+                is in
+                <b [style.color]="zone.ZoneColor">{{ zone.ZoneName }},</b>
+                1 of {{ zoneGroup.ZoneList.length }} total zones in the {{ waterAccount.Geography.GeographyName }} Geography's
+                <b>{{ zoneGroup.ZoneGroupName }}</b>
+                .
+            </p>
+            <p class="pb-4 copy copy-2">These zones are the boundaries that define and separate different allocations across the GSA.</p>
+            <a class="btn btn-primary" [routerLink]="['/geographies', waterAccount.Geography.GeographyName.toLowerCase(), 'allocation-plans']" target="_blank">
+                View All {{ waterAccount.Geography.GeographyName }} Allocation Plans
+            </a>
+        </div>
+        @if (geography$ | async; as geography) {
+            <div class="g-col-5">
+                <qanat-map (onMapLoad)="handleMapReady($event)" mapHeight="400px" [showLayerControl]="false" [boundingBox]="geography.BoundingBox">
+                    @if (mapIsReady) {
+                        <zone-group-layer
+                            [displayOnLoad]="true"
+                            [zoneGroupID]="zoneGroup.ZoneGroupID"
+                            [zoneGroupName]="zoneGroup.ZoneGroupName"
+                            [map]="map"
+                            [fitToBounds]="true"
+                            [layerControl]="layerControl"></zone-group-layer>
+                    }
+                </qanat-map>
+            </div>
+        }
+    </div>
+}

@@ -1,0 +1,12 @@
+@use "/src/scss/abstracts" as *;
+
+.water-account-title {
+    &__name {
+        font-size: $type-size-300;
+    }
+    &__id {
+        color: $gray-default;
+        font-size: $type-size-150;
+        font-weight: normal;
+    }
+}

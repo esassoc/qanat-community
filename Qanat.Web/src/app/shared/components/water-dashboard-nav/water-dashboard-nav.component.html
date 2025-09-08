@@ -1,0 +1,94 @@
+@if (user$ | async) {
+    <div class="nav-container">
+        <div class="dashboard-navbar">
+            <a routerLink="/water-dashboard/activity-center" class="tab" routerLinkActive="active">
+                <icon icon="ActivityCenter"></icon>
+                Activity Center
+            </a>
+            <a routerLink="/water-dashboard/water-accounts" class="tab" routerLinkActive="active">
+                <icon icon="WaterAccounts"></icon>
+                Water Accounts
+            </a>
+            <a routerLink="/water-dashboard/parcels" class="tab" routerLinkActive="active">
+                <icon icon="Parcels"></icon>
+                Parcels
+            </a>
+            <a routerLink="/water-dashboard/wells" class="tab" routerLinkActive="active">
+                <icon icon="Wells"></icon>
+                Wells
+            </a>
+            <a routerLink="/water-dashboard/usage-locations" class="tab" routerLinkActive="active">
+                <icon icon="Map"></icon>
+                Usage Locations
+            </a>
+            @if (canViewManageTools) {
+                <a routerLink="/water-dashboard/users" class="tab" routerLinkActive="active">
+                    <icon icon="Users"></icon>
+                    Users
+                </a>
+                <a routerLink="/water-dashboard/contacts" class="tab" routerLinkActive="active">
+                    <icon icon="Contact"></icon>
+                    Contacts
+                </a>
+            }
+
+            @if (geography) {
+                <ul class="manager-tools-nav">
+                    <li class="nav-item dropdown" routerLinkActive="active">
+                        @if (canViewManageTools) {
+                            <a
+                                href="javascript:void(0);"
+                                [dropdownToggle]="managerToolsDropdown"
+                                class="nav-link dropdown-toggle"
+                                role="button"
+                                data-toggle="dropdown"
+                                aria-haspopup="true"
+                                aria-expanded="false">
+                                <icon icon="Manage"></icon>
+                                <span class="nav-link__label">
+                                    Manager Tools
+                                    <icon icon="AngleDown" class="small"></icon>
+                                </span>
+                            </a>
+                        }
+                        <div #managerToolsDropdown class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <div class="dropdown-section-header">Water Accounts</div>
+                            <a routerLink="/water-accounts/{{ geographySlug }}/suggestions" class="dropdown-item">Water Account Suggestions</a>
+                            <a class="dropdown-item" (click)="createWaterAccountModal()">Create New Water Account</a>
+                            <div class="dropdown-divider"></div>
+                            <div class="dropdown-section-header">Parcels</div>
+                            <a routerLink="/parcels/{{ geographySlug }}/update" class="dropdown-item">Update Parcels</a>
+                            <a routerLink="/parcels/{{ geographySlug }}/zones/upload" class="dropdown-item">Assign Parcels to Zones</a>
+                            <a routerLink="/parcels/{{ geographySlug }}/bulk-actions" class="dropdown-item">Bulk Actions</a>
+                            <div class="dropdown-divider"></div>
+                            <div class="dropdown-section-header">Usage Locations</div>
+                            <a [routerLink]="['/supply-and-usage', geographySlug, 'usage-locations']" class="dropdown-item">Update Usage Locations</a>
+                            <a routerLink="/usage-location-bulk-actions/{{ geographySlug }}" class="dropdown-item">Bulk Actions</a>
+                            <div class="dropdown-divider"></div>
+                            <div class="dropdown-section-header">Wells</div>
+                            @if (geography?.GeographyConfiguration?.WellRegistryEnabled) {
+                                <a routerLink="/wells/{{ geographySlug }}/review-submitted-wells" class="dropdown-item"> Review Submitted Wells </a>
+                            }
+                            @if (geography?.GeographyConfiguration.WellRegistryEnabled) {
+                                <a routerLink="/wells/{{ geographySlug }}/well-registrations" class="dropdown-item"> Well Registrations </a>
+                            }
+                            @if (geography?.GeographyConfiguration.WellRegistryEnabled) {
+                                <a routerLink="/wells/{{ geographySlug }}/reference-wells" class="dropdown-item"> Reference Wells </a>
+                            }
+                            <a routerLink="/wells/{{ geographySlug }}/bulk-upload" class="dropdown-item">Bulk Upload Wells</a>
+                            @if (geography?.GeographyConfiguration.MetersEnabled) {
+                                <a routerLink="/wells/{{ geographySlug }}/meters" class="dropdown-item">Meters</a>
+                            }
+                            @if (geography?.GeographyConfiguration.MetersEnabled) {
+                                <a [routerLink]="['/geographies', geographySlug, 'bulk-upload-meter-readings']" class="dropdown-item"> Bulk Upload Meter Readings </a>
+                            }
+                            <div class="dropdown-divider"></div>
+                            <div class="dropdown-section-header">Contacts</div>
+                            <a [routerLink]="['/contacts', geographySlug, 'bulk-actions']" class="dropdown-item">Bulk Actions</a>
+                        </div>
+                    </li>
+                </ul>
+            }
+        </div>
+    </div>
+}

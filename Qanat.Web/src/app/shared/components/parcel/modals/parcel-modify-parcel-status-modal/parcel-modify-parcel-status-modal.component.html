@@ -1,0 +1,24 @@
+<div class="modal">
+    <div class="modal-header">
+        <h2>Modify Parcel Status</h2>
+    </div>
+
+    <div class="modal-body">
+        <app-alert-display></app-alert-display>
+        @if (parcel$ | async; as parcel) {
+            <form action="" class="grid-12" [formGroup]="formGroup">
+                <form-field [formControl]="formGroup.controls.ParcelStatusID" [fieldLabel]="'Status'" [formInputOptions]="statusOptions" [type]="FormFieldType.Select"></form-field>
+                <note>
+                    Are you sure you want to update the status for parcel
+                    <strong>{{ parcel.ParcelNumber }}</strong>
+                    ?
+                </note>
+            </form>
+        }
+    </div>
+
+    <div class="modal-footer">
+        <button class="btn btn-primary" (click)="save()" [class.disabled]="!formGroup.valid">Modify Parcel Status</button>
+        <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+    </div>
+</div>

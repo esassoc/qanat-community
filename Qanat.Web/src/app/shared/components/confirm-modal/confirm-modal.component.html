@@ -1,0 +1,20 @@
+<div class="modal">
+    <div class="modal-header">
+        <h2 class="section-title">
+            {{ modalContext.title }}
+        </h2>
+    </div>
+
+    <div class="modal-body">
+        <div class="modal-body__content" [innerHtml]="modalContext.message | trustHtml"></div>
+    </div>
+
+    <div class="modal-footer">
+        <button class="btn {{ modalContext.buttonClassYes }}" (click)="save()">
+            {{ modalContext.buttonTextYes }}
+        </button>
+        <button class="btn btn-primary-outline" (click)="close()">
+            {{ modalContext.buttonTextNo }}
+        </button>
+    </div>
+</div>

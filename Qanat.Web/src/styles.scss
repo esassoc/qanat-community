@@ -1,0 +1,27 @@
+// VENDORS
+// Imported styles from third-parties
+@use "scss/vendors";
+
+// ABSTRACTS
+// Variables, mixins, and maps
+@use "scss/abstracts";
+
+// BASE
+// Global reset, typography, and layout
+@use "scss/base";
+
+// COMPONENTS
+// Reusable component patterns
+@use "scss/components";
+
+// UTILITIES
+// Helper classes
+@use "scss/utilities";
+
+// TEMPLATES
+// Reusable page templates
+@use "scss/templates";
+
+// SHAME
+// Miscellaneous styles
+@use "scss/shame";

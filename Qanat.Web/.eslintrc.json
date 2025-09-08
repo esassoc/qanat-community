@@ -1,0 +1,52 @@
+{
+    "root": true,
+    "ignorePatterns": ["projects/**/*", "**/generated/**/*"],
+    "plugins": ["unused-imports", "simple-import-sort", "@typescript-eslint"],
+    "parserOptions": {
+        "project": "./tsconfig.json"
+    },
+    "overrides": [
+        {
+            "files": ["*.ts"],
+            "extends": [
+                "eslint:recommended",
+                "plugin:@typescript-eslint/recommended",
+                "plugin:@angular-eslint/recommended",
+                "plugin:@angular-eslint/template/process-inline-templates"
+            ],
+            "rules": {
+                "quotes": [
+                    "error",
+                    {
+                        "allowTemplateLiterals": true
+                    }
+                ],
+                "@typescript-eslint/no-unused-vars": "warn",
+                "@typescript-eslint/no-explicit-any": "warn",
+                "unused-imports/no-unused-imports": "error",
+                "@typescript-eslint/indent": [
+                    "error",
+                    4,
+                    {
+                        "FunctionDeclaration": {
+                            "parameters": "first"
+                        },
+                        "FunctionExpression": {
+                            "parameters": "first"
+                        }
+                    }
+                ],
+                "import/prefer-default-export": "off",
+                "@typescript-eslint/lines-between-class-members": "off",
+                "@typescript-eslint/dot-notation": "error",
+                "@angular-eslint/template/label-has-associated-control": ["off"],
+                "semi": "warn"
+            }
+        },
+        {
+            "files": ["*.html"],
+            "extends": ["plugin:@angular-eslint/template/recommended", "plugin:@angular-eslint/template/accessibility"],
+            "rules": {}
+        }
+    ]
+}

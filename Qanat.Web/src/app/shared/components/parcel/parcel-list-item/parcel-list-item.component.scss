@@ -1,0 +1,58 @@
+@use "/src/scss/abstracts" as *;
+
+.text-small {
+    font-size: $type-size-100;
+}
+
+.list-item {
+    background-color: $white;
+    border: 1px solid $gray-light;
+    border-radius: $spacing-100;
+    padding: $spacing-200;
+    margin-bottom: $spacing-300;
+    gap: $spacing-200;
+
+    flex-wrap: nowrap;
+    overflow: hidden;
+    width: 100%;
+    text-overflow: ellipsis;
+
+    > * {
+        flex: 8%;
+    }
+
+    .parcel-details {
+        flex: 75%;
+        line-height: 1.5rem;
+        min-width: 0;
+        white-space: nowrap;
+
+        p {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    }
+
+    .zone-color-wrapper {
+        flex: 5%;
+        align-self: start;
+        margin-top: 6px;
+
+        .zone-color {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+    }
+
+    .remove {
+        &:hover {
+            cursor: pointer;
+        }
+
+        icon ::ng-deep svg {
+            height: 14px;
+            width: 14px;
+        }
+    }
+}

@@ -1,0 +1,46 @@
+@use "/src/scss/abstracts" as *;
+:host,
+.field {
+    height: 100%;
+}
+
+.units-wrapper {
+    position: relative;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    .units {
+        position: absolute;
+        pointer-events: none;
+        right: 2rem;
+        color: $gray-700;
+    }
+}
+
+.radio-options {
+    display: flex;
+    gap: $spacing-400;
+    align-items: center;
+    height: $spacing-700;
+}
+
+.check-label {
+    display: flex;
+    gap: $spacing-400;
+    input {
+        transform: scale(150%);
+        margin-left: $spacing-100;
+    }
+}
+
+input[disabled] {
+    background-color: $gray-200 !important;
+}
+
+[disabled] {
+    background-color: $gray-200 !important;
+}
+
+::ng-deep .ng-select.ng-select-disabled > .ng-select-container {
+    background-color: $gray-200 !important;
+}

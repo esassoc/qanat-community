@@ -1,0 +1,23 @@
+<div class="modal-header">
+    <h2 class="modal-title"><icon icon="Map"></icon>Update Usage Location Type</h2>
+</div>
+<div class="modal-body" [loadingSpinner]="{ isLoading: isLoading, loadingHeight: 200 }">
+    <form class="form grid-12" [formGroup]="bulkUpdateUsageLocationTypeForm">
+        <form-field
+            class="g-col-12"
+            [formInputOptions]="usageLocationTypeSelectDropdownOptions$ | async"
+            [formControl]="bulkUpdateUsageLocationTypeForm.controls.UsageLocationTypeID"
+            fieldLabel="Usage Location Type"
+            [type]="FormFieldType.Select">
+        </form-field>
+
+        <form-field class="g-col-12" [formControl]="bulkUpdateUsageLocationTypeForm.controls.Note" fieldLabel="Note" [type]="FormFieldType.Textarea" placeholder="Enter Note">
+        </form-field>
+    </form>
+
+    <note noteType="info" class="g-col-12 mt-3"> Updating {{ ref.data.UsageLocationIDs?.length }} usage location{{ ref.data.UsageLocationIDs?.length === 1 ? "" : "s" }}.</note>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-primary" (click)="save()" [buttonLoading]="isLoadingSubmit" [disabled]="!bulkUpdateUsageLocationTypeForm.valid || isLoadingSubmit">Save</button>
+    <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+</div>

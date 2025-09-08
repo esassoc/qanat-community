@@ -1,0 +1,22 @@
+@use "/src/scss/abstracts" as *;
+
+table {
+    button {
+        font-size: $type-size-400;
+        color: $gray-default;
+
+        &:hover {
+            color: $red-default;
+        }
+    }
+
+    .notifications-dropdown ng-select {
+        max-width: 18rem;
+    }
+}
+
+.page-body.has-spinner {
+    .spinner-container {
+        top: 10rem;
+    }
+}

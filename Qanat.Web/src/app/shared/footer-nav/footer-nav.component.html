@@ -1,0 +1,58 @@
+<footer class="site-footer grid-12">
+    <a [routerLink]="['/']" class="site-logo | g-col-3">
+        <icon icon="Logo"></icon>
+    </a>
+
+    <ul class="site-footer__links | g-col-3">
+        <li class="site-footer__item">
+            <a [routerLink]="['/about']" class="site-footer__link">About</a>
+        </li>
+
+        <li class="site-footer__item">
+            <a [routerLink]="['/contact']" class="site-footer__link">Contact</a>
+        </li>
+
+        <li class="site-footer__item">
+            <a [routerLink]="['/geographies']" class="site-footer__link">Geographies</a>
+        </li>
+    </ul>
+
+    <ul class="site-footer__links | g-col-3">
+        <li class="site-footer__item">
+            <a [routerLink]="['/help']" class="site-footer__link">Help</a>
+        </li>
+
+        <li class="site-footer__item">
+            <a [routerLink]="['/frequently-asked-questions']" class="site-footer__link">Frequently Asked Questions</a>
+        </li>
+
+        <li class="site-footer__item">
+            <a [routerLink]="['/grower-guide']" class="site-footer__link">Guide for Growers</a>
+        </li>
+
+        <li class="site-footer__item">
+            <a [routerLink]="['/manager-guide']" class="site-footer__link">Guide for Water Manager</a>
+        </li>
+    </ul>
+
+    <ul class="site-footer__links | g-col-3">
+        <li class="site-footer__item">
+            <a [routerLink]="['/news-and-announcements']" class="site-footer__link">News & Announcements</a>
+        </li>
+
+        <li class="site-footer__item">
+            <a [routerLink]="['/acknowledgements']" class="site-footer__link">Acknowledgements</a>
+        </li>
+
+        <li class="site-footer__item">
+            <a [routerLink]="['/license']" class="site-footer__link">License & Copyright</a>
+        </li>
+    </ul>
+
+    @if (systemInfo$ | async; as systemInfo) {
+        <div class="system-info g-col-12">
+            <span class="system-info__detail" [title]="systemInfo.FullInformationalVersion"> Version: {{ systemInfo.Version }} - {{ systemInfo.Environment }} </span>
+            <span class="system-info__detail">Built on: {{ systemInfo.CompilationDateTime | date: "short" }}</span>
+        </div>
+    }
+</footer>

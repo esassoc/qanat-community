@@ -1,0 +1,41 @@
+@use "/src/scss/abstracts" as *;
+
+.site-footer {
+    background-color: $blue-700;
+    color: $gray-0;
+    padding: $spacing-700 $spacing-600;
+
+    &__links {
+        display: grid;
+        gap: $spacing-200;
+    }
+
+    &__link {
+        display: block;
+        font-size: $type-size-200;
+        text-decoration: none;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+}
+
+.system-info {
+    display: inline-flex;
+    gap: $spacing-300;
+    justify-content: flex-end;
+
+    &__detail {
+        display: block;
+        font-size: $type-size-050;
+        font-family: $overpass-mono;
+        text-transform: uppercase;
+        line-height: 1;
+        letter-spacing: 0.05em;
+        background: rgba($gray-0, 0.05);
+        padding: $spacing-300;
+        padding-bottom: 10px;
+        border-radius: $border-radius-200;
+    }
+}

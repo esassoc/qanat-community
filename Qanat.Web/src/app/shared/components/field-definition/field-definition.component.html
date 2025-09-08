@@ -1,0 +1,77 @@
+@if (isLoading) {
+    <div class="text-center">
+        <span class="fa fa-spinner loading-spinner"></span>
+    </div>
+}
+
+@if (!isLoading) {
+    <div class="field-definition-wrapper">
+        <ng-template #popTitle>
+            <div class="field-definition-title flex">
+                <div class="mt-1">
+                    {{ fieldDefinition.CustomRichTextType.CustomRichTextTypeDisplayName }}
+                </div>
+                @if (showEditButton()) {
+                    <button type="button" class="btn btn-link" style="margin-left: auto" [hidden]="isEditing" (click)="enterEdit($event)">
+                        <i class="fa fa-pencil-square-o" attr.aria-label="Edit the definition for {{ fieldDefinition.CustomRichTextType.CustomRichTextTypeDisplayName }}"></i>
+                    </button>
+                }
+            </div>
+        </ng-template>
+        <ng-template #popContent>
+            @if (!isEditing) {
+                @if (showEditButton()) {
+                    <div>
+                        @if (!emptyContent) {
+                            <div [innerHtml]="fieldDefinition.CustomRichTextContent"></div>
+                        }
+                        @if (emptyContent) {
+                            <div class="hoverEmptySpace"></div>
+                        }
+                    </div>
+                }
+                @if (!showEditButton()) {
+                    <div [innerHtml]="fieldDefinition.CustomRichTextContent"></div>
+                }
+            }
+            @if (isEditing) {
+                <div>
+                    <editor #tinyMceEditor [init]="tinyMceConfig" [(ngModel)]="editedContent"></editor>
+                    <div class="editor-buttons">
+                        <button type="button" class="btn btn-sm btn-primary mt-1 mr-1 mb-1" (click)="saveEdit()">Save</button>
+                        <button type="button" class="btn btn-sm btn-secondary mt-1 mb-1" (click)="cancelEdit()">Cancel</button>
+                    </div>
+                </div>
+            }
+        </ng-template>
+        @if (!inline) {
+            @if (showEditButton()) {
+                <span style="overflow: hidden; text-overflow: ellipsis">
+                    <span class="field-definition-label">{{ getLabelText() }}</span>
+                    <i class="fas fa-question-circle small" style="cursor: help" [popper]="popContent" [useBodyContainer]="useBodyContainer" [popperTitle]="popTitle"></i>
+                </span>
+            }
+            @if (!showEditButton()) {
+                <span>
+                    <span class="field-definition-label">{{ getLabelText() }}</span>
+                    <i
+                        class="fas fa-question-circle small"
+                        style="cursor: help"
+                        [popper]="popContent"
+                        [useBodyContainer]="useBodyContainer"
+                        [popperTitle]="fieldDefinition.CustomRichTextType.CustomRichTextTypeDisplayName"></i>
+                </span>
+            }
+        } @else {
+            <div class="inline-display flex-start pt-2">
+                <i class="fas fa-question-circle small"></i>
+                <div>
+                    <span [innerHtml]="fieldDefinition.CustomRichTextContent"></span>
+                    @if (showEditButton()) {
+                        <em class="edit-button" [popper]="popContent" [useBodyContainer]="useBodyContainer" [popperTitle]="popTitle" (click)="enterEdit($event)"> (edit) </em>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}

@@ -1,0 +1,21 @@
+@use "/src/scss/abstracts" as *;
+
+.badge {
+    background-color: $secondary;
+    color: white;
+    padding: 0.75em 0.75rem 0.3125em 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.5em;
+    font-weight: bold;
+    letter-spacing: 0.06em;
+    transform: translateY(-2px);
+}
+
+.suggested-water-accounts {
+    &__title {
+        line-height: 1;
+        display: flex;
+        align-items: center;
+        gap: 0 0.5rem;
+    }
+}

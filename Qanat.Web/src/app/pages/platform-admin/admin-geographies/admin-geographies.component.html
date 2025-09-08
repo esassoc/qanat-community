@@ -1,0 +1,37 @@
+<page-header icon="Geography-Alt"></page-header>
+
+<div class="page-body grid-12">
+    <app-alert-display></app-alert-display>
+
+    <div class="row">
+        <div class="g-col-2 flex-end ai-fs">
+            <div>
+                <button class="btn btn-primary-outline" (click)="triggerMonitorWellsCNRA()">Rerun Monitoring Wells Job</button>
+            </div>
+            <div>
+                <button class="btn btn-primary-outline" (click)="refreshGSABoundaries()" [disabled]="isLoadingSubmit">
+                    @if (isLoadingSubmit) {
+                        <span class="fa fa-spinner loading-spinner"></span>
+                    }
+                    @if (!isLoadingSubmit) {
+                        <i class="fas fa-sync-alt"></i>
+                    }
+                    Refresh GSA Boundaries
+                </button>
+                @if (geographyBoundaries$ | async; as geographyBoundaries) {
+                    @if (lastUpdatedGSABoundariesDate) {
+                        <div class="mt-2 text-muted flex-end">
+                            <small>
+                                <em> Last Updated: {{ lastUpdatedGSABoundariesDate | date: "short" }} </em>
+                            </small>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+
+    @if (geographies$ | async; as geographies) {
+        <qanat-grid height="450px" [rowData]="geographies" [columnDefs]="columnDefs" downloadFileName="geographies" [colIDsToExclude]="colIDsToExclude"></qanat-grid>
+    }
+</div>

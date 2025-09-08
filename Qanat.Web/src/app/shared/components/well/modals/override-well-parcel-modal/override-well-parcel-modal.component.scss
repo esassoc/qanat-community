@@ -1,0 +1,18 @@
+ol {
+    max-height: 400px;
+    overflow: auto;
+
+    li {
+        width: 100%;
+        padding: 1rem 0;
+
+        span.parcel-index {
+            display: inline-block;
+            width: 1.5em;
+            font-weight: 600;
+        }
+        & + li {
+            border-top: 1px solid #0000001a;
+        }
+    }
+}

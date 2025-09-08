@@ -1,0 +1,25 @@
+<div class="modal">
+    <div class="modal-header">
+        <div>
+            <h3 class="section-title">Update Document Description</h3>
+        </div>
+    </div>
+
+    <div class="modal-body">
+        <form #fileResourceUploadForm="ngForm" class="form grid-12 mb-3">
+            <div class="field g-col-12">
+                <form-field
+                    [type]="FormFieldType.Textarea"
+                    class="m-2 g-col-8"
+                    [formControl]="formGroup.controls.FileDescription"
+                    fieldLabel="File Description"
+                    placeholder="Describe the content of the file."></form-field>
+            </div>
+        </form>
+    </div>
+
+    <div class="modal-footer">
+        <button class="btn btn-primary" type="submit" (click)="submitFileUpdate()">Update</button>
+        <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+    </div>
+</div>

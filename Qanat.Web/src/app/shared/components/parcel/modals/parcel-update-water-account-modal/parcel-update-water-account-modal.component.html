@@ -1,0 +1,46 @@
+<div class="modal">
+    <div class="modal-header">
+        <h2>Update Water Account</h2>
+    </div>
+
+    <div class="modal-body">
+        @if (parcel$ | async; as parcel) {
+            <form action="" class="grid-12" [formGroup]="formGroup">
+                @if (reportingPeriods$ | async; as reportingPeriods) {
+                    @if (waterAccountParcels$ | async) {
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 25%">Reporting Period</th>
+                                        <th style="width: 50%">Water Account</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (reportingPeriod of reportingPeriods; track reportingPeriod) {
+                                        <tr>
+                                            <td>
+                                                {{ reportingPeriod.Name }}
+                                            </td>
+                                            <td>
+                                                <form-field
+                                                    [formControl]="waterAccountFormControls[reportingPeriod.ReportingPeriodID]"
+                                                    [geographyID]="ref.data.GeographyID"
+                                                    [type]="FormFieldType.WaterAccountSearch"></form-field>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                }
+            </form>
+        }
+    </div>
+
+    <div class="modal-footer">
+        <button class="btn btn-primary" (click)="save()" [class.disabled]="!formGroup.valid">Save</button>
+        <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+    </div>
+</div>

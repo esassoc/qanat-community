@@ -1,0 +1,44 @@
+@use "/src/scss/abstracts" as *;
+
+.add-new {
+    gap: 1rem;
+
+    .section-header {
+        width: 100%;
+    }
+}
+
+.reorderable__title {
+    gap: 1rem;
+}
+
+.source-of-record {
+    select {
+        width: 100%;
+        max-width: 18rem;
+    }
+}
+
+.start-year-input {
+    select {
+        width: 100%;
+    }
+}
+
+.option-panel {
+    &__header {
+        border-bottom: 1px solid rgba($black, 0.1);
+        padding-bottom: 1rem;
+    }
+}
+
+.action {
+    &__label {
+        display: block;
+        font-size: $type-size-100;
+        text-transform: uppercase;
+        font-weight: bold;
+        letter-spacing: 0.05em;
+        transform: translateY(1px);
+    }
+}

@@ -1,0 +1,21 @@
+@use "/src/scss/abstracts" as *;
+
+.grid-8 {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    align-items: start;
+
+    & > * {
+        grid-column: 1 / -1;
+        min-width: 0px;
+    }
+
+    @for $i from 1 through 8 {
+        & > .g-col-#{$i} {
+            @include desktop-medium {
+                grid-column: span $i;
+            }
+        }
+    }
+}

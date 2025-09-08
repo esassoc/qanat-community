@@ -1,0 +1,7 @@
+@use "/src/scss/abstracts" as *;
+
+.form-note {
+    display: flex;
+    justify-content: space-between;
+    gap: $spacing-200;
+}

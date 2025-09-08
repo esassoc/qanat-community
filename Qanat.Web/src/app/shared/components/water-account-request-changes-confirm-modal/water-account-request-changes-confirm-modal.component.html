@@ -1,0 +1,55 @@
+<div class="modal-header">
+    <h2>
+        <icon icon="Warning"></icon>
+        Confirm Request
+    </h2>
+</div>
+
+<div class="modal-body" *ngIf="!modalContext.HasInvalidZones; else invalidZoneMessage">
+    <note noteType="warning"> Confirm your request to update your water accounts. Review the summary of the changes below and accept the certification to proceed. </note>
+
+    <div class="account-modifications">
+        <ng-container *ngFor="let waterAccount of modalContext.WaterAccounts">
+            <div class="account-name">
+                <icon icon="WaterAccounts"></icon>
+                {{ waterAccount.WaterAccountName }}
+                <span class="text-muted">#{{ waterAccount.WaterAccountNumber }}</span>
+            </div>
+            <div class="account-parcels">
+                {{ waterAccount.ParcelsCount }} parcel{{ waterAccount.ParcelsCount === 1 ? "" : "s" }}
+
+                <span *ngIf="waterAccount.AddedParcelsCount > 0" class="parcel-changes added">
+                    <i class="fa fa-plus-circle"></i>
+                    {{ waterAccount.AddedParcelsCount }}
+                </span>
+
+                <span *ngIf="waterAccount.RemovedParcelsCount > 0" class="parcel-changes removed">
+                    <i class="fa fa-minus-circle"></i>
+                    {{ waterAccount.RemovedParcelsCount }}
+                </span>
+            </div>
+        </ng-container>
+    </div>
+
+    <div class="certification">
+        <h3>Certification</h3>
+        <div class="content-wrapper">
+            <custom-rich-text [customRichTextTypeID]="customRichTextTypeID" [geographyID]="modalContext.GeographyID"></custom-rich-text>
+        </div>
+
+        <div class="accept-certification">
+            <label class="checkbox-label">
+                <input type="checkbox" class="form-control" name="checkbox-name" [(ngModel)]="certificationAccepted" />
+                I have reviewed and accept the above certification.
+            </label>
+        </div>
+    </div>
+</div>
+<ng-template #invalidZoneMessage>
+    <note noteType="danger"> Your requested changes contain invalid zones. Please ensure all water accounts contain parcels in only one zone to proceed. </note>
+</ng-template>
+
+<div class="modal-footer">
+    <button class="btn btn-primary" (click)="confirm()" [disabled]="!certificationAccepted || modalContext.HasInvalidZones">Submit Request</button>
+    <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+</div>

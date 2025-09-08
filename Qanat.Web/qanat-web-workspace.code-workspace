@@ -1,0 +1,19 @@
+{
+    "folders": [
+        {
+            "path": ".",
+        },
+    ],
+    "settings": {
+        "editor.codeActionsOnSave": {
+            "source.fixAll.eslint": "explicit",
+        },
+        "editor.formatOnSave": true,
+        "editor.tabSize": 4,
+        "typescript.tsdk": "node_modules\\typescript\\lib",
+        "prettier.configPath": ".prettierrc",
+        "prettier.requireConfig": true,
+        "prettier.tabWidth": 4,
+        "prettier.documentSelectors": ["*.ts, *.html"],
+    },
+}

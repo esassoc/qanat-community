@@ -1,0 +1,60 @@
+@if (userGeographySummary) {
+    <div class="geography-card">
+        <div class="geography-card-header flex-between">
+            <h2 class="geography-card-title flex-between">
+                <icon icon="Geography-Alt"></icon>
+                <div class="geography-card-short-name">
+                    {{ userGeographySummary.GeographyName }}
+                    <div class="geography-card-long-name">
+                        {{ userGeographySummary.GeographyDisplayName }}
+                    </div>
+                </div>
+            </h2>
+            <button class="btn btn-sm btn-primary" [routerLink]="['/water-dashboard']" [queryParams]="{ geography: userGeographySummary.GeographyID }">View Water Accounts</button>
+        </div>
+        @if (userGeographySummary.WaterAccounts) {
+            <div class="geography-card-body">
+                @for (waterAccount of userGeographySummary.WaterAccounts.slice(0, 3); track waterAccount) {
+                    <div class="water-account">
+                        <div class="water-account__number">
+                            <a class="water-account__number-label" [routerLink]="['water-accounts', waterAccount.WaterAccountID, 'water-budget']">
+                                #{{ waterAccount.WaterAccountNumber }}
+                            </a>
+                            @for (zone of waterAccount.Zones; track zone) {
+                                <div>
+                                    <span class="zone" [style.background-color]="zone.ZoneColor" [style.color]="zone.ZoneAccentColor" title="{{ zone.ZoneName }}">
+                                        {{ zone.ZoneName }}
+                                    </span>
+                                </div>
+                            }
+                        </div>
+                        <div class="water-account__parcels">
+                            <icon icon="Parcels"></icon>
+                            <span class="count">{{ waterAccount.NumOfParcels }} Parcels</span>
+                        </div>
+                        <div class="water-account__acres">{{ waterAccount.Area | number: "1.2-2" }} acres</div>
+                    </div>
+                }
+            </div>
+        }
+        <div class="geography-card-footer">
+            <div class="geography-card-link">
+                <icon icon="WaterAccounts"></icon>
+                <a [routerLink]="['/water-dashboard/water-accounts']" [queryParams]="{ geography: userGeographySummary.GeographyID }"> Water Accounts </a>
+                ({{ userGeographySummary.WaterAccounts.length }})
+            </div>
+            <div class="geography-card-link">
+                <icon icon="Parcels"></icon>
+                <a [routerLink]="['/water-dashboard/parcels']" [queryParams]="{ geography: userGeographySummary.GeographyID }"> Parcels </a>
+                ({{ userGeographySummary.ParcelsCount }})
+            </div>
+            @if (userGeographySummary.WellsCount > 0) {
+                <div class="geography-card-link">
+                    <icon icon="Wells"></icon>
+                    <a [routerLink]="['/water-dashboard/wells']" [queryParams]="{ geography: userGeographySummary.GeographyID }"> Wells </a>
+                    ({{ userGeographySummary.WellsCount }})
+                </div>
+            }
+        </div>
+    </div>
+}

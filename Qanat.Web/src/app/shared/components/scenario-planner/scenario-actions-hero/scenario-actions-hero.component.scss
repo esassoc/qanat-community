@@ -1,0 +1,21 @@
+@use "/src/scss/abstracts" as *;
+
+.scenario-actions-hero {
+    background: rgba($black, 0.02);
+    margin-bottom: 4.5rem;
+
+    h2 {
+        border-bottom: 2px solid $black;
+        font-size: $type-size-600;
+        line-height: $type-size-600;
+    }
+
+    .btn__label {
+        display: inline-block;
+        padding-left: 0.5rem;
+        transform: translateY(-1px);
+    }
+    ::ng-deep icon svg path {
+        fill: $white;
+    }
+}

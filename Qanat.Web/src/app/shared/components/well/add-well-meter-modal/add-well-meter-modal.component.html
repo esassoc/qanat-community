@@ -1,0 +1,43 @@
+<div class="modal-header">
+    <h3>
+        <icon icon="ActivityCenter"></icon>
+        Add Meter to Well
+    </h3>
+    <button type="button" class="close" (click)="close()">
+        <i class="fa fa-times-circle"></i>
+    </button>
+</div>
+
+<div class="modal-body">
+    <app-alert-display></app-alert-display>
+
+    <form action="" class="form" *ngIf="meters$ | async as meters">
+        <div class="field mb-4">
+            <div class="field-label required">Meter</div>
+            <ngx-select-dropdown
+                class="meter-dropdown"
+                name="meter"
+                [(ngModel)]="meter"
+                [options]="meters"
+                (change)="onMeterSelected()"
+                [config]="meterDropdownConfig"></ngx-select-dropdown>
+        </div>
+
+        <div class="field">
+            <div class="field-label required">Start Date</div>
+            <input class="form-control" type="date" name="startDate" [(ngModel)]="startDate" (change)="onStartDateSelected()" />
+        </div>
+    </form>
+    <div class="copy copy-3 note-color pt-4 pb-2">
+        <note>
+            Are you sure you want to add a meter to well
+            <strong>{{ modalContext.WellName }}</strong>
+            ?
+        </note>
+    </div>
+
+    <div class="modal-footer">
+        <button class="btn btn-primary" (click)="save()" [disabled]="!formGroup.valid || isLoadingSubmit">Add Meter to Well</button>
+        <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+    </div>
+</div>

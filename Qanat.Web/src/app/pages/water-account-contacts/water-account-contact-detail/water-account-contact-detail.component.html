@@ -1,0 +1,140 @@
+<div class="dashboard">
+    @if (waterAccountContact$ | async) {
+        <aside class="sidebar support-sidebar">
+            <div class="sidebar-header">
+                <a routerLink="/water-dashboard">
+                    <geography-logo [geographyID]="waterAccountContact.GeographyID"></geography-logo>
+                </a>
+            </div>
+            <div class="sidebar-body sticky-nav">
+                @if (pageMenu) {
+                    <dashboard-menu [dashboardMenu]="pageMenu" [viewingDetailPage]="true"></dashboard-menu>
+                }
+            </div>
+        </aside>
+        <main class="main">
+            <page-header
+                pageTitle="{{ waterAccountContact.ContactName }}"
+                preTitle="Water Account Contact"
+                icon="Contact"
+                [customRichTextTypeID]="customRichTextTypeID"></page-header>
+
+            <div class="page-body grid-12">
+                <app-alert-display></app-alert-display>
+
+                <div class="card" id="details">
+                    <div class="card-header">
+                        <h2>Details</h2>
+                    </div>
+                    <div class="card-body grid-8">
+                        <div class="g-col-4">
+                            <key-value-pair-list>
+                                <key-value-pair [horizontal]="true">
+                                    <ng-container key>Contact Name</ng-container>
+                                    <ng-container keyValue>
+                                        <div>{{ waterAccountContact.ContactName }}</div>
+                                    </ng-container>
+                                </key-value-pair>
+                                <key-value-pair [horizontal]="true">
+                                    <ng-container key>Email</ng-container>
+                                    <ng-container keyValue>
+                                        <div [class.not-available]="!waterAccountContact.ContactEmail">{{ waterAccountContact.ContactEmail ?? "Not Available" }}</div>
+                                    </ng-container>
+                                </key-value-pair>
+                                <key-value-pair [horizontal]="true">
+                                    <ng-container key>Phone Number</ng-container>
+                                    <ng-container keyValue>
+                                        @if (waterAccountContact.ContactPhoneNumber) {
+                                            <div>{{ waterAccountContact.ContactPhoneNumber | phone }}</div>
+                                        } @else {
+                                            <div class="not-available">Not Available</div>
+                                        }
+                                    </ng-container>
+                                </key-value-pair>
+                                <key-value-pair [horizontal]="true">
+                                    <ng-container key>Communication Preference</ng-container>
+                                    <ng-container keyValue>
+                                        <div>{{ waterAccountContact.PrefersPhysicalCommunication ? "Physical Mail" : "Email" }}</div>
+                                    </ng-container>
+                                </key-value-pair>
+                            </key-value-pair-list>
+                        </div>
+                        <div class="g-col-4">
+                            <key-value-pair-list>
+                                <key-value-pair [horizontal]="true">
+                                    <ng-container key>Address</ng-container>
+                                    <ng-container keyValue>
+                                        <div>{{ waterAccountContact.Address }}</div>
+                                    </ng-container>
+                                </key-value-pair>
+                                @if (waterAccountContact.SecondaryAddress) {
+                                    <key-value-pair [horizontal]="true">
+                                        <ng-container key>Secondary Address</ng-container>
+                                        <ng-container keyValue>
+                                            <div>{{ waterAccountContact.SecondaryAddress }}</div>
+                                        </ng-container>
+                                    </key-value-pair>
+                                }
+                                <key-value-pair [horizontal]="true">
+                                    <ng-container key>City</ng-container>
+                                    <ng-container keyValue>
+                                        <div [class.not-available]="!waterAccountContact.City">{{ waterAccountContact.City ?? "Not Available" }}</div>
+                                    </ng-container>
+                                </key-value-pair>
+                                <key-value-pair [horizontal]="true">
+                                    <ng-container key>State</ng-container>
+                                    <ng-container keyValue>
+                                        <div [class.not-available]="!waterAccountContact.State">{{ waterAccountContact.State ?? "Not Available" }}</div>
+                                    </ng-container>
+                                </key-value-pair>
+                                <key-value-pair [horizontal]="true">
+                                    <ng-container key>Zip Code</ng-container>
+                                    <ng-container keyValue>
+                                        <div [class.not-available]="!waterAccountContact.ZipCode">{{ waterAccountContact.ZipCode ?? "Not Available" }}</div>
+                                    </ng-container>
+                                </key-value-pair>
+                            </key-value-pair-list>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div>
+                            <icon icon="Info"></icon>
+                            <a (click)="openUpdateModal(waterAccountContact)">
+                                <span>Update Info</span>
+                            </a>
+                        </div>
+                        @if (waterAccountContact.WaterAccounts.length == 0) {
+                            <div>
+                                <icon icon="Delete" class="red"></icon>
+                                <a (click)="openDeleteModal(waterAccountContact)">
+                                    <span>Delete</span>
+                                </a>
+                            </div>
+                        }
+                        @if (waterAccountContact.AddressValidationJson) {
+                            <div>
+                                <icon icon="File"></icon>
+                                <a (click)="openAddressValidationJsonModal()">
+                                    <span>View Address Validation JSON</span>
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="card" id="water-accounts">
+                    <div class="card-header">
+                        <h2>Water Accounts</h2>
+                    </div>
+                    <div class="card-body grid-8">
+                        <qanat-grid
+                            height="500px"
+                            [columnDefs]="columnDefs"
+                            [rowData]="waterAccountContact.WaterAccounts"
+                            downloadFileName="{{ waterAccountContact.ContactName }}-water-accounts"></qanat-grid>
+                    </div>
+                </div>
+            </div>
+        </main>
+    }
+</div>

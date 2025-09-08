@@ -1,0 +1,20 @@
+<div class="full-width-page">
+    <page-header pageTitle="Update Irrigated Parcels" [customRichTextTypeID]="customRichTextTypeID"></page-header>
+
+    <div class="page-body">
+        <app-alert-display></app-alert-display>
+
+        @if (wellIrrigatedParcels$ | async) {
+            <well-irrigated-parcels-edit-map
+                [wellIrrigatedParcels]="wellIrrigatedParcels"
+                [geographyID]="geographyID"
+                [wellLatLng]="wellLatLng"
+                (selectionChanged)="onSelectionChanged($event)"></well-irrigated-parcels-edit-map>
+        }
+
+        <div class="footer">
+            <button class="btn btn-primary" (click)="save()" [disabled]="isLoadingSubmit">Update Well</button>
+            <a class="btn btn-primary-outline" routerLink="..">Cancel</a>
+        </div>
+    </div>
+</div>

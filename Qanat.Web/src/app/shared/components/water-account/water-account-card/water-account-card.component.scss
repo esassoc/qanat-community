@@ -1,0 +1,81 @@
+@use "/src/scss/abstracts" as *;
+.water-account-card {
+    box-shadow: 0px 4px 12px 0px #0000001a;
+
+    .water-account-details {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 24px 32px 24px 32px;
+
+        .water-account-footer {
+            border-top: 2px solid $tan;
+            border-bottom: 2px solid $tan;
+            display: flex;
+            justify-content: space-between;
+
+            button {
+                background: none;
+                border: none;
+                padding: 0.5em 1em;
+                border-radius: 8px;
+                i {
+                    color: $primary;
+                    &.text-danger {
+                        color: $red-default;
+                    }
+                }
+                &:hover {
+                    background: $primary;
+                    color: #fff;
+                    i {
+                        color: #fff;
+                    }
+                    svg path {
+                        fill: #fff;
+                    }
+                }
+                &.danger:hover {
+                    background: $red-default;
+                }
+            }
+        }
+
+        .metadata-item {
+            p {
+                font-size: $type-size-400;
+                font-weight: 600;
+                line-height: 1.25em;
+            }
+            margin-top: 1.5rem;
+        }
+        .parcels {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            max-height: 200px;
+            padding: $spacing-100;
+            overflow: auto;
+        }
+        .module-title {
+            font-weight: 200;
+        }
+    }
+    .water-account-map {
+        min-height: 500px;
+        background: #d3d3d3;
+    }
+
+    .account-name-link {
+        color: $black;
+        &:hover {
+            columns: $primary;
+            text-decoration: underline;
+        }
+    }
+
+    .account-id {
+        font-size: $type-size-200;
+        padding-left: 0.5rem;
+    }
+}

@@ -1,0 +1,21 @@
+@use "/src/scss/abstracts" as *;
+
+.table-footer {
+    padding: $spacing-400;
+    border: 1px solid rgba($black, 0.1);
+    border-top: none;
+    border-radius: 0 0 $spacing-200 $spacing-200;
+    gap: 1em;
+    font-size: $type-size-200;
+
+    .row-count-data {
+        text-align: right;
+
+        .filtered-rows-count {
+            color: $gray-default;
+            font-size: $type-size-100;
+            font-style: italic;
+            padding-top: $spacing-050;
+        }
+    }
+}

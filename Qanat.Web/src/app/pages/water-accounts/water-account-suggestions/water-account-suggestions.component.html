@@ -1,0 +1,51 @@
+<div class="full-width-page">
+    <page-header icon="WaterAccounts" [customRichTextTypeID]="customRichTextTypeID" pageTitle="Water Account Suggestions" [templateAbove]="templateAbove"></page-header>
+
+    <ng-template #templateAbove>
+        <div class="back">
+            <a routerLink="/water-dashboard/water-accounts" class="back__link">Back to All Water Accounts</a>
+        </div>
+    </ng-template>
+
+    @if (geography$ | async) {
+        <div class="page-body" [loadingSpinner]="{ isLoading: isLoadingSuggestions }">
+            <app-alert-display></app-alert-display>
+            <section class="suggested-water-accounts">
+                @if (waterAccountSuggestions) {
+                    <h2 class="section-title suggested-water-accounts__title">
+                        Suggested New Water Accounts
+                        <span class="badge">{{ waterAccountSuggestions.length | number }}</span>
+                    </h2>
+                    <qanat-grid
+                        [rowData]="waterAccountSuggestions"
+                        [columnDefs]="columnDefs"
+                        downloadFileName="suggested-water-accounts"
+                        [colIDsToExclude]="colIDsToExclude"
+                        [rowSelection]="rowSelection"
+                        [pagination]="true"
+                        [sizeColumnsToFitGrid]="true"
+                        (gridReady)="onGridReady($event)"
+                        (selectionChanged)="getSelectedRows($event)"
+                        class="clear-action-widths">
+                        <div customGridActionsRight class="custom-grid-actions">
+                            <button
+                                (click)="bulkApprove()"
+                                [buttonLoading]="isLoadingSubmit"
+                                class="btn btn-sm btn-success"
+                                [disabled]="isLoadingSubmit || selectedRows.length === 0">
+                                Approve
+                            </button>
+                            <button
+                                (click)="bulkReject()"
+                                [buttonLoading]="isLoadingSubmit"
+                                class="btn btn-sm btn-danger"
+                                [disabled]="isLoadingSubmit || selectedRows.length === 0">
+                                Reject
+                            </button>
+                        </div>
+                    </qanat-grid>
+                }
+            </section>
+        </div>
+    }
+</div>

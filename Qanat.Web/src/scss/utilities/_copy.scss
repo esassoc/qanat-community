@@ -1,0 +1,85 @@
+@use "/src/scss/abstracts" as *;
+.copy {
+    line-height: 1.25em;
+
+    & > * + * {
+        margin-top: 1.5rem;
+    }
+
+    &-1 {
+        font-size: $type-size-400;
+    }
+
+    &-2 {
+        font-size: $type-size-300;
+    }
+
+    &-3 {
+        font-size: $type-size-200;
+
+        & > * + * {
+            margin-top: 1.25rem;
+        }
+    }
+
+    &-4 {
+        font-size: $type-size-150;
+
+        & > * + * {
+            margin-top: 1rem;
+        }
+    }
+
+    ul {
+        list-style-type: disc;
+    }
+
+    ol {
+        list-style-type: decimal;
+    }
+
+    ul,
+    ol {
+        padding-left: 1.25rem;
+    }
+
+    li + li {
+        padding-top: 1rem;
+    }
+
+    &-55 {
+        max-width: 55rem;
+    }
+
+    a {
+        text-decoration: underline;
+    }
+
+    &-user-entered {
+        white-space: pre-wrap;
+    }
+
+    &-user-entered ol {
+        padding-left: 2rem;
+    }
+
+    &-user-entered ul {
+        padding-left: 2rem;
+    }
+
+    &-user-entered li + li {
+        padding-top: unset;
+    }
+}
+
+.wa-name {
+    mark {
+        color: $primary;
+    }
+}
+
+.flow {
+    & > * + * {
+        margin-block-start: var(--flow-spacer, 1rem);
+    }
+}

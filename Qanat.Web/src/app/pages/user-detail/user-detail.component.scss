@@ -1,0 +1,72 @@
+@use "/src/scss/abstracts" as *;
+
+.user-location {
+    list-style-type: disc;
+}
+
+.page-body {
+    align-items: start;
+}
+
+.full-width-page {
+    padding: 2rem;
+}
+
+.user-detail::ng-deep {
+    .alert {
+        margin-bottom: 0; //MK 7/10/2024 - The alert had an odd amount of margin-bottom, this was the quickest way to make it look better in this instance. Happy to change if needed.
+    }
+}
+
+.geography-list {
+    list-style-type: disc;
+    list-style-position: inside;
+    padding-left: $spacing-400;
+}
+
+.card-footer {
+    display: flex;
+    gap: 3rem;
+    align-items: center;
+
+    a {
+        color: $black;
+        letter-spacing: 0;
+        cursor: pointer;
+        text-decoration: underline;
+    }
+
+    icon {
+        display: inline-block;
+        @include svg-100-deep;
+        color: $primary;
+        width: 20px;
+        height: 20px;
+        margin-right: $spacing-200;
+        transform: translateY(4px);
+
+        &.red {
+            color: $red-default;
+        }
+    }
+}
+
+.model-tag {
+    display: inline-block;
+    max-width: 16rem;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    padding: 0.25rem 0.5rem;
+    padding-top: 6px;
+    background: rgba(240, 249, 251, 0.5);
+    color: #2c5f72;
+    border: 1px solid #b9e1e8;
+    border-radius: 0.25rem;
+    font-size: 1rem;
+    line-height: 1em;
+}
+
+.hidden {
+    display: none;
+}

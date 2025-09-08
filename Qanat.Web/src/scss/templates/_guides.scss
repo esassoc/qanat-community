@@ -1,0 +1,186 @@
+@use "/src/scss/abstracts" as *;
+
+.guide {
+    .icon {
+        color: $blue-light;
+        margin-bottom: 0.5rem;
+
+        svg {
+            width: 1.5rem;
+            height: auto;
+        }
+    }
+
+    .guide-title {
+        @include desktop-medium {
+            font-size: $type-size-600;
+        }
+    }
+
+    .about {
+        &__info {
+            @include desktop-medium {
+                grid-column: 1 / span 8;
+            }
+
+            .icon {
+                color: $blue-default;
+            }
+
+            .copy-1 {
+                line-height: 1.5em;
+            }
+        }
+
+        &__photo {
+            margin-bottom: 2rem;
+
+            img {
+                width: 100%;
+            }
+        }
+
+        .faqs {
+            padding: $spacing-600;
+            background: $white;
+            border: 1px solid $gray-200;
+            border-radius: $spacing-100;
+            box-shadow: 0px 2px 12px 0px rgba($black, 0.05);
+
+            @include desktop-medium {
+                grid-column: 9 / span 4;
+            }
+        }
+    }
+
+    .quick-links {
+        margin-top: 6rem;
+
+        .quick-links-grid {
+            align-items: stretch;
+            gap: $spacing-400;
+        }
+
+        rich-link ::ng-deep .rich-link {
+            padding: $spacing-500;
+        }
+    }
+
+    .annotations-header {
+        padding-top: 3rem;
+        text-align: center;
+
+        @include desktop-medium {
+            padding-top: 6rem;
+        }
+
+        .icon {
+            color: $blue-default;
+            margin-bottom: 1rem;
+        }
+
+        .page-title {
+            font-weight: bold;
+        }
+    }
+
+    .annotated-figure {
+        margin-top: 3rem;
+        border-top: 1px solid rgba($black, 0.1);
+        padding-top: 3rem;
+        align-items: start;
+
+        @include desktop-medium {
+            margin-top: 6rem;
+            padding-top: 6rem;
+
+            &.water-budget {
+                margin-top: 2rem;
+            }
+        }
+
+        &.first {
+            margin-top: 0;
+            border-top: none;
+            padding-top: 3rem;
+        }
+
+        &__header {
+            .copy {
+                max-width: 55rem;
+                line-height: 1.5em;
+            }
+        }
+    }
+
+    .screenshot {
+        @include desktop-medium {
+            grid-column: span 8;
+        }
+
+        img {
+            width: 100%;
+        }
+    }
+
+    .captions {
+        display: grid;
+        gap: 2rem;
+
+        @include tablet {
+            display: block;
+            columns: 2;
+            column-gap: 2rem;
+        }
+
+        @include desktop-small {
+            columns: 3;
+        }
+
+        @include desktop-medium {
+            display: grid;
+            columns: unset;
+            grid-column: span 4;
+            row-gap: 3rem;
+        }
+
+        @include desktop-x-large {
+            padding-top: 6rem;
+        }
+    }
+
+    .caption {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: 2rem minmax(0, 1fr);
+
+        @include tablet {
+            margin-bottom: 2rem;
+        }
+
+        @include desktop-medium {
+            margin-bottom: 0;
+            max-width: 28rem;
+        }
+
+        &__item {
+            border: 3px solid $orange-default;
+            background: $white;
+            color: $orange-default;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            line-height: 2rem;
+            font-weight: bold;
+            font-size: $type-size-200;
+
+            span {
+                display: block;
+                transform: translateY(2px);
+            }
+        }
+    }
+}

@@ -1,0 +1,105 @@
+@use "/src/scss/abstracts/" as *;
+
+icon {
+    margin-right: $spacing-100;
+    padding-top: $spacing-100;
+}
+
+.card-header {
+    align-items: center;
+
+    .card-title {
+        icon ::ng-deep svg {
+            height: 22px;
+            width: 22px;
+        }
+    }
+}
+
+.card-body {
+    .table-header {
+        padding: $spacing-300;
+        font-size: $type-size-200;
+        background-color: $primary;
+        color: $white;
+
+        div {
+            width: 50%;
+            font-weight: 700;
+
+            em {
+                font-weight: normal;
+            }
+        }
+    }
+
+    .row-label {
+        font-weight: 700;
+        font-size: $type-size-100;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-top: $spacing-400;
+        margin-bottom: $spacing-100;
+    }
+
+    .row-content-wrapper {
+        display: flex;
+        gap: $spacing-200;
+        border: 1px solid $gray-light;
+        border-radius: $spacing-100;
+        background-color: $gray-lighter;
+        padding: $spacing-200;
+
+        .table-cell {
+            height: 2rem;
+            width: 50%;
+            padding: $spacing-200;
+            border-radius: $spacing-100;
+
+            &.previous-value {
+                border: 1px solid $red-light;
+                background-color: $red-lighter;
+                color: $red-darker;
+            }
+
+            &.latest-value {
+                border: 1px solid $green-light;
+                background-color: $green-lighter;
+                color: $green-darker;
+            }
+        }
+
+        &.gray {
+            .table-cell {
+                border: 1px solid $gray-default;
+                background-color: $gray-light;
+                color: $gray-darker;
+            }
+        }
+    }
+}
+
+.card-footer {
+    display: flex;
+    gap: 3rem;
+    align-items: center;
+    padding: $spacing-300 0;
+    margin-bottom: $spacing-400;
+
+    a {
+        color: $black;
+        letter-spacing: 0;
+        cursor: pointer;
+        text-decoration: underline;
+    }
+
+    icon {
+        @include svg-100-deep;
+        display: inline-block;
+        color: $primary;
+        width: 22px;
+        height: 22px;
+        margin-right: $spacing-200;
+        transform: translateY(2px);
+    }
+}

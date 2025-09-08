@@ -1,0 +1,29 @@
+<div class="modal-header">
+    <div>
+        <h3 class="section-title">Add Water Account</h3>
+    </div>
+</div>
+
+<div class="modal-body" [loadingSpinner]="{ isLoading: isLoadingWaterAccounts }">
+    <form action="" class="form" [formGroup]="formGroup">
+        @if (waterAccountDropDownOptions$ | async; as waterAccountDropDownOptions) {
+            <div class="mb-3">
+                <span class="field-label required">Water Account</span>
+                <form-field [type]="FormFieldType.Select" [formControl]="formGroup.controls.WaterAccountID" [formInputOptions]="waterAccountDropDownOptions"></form-field>
+            </div>
+        }
+
+        <div class="mb-3">
+            <form-field
+                [formControl]="formGroup.controls.WaterAccountRoleID"
+                fieldLabel="Water Account Role"
+                [formInputOptions]="WaterAccountRolesSelectDropDownOptions"
+                [type]="FormFieldType.Select"></form-field>
+        </div>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-primary" (click)="save()" [disabled]="!formGroup.valid || isLoadingSubmit">Add Water Account</button>
+    <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+</div>

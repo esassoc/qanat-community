@@ -1,0 +1,80 @@
+@if (waterAccount$ | async; as waterAccount) {
+    <page-header [pageTitle]="'#' + waterAccount.WaterAccountNumber" [templateTitleAppend]="templateTitleAppend" icon="WaterAccounts" preTitle="Parcels">
+        <ng-template #templateTitleAppend>
+            @if (waterAccount.WaterAccountName?.length > 0 && waterAccount.WaterAccountName != waterAccount.WaterAccountNumber.toString()) {
+                <span class="water-account-name" title="{{ waterAccount.WaterAccountName }}">
+                    {{ waterAccount.WaterAccountName }}
+                </span>
+            }
+            @if (allocationPlans$ | async; as allocationPlans) {
+                <span>
+                    @if (allocationPlans?.length > 0) {
+                        <name-tag
+                            [name]="allocationPlans[0].ZoneName"
+                            [color]="allocationPlans[0].ZoneColor"
+                            [routerLink]="[
+                                '/geographies',
+                                waterAccount.Geography.GeographyName.toLowerCase(),
+                                'allocation-plans',
+                                allocationPlans[0].WaterTypeSlug,
+                                allocationPlans[0].ZoneSlug,
+                            ]"
+                            class="zone-tag"
+                            title="Allocation Plan Zone"></name-tag>
+                    }
+                </span>
+            }
+        </ng-template>
+    </page-header>
+}
+
+<div class="page-body grid-12">
+    @if (selectedParcelIDs && geographyID) {
+        <div class="g-col-12">
+            <qanat-map class="location-card" (onMapLoad)="handleMapReady($event)" mapHeight="700px">
+                @if (mapIsReady) {
+                    @if (selectedParcelIDs) {
+                        <parcel-layer
+                            [geographyID]="geographyID"
+                            [parcelIDs]="selectedParcelIDs"
+                            [selectedParcelID]="highlightedParcelID"
+                            [map]="map"
+                            [layerControl]="layerControl"
+                            [displayOnLoad]="true"
+                            (parcelSelected)="onMapSelectionChanged($event)">
+                        </parcel-layer>
+                    }
+                    @for (zoneGroup of zoneGroups; track zoneGroup) {
+                        <zone-group-layer
+                            [displayOnLoad]="false"
+                            [zoneGroupID]="zoneGroup.ZoneGroupID"
+                            [zoneGroupName]="zoneGroup.ZoneGroupName"
+                            [map]="map"
+                            [layerControl]="layerControl">
+                        </zone-group-layer>
+                    }
+                    @for (externalMapLayer of externalMapLayers; track externalMapLayer) {
+                        <geography-external-map-layer [map]="map" [layerControl]="layerControl" [externalMapLayer]="externalMapLayer"> </geography-external-map-layer>
+                    }
+                }
+            </qanat-map>
+        </div>
+    }
+    <div class="g-col-12" [loadingSpinner]="{ isLoading }">
+        <h3 class="module-title underline">All Parcels</h3>
+        <div class="table-wrapper" style="min-height: 10rem" [style]="{ 'padding-top': isLoading ? '10rem' : 'unset' }">
+            @if (parcels$ | async; as parcels) {
+                <qanat-grid
+                    [rowData]="parcels"
+                    [columnDefs]="columnDefs"
+                    downloadFileName="parcels"
+                    defaultRowSelection="singleRow"
+                    (gridReady)="onGridReady($event)"
+                    (selectionChanged)="onGridSelectionChanged($event)"
+                    height="500px"
+                    (filterChanged)="selectHighlightedParcelIDRowNode()"
+                    [pagination]="true"></qanat-grid>
+            }
+        </div>
+    </div>
+</div>

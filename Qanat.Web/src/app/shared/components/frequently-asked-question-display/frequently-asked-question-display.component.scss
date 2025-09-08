@@ -1,0 +1,47 @@
+@use "/src/scss/abstracts" as *;
+
+.faq {
+    &__question {
+        font-weight: bold;
+        color: $white;
+        background: $secondary;
+        font-size: $type-size-300;
+        line-height: 1.25em;
+        color: $blue-800;
+        background: $blue-50;
+        border: 1px solid $blue-200;
+        padding: $spacing-300 $spacing-500 $spacing-200;
+        border-radius: $spacing-100;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+
+        h3 {
+            font-size: $type-size-300;
+        }
+
+        icon {
+            margin-left: $spacing-200;
+        }
+
+        ::ng-deep {
+            svg {
+                width: 0.75rem;
+            }
+        }
+
+        &.open icon {
+            transform: rotate(180deg) translateY(5px);
+        }
+    }
+
+    &__answer {
+        display: none;
+        padding: $spacing-300 $spacing-500;
+
+        &.open {
+            display: block;
+        }
+    }
+}

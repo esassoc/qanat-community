@@ -1,0 +1,264 @@
+<header class="site-header">
+    @if (!hasManageMenu()) {
+        <div>
+            @if (showTestingWarning()) {
+                <div class="qa-warning">
+                    <span class="qa-warning__icon fa fa-warning"></span>
+                    <span class="qa-warning__message">{{ testingWarningText() }}</span>
+                </div>
+            }
+        </div>
+    }
+
+    @if (hasManageMenu()) {
+        <nav class="admin-nav">
+            <div class="admin-nav__wrapper" #mobileAdminToggle>
+                <ul class="admin-nav__list">
+                    <button class="admin-nav__close" type="button" [dropdownToggleClose]="AdminMenuToggleButton">
+                        <i class="fas fa-times-circle"></i>
+                    </button>
+                    <li class="admin-nav__item manage">
+                        <a routerLink="/supply-and-usage" class="admin-nav__link" role="button" routerLinkActive="active">
+                            <icon icon="Manage"></icon>
+                            <span class="admin-nav__link-label">Supply and Usage</span>
+                        </a>
+                    </li>
+                    <li class="admin-nav__item configure">
+                        <a routerLink="/configure" class="admin-nav__link" role="button" routerLinkActive="active">
+                            <icon icon="Configure"></icon>
+                            <span class="admin-nav__link-label">Geography Configuration</span>
+                        </a>
+                    </li>
+                    <li class="admin-nav__item configure">
+                        <a routerLink="/support-tickets" class="admin-nav__link" role="button" routerLinkActive="active">
+                            <icon icon="Question"></icon>
+                            <span class="admin-nav__link-label">Support Desk</span>
+                        </a>
+                    </li>
+                    <li
+                        class="admin-nav__item admin"
+                        *withFlag="{
+                            currentUser: currentUser,
+                            flag: FlagEnum.IsSystemAdmin,
+                        }">
+                        <a routerLink="/platform-admin" class="admin-nav__link" role="button" routerLinkActive="active">
+                            <icon icon="Configure"></icon>
+                            <span class="admin-nav__link-label">Platform Admin</span>
+                        </a>
+                    </li>
+                    @if (showTestingWarning()) {
+                        <li class="qa-warning-admin">
+                            <span class="fa fa-warning"></span>
+                            {{ testingWarningText() }}
+                        </li>
+                    }
+                </ul>
+            </div>
+            <button
+                class="admin-nav__toggle"
+                [dropdownToggle]="mobileAdminToggle"
+                #AdminMenuToggleButton="dropdownToggleName"
+                type="button"
+                aria-controls="hamburger-btn"
+                aria-expanded="false">
+                <svg width="24" height="6" viewBox="0 0 16 4" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M12 2C12 1.46957 12.2107 0.96086 12.5858 0.585787C12.9609 0.210714 13.4696 0 14 0C14.5304 0 15.0391 0.210714 15.4142 0.585787C15.7893 0.96086 16 1.46957 16 2C16 2.53043 15.7893 3.03914 15.4142 3.41421C15.0391 3.78929 14.5304 4 14 4C13.4696 4 12.9609 3.78929 12.5858 3.41421C12.2107 3.03914 12 2.53043 12 2ZM6 2C6 1.46957 6.21071 0.96086 6.58579 0.585787C6.96086 0.210714 7.46957 0 8 0C8.53043 0 9.03914 0.210714 9.41421 0.585787C9.78929 0.96086 10 1.46957 10 2C10 2.53043 9.78929 3.03914 9.41421 3.41421C9.03914 3.78929 8.53043 4 8 4C7.46957 4 6.96086 3.78929 6.58579 3.41421C6.21071 3.03914 6 2.53043 6 2ZM0 2C0 1.46957 0.210714 0.96086 0.585786 0.585787C0.960859 0.210714 1.46957 0 2 0C2.53043 0 3.03914 0.210714 3.41421 0.585787C3.78929 0.96086 4 1.46957 4 2C4 2.53043 3.78929 3.03914 3.41421 3.41421C3.03914 3.78929 2.53043 4 2 4C1.46957 4 0.960859 3.78929 0.585786 3.41421C0.210714 3.03914 0 2.53043 0 2Z"
+                        fill="white" />
+                </svg>
+            </button>
+        </nav>
+    }
+
+    <nav class="site-nav">
+        <a [routerLink]="['/']" class="site-logo">
+            <icon icon="Logo"></icon>
+        </a>
+
+        <button
+            class="hamburger-btn"
+            [dropdownToggle]="mobileMenuToggle"
+            #mobileMenuToggleButton="dropdownToggleName"
+            type="button"
+            aria-controls="hamburger-btn"
+            aria-expanded="false">
+            <span class="sr-only">Open main menu</span>
+            <svg aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path
+                    fill-rule="evenodd"
+                    d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+                    clip-rule="evenodd"></path>
+            </svg>
+        </button>
+
+        <div class="site-nav__wrapper" #mobileMenuToggle>
+            <button class="site-nav__close" type="button" [dropdownToggleClose]="mobileMenuToggleButton">
+                <i class="fas fa-times-circle"></i>
+            </button>
+
+            <a [routerLink]="['/']" class="site-logo-mobile">
+                <icon icon="Logo"></icon>
+            </a>
+
+            <ul class="site-nav__links site-nav__main">
+                <li
+                    class="nav-item dropdown"
+                    *withFlag="{
+                        currentUser: currentUser,
+                        flag: FlagEnum.CanClaimWaterAccounts,
+                    }">
+                    @if (geographySummaries$ | async) {
+                        @if (showWaterDashboardDropdown) {
+                            <a
+                                href="javascript:void(0);"
+                                [dropdownToggle]="waterDashboardToggle"
+                                class="nav-link dropdown-toggle"
+                                role="button"
+                                data-toggle="dropdown"
+                                aria-haspopup="true"
+                                aria-expanded="false">
+                                <icon icon="WaterAccounts"></icon>
+                                <span class="nav-link__label">
+                                    Water Dashboard
+                                    <icon icon="AngleDown"></icon>
+                                </span>
+                            </a>
+                        } @else {
+                            <a
+                                [routerLink]="['water-dashboard', 'water-accounts']"
+                                class="nav-link dropdown-toggle"
+                                role="button"
+                                data-toggle="dropdown"
+                                aria-haspopup="true"
+                                aria-expanded="false">
+                                <icon icon="WaterAccounts"></icon>
+                                <span class="nav-link__label">Water Dashboard</span>
+                            </a>
+                        }
+                        <div #waterDashboardToggle class="dropdown-menu dropdown-menu__water-dashboard" aria-labelledby="navbarDropdown">
+                            <div class="dropdown-menu__water-dashboard-grid">
+                                <div class="water-accounts">
+                                    <div class="water-accounts__header">
+                                        <icon icon="WaterAccounts"></icon>
+                                        <a [routerLink]="['/water-dashboard/water-accounts']">
+                                            Water Accounts
+                                            <span class="count">({{ numberOfWaterAccounts }})</span>
+                                        </a>
+                                    </div>
+                                    <div class="water-accounts__body">
+                                        @for (waterAccount of waterAccounts.slice(0, 3); track waterAccount) {
+                                            <div class="water-account">
+                                                <div class="water-account__geography">{{ waterAccount.GeographyName }} Geography</div>
+                                                <div class="water-account__number">
+                                                    <a class="water-account__number-label" [routerLink]="['water-accounts', waterAccount.WaterAccountID, 'water-budget']">
+                                                        #{{ waterAccount.WaterAccountNumber }}
+                                                    </a>
+                                                    @for (zone of waterAccount.Zones; track zone) {
+                                                        <div>
+                                                            <span class="zone" [style.background-color]="zone.ZoneColor" [style.color]="zone.ZoneAccentColor">
+                                                                {{ zone.ZoneName }}
+                                                            </span>
+                                                        </div>
+                                                    }
+                                                </div>
+                                                <div class="water-account__parcels">
+                                                    <icon icon="Parcels"></icon>
+                                                    <span class="count"> {{ waterAccount.NumOfParcels }} Parcels </span>
+                                                </div>
+                                                <div class="water-account__acres">{{ waterAccount.Area | number: "1.2-2" }} acres</div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="right">
+                                    <div class="main-links">
+                                        <div class="main-link">
+                                            <icon icon="ActivityCenter"></icon>
+                                            <a [routerLink]="['/water-dashboard/activity-center']">Activity Center</a>
+                                        </div>
+                                        <div class="main-link">
+                                            <icon icon="Parcels"></icon>
+                                            <a [routerLink]="['/water-dashboard/parcels']">
+                                                Parcels
+                                                <span class="count">({{ numberOfParcels }})</span>
+                                            </a>
+                                        </div>
+                                        <div class="main-link">
+                                            <icon icon="Wells"></icon>
+                                            <a [routerLink]="['/water-dashboard/wells']">
+                                                Wells
+                                                <span class="count">({{ numberOfWells }})</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </li>
+
+                <li
+                    class="nav-item"
+                    *withScenarioPlannerRolePermission="{
+                        currentUser: currentUser,
+                        permission: PermissionEnum.ModelRights,
+                        rights: RightsEnum.Read,
+                    }">
+                    <a [routerLink]="['/scenario-planner', 'models']" class="nav-link" role="button" routerLinkActive="active">
+                        <icon icon="ScenarioPlanner"></icon>
+                        <span class="nav-link__label">Scenario Planner</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a [routerLink]="['/geographies']" class="nav-link" role="button" routerLinkActive="active">
+                        <icon icon="Geography-Alt"></icon>
+                        <span class="nav-link__label">Geographies</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a [routerLink]="['/help']" class="nav-link" role="button" routerLinkActive="active">
+                        <icon icon="Question"></icon>
+                        <span class="nav-link__label">Help</span>
+                    </a>
+                </li>
+            </ul>
+
+            <ul class="site-nav__links site-nav__utilities" #testRef>
+                @if (!isAuthenticated()) {
+                    <li class="nav-item" routerLinkActive="active">
+                        <a href="javascript:void(0);" (click)="login()" routerLinkActive="active" class="nav-link"> Sign In </a>
+                    </li>
+                }
+
+                @if (isAuthenticated()) {
+                    <li class="nav-item dropdown welcomeUser" routerLinkActive="active">
+                        <a
+                            href="javascript:void(0);"
+                            [dropdownToggle]="helpToggle"
+                            class="nav-link dropdown-toggle"
+                            role="button"
+                            data-toggle="dropdown"
+                            aria-haspopup="true"
+                            aria-expanded="false">
+                            <icon icon="User"></icon>
+                            <span class="username nav-link__label">
+                                {{ isCurrentUserBeingImpersonated() ? "Impersonating" : "Hi, " }}
+                                {{ getUserName() }}
+                                <icon icon="AngleDown"></icon>
+                            </span>
+                        </a>
+                        <div #helpToggle class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                            <a routerLink="/profile" class="dropdown-item">Profile</a>
+                            <a routerLink="/getting-started-with-the-api" class="dropdown-item">API</a>
+                            <a href="javascript:void(0);" (click)="logout()" class="dropdown-item">
+                                {{ isCurrentUserBeingImpersonated() ? "Stop Impersonating" : "Sign Out" }}
+                            </a>
+                        </div>
+                    </li>
+                }
+            </ul>
+        </div>
+    </nav>
+</header>

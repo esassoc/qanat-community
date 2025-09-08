@@ -1,0 +1,18 @@
+@use "/src/scss/abstracts" as *;
+$allocation-plan-grid-width: $spacing-950;
+$allocation-plan-period-width: $spacing-1000;
+:host {
+    display: grid;
+    grid-template-columns: $allocation-plan-period-width $allocation-plan-grid-width;
+    grid-auto-flow: column;
+    grid-auto-columns: $allocation-plan-grid-width;
+
+    .period {
+        width: $allocation-plan-period-width;
+    }
+
+    .year {
+        width: $allocation-plan-grid-width;
+        text-align: center;
+    }
+}

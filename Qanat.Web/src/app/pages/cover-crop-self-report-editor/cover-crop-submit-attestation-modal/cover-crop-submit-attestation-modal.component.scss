@@ -1,0 +1,28 @@
+@use "/src/scss/abstracts" as *;
+
+.modal-header {
+    icon {
+        color: $yellow-dark;
+        margin-right: $spacing-100;
+    }
+}
+
+.modal-body {
+    note {
+        font-size: 14px;
+        line-height: 1.25em;
+        margin-bottom: $spacing-300;
+    }
+    .accept-certification {
+        background-color: $gray-50;
+        border: 1px solid $gray-200;
+        border-radius: $spacing-100;
+        padding: $spacing-400;
+        font-size: 14px;
+        font-weight: bold;
+
+        input {
+            margin-right: $spacing-100;
+        }
+    }
+}

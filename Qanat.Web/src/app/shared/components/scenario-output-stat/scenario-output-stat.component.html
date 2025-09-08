@@ -1,0 +1,15 @@
+<div class="stat">
+    <div class="title">{{ statTitle }}</div>
+    <div class="value-units flex">
+        @if (value) {
+            <span class="value">{{ value | number: "1.2-2" }}</span>
+        }
+        @if (!value) {
+            <span class="value">n/a</span>
+        }
+        <span class="units">{{ units }}</span>
+    </div>
+    <div class="description">
+        {{ description }}
+    </div>
+</div>

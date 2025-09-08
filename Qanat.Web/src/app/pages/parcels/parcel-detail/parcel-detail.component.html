@@ -1,0 +1,233 @@
+@if (currentUser$ | async) {
+    @if (parcel$ | async; as parcel) {
+        <div>
+            <page-header [templateRight]="templateRight" icon="Parcels" [pageTitle]="parcel.ParcelNumber">
+                <ng-template #templateRight>
+                    @if (parcel.WaterAccount) {
+                        <a [routerLink]="['/water-accounts', parcel.WaterAccount.WaterAccountID]">
+                            <water-account-title
+                                [waterAccountName]="parcel.WaterAccount.WaterAccountName"
+                                [waterAccountNumber]="parcel.WaterAccount.WaterAccountNumber.toString()"></water-account-title>
+                        </a>
+                    }
+                </ng-template>
+            </page-header>
+            <div class="page-body statistics grid-12">
+                <qanat-map (onMapLoad)="handleMapReady($event)" mapHeight="500px">
+                    @if (mapIsReady) {
+                        @if (parcel.WaterAccount) {
+                            <water-account-parcels-layer
+                                [displayOnLoad]="true"
+                                [map]="map"
+                                [geographyID]="parcel.GeographyID"
+                                [waterAccountID]="parcel.WaterAccountID"
+                                [highlightedParcelIDs]="[parcel.ParcelID]"
+                                [layerControl]="layerControl"></water-account-parcels-layer>
+                        }
+                        @if (!parcel.WaterAccount) {
+                            <water-account-parcels-layer
+                                [displayOnLoad]="true"
+                                [map]="map"
+                                [geographyID]="parcel.GeographyID"
+                                [waterAccountID]="parcel.WaterAccountID"
+                                [parcelID]="parcel.ParcelID"
+                                [highlightedParcelIDs]="[parcel.ParcelID]"
+                                [layerControl]="layerControl"></water-account-parcels-layer>
+                        }
+                        <gsa-boundaries [map]="map" [layerControl]="layerControl" [geographyID]="parcel.GeographyID" [displayOnLoad]="false"></gsa-boundaries>
+                        @for (zone of parcel.Zones; track zone) {
+                            <zone-group-layer
+                                [displayOnLoad]="false"
+                                [zoneGroupID]="zone.ZoneGroupID"
+                                [zoneGroupName]="zone.ZoneGroupName"
+                                [map]="map"
+                                [layerControl]="layerControl"></zone-group-layer>
+                        }
+                        @for (externalMapLayer of externalMapLayers$ | async; track externalMapLayer) {
+                            <geography-external-map-layer [map]="map" [layerControl]="layerControl" [externalMapLayer]="externalMapLayer"></geography-external-map-layer>
+                        }
+                        <usage-location-layer
+                            [map]="map"
+                            [layerControl]="layerControl"
+                            [parcelIDs]="[parcel.ParcelID]"
+                            [displayOnLoad]="true"
+                            [geographyID]="parcel.GeographyID"></usage-location-layer>
+                    }
+                </qanat-map>
+                <div class="group group-3">
+                    <div class="statistics__module">
+                        <div class="statistics__module-header">
+                            <h3 class="statistics__title-small">Parcel Area</h3>
+                        </div>
+                        <div class="stat">
+                            <h4 class="stat__value">
+                                {{ parcel.ParcelArea | number: "1.2-2" }}
+                            </h4>
+                            <p class="stat__meta">acres</p>
+                        </div>
+                        @if (currentUserIsAdminOrWaterManager) {
+                            <a href="javascript:void(0);" (click)="editAcres()">
+                                <icon icon="Parcels"></icon>
+                                Edit Acres
+                            </a>
+                        }
+
+                        <div class="statistics__module-header mt-4">
+                            <h3 class="statistics__title-small">Parcel Status</h3>
+                        </div>
+                        <div class="stat">
+                            <h4 class="stat__value">
+                                {{ parcel.ParcelStatus.ParcelStatusDisplayName }}
+                            </h4>
+                        </div>
+                        @if (currentUserIsAdminOrWaterManager) {
+                            <a href="javascript:void(0);" (click)="modifyParcelStatus()">
+                                <icon icon="Parcels"></icon>
+                                Edit Parcel Status
+                            </a>
+                        }
+                    </div>
+                    <div class="statistics__module">
+                        @if (parcel.Zones.length > 0) {
+                            <div>
+                                @for (zone of parcel.Zones; track zone) {
+                                    <div class="pb-3">
+                                        <div class="statistics__module-header">
+                                            <h3 class="statistics__title-small">
+                                                {{ zone.ZoneGroupName }}
+                                            </h3>
+                                        </div>
+                                        <div class="stat pb-2">
+                                            <h3>
+                                                <span class="dot" [style]="getZoneColorStyle(zone.ZoneColor)"></span>
+                                                {{ zone.ZoneName }}
+                                            </h3>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        } @else {
+                            <div class="stat pb-2">This parcel does not belong to any Zone Groups.</div>
+                        }
+
+                        @if (currentUserIsAdminOrWaterManager) {
+                            <a href="javascript:void(0);" (click)="editZoneAssignments()">
+                                <icon icon="Zones"></icon>
+                                Edit Zone Assignments
+                            </a>
+                        }
+                    </div>
+                    <div class="statistics__module">
+                        <div class="statistics__module-header">
+                            <h3 class="statistics__title-small">Owner Name</h3>
+                        </div>
+                        @if (parcel.OwnerName) {
+                            <div class="stat pb-3">
+                                <h4 class="stat__meta address">{{ parcel.OwnerName }}</h4>
+                            </div>
+                        } @else {
+                            <div class="stat not-available pb-3">Not Available</div>
+                        }
+                        <div class="statistics__module-header">
+                            <h3 class="statistics__title-small">Owner Address</h3>
+                        </div>
+                        @if (parcel.OwnerAddress) {
+                            <div class="stat pb-3">
+                                <h4 class="stat__meta address">{{ parcel.OwnerAddress }}</h4>
+                            </div>
+                        } @else {
+                            <div class="stat not-available pb-3">Not Available</div>
+                        }
+
+                        @if (currentUserIsAdminOrWaterManager) {
+                            <a href="javascript:void(0);" (click)="updateOwnershipInfo()">
+                                <icon icon="Users"></icon>
+                                Update Ownership Info
+                            </a>
+                        }
+                    </div>
+                </div>
+                @if (geography$ | async; as geography) {
+                    <div class="group">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="section-title">Usage Locations</h2>
+                            </div>
+                            @if (usageLocations$ | async; as usageLocations) {
+                                <div class="card-body">
+                                    <qanat-grid
+                                        height="300px"
+                                        [rowData]="usageLocations"
+                                        [columnDefs]="usageLocationColumnDefs"
+                                        downloadFileName="{{ parcel.ParcelNumber }}-usage-locations"></qanat-grid>
+                                </div>
+                            } @else {
+                                <div class="card-body" [loadingSpinner]="{ loadingHeight: 300, isLoading: true }"></div>
+                            }
+                        </div>
+                    </div>
+                }
+                <div id="water-measurements">
+                    <vega-parcel-usage-chart [parcel]="parcel"></vega-parcel-usage-chart>
+                </div>
+                @if (allocationPlans$ | async; as allocationPlans) {
+                    @if (showAllocationPlan) {
+                        <div class="card" id="allocation-plan">
+                            <div class="card-header">
+                                <h2 class="section-title">
+                                    @if (selectedAllocationPlan) {
+                                        <span>
+                                            {{ selectedAllocationPlan.Zone.ZoneName }}
+                                        </span>
+                                    }
+                                    Allocation Plan
+                                </h2>
+                            </div>
+                            <div class="card-body">
+                                @if (selectedAllocationPlan.GeographyAllocationPlanConfiguration.AllocationPlansDescription; as allocationPlansDescription) {
+                                    <div class="copy copy-2 copy-user-entered mt-2 mb-3" [innerHtml]="allocationPlansDescription"></div>
+                                }
+                                <button-group class="mb-3 flex">
+                                    @for (allocationPlan of allocationPlans; track allocationPlan) {
+                                        <button (click)="selectedAllocationPlan = allocationPlan" [class.active]="selectedAllocationPlan === allocationPlan">
+                                            {{ allocationPlan.WaterType.WaterTypeName }}
+                                        </button>
+                                    }
+                                </button-group>
+                                <allocation-plan-table [allocationPlan]="selectedAllocationPlan" class="mb-3"></allocation-plan-table>
+                            </div>
+                        </div>
+                    }
+                }
+                <div class="card" id="ledger-activity">
+                    <div class="card-header">
+                        <h2 class="section-title">Parcel Supply Activity</h2>
+                    </div>
+                    <div class="card-body">
+                        @if (parcelSupplies$ | async; as parcelSupplies) {
+                            <qanat-grid
+                                height="500px"
+                                [rowData]="parcelSupplies"
+                                [columnDefs]="parcelSupplyGridColumnDefs"
+                                downloadFileName="{{ parcel.ParcelNumber }}-parcel-supply"></qanat-grid>
+                        }
+                        <div class="meta flex-end">
+                            <div class="copy copy-3">
+                                <note>
+                                    <p class="flex-between">
+                                        <icon icon="Info"></icon>
+                                        All transaction data is in units of acre-feet.
+                                    </p>
+                                </note>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <ng-template #isLoadingTemplate>
+                <aside class="sidebar" [loadingSpinner]="{ isLoading: true }"></aside>
+                <main class="main" [loadingSpinner]="{ isLoading: true }"></main>
+            </ng-template>
+        </div>
+    }
+}

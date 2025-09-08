@@ -1,0 +1,23 @@
+<div class="modal-header">
+    <div>
+        <h3 class="section-title">Update Role for {{ userDisplayName }}</h3>
+    </div>
+</div>
+
+<div class="modal-body">
+    <form action="" class="form" [formGroup]="formGroup">
+        <div class="mb-3">
+            <form-field
+                [formControl]="formGroup.controls.WaterAccountRoleID"
+                fieldLabel="Name"
+                fieldValue="Value"
+                [formInputOptions]="WaterAccountRolesSelectDropdownOptions"
+                [type]="FormFieldType.Select"></form-field>
+        </div>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-primary" (click)="save()" [disabled]="!formGroup.valid || isLoadingSubmit">Update User's Role</button>
+    <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+</div>

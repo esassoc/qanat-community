@@ -1,0 +1,18 @@
+@if (geographies$ | async; as geographies) {
+    <div class="geography-list">
+        <p class="select-label">Select a geography to claim water accounts:</p>
+        @for (geography of geographies; track geography) {
+            <div class="geography-list-item" (click)="onGeographySelected(geography)">
+                <div class="geography-logo">
+                    <geography-logo [geographyID]="geography.GeographyID"></geography-logo>
+                </div>
+                <div class="geography-name">
+                    <h2 class="geography-short-name">{{ geography.GeographyName }}</h2>
+                    <div class="geography-long-name">
+                        {{ geography.GeographyDisplayName }}
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

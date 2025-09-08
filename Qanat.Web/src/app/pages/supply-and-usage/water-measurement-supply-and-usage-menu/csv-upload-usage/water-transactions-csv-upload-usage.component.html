@@ -1,0 +1,131 @@
+<page-header icon="Transactions" [customRichTextTypeID]="richTextTypeID" [templateAbove]="templateAbove" pageTitle="Upload Water Measurement Data (CSV)">
+    <ng-template #templateAbove>
+        <div class="back">
+            <a routerLink="../" class="back__link">Back to Water Measurements</a>
+        </div>
+    </ng-template>
+</page-header>
+
+@if (geography$ | async; as geography) {
+    <div class="page-body">
+        <app-alert-display></app-alert-display>
+        <form class="form mb-3 grid-9">
+            @if (!displayFileInputPanel) {
+                <form class="form mb-3 grid-8">
+                    @if (waterMeasurementTypes$ | async; as waterMeasurementTypes) {
+                        <div class="field g-col-6">
+                            <label class="d-block required field-label">Water Measurement Type</label>
+                            <ng-select
+                                class="form-control custom small"
+                                name="waterMeasurementType"
+                                [(ngModel)]="waterMeasurementTypeID"
+                                [items]="waterMeasurementTypes"
+                                bindLabel="WaterMeasurementTypeName"
+                                bindValue="WaterMeasurementTypeID"></ng-select>
+                            <field-definition fieldDefinitionType="UsageType"></field-definition>
+                        </div>
+                    }
+                    <div class="field g-col-6">
+                        <label class="d-block required field-label">Unit Type</label>
+                        <ng-select
+                            class="form-control custom small"
+                            name="unitType"
+                            [(ngModel)]="unitTypeID"
+                            [items]="unitTypeSelectDropdownOptions"
+                            bindLabel="Label"
+                            bindValue="Value"></ng-select>
+                    </div>
+                    <div class="field g-col-6">
+                        <label class="field-label">Estimate Date</label>
+                        <h3>{{ effectiveDate | date: "shortDate" }}</h3>
+                        <field-definition fieldDefinitionType="EstimateDate"></field-definition>
+                    </div>
+                    <div class="field g-col-3">
+                        <label class="required field-label">Estimate Month</label>
+                        <ng-select class="form-control custom small" name="estimateMonth" [(ngModel)]="effectiveDateMonth" (change)="updateEffectiveDate()">
+                            @for (month of months; track month; let i = $index) {
+                                <ng-option [value]="i">
+                                    {{ month }}
+                                </ng-option>
+                            }
+                        </ng-select>
+                    </div>
+                    <div class="field g-col-3">
+                        <label class="required field-label">Estimate Year</label>
+                        <ng-select
+                            class="form-control custom small"
+                            name="estimateYear"
+                            [(ngModel)]="effectiveDateYear"
+                            [items]="years"
+                            (change)="updateEffectiveDate()"></ng-select>
+                    </div>
+                    <div class="field g-col-6">
+                        <label class="d-block required field-label">APN or Field ID Name Column</label>
+                        <ng-select class="form-control custom small" name="apnColumnName" [(ngModel)]="apnColumnName">
+                            @for (fileUploadHeader of fileUploadHeaders; track fileUploadHeader) {
+                                <ng-option [value]="fileUploadHeader" [disabled]="fileUploadHeader === quantityColumnName || fileUploadHeader === commentColumnName">
+                                    {{ fileUploadHeader }}
+                                </ng-option>
+                            }
+                        </ng-select>
+                        <field-definition fieldDefinitionType="APNColumn"></field-definition>
+                    </div>
+                    <div class="field g-col-6">
+                        <label class="d-block required field-label">Value Column</label>
+                        <ng-select class="form-control custom small" name="quantityColumnName" [(ngModel)]="quantityColumnName">
+                            @for (fileUploadHeader of fileUploadHeaders; track fileUploadHeader) {
+                                <ng-option [value]="fileUploadHeader" [disabled]="fileUploadHeader === apnColumnName || fileUploadHeader === commentColumnName">
+                                    {{ fileUploadHeader }}
+                                </ng-option>
+                            }
+                        </ng-select>
+                        <field-definition fieldDefinitionType="ValueColumn"></field-definition>
+                    </div>
+                    <div class="field g-col-6">
+                        <label class="d-block field-label">Comment Column</label>
+                        <ng-select class="form-control custom small" name="commentColumnName" [(ngModel)]="commentColumnName">
+                            @for (fileUploadHeader of fileUploadHeaders; track fileUploadHeader) {
+                                <ng-option [value]="fileUploadHeader" [disabled]="fileUploadHeader === apnColumnName || fileUploadHeader === quantityColumnName">
+                                    {{ fileUploadHeader }}
+                                </ng-option>
+                            }
+                        </ng-select>
+                    </div>
+                </form>
+                <div class="form__actions flex-end">
+                    <button class="btn btn-primary-outline btn-lg" (click)="backToFileInputPanel()" [disabled]="isLoadingSubmit">
+                        <i class="fa fa-long-arrow-left"></i>
+                        Back
+                    </button>
+                    <button class="btn btn-primary btn-lg" (click)="onSubmit(geography.GeographyID)" [disabled]="isLoadingSubmit">
+                        @if (isLoadingSubmit) {
+                            <span class="fa fa-spinner loading-spinner"></span>
+                        }
+                        Save
+                    </button>
+                </div>
+            } @else {
+                <div class="field g-col-6">
+                    <label class="required field-label">File</label>
+                    <div class="file-upload-wrapper pb-2">
+                        <label for="file-upload" class="custom-file-upload">
+                            <input type="file" class="form-control" name="file-upload" [id]="fileUploadElementID" (change)="onFileUploadChange($event)" required />
+                            {{ fileUpload?.name ?? "No file chosen..." }}
+                            <fresca-button iconClass="fas fa-folder-open" (click)="onClickFileUpload()"> Browse </fresca-button>
+                        </label>
+                    </div>
+                    <em>Accepted extensions: CSV</em>
+                    <i class="fas fa-file-open"></i>
+                </div>
+                <div class="form__actions flex-end">
+                    <fresca-button (click)="getFileUploadHeaders(geography.GeographyID)" [disabled]="!fileUpload || isLoadingSubmit">
+                        @if (isLoadingSubmit) {
+                            <span class="fa fa-spinner loading-spinner"></span>
+                        }
+                        Continue
+                    </fresca-button>
+                </div>
+            }
+        </form>
+    </div>
+}

@@ -1,0 +1,67 @@
+@if (parcel) {
+    <div class="card">
+        <div class="card-header flex-between">
+            <h2 class="card-title">
+                <icon icon="Parcels" class="text-primary"></icon>
+                Review Changes to
+                <span class="text-primary">{{ parcel.ParcelNumber }}</span>
+            </h2>
+            @if (parcel.WaterAccount) {
+                <div>
+                    <span class="text-primary">
+                        <icon icon="WaterAccounts"></icon>
+                        <b class="pl-1">#{{ parcel.WaterAccount.WaterAccountNumber }}</b>
+                    </span>
+                    <span class="text-muted pl-2">{{ parcel.WaterAccount.WaterAccountName }}</span>
+                </div>
+            }
+        </div>
+        <div class="card-body">
+            <div class="table-header flex">
+                <div>
+                    Previous
+                    @if (parcel.PreviousParcelHistoryUploadDate) {
+                        <em> ({{ parcel.PreviousParcelHistoryUploadDate | date: "medium" }}) </em>
+                    }
+                </div>
+                <div>
+                    Latest
+                    <em>({{ parcel.CurrentParcelHistoryUploadDate | date: "medium" }})</em>
+                </div>
+            </div>
+            @for (parcelFieldDiff of parcel.ParcelFieldDiffs; track parcelFieldDiff) {
+                <div class="row">
+                    <div class="row-label">{{ parcelFieldDiff.FieldName }}</div>
+                    <div class="row-content-wrapper" [class.gray]="parcel.IsReviewed || parcelFieldDiff.PreviousFieldValue === parcelFieldDiff.CurrentFieldValue">
+                        <div class="table-cell previous-value">
+                            {{ parcelFieldDiff.PreviousFieldValue }}
+                        </div>
+                        <div class="table-cell latest-value">{{ parcelFieldDiff.CurrentFieldValue }}</div>
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="card-footer flex-start">
+            <div>
+                <icon icon="Info"></icon>
+                <a (click)="updateParcelOwnershipInfo()">Update Ownership Info</a>
+            </div>
+            <div>
+                <icon icon="WaterAccounts"></icon>
+                <a (click)="updateWaterAccount()">Update Water Account</a>
+            </div>
+            <div>
+                <icon icon="Zones"></icon>
+                <a (click)="editZoneAssignments()">Edit Zone Assignments</a>
+            </div>
+            <div>
+                <icon icon="Parcels"></icon>
+                <a (click)="modifyParcelStatus()">Modify Parcel Status</a>
+            </div>
+        </div>
+        <div class="flex-end">
+            <button class="btn btn-primary" (click)="markParcelAsReviewed()" [disabled]="parcel.IsReviewed">Mark as Reviewed</button>
+            <button class="btn btn-primary-outline" (click)="selectNextParcel()" [disabled]="nextButtonDisabled">Next Record</button>
+        </div>
+    </div>
+}

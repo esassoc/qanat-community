@@ -1,0 +1,117 @@
+@use "/src/scss/abstracts" as *;
+
+.multi-switch {
+    display: flex;
+    align-items: flex-end;
+    gap: 0 1rem;
+    border-bottom: 2px solid $primary;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    white-space: nowrap;
+    max-width: calc(100vw - 7rem);
+    padding-right: 2rem;
+
+    input[type="radio"],
+    input[type="checkbox"] {
+        position: relative;
+        left: -200vw;
+    }
+
+    .option {
+        &__radio {
+            &:checked {
+                & + .option__label {
+                    background: $primary;
+                    color: $white;
+                    display: flex;
+                    align-items: center;
+
+                    &:after {
+                        display: block;
+                        margin-left: 0.25rem;
+                        font-family: "Font Awesome 5 Free";
+                        content: "\f058";
+                    }
+                }
+            }
+        }
+
+        &__checkbox {
+            &:checked {
+                & + .option__label {
+                    display: flex;
+                    align-items: center;
+
+                    &:after {
+                        display: block;
+                        margin-left: 0.25rem;
+                        font-family: "Font Awesome 5 Free";
+                        content: "\f058";
+                    }
+                }
+            }
+
+            &.active + .option__label {
+                background: $primary;
+                color: $white;
+            }
+
+            &:disabled {
+                & + .option__label {
+                    color: #aaa;
+                    font-style: italic;
+                    pointer-events: none;
+                }
+            }
+        }
+
+        &__water_usage {
+            &:checked + .option__label {
+                background: $primary;
+                color: $white;
+                padding-right: 2.25rem;
+
+                i {
+                    right: 0.75rem;
+                    display: block;
+                }
+            }
+
+            &:disabled {
+                & + .option__label {
+                    color: #aaa;
+                    font-style: italic;
+                    pointer-events: none;
+                }
+            }
+        }
+
+        &__label {
+            display: block;
+            padding: 0.875rem 1.75rem 0.6125rem 1.25rem;
+            border-top-left-radius: 0.25rem;
+            border-top-right-radius: 0.25rem;
+            font-size: $type-size-200;
+            position: relative;
+            white-space: nowrap;
+
+            i {
+                position: absolute;
+                right: 0.25rem;
+                top: 0.75rem;
+            }
+        }
+    }
+}
+
+.option-panel {
+    padding: 2rem 1rem;
+
+    @include desktop-medium {
+        padding: 2rem;
+    }
+
+    &__title {
+        font-size: $type-size-400;
+    }
+}

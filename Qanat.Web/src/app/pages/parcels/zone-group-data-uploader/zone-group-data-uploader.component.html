@@ -1,0 +1,109 @@
+<div class="full-width-page">
+    <page-header icon="Zones" [customRichTextTypeID]="richTextTypeID" pageTitle="Assign Parcels to Zones" [templateAbove]="templateAbove"></page-header>
+    <ng-template #templateAbove>
+        <div class="back">
+            <a routerLink="/water-dashboard/parcels" class="back__link">Back to All Parcels</a>
+        </div>
+    </ng-template>
+
+    <div class="page-body">
+        <app-alert-display></app-alert-display>
+
+        @if (geographyZoneGroups$ | async; as geographyZoneGroups) {
+            <div class="grid-12">
+                <form-field
+                    class="g-col-4"
+                    fieldLabel="Select a Zone Group"
+                    [formControl]="selectedZoneGroupField"
+                    [formInputOptions]="zoneGroupSelectOptions"
+                    [type]="FormFieldType.Select"></form-field>
+            </div>
+            @if (selectedZoneGroupFieldValue$ | async; as selectedZoneGroup) {
+                <div class="mt-5">
+                    <manage-zone-group-card [zoneGroup]="selectedZoneGroup">
+                        <form class="form mb-3 grid-9">
+                            @if (!displayFileInputPanel) {
+                                <form class="form mb-3 grid-8">
+                                    <div class="field g-col-4">
+                                        <label class="d-block required field-label">APN Column</label>
+                                        <ng-select class="form-control" name="apnColumnName" [(ngModel)]="apnColumnName">
+                                            @for (fileUploadHeader of fileUploadHeaders; track fileUploadHeader) {
+                                                <ng-option [value]="fileUploadHeader" [disabled]="fileUploadHeader == zoneColumnName">
+                                                    {{ fileUploadHeader }}
+                                                </ng-option>
+                                            }
+                                        </ng-select>
+                                        <field-definition fieldDefinitionType="APNColumn"></field-definition>
+                                    </div>
+                                    <div class="field g-col-4">
+                                        <label class="d-block required field-label">Zone Column</label>
+                                        <ng-select class="form-control" name="zoneColumnName" [(ngModel)]="zoneColumnName">
+                                            @for (fileUploadHeader of fileUploadHeaders; track fileUploadHeader) {
+                                                <ng-option [value]="fileUploadHeader" [disabled]="fileUploadHeader == apnColumnName">
+                                                    {{ fileUploadHeader }}
+                                                </ng-option>
+                                            }
+                                        </ng-select>
+                                        <field-definition fieldDefinitionType="ZoneColumn"></field-definition>
+                                    </div>
+                                </form>
+                                <div class="form__actions flex-end">
+                                    <button class="btn btn-primary" (click)="onSubmit(selectedZoneGroup)" [disabled]="isLoadingSubmit">
+                                        @if (isLoadingSubmit) {
+                                            <span class="fa fa-spinner loading-spinner"></span>
+                                        }
+                                        Save
+                                    </button>
+                                    <button class="btn btn-primary-outline" (click)="closeColumns()">Cancel</button>
+                                </div>
+                            } @else {
+                                <div class="field g-col-4">
+                                    <label class="required field-label">File</label>
+                                    <div class="file-upload-wrapper pb-2">
+                                        <label for="file-upload" class="custom-file-upload">
+                                            <span class="file-upload-name">
+                                                <input
+                                                    type="file"
+                                                    class="form-control"
+                                                    name="file-upload"
+                                                    [id]="fileUploadElementID"
+                                                    (change)="onFileUploadChange($event)"
+                                                    required />
+                                                {{ fileUpload?.name ?? "No file chosen..." }}
+                                            </span>
+                                            <fresca-button iconClass="fas fa-folder-open" (click)="onClickFileUpload()"> Browse </fresca-button>
+                                        </label>
+                                    </div>
+                                    <em>Accepted extensions: CSV</em>
+                                    <i class="fas fa-file-open"></i>
+                                </div>
+                                <div class="g-col-5">
+                                    <qanat-map (onMapLoad)="handleMapReady($event)" mapHeight="400px" [boundingBox]="geography.BoundingBox">
+                                        @if (mapIsReady) {
+                                            <zone-group-layer
+                                                [displayOnLoad]="true"
+                                                [zoneGroupID]="selectedZoneGroup.ZoneGroupID"
+                                                [zoneGroupName]="selectedZoneGroup.ZoneGroupName"
+                                                [map]="map"
+                                                [layerControl]="layerControl"></zone-group-layer>
+                                        }
+                                    </qanat-map>
+                                </div>
+                                <div class="form__actions flex-end">
+                                    <fresca-button (click)="getFileUploadHeaders()" [disabled]="!fileUpload || isLoadingSubmit">
+                                        @if (isLoadingSubmit) {
+                                            <span class="fa fa-spinner loading-spinner"></span>
+                                        }
+                                        Continue
+                                    </fresca-button>
+                                </div>
+                            }
+                        </form>
+                    </manage-zone-group-card>
+                </div>
+            } @else {
+                <no-selected-item-box class="mt-5" [boxHeight]="500" boxText="No Zone Group Selected"></no-selected-item-box>
+            }
+        }
+    </div>
+</div>

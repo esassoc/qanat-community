@@ -1,0 +1,20 @@
+<div class="modal-header">
+    <h2 class="modal-title">Update Fallowing Self Report Visibility</h2>
+</div>
+<div class="modal-body">
+    <div class="accept-certification">
+        <form class="form grid-12" [formGroup]="formGroup">
+            <form-field [formControl]="formGroup.controls.FallowSelfReportStartDate" fieldLabel="Self Report Start Date" [type]="FormFieldType.Date"></form-field>
+            <form-field [formControl]="formGroup.controls.FallowSelfReportEndDate" fieldLabel="Self Report End Date" [type]="FormFieldType.Date"></form-field>
+            <form-field
+                [formControl]="formGroup.controls.FallowSelfReportReadyForAccountHolders"
+                fieldLabel="Ready for Account Holders"
+                [type]="FormFieldType.Check"
+                [checkLabel]="formGroup.controls.FallowSelfReportReadyForAccountHolders.value ? 'Yes' : 'No'"></form-field>
+        </form>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-primary" (click)="save()" [disabled]="!formGroup.valid">Save</button>
+    <button class="btn btn-primary-outline" (click)="cancel()">Cancel</button>
+</div>

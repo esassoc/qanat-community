@@ -1,0 +1,40 @@
+<page-header pageTitle="Select a Parcel"></page-header>
+
+<workflow-body [helpCustomRichTextTypeID]="richTextTypeID">
+    <form class="form grid-12" #wellParcelForm="ngForm">
+        <div class="field g-col-12">
+            <div class="field-label">APN where your well is located</div>
+            @if (selectedParcel$ | async; as selectedParcel) {
+                @if (geography) {
+                    <parcel-typeahead [geographyID]="geography.GeographyID" [selectedParcel]="selectedParcel ?? null" (change)="selectedParcelChanged($event)"></parcel-typeahead>
+                }
+            } @else {
+                @if (geography) {
+                    <parcel-typeahead [selectedParcel]="selectedParcel ?? null" [geographyID]="geography.GeographyID" (change)="selectedParcelChanged($event)"></parcel-typeahead>
+                }
+            }
+            <div class="mt-2 copy copy-3">
+                <i class="fa fa-info-circle"></i>
+                If you don't know your APN or your well is not located on a parcel, you can proceed without completing this field.
+            </div>
+        </div>
+        @if (selectedParcel && geography) {
+            <div class="g-col-12">
+                <qanat-map (onMapLoad)="handleMapReady($event)" mapHeight="500px">
+                    @if (mapIsReady) {
+                        <highlighted-parcels-layer
+                            [displayOnLoad]="true"
+                            [map]="map"
+                            [geographyID]="geography.GeographyID"
+                            [highlightedParcelIDs]="[selectedParcel.ParcelID]"
+                            [layerControl]="layerControl"></highlighted-parcels-layer>
+                    }
+                </qanat-map>
+            </div>
+        }
+    </form>
+</workflow-body>
+
+<div class="page-footer">
+    <fresca-button class="ml-auto" (click)="continue()">Save & Continue</fresca-button>
+</div>

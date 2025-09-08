@@ -1,0 +1,20 @@
+<layer>
+  <name>AllUsageEntities</name>
+  <id>LayerInfoImpl--715962d3:18fc57183f1:-6ba1</id>
+  <type>VECTOR</type>
+  <defaultStyle>
+    <id>StyleInfoImpl--715962d3:18fc669eb5a:39f9</id>
+  </defaultStyle>
+  <styles class="linked-hash-set">
+    <style>
+      <id>StyleInfoImpl-74c98642:16baecba8e3:260a</id>
+    </style>
+  </styles>
+  <resource class="featureType">
+    <id>FeatureTypeInfoImpl--715962d3:18fc57183f1:-6ba2</id>
+  </resource>
+  <attribution>
+    <logoWidth>0</logoWidth>
+    <logoHeight>0</logoHeight>
+  </attribution>
+</layer>

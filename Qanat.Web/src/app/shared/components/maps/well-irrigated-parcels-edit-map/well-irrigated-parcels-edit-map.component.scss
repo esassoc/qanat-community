@@ -1,0 +1,118 @@
+@use "sass:color";
+@use "/src/scss/abstracts" as *;
+
+.parcel-list {
+    border: 1px solid rgba($black, 0.1);
+    height: 24rem;
+    overflow-y: scroll;
+    background: $white;
+
+    .ng-select.search ::ng-deep .ng-select-container {
+        border: 0;
+        border-bottom: 1px solid rgba($black, 0.1) !important;
+        border-radius: 0;
+        .ng-placeholder {
+            top: 5px !important;
+        }
+    }
+
+    .search input {
+        max-height: 36px;
+        font-size: 1em;
+        line-height: 1;
+        font-family: $overpass;
+        border: 0;
+        outline: none;
+    }
+
+    .action-icon {
+        color: $primary;
+
+        &:hover {
+            cursor: pointer;
+        }
+    }
+
+    .list-item {
+        border-bottom: 1px solid rgba($black, 0.1);
+
+        &:nth-of-type(even) {
+            background: #fafafa;
+        }
+
+        &.recently-active {
+            background-color: color.adjust($primary, $lightness: 40%);
+        }
+
+        &:hover {
+            background-color: $primary;
+            color: $white;
+
+            .small {
+                visibility: visible;
+                color: $white;
+            }
+
+            .action-icon {
+                color: $white;
+            }
+        }
+
+        .small {
+            margin-left: 1rem;
+            font-style: italic;
+            color: $white;
+        }
+    }
+}
+
+.all {
+    .list-item.recently-active {
+        background-color: rgba($red-default, 40%);
+
+        .action-icon {
+            color: $black;
+        }
+
+        span.small {
+            color: $black;
+        }
+
+        &:hover {
+            color: $black;
+        }
+    }
+}
+
+.selected {
+    .no-parcels {
+        padding: 1rem;
+        text-align: center;
+    }
+
+    .list-item.recently-active {
+        background-color: rgba($green-default, 40%);
+
+        .action-icon {
+            color: $black;
+        }
+
+        span.small {
+            color: $black;
+        }
+
+        &:hover {
+            color: $black;
+        }
+    }
+}
+
+.small {
+    color: $secondary;
+    font-size: 0.8em;
+    letter-spacing: 0.025em;
+}
+
+.text-center {
+    text-align: center;
+}

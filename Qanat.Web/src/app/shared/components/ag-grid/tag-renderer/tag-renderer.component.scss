@@ -1,0 +1,20 @@
+@use "/src/scss/abstracts/" as *;
+
+.tag {
+    color: $orange-darker;
+    background-color: $orange-lighter;
+    border: 1px solid $orange-light;
+    border-radius: $spacing-100;
+    padding: 0.125rem 0.5rem;
+    margin-right: 0.5rem;
+    text-transform: uppercase;
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 5%;
+
+    &.disabled {
+        border-color: $gray-light;
+        background-color: $gray-lighter;
+        color: $gray-default;
+    }
+}

@@ -1,0 +1,20 @@
+<layer>
+  <name>ZoneGroups</name>
+  <id>LayerInfoImpl--5295db08:16ba03a820v:-7ff6</id>
+  <type>VECTOR</type>
+  <defaultStyle>
+    <id>StyleInfoImpl-53e9eefb:16b9054e5ev:-77b7</id>
+  </defaultStyle>
+  <styles class="linked-hash-set">
+    <style>
+      <id>StyleInfoImpl-53e9eefb:16b9054e5ev:-77b7</id>
+    </style>
+  </styles>
+  <resource class="featureType">
+    <id>FeatureTypeInfoImpl--5295db08:16ba03a820v:-7ff7</id>
+  </resource>
+  <attribution>
+    <logoWidth>0</logoWidth>
+    <logoHeight>0</logoHeight>
+  </attribution>
+</layer>

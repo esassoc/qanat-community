@@ -1,0 +1,21 @@
+<layer>
+  <name>AllUsageLocations</name>
+  <id>LayerInfoImpl--715962d3:18fc57183f1:-6ba1</id>
+  <type>VECTOR</type>
+  <defaultStyle>
+    <id>StyleInfoImpl-69206aec:197ccfa0a6e:-7d2c</id>
+  </defaultStyle>
+  <styles class="linked-hash-set">
+    <style>
+      <id>StyleInfoImpl-69206aec:197ccfa0a6e:-7d2c</id>
+    </style>
+  </styles>
+  <resource class="featureType">
+    <id>FeatureTypeInfoImpl--715962d3:18fc57183f1:-6ba2</id>
+  </resource>
+  <attribution>
+    <logoWidth>0</logoWidth>
+    <logoHeight>0</logoHeight>
+  </attribution>
+  <dateModified>2025-07-02 22:19:40.440 UTC</dateModified>
+</layer>

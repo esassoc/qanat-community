@@ -1,0 +1,47 @@
+@if (gridRef) {
+    <qanat-grid-header [grid]="gridRef" [rowDataCount]="rowData?.length" [leftAlignClearFiltersButton]="true" [disableGlobalFilter]="selectedPanel === 'Map'">
+        <div customGridActionsCenter>
+            <div class="button-group tab-nav">
+                <button class="button-group__item btn-sm" [class.active]="selectedPanel === 'Grid'" (click)="toggleSelectedPanel('Grid')">
+                    <icon icon="BulletedList"></icon>
+                    Grid
+                </button>
+                <button class="button-group__item btn-sm" [class.active]="selectedPanel === 'Hybrid'" (click)="toggleSelectedPanel('Hybrid')">
+                    <icon icon="Layout"></icon>
+                    Hybrid
+                </button>
+                <button class="button-group__item btn-sm" [class.active]="selectedPanel === 'Map'" (click)="toggleSelectedPanel('Map')">
+                    <icon icon="VerticalMap"></icon>
+                    Map
+                </button>
+            </div>
+        </div>
+        <div customGridActionsRight>
+            <ng-content select="[headerActions]"></ng-content>
+        </div>
+    </qanat-grid-header>
+}
+
+<div class="grid-12 mt-3">
+    <div class="tab-nav-panel" [class.g-col-6]="selectedPanel === 'Hybrid'" [class.g-col-12]="selectedPanel === 'Grid'" [class.hidden]="selectedPanel === 'Map'">
+        <qanat-grid
+            height="675px"
+            [rowData]="rowData"
+            [columnDefs]="columnDefs"
+            [overrideDefaultGridHeader]="true"
+            defaultRowSelection="singleRow"
+            (gridReady)="onGridReady($event)"
+            (gridRefReady)="onGridRefReady($event)"
+            (selectionChanged)="onGridSelectionChanged()"
+            [downloadFileName]="downloadFileName"
+            [colIDsToExclude]=""></qanat-grid>
+    </div>
+
+    <div class="tab-nav-panel" [class.g-col-6]="selectedPanel === 'Hybrid'" [class.g-col-12]="selectedPanel === 'Map'" [class.hidden]="selectedPanel === 'Grid'">
+        <qanat-map class="location-card" [mapHeight]="mapHeight" (onMapLoad)="handleMapReady($event)">
+            @if (mapIsReady) {
+                <ng-content select="[mapLayers]"></ng-content>
+            }
+        </qanat-map>
+    </div>
+</div>

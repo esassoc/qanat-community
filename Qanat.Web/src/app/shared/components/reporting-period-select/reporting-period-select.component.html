@@ -1,0 +1,19 @@
+@if (reportingPeriods$ | async; as reportingPeriods) {
+    <div class="statistics__filter year" [ngClass]="{ compact: compact }">
+        <h5 class="statistics__filter-label">Reporting Period</h5>
+        @if (reportingPeriods.length > 0) {
+            <ng-select
+                name="reporting-period-years"
+                [(ngModel)]="selectedReportingPeriod"
+                (change)="onSelectionChanged()"
+                [items]="reportingPeriods"
+                [clearable]="false"
+                [searchable]="false"
+                class="custom"
+                bindLabel="Name"
+                [appendTo]="'body'"></ng-select>
+        } @else {
+            <p>No Valid Reporting Period Configured for Geography</p>
+        }
+    </div>
+}

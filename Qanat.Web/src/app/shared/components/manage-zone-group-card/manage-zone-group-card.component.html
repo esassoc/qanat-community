@@ -1,0 +1,18 @@
+<div class="manage-zone-group-card">
+    <div class="manage-zone-group-card-header">
+        <page-header [pageTitle]="zoneGroup.ZoneGroupName" icon="Zones"></page-header>
+    </div>
+    <div class="manage-zone-group-card-body">
+        <ng-content></ng-content>
+    </div>
+    <div class="manage-zone-group-card-footer flex">
+        <a href="javascript:void(0);" (click)="downloadZoneGroupDataAsCsv()" [class.disabled]="isLoadingSubmit" class="flex-center download">
+            <icon icon="Download"></icon>
+            Download as CSV
+        </a>
+        <a href="javascript:void(0);" (click)="clearZoneGroupData()" [class.disabled]="isLoadingSubmit" class="flex-center delete">
+            <icon icon="Delete"></icon>
+            Clear Data
+        </a>
+    </div>
+</div>

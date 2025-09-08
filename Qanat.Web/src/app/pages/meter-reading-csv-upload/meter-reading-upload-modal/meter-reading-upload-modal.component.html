@@ -1,0 +1,35 @@
+<div class="modal">
+    <div class="modal-header">
+        <div>
+            <h3 class="section-title">Upload Meter Data</h3>
+        </div>
+    </div>
+
+    <div class="modal-body">
+        <form class="form">
+            <div class="field g-col-6">
+                <label class="required field-label">File</label>
+                <div class="file-upload-wrapper pb-2">
+                    <label for="file-upload" class="custom-file-upload">
+                        <input type="file" class="form-control" name="file-upload" [id]="fileUploadElementID" (change)="onFileUploadChange($event)" required />
+                        {{ fileUpload?.name ?? "No file chosen..." }}
+
+                        <fresca-button iconClass="fas fa-folder-open" (click)="onClickFileUpload()"> Browse </fresca-button>
+                    </label>
+                </div>
+                <em>Accepted extensions: CSV</em>
+                <i class="fas fa-file-open"></i>
+            </div>
+        </form>
+    </div>
+
+    <div class="modal-footer">
+        <button class="btn btn-primary" (click)="save()" [disabled]="isLoadingSubmit || !fileUpload">
+            @if (isLoadingSubmit) {
+                <span class="fa fa-spinner loading-spinner"></span>
+            }
+            Upload
+        </button>
+        <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+    </div>
+</div>

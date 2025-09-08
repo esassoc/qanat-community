@@ -1,0 +1,137 @@
+<page-header [templateAbove]="templateAbove" pageTitle="Review Usage Locations" [customRichTextTypeID]="customRichTextType">
+    <ng-template #templateAbove>
+        <div class="back">
+            <a [routerLink]="['../']" class="back__link">Back to Upload Usage Location GDB</a>
+        </div>
+    </ng-template>
+</page-header>
+
+@if (geography$ | async; as geography) {
+    <div class="page-body grid-12">
+        <app-alert-display></app-alert-display>
+        <div class="g-col-12">
+            @if (resultsPreview$ | async; as resultsPreview) {
+                <form class="form" [formGroup]="formGroup">
+                    <label class="required field-label">Merge Type</label>
+                    <div class="flex-start mb-3">
+                        <btn-group-radio-input
+                            [required]="true"
+                            [formControl]="formGroup.controls.usageLocationOption"
+                            [options]="[
+                                { label: 'Delete Merge', value: true, red: true },
+                                { label: 'Preserve Merge', value: false },
+                            ]">
+                        </btn-group-radio-input>
+                    </div>
+                    <div class="merge-type-note mb-3">
+                        @if (formGroup.controls.usageLocationOption.value === true) {
+                            <note>
+                                <div class="note-content">
+                                    <icon icon="Warning" class="warning"></icon>
+                                    <p>
+                                        Replace will delete all existing Usage Locations and Water Measurements for this geography for the selected reporting period and replace
+                                        them with what is uploaded.
+                                    </p>
+                                </div>
+                            </note>
+                        } @else if (formGroup.controls.usageLocationOption.value === false) {
+                            <note>
+                                <div class="note-content">
+                                    <icon icon="Warning" class="warning"></icon>
+                                    <p>
+                                        Merge will add new Usage Locations not yet in the database and match on Usage Location Name to update existing records. No Water
+                                        Measurements will be deleted.
+                                    </p>
+                                </div>
+                            </note>
+                        }
+                    </div>
+                    @if (reportingPeriodSelectOptions$ | async; as dropdownOptions) {
+                        <div class="field mb-3">
+                            <form-field
+                                [formControl]="formGroup.controls.ReportingPeriodID"
+                                fieldLabel="Reporting Period"
+                                [type]="FormFieldType.Select"
+                                [formInputOptions]="dropdownOptions"
+                                required></form-field>
+                        </div>
+                    }
+                    <table class="table table-group-striped mt-3">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th class="w-50">Expected Column</th>
+                                <th class="w-50">Layer Column To Use</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <span class="required flex">Usage Location Name</span>
+                                </td>
+                                <td>
+                                    <form-field [formInputOptions]="columnOptions" [type]="FormFieldType.Select" [formControl]="formGroup.controls.UsageLocationName"></form-field>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="required flex">APN / Parcel Number</span>
+                                </td>
+                                <td>
+                                    <form-field [formInputOptions]="columnOptions" [type]="FormFieldType.Select" [formControl]="formGroup.controls.APN"></form-field>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <field-definition fieldDefinitionType="UsageLocationType" [inline]="false"></field-definition>
+                                </td>
+                                <td>
+                                    <form-field [formInputOptions]="columnOptions" [type]="FormFieldType.Select" [formControl]="formGroup.controls.UsageType"></form-field>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="flex">Crop 1</span>
+                                </td>
+                                <td>
+                                    <form-field [formInputOptions]="columnOptions" [type]="FormFieldType.Select" [formControl]="formGroup.controls.Crop1"></form-field>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="flex">Crop 2</span>
+                                </td>
+                                <td>
+                                    <form-field [formInputOptions]="columnOptions" [type]="FormFieldType.Select" [formControl]="formGroup.controls.Crop2"></form-field>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="flex">Crop 3</span>
+                                </td>
+                                <td>
+                                    <form-field [formInputOptions]="columnOptions" [type]="FormFieldType.Select" [formControl]="formGroup.controls.Crop3"></form-field>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="flex">Crop 4</span>
+                                </td>
+                                <td>
+                                    <form-field [formInputOptions]="columnOptions" [type]="FormFieldType.Select" [formControl]="formGroup.controls.Crop4"></form-field>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+            }
+        </div>
+    </div>
+    <div class="page-footer">
+        <fresca-button (onClick)="launchModal(geography)" [disabled]="!formGroup.valid || isLoadingSubmit">
+            @if (isLoadingSubmit) {
+                <span class="fa fa-spinner loading-spinner"></span>
+            }
+            Finalize Changes
+        </fresca-button>
+    </div>
+}

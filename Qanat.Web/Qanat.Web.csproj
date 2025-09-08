@@ -1,0 +1,57 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <DockerComposeProjectPath>docker-compose\docker-compose.dcproj</DockerComposeProjectPath>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <OutputPath>bin\Debug\</OutputPath>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+        <OutputPath>obj\Docker\publish\</OutputPath>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <PublishWithAspNetCoreTargetManifest>false</PublishWithAspNetCoreTargetManifest>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Remove="docker-compose\**" />
+        <Compile Remove="node_modules\**" />
+        <EmbeddedResource Remove="docker-compose\**" />
+        <EmbeddedResource Remove="node_modules\**" />
+        <None Remove="docker-compose\**" />
+        <None Remove="node_modules\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Remove=".editorconfig" />
+        <None Remove=".gitignore" />
+        <None Remove="angular.json" />
+        <None Remove="package-lock.json" />
+        <None Remove="Qanat.Web.sln.DotSettings" />
+        <None Remove="tsconfig.json" />
+        <None Remove="tslint.json" />
+        <None Remove="workspace.code-workspace" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="Dockerfile">
+            <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="wwwroot\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+    </ItemGroup>
+</Project>

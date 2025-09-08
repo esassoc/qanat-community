@@ -1,0 +1,16 @@
+@use "/src/scss/abstracts" as *;
+
+.user-location {
+    text-decoration: none !important;
+
+    .account__name {
+        text-decoration: underline !important;
+        font-weight: bold;
+        font-size: $type-size-300 !important;
+    }
+
+    .geography__name {
+        display: block;
+        color: #888;
+    }
+}

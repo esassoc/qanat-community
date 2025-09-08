@@ -1,0 +1,144 @@
+<page-header icon="Map" [customRichTextTypeID]="richTextTypeID" [templateRight]="templateRight" [pageTitle]="'Usage Location Types'">
+    <ng-template #templateRight>
+        <name-tag name="enabled" color="#ffa62b" title="{{ hoverText }}"></name-tag>
+    </ng-template>
+</page-header>
+
+<div class="page-body grid-12">
+    <app-alert-display></app-alert-display>
+
+    <div class="card">
+        <div class="card-header">
+            <h3>Usage Location Types</h3>
+        </div>
+        @if (usageLocationTypes$ | async; as usageLocationTypes) {
+            <div class="card-body" [loadingSpinner]="{ isLoading: isLoading }">
+                <ul cdkDropList class="reorderable" (cdkDropListDropped)="dropUsageLocation($event, workingUsageLocationTypes)">
+                    @for (usageLocationType of workingUsageLocationTypes; track usageLocationType.UsageLocationTypeID; let i = $index) {
+                        <li class="reorderable__item" cdkDrag>
+                            <div class="reorderable__order">
+                                <span></span>
+                            </div>
+                            <div class="reorderable__label">
+                                <div class="reorderable__title flex-left ai-fe">
+                                    <div class="field">
+                                        <label class="field-label required small" style="display: flex">Name</label>
+                                        <input [ngModelOptions]="{ standalone: true }" type="text" [(ngModel)]="usageLocationType.Name" />
+                                    </div>
+                                    <div class="field">
+                                        <label class="field-label small required" style="display: flex">Can Be Remote Sensed?</label>
+                                        <label class="switch">
+                                            <input
+                                                type="checkbox"
+                                                id="CanBeRemoteSensed"
+                                                [ngModelOptions]="{ standalone: true }"
+                                                [(ngModel)]="usageLocationType.CanBeRemoteSensed"
+                                                ngDefaultControl />
+                                            <span class="toggle" for="CanBeRemoteSensed"></span>
+                                        </label>
+                                    </div>
+                                    <div class="field">
+                                        <label class="field-label small required" style="display: flex">Include in Usage Calculation?</label>
+                                        <label class="switch">
+                                            <input
+                                                type="checkbox"
+                                                id="IsIncludedInUsageCalculation"
+                                                [ngModelOptions]="{ standalone: true }"
+                                                [(ngModel)]="usageLocationType.IsIncludedInUsageCalculation"
+                                                ngDefaultControl />
+                                            <span class="toggle" for="IsIncludedInUsageCalculation"></span>
+                                        </label>
+                                    </div>
+
+                                    <div class="field">
+                                        <label class="field-label small required" style="display: flex">Is Default?</label>
+                                        <label class="switch">
+                                            <input
+                                                type="checkbox"
+                                                id="IsDefault"
+                                                [ngModelOptions]="{ standalone: true }"
+                                                [(ngModel)]="usageLocationType.IsDefault"
+                                                ngDefaultControl
+                                                (ngModelChange)="onDefaultChanged($event, usageLocationType, workingUsageLocationTypes)"
+                                                [disabled]="originalUsageLocationTypes.length == 1" />
+                                            <span class="toggle" for="IsDefault"></span>
+                                        </label>
+                                    </div>
+                                    <div class="field">
+                                        <label class="field-label small required" style="display: flex">Color</label>
+                                        <input [ngModelOptions]="{ standalone: true }" type="color" [(ngModel)]="usageLocationType.ColorHex" />
+                                    </div>
+                                </div>
+                                <div class="reorderable__title flex-left ai-fe" style="margin-top: 1rem">
+                                    <div class="field fill">
+                                        <label class="field-label small">Definition</label>
+                                        <input [ngModelOptions]="{ standalone: true }" type="text" [(ngModel)]="usageLocationType.Definition" />
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-link" (click)="deleteUsageLocationType(usageLocationType)">
+                                <div class="reorderable__close">
+                                    <i class="fas fa-times-circle"></i>
+                                </div>
+                            </button>
+                            <div class="reorderable__handle" cdkDragHandle>
+                                <i class="fas fa-bars"></i>
+                            </div>
+                        </li>
+                    }
+                </ul>
+
+                <form class="form add-new mt-4 flex-between ai-fe">
+                    <div class="field">
+                        <label class="field-label">Add New Usage Location Type</label>
+                        <input placeholder="New Usage Location Type" type="text" [ngModelOptions]="{ standalone: true }" [(ngModel)]="newUsageLocationTypeName" />
+                    </div>
+                    <div class="field">
+                        <label class="field-label">Can Be Remote Sensed?</label>
+                        <label class="switch">
+                            <input type="checkbox" [ngModelOptions]="{ standalone: true }" [(ngModel)]="newUsageLocationTypeCanBeRemoteSensed" />
+                            <span class="toggle"></span>
+                        </label>
+                    </div>
+                    <div class="field">
+                        <label class="field-label">Include in Usage Calculation?</label>
+                        <label class="switch">
+                            <input type="checkbox" [ngModelOptions]="{ standalone: true }" [(ngModel)]="newUsageLocationTypeIsIncludedInUsageCalculation" />
+                            <span class="toggle"></span>
+                        </label>
+                    </div>
+                    <div class="field">
+                        <label class="field-label">Color</label>
+                        <input type="color" [ngModelOptions]="{ standalone: true }" [(ngModel)]="newUsageLocationTypeColor" />
+                    </div>
+                    <div class="field full-width">
+                        <label class="field-label">Definition</label>
+                        <input placeholder="Definition" type="text" [ngModelOptions]="{ standalone: true }" [(ngModel)]="newUsageLocationTypeDefinition" />
+                    </div>
+                    <div class="field-actions">
+                        <button
+                            class="btn btn-secondary btn-md"
+                            (click)="addUsageLocationType(workingUsageLocationTypes)"
+                            [buttonLoading]="isLoadingSubmit"
+                            [disabled]="!newUsageLocationTypeName || isLoadingSubmit">
+                            + Add
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer flex-end">
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                    [buttonLoading]="isLoadingSubmit"
+                    [disabled]="isLoadingSubmit"
+                    (click)="updateUsageLocationTypes(workingUsageLocationTypes)">
+                    Save
+                </button>
+                <a class="btn btn-primary-outline" [routerLink]="['/configure']">Cancel</a>
+            </div>
+        } @else {
+            <div class="card-body" [loadingSpinner]="{ isLoading: isLoading }"></div>
+        }
+    </div>
+</div>

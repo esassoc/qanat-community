@@ -1,0 +1,132 @@
+@use "/src/scss/abstracts" as *;
+
+input:checked {
+    & + .toggle {
+        border: 1px solid $primary;
+        background: $primary;
+        color: $white;
+        text-align: center;
+
+        &:before {
+            transform: translateX(3rem);
+            background-color: $white;
+        }
+
+        &[check-true]:after {
+            content: attr(check-true);
+        }
+
+        &:after {
+            content: "On";
+            right: auto;
+            left: 1rem;
+        }
+    }
+
+    &.secondary + .toggle {
+        border: 1px solid $secondary;
+        background: $secondary;
+    }
+
+    & + .toggle.toggle-orange {
+        border: 1px solid $orange-default;
+        background-color: $orange-default;
+        color: $white;
+    }
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 5rem;
+    height: 2rem;
+
+    p {
+        padding-top: 0.5rem;
+        padding-right: 0.5rem;
+    }
+
+    input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+
+        &:disabled {
+            &:hover {
+                pointer-events: none;
+                cursor: default;
+            }
+
+            & + .toggle {
+                border: 1px solid #dcdcdc;
+                background-color: #fff;
+                color: #b4b4b4;
+
+                &:hover {
+                    pointer-events: none;
+                    cursor: default;
+                }
+
+                &:before {
+                    background-color: #b4b4b4;
+                }
+            }
+        }
+
+        &.secondary + .toggle {
+            border: 1px solid $secondary;
+
+            &::before {
+                background-color: $secondary;
+            }
+        }
+    }
+
+    .toggle {
+        position: absolute;
+        cursor: pointer;
+        inset: 0;
+        border: 1px solid $primary;
+        background-color: $white;
+        transition: 0.4s;
+        color: $primary;
+
+        text-align: center;
+        border-radius: 2rem;
+
+        &.toggle-orange {
+            border: 1px solid $gray-light;
+            background-color: $gray-light;
+            color: $gray-default;
+            &:before {
+                background-color: $white;
+            }
+        }
+
+        &:before {
+            position: absolute;
+            content: "";
+            height: 1.5rem;
+            width: 1.5rem;
+            left: 3px;
+            bottom: 3px;
+            background-color: $primary;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+        &[check-false]:after {
+            content: attr(check-false);
+        }
+        &:after {
+            display: block;
+            content: "Off";
+            position: absolute;
+            top: 0.5875rem;
+            right: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: $type-size-150;
+            transition: all 150ms ease;
+        }
+    }
+}

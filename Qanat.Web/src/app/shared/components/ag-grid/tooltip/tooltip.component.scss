@@ -1,0 +1,7 @@
+@use "/src/scss/abstracts" as *;
+
+.custom-tooltip {
+    background-color: $gray-lighter;
+    border: 1px solid rgba($black, 0.1);
+    padding: $spacing-100;
+}

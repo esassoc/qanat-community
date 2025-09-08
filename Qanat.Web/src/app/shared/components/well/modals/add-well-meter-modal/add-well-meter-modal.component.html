@@ -1,0 +1,36 @@
+<div class="modal">
+    <div class="modal-header">
+        <h3>
+            <icon icon="Meter"></icon>
+            Add Meter to Well
+        </h3>
+    </div>
+
+    <div class="modal-body">
+        <app-alert-display></app-alert-display>
+
+        @if (meters$ | async; as meters) {
+            <form action="" class="form grid-12">
+                <form-field
+                    [type]="FormFieldType.Select"
+                    [formControl]="formGroup.controls.MeterID"
+                    [formInputOptions]="meters"
+                    fieldLabel="Meter"
+                    placeholder="Select a Meter"></form-field>
+                <form-field [type]="FormFieldType.Date" [formControl]="formGroup.controls.StartDate" fieldLabel="Start Date"></form-field>
+            </form>
+        }
+        <div class="copy copy-3 note-color pt-4 pb-2">
+            <note>
+                Are you sure you want to add a meter to well
+                <strong>{{ ref.data.WellName }}</strong>
+                ?
+            </note>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-primary" (click)="save()" [disabled]="!formGroup.valid || isLoadingSubmit">Add Meter to Well</button>
+            <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+        </div>
+    </div>
+</div>

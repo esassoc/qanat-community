@@ -1,0 +1,11 @@
+<div class="parcel-popup popup-wrapper" [loadingSpinner]="{ isLoading, loadingHeight: 100 }">
+    @if (parcel$ | async; as parcel) {
+        <div class="popup-header">
+            <parcel-title [parcelNumber]="parcel.ParcelNumber" [large]="false"></parcel-title>
+        </div>
+        <div class="popup-body">
+            <div class="acres">{{ parcel.ParcelArea | number: "1.2-2" }} acres</div>
+            <a [routerLink]="['/parcels', parcel.ParcelID]" class="btn btn-primary btn-sm mt-2"> View Parcel </a>
+        </div>
+    }
+</div>

@@ -1,0 +1,77 @@
+<page-header icon="Wells" pageTitle="Basic Information"></page-header>
+<workflow-body [helpCustomRichTextTypeID]="customRichTextTypeID" [showLoadingSpinner]="isLoadingSubmit">
+    <app-alert-display></app-alert-display>
+    <div class="mb-4">
+        <custom-rich-text [customRichTextTypeID]="formAsteriskExplanationID"></custom-rich-text>
+    </div>
+
+    @if (basicWellInfo$ | async) {
+        <form class="form" [formGroup]="formGroup">
+            <div class="grid-12">
+                <form-field
+                    class="g-col-12"
+                    [formControl]="formGroup.controls.WellName"
+                    fieldLabel="Owner's Well Name/No."
+                    [required]="true"
+                    [fieldDefinitionName]="'WellRegistryFieldWellName'"
+                    [type]="FormFieldType.Text"></form-field>
+                <form-field
+                    class="g-col-6"
+                    [formControl]="formGroup.controls.StateWellNumber"
+                    [fieldDefinitionName]="'WellRegistryFieldSWN'"
+                    fieldLabel="State Well No. (SWN)"
+                    [type]="FormFieldType.Text"></form-field>
+                <form-field
+                    class="g-col-6"
+                    [formControl]="formGroup.controls.StateWellCompletionNumber"
+                    [fieldDefinitionName]="'WellRegistryFieldWCR'"
+                    fieldLabel="State WCR No."
+                    [type]="FormFieldType.Text"></form-field>
+                <form-field
+                    class="g-col-6"
+                    [formControl]="formGroup.controls.CountyWellPermit"
+                    [fieldDefinitionName]="'WellRegistryFieldCountyWellPermit'"
+                    fieldLabel="County Well Permit"
+                    [type]="FormFieldType.Text"></form-field>
+                <form-field
+                    class="g-col-6"
+                    [required]="true"
+                    [formControl]="formGroup.controls.DateDrilled"
+                    [fieldDefinitionName]="'WellRegistryFieldDateDrilled'"
+                    fieldLabel="Date Drilled"
+                    [type]="FormFieldType.Date"></form-field>
+            </div>
+            <ng-container formArrayName="WaterUseTypes">
+                <h2 class="section-title underline text-primary mt-4">
+                    <span class="required flex">Water Use Type</span>
+                </h2>
+                <div class="grid-12">
+                    @for (control of formGroup.controls.WaterUseTypes.controls; track control; let i = $index) {
+                        <div [formGroup]="control" class="grid-12">
+                            <form-field
+                                [formControl]="control.controls.Checked"
+                                [fieldLabel]="WellRegistrationWaterUseTypes[i].DisplayName"
+                                toggleTrue="Yes"
+                                toggleFalse="No"
+                                [type]="FormFieldType.Toggle"></form-field>
+                            @if (control.controls.Checked.value) {
+                                <form-field
+                                    [@inOutAnimation]
+                                    [formControl]="control.controls.Description"
+                                    fieldLabel="Water Use Description"
+                                    [fieldDefinitionName]="'WellRegistryFieldWaterUseDescription' + WellRegistrationWaterUseTypes[i].Name"
+                                    [required]="true"
+                                    [type]="FormFieldType.Textarea"></form-field>
+                            }
+                        </div>
+                    }
+                </div>
+            </ng-container>
+        </form>
+    }
+</workflow-body>
+
+<div class="page-footer">
+    <fresca-button class="mr-2" (click)="save()" iconClass="" [disabled]="isLoadingSubmit"> Save </fresca-button>
+    <fresca-button class="ml-auto" (click)="save(true)" [disabled]="isLoadingSubmit"> Save & Continue </fresca-button>
+</div>

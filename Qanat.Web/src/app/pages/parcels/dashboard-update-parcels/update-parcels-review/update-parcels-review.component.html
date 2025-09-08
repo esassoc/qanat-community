@@ -1,0 +1,109 @@
+<page-header [templateAbove]="templateAbove" pageTitle="Review Parcels">
+    <ng-template #templateAbove>
+        <div class="back">
+            <a [routerLink]="['../../update']" class="back__link">Back to Update Parcels</a>
+        </div>
+    </ng-template>
+</page-header>
+
+@if (geography$ | async; as geography) {
+    <div class="page-body grid-12">
+        <div class="g-col-8">
+            <app-alert-display></app-alert-display>
+            @if (featureClass$ | async) {
+                @if (featureClass && !resultsPreview) {
+                    <form class="form grid-12 update-parcel-review-form" [formGroup]="submitForPreviewForm" (ngSubmit)="onSubmitForPreview(geography)">
+                        <div class="field g-col-9">
+                            <div class="form-check">
+                                @if (reportingPeriodSelectOptions$ | async; as dropdownOptions) {
+                                    <form-field
+                                        [formControl]="submitForPreviewForm.controls.waterYearSelection"
+                                        fieldLabel="Reporting Period"
+                                        [type]="FormFieldType.Select"
+                                        [formInputOptions]="dropdownOptions"
+                                        required
+                                        (ngModelChange)="onSelectedReportingPeriodChange($event)"></form-field>
+                                }
+                            </div>
+                            <table class="table table-group-striped mt-3">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th class="w-50">Expected Column</th>
+                                        <th class="w-50">Layer Column To Use</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <span class="required flex">APN / Parcel Number</span>
+                                        </td>
+                                        <td>
+                                            <ng-select
+                                                class="form-control custom small"
+                                                name="parcelNumberColumn"
+                                                [(ngModel)]="parcelLayerUpdateDto.ParcelNumberColumn"
+                                                [ngModelOptions]="{ standalone: true }"
+                                                [items]="getColumns()">
+                                            </ng-select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <span class="required flex">Owner Name</span>
+                                        </td>
+                                        <td>
+                                            <ng-select
+                                                class="form-control custom small"
+                                                name="ownerNameColumn"
+                                                [(ngModel)]="parcelLayerUpdateDto.OwnerNameColumn"
+                                                [ngModelOptions]="{ standalone: true }"
+                                                [items]="getColumns()">
+                                            </ng-select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="required flex">Owner Address</span></td>
+                                        <td>
+                                            <ng-select
+                                                class="form-control custom small"
+                                                name="ownerAddressColumn"
+                                                [(ngModel)]="parcelLayerUpdateDto.OwnerAddressColumn"
+                                                [ngModelOptions]="{ standalone: true }"
+                                                [items]="getColumns()">
+                                            </ng-select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="required flex">Acres</span></td>
+                                        <td>
+                                            <ng-select
+                                                class="form-control custom small"
+                                                name="acreColumn"
+                                                [(ngModel)]="parcelLayerUpdateDto.AcreColumn"
+                                                [ngModelOptions]="{ standalone: true }"
+                                                [items]="getColumns()">
+                                            </ng-select>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            @if (latestFinalizedGDBUpload$ | async; as latestGDBUpload) {
+                                <div class="mt-4">
+                                    <note> Latest finalized GDB Upload was for {{ latestGDBUpload.EffectiveYear }} on {{ latestGDBUpload.UploadDate | date: "medium" }} </note>
+                                </div>
+                            }
+                        </div>
+                    </form>
+                }
+            }
+        </div>
+        <div class="sidebar-help g-col-4">
+            <custom-rich-text [customRichTextTypeID]="customRichTextType"></custom-rich-text>
+        </div>
+    </div>
+    <div class="page-footer">
+        <fresca-button (onClick)="onSubmitForPreview(geography)" [disabled]="isLoadingSubmit || !previewFormValid()" [buttonLoading]="isLoadingSubmit">
+            Save & Confirm
+        </fresca-button>
+    </div>
+}

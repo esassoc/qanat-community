@@ -1,0 +1,1 @@
+﻿// MCS: I don't think you can actually get a BadRequest; anything that would generate one gets shut down by the RightsChecker

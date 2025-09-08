@@ -1,0 +1,23 @@
+<div class="full-width-page">
+    <page-header [customRichTextTypeID]="richTextTypeID" pageTitle="Geographies" icon="Geography-Alt"></page-header>
+
+    <div class="page-body grid-12">
+        <app-alert-display></app-alert-display>
+
+        @for (geography of geographies$ | async; track geography) {
+            <div class="g-col-3 card" [class.authenticated]="isAuthenticated" (click)="navigateToGeographyDashboard(geography)">
+                <div class="card-header">
+                    <div class="logo">
+                        <geography-logo [geographyID]="geography.GeographyID"></geography-logo>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h3>{{ geography.GeographyName }}</h3>
+                    <div class="copy copy-4">
+                        {{ geography.GeographyDisplayName }}
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

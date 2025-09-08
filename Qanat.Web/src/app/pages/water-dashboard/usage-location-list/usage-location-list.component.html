@@ -1,0 +1,106 @@
+@if (currentUser$ | async) {
+    @if (geography$ | async; as geography) {
+        <water-dashboard-nav [geography]="geography"></water-dashboard-nav>
+        <div class="full-width-page">
+            <page-header preTitle="Water Dashboard" pageTitle="Usage Locations" [customRichTextTypeID]="richTextID" icon="WaterDropFilled"> </page-header>
+            @if (currentUserGeographies$ | async; as currentUserGeographies) {
+                @if (reportingPeriods$ | async; as reportingPeriods) {
+                    <div class="page-body" [loadingSpinner]="{ isLoading: isLoading && firstLoad, loadingHeight: 700 }">
+                        <app-alert-display></app-alert-display>
+                        @if (!currentUserHasNoGeographies) {
+                            @if (usageLocations$ | async; as usageLocations) {
+                                <hybrid-map-grid
+                                    [rowData]="usageLocations"
+                                    [columnDefs]="columnDefs$ | async"
+                                    downloadFileName="usage-locations"
+                                    entityIDField="UsageLocationID"
+                                    (gridReady)="onGridReady($event)"
+                                    (onMapLoad)="handleMapReady($event)"
+                                    [selectedValue]="selectedUsageLocationID"
+                                    (selectedValueChange)="onSelectedUsageLocationIDChanged($event)">
+                                    <div headerActions>
+                                        <!-- MK 2/28/2025: Leaving these as just native html selects as discussed. -->
+                                        <div class="navigation-selector-container">
+                                            @if (currentUserGeographies.length > 1) {
+                                                <div class="form-field navigation-selector mr-1">
+                                                    <div class="field">
+                                                        <ng-select
+                                                            name="Geography"
+                                                            [(ngModel)]="currentGeography"
+                                                            (ngModelChange)="onGeographySelected($event)"
+                                                            [compareWith]="compareGeography"
+                                                            [items]="currentUserGeographies"
+                                                            [clearable]="false"
+                                                            [searchable]="false"
+                                                            bindLabel="GeographyName"
+                                                            class="custom small">
+                                                        </ng-select>
+                                                    </div>
+                                                </div>
+                                            }
+                                            <div class="form-field navigation-selector">
+                                                <div class="field">
+                                                    <ng-select
+                                                        name="ReportingPeriod"
+                                                        [(ngModel)]="currentReportingPeriodID"
+                                                        (ngModelChange)="onReportingPeriodSelected($event)"
+                                                        [items]="reportingPeriods"
+                                                        [clearable]="false"
+                                                        [searchable]="false"
+                                                        bindLabel="Name"
+                                                        bindValue="ReportingPeriodID"
+                                                        class="custom small">
+                                                    </ng-select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @if (mapIsReady) {
+                                        <div mapLayers [loadingSpinner]="{ isLoading: layerLoading, opacity: 0.33 }">
+                                            <usage-location-layer
+                                                [map]="map"
+                                                [layerControl]="layerControl"
+                                                [displayOnLoad]="true"
+                                                [geographyID]="currentGeography.GeographyID"
+                                                [reportingPeriodID]="currentReportingPeriodID"
+                                                [usageLocationIDs]="currentUserHasOverallPermission ? null : usageLocationIDs"
+                                                [selectedUsageLocationID]="selectedUsageLocationID"
+                                                (usageLocationSelected)="onSelectedUsageLocationIDChanged($event)"
+                                                (layerStartedLoading)="onLayerLoadStarted()"
+                                                (layerFinishedLoading)="onLayerLoadFinished()">
+                                            </usage-location-layer>
+                                            @if (currentGeography) {
+                                                <gsa-boundaries [displayOnLoad]="false" [map]="map" [geographyID]="currentGeography.GeographyID" [layerControl]="layerControl">
+                                                </gsa-boundaries>
+                                            }
+                                            @for (zoneGroup of zoneGroups$ | async; track zoneGroup) {
+                                                <zone-group-layer
+                                                    [displayOnLoad]="false"
+                                                    [zoneGroupID]="zoneGroup.ZoneGroupID"
+                                                    [zoneGroupName]="zoneGroup.ZoneGroupName"
+                                                    [map]="map"
+                                                    [layerControl]="layerControl">
+                                                </zone-group-layer>
+                                            }
+                                            @for (externalMapLayer of externalMapLayers$ | async; track externalMapLayer) {
+                                                <geography-external-map-layer [map]="map" [layerControl]="layerControl" [externalMapLayer]="externalMapLayer">
+                                                </geography-external-map-layer>
+                                            }
+                                        </div>
+                                    }
+                                </hybrid-map-grid>
+                            }
+                        } @else {
+                            <div class="alert alert-info">
+                                <div class="alert-content">
+                                    <i class="fa fa-info"></i>
+                                    It appears that you don't have access to any geographies. Please contact your administrator for assistance.
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            }
+        </div>
+    }
+}

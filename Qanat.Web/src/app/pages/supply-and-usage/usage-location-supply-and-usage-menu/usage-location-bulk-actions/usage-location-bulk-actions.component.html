@@ -1,0 +1,126 @@
+<div class="full-width-page">
+    @if (geography$ | async; as geography) {
+        <page-header pageTitle="Usage Location Bulk Actions" [templateAbove]="templateAbove" [customRichTextTypeID]="customRichTextTypeID">
+            <ng-template #templateAbove>
+                <div class="back">
+                    <a [routerLink]="['/supply-and-usage', geography.GeographyName.toLowerCase(), 'usage-locations']" class="back__link">Back to Supply & Usage</a>
+                </div>
+            </ng-template>
+        </page-header>
+
+        <app-alert-display></app-alert-display>
+
+        <div class="page-body statistics grid-12">
+            <div class="form statistics__filters grid-12 g-col-12 mb-1">
+                <div class="field g-col-2 statistics__filter">
+                    <form-field
+                        class="m-2"
+                        [multiple]="false"
+                        [formControl]="filterFormGroup.controls.Geography"
+                        fieldLabel="Geography"
+                        [formInputOptions]="currentUserGeographiesSelectOptions$ | async"
+                        [type]="FormFieldType.Select">
+                    </form-field>
+                </div>
+                <div class="field g-col-2 statistics__filter year">
+                    <reporting-period-select [geographyID]="geography.GeographyID" (selectionChanged)="onSelectedReportingPeriodChange($event)"></reporting-period-select>
+                </div>
+                <div class="field g-col-4 statistics__filter">
+                    <form-field
+                        class="m-2"
+                        [multiple]="true"
+                        [formControl]="filterFormGroup.controls.Months"
+                        fieldLabel="Months"
+                        [formInputOptions]="monthOptions$ | async"
+                        [type]="FormFieldType.Select">
+                    </form-field>
+                </div>
+                <div class="field g-col-4 statistics__filter">
+                    <form-field
+                        class="m-2"
+                        [multiple]="false"
+                        [formControl]="filterFormGroup.controls.WaterMeasurementType"
+                        fieldLabel="Water Measurement Type"
+                        [formInputOptions]="waterMeasurementTypeOptions$ | async"
+                        [type]="FormFieldType.Select">
+                    </form-field>
+                </div>
+            </div>
+            <div [loadingSpinner]="{ loadingHeight: 800, isLoading: isLoading }">
+                @if (waterMeasurements$ | async; as waterMeasurements) {
+                    <qanat-map mapHeight="500px" (onMapLoad)="handleMapReady($event)" [loadingSpinner]="{ isLoading: layerLoading, opacity: 0.33 }">
+                        @if (mapIsReady && geography && selectedReportingPeriod && selectedWaterMeasurementType) {
+                            <water-measurement-quality-assurance-layer
+                                [map]="map"
+                                [layerControl]="layerControl"
+                                [geographyID]="geography.GeographyID"
+                                [reportingPeriodID]="selectedReportingPeriod?.ReportingPeriodID"
+                                [waterMeasurementTypeName]="selectedWaterMeasurementType?.Label"
+                                [waterMeasurements]="waterMeasurements"
+                                [displayOnLoad]="true"
+                                [selectedUsageLocationIDs]="selectedUsageLocationIDs"
+                                (layerStartedLoading)="layerLoading = true"
+                                (layerFinishedLoading)="layerLoading = false"
+                                (usageLocationSelected)="onUsageLocationFeatureSelected($event)"></water-measurement-quality-assurance-layer>
+                            <gsa-boundaries [displayOnLoad]="false" [map]="map" [geographyID]="geography.GeographyID" [layerControl]="layerControl"></gsa-boundaries>
+                            <parcel-layer
+                                [geographyID]="geography.GeographyID"
+                                [map]="map"
+                                [layerControl]="layerControl"
+                                [reportingPeriodID]="selectedReportingPeriod?.ReportingPeriodID"
+                                [displayOnLoad]="false"></parcel-layer>
+                            @if (wells$ | async; as wells) {
+                                <wells-layer [wells]="wells" [displayOnLoad]="false" [map]="map" [layerControl]="layerControl" controlTitle="Wells"> </wells-layer>
+                            }
+                            @if (zoneGroups$ | async; as zoneGroups) {
+                                @for (zoneGroup of zoneGroups; track zoneGroup) {
+                                    <zone-group-layer
+                                        [displayOnLoad]="false"
+                                        [zoneGroupID]="zoneGroup.ZoneGroupID"
+                                        [zoneGroupName]="zoneGroup.ZoneGroupName"
+                                        [map]="map"
+                                        [layerControl]="layerControl">
+                                    </zone-group-layer>
+                                }
+                            }
+                        }
+                    </qanat-map>
+                    <div class="mt-2">
+                        <qanat-grid
+                            height="500px"
+                            [rowData]="waterMeasurements"
+                            [columnDefs]="colDefs$ | async"
+                            [gridOptions]="gridOptions"
+                            defaultRowSelection="multiRow"
+                            [downloadFileName]="geography.GeographyName + '_' + selectedReportingPeriod?.Name + '_' + selectedWaterMeasurementType?.Label"
+                            [unsetHeaderGridActionWidth]="true"
+                            (gridReady)="onGridReady($event)"
+                            (selectionChanged)="onGridSelectionChanged($event)">
+                            <div customGridActionsRight>
+                                <button class="btn btn-sm btn-primary mr-2" (click)="bulkUpdateUsageLocationTypes(geography)" [disabled]="selectedUsageLocationIDs.length === 0">
+                                    Update Usage Location Types
+                                </button>
+                                <button class="btn btn-sm btn-primary mr-2" (click)="migrateUsageLocations(geography)" [disabled]="selectedUsageLocationIDs.length === 0">
+                                    Update Parcels
+                                </button>
+                                <button
+                                    class="btn btn-sm btn-primary mr-2"
+                                    (click)="refreshWaterMeasurementCalculations(geography)"
+                                    [disabled]="selectedUsageLocationIDs.length === 0">
+                                    Refresh Water Measurements
+                                </button>
+                                @if (geography.IsOpenETActive) {
+                                    <button class="btn btn-sm btn-primary mr-2" (click)="recalculateOpenETRasterData(geography)" [disabled]="selectedUsageLocationIDs.length === 0">
+                                        Recalculate OpenET Raster Data
+                                    </button>
+                                }
+                            </div>
+                        </qanat-grid>
+                    </div>
+                }
+            </div>
+        </div>
+    } @else {
+        <div [loadingSpinner]="{ loadingHeight: 800, isLoading: true }"></div>
+    }
+</div>

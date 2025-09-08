@@ -1,0 +1,24 @@
+<li class="sidebar-item workflow-sidebar-item">
+    <a [routerLink]="navRouterLink" routerLinkActive="active" class="sidebar-link" [class.disabled]="disabled">
+        <div>
+            @switch (required) {
+                @case (true) {
+                    @switch (complete) {
+                        @case (true) {
+                            <icon class="complete" icon="StepComplete"></icon>
+                        }
+                        @default {
+                            <icon class="fade" icon="StepIncomplete"></icon>
+                        }
+                    }
+                }
+                @case (false) {
+                    <icon class="fade" icon="Info"></icon>
+                }
+            }
+        </div>
+        <div>
+            <ng-content></ng-content>
+        </div>
+    </a>
+</li>

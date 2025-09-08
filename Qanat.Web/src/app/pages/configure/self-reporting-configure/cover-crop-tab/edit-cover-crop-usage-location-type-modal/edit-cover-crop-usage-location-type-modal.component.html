@@ -1,0 +1,25 @@
+<div class="modal-header">
+    <h2 class="modal-title">Confirm:</h2>
+</div>
+<div class="modal-body">
+    <div class="accept-certification">
+        <form class="form grid-12" [formGroup]="formGroup">
+            <form-field
+                class="g-col-12"
+                [formControl]="formGroup.controls.CanBeSelectedInCoverCropForm"
+                fieldLabel="Can be Selected in Cover Crop Form"
+                [type]="FormFieldType.Check"
+                [checkLabel]="formGroup.controls.CanBeSelectedInCoverCropForm.value ? 'Yes' : 'No'"></form-field>
+            <form-field
+                class="g-col-12"
+                [formControl]="formGroup.controls.CountsAsCoverCropped"
+                fieldLabel="Counts as Cover Cropped"
+                [type]="FormFieldType.Check"
+                [checkLabel]="formGroup.controls.CountsAsCoverCropped.value ? 'Yes' : 'No'"></form-field>
+        </form>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-primary" (click)="save()" [disabled]="!formGroup.valid">Save</button>
+    <button class="btn btn-primary-outline" (click)="cancel()">Cancel</button>
+</div>

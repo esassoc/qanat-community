@@ -1,0 +1,6 @@
+@use "/src/scss/abstracts" as *;
+
+.description-color {
+    background-color: $yellow-default;
+    border-radius: 0.5rem;
+}

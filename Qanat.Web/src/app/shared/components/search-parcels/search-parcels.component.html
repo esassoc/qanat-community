@@ -1,0 +1,92 @@
+<div class="form-group">
+    <div class="field">
+        <div class="search-container">
+            <div class="search-prepend">
+                <i class="fa" [class.fa-search]="!isSearching" [class.fa-spinner]="isSearching" [class.spin-animation]="isSearching"></i>
+            </div>
+            <input
+                onkeydown="return event.key != 'Enter';"
+                (keyup.arrowdown)="selectNext()"
+                (keyup.arrowup)="selectPrevious()"
+                (keyup.enter)="selectCurrent($event)"
+                type="text"
+                name="ParcelSearch"
+                placeholder="APN, Owner Name, Owner Address"
+                [formControl]="searchString"
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="none"
+                spellcheck="false" />
+            <div class="search-append">
+                @if (searchString.value) {
+                    <button class="clear" (click)="clearSearch()">
+                        <i class="fa fa-times-circle"></i>
+                    </button>
+                }
+                @if (isPartOfForm) {
+                    <button class="clear" (click)="toggleDropdown()">
+                        <icon icon="AngleDown"></icon>
+                    </button>
+                }
+            </div>
+        </div>
+        @if (searchResults$ | async; as searchResults) {
+            <div class="search-results">
+                @if (searchResults?.TotalResults > 10 && !isSearching && !val) {
+                    <div class="refine-search p-3">Displaying 10 of {{ searchResults?.TotalResults }} results.</div>
+                }
+                @if (val == null && !isSearching) {
+                    <ul>
+                        @for (result of searchResults.ParcelSearchResults; track result) {
+                            <li [id]="'Parcel_' + result.Parcel.ParcelID" [class.highlighted-search-result]="result == highlightedSearchResult">
+                                <button (click)="selectParcel(result)">
+                                    <div class="button-head">
+                                        <icon [icon]="'Parcels'"></icon>
+                                        <strong class="wa-name" [innerHTML]="'#' + result.Parcel.ParcelNumber" [highlight]="searchString.value"></strong>
+                                    </div>
+                                    @if (result.Parcel.WaterAccountNumber) {
+                                        <div class="button-metadata mt-1">
+                                            <small class="wa-apns wa-meta">
+                                                <strong>Water Account Number:</strong>
+                                                <span [highlight]="searchString.value" [innerHTML]="result.Parcel.WaterAccountNumber"></span>
+                                            </small>
+                                        </div>
+                                    }
+                                    @if (searchString.value && searchString.value.length > 0) {
+                                        @if (result.MatchedFields.WaterAccountName) {
+                                            <div class="button-metadata mt-1">
+                                                <small class="wa-apns wa-meta">
+                                                    <strong>Water Account Name:</strong>
+                                                    <span [highlight]="searchString.value" [innerHTML]="result.Parcel.WaterAccountName"></span>
+                                                </small>
+                                            </div>
+                                        }
+                                        @if (result.MatchedFields.ContactName) {
+                                            <div class="button-metadata mt-1">
+                                                <small class="wa-contact-name wa-meta">
+                                                    <strong>Contact Name:</strong>
+                                                    <span [highlight]="searchString.value" [innerHTML]="result.Parcel.ContactName"></span>
+                                                </small>
+                                            </div>
+                                        }
+                                        @if (result.MatchedFields.ContactAddress) {
+                                            <div class="button-metadata mt-1">
+                                                <small class="wa-contact-address wa-meta">
+                                                    <strong>Contact Address:</strong>
+                                                    <span [highlight]="searchString.value" [innerHTML]="result.Parcel.ContactAddress"></span>
+                                                </small>
+                                            </div>
+                                        }
+                                    }
+                                </button>
+                            </li>
+                        }
+                        @if (searchResults?.ParcelSearchResults?.length == 0 && searchString.value && searchString.value.length > 1) {
+                            <li class="p-3">No results</li>
+                        }
+                    </ul>
+                }
+            </div>
+        }
+    </div>
+</div>

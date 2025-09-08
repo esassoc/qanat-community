@@ -1,0 +1,25 @@
+@use "/src/scss/abstracts" as *;
+
+.water-account-nav-header {
+    padding-top: 3rem;
+}
+
+.dot {
+    height: 10px;
+    width: 10px;
+    background-color: #bbb;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.address {
+    color: $black;
+}
+
+.not-available {
+    color: $gray-default;
+}
+
+.meta {
+    margin-top: $spacing-400;
+}

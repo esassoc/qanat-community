@@ -1,0 +1,20 @@
+<div class="card blue-border-top grid-12">
+    <div class="g-col-6">
+        <span class="enabled-circle" style="top: 2px" [class.enabled]="currentGeography.AllowWaterMeasurementSelfReporting"></span>
+        <h2 style="display: inline-block">Surface Water</h2>
+    </div>
+    <div class="g-col-6">
+        <label class="switch">
+            <input type="checkbox" [(ngModel)]="waterMeasurementsEnabled" (change)="onEnabledToggle()" />
+            <span class="toggle toggle-orange"></span>
+        </label>
+    </div>
+</div>
+
+@if (currentGeography.AllowWaterMeasurementSelfReporting) {
+    <div class="self-report-dates mt-3">
+        <h3 class="ml-2 mb-2">Configure Self Report Visibility</h3>
+
+        <span class="ml-2">Coming soon...</span>
+    </div>
+}

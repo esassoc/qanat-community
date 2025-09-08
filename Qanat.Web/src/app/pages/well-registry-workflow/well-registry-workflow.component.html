@@ -1,0 +1,20 @@
+<div class="dashboard workflow">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h5 class="sidebar-title">
+                @if (geography$ | async; as geography) {
+                    <geography-logo [geographyID]="geography.GeographyID"></geography-logo>
+                }
+                <div>Register a Well</div>
+            </h5>
+        </div>
+        <well-registry-workflow-nav></well-registry-workflow-nav>
+    </aside>
+    <main class="main">
+        <well-registry-workflow-progress></well-registry-workflow-progress>
+        <div class="outlet-container">
+            <router-outlet></router-outlet>
+        </div>
+    </main>
+</div>
+<well-registry-review-banner></well-registry-review-banner>

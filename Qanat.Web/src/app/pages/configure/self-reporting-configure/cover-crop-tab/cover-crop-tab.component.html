@@ -1,0 +1,40 @@
+<div class="card blue-border-top grid-12">
+    <div class="g-col-6">
+        <span class="enabled-circle" style="top: 2px" [class.enabled]="currentGeography.AllowCoverCropSelfReporting"></span>
+        <h2 style="display: inline-block">Cover Crop</h2>
+    </div>
+    <div class="g-col-6">
+        <label class="switch">
+            <input type="checkbox" [(ngModel)]="coverCropEnabled" (change)="onEnabledToggle()" />
+            <span class="toggle toggle-orange"></span>
+        </label>
+    </div>
+</div>
+
+@if (currentGeography.AllowCoverCropSelfReporting) {
+    <div class="self-report-dates mt-3">
+        <h3 class="ml-2 mb-2">Configure Self Report Visibility</h3>
+        <qanat-grid
+            [rowData]="reportingPeriods"
+            [columnDefs]="reportingPeriodColumnDefs"
+            downloadFileName="reporting-periods-cover-crop-self-reporting"
+            [pagination]="true"
+            [sizeColumnsToFitGrid]="true"
+            (gridReady)="onGridReady($event)"
+            [height]="'400px'">
+        </qanat-grid>
+    </div>
+
+    <div class="self-report-usage-location-types mt-3">
+        <h3 class="ml-2 mb-2">Configure Usage Location Types</h3>
+        <qanat-grid
+            [rowData]="usageLocationTypes"
+            [columnDefs]="usageLocationTypeColumnDefs"
+            downloadFileName="usage-location-types-cover-crop-self-reporting"
+            [pagination]="true"
+            [sizeColumnsToFitGrid]="true"
+            (gridReady)="onGridReady($event)"
+            [height]="'400px'">
+        </qanat-grid>
+    </div>
+}

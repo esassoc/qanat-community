@@ -1,0 +1,9 @@
+<page-header pageTitle="Parcel Attributes" [customRichTextTypeID]="customRichTextTypeID"></page-header>
+
+<div class="page-body">
+    <app-alert-display></app-alert-display>
+
+    @if (parcelCustomAttributes$ | async; as parcelCustomAttributes) {
+        <entity-custom-attributes-edit [entityCustomAttributes]="parcelCustomAttributes" [isLoadingSubmit]="isLoadingSubmit" (save)="save($event)"></entity-custom-attributes-edit>
+    }
+</div>

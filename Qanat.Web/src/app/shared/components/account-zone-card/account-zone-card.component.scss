@@ -1,0 +1,13 @@
+@use "/src/scss/abstracts/" as *;
+
+.zone-card {
+    overflow: hidden;
+
+    .card-body {
+        margin: auto;
+    }
+
+    .copy-2 {
+        color: $gray-700;
+    }
+}

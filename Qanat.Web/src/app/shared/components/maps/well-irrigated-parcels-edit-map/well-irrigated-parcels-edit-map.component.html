@@ -1,0 +1,96 @@
+<div class="map-wrapper pb-5">
+    <qanat-map (onMapLoad)="handleMapReady($event)" mapHeight="500px">
+        @if (mapIsReady) {
+            <geography-parcels-layer
+                [displayOnLoad]="true"
+                [geographyID]="geographyID"
+                [map]="map"
+                parcelStyle="parcel_labeled"
+                [layerControl]="layerControl"></geography-parcels-layer>
+            <highlighted-parcels-layer
+                [displayOnLoad]="true"
+                [map]="map"
+                [geographyID]="geographyID"
+                [highlightedParcelIDs]="irrigatedParcelIDs"
+                (onHighlightedParcelClick)="clickedOnHighlightedParcel($event)"
+                (onNonHighlightedParcelClick)="clickedOnNonHighlightedParcel($event)"
+                [layerControl]="layerControl"></highlighted-parcels-layer>
+        }
+    </qanat-map>
+</div>
+
+<div class="module-header mb-4">
+    <h3 class="section-title underline text-primary">Add & Remove Parcels</h3>
+</div>
+
+<div class="grid-12">
+    <div class="g-col-6 all">
+        <div class="field-label">All Parcels</div>
+
+        <div class="parcel-list">
+            <ng-select
+                class="search"
+                [(ngModel)]="parcelSearchModel"
+                [typeahead]="parcelInputs$"
+                [minTermLength]="2"
+                [loading]="searchLoading"
+                (add)="onSelected($event)"
+                [multiple]="true"
+                placeholder="Search APNs"
+                typeToSearchText="Begin typing to search">
+                @for (parcel of parcels$ | async; track parcel) {
+                    <ng-option [value]="parcel" [disabled]="isIrrigatedParcel[parcel.ParcelID]">
+                        {{ parcel.ParcelNumber }}
+                        @if (isIrrigatedParcel[parcel.ParcelID]) {
+                            <span>(Already Added)</span>
+                        }
+                    </ng-option>
+                }
+            </ng-select>
+
+            @for (parcel of selectedParcels; track parcel; let i = $index) {
+                <div class="list-item flex-between p-2" [class.recently-active]="isIrrigatedParcel[parcel.ParcelID] == false" (click)="highlightParcel(parcel.ParcelID)">
+                    <div>
+                        {{ parcel.ParcelNumber }}
+                        @if (isIrrigatedParcel[parcel.ParcelID] == false) {
+                            <span class="small"> Recently Deleted </span>
+                        }
+                    </div>
+                    <div class="action-icon" (click)="addIrrigatedParcel(parcel, i)">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="g-col-6 selected">
+        <div class="field-label">Irrigated Parcels</div>
+
+        @if (irrigatedParcels) {
+            <div class="parcel-list">
+                @if (irrigatedParcels?.length === 0) {
+                    <div class="no-parcels copy copy-4">
+                        <p><em>This user hasn't claimed any parcels yet</em></p>
+                    </div>
+                }
+                @for (parcel of irrigatedParcels; track parcel; let i = $index) {
+                    <div
+                        class="list-item flex-between p-2"
+                        [ngClass]="{ 'recently-active': i < recentlyAddedCount, 'no-border': i == 0 }"
+                        (click)="highlightParcel(parcel.ParcelID)">
+                        <div>
+                            {{ parcel.ParcelNumber }}
+                            @if (i < recentlyAddedCount) {
+                                <span class="small">Recently Added</span>
+                            }
+                        </div>
+                        <div class="action-icon" (click)="removeIrrigatedParcel(parcel, i)">
+                            <i class="fas fa-minus-circle"></i>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>

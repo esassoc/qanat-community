@@ -1,0 +1,63 @@
+@use "/src/scss/abstracts" as *;
+
+.preview-column {
+    display: grid;
+    gap: $spacing-600;
+
+    .custom-content-warning {
+        display: flex;
+        justify-content: flex-start;
+        gap: $spacing-300;
+        padding: $spacing-200;
+        line-height: 22px;
+    }
+}
+
+.configuration-column {
+    border-left: 1px solid $gray-200;
+    padding-left: $spacing-600;
+
+    .configuration-form-wrapper {
+        display: grid;
+        gap: $spacing-300;
+
+        .form {
+            gap: $spacing-500;
+        }
+    }
+
+    .form-section-header {
+        font-size: $type-size-300;
+        font-weight: 800;
+        color: $blue-700;
+        margin-top: $spacing-400;
+    }
+
+    .pdf-preview-button {
+        color: $blue-700;
+        text-align: left;
+        text-decoration: underline;
+        padding-left: 0;
+
+        &:disabled {
+            background: none;
+            border: none;
+            color: $gray-400;
+
+            &:hover {
+                background: none;
+            }
+        }
+    }
+
+    .form-note {
+        display: flex;
+        gap: $spacing-200;
+        padding: $spacing-200 $spacing-100;
+        line-height: 20px;
+
+        icon {
+            color: $blue-700;
+        }
+    }
+}

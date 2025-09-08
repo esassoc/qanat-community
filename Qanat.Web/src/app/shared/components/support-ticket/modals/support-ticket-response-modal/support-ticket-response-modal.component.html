@@ -1,0 +1,25 @@
+<div class="modal">
+    <div class="modal-header">
+        <h3 class="section-title">{{ ref.data.IsInternalNote ? "Add Note to" : "Respond to" }} Support Ticket #{{ ref.data.SupportTicketID }}</h3>
+    </div>
+    <div class="modal-body grid-12">
+        @if (ref.data.IsInternalNote) {
+            <p>Notes will only appear on the support ticket detail page for Water Managers; this will not send any email notifications</p>
+        } @else {
+            <p>Write a response to the creator of this support ticket. The system will send your response to the email address listed in the ticket details and cc you.</p>
+        }
+
+        <form [formGroup]="formGroup">
+            <form-field
+                [formControl]="formGroup.controls.Message"
+                fieldLabel="{{ ref.data.IsInternalNote ? 'Note' : 'Response' }}"
+                [required]="true"
+                [type]="FormFieldType.RTE"></form-field>
+        </form>
+    </div>
+
+    <div class="modal-footer">
+        <button class="btn btn-primary" (click)="save()" [disabled]="formGroup.invalid">{{ ref.data.IsInternalNote ? "Submit" : "Send Response" }}</button>
+        <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+    </div>
+</div>

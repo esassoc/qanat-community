@@ -1,0 +1,14 @@
+<div class="list-item flex-between">
+    <div class="zone-color-wrapper">
+        <div class="zone-color" [style.background-color]="parcel.AllocationZone?.ZoneColor"></div>
+    </div>
+    <div class="parcel-details">
+        <b>{{ parcel.ParcelNumber }}</b>
+        <p class="text-muted text-small">{{ parcel.WaterAccountName }}</p>
+    </div>
+    <div class="remove text-muted" [title]="titleText">
+        <!-- <i class="fa fa-times-circle" (click)="onRemove()"></i> -->
+        <icon icon="Delete" (click)="onRemove()"></icon>
+    </div>
+    <ng-content select="[cdkDragHandle]"></ng-content>
+</div>

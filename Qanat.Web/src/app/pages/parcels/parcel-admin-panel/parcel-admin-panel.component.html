@@ -1,0 +1,323 @@
+@if (parcel$ | async; as parcel) {
+    <div>
+        <page-header [templateRight]="templateRight" icon="Parcels" [pageTitle]="parcel.ParcelNumber">
+            <ng-template #templateRight>
+                @if (parcel.WaterAccount) {
+                    <a [routerLink]="['/water-accounts', parcel.WaterAccountID]">
+                        <water-account-title
+                            [waterAccountName]="parcel.WaterAccount.WaterAccountName"
+                            [waterAccountNumber]="parcel.WaterAccount.WaterAccountNumber.toString()"></water-account-title>
+                    </a>
+                }
+            </ng-template>
+        </page-header>
+        <div class="page-body" [loadingSpinner]="{ isLoading: isLoading, loadingHeight: 500 }">
+            <app-alert-display></app-alert-display>
+            <div class="card management-actions">
+                <div class="card-header">
+                    <h3 class="water-account-title | section-title">
+                        Management Actions
+                        <name-tag name="Admin" color="#000" class="name-tag-nudge"></name-tag>
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="flex-between mb-2">
+                        <a href="javascript:void(0);" (click)="updateOwnershipInfo()">
+                            <icon icon="Users"></icon>
+                            Update Ownership Info
+                        </a>
+                        <a href="javascript:void(0);" (click)="updateWaterAccounts()">
+                            <icon icon="WaterAccounts"></icon>
+                            Update Water Accounts
+                        </a>
+                        <a href="javascript:void(0);" (click)="editZoneAssignments()">
+                            <icon icon="Zones"></icon>
+                            Edit Zone Assignments
+                        </a>
+                        <a href="javascript:void(0);" (click)="modifyParcelStatus()">
+                            <icon icon="Parcels"></icon>
+                            Modify Parcel Status
+                        </a>
+                        <a href="javascript:void(0);" (click)="editAcres()">
+                            <icon icon="Parcels"></icon>
+                            Edit Acres
+                        </a>
+                    </div>
+                    @if (geography$ | async; as geography) {
+                        @if (geography.IsOpenETActive) {
+                            <div class="flex-between">
+                                <a href="javascript:void(0);" (click)="recalculateOpenETRasterData(parcel)">
+                                    <icon icon="Map"></icon>
+                                    Recalculate OpenET Raster Data
+                                </a>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+            @if (parcelCustomAttributes$ | async; as parcelCustomAttributes) {
+                <div class="card custom-attributes g-col-12" id="custom_attributes_anchor">
+                    <div class="card-header flex-between">
+                        <h3 class="card-title">
+                            Attributes
+                            <name-tag name="Admin" color="#000" class="name-tag-nudge"></name-tag>
+                        </h3>
+                        @if (parcelCustomAttributes.CustomAttributes) {
+                            <a class="btn btn-sm btn-secondary" routerLink="edit-attributes">
+                                <span class="fas fa-edit"></span>
+                                Edit Attributes
+                            </a>
+                        }
+                    </div>
+                    <div class="card-body">
+                        @if (parcelCustomAttributes.CustomAttributes) {
+                            <key-value-pair-list>
+                                @for (customAttribute of parcelCustomAttributes.CustomAttributes | keyvalue; track customAttribute) {
+                                    <key-value-pair [horizontal]="true" [copyValueToClipboard]="customAttribute.value !== ''">
+                                        <ng-container key>{{ customAttribute.key }}</ng-container>
+                                        <ng-container keyValue>
+                                            {{ customAttribute.value }}
+                                            @if (!customAttribute.value) {
+                                                <em class="text-muted">Not Available</em>
+                                            }
+                                        </ng-container>
+                                    </key-value-pair>
+                                }
+                            </key-value-pair-list>
+                        } @else {
+                            <div class="copy copy-3 no-custom-attributes">
+                                No custom attributes have been configured for Parcels in this geography.
+                                <br />
+                                Contact an administrator to learn more about this feature.
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            <div class="parcel-detail-manage-card card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        Wells
+                        <name-tag name="Admin" color="#000" class="name-tag-nudge"></name-tag>
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="grid-12">
+                        <div class="g-col-3">
+                            <key-value-pair-list>
+                                <key-value-pair>
+                                    <ng-container key>Wells on Parcel</ng-container>
+                                    <ng-container keyValue>
+                                        @if (parcel.WellsOnParcel && parcel.WellsOnParcel.length > 0) {
+                                            @for (well of parcel.WellsOnParcel; track well) {
+                                                <div>
+                                                    <a [routerLink]="['/manage', parcel.GeographyName.toLowerCase(), 'wells', well.WellID]">
+                                                        {{ well.WellName }} ({{ well.WellID }})
+                                                    </a>
+                                                </div>
+                                            }
+                                        } @else {
+                                            <em>Not Available</em>
+                                        }
+                                    </ng-container>
+                                </key-value-pair>
+                            </key-value-pair-list>
+                        </div>
+                        <div class="g-col-3">
+                            <key-value-pair-list>
+                                <key-value-pair>
+                                    <ng-container key>Irrigated By Wells</ng-container>
+                                    <ng-container keyValue>
+                                        @if (parcel.IrrigatedByWells && parcel.IrrigatedByWells.length > 0) {
+                                            @for (well of parcel.IrrigatedByWells; track well) {
+                                                <div>
+                                                    <a [routerLink]="['/manage', parcel.GeographyName.toLowerCase(), 'wells', well.WellID]">
+                                                        {{ well.WellName }} ({{ well.WellID }})
+                                                    </a>
+                                                </div>
+                                            }
+                                        } @else {
+                                            <em>Not Available</em>
+                                        }
+                                    </ng-container>
+                                </key-value-pair>
+                            </key-value-pair-list>
+                        </div>
+                        @if (wellLocations$ | async; as wellLocations) {
+                            <div class="g-col-6">
+                                <qanat-map (onMapLoad)="handleMapReady($event)" mapHeight="500px">
+                                    @if (mapIsReady) {
+                                        <highlighted-parcels-layer
+                                            [displayOnLoad]="true"
+                                            [map]="map"
+                                            controlTitle="Irrigated Parcel(s)"
+                                            [geographyID]="parcel.GeographyID"
+                                            [highlightedParcelIDs]="[parcel.ParcelID]"
+                                            [layerControl]="layerControl"></highlighted-parcels-layer>
+                                        <wells-layer [wells]="wellLocations" [displayOnLoad]="true" [map]="map" [layerControl]="layerControl"></wells-layer>
+                                    }
+                                </qanat-map>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            @if (parcel$ | async; as parcel) {
+                <div class="card ownership-history" id="ownership_history_anchor">
+                    <div class="card-header flex-between">
+                        <h3 class="card-title">
+                            Parcel History
+                            <name-tag name="Admin" color="#000" class="name-tag-nudge"></name-tag>
+                        </h3>
+                        <button class="btn btn-secondary" (click)="updateOwnershipInfo()">Update Ownership Info</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Owner Name</th>
+                                        <th>Owner Address</th>
+                                        <th>Status</th>
+                                        <th>Updated</th>
+                                        <th>Updated By</th>
+                                        <th>Source</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (parcelHistory of parcelHistories$ | async; track parcelHistory) {
+                                        <tr>
+                                            <td>
+                                                {{ parcelHistory.OwnerName }}
+                                            </td>
+                                            <td>
+                                                {{ parcelHistory.OwnerAddress }}
+                                            </td>
+                                            <td>
+                                                {{ parcelHistory.ParcelStatus.ParcelStatusDisplayName }}
+                                            </td>
+                                            <td>
+                                                {{ parcelHistory.UpdateDate | date: "short" }}
+                                            </td>
+                                            <td>
+                                                {{ parcelHistory.UpdateUserFullName }}
+                                            </td>
+                                            <td>
+                                                {{ parcelHistory.IsManualOverride ? "Manual Entry" : "GDB Upload" }}
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+            <div class="card ownership-history" id="water_account_history_anchor">
+                <div class="card-header flex-between">
+                    <h3 class="card-title">
+                        Water Accounts
+                        <name-tag name="Admin" color="#000" class="name-tag-nudge"></name-tag>
+                    </h3>
+                    <button class="btn btn-secondary" (click)="updateWaterAccounts()">Update Water Accounts</button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table water-account-parcel-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 25%">Reporting Period</th>
+                                    <th style="width: 75%">Water Account</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (waterAccountParcels$ | async; as waterAccountParcels) {
+                                    @if (waterAccountParcels.length) {
+                                        @for (waterAccountParcel of waterAccountParcels; track waterAccountParcel) {
+                                            <tr>
+                                                <td style="width: 25%">
+                                                    {{ waterAccountParcel.ReportingPeriod.Name }}
+                                                </td>
+                                                <td style="width: 75%">
+                                                    <a class="no-underline" [routerLink]="['/water-accounts', waterAccountParcel.WaterAccount.WaterAccountID]">
+                                                        <water-account-title
+                                                            [waterAccountName]="waterAccountParcel.WaterAccount?.WaterAccountName"
+                                                            [waterAccountNumber]="waterAccountParcel.WaterAccount?.WaterAccountNumber.toString()"></water-account-title>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    } @else {
+                                        <td colspan="3">
+                                            <em>This parcel does not have any water account associations.</em>
+                                        </td>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="card ownership-history">
+                <div class="card-header flex-between">
+                    <h3 class="card-title">
+                        Water Account History
+                        <name-tag name="Admin" color="#000" class="name-tag-nudge"></name-tag>
+                    </h3>
+                </div>
+                @if (parcelWaterAccountHistories$ | async; as parcelWaterAccountHistories) {
+                    <div class="card-body">
+                        <qanat-grid
+                            [rowData]="parcelWaterAccountHistories"
+                            [columnDefs]="parcelWaterAccountHistoriesColumnDefs"
+                            [downloadFileName]="'parcel-water-account-histories-' + parcel.ParcelID"
+                            [pagination]="true"
+                            [sizeColumnsToFitGrid]="true"
+                            (gridReady)="onParcelWaterAccountHistoriesGridReady($event)">
+                        </qanat-grid>
+                    </div>
+                }
+            </div>
+            <div class="card ownership-history">
+                <div class="card-header flex-between">
+                    <h3 class="card-title">
+                        Usage Location Parcel History
+                        <name-tag name="Admin" color="#000" class="name-tag-nudge"></name-tag>
+                    </h3>
+                </div>
+                @if (usageLocationParcelHistories$ | async; as usageLocationParcelHistories) {
+                    <div class="card-body">
+                        <qanat-grid
+                            [rowData]="usageLocationParcelHistories"
+                            [columnDefs]="usageLocationParcelHistoriesColumnDefs"
+                            [downloadFileName]="'usage-location-parcel-histories-' + parcel.ParcelID"
+                            [pagination]="true"
+                            [sizeColumnsToFitGrid]="true"
+                            (gridReady)="onUsageLocationParcelHistoriesGridReady($event)">
+                        </qanat-grid>
+                    </div>
+                }
+            </div>
+            <div class="card ownership-history">
+                <div class="card-header flex-between">
+                    <h3 class="card-title">
+                        Usage Location History
+                        <name-tag name="Admin" color="#000" class="name-tag-nudge"></name-tag>
+                    </h3>
+                </div>
+                @if (usageLocationHistories$ | async; as usageLocationHistories) {
+                    <div class="card-body">
+                        <qanat-grid
+                            [rowData]="usageLocationHistories"
+                            [columnDefs]="usageLocationHistoriesColumnDefs"
+                            [downloadFileName]="'usage-location-histories-' + parcel.ParcelID"
+                            [pagination]="true"
+                            [sizeColumnsToFitGrid]="true"
+                            (gridReady)="onUsageLocationHistoriesGridReady($event)">
+                        </qanat-grid>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}

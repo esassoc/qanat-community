@@ -1,0 +1,20 @@
+<layer>
+  <name>MonitoringWells</name>
+  <id>LayerInfoImpl-25a3190c:190c11570ce:-7d04</id>
+  <type>VECTOR</type>
+  <defaultStyle>
+    <id>StyleInfoImpl--570ae188:124761b8d78:-7fdf</id>
+  </defaultStyle>
+  <styles class="linked-hash-set">
+    <style>
+      <id>StyleInfoImpl--570ae188:124761b8d78:-7fdf</id>
+    </style>
+  </styles>
+  <resource class="featureType">
+    <id>FeatureTypeInfoImpl-25a3190c:190c11570ce:-7d05</id>
+  </resource>
+  <attribution>
+    <logoWidth>0</logoWidth>
+    <logoHeight>0</logoHeight>
+  </attribution>
+</layer>

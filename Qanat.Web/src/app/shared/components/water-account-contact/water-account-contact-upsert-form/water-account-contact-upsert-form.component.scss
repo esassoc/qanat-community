@@ -1,0 +1,16 @@
+@use "/src/scss/abstracts" as *;
+
+form {
+    gap: $spacing-400;
+
+    note {
+        align-self: flex-end;
+
+        .note-content {
+            display: flex;
+            gap: $spacing-200;
+            align-items: center;
+            padding: $spacing-200 $spacing-100;
+        }
+    }
+}

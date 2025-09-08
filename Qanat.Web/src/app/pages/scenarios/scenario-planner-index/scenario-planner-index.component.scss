@@ -1,0 +1,37 @@
+@use "/src/scss/abstracts" as *;
+
+.model-groups {
+    display: grid;
+    gap: 3rem;
+
+    .model-group {
+        display: grid;
+        gap: 1rem;
+    }
+}
+
+.get-promo {
+    background: $primary;
+    color: $white;
+    align-items: center;
+    padding: 2rem;
+    border-radius: 0.5rem;
+    margin-top: 4.5rem;
+
+    .module-title {
+        color: $white;
+    }
+
+    img {
+        @include desktop-small {
+            transform: translateY(-0.5rem);
+        }
+    }
+
+    ::ng-deep .copy {
+        a {
+            color: $white;
+            text-decoration: underline;
+        }
+    }
+}

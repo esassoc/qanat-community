@@ -1,0 +1,7 @@
+<div class="button-group" role="group" [class.invalid]="required && val == null">
+    @for (option of options; track option) {
+        <button type="button" class="button-group__item" [class.red]="option.red" [name]="uniqueName" [class.active]="val == option.value" (click)="value = option.value">
+            {{ option.label }}
+        </button>
+    }
+</div>

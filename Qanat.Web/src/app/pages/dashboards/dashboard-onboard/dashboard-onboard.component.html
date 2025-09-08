@@ -1,0 +1,41 @@
+<div class="dashboard">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h5 class="sidebar-title">
+                @if (geography$ | async; as geography) {
+                    <a routerLink="/claim-water-accounts">
+                        <geography-logo [geographyID]="geography.GeographyID"></geography-logo>
+                        <span class="sidebar-title__label">{{ geography.GeographyDisplayName }}</span>
+                    </a>
+                }
+            </h5>
+        </div>
+
+        <ul class="sidebar-nav">
+            <li class="sidebar-item">
+                <a [routerLink]="['./overview']" routerLinkActive="active" class="sidebar-link">
+                    <i>
+                        <icon icon="Info" class="info-icon"></icon>
+                    </i>
+                    Overview
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a [routerLink]="['./enter-pin']" routerLinkActive="active" class="sidebar-link">
+                    <i class="fa fa-key"></i>
+                    Enter Water Account PIN
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a [routerLink]="['./review']" routerLinkActive="active" class="sidebar-link">
+                    <i class="fa fa-map"></i>
+                    Review Water Accounts
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <main class="main">
+        <router-outlet></router-outlet>
+    </main>
+</div>

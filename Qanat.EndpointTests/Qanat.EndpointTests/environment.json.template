@@ -1,0 +1,14 @@
+﻿{
+  "BaseAddress": "host.docker.internal:8112",
+  "IdentityManagement": {
+    "Url": "",
+    "Scope": "",
+    "GrantType": "client_credentials",
+
+    "AdminClientFlowClientID": "",
+    "AdminClientFlowClientSecret": "",
+
+    "InactiveClientFlowClientID": "",
+    "InactiveClientFlowClientSecret": ""
+  }
+}

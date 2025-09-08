@@ -1,0 +1,56 @@
+<page-header icon="Transactions" [customRichTextTypeID]="richTextTypeID" [templateAbove]="templateAbove" pageTitle="New Water Transaction">
+    <ng-template #templateAbove>
+        <div class="back">
+            <a routerLink="../" class="back__link">Back to Water Transactions</a>
+        </div>
+    </ng-template>
+</page-header>
+
+@if (geography$ | async; as geography) {
+    <div class="page-body">
+        <app-alert-display></app-alert-display>
+        <form class="form mb-3 grid-9">
+            <div class="field">
+                <label class="required field-label">APN</label>
+                <parcel-typeahead [selectedParcel]="selectedParcel" [geographyID]="geography.GeographyID" (change)="onSelectedParcelChanged($event)"></parcel-typeahead>
+            </div>
+            <div class="field g-col-half">
+                <ng-container>
+                    <label class="d-block required field-label">Supply Type</label>
+                    <ng-select
+                        class="form-control custom"
+                        name="waterType"
+                        [(ngModel)]="model.WaterTypeID"
+                        [items]="waterTypes$ | async"
+                        bindLabel="WaterTypeName"
+                        bindValue="WaterTypeID"></ng-select>
+                    <field-definition fieldDefinitionType="SupplyType"></field-definition>
+                </ng-container>
+            </div>
+            <div class="field g-col-half">
+                <label class="required field-label">Quantity (ac-ft)</label>
+                <input type="number" step="1" class="form-control" name="transactionAmount" required [(ngModel)]="model.TransactionAmount" />
+            </div>
+            <div class="field g-col-half">
+                <label class="required field-label">Effective Date</label>
+                <input type="date" class="form-control" name="effectiveDate" required [(ngModel)]="model.EffectiveDate" />
+                <field-definition fieldDefinitionType="EffectiveDate"></field-definition>
+            </div>
+            <div class="field">
+                <label class="field-label">Comment</label>
+                <textarea class="form-control" name="userComment" required [(ngModel)]="model.UserComment"></textarea>
+            </div>
+        </form>
+    </div>
+}
+
+@if (geography$ | async; as geography) {
+    <div class="page-footer">
+        <fresca-button class="ml-auto" (click)="onSubmit(geography)" [disabled]="isLoadingSubmit">
+            @if (isLoadingSubmit) {
+                <span class="fa fa-spinner loading-spinner"></span>
+            }
+            Save
+        </fresca-button>
+    </div>
+}

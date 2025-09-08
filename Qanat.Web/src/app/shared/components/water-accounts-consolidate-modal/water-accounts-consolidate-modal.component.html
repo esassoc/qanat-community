@@ -1,0 +1,40 @@
+<div class="modal-header">
+    <h2>
+        <icon icon="Warning"></icon>
+        Confirm: Consolidate Accounts
+    </h2>
+</div>
+
+<div class="modal-body">
+    <note noteType="warning">
+        Confirm your request to consolidate all of your parcels into a single water account per allocation zone. Review a summary of the changes below.
+    </note>
+
+    <div class="account-modifications">
+        <ng-container *ngFor="let waterAccount of modalContext.WaterAccounts">
+            <div class="account-name">
+                <icon icon="WaterAccounts"></icon>
+                #{{ waterAccount.WaterAccountNumber }}
+                <span class="text-muted">{{ waterAccount.WaterAccountName }}</span>
+            </div>
+            <div class="account-parcels">
+                {{ waterAccount.ParcelsCount }} parcel{{ waterAccount.ParcelsCount === 1 ? "" : "s" }}
+
+                <span *ngIf="waterAccount.AddedParcelsCount > 0" class="parcel-changes added">
+                    <i class="fa fa-plus-circle"></i>
+                    {{ waterAccount.AddedParcelsCount }}
+                </span>
+
+                <span *ngIf="waterAccount.RemovedParcelsCount > 0" class="parcel-changes removed">
+                    <i class="fa fa-minus-circle"></i>
+                    {{ waterAccount.RemovedParcelsCount }}
+                </span>
+            </div>
+        </ng-container>
+    </div>
+
+    <div class="modal-footer">
+        <button class="btn btn-primary" (click)="confirm()">Consolidate Accounts</button>
+        <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+    </div>
+</div>

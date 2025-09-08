@@ -1,0 +1,13 @@
+<ng-select
+    #ngSelectComponent
+    class="search"
+    name="parcelNumber"
+    [items]="parcels$ | async"
+    bindLabel="ParcelNumber"
+    [ngModel]="selectedParcel"
+    [typeahead]="parcelInputs$"
+    [minTermLength]="2"
+    [loading]="searchLoading"
+    placeholder="Search APNs"
+    typeToSearchText="Begin typing to search"
+    (change)="onSelectedParcelChange($event)"></ng-select>

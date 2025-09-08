@@ -1,0 +1,30 @@
+@if (geography$ | async; as geography) {
+    <div class="dashboard">
+        <aside class="sidebar" [loadingSpinner]="{ isLoading }">
+            <div class="sidebar-header">
+                <a>
+                    <geography-logo [geographyID]="geography.GeographyID"></geography-logo>
+                </a>
+            </div>
+            <div class="sidebar-body sticky-nav">
+                <div class="sidebar-body__wrapper">
+                    <h3 class="sidebar-body__title">
+                        <icon icon="Geography"></icon>
+                        Geographies
+                    </h3>
+                    @if (currentUser) {
+                        <div class="sidebar-body__switcher">
+                            <geography-switcher></geography-switcher>
+                        </div>
+                    }
+                </div>
+                <ul class="sidebar-nav">
+                    <dashboard-menu [dashboardMenu]="geographyDashboardMenu" [viewingDetailPage]="true"></dashboard-menu>
+                </ul>
+            </div>
+        </aside>
+        <main class="main">
+            <router-outlet #manageOutlet="outlet"></router-outlet>
+        </main>
+    </div>
+}

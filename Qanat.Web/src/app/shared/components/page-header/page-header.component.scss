@@ -1,0 +1,19 @@
+@use "/src/scss/abstracts" as *;
+
+.page-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: $spacing-900;
+}
+
+.page-header-icon {
+    color: $blue-light;
+    width: 1.5rem;
+}
+
+.copy {
+    @include desktop-medium {
+        padding-left: 2rem;
+    }
+}

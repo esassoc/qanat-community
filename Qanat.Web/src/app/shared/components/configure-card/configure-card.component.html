@@ -1,0 +1,33 @@
+<div class="option">
+    <div class="option-header flex-between">
+        <h3 class="option-title">
+            @if (routerLinkValue) {
+                <a [routerLink]="[routerLinkValue]" [class.disabled]="linkDisabled">
+                    {{ title }}
+                </a>
+            } @else {
+                {{ title }}
+            }
+        </h3>
+        @if (!hideToggle) {
+            @if (toggleChecked) {
+                <name-tag name="enabled" color="#ffa62b"></name-tag>
+            }
+            @if (!toggleChecked) {
+                <name-tag name="Disabled" color="#fafafa" textColor="#8a8a8a"> </name-tag>
+            }
+        }
+    </div>
+
+    <div class="option-body">
+        <div class="copy copy-3">
+            <custom-rich-text [customRichTextTypeID]="customRichTextTypeID"></custom-rich-text>
+        </div>
+    </div>
+
+    @if (routerLinkValue) {
+        <div class="option-footer flex-end" [class.disabled]="linkDisabled">
+            <a [routerLink]="[routerLinkValue]" class="btn btn-primary-outline btn-sm">Options</a>
+        </div>
+    }
+</div>

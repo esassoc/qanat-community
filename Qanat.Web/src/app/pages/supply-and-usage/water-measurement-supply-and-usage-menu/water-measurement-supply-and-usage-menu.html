@@ -1,0 +1,104 @@
+<page-header icon="Measurements" pageTitle="Water Measurements" [customRichTextTypeID]="richTextTypeID"></page-header>
+
+@if (geography$ | async; as geography) {
+    <div class="page-body">
+        <app-alert-display></app-alert-display>
+        @if (currentUser$ | async; as currentUser) {
+            <div class="transaction-options grid-12">
+                <div class="g-col-6 border-right no-border-top">
+                    <div class="grid-12">
+                        <h2 class="section-title g-col-9">Upload CSV</h2>
+                        @if (canCreateTransactions$ | async) {
+                            <a class="btn btn-primary g-col-3" [routerLink]="['upload-water-measurements']">Upload CSV</a>
+                        } @else {
+                            <a class="btn btn-primary disabled g-col-3" href="javascript:void(0)">Upload CSV</a>
+                        }
+                    </div>
+                    <div class="copy copy-3 pt-1 pb-2">
+                        <p>Upload water measurements for multiple parcels by uploading a comma-separated spreadsheet containing water measurements per Parcel.</p>
+                    </div>
+                </div>
+                <div class="g-col-6 no-border-top">
+                    <div class="grid-12">
+                        <h2 class="section-title g-col-9">Bulk Set Water Measurements</h2>
+                        @if (canCreateTransactions$ | async) {
+                            <a class="btn btn-primary g-col-3" [routerLink]="['bulk-set']">Bulk Set</a>
+                        } @else {
+                            <a class="btn btn-primary disabled g-col-3" href="javascript:void(0)">Bulk Set</a>
+                        }
+                    </div>
+                    <div class="copy copy-3 pt-1 pb-2">
+                        <p>Bulk update a water measurement type for all usage locations.</p>
+                    </div>
+                </div>
+                <div class="g-col-6 border-right">
+                    <div class="grid-12">
+                        <h2 class="section-title g-col-9">Upload Raster TIF</h2>
+                        @if (canCreateTransactions$ | async) {
+                            <a class="btn btn-primary g-col-3" [routerLink]="['raster-upload']">Upload TIF</a>
+                        } @else {
+                            <a class="btn btn-primary disabled g-col-3" href="javascript:void(0)">Upload TIF</a>
+                        }
+                    </div>
+                    <div class="copy copy-3 pt-1 pb-2">
+                        <p>Upload a valid raster file to create water measurements.</p>
+                    </div>
+                </div>
+                <div class="g-col-6">
+                    <div class="grid-12">
+                        <h2 class="section-title g-col-9">OpenET Integration</h2>
+                        @if (geography.IsOpenETActive) {
+                            <a class="btn btn-primary g-col-3" [routerLink]="['openet-integration']">View</a>
+                        } @else {
+                            <a class="btn btn-primary disabled g-col-3" href="javascript:void(0)">View</a>
+                        }
+                    </div>
+                    <div class="copy copy-3 pt-1 pb-2">
+                        <p>View and download OpenET data.</p>
+                    </div>
+                </div>
+                <div class="g-col-6 border-right">
+                    <div class="grid-12">
+                        <h2 class="section-title g-col-9">Review Self-Reports</h2>
+                        @if (geography.AllowWaterMeasurementSelfReporting) {
+                            <a class="btn btn-primary g-col-3" [routerLink]="['/review-self-reports', geography.GeographyName.toLowerCase()]">Review</a>
+                        } @else {
+                            <a class="btn btn-primary disabled g-col-3" href="javascript:void(0)">Review</a>
+                        }
+                    </div>
+                    <div class="copy copy-3 pt-1 pb-2">
+                        <p>Review and Approve Water Measurement self-reports submitted by water account holders.</p>
+                    </div>
+                </div>
+                <div class="g-col-6">
+                    <div class="grid-12">
+                        <h2 class="section-title g-col-9">Refresh Calculations</h2>
+                        <button class="btn btn-primary g-col-3" [ngClass]="{ disabled: isDownloading }" (click)="refreshWaterMeasurementCalculations(geography)">Refresh</button>
+                    </div>
+                    <div class="copy copy-3 pt-1 pb-2">
+                        <p>Refresh all water measurement calculations for a specified year.</p>
+                    </div>
+                </div>
+                <div class="g-col-6 download border-right no-border-bottom">
+                    <div class="grid-12">
+                        <h2 class="section-title g-col-9">Download Water Measurements</h2>
+                        <button class="btn btn-primary g-col-3" [ngClass]="{ disabled: isDownloading }" (click)="openDownloadWaterMeasurementsModal(geography)">Download</button>
+                    </div>
+                    <div class="copy copy-3 pt-1 pb-2">
+                        <p>Download all water measurements from the platform for all configured water measurement data sources.</p>
+                    </div>
+                </div>
+            </div>
+        }
+        <div>
+            <div class="section-header pt-1 pb-1">
+                <h2 class="module-title underline">Water Measurement Types</h2>
+            </div>
+            <qanat-grid
+                [rowData]="waterMeasurementTypes$ | async"
+                [columnDefs]="waterMeasurementTypeGridCols"
+                downloadFileName="water-measurement-types-{{ geography.GeographyName.toLowerCase() }}"
+                [pagination]="false"></qanat-grid>
+        </div>
+    </div>
+}

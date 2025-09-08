@@ -1,0 +1,71 @@
+@if (waterAccount$ | async; as waterAccount) {
+    <page-header [pageTitle]="'#' + waterAccount.WaterAccountNumber" [templateTitleAppend]="templateTitleAppend" icon="WaterAccounts" preTitle="Wells">
+        <ng-template #templateTitleAppend>
+            @if (waterAccount.WaterAccountName?.length > 0 && waterAccount.WaterAccountName != waterAccount.WaterAccountNumber.toString()) {
+                <span class="water-account-name" title="{{ waterAccount.WaterAccountName }}">
+                    {{ waterAccount.WaterAccountName }}
+                </span>
+            }
+        </ng-template>
+    </page-header>
+    @if (wells$ | async; as wells) {
+        <div class="page-body grid-12">
+            @if (wells.length > 0) {
+                <div class="g-col-12">
+                    <qanat-map (onMapLoad)="handleMapReady($event)" mapHeight="700px">
+                        @if (mapIsReady) {
+                            <wells-layer
+                                [wells]="wells"
+                                [displayOnLoad]="true"
+                                [map]="map"
+                                (popupOpened)="onMapSelectionChanged($event)"
+                                [layerControl]="layerControl"
+                                [highlightedWellID]="highlightedWellID">
+                            </wells-layer>
+                            @if (zoneGroups$ | async; as zoneGroups) {
+                                @for (zoneGroup of zoneGroups; track zoneGroup) {
+                                    <zone-group-layer
+                                        [displayOnLoad]="false"
+                                        [zoneGroupID]="zoneGroup.ZoneGroupID"
+                                        [zoneGroupName]="zoneGroup.ZoneGroupName"
+                                        [map]="map"
+                                        [layerControl]="layerControl">
+                                    </zone-group-layer>
+                                }
+                            }
+                            @if (externalMapLayers$ | async; as externalMapLayers) {
+                                @for (externalMapLayer of externalMapLayers; track externalMapLayer) {
+                                    <geography-external-map-layer [map]="map" [layerControl]="layerControl" [externalMapLayer]="externalMapLayer"> </geography-external-map-layer>
+                                }
+                            }
+                        }
+                    </qanat-map>
+                </div>
+                <div class="g-col-12">
+                    <h3 class="module-title underline">All Wells</h3>
+                    <div class="table-wrapper">
+                        <qanat-grid
+                            [rowData]="wells"
+                            [columnDefs]="columnDefs"
+                            downloadFileName="parcels"
+                            defaultRowSelection="singleRow"
+                            (gridReady)="onGridReady($event)"
+                            (selectionChanged)="onGridSelectionChanged($event)"
+                            height="500px"
+                            (filterChanged)="selectHighlightedWellIDRowNode()"
+                            [pagination]="true"></qanat-grid>
+                    </div>
+                </div>
+            } @else {
+                <div class="alert alert-info">
+                    <div class="alert-content">
+                        <i class="fa fa-info"></i>
+                        There are no wells currently associated with this water account.
+                    </div>
+                </div>
+            }
+        </div>
+    } @else {
+        <div [loadingSpinner]="{ isLoading: true }" style="margin-top: 10rem"></div>
+    }
+}

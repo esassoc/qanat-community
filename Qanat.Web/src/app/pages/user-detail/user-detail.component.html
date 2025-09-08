@@ -1,0 +1,295 @@
+@if (userAndCurrentUser$ | async; as userAndCurrentUser) {
+    <div class="full-height-wrapper user-detail" [ngClass]="{ 'full-width-page': geographySpecific }">
+        <page-header
+            [pageTitle]="user?.FullName"
+            [preTitle]="'User'"
+            [icon]="'User'"
+            [templateRight]="pageHeaderTemplateRight"
+            [templateAbove]="geographySpecific ? templateAbove : null">
+            <ng-template #templateAbove>
+                <div class="back">
+                    <a [routerLink]="['/water-dashboard', 'users']" class="back__link">Back to Geography Users</a>
+                </div>
+            </ng-template>
+            <ng-template #pageHeaderTemplateRight>
+                @if (!isCurrentUser && canImpersonateUser) {
+                    <button class="btn btn-secondary-outline" (click)="impersonateUser(user?.UserID)">
+                        <span class="fas fa-user"></span>
+                        Impersonate
+                    </button>
+                }
+            </ng-template>
+        </page-header>
+        <div class="page-body grid-12">
+            <app-alert-display></app-alert-display>
+            <div class="user-info card g-col-6">
+                <div class="card-header flex-between">
+                    <h3 class="card-title">User Information</h3>
+                </div>
+                <div class="card-body grid-12">
+                    <key-value-pair-list>
+                        <key-value-pair>
+                            <ng-container key>Full Name</ng-container>
+                            <ng-container keyValue>
+                                <div>{{ user?.FullName }}</div>
+                                @if (!user?.FullName) {
+                                    <em class="text-muted"> Not Available </em>
+                                }
+                            </ng-container>
+                        </key-value-pair>
+                        <key-value-pair>
+                            <ng-container key>Email</ng-container>
+                            <ng-container keyValue>
+                                <div>{{ user?.Email }}</div>
+                                @if (!user?.Email) {
+                                    <em class="text-muted">Not Available</em>
+                                }
+                            </ng-container>
+                        </key-value-pair>
+                        <key-value-pair>
+                            <ng-container key>Platform Role</ng-container>
+                            <ng-container keyValue>
+                                <div>{{ user?.RoleDisplayName }}</div>
+                                @if (!user?.RoleDisplayName) {
+                                    <em class="text-muted"> Not Available </em>
+                                }
+                            </ng-container>
+                        </key-value-pair>
+                        @if (userGeographyPermissions$ | async; as userGeographyPermissions) {
+                            <key-value-pair>
+                                <ng-container key>
+                                    Geographies
+                                    @if (!userIsAdmin) {
+                                        <span> ({{ userGeographyPermissions.length }}) </span>
+                                    }
+                                </ng-container>
+                                <ng-container keyValue>
+                                    @if (userIsAdmin) {
+                                        <div>
+                                            @if (!isCurrentUser) {
+                                                <span> As an administrator {{ this.user.FullName }} has access to manage all geographies. </span>
+                                            }
+                                            @if (isCurrentUser) {
+                                                <span> As an administrator you have access to manage all geographies. </span>
+                                            }
+                                        </div>
+                                    } @else {
+                                        <div>
+                                            @if (userGeographyPermissions.length > 0) {
+                                                <ul class="geography-list">
+                                                    @for (permission of userGeographyPermissions; track permission) {
+                                                        <li class="geography-list-item">
+                                                            {{ permission.Geography.GeographyDisplayName }}
+                                                            @if (isGeographyWaterManagerDictionary[permission.Geography.GeographyID]) {
+                                                                ({{ isGeographyWaterManagerDictionary[permission.Geography.GeographyID] }})
+                                                            }
+                                                            @if (!isGeographyWaterManagerDictionary[permission.Geography.GeographyID]) {
+                                                                @if (geographyWaterAccountRoleDictionary[permission.Geography.GeographyID]) {
+                                                                    ({{ geographyWaterAccountRoleDictionary[permission.Geography.GeographyID] }})
+                                                                }
+                                                                @if (!geographyWaterAccountRoleDictionary[permission.Geography.GeographyID]) {
+                                                                    (No Associated Water Account)
+                                                                }
+                                                            }
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            } @else {
+                                                <div class="copy copy-3">
+                                                    <ul>
+                                                        <li>
+                                                            @if (!isCurrentUser) {
+                                                                <em> This user does not have any geography permissions. </em>
+                                                            }
+                                                            @if (isCurrentUser) {
+                                                                <em> You do not have any geography permissions. </em>
+                                                            }
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                </ng-container>
+                            </key-value-pair>
+                        }
+                    </key-value-pair-list>
+                </div>
+                <div class="card-footer">
+                    @if (currentUserIsAdmin) {
+                        <div>
+                            <icon icon="Info"></icon>
+                            <a (click)="updateUserInformationModal(true)">Update User Information</a>
+                        </div>
+                    }
+                    @if (isCurrentUser && displayProfileEdit) {
+                        <div>
+                            <icon icon="Info"></icon>
+                            <a (click)="editProfile()">Update My Information</a>
+                        </div>
+                    }
+                    @if (isCurrentUser && displayProfileEdit) {
+                        <div>
+                            <icon icon="Info"></icon>
+                            <a (click)="updateEmailAddress()">Update My Email Address</a>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="get-configuration card g-col-6">
+                <div class="card-header flex-between">
+                    <h3 class="card-title">Scenario Planner Access</h3>
+                </div>
+                <div class="card-body grid-12">
+                    @if (!userIsAdmin) {
+                        <key-value-pair-list class="g-col-6">
+                            <key-value-pair-list class="g-col-6">
+                                <key-value-pair>
+                                    <ng-container key>Role</ng-container>
+                                    <ng-container keyValue>
+                                        {{ user?.ScenarioPlannerRoleDisplayName }}
+                                    </ng-container>
+                                </key-value-pair>
+                                <key-value-pair>
+                                    <ng-container key>Model Access</ng-container>
+                                    <ng-container keyValue>
+                                        <div class="flex-wrap">
+                                            @for (model of user?.Models; track model; let i = $index) {
+                                                <span class="model-tag">
+                                                    {{ model.ModelName }}
+                                                </span>
+                                            }
+                                        </div>
+                                        @if (!user?.Models || user?.Models.length == 0) {
+                                            <em class="text-muted">No Associated Models</em>
+                                        }
+                                    </ng-container>
+                                </key-value-pair>
+                                <key-value-pair>
+                                    <ng-container key>GET Customer ID</ng-container>
+                                    <ng-container keyValue>
+                                        {{ user?.GETRunCustomerID }}
+                                        @if (!user?.GETRunCustomerID) {
+                                            <em class="text-muted">None</em>
+                                        }
+                                    </ng-container>
+                                </key-value-pair>
+                                <key-value-pair>
+                                    <ng-container key>GET User ID</ng-container>
+                                    <ng-container keyValue>
+                                        {{ user?.GETRunUserID }}
+                                        @if (!user?.GETRunUserID) {
+                                            <em class="text-muted">None</em>
+                                        }
+                                    </ng-container>
+                                </key-value-pair>
+                            </key-value-pair-list>
+                        </key-value-pair-list>
+                    } @else {
+                        <div class="copy copy-3">
+                            @if (!isCurrentUser) {
+                                <span>As an administrator {{ this.user.FullName }} has access to all models and scenario runs.</span>
+                            }
+                            @if (isCurrentUser) {
+                                <span>As an administrator you have access to all models and scenario runs.</span>
+                            }
+                        </div>
+                    }
+                </div>
+                @if (!userIsAdmin) {
+                    <div class="card-footer">
+                        @if (currentUserIsAdmin) {
+                            <div>
+                                <icon icon="ScenarioPlanner"></icon>
+                                <a (click)="updateUserInformationModal(false)">Update Scenario Planner Access</a>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+            <div class="water-accounts card g-col-12">
+                <div class="card-header">
+                    <h3 class="card-title">Water Accounts</h3>
+                </div>
+                <div class="card-body">
+                    @if (waterAccountGridRef) {
+                        <qanat-grid-header [grid]="waterAccountGridRef" [leftAlignClearFiltersButton]="true">
+                            @if (currentUserIsAdmin || currentUserIsWaterManager) {
+                                <div customGridActionsRight class="custom-grid-actions">
+                                    <button class="btn btn-primary btn-sm" (click)="addWaterAccountUserModal()">+ Add Water Account</button>
+                                </div>
+                            }
+                        </qanat-grid-header>
+                    }
+                    @if (userWaterAccounts$ | async; as waterAccounts) {
+                        <qanat-grid
+                            [rowData]="waterAccounts"
+                            [columnDefs]="waterAccountGridColumnDefs"
+                            (gridReady)="onWaterAccountGridReady($event)"
+                            (gridRefReady)="onWaterAccountGridRefReady($event)"
+                            downloadFileName="water-accounts"
+                            [sizeColumnsToFitGrid]="true"
+                            [colIDsToExclude]="waterAccountCSVDownloadColIDsToExclude"
+                            [overrideDefaultGridHeader]="true"
+                            height="500px">
+                        </qanat-grid>
+                    }
+                    @if (userIsAdmin) {
+                        <div class="copy copy-3">
+                            @if (!isCurrentUser) {
+                                <span> As an administrator {{ this.user.FullName }} has access to all water accounts. </span>
+                            }
+                            @if (isCurrentUser) {
+                                <span> As an administrator you have access to all water accounts. </span>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+            @if (wellRegistrations$ | async; as wellRegistrations) {
+                <div class="well-registrations card g-col-12">
+                    <div class="card-header">
+                        <h3 class="card-title">Well Registrations</h3>
+                    </div>
+                    <div class="card-body">
+                        <qanat-grid
+                            [rowData]="wellRegistrations"
+                            [columnDefs]="wellRegistrationGridColumnDefs"
+                            (gridReady)="onWellRegistrationGridReady($event)"
+                            downloadFileName="well-registrations"
+                            [sizeColumnsToFitGrid]="true"
+                            [colIDsToExclude]="wellRegistrationCSVDownloadColIDsToExclude"
+                            height="500px"></qanat-grid>
+                    </div>
+                </div>
+            }
+            @if (isCurrentUser || currentUserIsAdmin) {
+                <div class="card g-col-6">
+                    <div class="card-header flex-between">
+                        <h3 class="card-title">API Key</h3>
+                    </div>
+                    <div class="card-body grid-12">
+                        <key-value-pair-list class="g-col">
+                            <key-value-pair [copyValueToClipboard]="true">
+                                <ng-container key>Key</ng-container>
+                                <ng-container keyValue>
+                                    @if (apiKey$ | async; as apiKey) {
+                                        {{ apiKey }}
+                                    } @else {
+                                        No API Key Generated
+                                    }
+                                </ng-container>
+                            </key-value-pair>
+                        </key-value-pair-list>
+                    </div>
+                    <div class="card-footer">
+                        <div>
+                            <span class="fa fa-key mr-2"></span>
+                            <a (click)="generateNewApiKeyModal()">Generate new API Key</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}

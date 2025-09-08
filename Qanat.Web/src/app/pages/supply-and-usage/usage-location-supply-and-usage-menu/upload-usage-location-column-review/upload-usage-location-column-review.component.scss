@@ -1,0 +1,43 @@
+@use "/src/scss/abstracts" as *;
+
+form-field {
+    ::ng-deep .switch {
+        width: 7rem;
+        .toggle {
+            &:after {
+                font-size: $type-size-100;
+                top: 0.6875rem;
+            }
+        }
+
+        input:checked {
+            & + .toggle {
+                &:before {
+                    transform: translateX(5rem);
+                }
+            }
+        }
+    }
+}
+
+.merge-type-note {
+    display: block;
+}
+
+.note-content {
+    display: flex;
+    justify-content: flex-start;
+    gap: $spacing-200;
+    font-size: 14px;
+    line-height: 22px;
+    align-items: center;
+
+    icon {
+        &.info::ng-deep svg path {
+            color: $blue-700;
+        }
+        &.warning::ng-deep svg path {
+            color: $yellow-darker;
+        }
+    }
+}

@@ -1,0 +1,54 @@
+<div class="full-width-page">
+    <div class="page-header">
+        <h1 class="page-title">
+            <span>
+                <icon class="page-header-icon" icon="Code"></icon>
+                Getting Started with the API
+            </span>
+        </h1>
+    </div>
+    <div class="page-content grid-12">
+        <app-alert-display></app-alert-display>
+        <div class="g-col-6">
+            <note noteType="info">
+                <custom-rich-text [customRichTextTypeID]="APIKeyCustomRichTextTypeID"></custom-rich-text>
+            </note>
+        </div>
+        <div class="card g-col-6">
+            <div class="card-header flex-between">
+                <h3 class="card-title">API Key</h3>
+            </div>
+            <div class="card-body grid-12">
+                <key-value-pair-list class="g-col">
+                    <key-value-pair>
+                        <ng-container key>Key</ng-container>
+                        <ng-container keyValue>
+                            @if (apiKey$ | async; as apiKey) {
+                                @if (showAPIKey) {
+                                    <span [copyToClipboard]> {{ apiKey }}</span>
+                                    <button class="btn btn-secondary-outline toggle-key-visibility-button ml-1" (click)="showAPIKey = false">Hide</button>
+                                } @else {
+                                    <span>************************************</span>
+                                    <button class="btn btn-primary toggle-key-visibility-button ml-1" (click)="showAPIKey = true">Show</button>
+                                }
+                            } @else {
+                                No API Key Generated
+                            }
+                        </ng-container>
+                    </key-value-pair>
+                </key-value-pair-list>
+            </div>
+            <div class="card-footer">
+                <div>
+                    <span class="fa fa-key mr-2"></span>
+                    @if (currentUser$ | async; as currentUser) {
+                        <a (click)="generateNewApiKeyModal(currentUser)">Generate new API Key</a>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="g-col-12">
+            <custom-rich-text [customRichTextTypeID]="GettingStartedWithTheAPICustomRichTextTypeID"></custom-rich-text>
+        </div>
+    </div>
+</div>

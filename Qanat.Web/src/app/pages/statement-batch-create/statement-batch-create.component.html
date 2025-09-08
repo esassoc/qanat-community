@@ -1,0 +1,43 @@
+<page-header pageTitle="New Statement Batch" icon="Statement" [customRichTextTypeID]="richTextTypeID" [templateAbove]="templateAbove"></page-header>
+
+<ng-template #templateAbove>
+    <div class="back">
+        <a routerLink=".." class="back__link">Back to All Statements</a>
+    </div>
+</ng-template>
+
+@if (geography$ | async) {
+    @if (statementTemplates$ | async) {
+        <div class="page-body grid-12">
+            <app-alert-display></app-alert-display>
+            @if (!noStatementTemplatesConfigured) {
+                <div class="field g-col-3">
+                    <reporting-period-select [geographyID]="geographyID" (selectionChanged)="onSelectedReportingPeriodChange($event)"></reporting-period-select>
+                </div>
+
+                @if (waterAccounts$ | async; as waterAccounts) {
+                    <qanat-grid
+                        [loadingSpinner]="{ isLoading: isLoading }"
+                        [rowData]="waterAccounts"
+                        [columnDefs]="columnDefs"
+                        defaultRowSelection="multiRow"
+                        [pagination]="true"
+                        (gridReady)="onGridReady($event)"
+                        (selectionChanged)="onSelectionChanged()"
+                        downloadFileName="statement-batch-water-accounts"
+                        class="clear-action-widths">
+                        <div customGridActionsRight>
+                            <button
+                                (click)="createStatementBatch()"
+                                class="btn btn-sm btn-primary"
+                                [disabled]="isLoadingSubmit || selectedWaterAccountIDs?.length === 0"
+                                [loadingSpinner]="{ isLoading: isLoadingSubmit }">
+                                + Create Statement Batch
+                            </button>
+                        </div>
+                    </qanat-grid>
+                }
+            }
+        </div>
+    }
+}

@@ -1,0 +1,10 @@
+@use "/src/scss/abstracts/" as *;
+
+.zone {
+    .zone-color {
+        width: 8px;
+        height: 8px;
+        display: inline-block;
+        border-radius: 50%;
+    }
+}

@@ -1,0 +1,152 @@
+@use "/src/scss/abstracts" as *;
+
+.alert {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    background: $white;
+    color: $black;
+    border: none;
+    border-top-width: 4px;
+    border-top-style: solid;
+    border-radius: 0;
+    box-shadow: 0 2px 4px rgba($black, 0.2);
+    padding: 0;
+    margin-bottom: 2rem;
+
+    @include tablet {
+        align-items: stretch;
+    }
+
+    ul {
+        list-style-type: disc;
+        margin-left: 1.5rem;
+    }
+
+    &:empty {
+        display: none;
+    }
+
+    i {
+        display: inline-block;
+        margin-right: 1rem;
+        font-size: 1.5rem;
+    }
+
+    &-primary {
+        border-top-color: $primary;
+
+        i {
+            color: $primary;
+        }
+    }
+
+    &-secondary {
+    }
+
+    &-success {
+        border-top-color: $green-default;
+
+        i {
+            color: $green-default;
+        }
+    }
+
+    &-danger {
+        border-top-color: $red-default;
+
+        i {
+            color: $red-default;
+        }
+    }
+
+    &-warning {
+        border-top-color: $yellow-default;
+
+        i {
+            color: $yellow-default;
+        }
+    }
+
+    &-info {
+        border-top-color: $primary;
+
+        i {
+            color: $primary;
+        }
+    }
+
+    &-light {
+    }
+
+    &-dark {
+    }
+
+    &.center {
+        .alert-content {
+            justify-content: center;
+        }
+    }
+
+    &-hero {
+        background: rgba(0, 0, 0, 0.5);
+        color: $white;
+        display: inline-block;
+
+        &.alert-info {
+            border-top-color: rgba($white, 0.85);
+
+            i {
+                color: $white;
+            }
+        }
+    }
+
+    &-content {
+        padding: 1.25rem;
+        display: flex;
+        flex: 1;
+        word-break: break-word;
+        font-size: 0.75rem;
+        align-items: center;
+
+        @include desktop-small {
+            font-size: 0.975rem;
+        }
+    }
+
+    &-dismissible {
+        .close {
+            opacity: 0.8;
+            border-left: 1px solid rgba(0, 0, 0, 0.1);
+            border-right: none;
+            border-bottom: none;
+            border-top: none;
+            padding: 1.25rem 1.75rem;
+            text-align: center;
+            position: static;
+            background: $white;
+
+            &:hover {
+                opacity: 1;
+            }
+
+            span {
+                width: 1.5rem;
+                height: 1.5rem;
+                border-radius: 50%;
+                background: rgba($black, 0.4);
+                display: block;
+                font-weight: 400;
+                line-height: 1.5rem;
+
+                font-size: 1rem;
+                color: $white;
+            }
+        }
+    }
+}
+
+app-alert-display:empty {
+    display: none;
+}

@@ -1,0 +1,44 @@
+@if (allocationPlansDescription$ | async; as allocationPlanDescription) {
+    <div class="copy copy-2 copy-user-entered mb-4" [innerHtml]="allocationPlanDescription"></div>
+}
+
+@if (allocationPlans?.length > 0) {
+    <div>
+        <div class="mb-4">
+            @if (waterTypes) {
+                <label class="field-label">Water Type</label>
+                <button-group>
+                    @for (waterType of waterTypes; track waterType) {
+                        <button (click)="changeSelectedWaterType(waterType)" [class.active]="selectedWaterType == waterType">
+                            {{ waterType.WaterTypeName }}
+                        </button>
+                    }
+                </button-group>
+            }
+            @if (showZoneToggle && availableAllocationPlans) {
+                <label class="field-label mt-4">{{ zoneGroupName }}</label>
+                <button-group>
+                    @for (allocationPlan of availableAllocationPlans; track allocationPlan) {
+                        <a [routerLink]="[allocationPlan.WaterTypeSlug, allocationPlan.ZoneSlug]" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+                            {{ allocationPlan.ZoneName }}
+                        </a>
+                    }
+                </button-group>
+            }
+        </div>
+        <router-outlet #allocationPlanOutletRef="outlet"></router-outlet>
+        @if (!allocationPlanOutletRef.isActivated) {
+            <div class="no-allocation-plan">
+                <p>
+                    <strong><em>No Allocation Plan Selected</em></strong>
+                </p>
+            </div>
+        }
+    </div>
+} @else {
+    <div class="no-allocation-plan">
+        <p>
+            <strong><em>No Allocation Plans Currently Available</em></strong>
+        </p>
+    </div>
+}

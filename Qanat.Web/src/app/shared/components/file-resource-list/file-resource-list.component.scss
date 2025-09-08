@@ -1,0 +1,124 @@
+@use "/src/scss/abstracts" as *;
+
+.title-container {
+    display: flex;
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: baseline;
+    position: relative;
+    top: 0.5rem;
+}
+
+.underline {
+    border-bottom: 2px solid $tan;
+    margin-bottom: 1rem;
+}
+
+.file-count {
+    border-radius: 50%;
+    background-color: #368ea4;
+    color: #ffffff;
+    align-self: flex-start;
+    width: 1.75rem;
+    height: 1.75rem;
+    text-align: center;
+    line-height: 1.75rem;
+    padding-top: 1px;
+    position: relative;
+    top: -2px;
+}
+
+.upload-button {
+    position: relative;
+    top: -0.5rem;
+}
+
+.upload-icon {
+    position: relative;
+    top: 2px;
+}
+
+.existing-file {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border: 1px solid #ddd; // Light gray border
+    border-radius: 8px; // Rounded corners
+    padding: 1rem;
+    box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.1); // Subtle shadow
+    margin-bottom: 1rem;
+}
+
+.file-description {
+    color: $gray-700;
+}
+
+.file-upload-date {
+    color: $gray-950;
+}
+
+.existing-file .grid-12 {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 0;
+}
+
+.existing-file .g-col-2 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    align-self: baseline;
+}
+
+.existing-file .g-col-6 {
+    flex-grow: 1;
+    padding: 0 1rem;
+}
+
+.actions {
+    align-self: center;
+}
+
+.edit-file-icon-button {
+    cursor: pointer;
+    ::ng-deep {
+        svg {
+            height: 2rem;
+            width: 2rem;
+            color: $gray-400;
+            transition: color 0.2s ease-in-out;
+        }
+    }
+}
+
+.edit-file-icon-button:hover {
+    ::ng-deep {
+        svg {
+            color: $gray-600;
+        }
+    }
+}
+
+.delete-file-icon-button {
+    cursor: pointer;
+    ::ng-deep {
+        svg {
+            height: 2rem;
+            width: 2rem;
+            color: $gray-400;
+            transition: color 0.2s ease-in-out;
+        }
+    }
+}
+
+.delete-file-icon-button:hover {
+    ::ng-deep {
+        svg {
+            color: $red-default;
+        }
+    }
+}

@@ -1,0 +1,38 @@
+@use "/src/scss/abstracts" as *;
+
+.field-definition-wrapper {
+    display: inline-block;
+}
+
+.fa-question-circle {
+    margin-left: 3px;
+}
+
+::ng-deep .popover-header,
+::ng-deep .popover-body {
+    text-transform: none;
+}
+
+::ng-deep .popover-body {
+    padding: $spacing-500 !important;
+
+    ul {
+        li {
+            list-style: disc;
+        }
+    }
+}
+
+.inline-display {
+    align-items: start;
+    column-gap: 0.8rem;
+
+    .edit-button {
+        cursor: pointer;
+        color: $primary;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+}

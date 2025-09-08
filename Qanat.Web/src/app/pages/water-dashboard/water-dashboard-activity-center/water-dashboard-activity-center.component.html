@@ -1,0 +1,26 @@
+@if (currentUser$ | async) {
+    <water-dashboard-nav></water-dashboard-nav>
+    <div class="full-width-page">
+        <page-header preTitle="Water Dashboard" pageTitle="Activity Center" [customRichTextTypeID]="richTextID" icon="ActivityCenter"> </page-header>
+
+        @if (currentUserGeographySummaries$ | async; as geographySummaries) {
+            <div class="page-body grid-12" [loadingSpinner]="{ isLoading: isLoading, loadingHeight: 700 }">
+                <app-alert-display></app-alert-display>
+
+                @for (geographySummary of geographySummaries; track geographySummary) {
+                    <geography-activities [geographySummary]="geographySummary" [isSystemAdmin]="isSystemAdmin"></geography-activities>
+                }
+
+                @if (geographySummaries.length == 0) {
+                    <div class="alert alert-info">
+                        <div class="alert-content">
+                            <i class="fa fa-info"></i>
+                            Your user profile does not currently have activity in any geographies. Claim Water Accounts to get started or contact a water manager for your geography
+                            for assistance.
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+}

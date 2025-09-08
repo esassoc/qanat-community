@@ -1,0 +1,56 @@
+<page-header icon="Allocations" [customRichTextTypeID]="richTextTypeID" [templateAbove]="templateAbove" pageTitle="Bulk Set Water Measurements">
+    <ng-template #templateAbove>
+        <div class="back">
+            <a [routerLink]="['..']" class="back__link">Back to Water Measurements</a>
+        </div>
+    </ng-template>
+</page-header>
+
+<div class="page-body">
+    <app-alert-display></app-alert-display>
+
+    @if (viewModel$ | async; as viewModel) {
+        <form class="form mb-3 grid-12" [formGroup]="formGroup" #bulkSetWaterMeasurementForm="ngForm" [loadingSpinner]="{ isLoading: viewModel.IsLoading }">
+            <div class="field g-col-6">
+                <form-field
+                    [formControl]="formGroup.controls.WaterMeasurementTypeID"
+                    fieldLabel="Water Measurement Type"
+                    [formInputOptions]="viewModel.WaterMeasurementTypeSelectOptions"
+                    [type]="FormFieldType.Select">
+                </form-field>
+            </div>
+            <div class="g-col-6">
+                <form-field
+                    [formControl]="formGroup.controls.ValueInAcreFeetPerAcre"
+                    [type]="FormFieldType.Number"
+                    fieldLabel="Value In Acre Feet Per Acre"
+                    placeholder="ac-ft/acre"></form-field>
+            </div>
+            <div class="field g-col-6">
+                <form-field [formControl]="formGroup.controls.Year" fieldLabel="Year" [formInputOptions]="viewModel.YearSelectOptions" [type]="FormFieldType.Select"> </form-field>
+            </div>
+            <div class="field g-col-6">
+                <form-field [formControl]="formGroup.controls.Month" fieldLabel="Month" [formInputOptions]="viewModel.MonthSelectOptions" [type]="FormFieldType.Select">
+                </form-field>
+            </div>
+            <div class="field g-col-12">
+                <form-field [formControl]="formGroup.controls.Comment" [type]="FormFieldType.Textarea"> </form-field>
+            </div>
+        </form>
+        <div class="form__actions flex-end">
+            <button class="btn btn-primary-outline btn-lg" [routerLink]="['..']" [disabled]="isLoadingSubmit">Cancel</button>
+            <button class="btn btn-primary btn-lg" (click)="onSubmit(viewModel.Geography)" [disabled]="isLoadingSubmit || !formGroup.valid">
+                @if (isLoadingSubmit) {
+                    <span class="fa fa-spinner loading-spinner"></span>
+                }
+                Save
+            </button>
+        </div>
+        <note noteType="warning" class="mt-2" style="width: fit-content; float: right">
+            <p>
+                This will overwrite the selected water measurement type for all usage locations for the specified year and month and run dependant calculations. This action cannot
+                be undone.
+            </p>
+        </note>
+    }
+</div>

@@ -1,0 +1,362 @@
+@if (currentUser$ | async) {
+    <div class="dashboard">
+        @if (well$ | async; as well) {
+            <aside class="sidebar support-sidebar">
+                <div class="sidebar-header">
+                    <a routerLink="/water-dashboard">
+                        <geography-logo [geographyID]="well.Geography.GeographyID"></geography-logo>
+                    </a>
+                </div>
+                <div class="sidebar-body sticky-nav">
+                    @if (pageMenu) {
+                        <dashboard-menu [dashboardMenu]="pageMenu" [viewingDetailPage]="true"></dashboard-menu>
+                    }
+                </div>
+            </aside>
+            <main class="main">
+                <page-header icon="Wells" [templateRight]="templateRight" [templateTitleAppend]="templateTitleAppend" [pageTitle]="well.WellName">
+                    <ng-template #templateTitleAppend>
+                        <small class="text-muted account-id">{{ well.WellID }}</small>
+                    </ng-template>
+                    <ng-template #templateRight>
+                        @if (well.WellRegistration?.WellRegistrationID) {
+                            <a
+                                [routerLink]="['/wells', well.Geography.GeographyName.toLowerCase(), 'well-registrations', well.WellRegistration.WellRegistrationID]"
+                                target="_blank">
+                                <span class="text-muted">
+                                    <icon icon="ExternalLink"></icon>
+                                    View Well Registration
+                                </span>
+                            </a>
+                        }
+                    </ng-template>
+                </page-header>
+                <div class="page-body grid-12">
+                    <app-alert-display></app-alert-display>
+                    <div class="card g-col-12">
+                        <div class="card-header">
+                            <h3 class="card-title">Well Details</h3>
+                        </div>
+                        <div class="card-body grid-12">
+                            <div class="g-col-3">
+                                <dl class="kv-pair">
+                                    <dt class="key">Default APN</dt>
+                                    @if (well.Parcel) {
+                                        <dd class="value">
+                                            <a routerLink="/parcels/{{ well.Parcel?.ParcelID }}">
+                                                <icon icon="Parcels"></icon>
+                                                {{ well.Parcel?.ParcelNumber }}
+                                            </a>
+                                        </dd>
+                                    } @else {
+                                        <dd class="value"><i>Not Available</i></dd>
+                                    }
+                                    <dt class="key">
+                                        <field-definition fieldDefinitionType="WaterAccount" [inline]="false"></field-definition>
+                                    </dt>
+                                    @if (well.Parcel?.WaterAccount) {
+                                        <dd class="value">
+                                            <a routerLink="/water-accounts/{{ well.Parcel?.WaterAccountID }}">
+                                                <icon icon="WaterAccounts"></icon>
+                                                {{ well.Parcel?.WaterAccount?.WaterAccountNumber }}
+                                            </a>
+                                        </dd>
+                                    } @else {
+                                        <dd class="value"><i>Not Available</i></dd>
+                                    }
+                                    @if (well.IrrigatedParcels?.length > 0) {
+                                        <dt class="key">Irrigated Parcels</dt>
+                                        <dd class="value">
+                                            @for (parcel of well.IrrigatedParcels; track parcel) {
+                                                <div>
+                                                    <a routerLink="/parcels/{{ parcel?.ParcelID }}">
+                                                        <icon icon="Parcels"></icon>
+                                                        {{ parcel?.ParcelNumber }}
+                                                    </a>
+                                                </div>
+                                            }
+                                        </dd>
+                                    }
+                                    <dt class="key">Latitude/Longitude</dt>
+                                    <dd class="value">
+                                        {{ well.Latitude | number: "0.5-5" }},
+                                        {{ well.Longitude | number: "0.5-5" }}
+                                    </dd>
+                                    <dt class="key">
+                                        <field-definition fieldDefinitionType="WellStatus" [inline]="false"></field-definition>
+                                    </dt>
+                                    <dd class="value">{{ well.WellStatus.WellStatusDisplayName }}</dd>
+                                </dl>
+                            </div>
+                            <div class="g-col-3">
+                                <dl class="kv-pair">
+                                    <dt class="key">
+                                        <field-definition fieldDefinitionType="StateWCRNo" [inline]="false"></field-definition>
+                                    </dt>
+                                    <dd class="value">{{ well.StateWCRNumber }}</dd>
+                                    <dt class="key">
+                                        <field-definition fieldDefinitionType="CountyWellPermitNo" [inline]="false"></field-definition>
+                                    </dt>
+                                    <dd class="value">{{ well.CountyWellPermitNumber }}</dd>
+                                    <dt class="key">
+                                        <field-definition fieldDefinitionType="DateDrilled" [inline]="false"></field-definition>
+                                    </dt>
+                                    <dd class="value">{{ well.DateDrilled | date: "MM/dd/yyyy" }}</dd>
+                                    <dt class="key">Well Registration</dt>
+                                    <dd class="value">
+                                        <a routerLink="/wells/{{ well.Geography.GeographyName.toLowerCase() }}/well-registrations/{{ well.WellRegistration?.WellRegistrationID }}">
+                                            {{ well.WellRegistration?.ApprovalDate | date: "MM/dd/yyyy" }}
+                                        </a>
+                                    </dd>
+                                    <dt class="key">Notes</dt>
+                                    <dd class="value">{{ well.Notes }}</dd>
+                                </dl>
+                            </div>
+                            @if (wellLocation$ | async; as wellLocation) {
+                                <div class="g-col-6 map-container">
+                                    <qanat-map (onMapLoad)="handleMapReady($event)" mapHeight="400px" [showLayerControl]="false">
+                                        @if (mapIsReady) {
+                                            @if (highlightedParcelIDs) {
+                                                <highlighted-parcels-layer
+                                                    [displayOnLoad]="true"
+                                                    [map]="map"
+                                                    controlTitle="Irrigated Parcel(s)"
+                                                    [geographyID]="well.Geography.GeographyID"
+                                                    [highlightedParcelIDs]="highlightedParcelIDs"
+                                                    [layerControl]="layerControl"></highlighted-parcels-layer>
+                                            }
+                                            <wells-layer [wells]="[wellLocation]" [displayOnLoad]="true" [map]="map" [layerControl]="layerControl"></wells-layer>
+                                        }
+                                    </qanat-map>
+                                </div>
+                            }
+                        </div>
+                        @if (hasGeographyWellManagePermissions$ | async; as hasGeographyWellManagePermissions) {
+                            <div class="card-footer">
+                                <div>
+                                    <icon icon="Info"></icon>
+                                    <a (click)="updateWellInfoModal()">Update Well Info</a>
+                                </div>
+                                <div>
+                                    <icon icon="Map"></icon>
+                                    <a routerLink="update-location">Update Well Location</a>
+                                </div>
+                                <div>
+                                    <icon icon="Parcels"></icon>
+                                    <a (click)="overrideWellParcelModal()">Update Parcel</a>
+                                </div>
+                                <div>
+                                    <icon icon="Parcels"></icon>
+                                    <a routerLink="update-irrigated-parcels">Update Irrigated Parcels</a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div class="card g-col-6" id="technical-info">
+                        <div class="card-header">
+                            <h3 class="card-title">Technical Info</h3>
+                        </div>
+                        <div class="card-body grid-12">
+                            <div class="g-col-6">
+                                <dl class="kv-pair">
+                                    <dt class="key">
+                                        <field-definition fieldDefinitionType="WellDepth" [inline]="false"></field-definition>
+                                    </dt>
+                                    <dd class="value">{{ well.WellDepth }}</dd>
+                                    <dt class="key">
+                                        <field-definition fieldDefinitionType="WellRegistryFieldTopOfPerforations" [inline]="false"></field-definition>
+                                    </dt>
+                                    <dd class="value">{{ well.TopOfPerforations }}</dd>
+                                    <dt class="key">Electric Meter Number</dt>
+                                    <dd class="value">{{ well.ElectricMeterNumber }}</dd>
+                                </dl>
+                            </div>
+                            <div class="g-col-6">
+                                <dl class="kv-pair">
+                                    <dt class="key">Casing Diameter (in)</dt>
+                                    <dd class="value">{{ well.CasingDiameter }}</dd>
+                                    <dt class="key">
+                                        <field-definition fieldDefinitionType="WellRegistryFieldBottomOfPerforations" [inline]="false"></field-definition>
+                                    </dt>
+                                    <dd class="value">{{ well.BottomOfPerforations }}</dd>
+                                </dl>
+                            </div>
+                        </div>
+
+                        @if (hasGeographyMeterManagePermissions$ | async; as hasGeographyMeterManagePermissions) {
+                            <div class="card-footer">
+                                <div>
+                                    <icon icon="Info"></icon>
+                                    <a (click)="updateTechnicalInfoModal()">Update Technical Info</a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    @if (well.WellType.HasSchomotoSchema) {
+                        @if (wellType$ | async; as wellType) {
+                            @if (wellInstance$ | async; as wellInstance) {
+                                <instance-display
+                                    class="g-col-12 grid-12"
+                                    [schema]="wellType.SchemotoSchema"
+                                    [instance]="wellInstance.SchemotoInstance"
+                                    [gridCol]="'g-col-12'"></instance-display>
+                            }
+                        }
+                    }
+                    @if (well.MetersEnabled) {
+                        <div class="card g-col-6" id="meter">
+                            <div class="card-header">
+                                <h3 class="card-title">Meter</h3>
+                            </div>
+                            @if (well.Meter) {
+                                <div class="card-body grid-12">
+                                    <div class="g-col-6">
+                                        <dl class="kv-pair">
+                                            <dt class="key">
+                                                <field-definition fieldDefinitionType="SerialNumber" [inline]="false"></field-definition>
+                                            </dt>
+                                            <dd class="value">{{ well.Meter.SerialNumber }}</dd>
+                                            <dt class="key">Meter Status</dt>
+                                            <dd class="value">
+                                                {{ well.Meter.MeterStatus.MeterStatusDisplayName }}
+                                            </dd>
+                                            <dt class="key">Model Number</dt>
+                                            <dd class="value">{{ well.Meter.ModelNumber }}</dd>
+                                        </dl>
+                                    </div>
+                                    <div class="g-col-6">
+                                        <dl class="kv-pair">
+                                            <dt class="key">Device Name</dt>
+                                            <dd class="value">{{ well.Meter.DeviceName }}</dd>
+                                            <dt class="key">Make</dt>
+                                            <dd class="value">{{ well.Meter.Make }}</dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                                @if (hasGeographyWellManagePermissions$ | async; as hasGeographyWellManagePermissions) {
+                                    <div class="card-footer">
+                                        <div>
+                                            <icon icon="Info"></icon>
+                                            @if (hasGeographyMeterManagePermissions$ | async; as hasGeographyMeterManagePermissions) {
+                                                <a (click)="updateMeterModal()">Update Meter Info</a>
+                                            }
+                                        </div>
+                                        <div>
+                                            <icon icon="Delete" class="red"></icon>
+                                            <a (click)="removeWellMeterModal()">Remove Meter from Well</a>
+                                        </div>
+                                    </div>
+                                }
+                            } @else {
+                                <div class="card-body">
+                                    <div class="no-well-meter">
+                                        <p>No meter assigned to well.</p>
+                                        @if (hasGeographyWellManagePermissions$ | async; as hasGeographyWellManagePermissions) {
+                                            <button class="btn btn-primary" (click)="addWellMeterModal()">Add Meter to Well</button>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    @if (well.MetersEnabled) {
+                        <div class="card g-col" id="meter-readings">
+                            <div class="card-header flex-between">
+                                <h3 class="card-title">Meter Readings</h3>
+                                @if (hasGeographyWellManagePermissions$ | async) {
+                                    @if (well.Meter) {
+                                        <button class="btn btn-primary" routerLink="new-meter-reading">+ Add Meter Reading</button>
+                                    }
+                                }
+                            </div>
+                            <div class="card-body">
+                                @if (monthlyInterpolations$ | async; as monthlyInterpolations) {
+                                    @if (monthlyInterpolations.length > 0) {
+                                        <div class="mb-2">
+                                            <vega-meter-reading-monthly-chart [monthlyInterpolations]="monthlyInterpolations"></vega-meter-reading-monthly-chart>
+                                        </div>
+                                    }
+                                }
+                                @if (selectedMeterPanel == "MeterReadings") {
+                                    @if (meterReadingGridRef) {
+                                        <qanat-grid-header [grid]="meterReadingGridRef">
+                                            <div customGridActionsCenter>
+                                                <div class="button-group tab-nav">
+                                                    <button class="button-group__item btn-sm" [class.active]="true">
+                                                        <icon icon="BulletedList"></icon>
+                                                        Readings
+                                                    </button>
+                                                    <button class="button-group__item btn-sm" [class.active]="false" (click)="selectedMeterPanel = 'MonthlyInterpolations'">
+                                                        <icon icon="Statistics"></icon>
+                                                        Monthly Values
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </qanat-grid-header>
+                                    }
+                                    @if (meterReadings$ | async; as meterReadings) {
+                                        <qanat-grid
+                                            height="600px"
+                                            [columnDefs]="meterReadingColumnDefs"
+                                            [rowData]="meterReadings"
+                                            downloadFileName="well-{{ well.WellID }}-meter-readings"
+                                            [sizeColumnsToFitGrid]="true"
+                                            (gridRefReady)="onMeterReadingGridRefReady($event)"
+                                            [overrideDefaultGridHeader]="true"></qanat-grid>
+                                    } @else {
+                                        <p class="no-well-meter">No meter readings to display.</p>
+                                    }
+                                }
+                                @if (selectedMeterPanel == "MonthlyInterpolations") {
+                                    @if (meterReadingGridRef) {
+                                        <qanat-grid-header [grid]="meterReadingGridRef">
+                                            <div customGridActionsCenter>
+                                                <div class="button-group tab-nav">
+                                                    <button class="button-group__item btn-sm" [class.active]="false" (click)="selectedMeterPanel = 'MeterReadings'">
+                                                        <icon icon="BulletedList"></icon>
+                                                        Readings
+                                                    </button>
+                                                    <button class="button-group__item btn-sm" [class.active]="true">
+                                                        <icon icon="Statistics"></icon>
+                                                        Monthly Values
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </qanat-grid-header>
+                                    }
+                                    @if (monthlyInterpolations$ | async; as monthlyInterpolations) {
+                                        <qanat-grid
+                                            height="600px"
+                                            [columnDefs]="monthlyInterpolationsColumnDefs"
+                                            [rowData]="monthlyInterpolations"
+                                            downloadFileName="well-{{ well.WellID }}-monthly-readings"
+                                            [sizeColumnsToFitGrid]="true"
+                                            (gridRefReady)="onMonthlyInterpolationsGridRefReady($event)"
+                                            [overrideDefaultGridHeader]="true"></qanat-grid>
+                                    } @else {
+                                        <p class="no-well-meter">No monthly data to display.</p>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <div class="card g-col-12" id="documents">
+                        <div class="card-body">
+                            <file-resource-list
+                                [fileResources]="fileResources$ | async"
+                                [allowEditing]="hasGeographyWellManagePermissions$ | async"
+                                (fileResourceUploaded)="onFileResourceUploaded($event)"
+                                (fileResourceUpdated)="onFileResourceUpdated($event)"
+                                (fileResourceDeleted)="deleteFileResource($event)"></file-resource-list>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        }
+    </div>
+}
+
+<div class="full-width-page">
+    <ng-container> </ng-container>
+</div>

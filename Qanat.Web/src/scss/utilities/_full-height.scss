@@ -1,0 +1,7 @@
+@use "/src/scss/abstracts" as *;
+
+.full-height-wrapper {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    height: 100%;
+}

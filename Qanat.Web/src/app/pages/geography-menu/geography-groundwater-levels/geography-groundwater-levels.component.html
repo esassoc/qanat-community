@@ -1,0 +1,57 @@
+@if (geography$ | async; as geography) {
+    <div>
+        <page-header
+            icon="LineChart"
+            [templateTitleAppend]="templateTitleAppend"
+            [customRichTextTypeID]="customRichTextTypeID"
+            [customRichTextTypeGeographyID]="geography.GeographyID"
+            pageTitle="Groundwater Levels">
+            <ng-template #templateTitleAppend>
+                <name-tag [name]="geography.GeographyName" class="mb-2"></name-tag>
+            </ng-template>
+        </page-header>
+        <div class="page-body grid-12">
+            <app-alert-display></app-alert-display>
+            @if (isYoloGeography() && currentUserHasMonitoringWellUpdatePermissions()) {
+                <div class="flex-end">
+                    <button class="btn btn-primary g-col-3" (click)="retrieveYoloWells()" [buttonLoading]="isTriggeringYoloWellJob" [disabled]="isTriggeringYoloWellJob">
+                        Pull Scada Well Data
+                    </button>
+                </div>
+            }
+            <qanat-map class="location-card" (onMapLoad)="handleMapReady($event)" mapHeight="400px">
+                @if (mapIsReady) {
+                    @if (geography$ | async; as geography) {
+                        <gsa-boundaries
+                            [displayOnLoad]="true"
+                            [map]="map"
+                            [controlTitle]="geography.GeographyDisplayName"
+                            [geographyID]="geography.GeographyID"
+                            [layerControl]="layerControl"></gsa-boundaries>
+                    }
+                    <monitoring-wells-layer
+                        [map]="map"
+                        [layerControl]="layerControl"
+                        [displayOnLoad]="true"
+                        [editingMap]="false"
+                        [geographyID]="geography.GeographyID"></monitoring-wells-layer>
+                }
+            </qanat-map>
+            <div class="info pt-3">
+                <h2 class="section-title primary">Monitoring Wells Database</h2>
+                <div class="copy copy-2 copy-55">
+                    <custom-rich-text [customRichTextTypeID]="monitoringWellsCustomRichTextTypeID" [geographyID]="geography.GeographyID"></custom-rich-text>
+                </div>
+            </div>
+            <div class="monitoring-wells-grid">
+                <qanat-grid
+                    [rowData]="monitoringWellData$ | async"
+                    [columnDefs]="columnDefs"
+                    downloadFileName="monitoring-well-measurements"
+                    [pagination]="true"
+                    (filterChanged)="selectHighlightedMonitoringWellIDRowNode()"
+                    (gridReady)="onGridReady($event)"></qanat-grid>
+            </div>
+        </div>
+    </div>
+}

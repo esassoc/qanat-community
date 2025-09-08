@@ -1,0 +1,47 @@
+@if (noAddressMatch) {
+    <note noteType="warning">
+        <div class="note-content">
+            <icon icon="Warning" class="warning"></icon>
+            <p>Address validation didn't return any matches for the address you entered. This contact can still be saved, but the address will be marked as unverified.</p>
+        </div>
+    </note>
+} @else {
+    <p>Address validation returned {{ confidenceDescriptor }} match for the address you entered. Please confirm which address to use:</p>
+
+    <form action="" class="form grid-8">
+        <div class="radio-button-container">
+            <label class="radio-button suggested-address" for="entered-address">
+                <input type="radio" name="enteredAddress" id="entered-address" [formControl]="isUsingValidatedAddressFormControl" [value]="true" />
+                <div>
+                    <div class="radio-label">Suggested Address</div>
+
+                    <div class="address">
+                        <div>{{ mapboxResponseDto.Address }}</div>
+                        <div>{{ mapboxResponseDto.SecondaryAddress }}</div>
+                        <div>{{ mapboxResponseDto.City }}, {{ mapboxResponseDto.StatePostalCode }} {{ mapboxResponseDto.ZipCode }}</div>
+                    </div>
+                </div>
+            </label>
+            <label class="radio-button entered-address" for="suggested-address">
+                <input type="radio" name="enteredAddress" id="suggested-address" [formControl]="isUsingValidatedAddressFormControl" [value]="false" />
+                <div>
+                    <div class="radio-label">Entered Address</div>
+                    <div class="address">
+                        <div>{{ waterAccountContactUpsertDto.Address }}</div>
+                        <div>{{ waterAccountContactUpsertDto.SecondaryAddress }}</div>
+                        <div>{{ waterAccountContactUpsertDto.City }}, {{ waterAccountContactUpsertDto.State }} {{ waterAccountContactUpsertDto.ZipCode }}</div>
+                    </div>
+                </div>
+            </label>
+        </div>
+    </form>
+
+    @if (showUnvalidatedWarning) {
+        <note noteType="warning">
+            <div class="note-content">
+                <icon icon="Warning" class="warning"></icon>
+                <p>Are you sure you want to proceed using an unverified address?</p>
+            </div>
+        </note>
+    }
+}

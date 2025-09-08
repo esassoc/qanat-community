@@ -1,0 +1,30 @@
+@use "../../../../../scss/abstracts/" as *;
+
+.search-container {
+    position: relative;
+
+    .clear {
+        background: none;
+        border: none;
+        position: absolute;
+        right: 15px;
+        bottom: 12px;
+    }
+}
+
+.section-title {
+    span {
+        color: $blue-700;
+    }
+}
+
+.module-title {
+    color: $gray-1000;
+}
+
+.search {
+    border: 1px solid $gray-200;
+    border-radius: $spacing-100;
+    padding: $spacing-400;
+    background-color: $gray-50;
+}

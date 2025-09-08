@@ -1,0 +1,11 @@
+@use "src/scss/abstracts" as *;
+
+.sidebar-body__title {
+    icon {
+        transform: translateY(-1px);
+    }
+}
+
+.fas {
+    color: $secondary;
+}

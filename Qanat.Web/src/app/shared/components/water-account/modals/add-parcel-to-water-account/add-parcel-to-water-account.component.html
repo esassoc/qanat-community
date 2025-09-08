@@ -1,0 +1,28 @@
+<div class="modal">
+    <div class="modal-header">
+        <custom-rich-text [customRichTextTypeID]="customRichTextID" [showLoading]="false" [showInfoIcon]="false"></custom-rich-text>
+    </div>
+
+    <div class="modal-body">
+        <div class="field" style="width: 100%">
+            <label class="field-label">Add parcel:</label>
+            @if (parcel$ | async; as parcel) {
+                <parcel-icon-with-number [parcel]="parcel"></parcel-icon-with-number>
+            }
+        </div>
+
+        <form action="" class="form mt-4" [formGroup]="formGroup">
+            <div class="water-account">
+                <div class="field">
+                    <label class="field-label">To water account:</label>
+                    <search-water-accounts class="mb-4" [geographyID]="ref.data.GeographyID" [formControl]="formGroup.controls.waterAccountID"></search-water-accounts>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="modal-footer">
+        <button class="btn btn-primary" (click)="save()">Update Info & Save</button>
+        <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+    </div>
+</div>

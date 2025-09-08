@@ -1,0 +1,6 @@
+@use "/src/scss/abstracts" as *;
+
+.modal-body {
+    overflow-y: auto;
+    max-height: 50vh;
+}

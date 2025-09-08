@@ -1,0 +1,23 @@
+@if (!showLoadingSpinner) {
+    <div class="page-body">
+        <div class="grid-12">
+            <div [class.g-col-8]="displaySidebar" [class.g-col-12]="!displaySidebar">
+                <ng-content></ng-content>
+            </div>
+            @if (displaySidebar) {
+                <div class="g-col-4 sticky-help">
+                    @if (helpCustomRichTextTypeID) {
+                        <workflow-help [customRichTextTypeID]="helpCustomRichTextTypeID"></workflow-help>
+                    }
+                    @if (sidebarTemplateAppend) {
+                        <div class="mt-4">
+                            <ng-container *ngTemplateOutlet="sidebarTemplateAppend"></ng-container>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+} @else {
+    <div [loadingSpinner]="{ loadingHeight: 700, isLoading: showLoadingSpinner }"></div>
+}

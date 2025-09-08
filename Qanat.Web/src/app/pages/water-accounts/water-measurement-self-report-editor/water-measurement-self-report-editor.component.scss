@@ -1,0 +1,171 @@
+@use "/src/scss/abstracts" as *;
+water-measurement-self-report-editor {
+    //Base
+    .left-aligned {
+        text-align: left !important;
+    }
+
+    .center-aligned {
+        text-align: center !important;
+    }
+
+    .right-aligned {
+        text-align: right !important;
+    }
+
+    .status-container {
+        padding: $spacing-400;
+        width: fit-content;
+        border-radius: $border-radius-200;
+    }
+
+    .status-container.Draft {
+        background: rgba($gray-100, 0.5);
+        color: $gray-700;
+        border: 1px solid $gray-200;
+    }
+
+    .status-container.Submitted {
+        background: rgba($blue-50, 0.5);
+        color: $blue-700;
+        border: 1px solid $blue-200;
+    }
+
+    .status-container.Approved {
+        background: rgba($green-50, 0.5);
+        color: $green-dark;
+        border: 1px solid $green-200;
+    }
+
+    .status-container.Returned {
+        background: rgba($red-lighter, 0.5);
+        color: $red-dark;
+        border: 1px solid $red-light;
+    }
+
+    .save-validation-message {
+        padding: $spacing-400;
+        width: fit-content;
+        background-color: $red-light;
+        margin-top: $spacing-200;
+        margin-left: auto;
+        border-radius: 0.25rem;
+    }
+
+    .month-input-column {
+        width: 6rem;
+    }
+
+    .document-upload-container {
+    }
+
+    .save-button-container {
+        justify-items: end;
+    }
+
+    .submit-button-container {
+        justify-self: end;
+    }
+
+    //Overrides
+
+    .page-wrapper {
+        padding: $spacing-600;
+        .page-header {
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .extra-info {
+            margin-bottom: $spacing-300;
+            display: flex;
+            justify-items: flex-end;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+        .form {
+            gap: 1rem;
+        }
+    }
+
+    .field input[type="number"] {
+        text-align: right;
+    }
+
+    .field input[disabled] {
+        background-color: $gray-200;
+    }
+
+    .units-wrapper {
+        width: 100%;
+    }
+
+    //https://stackoverflow.com/questions/3790935/can-i-hide-the-html5-number-input-s-spin-box
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+    }
+
+    input[type="number"] {
+        -moz-appearance: textfield; /* Firefox */
+    }
+
+    .field select[disabled] {
+        background-color: $gray-200;
+    }
+
+    .table thead th {
+        text-align: center;
+    }
+
+    .table tbody tr {
+        transition: background-color 0.3s ease;
+    }
+
+    .table tbody tr:has(input:focus),
+    .table tbody tr:has(select:focus) {
+        background-color: $blue-100;
+    }
+
+    .table tbody td {
+        padding: 0.5rem 0.25rem;
+    }
+
+    tfoot tr {
+        border-top: 1px solid $gray-800;
+        td {
+            padding: $spacing-400 $spacing-200;
+            font-weight: bold;
+            font-size: $type-size-200;
+        }
+    }
+
+    .admin-banner {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        z-index: 9999;
+        background: linear-gradient(180deg, #2e2e2e 0%, #131313 100%);
+        width: 100%;
+        height: 5.5rem;
+        line-height: 5.5rem;
+        padding-right: 1rem;
+    }
+
+    .table-container {
+        overflow-x: auto;
+    }
+
+    th,
+    td {
+        white-space: nowrap;
+    }
+
+    .attachment-data {
+        overflow-wrap: break-word;
+    }
+
+    .attachment-actions {
+        margin-left: auto;
+    }
+}

@@ -1,0 +1,114 @@
+@if (wellMeter$ | async; as wellMeter) {
+    <div class="full-width-page">
+        <page-header
+            pageTitle="{{ pageHeaderVerb }} Meter Reading"
+            icon="Meter"
+            [customRichTextTypeID]="customRichTextTypeID"
+            [templateAbove]="templateAbove"
+            [templateRight]="templateRight">
+            <ng-template #templateAbove>
+                <div class="back">
+                    <a [routerLink]="['/wells', wellMeter.WellID]" class="back__link"> Back to Well </a>
+                </div>
+            </ng-template>
+            <ng-template #templateRight>
+                <div class="extra-info flex-end">
+                    @if (wellMeter.WaterAccountNumber) {
+                        <div class="field mr-4">
+                            <div class="field-label">Water Account</div>
+                            <div>#{{ wellMeter.WaterAccountNumber }}</div>
+                        </div>
+                    }
+                    <div class="field mr-4">
+                        <div class="field-label">Well</div>
+                        <div>
+                            #{{ wellMeter.WellID }}
+                            @if (wellMeter.WellName) {
+                                <span> {{ wellMeter.WellName }}</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">Meter</div>
+                        <div>{{ wellMeter.MeterSerialNumber }}</div>
+                    </div>
+                </div>
+            </ng-template>
+        </page-header>
+        <div class="page-body grid-12">
+            <app-alert-display></app-alert-display>
+            <div class="g-col-8">
+                @if (meterReading$ | async) {}
+                <form class="form grid-12" #allocationPlanForm="ngForm" [loadingSpinner]="{ isLoading: isLoading }">
+                    <div class="field g-col-6">
+                        <form-field [formControl]="formGroup.controls.ReadingDate" fieldLabel="Date" [type]="FormFieldType.Date"></form-field>
+                    </div>
+                    <div class="field g-col-6">
+                        <form-field [formControl]="formGroup.controls.ReadingTime" fieldLabel="Time" [type]="FormFieldType.Time"></form-field>
+                    </div>
+                    <div class="field g-col-6">
+                        <form-field [formControl]="formGroup.controls.ReaderInitials" fieldLabel="Reader Initials" placeholder="Reader Initials"></form-field>
+                    </div>
+                    <div class="field g-col-6">
+                        <form-field
+                            [formControl]="formGroup.controls.MeterReadingUnitTypeID"
+                            fieldLabel="Units"
+                            [formInputOptions]="unitSelectOptions"
+                            [type]="FormFieldType.Select"></form-field>
+                    </div>
+                    <div class="field g-col-6">
+                        <form-field [formControl]="formGroup.controls.PreviousReading" fieldLabel="Previous Reading" placeholder="Previous Reading"></form-field>
+                    </div>
+                    <div class="field g-col-6">
+                        <form-field
+                            [formControl]="formGroup.controls.CurrentReading"
+                            fieldLabel="Current Reading"
+                            placeholder="Current Reading"
+                            [type]="FormFieldType.Number"></form-field>
+                    </div>
+                    <div [loadingSpinner]="{ isLoading: isLoadingPreviousReading }" class="g-col-6">
+                        @if (previousMeterReading$ | async; as previousMeterReading) {
+                            @if (previousMeterReading) {
+                                <note noteType="info">
+                                    <div class="mb-2">
+                                        <b>Previous Reading:</b> {{ previousMeterReading.CurrentReading | number: "0.0-4" }}
+                                        {{ previousMeterReading.MeterReadingUnitType.MeterReadingUnitTypeDisplayName }}
+                                    </div>
+                                    <div><b>Previous Reading Date:</b> {{ previousMeterDateTime }}</div>
+                                </note>
+                            }
+                        } @else {
+                            <note noteType="info">No previous reading found.</note>
+                        }
+                    </div>
+                    @if (formGroup.controls.MeterReadingUnitTypeID.value && formGroup.controls.PreviousReading.value && formGroup.controls.CurrentReading.value) {
+                        <div class="g-col-6">
+                            <note noteType="info">
+                                <div [ngClass]="{ 'mb-2': showAcreFeetConversion }">
+                                    <b>Volume:</b> {{ volume ?? 0 | number: "0.0-4" }} {{ !showAcreFeetConversion ? "ac-ft" : "gallons" }}
+                                </div>
+                                @if (showAcreFeetConversion) {
+                                    <div><b>Volume in Acre Feet:</b> {{ volumeInAcreFeet ?? 0 | number: "0.0-4" }} ac-ft</div>
+                                }
+                            </note>
+                        </div>
+                    }
+                    <div class="field g-col-12">
+                        <form-field [formControl]="formGroup.controls.Comment" fieldLabel="Comment" [type]="FormFieldType.Textarea"></form-field>
+                    </div>
+                </form>
+            </div>
+            <div class="g-col-4">
+                <note noteType="info">
+                    <custom-rich-text [customRichTextTypeID]="formCustomRichTextTypeID"></custom-rich-text>
+                </note>
+            </div>
+            <div class="form-buttons flex-end">
+                <button class="btn btn-primary" (click)="save()" [buttonLoading]="isLoadingSubmit" [disabled]="isLoadingSubmit">Save</button>
+                <button class="btn btn-primary-outline" [routerLink]="['/wells', wellMeter.WellID]" [disabled]="isLoadingSubmit">Cancel</button>
+            </div>
+        </div>
+    </div>
+} @else {
+    <div [loadingSpinner]="{ isLoading: true }" style="margin-top: 10rem"></div>
+}

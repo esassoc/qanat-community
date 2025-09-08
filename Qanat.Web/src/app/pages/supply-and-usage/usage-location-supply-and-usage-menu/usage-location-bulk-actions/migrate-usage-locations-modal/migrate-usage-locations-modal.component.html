@@ -1,0 +1,22 @@
+<div class="modal-header">
+    <h2 class="modal-title"><icon icon="Parcels"></icon>Update Parcel</h2>
+</div>
+<div class="modal-body" [loadingSpinner]="{ isLoading: isLoading, loadingHeight: 200 }">
+    <form class="form grid-12" [formGroup]="migrateUsageLocationsForm">
+        <form-field
+            [formInputOptions]="parcelSelectDropdownOptions$ | async"
+            [formControl]="migrateUsageLocationsForm.controls.ParcelID"
+            fieldLabel="Parcel"
+            [type]="FormFieldType.Select">
+        </form-field>
+    </form>
+
+    <note noteType="info" class="g-col-12 mt-3">
+        Updating {{ ref.data.UsageLocationIDs?.length }} usage location{{ ref.data.UsageLocationIDs?.length === 1 ? "" : "s" }} for Reporting Period
+        {{ ref.data.ReportingPeriod?.Name }}.</note
+    >
+</div>
+<div class="modal-footer">
+    <button class="btn btn-primary" (click)="save()" [disabled]="!migrateUsageLocationsForm.valid">Save</button>
+    <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+</div>

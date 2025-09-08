@@ -1,0 +1,41 @@
+@use "../../../../scss/abstracts/" as *;
+
+.button-group {
+    padding: 0;
+    overflow: hidden;
+
+    &__item {
+        border: none;
+        border-radius: 0;
+    }
+}
+
+.geography-selector {
+    .field {
+        width: $spacing-950;
+    }
+}
+
+.tab-nav-panel.hidden {
+    display: none;
+}
+
+.tab-nav {
+    .btn-sm {
+        padding: 10px 15px 7px;
+        border-right: 1px solid $gray-200;
+
+        &:last-of-type {
+            border-right: none;
+        }
+    }
+
+    icon {
+        margin-right: 0.15rem;
+
+        ::ng-deep svg {
+            height: 12px;
+            width: 12px;
+        }
+    }
+}

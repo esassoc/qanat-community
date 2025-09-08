@@ -1,0 +1,40 @@
+@use "/src/scss/abstracts" as *;
+
+.dropdown-overflow {
+    overflow: hidden;
+}
+
+.border-top {
+    border-top: 1px solid rgba($black, 0.33);
+}
+
+.dropdown-list {
+    li + li {
+        border-top: 1px solid rgba($black, 0.1);
+    }
+}
+
+.button-left {
+    max-width: 80%;
+}
+
+.button-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.flex-grow {
+    flex-grow: 1;
+}
+
+.sidebar-link {
+    &__label {
+        margin-right: auto;
+    }
+}
+
+.sidebar-nav {
+    position: relative;
+    z-index: 0;
+}

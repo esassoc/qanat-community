@@ -1,0 +1,73 @@
+<page-header [templateAbove]="templateAbove" pageTitle="Confirm Parcels">
+    <ng-template #templateAbove>
+        <div class="back">
+            <a [routerLink]="['../../update']" class="back__link">Back to Update Parcels</a>
+        </div>
+    </ng-template>
+</page-header>
+
+@if (geography$ | async; as geography) {
+    <div class="page-body grid-12">
+        <app-alert-display></app-alert-display>
+        <div class="g-col-8">
+            @if (resultsPreview$ | async; as resultsPreview) {
+                <form class="form" [formGroup]="submitForPreviewForm">
+                    <div class="module-header mb-4">
+                        <h3 class="module-title underline">Parcel Upload Summary</h3>
+                    </div>
+                    <table class="parcel-confirm-table">
+                        <tbody>
+                            <tr>
+                                <td><strong>Number of Parcels in GDB</strong></td>
+                                <td>{{ resultsPreview.NumParcelsInGdb | number }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Number of Parcels Added and Set to Unassigned</strong></td>
+                                <td>{{ resultsPreview.NumParcelsAdded | number }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Number of Parcels To Be Inactivated</strong></td>
+                                <td>{{ resultsPreview.NumParcelsToBeInactivated | number }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Number of Parcels Unchanged</strong></td>
+                                <td>{{ resultsPreview.NumParcelsUnchanged | number }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Number of Parcels To Be Updated</strong></td>
+                                <td>{{ resultsPreview.NumParcelsToBeUpdated | number }}</td>
+                            </tr>
+                            <tr>
+                                <td class="pl-4"><strong>Number of Parcels With Updated Geometries</strong></td>
+                                <td>{{ resultsPreview.NumParcelsWithUpdatedGeometries | number }}</td>
+                            </tr>
+                            <tr>
+                                <td class="pl-4">
+                                    <strong>Number of Parcels With Updated Owner Name or Address</strong>
+                                </td>
+                                <td>{{ resultsPreview.NumParcelsWithOwnerOrAddressChange | number }}</td>
+                            </tr>
+                            <tr>
+                                <td class="pl-4">
+                                    <strong>Number of Parcels With Updated Acres</strong>
+                                </td>
+                                <td>{{ resultsPreview.NumParcelsWithAcresChange | number }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+            }
+        </div>
+        <div class="sidebar-help g-col-4">
+            <custom-rich-text [customRichTextTypeID]="customRichTextType"></custom-rich-text>
+        </div>
+    </div>
+    <div class="page-footer">
+        <fresca-button (onClick)="launchModal(geography)" [disabled]="!expectedResultsRetrievedSuccessfully || isLoadingSubmit">
+            @if (isLoadingSubmit) {
+                <span class="fa fa-spinner loading-spinner"></span>
+            }
+            Finalize Changes
+        </fresca-button>
+    </div>
+}

@@ -1,0 +1,16 @@
+<div class="popover">
+    @if (title) {
+        <h3 class="popover-header">
+            @if (titleAsTemplate) {
+                <ng-template [ngTemplateOutlet]="titleAsTemplate"></ng-template>
+            } @else {
+                <ng-container>{{ title }}</ng-container>
+            }
+        </h3>
+    }
+    <div class="popover-body">
+        <ng-content></ng-content>
+        <ng-template [ngTemplateOutlet]="context"></ng-template>
+    </div>
+</div>
+<div class="popover-arrow" data-popper-arrow></div>

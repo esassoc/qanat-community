@@ -1,0 +1,31 @@
+@use "/src/scss/abstracts" as *;
+.kv-pair {
+    display: flex;
+    flex-wrap: wrap;
+    font-size: $type-size-200;
+    line-height: 1.375em;
+    padding: 1rem 0 0 0;
+    margin: 0;
+
+    .key {
+        flex-basis: 50%;
+        padding-bottom: 1rem;
+        font-weight: bold;
+    }
+
+    .value {
+        flex-basis: 50%;
+        padding-bottom: 1rem;
+        margin-bottom: 0;
+
+        & + .key {
+            border-top: 1px solid rgba(black, 0.05);
+            padding-top: 1.125rem;
+
+            & + .value {
+                border-top: 1px solid rgba(black, 0.05);
+                padding-top: 1.125rem;
+            }
+        }
+    }
+}

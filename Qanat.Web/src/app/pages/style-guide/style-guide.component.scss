@@ -1,0 +1,246 @@
+@use "/src/scss/abstracts" as *;
+
+// GUIDE STYLING
+$apple-green: #90e39a;
+$key-lime: #ddf093;
+$desert-sand: #f6d0b1;
+
+.style-guide {
+    padding: 2rem;
+
+    @include desktop-small {
+        padding: 4rem;
+    }
+
+    .page-header {
+        margin-bottom: 1rem;
+    }
+}
+
+.section-nav {
+    gap: 1rem;
+    padding-bottom: 6rem;
+
+    a {
+        font-size: $type-size-150;
+        line-height: 1em;
+        color: $primary;
+        border: 2px solid $primary;
+        font-weight: 600;
+        display: block;
+        padding: 0.75rem 1rem 0.5rem;
+        border-radius: 2rem;
+
+        &:hover {
+            background: $primary;
+            color: $white;
+        }
+    }
+}
+
+.style-section {
+    & + .style-section {
+        margin-top: 6rem;
+    }
+
+    .section-header {
+        margin-bottom: 2rem;
+    }
+}
+
+.style-grid {
+    border-top: 1px solid rgba($black, 0.1);
+    border-left: 1px solid rgba($black, 0.1);
+}
+
+.typography-grid {
+    border-bottom: 1px solid rgba($black, 0.1);
+    border-right: 1px solid rgba($black, 0.1);
+
+    .component {
+        width: 100%;
+    }
+
+    .component__wrapper {
+        @include tablet {
+            width: 100%;
+            display: grid;
+            gap: 0 2rem;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+
+            .component__title {
+                grid-column: 1 / span 2;
+            }
+        }
+    }
+
+    pre {
+        @include tablet {
+            margin: 0;
+        }
+    }
+
+    .component {
+        & + .component {
+            border-top: 1px solid rgba($black, 0.1);
+        }
+    }
+}
+
+.color-grid {
+    .component {
+        justify-content: center;
+    }
+}
+
+.color-grid,
+.btn-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    grid-template-rows: minmax(16rem, 1fr);
+    border-top: 1px solid rgba($black, 0.1);
+    border-left: 1px solid rgba($black, 0.1);
+
+    .component {
+        border-bottom: 1px solid rgba($black, 0.1);
+        border-right: 1px solid rgba($black, 0.1);
+
+        &.span-2 {
+            grid-column: span 2;
+        }
+    }
+
+    pre {
+        margin-top: 2rem;
+    }
+
+    code {
+        font-size: $type-size-100;
+    }
+}
+
+.grid-grid {
+    border-bottom: 1px solid rgba($black, 0.1);
+    border-right: 1px solid rgba($black, 0.1);
+
+    .component,
+    .component__wrapper {
+        width: 100%;
+    }
+
+    .component {
+        & + .component {
+            border-top: 1px solid rgba($black, 0.1);
+        }
+    }
+
+    .grid-8,
+    .grid-9,
+    .grid-12 {
+        [class*="g-col-"] {
+            height: 8rem;
+
+            &:nth-child(5n + 1) {
+                background: $primary;
+            }
+
+            &:nth-child(5n + 2) {
+                background: $secondary;
+            }
+
+            &:nth-child(5n + 3) {
+                background: $apple-green;
+            }
+
+            &:nth-child(5n + 4) {
+                background: $key-lime;
+            }
+
+            &:nth-child(5n + 5) {
+                background: $desert-sand;
+            }
+        }
+    }
+}
+
+.grid-example {
+    [class*="g-col-"] {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        pre {
+            width: unset;
+            background: rgba($white, 0.8);
+        }
+    }
+}
+
+.forms-grid {
+    border-bottom: 1px solid rgba($black, 0.1);
+    border-right: 1px solid rgba($black, 0.1);
+
+    .component__wrapper {
+        display: grid;
+        gap: 2rem;
+
+        @include tablet {
+            grid-template-columns: repeat(2, 1fr);
+
+            .code,
+            .example {
+                width: 100%;
+            }
+        }
+    }
+}
+
+.component {
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+
+    &__title {
+        font-size: $type-size-050;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-weight: normal;
+        padding-bottom: 1rem;
+        opacity: 0.45;
+    }
+
+    pre {
+        padding: 0.5rem 1rem;
+        width: 100%;
+    }
+}
+
+.swatch {
+    span {
+        display: block;
+        width: 10rem;
+        height: 10rem;
+        border-radius: 50%;
+    }
+}
+
+// PRISM STYLING
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+    background: $gray-lighter;
+    border: 1px solid rgba($black, 0.1);
+}
+
+.inline {
+    display: inline-block;
+}
+
+.guidance {
+    border: 2px solid $desert-sand;
+    padding: 2rem;
+    margin: 2rem 0 0 0;
+
+    &.inset {
+        margin: 0 2rem 2rem 2rem;
+    }
+}

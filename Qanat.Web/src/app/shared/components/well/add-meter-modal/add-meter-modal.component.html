@@ -1,0 +1,45 @@
+<div class="modal-header">
+    <h3>
+        <icon icon="ActivityCenter"></icon>
+        Add Meter
+    </h3>
+    <button type="button" class="close" (click)="close()">
+        <i class="fa fa-times-circle"></i>
+    </button>
+</div>
+
+<div class="modal-body">
+    <app-alert-display></app-alert-display>
+    <form action="" class="form" [formGroup]="formGroup">
+        <div class="mb-3">
+            <form-field
+                [formControl]="formGroup.controls.SerialNumber"
+                fieldLabel="Serial Number"
+                [type]="FormFieldType.Text"
+                required
+                [fieldDefinitionName]="'SerialNumber'"></form-field>
+        </div>
+        <div class="mb-3">
+            <form-field
+                [formControl]="formGroup.controls.MeterStatusID"
+                fieldLabel="Status"
+                [type]="FormFieldType.Select"
+                [formInputOptions]="MeterStatusSelectDropdownOptions"
+                required></form-field>
+        </div>
+        <div class="mb-3">
+            <form-field [formControl]="formGroup.controls.DeviceName" fieldLabel="Device Name" [type]="FormFieldType.Text"></form-field>
+        </div>
+        <div class="mb-3">
+            <form-field [formControl]="formGroup.controls.Make" fieldLabel="Make" [type]="FormFieldType.Text"></form-field>
+        </div>
+        <div class="mb-3">
+            <form-field [formControl]="formGroup.controls.ModelNumber" fieldLabel="Model Number" [type]="FormFieldType.Text"></form-field>
+        </div>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-primary" (click)="save()" [disabled]="!formGroup.valid || isLoadingSubmit">Add Meter</button>
+    <button class="btn btn-primary-outline" (click)="close()">Cancel</button>
+</div>

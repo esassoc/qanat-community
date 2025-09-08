@@ -1,0 +1,37 @@
+@if (allocationPlan$ | async; as allocationPlan) {
+    <div>
+        <div class="flex-between ai-fs mb-3">
+            <div>
+                <h2 class="section-title">{{ allocationPlan.WaterType.WaterTypeName }} / {{ allocationPlan.Zone.ZoneName }}</h2>
+                @if (editing) {
+                    <small>
+                        <em>
+                            <strong>Last Updated:</strong>
+                            {{ allocationPlan.LastUpdated | timeAgo }} ({{ allocationPlan.LastUpdated | date: "short" }})
+                        </em>
+                    </small>
+                }
+            </div>
+            @if (allocationPlans$ | async; as allocationPlans) {
+                <div>
+                    @if (editing && canCopyFromExisting) {
+                        <button type="button" class="btn btn-primary-outline" (click)="copyFromExistingPeriod()">
+                            <i class="fa fa-copy"></i>
+                            Copy From Existing
+                        </button>
+                    }
+                </div>
+            }
+        </div>
+        @if (allocationPlan?.AllocationPlanPeriods.length > 0) {
+            <allocation-plan-table [allocationPlan]="allocationPlan" [readonly]="!editing" class="mb-3"></allocation-plan-table>
+        } @else {
+            <div class="no-allocation-plan-periods mb-3">
+                <p><em>No Allocation Plan set for this zone</em></p>
+            </div>
+        }
+        @if (editing) {
+            <button type="button" class="btn btn-secondary" (click)="addAllocationPeriod()">+ Add Allocation Period</button>
+        }
+    </div>
+}

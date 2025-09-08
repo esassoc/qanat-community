@@ -1,0 +1,84 @@
+<div class="dashboard scenario-planner-dashboard">
+    @if (models$ | async; as models) {
+        <aside class="sidebar sidebar-scenarios">
+            <div class="sidebar-header">
+                <icon icon="ScenarioPlanner"></icon>
+            </div>
+            <div class="sidebar-body sticky-nav">
+                <div class="sidebar-body__wrapper">
+                    <h3 class="sidebar-body__title">
+                        <icon icon="ScenarioPlanner"></icon>
+                        Scenario Planner
+                    </h3>
+                </div>
+            </div>
+            <ul class="sidebar-nav entities-nav">
+                <li class="sidebar-item">
+                    <a title="Models" [routerLink]="['/scenario-planner/models']" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="sidebar-link">
+                        <icon icon="Model"></icon>
+                        <span class="sidebar-link__label">Models</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a title="Scenario Runs" [routerLink]="['/scenario-planner/runs']" routerLinkActive="active" class="sidebar-link">
+                        <icon icon="ScenarioRun"></icon>
+                        <span class="sidebar-link__label">Scenario Runs</span>
+                    </a>
+                </li>
+            </ul>
+            @if (currentModel$ | async; as currentModel) {
+                <h5 class="sidebar-title model-nav-header has-icon">
+                    <icon icon="Model"></icon>
+                    {{ currentModel.ModelName }}
+                </h5>
+                <ul class="sidebar-nav model-nav">
+                    <li>
+                        <a
+                            [title]="currentModel.ModelName + ' Overview'"
+                            [routerLink]="['/scenario-planner/models', currentModel.ModelShortName]"
+                            routerLinkActive="active"
+                            [routerLinkActiveOptions]="{ exact: true }"
+                            class="sidebar-link">
+                            <icon icon="Model"></icon>
+                            <span class="sidebar-link__label">Model Overview</span>
+                        </a>
+                    </li>
+                    @if (scenarioRun$ | async; as scenarioRun) {
+                        <li>
+                            <a
+                                [title]="scenarioRun.RunName"
+                                [routerLink]="['/scenario-planner/models', scenarioRun.Model.ModelShortName, scenarioRun.Scenario.ScenarioShortName, scenarioRun.ScenarioRunID]"
+                                routerLinkActive="active"
+                                [routerLinkActiveOptions]="{ exact: true }"
+                                class="sidebar-link">
+                                <icon icon="ScenarioRun"></icon>
+                                <span class="sidebar-link__label">{{ scenarioRun.RunName }}</span>
+                            </a>
+                        </li>
+                    }
+                    @for (scenario of scenarios; track scenario) {
+                        <li class="sidebar-item">
+                            <a
+                                [title]="scenario.DisplayName"
+                                [routerLink]="['/scenario-planner/models', currentModel.ModelShortName, scenario.Name.toLowerCase().replaceAll(' ', '-'), 'new']"
+                                routerLinkActive="active"
+                                class="sidebar-link">
+                                <icon [icon]="scenario.Value == ScenarioEnum.AddaWell ? 'Wells' : 'WaterDropFilled'"></icon>
+                                <span class="sidebar-link__label">{{ scenario.DisplayName }}</span>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            }
+        </aside>
+    }
+
+    <main class="main">
+        <router-outlet #manageOutlet="outlet"></router-outlet>
+    </main>
+
+    <ng-template #isLoadingTemplate>
+        <aside class="sidebar" [loadingSpinner]="{ isLoading: true }"></aside>
+        <main class="main" [loadingSpinner]="{ isLoading: true }"></main>
+    </ng-template>
+</div>
