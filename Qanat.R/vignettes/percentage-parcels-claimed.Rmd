@@ -1,0 +1,78 @@
+---
+title: "Percentage Parcels Claimed"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Percentage Parcels Claimed}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(Qanat.R)
+library(dplyr)
+```
+
+## Task
+
+Calculate the percentage of parcels with claimed water accounts across all geographies, using `WaterAccountPINLastUsed` as an indicator for claimed accounts.
+
+### Get all geographies
+
+```{r}
+all_geographies_data = geographies()
+
+glimpse(all_geographies_data)
+```
+
+### Iterate through geographies
+
+For each geography, retrieve all water accounts and all parcels.
+
+```{r}
+all_geography_water_accounts = lapply(all_geographies_data$GeographyID, function(geo_id){
+  water_accounts(geo_id)
+}) |> 
+  bind_rows()
+
+all_geography_parcels = lapply(all_geographies_data$GeographyID, function(geo_id){
+  parcels(geo_id)
+}) |> 
+  bind_rows()
+```
+
+### Add water account information to parcel data
+
+```{r}
+all_geography_parcels = all_geography_parcels |> 
+  left_join(select(all_geography_water_accounts, WaterAccountID, WaterAccountPINLastUsed))
+
+glimpse(all_geography_parcels)
+```
+
+### Calculate percentage
+
+For each geography, calculate the percentage of parcels linked to claimed accounts out of the total parcels in that geography.
+
+```{r}
+parcels_percentage = all_geography_parcels |> 
+  group_by(GeographyID) |> 
+  summarise(Percentage = sum(!is.na(WaterAccountPINLastUsed))/n() *100)
+
+parcels_percentage
+```
+
+### Calculate overall percentage
+
+Calculate the overall percentage of parcels linked to claimed accounts across all geographies. The Demo geography only includes one geography so this calculation returns the same result as the previous one.
+
+```{r}
+all_geography_parcels |> 
+  summarise(Percentage = sum(!is.na(WaterAccountPINLastUsed))/n() *100)
+```
