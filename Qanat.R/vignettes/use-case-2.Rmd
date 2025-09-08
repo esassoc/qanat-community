@@ -23,8 +23,6 @@ library(ggplot2)
 library(plotly)
 ```
 
-Note, this vignette loosely follows the [example provided for Python](https://github.com/esassoc/qanat-community/blob/develop/Qanat.CommunityAPI/Examples/Use-Case-2-Histogram.ipynb).
-
 ## Task
 
 Create a bar plot of month by monthly OpenET Evapotranspiration measurements in the Demo geography for the year 2024 using the geographies data and the water measurements API.
@@ -61,7 +59,7 @@ water_measurements_df = water_measurements(geography_id = 5, water_measurement_t
 
 ### Process water measurements
 
-Sum `ReportedValueInAcreFeet` for each motnh and parcel.
+Sum `ReportedValueInAcreFeet` for each month and parcel.
 
 ```{r}
 wm_month_parcel = water_measurements_df |> 
