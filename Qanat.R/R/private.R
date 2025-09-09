@@ -2,7 +2,7 @@
 
 # Private Functions -------------------------------------------------------
 
-api_url <- function(use_qa = TRUE){
+api_url <- function(use_qa = FALSE){
   # returns base url
   qa = if (use_qa) "-qa" else ""
   glue::glue("https://api{qa}.groundwateraccounting.org")
