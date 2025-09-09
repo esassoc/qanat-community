@@ -1,0 +1,97 @@
+---
+title: "Use Case 2"
+output: html_document
+---
+
+```{r setup, message=FALSE}
+library(Qanat.R)
+library(dplyr)
+library(lubridate)
+library(ggplot2)
+library(plotly)
+```
+
+## Task
+
+Create a bar plot of month by monthly OpenET Evapotranspiration measurements in the Demo geography for the year 2024 using the geographies data and the water measurements API.
+
+### Identify demo geography ID
+
+Find the `GeographyID` for the "Demo" geographies data.
+
+```{r}
+geographies() |> 
+  filter(GeographyName == "Demo") |> 
+  pull(GeographyID)
+```
+
+### Identify OpenET Evapotranspiration measurement type ID
+
+Find the `WaterMeasurementTypeID` for "OpenET Evapotranspiration" from the available water measurement types for the Demo geography.
+
+```{r}
+water_measurement_types(geography_id = 5) |> 
+  filter(WaterMeasurementTypeName == "OpenET Evapotranspiration") |> 
+  pull(WaterMeasurementTypeID)
+```
+
+### Fetch water measurements
+
+Fetch the water measurements for the Demo geography, year 2024, and the OpenET Evapotranspiration measurement type. Convert `ReportingDate` from a character to a datetime object and extract the month.
+
+```{r}
+water_measurements_df = water_measurements(geography_id = 5, water_measurement_type_id = 5, year = 2024) |> 
+  mutate(ReportingDate = ymd_hms(ReportingDate),
+         Month = month(ReportingDate))
+```
+
+### Process water measurements
+
+Sum `ReportedValueInAcreFeet` for each month and parcel.
+
+```{r}
+wm_month_parcel = water_measurements_df |> 
+  group_by(Month, ParcelID) |> 
+  summarise(ReportedValueInAcreFeet = sum(ReportedValueInAcreFeet, na.rm = TRUE))
+```
+
+Sum `ReportedValueInAcreFeet` across parcels for each month.
+
+```{r}
+wm_month = wm_month_parcel |> 
+  group_by(Month) |> 
+  summarise(ReportedValueInAcreFeet = sum(ReportedValueInAcreFeet, na.rm = TRUE))
+```
+
+### Create bar plot
+
+Generate a bar plot based on the `wm_month` data frame.
+
+```{r}
+ggplot(wm_month, aes(x = Month, y = ReportedValueInAcreFeet, fill = ReportedValueInAcreFeet)) +
+  geom_col(show.legend = FALSE) +
+  labs(y = "Total Reported Value (acre-feet)",
+       title = "Total Monthly OpenET Evapotranspiration Measurements (2024)") +
+  scale_x_continuous(breaks = 1:12, labels = month.abb) +
+  theme_minimal()
+```
+
+### Create interactive bar plot
+
+Generate an interactive bar plot based on the `wm_month` data frame.
+
+```{r}
+wm_month = wm_month |> 
+  mutate(Tooltip = paste0("Month: ", month.abb[Month], "<br>",
+                          "Total: ", round(ReportedValueInAcreFeet), " acre-feet"))
+
+p = ggplot(wm_month, aes(x = Month, y = ReportedValueInAcreFeet, 
+                         fill = ReportedValueInAcreFeet, text = Tooltip)) +
+  geom_col(show.legend = FALSE) +
+  labs(y = "Total Reported Value (acre-feet)",
+       title = "Total Monthly OpenET Evapotranspiration Measurements (2024)") +
+  scale_x_continuous(breaks = 1:12, labels = month.abb) +
+  theme_minimal()
+
+ggplotly(p, tooltip = "text")
+```
