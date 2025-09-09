@@ -4,19 +4,19 @@ R Interface to the REST API for the Groundwater Accounting Platform (codename "Q
 
 ### Requirements
 
-The `Qanat.R` package requires R version 4.1 or newer. The package is only available on GitHub, but can be installed with the [`remotes` package](https://remotes.r-lib.org/). The [`sf` package](https://r-spatial.github.io/sf/) is suggested if you are working with the spatial data provided by the API. 
+The `Qanat.R` package requires R version 4.1 or newer. The package is only available on GitHub, but can be installed with the [`remotes` package](https://remotes.r-lib.org/). The [`sf` package](https://r-spatial.github.io/sf/) is suggested if you are working with the spatial data provided by the API.
 
 ### Installation
 
 ```
-remotes::install_github("esassoc/qanat-community@develop", subdir = "Qanat.R")
+remotes::install_github("esassoc/qanat-community@develop", subdir = "Qanat.CommunityAPI/Examples/Qanat.R")
 ```
 
 ### Authentication
 
-If you haven't already, create an API key via the [Groundwater Accounting Platform](https://www.groundwateraccounting.org/getting-started-with-the-api). After loading the package with `libarary(Qanat.R)`, run `set_user_key()` to open a dialog box where you can paste the key that you copied from the Groundwater Accounting Platform. After setting your key, you can confirm that it worked by running `get_user_key()`. 
+If you haven't already, create an API key via the [Groundwater Accounting Platform](https://www.groundwateraccounting.org/getting-started-with-the-api). After loading the package with `libarary(Qanat.R)`, run `set_user_key()` to open a dialog box where you can paste the key that you copied from the Groundwater Accounting Platform. After setting your key, you can confirm that it worked by running `get_user_key()`.
 
-To avoid setting the key every time, add `X-QANAT-KEY=put_your_unique_key_here` to the .Renviron file. If you are new to editing the .Renviron file, see [`usethis::edit_r_environ()`](https://usethis.r-lib.org/reference/edit.html). 
+To avoid setting the key every time, add `X-QANAT-KEY=put_your_unique_key_here` to the .Renviron file. If you are new to editing the .Renviron file, see [`usethis::edit_r_environ()`](https://usethis.r-lib.org/reference/edit.html).
 
 ### Demo geography
 
@@ -88,7 +88,7 @@ Error in `httr2::req_perform()` at Qanat.R/R/private.R:13:3:
 
 ### Examples
 
-The `Qanat.R` package includes examples as R Markdown files to demonstrate how to use the package. The examples require the following packages: dplyr, lubridate, sf, mapview, ggplot2, plotly, reactable. The examples can be found on [GitHub](https://github.com/esassoc/qanat-community/tree/develop/Qanat.R/inst/examples), but are also available locally after installing the package. Run the following code in the R console to find where the examples are stored locally.
+The `Qanat.R` package includes examples as R Markdown files to demonstrate how to use the package. The examples require the following packages: dplyr, lubridate, sf, mapview, ggplot2, plotly, reactable. The examples can be found on [GitHub](https://github.com/esassoc/qanat-community/tree/develop/Qanat.CommunityAPI/Examples/Qanat.R/inst/examples), but are also available locally after installing the package. Run the following code in the R console to find where the examples are stored locally.
 
 ```
 system.file("examples", package = "Qanat.R")
