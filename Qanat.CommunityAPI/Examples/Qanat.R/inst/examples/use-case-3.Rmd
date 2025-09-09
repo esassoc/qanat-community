@@ -1,0 +1,159 @@
+---
+title: "Use Case 3"
+output: html_document
+---
+
+```{r setup, message=FALSE}
+library(Qanat.R)
+library(dplyr)
+library(reactable)
+```
+
+## Task
+
+Detect outlier water accounts in the Demo geography based on 2024 groundwater usage and display a table with Water Account Name, Owner, Parcel Acreage, Groundwater Usage, and Percent Deviation from the average groundwater usage for the year for the outlier accounts.
+
+### Identify consumed groundwater measurement type
+
+Find the `WaterMeasurementTypeID` for "Consumed Groundwater" from the available water measurement types for the Demo geography.
+
+```{r}
+water_measurement_types(geography_id = 5) |> 
+  filter(WaterMeasurementTypeName == "Consumed Groundwater") |> 
+  pull(WaterMeasurementTypeID)
+```
+### Fetch water measurements
+
+Fetch the water measurements for the Demo geography, year 2024, and the Consumed Groundwater measurement type. 
+
+```{r}
+water_measurements_df = water_measurements(geography_id = 5, water_measurement_type_id = 19, year = 2024)
+
+glimpse(water_measurements_df)
+```
+
+### Fetch usage locations
+
+Retrieve all usage locations for the year 2024 in the Demo geography.
+
+```{r}
+water_usage_df = usage_locations(geography_id = 5, year = 2024)
+
+glimpse(water_usage_df)
+```
+
+### Fetch parcels
+
+Retrieve all parcels for the Demo geography.
+
+```{r}
+parcels_df = parcels(geography_id = 5)
+
+glimpse(parcels_df)
+```
+### Fetch water accounts
+
+Retrieve all water accounts for the Demo geography.
+
+```{r}
+water_accounts_df = water_accounts(geography_id = 5)
+
+glimpse(water_accounts_df)
+```
+### Combine data
+
+Merge the fetched data frames to create a comprehensive data frame containing water measurement details, usage location information, parcel data (including acreage), and water account details.
+
+```{r}
+water_accounts_selected = select(water_accounts_df, WaterAccountID, WaterAccountNumber, 
+                                 WaterAccountName, WaterAccountContactName, ContactEmail, 
+                                 ContactPhoneNumber, FullAddress, GeographyID)
+
+combined_df = water_measurements_df |> 
+  select(UsageLocationID, WaterMeasurementTypeID, TotalGroundwaterUsage = ReportedValueInAcreFeet) |> 
+  left_join(select(water_usage_df, UsageLocationID, ParcelID, Name, Area, UsageLocationType, WaterAccountID)) |> 
+  left_join(select(parcels_df, ParcelID, ParcelNumber, ParcelArea, OwnerName)) |> 
+  left_join(water_accounts_selected)
+ 
+glimpse(combined_df)
+```
+
+### Calculate total groundwater usage per usage location
+
+Calculate the sum of `TotalGroundwaterUsage` for each usage location.
+
+```{r}
+location_groundwater_usage_df = combined_df |> 
+  group_by(UsageLocationID) |> 
+  summarise(TotalGroundwaterUsage = sum(TotalGroundwaterUsage, na.rm = TRUE))
+
+glimpse(location_groundwater_usage_df)
+```
+
+### Calculate the average groundwater usage
+
+Calculate the average total groundwater usage across all water accounts.
+
+```{r}
+water_account_groundwater_usage_df = combined_df |> 
+  group_by(WaterAccountID) |> 
+  summarise(TotalGroundwaterUsage = sum(TotalGroundwaterUsage, na.rm = TRUE)) 
+
+avg_gw_usage_all_accounts = mean(water_account_groundwater_usage_df$TotalGroundwaterUsage) 
+```
+
+### Calculate percentage deviation from average
+
+Calculate the percentage deviation from the average groundwater usage for each water account.
+
+```{r}
+water_account_groundwater_usage_df = water_account_groundwater_usage_df |> 
+  mutate(PercentDeviationFromAverage = (TotalGroundwaterUsage - avg_gw_usage_all_accounts)/avg_gw_usage_all_accounts * 100)
+
+glimpse(water_account_groundwater_usage_df)
+```
+
+### Identify outliers
+
+Define outliers as water accounts with a percentage deviation from the average greater than 50%.
+
+```{r}
+outliers_df = water_account_groundwater_usage_df |> 
+  filter(!is.na(WaterAccountID) & abs(PercentDeviationFromAverage) > 50)
+
+glimpse(outliers_df)
+```
+
+
+### Summarize outlier water usage by water account
+
+Add total area for all outlier usage locations belonging to each water account. Also, link this back to the Water Account name and owner.
+
+```{r}
+water_account_area_df = combined_df |> 
+  group_by(WaterAccountID) |> 
+  summarise(Area = sum(Area, na.rm = TRUE))
+
+outlier_summary_table = outliers_df |> 
+  left_join(water_accounts_selected) |> 
+  left_join(water_account_area_df) |> 
+  mutate(`Average Groundwater Usage` = avg_gw_usage_all_accounts) |> 
+  select(`Water Account Name` = WaterAccountName,
+         Owner = WaterAccountContactName,
+         `Parcel Acreage` = Area,
+         `Groundwater Usage` = TotalGroundwaterUsage,
+         `Average Groundwater Usage`,
+         `Percent Deviation from Average` = PercentDeviationFromAverage)
+
+glimpse(outlier_summary_table)
+```
+
+### Present outlier water account table
+
+Display outlier table showing the `Water Account Name`, `Owner`, total `Parcel Acreage`, total `Groundwater Usage`, and the calculated `Percentage Deviation from Average` at the Water Account level.
+
+```{r}
+outlier_summary_table |> 
+  mutate(across(.cols = where(is.numeric), .fns = ~ round(.x, 2))) |> 
+  reactable()
+```

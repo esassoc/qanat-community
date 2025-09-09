@@ -399,8 +399,8 @@
         "tags": [
           "Usage Locations"
         ],
-        "summary": "List by Geography and Reporting Period",
-        "description": "List all usage locations for a specified geography and reporting period",
+        "summary": "List by Geography and Year",
+        "description": "List all usage locations for a specified geography and year",
         "parameters": [
           {
             "name": "geographyID",
@@ -468,8 +468,8 @@
         "tags": [
           "Usage Locations"
         ],
-        "summary": "List by Geography (GeoJSON)",
-        "description": "List all usage locations as a feature collection (GeoJSON) for a specified geography and reporting period",
+        "summary": "List by Geography and Year (GeoJSON)",
+        "description": "List all usage locations as a feature collection (GeoJSON) for a specified geography and year",
         "parameters": [
           {
             "name": "geographyID",

@@ -1,0 +1,73 @@
+---
+title: "Feature Collections"
+output: html_document
+---
+
+```{r setup, message=FALSE}
+library(Qanat.R)
+library(dplyr)
+library(lubridate)
+library(sf)
+library(mapview)
+```
+
+## Fetch feature collections
+
+The `Qanat.R` package provides access to three spatial datasets. These datasets are provided through the API as GeoJSON objects, but, by default, are converted to sf objects in R. The wells feature collection in the Demo geography has mismatching coordinates and reference system so requires extra processing.
+
+```{r}
+parcels_sf = parcels_features(geography_id = 5)
+
+usage_locations_sf = usage_locations_features(geography_id = 5, year = 2024)
+
+wells_sf = wells_features(geography_id = 5) |> 
+  st_drop_geometry() |> 
+  st_as_sf(coords = c("Longitude", "Latitude"), crs = 4326)
+```
+
+## Individual map views
+
+```{r}
+mapview(parcels_sf)
+mapview(usage_locations_sf)
+mapview(wells_sf)
+```
+
+## Map data subsets
+
+```{r}
+mapview(filter(parcels_sf, WaterAccountName == "Green Meadows Farm"),
+        layer.name = "Green Meadows Farm")
+mapview(filter(usage_locations_sf, grepl("Zone 3", ParcelZones)),
+        layer.name = "Zone 3")
+```
+
+## Multiple layers
+
+```{r}
+mapview(list(filter(usage_locations_sf, grepl("Zone 3", ParcelZones)),
+             wells_sf),
+        layer.name = c("Zone 3", "Wells"),
+        col.regions = c("blue", "yellow"))
+```
+
+## Color map by parcel zone
+
+```{r}
+mapview(usage_locations_sf, zcol = "ParcelZones")
+```
+
+## Chloropleth map
+
+```{r}
+water_measurements_df = water_measurements(geography_id = 5, water_measurement_type_id = 5, year = 2024) |> 
+  mutate(ReportingDate = ymd_hms(ReportingDate),
+         Month = month(ReportingDate)) |> 
+  filter(Month == 7) |> 
+  group_by(ParcelID) |> 
+  summarise(TotalReportedValue = sum(ReportedValueInAcreFeet, na.rm = TRUE))
+
+parcels_sf = left_join(parcels_sf, water_measurements_df)
+
+mapview(parcels_sf, zcol = "TotalReportedValue")
+```
