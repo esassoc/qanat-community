@@ -9,7 +9,7 @@ The `Qanat.R` package requires R version 4.1 or newer. The package is only avail
 ### Installation
 
 ```
-remotes::install_github("thinkelman-ESA/qanat-community@r-package", subdir = "Qanat.R")
+remotes::install_github("esassoc/qanat-community@develop", subdir = "Qanat.R")
 ```
 
 ### Authentication
@@ -88,7 +88,7 @@ Error in `httr2::req_perform()` at Qanat.R/R/private.R:13:3:
 
 ### Examples
 
-The `Qanat.R` package includes examples as R Markdown files to demonstrate how to use the package. The examples require the following packages: dplyr, lubridate, sf, mapview, ggplot2, plotly, reactable. The examples can be found on [GitHub](https://github.com/thinkelman-ESA/qanat-community/tree/r-package/Qanat.R/inst/examples), but are also available locally after installing the package. Run the following code in the R console to find where the examples are stored locally.
+The `Qanat.R` package includes examples as R Markdown files to demonstrate how to use the package. The examples require the following packages: dplyr, lubridate, sf, mapview, ggplot2, plotly, reactable. The examples can be found on [GitHub](https://github.com/esassoc/qanat-community/tree/develop/Qanat.R/inst/examples), but are also available locally after installing the package. Run the following code in the R console to find where the examples are stored locally.
 
 ```
 system.file("examples", package = "Qanat.R")
