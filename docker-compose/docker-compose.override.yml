@@ -84,7 +84,7 @@ services:
     ports:
       - 127.0.0.1:7615:8080
     volumes:
-      - c:/git/sitkatech/qanat/Qanat.GeoServer/data_dir:/opt/geoserver/data_dir
+      - c:/git/esassoc/qanat/Qanat.GeoServer/data_dir:/opt/geoserver/data_dir
       - c:/sitka/Qanat/GeoServer/geoserver-environment.properties:/opt/geoserver/geoserver-environment.properties
 
   sitkacapture:
