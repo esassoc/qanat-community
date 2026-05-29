@@ -1,3 +1,34 @@
+# Groundwater Accounting Platform
+
+The Groundwater Accounting Platform is open-source software that helps groundwater managers and users track policies, usage, meters, allocations, and parcel/field land management. It supports California's Sustainable Groundwater Management Act (SGMA) and similar groundwater regulations in other states. The Platform is licensed under the GNU Affero General Public License v3 (AGPL) and is jointly developed by California Water Data Consortium, Environmental Defense Fund, and Environmental Science Associates (together, the Platform Team).
+
+## About the license
+
+The Groundwater Accounting Platform is open source under the AGPL, and the source code is available upon request.
+
+To access the current source code, email info@groundwateraccounting.org. We'll get back to you to provide access. Under the AGPL, any modifications to the source code are required to be shared back to the User Community. The Platform Team can coordinate with you on the best way to share Platform updates.
+
+## What's here
+
+- The last published version of the source code remains available here (https://github.com/esassoc/qanat-community).
+- Documentation about the Platform (how it's designed, what it does, and the data model behind it) is at https://groundwateraccounting.org.
+
+## Contributions
+
+The Platform Team welcomes contributions to the Groundwater Accounting Platform source code. Whether you'd like to start a conversation, share ideas, or submit a pull request, reach out at info@groundwateraccounting.org.
+
+## Thank you!
+
+Thank you for your interest in the Groundwater Accounting Platform, and in the broader work of making groundwater management more transparent and accountable.
+
+The Platform Team:
+
+- California Water Data Consortium
+- Environmental Defense Fund
+- Environmental Science Associates
+
+---
+
 # Qanat Platform Documentation
 
 Welcome to the Groundwater Accounting Platform (codename Qanat)! This guide provides comprehensive instructions for setting up and building the project locally. For any questions, please contact info@groundwateraccounting.org.
